@@ -29,7 +29,7 @@
     parent: tox
     description: Run py27 for nfv
     required-projects:
-      - openstack/stx-fault
+      - starlingx/fault
     vars:
       tox_envlist: py27
       tox_extra_args: -c nfv/tox.ini
@@ -39,7 +39,7 @@
     parent: tox
     description: Run pep8 for nfv
     required-projects:
-      - openstack/stx-fault
+      - starlingx/fault
     vars:
       tox_envlist: pep8
       tox_extra_args: -c nfv/tox.ini
@@ -49,7 +49,7 @@
     parent: tox
     description: Run pylint for nfv
     required-projects:
-      - openstack/stx-fault
+      - starlingx/fault
     vars:
       tox_envlist: pylint
       tox_extra_args: -c nfv/tox.ini
