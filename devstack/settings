@@ -9,7 +9,7 @@
 
 # Devstack settings
 
-# This plugin enables StarlingX stx-update services and follows the
+# This plugin enables StarlingX nfv services and follows the
 # DevStack plugin contract:
 # https://docs.openstack.org/devstack/latest/plugins.html#plugin-sh-contract
 
@@ -18,19 +18,19 @@
 # Defaults
 # --------
 
-STX_NFV_NAME=stx-nfv
+STX_NFV_NAME=nfv
 
 ######### Plugin Specific ##########
 enable_service $STX_NFV_NAME
 
 # This must not use any variables to work properly in OpenStack's DevStack playbook
-define_plugin stx-nfv
+define_plugin nfv
 # This works for Zuul jobs using OpenStack's DevStack roles
-plugin_requires stx-nfv stx-update
-plugin_requires stx-nfv stx-fault
-plugin_requires stx-nfv stx-metal
+plugin_requires nfv update
+plugin_requires nfv fault
+plugin_requires nfv metal
 
-if is_service_enabled stx-nfv; then
+if is_service_enabled nfv; then
     # Enable prerequisites here
     :
 fi
@@ -40,9 +40,9 @@ fi
 #                prereqs are not configured?
 if is_service_enabled guest-agent || is_service_enabled guest-server; then
     # These guest- services require additional prerequisites
-    # stx-metal: to install mtce_common header files and libraries
+    # metal: to install mtce_common header files and libraries
     # fm-common: to install fmcommon library
-    local req_services="stx-metal fm-common"
+    local req_services="metal fm-common"
     for srv in $req_services;do
         if ! is_service_enabled "$srv"; then
             die $LINENO "$srv should be enabled for guestAgent/guestServer"
@@ -51,4 +51,4 @@ if is_service_enabled guest-agent || is_service_enabled guest-server; then
 fi
 
 # Initial source of lib script
-source $DEST/stx-nfv/devstack/lib/stx-nfv
+source $DEST/nfv/devstack/lib/nfv

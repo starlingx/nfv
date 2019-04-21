@@ -11,7 +11,7 @@
 echo_summary "stx-nfv devstack plugin.sh called: $1/$2"
 
 # check for service enabled
-if is_service_enabled stx-nfv; then
+if is_service_enabled nfv; then
     if [[ "$1" == "stack" && "$2" == "install" ]]; then
         # Perform installation of service source
         echo_summary "Installing stx-nfv"
