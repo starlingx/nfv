@@ -12,11 +12,11 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.fm')
 
 
-def get_alarms(token):
+def get_alarms(token, fm_service=PLATFORM_SERVICE.FM):
     """
     Asks Fault Management for customer alarms
     """
-    url = token.get_service_url(PLATFORM_SERVICE.FM)
+    url = token.get_service_url(fm_service)
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 
@@ -26,11 +26,11 @@ def get_alarms(token):
     return response
 
 
-def get_logs(token, start=None, end=None):
+def get_logs(token, start=None, end=None, fm_service=PLATFORM_SERVICE.FM):
     """
     Asks Fault Management for customer logs
     """
-    url = token.get_service_url(PLATFORM_SERVICE.FM)
+    url = token.get_service_url(fm_service)
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 
@@ -55,11 +55,11 @@ def get_logs(token, start=None, end=None):
     return response
 
 
-def get_alarm_history(token, start=None, end=None):
+def get_alarm_history(token, start=None, end=None, fm_service=PLATFORM_SERVICE.FM):
     """
     Asks Fault Management for customer alarm history
     """
-    url = token.get_service_url(PLATFORM_SERVICE.FM)
+    url = token.get_service_url(fm_service)
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 

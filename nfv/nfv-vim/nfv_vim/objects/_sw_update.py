@@ -328,6 +328,9 @@ class SwUpdate(ObjectData):
         """
         raise NotImplementedError()
 
+    def nfvi_alarms_clear(self):
+        self._nfvi_alarms = list()
+
     @coroutine
     def nfvi_alarms_callback(self, timer_id):
         """
@@ -338,7 +341,7 @@ class SwUpdate(ObjectData):
         if response['completed']:
             DLOG.verbose("Audit-Alarms callback, response=%s." % response)
 
-            self._nfvi_alarms = response['result-data']
+            self._nfvi_alarms.extend(response['result-data'])
         else:
             DLOG.error("Audit-Alarms callback, not completed, "
                        "response=%s." % response)

@@ -196,7 +196,6 @@ class TestHost(_test_base.Test):
         Fetch the customer alarms raised
         """
         self._customer_alarms = fm.get_alarms(self.platform_token).result_data
-
         return
 
     def _refresh_customer_logs(self):

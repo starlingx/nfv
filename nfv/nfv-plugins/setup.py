@@ -34,6 +34,7 @@ setup(
             'compute_plugin = nfv_plugins.nfvi_plugins.nfvi_compute_api:NFVIComputeAPI',
             'guest_plugin = nfv_plugins.nfvi_plugins.nfvi_guest_api:NFVIGuestAPI',
             'sw_mgmt_plugin = nfv_plugins.nfvi_plugins.nfvi_sw_mgmt_api:NFVISwMgmtAPI',
+            'fault_mgmt_plugin = nfv_plugins.nfvi_plugins.nfvi_fault_mgmt_api:NFVIFaultMgmtAPI',
         ],
     }
 )

@@ -154,7 +154,10 @@ class SwUpgrade(SwUpdate):
             timer_id = (yield)
 
             DLOG.info("Audit alarms, timer_id=%s." % timer_id)
+            self.nfvi_alarms_clear()
             nfvi.nfvi_get_alarms(self.nfvi_alarms_callback(timer_id))
+            if not nfvi.nfvi_fault_mgmt_plugin_disabled():
+                nfvi.nfvi_get_openstack_alarms(self.nfvi_alarms_callback(timer_id))
             self._nfvi_audit_inprogress = True
             while self._nfvi_audit_inprogress:
                 timer_id = (yield)

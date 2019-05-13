@@ -58,6 +58,11 @@ from nfv_vim.nfvi._nfvi_compute_module import nfvi_unpause_instance  # noqa: F40
 
 from nfv_vim.nfvi._nfvi_defs import NFVI_ERROR_CODE  # noqa: F401
 
+from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_fault_mgmt_plugin_disabled  # noqa: F401
+from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_get_openstack_alarm_history  # noqa: F401
+from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_get_openstack_alarms  # noqa: F401
+from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_get_openstack_logs  # noqa: F401
+
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_create_guest_host_services  # noqa: F401
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_delete_guest_host_services  # noqa: F401
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_disable_guest_host_services  # noqa: F401

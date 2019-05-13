@@ -10,6 +10,8 @@ from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_block_storage_finalize
 from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_block_storage_initialize
 from nfv_vim.nfvi._nfvi_compute_module import nfvi_compute_finalize
 from nfv_vim.nfvi._nfvi_compute_module import nfvi_compute_initialize
+from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_fault_mgmt_finalize
+from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_fault_mgmt_initialize
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_guest_finalize
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_guest_initialize
 from nfv_vim.nfvi._nfvi_identity_module import nfvi_identity_finalize
@@ -48,6 +50,12 @@ def nfvi_initialize(config):
                                           'False') in DISABLED_LIST)
     guest_plugin_disabled = (config.get('guest_plugin_disabled',
                                         'False') in DISABLED_LIST)
+    # 'fault_management_pod_disabled' is used to disable get alarms
+    # from containerized fm and will be removed in future.
+    fault_mgmt_plugin_disabled = (config.get('fault_mgmt_plugin_disabled',
+                                        'False') in DISABLED_LIST) or \
+                                 (config.get('fault_management_pod_disabled',
+                                        'True') in DISABLED_LIST)
 
     _task_worker_pools['identity'] = \
         tasks.TaskWorkerPool('Identity', num_workers=1)
@@ -89,6 +97,11 @@ def nfvi_initialize(config):
         tasks.TaskWorkerPool('Sw-Mgmt', num_workers=1)
     nfvi_sw_mgmt_initialize(config, _task_worker_pools['sw_mgmt'])
 
+    if not fault_mgmt_plugin_disabled:
+        _task_worker_pools['fault_mgmt'] = \
+            tasks.TaskWorkerPool('Fault-Mgmt', num_workers=1)
+        nfvi_fault_mgmt_initialize(config, _task_worker_pools['fault_mgmt'])
+
     return init_complete
 
 
@@ -122,6 +135,7 @@ def nfvi_finalize():
     nfvi_identity_finalize()
     nfvi_guest_finalize()
     nfvi_sw_mgmt_finalize()
+    nfvi_fault_mgmt_finalize()
 
     for pool in _task_worker_pools.values():
         pool.shutdown()

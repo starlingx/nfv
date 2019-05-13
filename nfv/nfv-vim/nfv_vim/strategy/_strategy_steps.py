@@ -1471,7 +1471,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
         self._ignore_alarms = ignore_alarms
 
     @coroutine
-    def _query_alarms_callback(self):
+    def _query_alarms_callback(self, fm_service):
         """
         Query Alarms Callback
         """
@@ -1480,7 +1480,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
 
         if response['completed']:
             if self.strategy is not None:
-                nfvi_alarms = list()
+                nfvi_alarms = self.strategy.nfvi_alarms
                 for nfvi_alarm in response['result-data']:
                     if (self.strategy._alarm_restrictions ==
                             strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED and
@@ -1498,7 +1498,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
 
             if self._fail_on_alarms and self.strategy.nfvi_alarms:
                 result = strategy.STRATEGY_STEP_RESULT.FAILED
-                reason = "alarms are present"
+                reason = "alarms from %s are present" % fm_service
             else:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 reason = ""
@@ -1515,7 +1515,10 @@ class QueryAlarmsStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_get_alarms(self._query_alarms_callback())
+        self.strategy.nfvi_alarms = list()
+        nfvi.nfvi_get_alarms(self._query_alarms_callback("platform"))
+        if not nfvi.nfvi_fault_mgmt_plugin_disabled():
+            nfvi.nfvi_get_openstack_alarms(self._query_alarms_callback("openstack"))
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
