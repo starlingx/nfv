@@ -6,10 +6,15 @@
 
 from nfv_common import debug
 
+from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
+import json
+
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.fm')
+
+# TODO(add service for following method)
 
 
 def get_alarms(token, fm_service=PLATFORM_SERVICE.FM):
@@ -82,3 +87,41 @@ def get_alarm_history(token, start=None, end=None, fm_service=PLATFORM_SERVICE.F
 
     response = rest_api_request(token, "GET", api_cmd)
     return response
+
+
+def raise_alarm(token, alarm_data="", fm_service=OPENSTACK_SERVICE.FM):
+    """
+    Raise customer alarm to Fault Management
+    """
+    url = token.get_service_url(fm_service)
+    if url is None:
+        raise ValueError("OpenStack FM URL is invalid")
+
+    api_cmd = url + "/alarms"
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+
+    json_alarm_data = json.dumps(alarm_data)
+    response = rest_api_request(token, "POST", api_cmd, api_cmd_headers, json_alarm_data)
+
+    return response
+
+
+def clear_alarm(token, fm_uuid="", fm_service=OPENSTACK_SERVICE.FM):
+    """
+    Clear customer alarm to Fault Management
+    """
+    url = token.get_service_url(fm_service)
+    if url is None:
+        raise ValueError("OpenStack FM URL is invalid")
+
+    api_cmd = url + "/alarms"
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+
+    payload = ('{"id": "%s"}' % fm_uuid)
+
+    rest_api_request(token, "DELETE", api_cmd, api_cmd_headers, payload)
+    return

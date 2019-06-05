@@ -597,7 +597,7 @@ class SimpleHttpServer(object):
 
         config.load(nfvi_config['config_file'])
         _directory = openstack.get_directory(config,
-                                             openstack.SERVICE_CATEGORY.PLATFORM)
+                                             openstack.SERVICE_CATEGORY.OPENSTACK)
         _vim_api_ip = vim_api_config['host']
         if ':' in _vim_api_ip:
             # Wrap IPv6 address for use in URLs

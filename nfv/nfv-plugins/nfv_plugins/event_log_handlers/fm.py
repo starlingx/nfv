@@ -3,10 +3,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
 import six
 
 from fm_api import constants as fm_constants
 from fm_api import fm_api
+from six.moves import http_client as httplib
 
 from nfv_common import debug
 
@@ -14,6 +16,10 @@ import nfv_common.event_log.handlers.v1 as event_log_handlers_v1
 import nfv_common.event_log.objects.v1 as event_log_objects_v1
 
 from nfv_plugins.event_log_handlers import config
+from nfv_plugins.nfvi_plugins.openstack import exceptions
+from nfv_plugins.nfvi_plugins.openstack import fm
+from nfv_plugins.nfvi_plugins.openstack import openstack
+
 
 DLOG = debug.debug_get_logger('nfv_plugins.event_log_handlers.fm')
 
@@ -338,6 +344,12 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
 
     _log_db = dict()
     _fm_api = None
+    _openstack_token = None
+    _openstack_directory = None
+    _openstack_fm_endpoint_disabled = False
+    # _fault_management_pod_disabled is used to disable
+    # raising alarm to containerized fm and will be removed in future.
+    _fault_management_pod_disabled = True
 
     @property
     def name(self):
@@ -355,9 +367,23 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
     def signature(self):
         return self._signature
 
-    def log(self, log_data):
-        DLOG.debug("Generating Customer Log")
+    @property
+    def openstack_fm_endpoint_disabled(self):
+        return self._openstack_fm_endpoint_disabled
 
+    @property
+    def openstack_token(self):
+        if self._openstack_token is None or \
+                   self._openstack_token.is_expired():
+            self._openstack_token = openstack.get_token(self._openstack_directory)
+
+        if self._openstack_token is None:
+            raise Exception("OpenStack get-token did not complete.")
+
+        return self._openstack_token
+
+    def _format_log(self, log_data):
+        format_log = None
         fm_event_id = _fm_event_id_mapping.get(log_data.event_id, None)
         if fm_event_id is not None:
             fm_event_type = _fm_event_type_mapping[log_data.event_type]
@@ -366,23 +392,70 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
             fm_severity = _fm_event_importance_mapping[log_data.importance]
             fm_uuid = None
             fm_reason_text = six.text_type(log_data.reason_text)
-            fault = fm_api.Fault(fm_event_id, fm_event_state,
+            format_log = fm_api.Fault(fm_event_id, fm_event_state,
                                  log_data.entity_type, log_data.entity,
                                  fm_severity, fm_reason_text, fm_event_type,
                                  fm_probable_cause, "", False, True)
-            response = self._fm_api.set_fault(fault)
-            if response is None:
+        return format_log
+
+    def _raise_openstack_log(self, format_log):
+        if self.openstack_fm_endpoint_disabled:
+            DLOG.error("Openstack fm endpoint is disabled when raise openstack log.")
+            return None
+
+        try:
+            result = fm.raise_alarm(self.openstack_token, format_log)
+            result_data = json.loads(result.result_data)
+            if result_data is not None:
+                return result_data["uuid"]
+            else:
+                return None
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                if self._openstack_token is not None:
+                    self._openstack_token.set_expired()
+            else:
+                DLOG.exception("Caught exception while trying to get token, "
+                               "error=%s." % e)
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to get token, "
+                           "error=%s." % e)
+
+    def log(self, log_data):
+        DLOG.debug("Generating Customer Log")
+
+        fault = self._format_log(log_data)
+        if fault is not None:
+            fm_uuid = None
+            # conditional statements self._fault_management_pod_disabled
+            # is used to disable raising alarm to containerized fm and
+            # will be removed in future.
+            if "instance" in log_data.entity_type and (not self._fault_management_pod_disabled):
+                fm_uuid = self._raise_openstack_log(fault.as_dict())
+            else:
+                fm_uuid = self._fm_api.set_fault(fault)
+
+            if fm_uuid is None:
                 DLOG.error("Failed to generate customer log, fm_uuid=%s."
                            % fm_uuid)
             else:
-                fm_uuid = response
                 DLOG.info("Generated customer log, fm_uuid=%s." % fm_uuid)
         else:
             DLOG.error("Unknown event id (%s) given." % log_data.event_id)
 
     def initialize(self, config_file):
         config.load(config_file)
+        self._openstack_directory = openstack.get_directory(
+            config, openstack.SERVICE_CATEGORY.OPENSTACK)
         self._fm_api = fm_api.FaultAPIs()
+
+        DISABLED_LIST = ['Yes', 'yes', 'Y', 'y', 'True', 'true', 'T', 't', '1']
+        self._openstack_fm_endpoint_disabled = (config.CONF['fm']['endpoint_disabled'] in DISABLED_LIST)
+        # _fault_management_pod_disabled is used to disable raising alarm
+        # to containerized fm and will be removed in future.
+        self._fault_management_pod_disabled = \
+            (config.CONF['openstack'].get('fault_management_pod_disabled', 'True') in DISABLED_LIST)
 
     def finalize(self):
         return

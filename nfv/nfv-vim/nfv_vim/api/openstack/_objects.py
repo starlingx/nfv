@@ -58,7 +58,7 @@ class OpenStackServices(Constants):
     NEUTRON = Constant('neutron')
     NOVA = Constant('nova')
     HEAT = Constant('heat')
-
+    FM = Constant('fm')
 
 # OpenStack Services Constant
 OPENSTACK_SERVICE = OpenStackServices()
