@@ -284,6 +284,56 @@ class DisableHostTask(state_machine.StateTask):
                 self._host.fsm.handle_event(HOST_EVENT.TASK_FAILED, event_data)
 
 
+class OfflineHostTask(state_machine.StateTask):
+    """
+    Offline Host Task
+    """
+    def __init__(self, host):
+        from nfv_vim import objects
+
+        self._host_reference = weakref.ref(host)
+
+        task_work_list = list()
+        if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
+            # Only disable the container services if we are not running in a
+            # single controller configuration. In a single controller
+            # configuration we keep the container services running.
+            from nfv_vim import directors
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            if not sw_mgmt_director.single_controller:
+                task_work_list.append(DisableHostServicesTaskWork(
+                    self, host, objects.HOST_SERVICES.CONTAINER))
+
+        super(OfflineHostTask, self).__init__(
+            'offline-host_%s' % host.name, task_work_list)
+
+    @property
+    def _host(self):
+        """
+        Returns the host
+        """
+        host = self._host_reference()
+        return host
+
+    def complete(self, result, reason):
+        """
+        Disable Host Task Complete
+        """
+        if self.aborted():
+            DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
+        else:
+            DLOG.debug("Task (%s) complete." % self._name)
+
+            event_data = dict()
+            event_data['reason'] = reason
+
+            if state_machine.STATE_TASK_RESULT.SUCCESS == result:
+                self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED,
+                                            event_data)
+            else:
+                self._host.fsm.handle_event(HOST_EVENT.TASK_FAILED, event_data)
+
+
 class FailHostTask(state_machine.StateTask):
     """
     Fail Host Task

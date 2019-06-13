@@ -970,7 +970,7 @@ class DisableHostServicesTaskWork(state_machine.StateTaskWork):
         elif self._service == objects.HOST_SERVICES.CONTAINER:
             nfvi.nfvi_disable_container_host_services(
                 self._host.uuid, self._host.name, self._host.personality,
-                self._callback())
+                self._host.is_offline(), self._callback())
         else:
             reason = ("Trying to disable unknown "
                       "host service %s" % self._service)

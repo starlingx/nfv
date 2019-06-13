@@ -134,3 +134,44 @@ def delete_node(node_name):
             raise
 
     return Result(response)
+
+
+def mark_all_pods_not_ready(node_name, reason):
+    """
+    Mark all pods on a node as not ready
+    Note: It would be preferable to mark the node as not ready and have
+    kubernetes then mark the pods as not ready, but this is not supported.
+    """
+    # Get the client.
+    kube_client = get_client()
+
+    # Retrieve the pods on the specified node.
+    response = kube_client.list_namespaced_pod(
+        "", field_selector="spec.nodeName=%s" % node_name)
+
+    pods = response.items
+    if pods is not None:
+        for pod in pods:
+            for condition in pod.status.conditions:
+                if condition.type == "Ready":
+                    if condition.status != "False":
+                        # Update the Ready status to False
+                        body = {"status":
+                                {"conditions":
+                                 [{"type": "Ready",
+                                   "status": "False",
+                                   "reason": reason,
+                                   }]}}
+                        try:
+                            DLOG.debug(
+                                "Marking pod %s in namespace %s not ready" %
+                                (pod.metadata.name, pod.metadata.namespace))
+                            kube_client.patch_namespaced_pod_status(
+                                pod.metadata.name, pod.metadata.namespace, body)
+                        except ApiException:
+                            DLOG.exception(
+                                "Failed to update status for pod %s in "
+                                "namespace %s" % (pod.metadata.name,
+                                                  pod.metadata.namespace))
+                    break
+    return

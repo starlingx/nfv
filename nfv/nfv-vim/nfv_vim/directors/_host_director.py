@@ -102,7 +102,7 @@ class HostDirector(object):
             sw_mgmt_director.disable_host_services_failed(host)
 
     def _nfvi_disable_host_services(self, host_uuid, host_name,
-                                    host_personality, service):
+                                    host_personality, host_offline, service):
         """
         NFVI Disable Host Services
         """
@@ -118,7 +118,7 @@ class HostDirector(object):
                     objects.HOST_SERVICES.GUEST))
         elif service == objects.HOST_SERVICES.CONTAINER:
             nfvi.nfvi_disable_container_host_services(
-                host_uuid, host_name, host_personality,
+                host_uuid, host_name, host_personality, host_offline,
                 self._nfvi_disable_host_services_callback(
                     objects.HOST_SERVICES.CONTAINER))
         else:
@@ -701,7 +701,8 @@ class HostDirector(object):
 
         for host in host_list:
             self._nfvi_disable_host_services(
-                host.uuid, host.name, host.personality, service)
+                host.uuid, host.name, host.personality, host.is_offline,
+                service)
 
         if host_operation.is_inprogress():
             self._host_operation = host_operation

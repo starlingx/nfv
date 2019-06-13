@@ -11,6 +11,7 @@ from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import AuditDisabledHostTask
 from nfv_vim.host_fsm._host_tasks import FailHostTask
 from nfv_vim.host_fsm._host_tasks import NotifyDisabledHostTask
+from nfv_vim.host_fsm._host_tasks import OfflineHostTask
 
 DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
 
@@ -76,6 +77,13 @@ class DisabledState(state_machine.State):
             if not host.task.inprogress():
                 host.task = AuditDisabledHostTask(host)
                 host.task.start()
+
+        elif HOST_EVENT.DISABLE == event:
+            if not host.task.inprogress():
+                # This host may have gone offline after being disabled.
+                if host.is_offline():
+                    host.task = OfflineHostTask(host)
+                    host.task.start()
 
         else:
             DLOG.verbose("Ignoring %s event for %s." % (event, host.name))

@@ -925,7 +925,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def disable_host_services(self, future, host_uuid,
-                              host_name, host_personality,
+                              host_name, host_personality, host_offline,
                               callback):
         """
         Disable Host Services, notifies kubernetes client to disable services
@@ -954,6 +954,24 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                "did not complete, host_uuid=%s, host_name=%s."
                                % (host_uuid, host_name))
                     return
+
+                if host_offline:
+                    # If the disabled node is offline, we also mark all
+                    # the pods on the node as not ready. This will ensure
+                    # kubernetes takes action immediately (e.g. to disable
+                    # endpoints associated with the pods) instead of waiting
+                    # for a grace period to determine the node is unavailable.
+                    future.work(kubernetes_client.mark_all_pods_not_ready,
+                                host_name, "NodeOffline")
+
+                    future.result = (yield)
+
+                    if not future.result.is_complete():
+                        DLOG.error("Kubernetes mark_all_pods_not_ready failed, "
+                                   "operation did not complete, host_uuid=%s, "
+                                   "host_name=%s."
+                                   % (host_uuid, host_name))
+                        return
 
             response['completed'] = True
             response['reason'] = ''

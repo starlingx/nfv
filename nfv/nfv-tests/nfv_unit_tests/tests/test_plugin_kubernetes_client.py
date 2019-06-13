@@ -203,3 +203,110 @@ class TestNFVPluginsK8SNodeTaint(testcase.NFVTestCase):
                                       'NoSchedule',
                                       self.test_key1,
                                       self.test_value1) is False
+
+
+@mock.patch('kubernetes.config.load_kube_config', mock_load_kube_config)
+class TestNFVPluginsK8SMarkAllPodsNotReady(testcase.NFVTestCase):
+
+    list_namespaced_pod_result = kubernetes.client.V1PodList(
+        api_version="v1",
+        items=[
+            kubernetes.client.V1Pod(
+                api_version="v1",
+                kind="Pod",
+                metadata=kubernetes.client.V1ObjectMeta(
+                    name="test-pod-not-ready",
+                    namespace="test-namespace-1"),
+                status=kubernetes.client.V1PodStatus(
+                    conditions=[
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="Initialized"),
+                        kubernetes.client.V1PodCondition(
+                            status="False",
+                            type="Ready"),
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="ContainersReady"),
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="PodScheduled"),
+                    ]
+                )
+            ),
+            kubernetes.client.V1Pod(
+                api_version="v1",
+                kind="Pod",
+                metadata=kubernetes.client.V1ObjectMeta(
+                    name="test-pod-ready",
+                    namespace="test-namespace-1"),
+                status=kubernetes.client.V1PodStatus(
+                    conditions=[
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="Initialized"),
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="Ready"),
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="ContainersReady"),
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="PodScheduled"),
+                    ]
+                )
+            ),
+            kubernetes.client.V1Pod(
+                api_version="v1",
+                kind="Pod",
+                metadata=kubernetes.client.V1ObjectMeta(
+                    name="test-pod-no-ready-status",
+                    namespace="test-namespace-1"),
+                status=kubernetes.client.V1PodStatus(
+                    conditions=[
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="Initialized"),
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="ContainersReady"),
+                        kubernetes.client.V1PodCondition(
+                            status="True",
+                            type="PodScheduled"),
+                    ]
+                )
+            ),
+        ]
+    )
+
+    def setUp(self):
+        super(TestNFVPluginsK8SMarkAllPodsNotReady, self).setUp()
+
+        def mock_list_namespaced_pod(obj, namespace, field_selector=""):
+            return self.list_namespaced_pod_result
+
+        self.mocked_list_namespaced_pod = mock.patch(
+            'kubernetes.client.CoreV1Api.list_namespaced_pod',
+            mock_list_namespaced_pod)
+        self.mocked_list_namespaced_pod.start()
+
+        self.mock_patch_namespaced_pod_status = mock.Mock()
+        self.mocked_patch_namespaced_pod_status = mock.patch(
+            'kubernetes.client.CoreV1Api.patch_namespaced_pod_status',
+            self.mock_patch_namespaced_pod_status)
+        self.mocked_patch_namespaced_pod_status.start()
+
+    def tearDown(self):
+        super(TestNFVPluginsK8SMarkAllPodsNotReady, self).tearDown()
+
+        self.mocked_list_namespaced_pod.stop()
+        self.mocked_patch_namespaced_pod_status.stop()
+
+    def test_mark_pods(self):
+
+        kubernetes_client.mark_all_pods_not_ready("test_node", "test_reason")
+
+        self.mock_patch_namespaced_pod_status.assert_called_with(
+            "test-pod-ready", "test-namespace-1", mock.ANY)
+        self.mock_patch_namespaced_pod_status.assert_called_once()

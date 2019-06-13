@@ -96,14 +96,14 @@ def nfvi_upgrade_complete(callback):
 
 
 def nfvi_disable_container_host_services(host_uuid, host_name,
-                                         host_personality,
+                                         host_personality, host_offline,
                                          callback):
     """
     Disable container services on a host
     """
     cmd_id = _infrastructure_plugin.invoke_plugin(
         'disable_host_services',
-        host_uuid, host_name, host_personality,
+        host_uuid, host_name, host_personality, host_offline,
         callback=callback)
     return cmd_id
 

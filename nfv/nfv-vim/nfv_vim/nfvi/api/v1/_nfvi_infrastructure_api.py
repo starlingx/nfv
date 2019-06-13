@@ -94,7 +94,7 @@ class NFVIInfrastructureAPI(object):
 
     @abc.abstractmethod
     def disable_host_services(self, future, host_uuid,
-                              host_name, host_personality,
+                              host_name, host_personality, host_offline,
                               callback):
         """
         Disable infrastructure host services using the plugin
