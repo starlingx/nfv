@@ -1467,7 +1467,7 @@ class InstanceDirector(object):
                                        host.name))
             return
 
-        if not host.nfvi_host_is_enabled() or host.is_failed() or host.is_offline():
+        if host.is_disabled() or host.is_failed() or host.is_offline():
             instance_table = tables.tables_get_instance_table()
             for instance in instance_table.on_host(host.name):
                 if instance.is_deleting() or instance.is_deleted() or \
