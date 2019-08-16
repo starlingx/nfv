@@ -347,9 +347,6 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
     _openstack_token = None
     _openstack_directory = None
     _openstack_fm_endpoint_disabled = False
-    # _fault_management_pod_disabled is used to disable
-    # raising alarm to containerized fm and will be removed in future.
-    _fault_management_pod_disabled = True
 
     @property
     def name(self):
@@ -428,10 +425,7 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
         fault = self._format_log(log_data)
         if fault is not None:
             fm_uuid = None
-            # conditional statements self._fault_management_pod_disabled
-            # is used to disable raising alarm to containerized fm and
-            # will be removed in future.
-            if "instance" in log_data.entity_type and (not self._fault_management_pod_disabled):
+            if "instance" in log_data.entity_type:
                 fm_uuid = self._raise_openstack_log(fault.as_dict())
             else:
                 fm_uuid = self._fm_api.set_fault(fault)
@@ -452,10 +446,6 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
 
         DISABLED_LIST = ['Yes', 'yes', 'Y', 'y', 'True', 'true', 'T', 't', '1']
         self._openstack_fm_endpoint_disabled = (config.CONF['fm']['endpoint_disabled'] in DISABLED_LIST)
-        # _fault_management_pod_disabled is used to disable raising alarm
-        # to containerized fm and will be removed in future.
-        self._fault_management_pod_disabled = \
-            (config.CONF['openstack'].get('fault_management_pod_disabled', 'True') in DISABLED_LIST)
 
     def finalize(self):
         return
