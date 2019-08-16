@@ -53,8 +53,12 @@ class EnabledState(state_machine.State):
             return HOST_STATE.DISABLING
 
         elif HOST_EVENT.TASK_COMPLETED == event:
+            # Do not disable this host if only the compute service is disabled.
+            # We will raise an alarm, but there is no way to safely move work
+            # off the host if the compute service is down.
             if objects.HOST_SERVICE_STATE.ENABLED != \
-                    host.host_service_state_aggregate():
+                    host.host_service_state_aggregate(
+                        ignore_services=[objects.HOST_SERVICES.COMPUTE]):
                 if not host.host_services_locked:
                     DLOG.info("Host services are not enabled on %s. "
                               "Disabling host." % host.name)
@@ -62,6 +66,7 @@ class EnabledState(state_machine.State):
                 else:
                     DLOG.info("Host services are not enabled on %s. "
                               "Host services are locked." % host.name)
+
         elif HOST_EVENT.TASK_FAILED == event:
             DLOG.info("Audit failed for %s." % host.name)
 

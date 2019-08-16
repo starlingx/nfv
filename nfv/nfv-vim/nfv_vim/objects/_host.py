@@ -185,16 +185,21 @@ class Host(ObjectData):
         """
         return self._host_service_state[service]
 
-    def host_service_state_aggregate(self):
+    def host_service_state_aggregate(self, ignore_services=None):
         """
         Returns the overall state of the host services
         """
+        if ignore_services is None:
+            ignore_services = []
         all_enabled = True
         at_least_one_failed = False
         for service, service_state in self._host_service_state.items():
             # Ignore state of kubernetes, plugin as
             # there is no query function for that sevice.
             if service == HOST_SERVICES.CONTAINER:
+                continue
+            # Ignore services we were told to ignore
+            if service in ignore_services:
                 continue
             all_enabled = all_enabled and \
                 (service_state == HOST_SERVICE_STATE.ENABLED)
@@ -758,30 +763,39 @@ class Host(ObjectData):
 
         if service is not None:
             if host_service_state == self._host_service_state[service]:
+                # No change to the state of the service
                 return
 
             self._host_service_state[service] = host_service_state
 
-        # Host services logs and alarms only apply to worker hosts
-        if 'worker' in self.personality:
-            host_service_state_overall = \
-                self.host_service_state_aggregate()
-            if (HOST_SERVICE_STATE.ENABLED ==
-                    host_service_state_overall):
+        # Host services logs and alarms only apply to the compute service on
+        # worker hosts
+        if 'worker' in self.personality and HOST_SERVICES.COMPUTE == service:
+            if HOST_SERVICE_STATE.ENABLED == host_service_state:
                 self._events = event_log.host_issue_log(
                     self, event_log.EVENT_ID.HOST_SERVICES_ENABLED)
                 alarm.host_clear_alarm(self._alarms)
                 self._alarms[:] = list()
 
-            elif (HOST_SERVICE_STATE.DISABLED ==
-                    host_service_state_overall):
+            elif HOST_SERVICE_STATE.DISABLED == host_service_state:
+                # Always log the disabled compute service
                 self._events = event_log.host_issue_log(
                     self, event_log.EVENT_ID.HOST_SERVICES_DISABLED)
+                # Clear any previous alarms for this host
                 alarm.host_clear_alarm(self._alarms)
                 self._alarms[:] = list()
+                # Alarm the disabled compute service if the host is still
+                # enabled and is not being locked. Alarm it as a failure.
+                if self.nfvi_host_is_enabled():
+                    if reason is None:
+                        additional_text = ''
+                    else:
+                        additional_text = ", %s" % reason
+                    self._alarms = alarm.host_raise_alarm(
+                        self, alarm.ALARM_TYPE.HOST_SERVICES_FAILED,
+                        additional_text=additional_text)
 
-            elif (HOST_SERVICE_STATE.FAILED ==
-                    host_service_state_overall):
+            elif HOST_SERVICE_STATE.FAILED == host_service_state:
                 if reason is None:
                     additional_text = ''
                 else:
@@ -790,6 +804,10 @@ class Host(ObjectData):
                 self._events = event_log.host_issue_log(
                     self, event_log.EVENT_ID.HOST_SERVICES_FAILED,
                     additional_text=additional_text)
+                # Clear any previous alarms for this host
+                alarm.host_clear_alarm(self._alarms)
+                self._alarms[:] = list()
+                # Alarm the failed compute service
                 self._alarms = alarm.host_raise_alarm(
                     self, alarm.ALARM_TYPE.HOST_SERVICES_FAILED,
                     additional_text=additional_text)
