@@ -14,7 +14,15 @@ import json
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.fm')
 
-# TODO(add service for following method)
+
+def assemble_api_cmd(url, cmd):
+    """
+    Adapt Address to Different Url Format
+    """
+    if url.endswith('/'):
+        return url + cmd
+    else:
+        return url + "/" + cmd
 
 
 def get_alarms(token, fm_service=PLATFORM_SERVICE.FM):
@@ -25,7 +33,7 @@ def get_alarms(token, fm_service=PLATFORM_SERVICE.FM):
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 
-    api_cmd = url + "/alarms?include_suppress=True"
+    api_cmd = assemble_api_cmd(url, "alarms?include_suppress=True")
 
     response = rest_api_request(token, "GET", api_cmd)
     return response
@@ -39,7 +47,7 @@ def get_logs(token, start=None, end=None, fm_service=PLATFORM_SERVICE.FM):
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 
-    api_cmd = url + "/event_log?logs=True"
+    api_cmd = assemble_api_cmd(url, "event_log?logs=True")
 
     if start is not None and end is not None:
         api_cmd += ("&q.field=start&q.field=end&q.op=eq&q.op=eq"
@@ -68,7 +76,7 @@ def get_alarm_history(token, start=None, end=None, fm_service=PLATFORM_SERVICE.F
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 
-    api_cmd = url + "/event_log?alarms=True"
+    api_cmd = assemble_api_cmd(url, "event_log?alarms=True")
 
     if start is not None and end is not None:
         api_cmd += ("&q.field=start&q.field=end&q.op=eq&q.op=eq"
@@ -97,7 +105,7 @@ def raise_alarm(token, alarm_data="", fm_service=OPENSTACK_SERVICE.FM):
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 
-    api_cmd = url + "/alarms"
+    api_cmd = assemble_api_cmd(url, "alarms")
 
     api_cmd_headers = dict()
     api_cmd_headers['Content-Type'] = "application/json"
@@ -116,7 +124,7 @@ def clear_alarm(token, fm_uuid="", fm_service=OPENSTACK_SERVICE.FM):
     if url is None:
         raise ValueError("OpenStack FM URL is invalid")
 
-    api_cmd = url + "/alarms"
+    api_cmd = assemble_api_cmd(url, "alarms")
 
     api_cmd_headers = dict()
     api_cmd_headers['Content-Type'] = "application/json"
