@@ -6,7 +6,6 @@
       - stx-release-notes-jobs
     check:
       jobs:
-        - flock-devstack-nfv
         - openstack-tox-linters
         - nfv-tox-pep8
         - nfv-tox-py27
@@ -16,7 +15,6 @@
         - nova-api-proxy-tox-pylint
     gate:
       jobs:
-        - flock-devstack-nfv
         - openstack-tox-linters
         - nfv-tox-pep8
         - nfv-tox-py27

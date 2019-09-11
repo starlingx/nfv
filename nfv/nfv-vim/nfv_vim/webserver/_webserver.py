@@ -52,8 +52,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
                 self.wfile.write(f.read())
-
-        elif self.path == '/windriver-favicon.ico':
+        elif self.path == '/StarlingX_Icon_RGB_Stacked_2color.png':
             with open(_webserver_src_dir + '/images' + self.path, 'r') as f:
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'image/x-icon')

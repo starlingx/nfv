@@ -15,7 +15,7 @@ BuildRequires: python2-pip
 BuildRequires: python2-wheel
 
 %description
-Titanium Cloud Config Info
+StarlingX Network Function Virtualization
 
 %define local_bindir /usr/bin/
 %define pythonroot /usr/lib64/python2.7/site-packages
