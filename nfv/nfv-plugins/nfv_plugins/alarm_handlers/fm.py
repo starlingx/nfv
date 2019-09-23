@@ -141,9 +141,6 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
     _openstack_token = None
     _openstack_directory = None
     _openstack_fm_endpoint_disabled = False
-    # This flag is used to disable raising alarm to containerized fm
-    # and will be removed in future.
-    _fault_management_pod_disabled = True
 
     @property
     def name(self):
@@ -225,9 +222,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
 
         fault = self._format_alarm(alarm_data)
         if fault is not None:
-            # conditional statement 'self._fault_management_pod_disabled' is used
-            # to disable raising alarm to containerized fm and will be removed in future.
-            if "instance" in alarm_data.entity_type and (not self._fault_management_pod_disabled):
+            if "instance" in alarm_data.entity_type:
                 fm_uuid = self._raise_openstack_alarm(fault.as_dict())
                 self._openstack_alarm_db[alarm_uuid] = (alarm_data, fm_uuid)
             else:
@@ -375,10 +370,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
     def audit_alarms(self):
         DLOG.debug("Auditing alarms begin.")
 
-        # conditional statement 'self._fault_management_pod_disabled' is used
-        # to disable raising alarm to containerized fm and will be removed in future.
-        if not self._fault_management_pod_disabled:
-            self._audit_openstack_alarms()
+        self._audit_openstack_alarms()
         self._audit_platform_alarms()
 
         DLOG.debug("Audited alarms end.")
@@ -391,10 +383,6 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
 
         DISABLED_LIST = ['Yes', 'yes', 'Y', 'y', 'True', 'true', 'T', 't', '1']
         self._openstack_fm_endpoint_disabled = (config.CONF['fm']['endpoint_disabled'] in DISABLED_LIST)
-        # self._fault_management_pod_disabled is used to disable
-        # raising alarm to containerized fm and will be removed in future.
-        self._fault_management_pod_disabled = \
-            (config.CONF['openstack'].get('fault_management_pod_disabled', 'True') in DISABLED_LIST)
 
     def finalize(self):
         return
