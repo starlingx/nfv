@@ -1,0 +1,15 @@
+-------------------------------------------------------------------
+Tue Sep 17 06:45:00 UTC 2019 - Dominig ar Foll Intel Open Source <dominig.arfoll@fridu.net>
+
+- move to _service to get source from git repo
+-------------------------------------------------------------------
+Thu Jun 20 14:47:42 UTC 2019 - Marcela Rosales <marcelarosalesj@gmail.com>
+
+- Modify Requires to use openSUSE's python2-Routes package instead of python-routes
+- Delete unused nfv.changes file
+
+-------------------------------------------------------------------
+Tue May 28 09:07:26 UTC 2019 - Marcela Rosales <marcelarosalesj@gmail.com>
+
+- Initial Commit
+
