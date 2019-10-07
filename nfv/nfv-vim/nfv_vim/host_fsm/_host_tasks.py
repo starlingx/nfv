@@ -28,6 +28,7 @@ from nfv_vim.host_fsm._host_task_work import NotifyInstancesHostDisabledTaskWork
 from nfv_vim.host_fsm._host_task_work import NotifyInstancesHostDisablingTaskWork
 from nfv_vim.host_fsm._host_task_work import QueryHypervisorTaskWork
 from nfv_vim.host_fsm._host_task_work import WaitHostServicesCreatedTaskWork
+from nfv_vim.host_fsm._host_task_work import WaitHostServicesDisabledTaskWork
 
 DLOG = debug.debug_get_logger('nfv_vim.state_machine.host_task')
 
@@ -244,6 +245,8 @@ class DisableHostTask(state_machine.StateTask):
                 sw_mgmt_director = directors.get_sw_mgmt_director()
                 if not sw_mgmt_director.single_controller:
                     task_work_list.append(DisableHostServicesTaskWork(
+                        self, host, objects.HOST_SERVICES.CONTAINER))
+                    task_work_list.append(WaitHostServicesDisabledTaskWork(
                         self, host, objects.HOST_SERVICES.CONTAINER))
         task_work_list.append(notify_host_services_task(
             self, host, force_pass=True))

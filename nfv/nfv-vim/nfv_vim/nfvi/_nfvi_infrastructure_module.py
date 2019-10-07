@@ -278,6 +278,15 @@ def nfvi_get_alarm_history(start_period, end_period, callback):
     return cmd_id
 
 
+def nfvi_get_terminating_pods(host_name, callback):
+    """
+    Get terminating pods
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_terminating_pods',
+                                                  host_name, callback=callback)
+    return cmd_id
+
+
 def nfvi_register_host_add_callback(callback):
     """
     Register for host add notifications

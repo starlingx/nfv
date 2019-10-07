@@ -175,3 +175,26 @@ def mark_all_pods_not_ready(node_name, reason):
                                                   pod.metadata.namespace))
                     break
     return
+
+
+def get_terminating_pods(node_name):
+    """
+    Get all pods on a node that are terminating
+    """
+    # Get the client.
+    kube_client = get_client()
+
+    # Retrieve the pods on the specified node.
+    response = kube_client.list_namespaced_pod(
+        "", field_selector="spec.nodeName=%s" % node_name)
+
+    terminating_pods = list()
+    pods = response.items
+    if pods is not None:
+        for pod in pods:
+            # The presence of the deletion_timestamp indicates the pod is
+            # terminating.
+            if pod.metadata.deletion_timestamp is not None:
+                terminating_pods.append(pod.metadata.name)
+
+    return Result(','.join(terminating_pods))

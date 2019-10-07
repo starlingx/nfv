@@ -2110,6 +2110,36 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def get_terminating_pods(self, future, host_name, callback):
+        """
+        Get list of terminating pods on a host
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            future.work(kubernetes_client.get_terminating_pods, host_name)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("Kubernetes get_terminating_pods failed, operation "
+                           "did not complete, host_name=%s" % host_name)
+                return
+
+            response['result-data'] = future.result.data
+            response['completed'] = True
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to get "
+                           "terminating pods on %s, error=%s." % (host_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
     def host_rest_api_get_handler(self, request_dispatch):
         """
         Host Rest-API GET handler callback

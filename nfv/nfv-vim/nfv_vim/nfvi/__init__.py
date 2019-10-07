@@ -101,6 +101,7 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_hosts  # noqa: F40
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_logs  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_system_info  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_system_state  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_terminating_pods  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_upgrade  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_lock_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_notify_host_failed  # noqa: F401
