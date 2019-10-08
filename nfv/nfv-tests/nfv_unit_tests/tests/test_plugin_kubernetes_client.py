@@ -310,3 +310,125 @@ class TestNFVPluginsK8SMarkAllPodsNotReady(testcase.NFVTestCase):
         self.mock_patch_namespaced_pod_status.assert_called_with(
             "test-pod-ready", "test-namespace-1", mock.ANY)
         self.mock_patch_namespaced_pod_status.assert_called_once()
+
+
+@mock.patch('kubernetes.config.load_kube_config', mock_load_kube_config)
+class TestNFVPluginsK8SGetTerminatingPods(testcase.NFVTestCase):
+
+    list_namespaced_pod_result = {
+        'test-node-1': kubernetes.client.V1PodList(
+            api_version="v1",
+            items=[
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-not-terminating",
+                        namespace="test-namespace-1",
+                        deletion_timestamp=None)
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-terminating",
+                        namespace="test-namespace-1",
+                        deletion_timestamp="2019-10-03T16:54:25Z")
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-not-terminating-2",
+                        namespace="test-namespace-1",
+                        deletion_timestamp=None)
+                )
+            ]
+        ),
+        'test-node-2': kubernetes.client.V1PodList(
+            api_version="v1",
+            items=[
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-not-terminating",
+                        namespace="test-namespace-1",
+                        deletion_timestamp=None)
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-not-terminating-2",
+                        namespace="test-namespace-1",
+                        deletion_timestamp=None)
+                )
+            ]
+        ),
+        'test-node-3': kubernetes.client.V1PodList(
+            api_version="v1",
+            items=[
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-not-terminating",
+                        namespace="test-namespace-1",
+                        deletion_timestamp=None)
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-terminating",
+                        namespace="test-namespace-1",
+                        deletion_timestamp="2019-10-03T16:54:25Z")
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-terminating-2",
+                        namespace="test-namespace-1",
+                        deletion_timestamp="2019-10-03T16:55:25Z")
+                )
+            ]
+        )
+    }
+
+    def setUp(self):
+        super(TestNFVPluginsK8SGetTerminatingPods, self).setUp()
+
+        def mock_list_namespaced_pod(obj, namespace, field_selector=""):
+            node_name = field_selector.split('spec.nodeName=', 1)[1]
+            return self.list_namespaced_pod_result[node_name]
+
+        self.mocked_list_namespaced_pod = mock.patch(
+            'kubernetes.client.CoreV1Api.list_namespaced_pod',
+            mock_list_namespaced_pod)
+        self.mocked_list_namespaced_pod.start()
+
+    def tearDown(self):
+        super(TestNFVPluginsK8SGetTerminatingPods, self).tearDown()
+
+        self.mocked_list_namespaced_pod.stop()
+
+    def test_get_terminating_with_terminating(self):
+
+        result = kubernetes_client.get_terminating_pods("test-node-1")
+
+        assert result.result_data == 'test-pod-terminating'
+
+    def test_get_terminating_no_terminating(self):
+
+        result = kubernetes_client.get_terminating_pods("test-node-2")
+
+        assert result.result_data == ''
+
+    def test_get_terminating_with_two_terminating(self):
+
+        result = kubernetes_client.get_terminating_pods("test-node-3")
+
+        assert result.result_data == \
+               'test-pod-terminating,test-pod-terminating-2'

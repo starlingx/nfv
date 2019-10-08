@@ -981,6 +981,144 @@ class DisableHostServicesTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
 
+class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
+    """
+    Wait Host Services Disabled Task Work
+    """
+    def __init__(self, task, host, service):
+        super(WaitHostServicesDisabledTaskWork, self).__init__(
+            'wait-host-services-disabled_%s_%s' % (host.name, service), task,
+            timeout_in_secs=180)
+        self._host_reference = weakref.ref(host)
+        self._service = service
+        self._query_inprogress = False
+        self._start_timestamp = None
+
+    @property
+    def _host(self):
+        """
+        Returns the host
+        """
+        host = self._host_reference()
+        return host
+
+    def timeout(self):
+        """
+        Handle task work timeout
+        """
+        if self._host.is_force_lock():
+            DLOG.info("Wait-Host-Services-Disabled timeout for %s, "
+                      "force-locking, passing." % self._host.name)
+            return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
+
+        if not self._host.has_reason():
+            self._host.update_failure_reason(
+                "Terminating pods on disabled host %s timed out." %
+                self._host.name)
+
+        return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
+
+    @coroutine
+    def _get_callback(self):
+        """
+        Callback for get terminating pods
+        """
+        response = (yield)
+        self._query_inprogress = False
+
+        if self.task is not None:
+            DLOG.verbose("Get-Terminating-Pods callback for service: "
+                         "%s %s, response=%s." %
+                         (self._service, self._host.name, response))
+
+            if response['completed']:
+                if response['result-data'] != '':
+                    DLOG.info("Get-Terminating-Pods callback for %s, "
+                              "pods %s terminating" %
+                              (self._service, response['result-data']))
+                    return
+
+                # An empty response means no terminating pods exist.
+                DLOG.info("Get-Terminating-Pods callback for %s, "
+                          "no pods are terminating" % self._service)
+                self.task.task_work_complete(
+                    state_machine.STATE_TASK_WORK_RESULT.SUCCESS,
+                    empty_reason)
+            else:
+                DLOG.info("Get-Terminating-Pods callback for %s, "
+                          "failed" % self._host.name)
+
+    @coroutine
+    def _extend_callback(self):
+        """
+        Callback for host services disable extend
+        """
+        response = (yield)
+        if response['completed']:
+            DLOG.info("Extended host services disable timeout for host %s."
+                      % self._host.name)
+            self._host.disable_extend_timestamp = \
+                timers.get_monotonic_timestamp_in_ms()
+        else:
+            DLOG.error("Failed to extend host services disable timeout for "
+                       "host %s." % self._host.name)
+
+    def run(self):
+        """
+        Run wait host services disabled
+        """
+        from nfv_vim import objects
+
+        DLOG.verbose("Wait-Host-Services-Disabled for %s for service %s." %
+                     (self._host.name, self._service))
+
+        now_ms = timers.get_monotonic_timestamp_in_ms()
+        self._host.disable_extend_timestamp = now_ms
+        self._start_timestamp = now_ms
+
+        if self._service == objects.HOST_SERVICES.CONTAINER:
+            # We will wait for a bit before doing our first query to ensure
+            # kubernetes has had time to start terminating the pods.
+            return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
+        else:
+            reason = ("Trying to wait for unknown host service %s" %
+                      self._service)
+            DLOG.error(reason)
+            self._host.update_failure_reason(reason)
+            return state_machine.STATE_TASK_WORK_RESULT.FAILED, reason
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle events while waiting for host services to be disabled
+        """
+        from nfv_vim import objects
+
+        handled = False
+        if HOST_EVENT.PERIODIC_TIMER == event:
+            if self._service == objects.HOST_SERVICES.CONTAINER:
+                if not self._query_inprogress:
+                    now_ms = timers.get_monotonic_timestamp_in_ms()
+                    elapsed_secs = (now_ms - self._start_timestamp) / 1000
+                    # Wait 10s before doing our first query
+                    if 10 <= elapsed_secs:
+                        DLOG.verbose("Wait-Host-Services-Disabled for %s for "
+                                     "service %s. Doing query." %
+                                     (self._host.name, self._service))
+                        self._query_inprogress = True
+                        nfvi.nfvi_get_terminating_pods(self._host.name,
+                                                       self._get_callback())
+            handled = True
+
+        elif HOST_EVENT.AUDIT == event:
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            elapsed_secs = (now_ms - self._host.disable_extend_timestamp) / 1000
+            if 120 <= elapsed_secs:
+                nfvi.nfvi_notify_host_services_disable_extend(
+                    self._host.uuid, self._host.name, self._extend_callback())
+
+        return handled
+
+
 class NotifyHostServicesEnabledTaskWork(state_machine.StateTaskWork):
     """
     Notify Host Services Enabled Task Work
