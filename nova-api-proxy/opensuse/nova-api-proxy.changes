@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Oct  3 17:24:23 UTC 2019 - Erich Cordoba <erich.cordoba.malibran@intel.com> 1.0.0-1
+
+- Refactor on spec file to remove unneeded lines.
+- The %pre/%post sections were added.
+
+-------------------------------------------------------------------
 Tue Sep 17 06:45:00 UTC 2019 - Dominig ar Foll Intel Open Source <dominig.arfoll@fridu.net>
 
 - move to _service to get source from git repo
