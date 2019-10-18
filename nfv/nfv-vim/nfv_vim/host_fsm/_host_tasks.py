@@ -246,8 +246,9 @@ class DisableHostTask(state_machine.StateTask):
                 if not sw_mgmt_director.single_controller:
                     task_work_list.append(DisableHostServicesTaskWork(
                         self, host, objects.HOST_SERVICES.CONTAINER))
-                    task_work_list.append(WaitHostServicesDisabledTaskWork(
-                        self, host, objects.HOST_SERVICES.CONTAINER))
+                    if not self._host.is_offline():
+                        task_work_list.append(WaitHostServicesDisabledTaskWork(
+                            self, host, objects.HOST_SERVICES.CONTAINER))
         task_work_list.append(notify_host_services_task(
             self, host, force_pass=True))
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
