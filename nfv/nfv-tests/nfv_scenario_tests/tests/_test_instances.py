@@ -13,7 +13,6 @@ from nfv_common import debug
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import fm
 from nfv_plugins.nfvi_plugins.openstack import nova
-from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack import openstack
 
 from tests import _instances
@@ -182,47 +181,24 @@ class TestInstance(_test_base.Test):
         """
         Fetch the customer alarms raised
         """
-        alarms_in_fm = fm.get_alarms(self.platform_token).result_data["alarms"]
-
-        alarms_in_fm.extend(fm.get_alarms(self.openstack_token,
-                                          OPENSTACK_SERVICE.FM).result_data["alarms"])
-
-        self._customer_alarms = dict()
-        self._customer_alarms["alarms"] = alarms_in_fm
+        self._customer_alarms = fm.get_alarms(self.platform_token).result_data
 
     def _refresh_customer_logs(self):
         """
         Fetch the customer logs
         """
-        logs_in_fm = fm.get_logs(self.platform_token,
-                                 self.start_datetime,
-                                 self.end_datetime).result_data["event_log"]
-
-        logs_in_fm.extend(fm.get_logs(self.openstack_token,
-                                      self.start_datetime,
-                                      self.end_datetime,
-                                      OPENSTACK_SERVICE.FM).result_data["event_log"])
-
-        self._customer_logs = dict()
-        self._customer_logs["event_log"] = logs_in_fm
+        self._customer_logs = fm.get_logs(self.platform_token,
+                                          self.start_datetime,
+                                          self.end_datetime).result_data
 
     def _refresh_customer_alarm_history(self):
         """
         Fetch the customer alarm history
         """
-        alarm_history_in_fm = fm.get_alarm_history(
+        self._customer_alarm_history = fm.get_alarm_history(
             self.platform_token,
             self.start_datetime,
-            self.end_datetime).result_data["event_log"]
-
-        alarm_history_in_fm.extend(fm.get_alarm_history(
-            self.openstack_token,
-            self.start_datetime,
-            self.end_datetime,
-            OPENSTACK_SERVICE.FM).result_data["event_log"])
-
-        self._customer_alarm_history = dict()
-        self._customer_alarm_history["event_log"] = alarm_history_in_fm
+            self.end_datetime).result_data
 
 
 class TestInstanceStart(TestInstance):
