@@ -50,8 +50,12 @@ def nfvi_initialize(config):
                                           'False') in DISABLED_LIST)
     guest_plugin_disabled = (config.get('guest_plugin_disabled',
                                         'False') in DISABLED_LIST)
+    # 'fault_management_pod_disabled' is used to disable get alarms
+    # from containerized fm and will be removed in future.
     fault_mgmt_plugin_disabled = (config.get('fault_mgmt_plugin_disabled',
-                                        'False') in DISABLED_LIST)
+                                        'False') in DISABLED_LIST) or \
+                                 (config.get('fault_management_pod_disabled',
+                                        'True') in DISABLED_LIST)
 
     _task_worker_pools['identity'] = \
         tasks.TaskWorkerPool('Identity', num_workers=1)
