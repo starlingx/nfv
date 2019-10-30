@@ -40,28 +40,28 @@ class NFVISwMgmtAPI(object):
         """
         pass
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def query_updates(self, future, callback):
         """
         Query software updates using the plugin
         """
         pass
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def query_hosts(self, future, callback):
         """
         Query hosts using the plugin
         """
         pass
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def update_host(self, future, host_name, callback):
         """
         Apply a software update to a host using the plugin
         """
         pass
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def update_hosts(self, future, host_names, callback):
         """
         Apply a software update to a list of hosts using the plugin
