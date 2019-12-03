@@ -720,11 +720,12 @@ class SwPatchStrategy(SwUpdateStrategy):
         from nfv_vim import tables
 
         if SW_UPDATE_APPLY_TYPE.IGNORE != self._worker_apply_type:
-            # When using a single controller/worker host, only allow the
-            # stop/start instance action.
+            # When using a single controller/worker host that is running
+            # OpenStack, only allow the stop/start instance action.
             if self._single_controller:
                 for host in worker_hosts:
-                    if HOST_PERSONALITY.CONTROLLER in host.personality and \
+                    if host.openstack_compute and \
+                            HOST_PERSONALITY.CONTROLLER in host.personality and \
                             SW_UPDATE_INSTANCE_ACTION.STOP_START != \
                             self._default_instance_action:
                         DLOG.error("Cannot migrate instances in a single "

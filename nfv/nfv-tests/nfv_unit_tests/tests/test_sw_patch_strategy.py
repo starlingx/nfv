@@ -272,21 +272,28 @@ class TestSwPatchStrategy(testcase.NFVTestCase):
     def create_host(self,
                     host_name,
                     cpe=False,
-                    admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED):
+                    admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED,
+                    openstack_installed=True):
         """
         Create a host
         """
         personality = ''
 
+        openstack_control = False
         openstack_compute = False
 
         if host_name.startswith('controller'):
             personality = HOST_PERSONALITY.CONTROLLER
             if cpe:
                 personality = personality + ',' + HOST_PERSONALITY.WORKER
+            if openstack_installed:
+                openstack_control = True
+                if cpe:
+                    openstack_compute = True
         elif host_name.startswith('compute'):
             personality = HOST_PERSONALITY.WORKER
-            openstack_compute = True
+            if openstack_installed:
+                openstack_compute = True
         elif host_name.startswith('storage'):
             personality = HOST_PERSONALITY.STORAGE
         else:
@@ -303,7 +310,7 @@ class TestSwPatchStrategy(testcase.NFVTestCase):
             software_load='12.01',
             target_load='12.01',
             openstack_compute=openstack_compute,
-            openstack_control=False,
+            openstack_control=openstack_control,
             remote_storage=False,
             uptime='1000'
         )
@@ -3359,6 +3366,57 @@ class TestSwPatchStrategy(testcase.NFVTestCase):
             reboot=True)
 
         assert success is False, "Strategy creation did not fail"
+
+    def test_sw_patch_strategy_cpe_simplex_stages_serial_migrate_no_openstack(
+            self):
+        """
+        Test the sw_patch strategy add worker strategy stages:
+        - simplex cpe host (no openstack)
+        - serial apply
+        - migrate instance action
+        """
+        self.create_host('controller-0', cpe=True, openstack_installed=False)
+
+        worker_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
+            single_controller=True
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=worker_hosts,
+                                              reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 1,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60},
+                 ]
+                },
+            ]
+        }
+
+        validate_strategy_persists(strategy)
+        validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_cpe_simplex_stages_serial_stop_start(self):
         """
