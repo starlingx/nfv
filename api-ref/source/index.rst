@@ -1,12 +1,13 @@
-=====================
-stx-nfv API Reference
-=====================
+=================
+NFV API Reference
+=================
 
-Use the StarlingX stx-nfv API for NFVI orchestration.
+Use the StarlingX NFV API for NFVI orchestration.
 
-stx-nfv API content can be searched using the :ref:`search page <search>`.
+Search NFV API content using the :ref:`search page <search>`.
 
-API Reference
+-------------
+API reference
 -------------
 
 .. toctree::

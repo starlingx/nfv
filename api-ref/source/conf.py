@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 repository_name = 'openstack/stx-nfv'
-project = u'stx-nfv'
+project = u'StarlingX NFV'
 bug_project = 'starlingx'
 bug_tag = 'stx.nfv'
 
