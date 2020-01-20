@@ -10,13 +10,13 @@ Source0: %{name}-%{version}.tar.gz
 
 %define debug_package %{nil}
 
-BuildRequires: python-setuptools
-BuildRequires: python2-pip
-BuildRequires: python2-wheel
-Requires: python-eventlet
-Requires: python-routes
-Requires: python-webob
-Requires: python-paste
+BuildRequires: python3-setuptools
+BuildRequires: python3-pip
+BuildRequires: python3-wheel
+Requires: python3-eventlet
+Requires: python3-routes
+Requires: python3-webob
+Requires: python3-paste
 #TODO: Requires: oslo-config
 
 %description
@@ -24,7 +24,7 @@ Nova Computer API Proxy
 
 %define local_bindir /usr/bin/
 %define local_initddir /etc/rc.d/init.d
-%define pythonroot /usr/lib64/python2.7/site-packages
+%define pythonroot %{python3_sitearch}
 %define local_etc_systemd /etc/systemd/system/
 %define local_proxy_conf /etc/proxy/
 
@@ -32,11 +32,11 @@ Nova Computer API Proxy
 %setup
 
 %build
-%{__python} setup.py build
-%py2_build_wheel
+%{__python3} setup.py build
+%py3_build_wheel
 
 %install
-%{__python} setup.py install --root=$RPM_BUILD_ROOT \
+%{__python3} setup.py install --root=$RPM_BUILD_ROOT \
                              --install-lib=%{pythonroot} \
                              --prefix=/usr \
                              --install-data=/usr/share \
@@ -68,7 +68,7 @@ rm -rf $RPM_BUILD_ROOT
 %{local_proxy_conf}/api-proxy-paste.ini
 %dir %{pythonroot}/nova_api_proxy
 %{pythonroot}/nova_api_proxy/*
-%{pythonroot}/api_proxy-%{version}.0-py2.7.egg-info/*
+%{pythonroot}/api_proxy-%{version}.0-py3.6.egg-info/*
 
 %package wheels
 Summary: %{name} wheels
