@@ -10,25 +10,25 @@ Source0: %{name}-%{version}.tar.gz
 
 %define debug_package %{nil}
 
-BuildRequires: python-setuptools
-BuildRequires: python2-pip
-BuildRequires: python2-wheel
+BuildRequires: python3-setuptools
+BuildRequires: python3-pip
+BuildRequires: python3-wheel
 
 %description
 StarlingX Network Function Virtualization
 
 %define local_bindir /usr/bin/
-%define pythonroot /usr/lib64/python2.7/site-packages
+%define pythonroot %{python3_sitearch}
 
 %define build_python() ( \
     pushd %1; \
-    %{__python} setup.py build; \
-    %{__python} setup.py bdist_wheel; \
+    %{__python3} setup.py build; \
+    %{__python3} setup.py bdist_wheel; \
     popd)
 
 %define install_python() ( \
     pushd %1; \
-    %{__python} setup.py install \\\
+    %{__python3} setup.py install \\\
         --root=$RPM_BUILD_ROOT \\\
         --install-lib=%{pythonroot} \\\
         --prefix=/usr \\\
@@ -142,8 +142,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc nfv-common/LICENSE
 %dir %{pythonroot}/nfv_common/
 %{pythonroot}/nfv_common/*
-%dir %{pythonroot}/windriver_nfv_common_plugins-%{version}.0-py2.7.egg-info
-%{pythonroot}/windriver_nfv_common_plugins-%{version}.0-py2.7.egg-info/*
+%dir %{pythonroot}/windriver_nfv_common_plugins-%{version}.0-py3.6.egg-info
+%{pythonroot}/windriver_nfv_common_plugins-%{version}.0-py3.6.egg-info/*
 
 %files -n nfv-plugins
 %defattr(-,root,root,-)
@@ -157,8 +157,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/nfv/nfv_plugins/*
 %dir %{pythonroot}/nfv_plugins/
 %{pythonroot}/nfv_plugins/*
-%dir %{pythonroot}/windriver_nfv_plugins-%{version}.0-py2.7.egg-info
-%{pythonroot}/windriver_nfv_plugins-%{version}.0-py2.7.egg-info/*
+%dir %{pythonroot}/windriver_nfv_plugins-%{version}.0-py3.6.egg-info
+%{pythonroot}/windriver_nfv_plugins-%{version}.0-py3.6.egg-info/*
 
 %files -n nfv-tools
 %defattr(-,root,root,-)
@@ -167,8 +167,8 @@ rm -rf $RPM_BUILD_ROOT
 %{local_bindir}/nfv-notify
 %dir %{pythonroot}/nfv_tools/
 %{pythonroot}/nfv_tools/*
-%dir %{pythonroot}/nfv_tools-%{version}.0-py2.7.egg-info
-%{pythonroot}/nfv_tools-%{version}.0-py2.7.egg-info/*
+%dir %{pythonroot}/nfv_tools-%{version}.0-py3.6.egg-info
+%{pythonroot}/nfv_tools-%{version}.0-py3.6.egg-info/*
 
 %files -n nfv-vim
 %defattr(-,root,root,-)
@@ -186,8 +186,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/lib/ocf/resource.d/nfv/vim-webserver
 %dir %{pythonroot}/nfv_vim/
 %{pythonroot}/nfv_vim/*
-%dir %{pythonroot}/nfv_vim-%{version}.0-py2.7.egg-info
-%{pythonroot}/nfv_vim-%{version}.0-py2.7.egg-info/*
+%dir %{pythonroot}/nfv_vim-%{version}.0-py3.6.egg-info
+%{pythonroot}/nfv_vim-%{version}.0-py3.6.egg-info/*
 
 %files -n nfv-client
 %defattr(-,root,root,-)
@@ -196,8 +196,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/bash_completion.d/sw-manager
 %dir %{pythonroot}/nfv_client/
 %{pythonroot}/nfv_client/*
-%dir %{pythonroot}/nfv_client-%{version}.0-py2.7.egg-info
-%{pythonroot}/nfv_client-%{version}.0-py2.7.egg-info/*
+%dir %{pythonroot}/nfv_client-%{version}.0-py3.6.egg-info
+%{pythonroot}/nfv_client-%{version}.0-py3.6.egg-info/*
 
 %package wheels
 Summary: NFV wheels
