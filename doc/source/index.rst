@@ -1,32 +1,35 @@
 =====================
-stx-nfv Documentation
+StarlingX NFV Project
 =====================
 
-This is the documentation for StarlingX NFVI orchestration.
+The starlingx/nfv project provides NFVI orchestration.
 
-Release Notes
+-------------
+Release notes
 -------------
 
 .. toctree::
    :maxdepth: 1
 
-   Release Notes <https://docs.starlingx.io/releasenotes/stx-nfv>
+   Release notes <https://docs.starlingx.io/releasenotes/nfv>
 
-API Reference
+-------------
+API reference
 -------------
 
 .. toctree::
    :maxdepth: 1
 
-   API Reference <https://docs.starlingx.io/api-ref/stx-nfv>
+   API reference <https://docs.starlingx.io/api-ref/nfv>
 
+-----
 Links
 -----
 
-* Source: `stx-nfv`_
-* Code Review: `Gerrit`_
-* Bugs: `Storyboard`_
+* Source: `starlingx/nfv`_
+* Code review: `Gerrit`_
+* Project tracking: `Storyboard`_
 
-.. _stx-nfv: https://opendev.org/starlingx/nfv/
+.. _starlingx/nfv: https://opendev.org/starlingx/nfv/
 .. _Gerrit: https://review.opendev.org/#/q/project:starlingx/nfv
 .. _Storyboard: https://storyboard.openstack.org/#!/project/starlingx/nfv

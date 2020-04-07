@@ -1,6 +1,6 @@
-=====================
-stx-nfv Release Notes
-=====================
+===========================
+StarlingX NFV Release Notes
+===========================
 
 .. toctree::
    :maxdepth: 2

@@ -23,7 +23,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'stx-nfv'
+project = u'StarlingX NFV'
 copyright = u'2018, StarlingX'
 author = u'StarlingX'
 
