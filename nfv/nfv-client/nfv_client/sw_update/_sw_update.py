@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,6 +8,7 @@ from nfv_client.openstack import sw_update
 
 STRATEGY_NAME_SW_PATCH = 'sw-patch'
 STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
+STRATEGY_NAME_FW_UPDATE = 'fw-update'
 
 APPLY_TYPE_SERIAL = 'serial'
 APPLY_TYPE_PARALLEL = 'parallel'
@@ -105,6 +106,8 @@ def _display_strategy(strategy, details=False):
         print("Strategy Patch Strategy:")
     elif strategy.name == STRATEGY_NAME_SW_UPGRADE:
         print("Strategy Upgrade Strategy:")
+    elif strategy.name == STRATEGY_NAME_FW_UPDATE:
+        print("Strategy Firmware Update Strategy:")
     else:
         print("Strategy Unknown Strategy:")
 

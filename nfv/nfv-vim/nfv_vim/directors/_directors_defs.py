@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,6 +25,8 @@ class OperationTypes(Constants):
     REBOOT_HOSTS = Constant('reboot-hosts')
     UPGRADE_HOSTS = Constant('upgrade-hosts')
     SWACT_HOSTS = Constant('swact-hosts')
+    FW_UPDATE_HOSTS = Constant('fw-update-hosts')
+    FW_UPDATE_ABORT_HOSTS = Constant('fw-update-abort-hosts')
     START_INSTANCES = Constant('start-instances')
     START_INSTANCES_SERIAL = Constant('start-instances-serial')
     STOP_INSTANCES = Constant('stop-instances')

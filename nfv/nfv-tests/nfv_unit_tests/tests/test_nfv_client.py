@@ -54,6 +54,11 @@ class TestNFVClientShell(testcase.NFVTestCase):
         shell_args = ['patch-strategy', ]
         self._test_shell_bad_or_empty_args(shell_args=shell_args)
 
+    # fw-update-strategy expects additional arguments
+    def test_shell_fw_update_strategy_incomplete_args(self):
+        shell_args = ['fw-update-strategy', ]
+        self._test_shell_bad_or_empty_args(shell_args=shell_args)
+
     # --- Help Cases ----
     # -h will print_help and SystemExit
     @mock.patch('argparse.ArgumentParser.print_help')
@@ -67,6 +72,10 @@ class TestNFVClientShell(testcase.NFVTestCase):
 
     def test_shell_patch_strategy_help(self):
         shell_args = ['patch-strategy', '-h', ]
+        self._test_shell_help(shell_args=shell_args)
+
+    def test_shell_fw_update_strategy_help(self):
+        shell_args = ['fw-update-strategy', '-h', ]
         self._test_shell_help(shell_args=shell_args)
 
     # -- Show commands --
@@ -85,6 +94,10 @@ class TestNFVClientShell(testcase.NFVTestCase):
 
     def test_shell_patch_strategy_show_missing_env(self):
         shell_args = ['patch-strategy', 'show', ]
+        self._test_shell_show_missing_env(shell_args=shell_args)
+
+    def test_shell_fw_update_strategy_show_missing_env(self):
+        shell_args = ['fw-update-strategy', 'show', ]
         self._test_shell_show_missing_env(shell_args=shell_args)
 
     # Test the show commands are invoked when env values detected
@@ -109,4 +122,8 @@ class TestNFVClientShell(testcase.NFVTestCase):
 
     def test_shell_patch_strategy_show(self):
         shell_args = ['patch-strategy', 'show', ]
+        self._test_shell_show(shell_args=shell_args)
+
+    def test_shell_fw_update_strategy_show(self):
+        shell_args = ['fw-update-strategy', 'show', ]
         self._test_shell_show(shell_args=shell_args)

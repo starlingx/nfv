@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016,2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -66,4 +66,7 @@ def database_sw_update_get_list():
         elif objects.SW_UPDATE_TYPE.SW_UPGRADE == sw_update.sw_update_type:
             sw_upgrade_obj = objects.SwUpgrade(sw_update.uuid, strategy_data)
             sw_update_objs.append(sw_upgrade_obj)
+        elif objects.SW_UPDATE_TYPE.FW_UPDATE == sw_update.sw_update_type:
+            fw_update_obj = objects.FwUpdate(sw_update.uuid, strategy_data)
+            sw_update_objs.append(fw_update_obj)
     return sw_update_objs

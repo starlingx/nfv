@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016,2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -153,6 +153,73 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
             = sw_upgrade_cmds.add_parser('show', help='Show a strategy')
         sw_upgrade_show_strategy_cmd.set_defaults(cmd='show')
         sw_upgrade_show_strategy_cmd.add_argument(
+            '--details', action='store_true', help='show strategy details')
+
+        # Firmware Update Commands
+        fw_update_parser = commands.add_parser('fw-update-strategy',
+            help='Firmware Update Strategy')
+        fw_update_parser.set_defaults(cmd_area='fw-update-strategy')
+
+        fw_update_cmds = fw_update_parser.add_subparsers(
+            title='Firmware Update Commands', metavar='')
+        fw_update_cmds.required = True
+
+        fw_update_create_strategy_cmd \
+            = fw_update_cmds.add_parser('create', help='Create a strategy')
+        fw_update_create_strategy_cmd.set_defaults(cmd='create')
+        fw_update_create_strategy_cmd.add_argument('--controller-apply-type',
+            default=sw_update.APPLY_TYPE_IGNORE,
+            choices=[sw_update.APPLY_TYPE_IGNORE],
+            help='defaults to ignore')
+        fw_update_create_strategy_cmd.add_argument('--storage-apply-type',
+            default=sw_update.APPLY_TYPE_IGNORE,
+            choices=[sw_update.APPLY_TYPE_IGNORE],
+            help='defaults to ignore')
+        fw_update_create_strategy_cmd.add_argument('--worker-apply-type',
+            default=sw_update.APPLY_TYPE_SERIAL,
+            choices=[sw_update.APPLY_TYPE_SERIAL,
+                     sw_update.APPLY_TYPE_PARALLEL,
+                     sw_update.APPLY_TYPE_IGNORE],
+            help='defaults to serial')
+
+        fw_update_create_strategy_cmd.add_argument(
+            '--max-parallel-worker-hosts', type=int, choices=range(2, 11),
+            help='maximum worker hosts to update in parallel')
+
+        fw_update_create_strategy_cmd.add_argument('--instance-action',
+            default=sw_update.INSTANCE_ACTION_STOP_START,
+            choices=[sw_update.INSTANCE_ACTION_MIGRATE,
+                     sw_update.INSTANCE_ACTION_STOP_START],
+            help='defaults to stop-start')
+
+        fw_update_create_strategy_cmd.add_argument('--alarm-restrictions',
+            default=sw_update.ALARM_RESTRICTIONS_STRICT,
+            choices=[sw_update.ALARM_RESTRICTIONS_STRICT,
+                     sw_update.ALARM_RESTRICTIONS_RELAXED],
+            help='defaults to strict')
+
+        fw_update_delete_strategy_cmd \
+            = fw_update_cmds.add_parser('delete', help='Delete a strategy')
+        fw_update_delete_strategy_cmd.set_defaults(cmd='delete')
+        fw_update_delete_strategy_cmd.add_argument(
+            '--force', action='store_true', help=argparse.SUPPRESS)
+
+        fw_update_apply_strategy_cmd \
+            = fw_update_cmds.add_parser('apply', help='Apply a strategy')
+        fw_update_apply_strategy_cmd.set_defaults(cmd='apply')
+        fw_update_apply_strategy_cmd.add_argument(
+            '--stage-id', default=None, help='stage identifier to apply')
+
+        fw_update_abort_strategy_cmd \
+            = fw_update_cmds.add_parser('abort', help='Abort a strategy')
+        fw_update_abort_strategy_cmd.set_defaults(cmd='abort')
+        fw_update_abort_strategy_cmd.add_argument(
+            '--stage-id', help='stage identifier to abort')
+
+        fw_update_show_strategy_cmd \
+            = fw_update_cmds.add_parser('show', help='Show a strategy')
+        fw_update_show_strategy_cmd.set_defaults(cmd='show')
+        fw_update_show_strategy_cmd.add_argument(
             '--details', action='store_true', help='show strategy details')
 
         args = parser.parse_args(argv)
@@ -329,6 +396,77 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
 
             else:
                 raise ValueError("Unknown command, %s, given for upgrade-strategy"
+                                 % args.cmd)
+        elif 'fw-update-strategy' == args.cmd_area:
+            if 'create' == args.cmd:
+                sw_update.create_strategy(
+                    args.os_auth_url,
+                    args.os_project_name,
+                    args.os_project_domain_name,
+                    args.os_username,
+                    args.os_password,
+                    args.os_user_domain_name,
+                    args.os_region_name,
+                    args.os_interface,
+                    sw_update.STRATEGY_NAME_FW_UPDATE,
+                    args.controller_apply_type,
+                    args.storage_apply_type,
+                    sw_update.APPLY_TYPE_IGNORE,
+                    args.worker_apply_type,
+                    args.max_parallel_worker_hosts,
+                    args.instance_action,
+                    args.alarm_restrictions)
+
+            elif 'delete' == args.cmd:
+                sw_update.delete_strategy(args.os_auth_url,
+                    args.os_project_name,
+                    args.os_project_domain_name,
+                    args.os_username,
+                    args.os_password,
+                    args.os_user_domain_name,
+                    args.os_region_name,
+                    args.os_interface,
+                    sw_update.STRATEGY_NAME_FW_UPDATE,
+                    args.force)
+
+            elif 'apply' == args.cmd:
+                sw_update.apply_strategy(args.os_auth_url,
+                    args.os_project_name,
+                    args.os_project_domain_name,
+                    args.os_username,
+                    args.os_password,
+                    args.os_user_domain_name,
+                    args.os_region_name,
+                    args.os_interface,
+                    sw_update.STRATEGY_NAME_FW_UPDATE,
+                    args.stage_id)
+
+            elif 'abort' == args.cmd:
+                sw_update.abort_strategy(args.os_auth_url,
+                    args.os_project_name,
+                    args.os_project_domain_name,
+                    args.os_username,
+                    args.os_password,
+                    args.os_user_domain_name,
+                    args.os_region_name,
+                    args.os_interface,
+                    sw_update.STRATEGY_NAME_FW_UPDATE,
+                    args.stage_id)
+
+            elif 'show' == args.cmd:
+                sw_update.show_strategy(args.os_auth_url,
+                    args.os_project_name,
+                    args.os_project_domain_name,
+                    args.os_username,
+                    args.os_password,
+                    args.os_user_domain_name,
+                    args.os_region_name,
+                    args.os_interface,
+                    sw_update.STRATEGY_NAME_FW_UPDATE,
+                    args.details)
+            else:
+                raise ValueError("Unknown command, %s, "
+                                 "given for fw-update-strategy"
                                  % args.cmd)
         else:
             raise ValueError("Unknown command area, %s, given" % args.cmd_area)

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,6 +18,8 @@ class EventNames(object):
     HOST_UNLOCK_FAILED = Constant('host-unlock-failed')
     HOST_REBOOT_FAILED = Constant('host-reboot-failed')
     HOST_UPGRADE_FAILED = Constant('host-upgrade-failed')
+    HOST_FW_UPDATE_FAILED = Constant('host-fw-update-failed')
+    HOST_FW_UPDATE_ABORT_FAILED = Constant('host-fw-update-abort-failed')
     HOST_SWACT_FAILED = Constant('host-swact-failed')
     HOST_STATE_CHANGED = Constant('host-state-changed')
     HOST_AUDIT = Constant('host-audit')
@@ -30,3 +32,20 @@ class EventNames(object):
 
 # Constants
 STRATEGY_EVENT = EventNames()
+
+
+@six.add_metaclass(Singleton)
+class FirmwareUpdateLabels(object):
+    """
+    Firmware Update Labels
+    """
+    # Host image update pending key label : True / False
+    DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE = Constant('needs_firmware_update')
+
+    # Device Image Status
+    DEVICE_IMAGE_UPDATE_PENDING = Constant('pending')
+    DEVICE_IMAGE_UPDATE_IN_PROGRESS = Constant('in-progress')
+    DEVICE_IMAGE_UPDATE_COMPLETED = Constant('completed')
+    DEVICE_IMAGE_UPDATE_FAILED = Constant('failed')
+
+FW_UPDATE_LABEL = FirmwareUpdateLabels()

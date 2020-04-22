@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,5 +14,6 @@ from nfv_client.sw_update._sw_update import delete_strategy  # noqa: F401
 from nfv_client.sw_update._sw_update import INSTANCE_ACTION_MIGRATE  # noqa: F401
 from nfv_client.sw_update._sw_update import INSTANCE_ACTION_STOP_START  # noqa: F401
 from nfv_client.sw_update._sw_update import show_strategy  # noqa: F401
+from nfv_client.sw_update._sw_update import STRATEGY_NAME_FW_UPDATE  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_SW_PATCH  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_SW_UPGRADE  # noqa: F401

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -605,6 +605,229 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         except Exception as e:
             DLOG.exception("Caught exception while trying to get host "
                            "details, host=%s, error=%s." % (host_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def get_host_devices(self, future, host_uuid, host_name, callback):
+        """
+        Get host device list details
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete, "
+                               "host_uuid=%s." % host_uuid)
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.get_host_devices,
+                        self._platform_token, host_uuid)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                return
+
+            host_data = future.result.data
+
+            response['result-data'] = host_data
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception trying to get_host_devices"
+                               "details, host=%s, error=%s." % (host_name, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception trying to get_host_devices "
+                           "details, host=%s, error=%s." % (host_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def get_host_device(self, future, host_uuid, host_name,
+                        device_uuid, device_name, callback):
+        """
+        Get host device details
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete, "
+                               "host_uuid=%s." % host_uuid)
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.get_host_device,
+                        self._platform_token, device_uuid)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                return
+
+            host_data = future.result.data
+
+            response['result-data'] = host_data
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception trying to get_host_device "
+                               "details, host=%s, device=%s, error=%s." %
+                               (host_name, device_name, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception trying to get_host_device "
+                           "details, host=%s, device=%s, error=%s." %
+                           (host_name, device_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def host_device_image_update(self, future, host_uuid, host_name, callback):
+        """
+        Update a host device image
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete, "
+                               "host_uuid=%s." % host_uuid)
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.host_device_image_update,
+                        self._platform_token, host_uuid)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                return
+
+            host_data = future.result.data
+
+            response['result-data'] = host_data
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception requesting a host device "
+                               "image update, host=%s, error=%s." %
+                               (host_name, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception requesting a host device "
+                           "image update, host=%s, error=%s." %
+                           (host_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def host_device_image_update_abort(self, future, host_uuid, host_name, callback):
+        """
+        Abort a host device image update
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete, "
+                               "host_uuid=%s." % host_uuid)
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.host_device_image_update_abort,
+                        self._platform_token, host_uuid)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                return
+
+            host_data = future.result.data
+
+            response['result-data'] = host_data
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception requesting host device "
+                               "image update abort, host=%s, error=%s." %
+                               (host_name, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception requesting host device "
+                           "image update abort, host=%s, error=%s." %
+                           (host_name, e))
 
         finally:
             callback.send(response)

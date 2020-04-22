@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -101,6 +101,38 @@ class SwMgmtDirector(object):
                                         self._sw_update.strategy)
         return strategy_uuid, ''
 
+    def create_fw_update_strategy(self,
+                                  controller_apply_type,
+                                  storage_apply_type,
+                                  worker_apply_type,
+                                  max_parallel_worker_hosts,
+                                  default_instance_action,
+                                  alarm_restrictions,
+                                  callback):
+        """
+        Create Firmware Update Strategy
+        """
+        strategy_uuid = str(uuid.uuid4())
+
+        if self._sw_update is not None:
+            # Do not schedule the callback - if creation failed because a
+            # strategy already exists, the callback will attempt to operate
+            # on the old strategy, which is not what we want.
+            reason = "strategy already exists"
+            return None, reason
+
+        self._sw_update = objects.FwUpdate()
+        success, reason = self._sw_update.strategy_build(
+            strategy_uuid, controller_apply_type,
+            storage_apply_type,
+            worker_apply_type, max_parallel_worker_hosts,
+            default_instance_action, alarm_restrictions,
+            self._ignore_alarms, self._single_controller)
+
+        schedule.schedule_function_call(callback, success, reason,
+                                        self._sw_update.strategy)
+        return strategy_uuid, ''
+
     def apply_sw_update_strategy(self, strategy_uuid, stage_id, callback):
         """
         Apply Software Update Strategy
@@ -195,6 +227,22 @@ class SwMgmtDirector(object):
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_UPGRADE_FAILED, host)
+
+    def host_fw_update_abort_failed(self, host):
+        """
+        Called when firmware update abort for a host failed
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.HOST_FW_UPDATE_ABORT_FAILED, host)
+
+    def host_fw_update_failed(self, host):
+        """
+        Called when a firmware update of a host failed
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.HOST_FW_UPDATE_FAILED, host)
 
     def host_audit(self, host):
         """

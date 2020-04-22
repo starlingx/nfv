@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,6 +13,7 @@ from nfv_common.helpers import Singleton
 from nfv_common import strategy
 from nfv_common import timers
 from nfv_vim import objects
+from nfv_vim.strategy._strategy_defs import FW_UPDATE_LABEL
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 from nfv_vim import tables
 
@@ -24,6 +25,7 @@ class StrategyStepNames(Constants):
     """
     Strategy Step Names
     """
+    QUERY_HOSTS = Constant('query-hosts')
     SYSTEM_STABILIZE = Constant('system-stabilize')
     LOCK_HOSTS = Constant('lock-hosts')
     UNLOCK_HOSTS = Constant('unlock-hosts')
@@ -34,6 +36,8 @@ class StrategyStepNames(Constants):
     COMPLETE_UPGRADE = Constant('complete-upgrade')
     SWACT_HOSTS = Constant('swact-hosts')
     SW_PATCH_HOSTS = Constant('sw-patch-hosts')
+    FW_UPDATE_HOSTS = Constant('fw-update-hosts')
+    FW_UPDATE_ABORT_HOSTS = Constant('fw-update-abort-hosts')
     MIGRATE_INSTANCES = Constant('migrate-instances')
     STOP_INSTANCES = Constant('stop-instances')
     START_INSTANCES = Constant('start-instances')
@@ -41,6 +45,8 @@ class StrategyStepNames(Constants):
     WAIT_DATA_SYNC = Constant('wait-data-sync')
     QUERY_SW_PATCHES = Constant('query-sw-patches')
     QUERY_SW_PATCH_HOSTS = Constant('query-sw-patch-hosts')
+    QUERY_HOST_DEVICES = Constant('query-host-devices')
+    QUERY_HOST_DEVICE = Constant('query-host-device')
     QUERY_UPGRADE = Constant('query-upgrade')
     DISABLE_HOST_SERVICES = Constant('disable-host-services')
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
@@ -1386,6 +1392,7 @@ class StopInstancesStep(strategy.StrategyStep):
             if instance is not None:
                 self._instances.append(instance)
                 self._instance_names.append(instance.name)
+
                 # Retrieve the host this instance was on when the step was
                 # created.
                 self._instance_host_names[instance.uuid] = \
@@ -1476,6 +1483,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
         Query Alarms Callback
         """
         response = (yield)
+
         DLOG.debug("Query-Alarms callback response=%s." % response)
 
         if response['completed']:
@@ -1734,12 +1742,455 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
 
     def as_dict(self):
         """
-        Represent the query software update hosts step as a dictionary
+        Represent the query software patches hosts step as a dictionary
         """
         data = super(QuerySwPatchHostsStep, self).as_dict()
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
+        return data
+
+
+class QueryHostDeviceListStep(strategy.StrategyStep):
+    """
+    Query Host Device List
+    """
+
+    # This step queries system inventory for each host's device list.
+    # Any hosts whose devices have a firmware update pending have its name
+    # added to _fw_update_hosts to build a list of host names that require
+    # firmware update.
+
+    def __init__(self, host):
+        super(QueryHostDeviceListStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_HOST_DEVICES, timeout_in_secs=60)
+
+        self._host_names = list()
+        self._host_uuids = list()
+        self._host_names.append(host.name)
+        self._host_uuids.append(host.uuid)
+
+    @coroutine
+    def _get_host_devices_callback(self):
+        """
+        Query Host Device List callback
+        """
+        from nfv_vim import tables
+
+        response = (yield)
+
+        DLOG.verbose("get-host-devices %s callback response=%s." %
+                    (self._host_names[0], response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                pci_devices = response['result-data'].get('pci_devices')
+                if pci_devices:
+                    host_added_to_fw_update_hosts_list = False
+                    for pci_device in pci_devices:
+                        if pci_device.get(FW_UPDATE_LABEL.DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE) is False:
+                            DLOG.verbose("%s:%s device is up-to-date" %
+                                        (self._host_names[0],
+                                         pci_device.get('name')))
+                            continue
+
+                        # using existing vim host inventory for host info
+                        host_table = tables.tables_get_host_table()
+                        for host in host_table.values():
+                            if host.uuid == pci_device['host_uuid']:
+                                DLOG.info("%s:%s device requires update" %
+                                          (host.name, pci_device.get('name')))
+                                if host_added_to_fw_update_hosts_list is False:
+                                    self.strategy.fw_update_hosts.append(host.name)
+                                    host_added_to_fw_update_hosts_list = True
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, "firmware update query failed")
+
+    def apply(self):
+        """
+        Query Host Device List Apply
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("%s %s step apply" % (self._host_names[0], self._name))
+
+        # This step is only ever called with one host name.
+        nfvi.nfvi_get_host_devices(self._host_uuids[0],
+                                   self._host_names[0],
+                                   self._get_host_devices_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """
+        Load the firmware update host device list step
+        """
+        super(QueryHostDeviceListStep, self).from_dict(data)
+        self._host_names = data['entity_names']
+        self._host_uuids = data['entity_uuids']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the object as a dictionary for the strategy
+        """
+        data = super(QueryHostDeviceListStep, self).as_dict()
+        data['entity_type'] = ''
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        return data
+
+
+class FwUpdateHostsStep(strategy.StrategyStep):
+    """
+    Firmware Update Hosts - Strategy Step
+    """
+    # This step starts the firmware update process for the passed in hosts
+    def __init__(self, hosts):
+        super(FwUpdateHostsStep, self).__init__(
+            STRATEGY_STEP_NAME.FW_UPDATE_HOSTS, timeout_in_secs=3600)
+
+        # Constants
+        self.MONITOR_THRESHOLD = 0
+
+        self._hosts = hosts
+        self._host_names = list()
+        self._host_uuids = list()
+        self._monitoring_fw_update = False
+        self._wait_time = 0
+        self._host_failed_device_update = dict()
+        self._host_monitor_counter = dict()
+        self._host_completed = dict()
+        for host in hosts:
+            self._host_names.append(host.name)
+            self._host_uuids.append(host.uuid)
+            self._host_completed[host.name] = (False, False, '')
+            self._host_monitor_counter[host.uuid] = 0
+            self._host_failed_device_update[host.name] = list()
+
+    @coroutine
+    def _host_devices_list_callback(self):
+        """
+        Query Host Device List callback used for monitoring update process
+        """
+        response = (yield)
+        DLOG.debug("Host-Device-List callback response=%s." % response)
+        try:
+            if response['completed']:
+                if self.strategy is not None:
+                    # find the host for this callback response
+                    host_uuid = response['result-data']['pci_devices'][0].get('host_uuid')
+                    if host_uuid:
+                        if len(self._hosts):
+                            for host in self._hosts:
+                                if host.uuid == host_uuid:
+                                    # found it
+                                    self._host_monitor_counter[host.uuid] += 1
+                                    pci_devices = response['result-data'].get('pci_devices')
+                                    if len(pci_devices):
+                                        self._check_status(host.name,
+                                                           host.uuid,
+                                                           pci_devices)
+                                        return
+                                    else:
+                                        DLOG.info("failed to find any pci devices")
+                        else:
+                            DLOG.error("failed to find %s in hosts list" % host_uuid)
+                    else:
+                        DLOG.error("failed to get hostname in host device list response")
+                else:
+                    DLOG.error("failed to get host-device-list ; no strategy")
+            else:
+                DLOG.error("get host device list request did not complete")
+        except Exception as e:
+            DLOG.exception("Caught exception interpreting host device list")
+            DLOG.error("Response: %s" % response)
+
+        result = strategy.STRATEGY_STEP_RESULT.FAILED
+        fail_msg = "failed to get or parse fw update info"
+        self.stage.step_complete(result, fail_msg)
+
+    def apply(self):
+        """
+        Firmware Update Hosts Apply
+        """
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply for hosts %s." % (self._name,
+                                                     self._host_names))
+
+        if len(self._host_names):
+            host_director = directors.get_host_director()
+            operation = host_director.fw_update_hosts(self._host_names)
+            if operation.is_inprogress():
+                return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+            elif operation.is_failed():
+                return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+
+            return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        else:
+            reason = "no hosts found in firmware update step"
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, reason)
+            return strategy.STRATEGY_STEP_RESULT.FAILED, reason
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Firmware Image Update events
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_FW_UPDATE_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, "fw image update failed")
+                return True
+
+        elif event == STRATEGY_EVENT.HOST_AUDIT:
+            if not self._monitoring_fw_update:
+                self._monitoring_fw_update = True
+                DLOG.info("Start monitoring firmware update progress for %s" %
+                          self._host_names)
+
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) / 1000
+            if 60 <= secs_expired:
+                # force timer reload on next audit
+                self._wait_time = 0
+
+                for host in self._hosts:
+                    if self._host_completed[host.name][0] is True:
+                        DLOG.info("%s update already done")
+                        continue
+
+                    DLOG.info("%s firmware update monitor request %d" %
+                              (host.name, self._host_monitor_counter[host.uuid] + 1))
+                    nfvi.nfvi_get_host_devices(host.uuid,
+                                               host.name,
+                                               self._host_devices_list_callback())
+                return True
+        else:
+            DLOG.warn("Unexpected event (%s)" % event)
+
+        return False
+
+    def _check_status(self, host_name, host_uuid, pci_devices):
+        """Check firmware update status for specified host"""
+
+        done = True
+        for pci_device in pci_devices:
+            if pci_device.get(FW_UPDATE_LABEL.DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE) is False:
+                continue
+
+            status = pci_device.get('status')
+            pci_device_name = pci_device.get('name')
+
+            # Handle simulated testing ; Remove after integration testing
+            if self.MONITOR_THRESHOLD > 0 or status is None:
+                if self._host_monitor_counter[host_uuid] >= self.MONITOR_THRESHOLD:
+                    status = FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED
+                else:
+                    status = FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS
+
+            # stop monitoring failed devices
+            if pci_device_name in self._host_failed_device_update[host_name]:
+                continue
+
+            elif status == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
+                done = False
+                DLOG.verbose("%s pci device %s firmware update in-progress" %
+                            (host_name, pci_device_name))
+
+            elif status == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED:
+                DLOG.verbose("%s %s firmware update complete" %
+                            (host_name, pci_device_name))
+
+            elif status == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_FAILED:
+                if pci_device_name not in self._host_failed_device_update[host_name]:
+                    DLOG.info("%s %s firmware update failed" %
+                             (host_name, pci_device_name))
+                    self._host_failed_device_update[host_name].append(pci_device_name)
+
+            else:
+                if pci_device_name not in self._host_failed_device_update[host_name]:
+                    self._host_failed_device_update[host_name].append(pci_device_name)
+                    DLOG.info('unexpected device image status (%s)' % status)
+
+        if done:
+            if len(self._host_failed_device_update[host_name]):
+                failed_msg = "firmware update failed for devices: "
+                failed_msg += str(self._host_failed_device_update[host_name])
+                self._host_completed[host_name] = (True, False, failed_msg)
+            else:
+                self._host_completed[host_name] = (True, True, '')
+
+        # Check for firmware upgrade step complete
+        self._check_step_complete()
+
+    def _check_step_complete(self):
+        """
+        Check for firmware upgrade step complete
+        """
+
+        failed_hosts = ""
+        done = True
+        for hostname in self._host_names:
+            if self._host_completed[hostname][0] is False:
+                done = False
+            elif self._host_completed[hostname][1] is False:
+                failed_hosts += hostname + ' '
+            else:
+                DLOG.info("%s firmware update is complete" % hostname)
+
+        if done:
+            if len(failed_hosts) == 0:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, '')
+            else:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                failed_msg = 'Firmware update failed ; %s' % failed_hosts
+                self.stage.step_complete(result, failed_msg)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [FwUpdateAbortHostsStep(self._hosts)]
+
+    def from_dict(self, data):
+        """
+        Returns the firmware update hosts step object
+        initialized using the given dictionary
+        """
+        super(FwUpdateHostsStep, self).from_dict(data)
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_completed = dict()
+
+        self._monitoring_fw_update = False
+
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+                self._host_completed[host_name] = \
+                    data['hosts_completed'][host_name]
+        return self
+
+    def as_dict(self):
+        """
+        Represent the firmware update hosts step as a dictionary
+        """
+        data = super(FwUpdateHostsStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        data['hosts_completed'] = self._host_completed
+        return data
+
+
+class FwUpdateAbortHostsStep(strategy.StrategyStep):
+    """
+    Firmware Update Abort Hosts Step
+    """
+    def __init__(self, hosts):
+        super(FwUpdateAbortHostsStep, self).__init__(
+            STRATEGY_STEP_NAME.FW_UPDATE_ABORT_HOSTS, timeout_in_secs=3600)
+
+        self._hosts = hosts
+        self._host_names = list()
+        self._host_uuids = list()
+
+        self._wait_time = 0
+
+        self._host_completed = dict()
+        for host in hosts:
+            self._host_names.append(host.name)
+            self._host_uuids.append(host.uuid)
+            self._host_completed[host.name] = (False, False, '')
+
+    def apply(self):
+        """
+        Monitor Firmware Update Abort Hosts Apply
+        """
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply for hosts %s." % (self._name,
+                                                     self._host_names))
+
+        host_director = directors.get_host_director()
+        operation = host_director.fw_update_abort_hosts(self._host_names)
+        if operation.is_inprogress():
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        elif operation.is_failed():
+            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Firmware Image Update Abort events
+        """
+        # from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_FW_UPDATE_ABORT_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                failed_msg = "device image update abort failed"
+                DLOG.info("%s %s" % (host.name, failed_msg))
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, failed_msg)
+                return True
+
+        elif event == STRATEGY_EVENT.HOST_AUDIT:
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, '')
+            return True
+
+        return False
+
+    def from_dict(self, data):
+        """
+        Load the firmware update abort hosts step object
+        """
+        super(FwUpdateAbortHostsStep, self).from_dict(data)
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_completed = dict()
+
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+                self._host_completed[host_name] = \
+                    data['hosts_completed'][host_name]
+        return self
+
+    def as_dict(self):
+        """
+        Save the firmware update abort hosts step as a dictionary
+        """
+        data = super(FwUpdateAbortHostsStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        data['hosts_completed'] = self._host_completed
         return data
 
 
@@ -1872,7 +2323,8 @@ class DisableHostServicesStep(strategy.StrategyStep):
             host = event_data
             if host is not None and host.name in self._host_names:
                 result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, "disable host services failed")
+                self.stage.step_complete(result,
+                                         "disable host services failed")
                 return True
 
         return False
@@ -2079,6 +2531,15 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.ENABLE_HOST_SERVICES == data['name']:
         step_obj = object.__new__(EnableHostServicesStep)
+
+    elif STRATEGY_STEP_NAME.FW_UPDATE_HOSTS == data['name']:
+        step_obj = object.__new__(FwUpdateHostsStep)
+
+    elif STRATEGY_STEP_NAME.FW_UPDATE_ABORT_HOSTS == data['name']:
+        step_obj = object.__new__(FwUpdateAbortHostsStep)
+
+    elif STRATEGY_STEP_NAME.QUERY_HOST_DEVICES == data['name']:
+        step_obj = object.__new__(QueryHostDeviceListStep)
 
     else:
         step_obj = object.__new__(strategy.StrategyStep)

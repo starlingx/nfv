@@ -1,8 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+from nfv_vim.objects._fw_update import FwUpdate  # noqa: F401
 from nfv_vim.objects._guest_services import GuestServices  # noqa: F401
 from nfv_vim.objects._host import Host  # noqa: F401
 from nfv_vim.objects._host import HOST_NAME  # noqa: F401
