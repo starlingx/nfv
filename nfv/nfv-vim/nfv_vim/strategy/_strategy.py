@@ -269,14 +269,19 @@ class SwUpdateStrategy(strategy.Strategy):
         host_lists = list()
 
         if SW_UPDATE_APPLY_TYPE.SERIAL == self._worker_apply_type:
-            host_with_instances_lists = list()
-
-            # handle the workers with no instances first
+            # handle controller hosts first
             for host in worker_hosts:
-                if not instance_table.exist_on_host(host.name):
+                if HOST_PERSONALITY.CONTROLLER in host.personality:
                     host_lists.append([host])
-                else:
-                    host_with_instances_lists.append([host])
+
+            # handle the workers with no instances next
+            host_with_instances_lists = list()
+            for host in worker_hosts:
+                if HOST_PERSONALITY.CONTROLLER not in host.personality:
+                    if not instance_table.exist_on_host(host.name):
+                        host_lists.append([host])
+                    else:
+                        host_with_instances_lists.append([host])
 
             # then add workers with instances
             if host_with_instances_lists:
@@ -330,7 +335,8 @@ class SwUpdateStrategy(strategy.Strategy):
                     host_lists.append([host])
 
             if controller_list:
-                host_lists += controller_list
+                # handle controller hosts first
+                host_lists = controller_list + host_lists
 
         else:
             DLOG.verbose("Compute apply type set to ignore.")

@@ -3332,6 +3332,418 @@ class TestSwPatchStrategy(testcase.NFVTestCase):
         validate_strategy_persists(strategy)
         validate_phase(apply_phase, expected_results)
 
+    def test_sw_patch_strategy_cpe_plus_stages_parallel_stop_start(self):
+        """
+        Test the sw_patch strategy add worker strategy stages:
+        - cpe hosts plus workers
+        - parallel apply treated as serial
+        - stop start instance action
+        - test both reboot and no reboot cases
+        """
+        self.create_host('controller-0', cpe=True)
+        self.create_host('controller-1', cpe=True)
+
+        self.create_instance('small',
+                             "test_instance_0",
+                             'controller-0')
+        self.create_instance('small',
+                             "test_instance_1",
+                             'controller-1')
+
+        self.create_host('compute-0')
+        self.create_host('compute-1')
+
+        self.create_instance('small',
+                             "test_instance_2",
+                             'compute-0')
+        self.create_instance('small',
+                             "test_instance_3",
+                             'compute-1')
+
+        worker_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        # Sort worker hosts so the order of the steps is deterministic
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        # Test reboot patches
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                             reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 9,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_0']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60},
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 9,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_1']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 8,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_2', 'test_instance_3']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_2', 'test_instance_3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+            ]
+        }
+
+        validate_strategy_persists(strategy)
+        validate_phase(apply_phase, expected_results)
+
+        # Test no reboot patches
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                             reboot=False)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize'}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize'}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'system-stabilize'}
+                 ]
+                 },
+            ]
+        }
+
+        validate_strategy_persists(strategy)
+        validate_phase(apply_phase, expected_results)
+
+    def test_sw_patch_strategy_cpe_plus_stages_serial_stop_start(self):
+        """
+        Test the sw_patch strategy add worker strategy stages:
+        - cpe hosts plus workers
+        - serial apply
+        - stop start instance action
+        """
+        self.create_host('controller-0', cpe=True)
+        self.create_host('controller-1', cpe=True)
+
+        self.create_instance('small',
+                             "test_instance_0",
+                             'controller-0')
+        self.create_instance('small',
+                             "test_instance_1",
+                             'controller-1')
+
+        self.create_host('compute-0')
+        self.create_host('compute-1')
+
+        self.create_instance('small',
+                             "test_instance_2",
+                             'compute-0')
+        self.create_instance('small',
+                             "test_instance_3",
+                             'compute-1')
+
+        worker_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        # Sort worker hosts so the order of the steps is deterministic
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                             reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 4,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 9,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_0']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 9,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_1']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 8,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_2']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_2']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 8,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_3']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 }
+            ]
+        }
+
+        validate_strategy_persists(strategy)
+        validate_phase(apply_phase, expected_results)
+
+    def test_sw_patch_strategy_cpe_plus_stages_serial_stop_start_no_instances(
+            self):
+        """
+        Test the sw_patch strategy add worker strategy stages:
+        - cpe hosts plus workers
+        - no instances
+        - serial apply
+        - stop start instance action
+        """
+        self.create_host('controller-0', cpe=True)
+        self.create_host('controller-1', cpe=True)
+
+        self.create_host('compute-0')
+        self.create_host('compute-1')
+
+        worker_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        # Sort worker hosts so the order of the steps is deterministic
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                             reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 4,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 7,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 7,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 }
+            ]
+        }
+
+        validate_strategy_persists(strategy)
+        validate_phase(apply_phase, expected_results)
+
     def test_sw_patch_strategy_cpe_simplex_stages_serial_migrate(self):
         """
         Test the sw_patch strategy add worker strategy stages:
