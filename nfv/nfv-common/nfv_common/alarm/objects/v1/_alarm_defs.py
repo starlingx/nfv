@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -41,6 +41,9 @@ class _AlarmType(Constants):
     SW_UPGRADE_AUTO_APPLY_INPROGRESS = Constant('sw-upgrade-auto-apply-inprogress')
     SW_UPGRADE_AUTO_APPLY_ABORTING = Constant('sw-upgrade-auto-apply-aborting')
     SW_UPGRADE_AUTO_APPLY_FAILED = Constant('sw-upgrade-auto-apply-failed')
+    FW_UPDATE_AUTO_APPLY_INPROGRESS = Constant('fw-update-auto-apply-inprogress')
+    FW_UPDATE_AUTO_APPLY_ABORTING = Constant('fw-update-auto-apply-aborting')
+    FW_UPDATE_AUTO_APPLY_FAILED = Constant('fw-update-auto-apply-failed')
 
 
 @six.add_metaclass(Singleton)

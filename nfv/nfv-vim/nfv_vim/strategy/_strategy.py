@@ -1,8 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import copy
 import six
 import weakref
 
@@ -32,6 +33,7 @@ class StrategyNames(Constants):
     """
     SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
+    FW_UPDATE = Constant('fw-update')
 
 
 # Constant Instantiation
@@ -45,6 +47,11 @@ MTCE_DELAY = 15
 NO_REBOOT_DELAY = 30
 
 
+###################################################################
+#
+# The Software Update Strategy ; Base Class
+#
+###################################################################
 class SwUpdateStrategy(strategy.Strategy):
     """
     Software Update - Strategy
@@ -63,9 +70,12 @@ class SwUpdateStrategy(strategy.Strategy):
         self._max_parallel_worker_hosts = max_parallel_worker_hosts
         self._default_instance_action = default_instance_action
         self._alarm_restrictions = alarm_restrictions
-        self._ignore_alarms = ignore_alarms
         self._sw_update_obj_reference = None
 
+        # The ignore_alarms is a list that needs to get a copy
+        # to avoid inadvertently modifying the input list by
+        # subclass service strategies.
+        self._ignore_alarms = copy.copy(ignore_alarms)
         self._nfvi_alarms = list()
 
     @property
@@ -269,14 +279,19 @@ class SwUpdateStrategy(strategy.Strategy):
         host_lists = list()
 
         if SW_UPDATE_APPLY_TYPE.SERIAL == self._worker_apply_type:
-            host_with_instances_lists = list()
-
-            # handle the workers with no instances first
+            # handle controller hosts first
             for host in worker_hosts:
-                if not instance_table.exist_on_host(host.name):
+                if HOST_PERSONALITY.CONTROLLER in host.personality:
                     host_lists.append([host])
-                else:
-                    host_with_instances_lists.append([host])
+
+            # handle the workers with no instances next
+            host_with_instances_lists = list()
+            for host in worker_hosts:
+                if HOST_PERSONALITY.CONTROLLER not in host.personality:
+                    if not instance_table.exist_on_host(host.name):
+                        host_lists.append([host])
+                    else:
+                        host_with_instances_lists.append([host])
 
             # then add workers with instances
             if host_with_instances_lists:
@@ -330,10 +345,11 @@ class SwUpdateStrategy(strategy.Strategy):
                     host_lists.append([host])
 
             if controller_list:
-                host_lists += controller_list
+                # handle controller hosts first
+                host_lists = controller_list + host_lists
 
         else:
-            DLOG.verbose("Compute apply type set to ignore.")
+            DLOG.verbose("Worker apply type set to ignore.")
 
         # Drop empty lists and enforce a maximum number of hosts to be updated
         # at once (only required list of workers with no instances, as we
@@ -463,6 +479,11 @@ class SwUpdateStrategy(strategy.Strategy):
         return data
 
 
+###################################################################
+#
+# The Software Patch Strategy
+#
+###################################################################
 class SwPatchStrategy(SwUpdateStrategy):
     """
     Software Patch - Strategy
@@ -1093,6 +1114,11 @@ class SwPatchStrategy(SwUpdateStrategy):
         return data
 
 
+###################################################################
+#
+# The Software Upgrade Strategy
+#
+###################################################################
 class SwUpgradeStrategy(SwUpdateStrategy):
     """
     Software Upgrade - Strategy
@@ -1233,8 +1259,8 @@ class SwUpgradeStrategy(SwUpdateStrategy):
 
         for host in controllers:
             if HOST_PERSONALITY.WORKER in host.personality:
-                DLOG.warn("Cannot apply software upgrades to CPE configuration.")
-                reason = 'cannot apply software upgrades to CPE configuration'
+                DLOG.warn("Cannot apply software upgrades to AIO configuration.")
+                reason = 'cannot apply software upgrades to AIO configuration'
                 return False, reason
             elif HOST_NAME.CONTROLLER_1 == host.name:
                 controller_1_host = host
@@ -1617,11 +1643,359 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         return data
 
 
+###################################################################
+#
+# The Firmware Update Strategy
+#
+###################################################################
+class FwUpdateStrategy(SwUpdateStrategy):
+    """
+    Firmware Update - Strategy - FPGA
+    """
+    def __init__(self, uuid, controller_apply_type, storage_apply_type,
+                 worker_apply_type, max_parallel_worker_hosts,
+                 default_instance_action,
+                 alarm_restrictions, ignore_alarms,
+                 single_controller):
+        super(FwUpdateStrategy, self).__init__(
+            uuid,
+            STRATEGY_NAME.FW_UPDATE,
+            controller_apply_type,
+            storage_apply_type,
+            SW_UPDATE_APPLY_TYPE.IGNORE,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            ignore_alarms)
+
+        # The following alarms will not prevent a firmware update operation
+        IGNORE_ALARMS = ['700.004',  # VM stopped
+                         '280.002',  # Subcloud resource out-of-sync
+                         '900.301',  # Fw Update Auto Apply in progress
+                         '200.001',  # Locked Host
+                         ]
+
+        self._ignore_alarms += IGNORE_ALARMS
+        self._single_controller = single_controller
+
+        self._fail_on_alarms = True
+
+        # list of hostnames that need update
+        self._fw_update_hosts = list()
+
+    @property
+    def fw_update_hosts(self):
+        """
+        Returns a list of hostnames that require firmware update
+        """
+        return self._fw_update_hosts
+
+    @fw_update_hosts.setter
+    def fw_update_hosts(self, fw_update_hosts):
+        """
+        Save a list of hostnames that require firmware update
+        """
+        self._fw_update_hosts = fw_update_hosts
+
+    def build(self):
+        """
+        Build the strategy
+        """
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.FW_UPDATE_HOSTS_QUERY)
+
+        # Firmware update is only supported for hosts that support
+        # the worker function.
+        if self._worker_apply_type == SW_UPDATE_APPLY_TYPE.IGNORE:
+            msg = "apply type is 'ignore' ; must be '%s' or '%s'" % \
+                  (SW_UPDATE_APPLY_TYPE.SERIAL,
+                   SW_UPDATE_APPLY_TYPE.PARALLEL)
+            DLOG.warn("Worker %s" % msg)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = "Worker " + msg
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            return
+
+        stage.add_step(strategy.QueryAlarmsStep(
+            self._fail_on_alarms,
+            ignore_alarms=self._ignore_alarms))
+
+        # using existing vim host inventory add a step for each host
+        host_table = tables.tables_get_host_table()
+        for host in host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                if host.is_unlocked() and host.is_enabled():
+                    stage.add_step(strategy.QueryHostDeviceListStep(host))
+
+        self.build_phase.add_stage(stage)
+        super(FwUpdateStrategy, self).build()
+
+    def _add_worker_strategy_stages(self, worker_hosts, reboot):
+        """
+        Add worker firmware update strategy stages
+        """
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        hostnames = ''
+        for host in worker_hosts:
+            hostnames += host.name + ' '
+        DLOG.info("Worker hosts that require firmware update: %s " % hostnames)
+
+        # When using a single controller/worker host that is running
+        # OpenStack, only allow the stop/start instance action.
+        if self._single_controller:
+            for host in worker_hosts:
+                if host.openstack_compute and \
+                        HOST_PERSONALITY.CONTROLLER in host.personality and \
+                        SW_UPDATE_INSTANCE_ACTION.STOP_START != \
+                        self._default_instance_action:
+                    DLOG.error("Cannot migrate instances in a single "
+                               "controller configuration")
+                    reason = 'cannot migrate instances in a single ' \
+                             'controller configuration'
+                    return False, reason
+
+        # Returns a list of 'host update lists' based on serial vs parallel
+        # update specification and the overall host pool and various aspects
+        # of the hosts in that pool ; i.e. personality, instances, etc.
+        host_lists, reason = self._create_worker_host_lists(worker_hosts, reboot)
+        if host_lists is None:
+            DLOG.info("failed to create worker host lists")
+            return False, reason
+
+        instance_table = tables.tables_get_instance_table()
+
+        # Loop over the host aggregate lists creating back to back steps
+        # that will update all the worker hosts in the order dictated
+        # by the strategy.
+        for host_list in host_lists:
+
+            # Start the Update Worker Hosts Stage ; the stage that includes all
+            # the steps to update all the worker hosts found to need firmware update.
+            stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.FW_UPDATE_WORKER_HOSTS)
+
+            # build a list of unlocked instances
+            instance_list = list()
+            for host in host_list:
+                for instance in instance_table.on_host(host.name):
+                    # Do not take action (migrate or stop-start) on
+                    # an instance if it is locked (i.e. stopped).
+                    if not instance.is_locked():
+                        instance_list.append(instance)
+
+            # Handle alarms that show up after create but before apply.
+            stage.add_step(strategy.QueryAlarmsStep(
+                self._fail_on_alarms,
+                ignore_alarms=self._ignore_alarms))
+
+            # Issue Firmware Update for hosts in host_list
+            stage.add_step(strategy.FwUpdateHostsStep(host_list))
+
+            # Handle reboot-required option with host lock/unlock.
+            if reboot:
+                if 1 == len(host_list):
+                    if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
+                        if not self._single_controller:
+                            # Handle upgrade of both controllers
+                            # in AIO DX Swact controller before locking.
+                            # If this is not the active controller then it has no effect
+                            stage.add_step(strategy.SwactHostsStep(host_list))
+
+                # Handle instance migration
+                if len(instance_list):
+                    # Migrate or stop instances as necessary
+                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE == \
+                            self._default_instance_action:
+                        if SW_UPDATE_APPLY_TYPE.PARALLEL == \
+                                self._worker_apply_type:
+                            # Disable host services before migrating to ensure
+                            # instances do not migrate to worker hosts in the
+                            # same set of hosts.
+                            if host_list[0].host_service_configured(
+                                    HOST_SERVICES.COMPUTE):
+                                stage.add_step(strategy.DisableHostServicesStep(
+                                    host_list, HOST_SERVICES.COMPUTE))
+                            # TODO(ksmith)
+                            # When support is added for orchestration on
+                            # non-OpenStack worker nodes, support for disabling
+                            # kubernetes services will have to be added.
+                        stage.add_step(strategy.MigrateInstancesStep(
+                            instance_list))
+                    else:
+                        stage.add_step(strategy.StopInstancesStep(
+                            instance_list))
+
+                wait_until_disabled = True
+                if 1 == len(host_list):
+                    if HOST_PERSONALITY.CONTROLLER in \
+                            host_list[0].personality:
+                        if self._single_controller:
+                            # Handle upgrade of AIO SX
+                            # A single controller will not go disabled when
+                            # it is locked.
+                            wait_until_disabled = False
+
+                # Lock hosts
+                stage.add_step(strategy.LockHostsStep(host_list, wait_until_disabled=wait_until_disabled))
+
+                # Wait for system to stabilize
+                stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
+
+                # Unlock hosts
+                stage.add_step(strategy.UnlockHostsStep(host_list))
+
+                if 0 != len(instance_list):
+                    # Start any instances that were stopped
+                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE != \
+                            self._default_instance_action:
+                        stage.add_step(strategy.StartInstancesStep(
+                            instance_list))
+
+                stage.add_step(strategy.SystemStabilizeStep())
+            else:
+                # Less time required if host is not rebooting
+                stage.add_step(strategy.SystemStabilizeStep(
+                               timeout_in_secs=NO_REBOOT_DELAY))
+
+            self.apply_phase.add_stage(stage)
+
+        return True, ''
+
+    def build_complete(self, result, result_reason):
+        """
+        Strategy Build Complete
+        """
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        result, result_reason = \
+            super(FwUpdateStrategy, self).build_complete(result, result_reason)
+
+        DLOG.verbose("Build Complete Callback, result=%s, reason=%s." %
+                    (result, result_reason))
+
+        if result in [strategy.STRATEGY_RESULT.SUCCESS,
+                      strategy.STRATEGY_RESULT.DEGRADED]:
+
+            if self._nfvi_alarms:
+                # Fail create strategy if unignored alarms present
+                DLOG.warn("Active alarms found, can't update firmware.")
+                alarm_id_list = ""
+                for alarm_data in self._nfvi_alarms:
+                    if alarm_id_list:
+                        alarm_id_list += ', '
+                    alarm_id_list += alarm_data['alarm_id']
+                DLOG.warn("... active alarms: %s" % alarm_id_list)
+                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.build_phase.result_reason = 'active alarms present ; '
+                self.build_phase.result_reason += alarm_id_list
+                self.sw_update_obj.strategy_build_complete(
+                    False, self.build_phase.result_reason)
+                self.save()
+                return
+
+            # Fail if no hosts require firmware upgrade.
+            if len(self._fw_update_hosts) == 0:
+                self.build_phase.result_reason = "no firmware update required"
+                DLOG.warn(self.build_phase.result_reason)
+                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.sw_update_obj.strategy_build_complete(
+                    False, self.build_phase.result_reason)
+                self.save()
+                return
+
+            worker_hosts = list()
+            host_table = tables.tables_get_host_table()
+            for host in host_table.values():
+                if host.name in self._fw_update_hosts:
+                    worker_hosts.append(host)
+
+            STRATEGY_CREATION_COMMANDS = [
+                (self._add_worker_strategy_stages,
+                 worker_hosts, True)]
+
+            for add_strategy_stages_function, host_list, reboot in \
+                    STRATEGY_CREATION_COMMANDS:
+                if host_list:
+                    success, reason = add_strategy_stages_function(
+                        host_list, reboot)
+                    if not success:
+                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                        self.build_phase.result = \
+                            strategy.STRATEGY_PHASE_RESULT.FAILED
+                        self.build_phase.result_reason = reason
+                        self.sw_update_obj.strategy_build_complete(
+                            False, self.build_phase.result_reason)
+                        self.save()
+                        return
+        else:
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+
+        self.sw_update_obj.strategy_build_complete(True, '')
+        self.save()
+
+    def from_dict(self,
+                  data,
+                  build_phase=None,
+                  apply_phase=None,
+                  abort_phase=None):
+        """
+        Load firmware update strategy object from dict data.
+        """
+        from nfv_vim import nfvi
+
+        super(FwUpdateStrategy, self).from_dict(
+            data, build_phase, apply_phase, abort_phase)
+
+        self._single_controller = data['single_controller']
+
+        # Load nfvi alarm data
+        nfvi_alarms = list()
+        nfvi_alarms_data = data.get('nfvi_alarms_data')
+        if nfvi_alarms_data:
+            for alarm_data in data['nfvi_alarms_data']:
+                alarm = nfvi.objects.v1.Alarm(
+                    alarm_data['alarm_uuid'], alarm_data['alarm_id'],
+                    alarm_data['entity_instance_id'], alarm_data['severity'],
+                    alarm_data['reason_text'], alarm_data['timestamp'],
+                    alarm_data['mgmt_affecting'])
+                nfvi_alarms.append(alarm)
+            self._nfvi_alarms = nfvi_alarms
+        return self
+
+    def as_dict(self):
+        """
+        Return firmware update strategy nfvi data object as dictionary.
+        """
+        data = super(FwUpdateStrategy, self).as_dict()
+
+        data['single_controller'] = self._single_controller
+
+        #  Save nfvi alarm info to data
+        if self._nfvi_alarms:
+            nfvi_alarms_data = list()
+            for alarm in self._nfvi_alarms:
+                nfvi_alarms_data.append(alarm.as_dict())
+            data['nfvi_alarms_data'] = nfvi_alarms_data
+        return data
+
+
 def strategy_rebuild_from_dict(data):
     """
     Returns the strategy object initialized using the given dictionary
     """
-    from nfv_vim.strategy._strategy_phases import strategy_phase_rebuild_from_dict
+    from nfv_vim.strategy._strategy_phases import strategy_phase_rebuild_from_dict  # noqa: F401
 
     if not data:
         return None
@@ -1634,6 +2008,8 @@ def strategy_rebuild_from_dict(data):
         strategy_obj = object.__new__(SwPatchStrategy)
     elif STRATEGY_NAME.SW_UPGRADE == data['name']:
         strategy_obj = object.__new__(SwUpgradeStrategy)
+    elif STRATEGY_NAME.FW_UPDATE == data['name']:
+        strategy_obj = object.__new__(FwUpdateStrategy)
     else:
         strategy_obj = object.__new__(strategy.StrategyStage)
 

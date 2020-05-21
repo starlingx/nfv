@@ -1,5 +1,5 @@
 [Unit]
-Description=Titanium Cloud Guest Agent
+Description=StarlingX Guest Agent
 After=network.target syslog.service
 
 [Service]

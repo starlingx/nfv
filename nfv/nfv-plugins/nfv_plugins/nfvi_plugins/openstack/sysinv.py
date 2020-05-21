@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -474,5 +474,83 @@ def swact_from_host(token, host_uuid):
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
+                                json.dumps(api_cmd_payload))
+    return response
+
+
+def get_host_devices(token, host_uuid):
+    """
+    Asks System Inventory for host device details
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/ihosts/%s/pci_devices" % host_uuid
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
+    return response
+
+
+def get_host_device(token, device_uuid):
+    """
+    Asks System Inventory for host details for specific device
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/pci_devices/%s" % device_uuid
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
+    return response
+
+
+def host_device_image_update(token, host_uuid):
+    """
+    Asks System Inventory to start a host device image update
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/ihosts/%s/device_image_update" % host_uuid
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    api_cmd_payload = dict()
+
+    response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
+                                json.dumps(api_cmd_payload))
+    return response
+
+
+def host_device_image_update_abort(token, host_uuid):
+    """
+    Asks System Inventory to abort a host device image update
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/ihosts/%s/device_image_update_abort" % host_uuid
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    api_cmd_payload = dict()
+
+    response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
                                 json.dumps(api_cmd_payload))
     return response

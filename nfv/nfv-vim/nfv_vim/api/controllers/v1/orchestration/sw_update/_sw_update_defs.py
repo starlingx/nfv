@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,6 +18,7 @@ class SwUpdateNames(Constants):
     """
     SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
+    FW_UPDATE = Constant('fw-update')
 
 
 @six.add_metaclass(Singleton)
@@ -70,7 +71,8 @@ SW_UPDATE_ALARM_RESTRICTION_TYPES = SwUpdateAlarmRestrictionTypes()
 # WSME Types
 SwUpdateNames = wsme_types.Enum(str,
                                 SW_UPDATE_NAME.SW_PATCH,
-                                SW_UPDATE_NAME.SW_UPGRADE)
+                                SW_UPDATE_NAME.SW_UPGRADE,
+                                SW_UPDATE_NAME.FW_UPDATE)
 SwUpdateApplyTypes = wsme_types.Enum(str,
                                      SW_UPDATE_APPLY_TYPE.SERIAL,
                                      SW_UPDATE_APPLY_TYPE.PARALLEL,

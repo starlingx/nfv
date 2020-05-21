@@ -114,6 +114,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
        {
          "href": "http://192.168.204.2:4545/orchestration/sw-upgrade/",
          "rel": "sw-upgrade"
+       },
+       {
+         "href": "http://192.168.204.2:4545/orchestration/fw-update/",
+         "rel": "fw-update"
        }
      ]
    }
@@ -179,6 +183,39 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
        },
        {
          "href": "http://192.168.204.2:4545/orchestration/sw-upgrade/strategy/",
+         "rel": "strategy"
+       }
+     ]
+   }
+
+This operation does not accept a request body.
+
+**********************************************************************
+Lists information about all NFV VIM API orchestration fw-update links
+**********************************************************************
+
+.. rest_method:: GET /api/orchestration/fw-update
+
+**Normal response codes**
+
+200
+
+**Error response codes**
+
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+
+::
+
+   {
+     "id": "fw-update",
+     "links": [
+       {
+         "href": "http://192.168.204.2:4545/orchestration/fw-update/",
+         "rel": "self"
+       },
+       {
+         "href": "http://192.168.204.2:4545/orchestration/fw-update/strategy/",
          "rel": "strategy"
        }
      ]
@@ -2441,4 +2478,620 @@ forbidden (403), badMethod (405), overLimit (413)
      }
    }
 
+------------------------
+Firmware Update Strategy
+------------------------
+
+Firmware update orchestration is done with a firmware update orchestration
+strategy, or plan, for the automated update procedure which contains a number
+of parameters for customizing the particular behavior of the firmware update
+orchestration.
+
+***************************************************************
+Shows detailed information about the current fw-update strategy
+***************************************************************
+
+.. rest_method:: GET /api/orchestration/fw-update/strategy
+
+**Normal response codes**
+
+200
+
+**Error response codes**
+
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+
+::
+
+   {
+     "strategy": {
+       "controller-apply-type": "ignore",
+       "swift-apply-type": "ignore",
+       "storage-apply-type": "ignore",
+       "worker-apply-type": "serial",
+       "state": "ready-to-apply",
+       "default-instance-action": "stop-start",
+       "max-parallel-worker-hosts": 2,
+       "alarm-restrictions": "strict",
+       "current-phase-completion-percentage": 100,
+       "uuid": "5dd16d94-dfc5-4029-bfcb-d815e7c2dc3d",
+       "name": "fw-update",
+       "current-phase": "build",
+       "build-phase": {
+         "phase-name": "build",
+         "current-stage": 1,
+         "total-stages": 1,
+         "completion-percentage": 100,
+         "start-date-time": "2020-05-05 21:07:18",
+         "end-date-time": "2020-05-05 21:07:19",
+         "stop-at-stage": 1,
+         "result": "success",
+         "timeout": 182,
+         "reason": "",
+         "inprogress": false,
+         "stages": [
+           {
+             "stage-id": 0,
+             "total-steps": 3,
+             "stage-name": "fw-update-hosts-query",
+             "result": "success",
+             "timeout": 181,
+             "inprogress": false,
+             "start-date-time": "2020-05-05 21:07:18",
+             "end-date-time": "2020-05-05 21:07:19",
+             "reason": "",
+             "current-step" : 3,
+             "steps":[
+               {
+                 "step-id": 0,
+                 "step-name": "query-alarms",
+                 "entity-type": "",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "2020-05-05 21:07:18",
+                 "end-date-time": "2020-05-05 21:07:19",
+                 "timeout": 60,
+                 "result": "success",
+                 "reason": ""
+               },
+               {
+                 "step-id": 1,
+                 "step-name": "query-host-devices",
+                 "entity-type": "",
+                 "entity-names": ["compute-1"],
+                 "entity-uuids": ["ecff0928-9655-46ed-9ac0-433dfa21c7e2"],
+                 "start-date-time": "2020-05-05 21:07:19",
+                 "end-date-time": "2020-05-05 21:07:19",
+                 "timeout": 60,
+                 "result": "success",
+                 "reason": ""
+               },
+               {
+                 "step-id": 2,
+                 "step-name": "query-host-devices",
+                 "entity-type": "",
+                 "entity-names": ["compute-0"],
+                 "entity-uuids": ["fa62c159-7b2c-47f5-bbda-126bc5e7de21"],
+                 "start-date-time": "2020-05-05 21:07:19",
+                 "end-date-time": "2020-05-05 21:07:19",
+                 "timeout": 60,
+                 "result": "success",
+                 "reason": ""
+               }
+             ]
+           }
+         ]
+       },
+       "apply-phase": {
+         "phase-name": "apply",
+         "current-stage": 0,
+         "completion-percentage": 100,
+         "total-stages": 2,
+         "stop-at-stage": 0,
+         "start-date-time": "",
+         "end-date-time": "",
+         "result": "initial",
+         "timeout": 0,
+         "reason": "",
+         "inprogress": false,
+         "stages": [
+           {
+             "stage-id": 0,
+             "stage-name": "fw-update-worker-hosts",
+             "start-date-time": "",
+             "end-date-time": "",
+             "current-step": 0,
+             "result": "initial",
+             "timeout": 6436,
+             "inprogress": false,
+             "reason": "",
+             "total-steps": 6,
+             "steps": [
+               {
+                 "step-id": 0,
+                 "step-name": "query-alarms",
+                 "entity-type": "",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 1,
+                 "entity-type": "hosts",
+                 "step-name": "fw-update-hosts",
+                 "entity-names": ["compute-1"],
+                 "entity-uuids": ["ecff0928-9655-46ed-9ac0-433dfa21c7e2"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 3600,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 2,
+                 "entity-type": "hosts",
+                 "step-name": "lock-hosts",
+                 "entity-names": ["compute-1"],
+                 "entity-uuids": ["ecff0928-9655-46ed-9ac0-433dfa21c7e2"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 900,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 3,
+                 "entity-type": "",
+                 "step-name": "system-stabilize",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 15,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 4,
+                 "entity-type": "hosts",
+                 "step-name": "unlock-hosts",
+                 "entity-names": ["compute-1"],
+                 "entity-uuids": ["ecff0928-9655-46ed-9ac0-433dfa21c7e2"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 5,
+                 "entity-type": "",
+                 "step-name": "system-stabilize",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               }
+             ],
+           },
+           {
+             "stage-id": 1,
+             "total-steps": 6,
+             "stage-name": "fw-update-worker-hosts",
+             "inprogress": false,
+             "start-date-time": "",
+             "end-date-time": "",
+             "timeout": 6436,
+             "reason": "",
+             "result": "initial",
+             "current-step": 0,
+             "steps":[
+               {
+                 "step-id": 0,
+                 "step-name": "query-alarms",
+                 "entity-type": "",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id":1,
+                 "step-name": "fw-update-hosts",
+                 "entity-type": "hosts",
+                 "entity-names": ["compute-0"],
+                 "entity-uuids": ["fa62c159-7b2c-47f5-bbda-126bc5e7de21"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 3600,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 2,
+                 "step-name": "lock-hosts",
+                 "entity-type": "hosts",
+                 "entity-names": ["compute-0"],
+                 "entity-uuids": ["fa62c159-7b2c-47f5-bbda-126bc5e7de21"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 900,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 3,
+                 "step-name": "system-stabilize",
+                 "entity-type": "",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 15,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 4,
+                 "step-name": "unlock-hosts",
+                 "entity-type": "hosts",
+                 "entity-names": ["compute-0"],
+                 "entity-uuids": ["fa62c159-7b2c-47f5-bbda-126bc5e7de21"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 5,
+                 "step-name": "system-stabilize",
+                 "entity-type": "",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               }
+             ],
+           }
+         ],
+       },
+       "abort-phase": {
+         "phase-name": "abort",
+         "total-stages": 0,
+         "completion-percentage": 100,
+         "start-date-time": "",
+         "end-date-time": "",
+         "stop-at-stage": 0,
+         "result": "initial",
+         "timeout": 0,
+         "reason": "",
+         "inprogress": false,
+         "stages": [],
+         "current-stage": 0
+       }
+     }
+   }
+
+This operation does not accept a request body.
+
+****************************
+Creates a fw-update strategy
+****************************
+
+.. rest_method:: POST /api/orchestration/fw-update/strategy
+
+**Normal response codes**
+
+200
+
+**Error response codes**
+
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
+
+**Request parameters**
+
+.. csv-table::
+   :header: "Parameter", "Style", "Type", "Description"
+   :widths: 20, 20, 20, 60
+
+   "controller-apply-type", "plain", "xsd:string", "The apply type for controller hosts: ``ignore``."
+   "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts: ``ignore``."
+   "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``, ``parallel`` or ``ignore``."
+   "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of worker hosts to patch in parallel; only applicable if ``worker-apply-type = parallel``. Default value is ``2``."
+   "default-instance-action", "plain", "xsd:string", "The default instance action: ``stop-start`` or ``migrate``."
+   "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks: ``strict`` or ``relaxed``."
+
+::
+
+   {
+     "controller-apply-type": "ignore",
+     "storage-apply-type": "ignore",
+     "worker-apply-type": "serial",
+     "default-instance-action": "stop-start",
+     "alarm-restrictions": "strict",
+   }
+
+::
+
+   {
+     "strategy": {
+       "name": "fw-update",
+       "worker-apply-type": "serial",
+       "controller-apply-type": "ignore",
+       "swift-apply-type": "ignore",
+       "storage-apply-type": "ignore",
+       "current-phase-completion-percentage": 0,
+       "uuid": "447c4267-0ecb-48f4-9237-1d747a3e7cca",
+       "default-instance-action": "stop-start",
+       "max-parallel-worker-hosts": 2,
+       "alarm-restrictions": "strict",
+       "state": "building",
+       "build-phase": {
+         "phase-name": "build",
+         "current-stage": 0,
+         "start-date-time": "2020-05-06 13:26:11",
+         "end-date-time": "",
+         "completion-percentage": 0,
+         "stop-at-stage": 1,
+         "result": "inprogress",
+         "timeout": 182,
+         "reason": "",
+         "inprogress": true,
+         "total-stages": 1,
+         "stages": [
+           {
+             "stage-id": 0,
+             "stage-name": "fw-update-hosts-query",
+             "total-steps": 3,
+             "inprogress": true,
+             "start-date-time": "2020-05-06 13:26:11",
+             "end-date-time": "",
+             "reason": "",
+             "current-step": 0,
+             "result": "inprogress",
+             "timeout": 181,
+             "steps": [
+               {
+                 "step-id": 0,
+                 "step-name": "query-alarms",
+                 "entity-type": "",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "2020-05-06 13:26:11",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "wait",
+                 "reason": ""
+               },
+               {
+                 "step-id": 1,
+                 "step-name": "query-host-devices",
+                 "entity-type": "",
+                 "entity-names": ["compute-1"],
+                 "entity-uuids": ["ecff0928-9655-46ed-9ac0-433dfa21c7e2"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 2,
+                 "step-name": "query-host-devices",
+                 "entity-type": "",
+                 "entity-names": ["compute-0"],
+                 "entity-uuids": ["fa62c159-7b2c-47f5-bbda-126bc5e7de21"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               }
+             ],
+           }
+         ],
+       },
+       "apply-phase": {
+         "start-date-time": "",
+         "end-date-time": "",
+         "phase-name": "apply",
+         "completion-percentage": 100,
+         "total-stages": 0,
+         "stop-at-stage": 0,
+         "result": "initial",
+         "timeout": 0,
+         "reason": "",
+         "inprogress": false,
+         "stages": [],
+         "current-stage": 0
+       },
+       "abort-phase": {
+         "start-date-time": "",
+         "end-date-time": "",
+         "phase-name": "abort",
+         "completion-percentage": 100,
+         "total-stages": 0,
+         "stop-at-stage": 0,
+         "result": "initial",
+         "timeout": 0,
+         "reason": "",
+         "inprogress":false,
+         "stages": [],
+         "current-stage": 0
+       }
+     }
+   }
+
+**************************************
+Deletes the current fw-update strategy
+**************************************
+
+.. rest_method:: DELETE /api/orchestration/fw-update/strategy
+
+**Normal response codes**
+
+204
+
+::
+
+   {
+   }
+
+**************************************
+Applies or aborts a fw-update strategy
+**************************************
+
+.. rest_method:: POST /api/orchestration/fw-update/strategy/actions
+
+**Normal response codes**
+
+202
+
+**Error response codes**
+
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
+
+**Request parameters**
+
+.. csv-table::
+   :header: "Parameter", "Style", "Type", "Description"
+   :widths: 20, 20, 20, 60
+
+   "action", "plain", "xsd:string", "The action to take: ``apply-all``, ``apply-stage``, ``abort`` or ``abort-stage``."
+   "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort. Only used with ``apply-stage`` or ``abort-stage`` actions."
+
+::
+
+   {
+     "action": "apply-all"
+   }
+
+::
+
+   {
+     "strategy":{
+       "controller-apply-type": "ignore",
+       "swift-apply-type": "ignore",
+       "current-phase-completion-percentage": 0,
+       "uuid": "447c4267-0ecb-48f4-9237-1d747a3e7cca",
+       "name": "fw-update",
+       "current-phase": "build",
+       "storage-apply-type": "ignore",
+       "state":"building",
+       "worker-apply-type": "serial",
+       "default-instance-action": "stop-start",
+       "max-parallel-worker-hosts": 2,
+       "alarm-restrictions": "strict",
+       "build-phase": {
+         "phase-name": "build",
+         "current-stage": 0,
+         "start-date-time": "2020-05-06 13:26:11",
+         "end-date-time": "",
+         "completion-percentage": 0,
+         "stop-at-stage": 1,
+         "result": "inprogress",
+         "timeout": 182,
+         "reason": "",
+         "inprogress": true,
+         "total-stages": 1,
+         "stages": [
+           {
+             "stage-id": 0,
+             "stage-name": "fw-update-hosts-query",
+             "total-steps": 3,
+             "inprogress": true,
+             "start-date-time": "2020-05-06 13:26:11",
+             "end-date-time": "",
+             "reason": "",
+             "current-step": 0,
+             "result": "inprogress",
+             "timeout": 181,
+             "steps": [
+               {
+                 "step-id": 0,
+                 "step-name": "query-alarms",
+                 "entity-type": "",
+                 "entity-names": [],
+                 "entity-uuids": [],
+                 "start-date-time": "2020-05-06 13:26:11",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "wait",
+                 "reason": ""
+               },
+               {
+                 "step-id": 1,
+                 "step-name": "query-host-devices",
+                 "entity-type": "",
+                 "entity-names": ["compute-1"],
+                 "entity-uuids": ["ecff0928-9655-46ed-9ac0-433dfa21c7e2"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "step-id": 2,
+                 "step-name": "query-host-devices",
+                 "entity-type": "",
+                 "entity-names": ["compute-0"],
+                 "entity-uuids": ["fa62c159-7b2c-47f5-bbda-126bc5e7de21"],
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "result": "initial",
+                 "reason": ""
+               }
+             ]
+           }
+         ]
+       },
+       "apply-phase": {
+         "start-date-time": "",
+         "end-date-time": "",
+         "phase-name": "apply",
+         "completion-percentage": 100,
+         "total-stages": 0,
+         "stop-at-stage": 0,
+         "result": "initial",
+         "timeout": 0,
+         "reason": "",
+         "inprogress": false,
+         "stages": [],
+         "current-stage": 0
+       },
+       "abort-phase": {
+         "start-date-time": "",
+         "end-date-time": "",
+         "phase-name": "abort",
+         "completion-percentage": 100,
+         "total-stages": 0,
+         "stop-at-stage": 0,
+         "result": "initial",
+         "timeout": 0,
+         "reason": "",
+         "inprogress": false,
+         "stages": [],
+         "current-stage": 0
+       }
+     }
+   }
 

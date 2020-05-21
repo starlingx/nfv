@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -76,6 +76,41 @@ _alarm_templates = {
         'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
         'reason_text': "Software upgrade auto-apply failed",
         'repair_action': ("Attempt to perform software upgrade manually; if "
+                          "problem persists contact next level of support"),
+        'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
+    },
+
+    alarm.ALARM_TYPE.FW_UPDATE_AUTO_APPLY_INPROGRESS: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=fw-update",
+        'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
+        'severity': alarm.ALARM_SEVERITY.MAJOR,
+        'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
+        'reason_text': "Firmware update auto-apply inprogress",
+        'repair_action': ("Wait for firmware update auto-apply to complete; "
+                          "if problem persists contact next level of support"),
+        'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
+    },
+    alarm.ALARM_TYPE.FW_UPDATE_AUTO_APPLY_ABORTING: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=fw-update",
+        'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
+        'severity': alarm.ALARM_SEVERITY.MAJOR,
+        'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
+        'reason_text': "Firmware update auto-apply aborting",
+        'repair_action': ("Wait for firmware update auto-apply abort to "
+                          "complete; if problem persists contact next "
+                          "level of support"),
+        'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
+    },
+    alarm.ALARM_TYPE.FW_UPDATE_AUTO_APPLY_FAILED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=fw-update",
+        'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
+        'severity': alarm.ALARM_SEVERITY.CRITICAL,
+        'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
+        'reason_text': "Firmware update auto-apply failed",
+        'repair_action': ("Attempt to apply firmware update manually; if "
                           "problem persists contact next level of support"),
         'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
     },

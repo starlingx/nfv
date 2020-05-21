@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -54,6 +54,47 @@ def nfvi_get_host(host_uuid, host_name, callback):
     Get host details
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('get_host',
+                                                  host_uuid, host_name,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_get_host_devices(host_uuid, host_name, callback):
+    """
+    Get host device list details
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_host_devices',
+                                                  host_uuid, host_name,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_get_host_device(host_uuid, host_name, device_uuid, device_name, callback):
+    """
+    Get host device details
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_host_device',
+                                                  host_uuid, host_name,
+                                                  device_uuid, device_name,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_host_device_image_update(host_uuid, host_name, callback):
+    """
+    Update host device image
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('host_device_image_update',
+                                                  host_uuid, host_name,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_host_device_image_update_abort(host_uuid, host_name, callback):
+    """
+    Abort host device image update
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('host_device_image_update_abort',
                                                   host_uuid, host_name,
                                                   callback=callback)
     return cmd_id

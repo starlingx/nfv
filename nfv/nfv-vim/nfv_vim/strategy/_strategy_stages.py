@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -30,6 +30,10 @@ class StrategyStageNames(Constants):
     SW_UPGRADE_STORAGE_HOSTS = Constant('sw-upgrade-storage-hosts')
     SW_UPGRADE_WORKER_HOSTS = Constant('sw-upgrade-worker-hosts')
     SW_UPGRADE_COMPLETE = Constant('sw-upgrade-complete')
+    FW_UPDATE_QUERY = Constant('fw-update-query')
+    FW_UPDATE_HOSTS_QUERY = Constant('fw-update-hosts-query')
+    FW_UPDATE_HOST_QUERY = Constant('fw-update-host-query')
+    FW_UPDATE_WORKER_HOSTS = Constant('fw-update-worker-hosts')
 
 
 # Constant Instantiation

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -160,6 +160,17 @@ class _EventId(Constants):
     SW_UPGRADE_AUTO_APPLY_ABORT_REJECTED = Constant('sw-upgrade-auto-apply-abort-rejected')
     SW_UPGRADE_AUTO_APPLY_ABORT_FAILED = Constant('sw-upgrade-auto-apply-abort-failed')
     SW_UPGRADE_AUTO_APPLY_ABORTED = Constant('sw-upgrade-auto-apply-aborted')
+    FW_UPDATE_AUTO_APPLY_START = Constant('fw-update-auto-apply-started')
+    FW_UPDATE_AUTO_APPLY_INPROGRESS = Constant('fw-update-auto-apply-inprogress')
+    FW_UPDATE_AUTO_APPLY_REJECTED = Constant('fw-update-auto-apply-rejected')
+    FW_UPDATE_AUTO_APPLY_CANCELLED = Constant('fw-update-auto-apply-cancelled')
+    FW_UPDATE_AUTO_APPLY_FAILED = Constant('fw-update-auto-apply-failed')
+    FW_UPDATE_AUTO_APPLY_COMPLETED = Constant('fw-update-auto-apply-completed')
+    FW_UPDATE_AUTO_APPLY_ABORT = Constant('fw-update-auto-apply-abort')
+    FW_UPDATE_AUTO_APPLY_ABORTING = Constant('fw-update-auto-apply-aborting')
+    FW_UPDATE_AUTO_APPLY_ABORT_REJECTED = Constant('fw-update-auto-apply-abort-rejected')
+    FW_UPDATE_AUTO_APPLY_ABORT_FAILED = Constant('fw-update-auto-apply-abort-failed')
+    FW_UPDATE_AUTO_APPLY_ABORTED = Constant('fw-update-auto-apply-aborted')
 
 
 @six.add_metaclass(Singleton)

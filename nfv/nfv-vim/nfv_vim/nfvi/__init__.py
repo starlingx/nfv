@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -97,12 +97,16 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_alarm_history  # n
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_alarms  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_datanetworks  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_host  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_host_device  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_host_devices  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_hosts  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_logs  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_system_info  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_system_state  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_terminating_pods  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_upgrade  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_update  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_update_abort  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_lock_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_notify_host_failed  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_notify_host_services_delete_failed  # noqa: F401

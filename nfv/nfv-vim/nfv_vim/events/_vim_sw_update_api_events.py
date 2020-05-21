@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -106,6 +106,13 @@ def vim_sw_update_api_create_strategy(connection, msg):
             alarm_restrictions,
             start_upgrade, complete_upgrade,
             _vim_sw_update_api_create_strategy_callback)
+    elif 'fw-update' == msg.sw_update_type:
+        uuid, reason = sw_mgmt_director.create_fw_update_strategy(
+            controller_apply_type, storage_apply_type,
+            worker_apply_type, max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            _vim_sw_update_api_create_strategy_callback)
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         response = rpc.APIResponseCreateSwUpdateStrategy()
@@ -162,6 +169,8 @@ def vim_sw_update_api_apply_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
     elif 'sw-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
+    elif 'fw-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'
@@ -215,6 +224,8 @@ def vim_sw_update_api_abort_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
     elif 'sw-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
+    elif 'fw-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'
@@ -265,6 +276,8 @@ def vim_sw_update_api_delete_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
     elif 'sw-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
+    elif 'fw-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'
@@ -294,6 +307,8 @@ def vim_sw_update_api_get_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
     elif 'sw-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
+    elif 'fw-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'

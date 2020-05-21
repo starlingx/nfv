@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -338,6 +338,80 @@ class HostDirector(object):
         nfvi.nfvi_swact_from_host(host_uuid, host_name,
                                   self._nfvi_swact_host_callback())
 
+    @coroutine
+    def _nfvi_fw_update_host_callback(self):
+        """
+        NFVI Firmware Update Host Callback
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.verbose("NFVI Firmware Update Host callback response=%s." % response)
+        if not response['completed']:
+            DLOG.info("Firmware Image Update for host %s failed, reason=%s."
+                      % (response['host_name'], response['reason']))
+
+            host_table = tables.tables_get_host_table()
+            host = host_table.get(response['host_name'], None)
+            if host is None:
+                DLOG.verbose("Host %s does not exist." % response['host_name'])
+                return
+
+            if self._host_operation is None:
+                DLOG.verbose("No host %s operation inprogress." % host.name)
+                return
+
+            if OPERATION_TYPE.FW_UPDATE_HOSTS != self._host_operation.operation_type:
+                DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                             % (host.name, self._host_operation.operation_type))
+                return
+
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.host_fw_update_failed(host)
+
+    def _nfvi_fw_update_host(self, host_uuid, host_name):
+        """
+        NFVI Firmware Image Update Host
+        """
+        nfvi.nfvi_host_device_image_update(host_uuid, host_name, self._nfvi_fw_update_host_callback())
+
+    @coroutine
+    def _nfvi_fw_update_abort_callback(self):
+        """
+        NFVI Abort Firmware Update callback
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.verbose("NFVI Abort Firmware Update callback response=%s." % response)
+        if not response['completed']:
+            DLOG.info("Get Host Devices for host %s failed, reason=%s."
+                      % (response['host_name'], response['reason']))
+
+            host_table = tables.tables_get_host_table()
+            host = host_table.get(response['host_name'], None)
+            if host is None:
+                DLOG.verbose("Host %s does not exist." % response['host_name'])
+                return
+
+            if self._host_operation is None:
+                DLOG.verbose("No host %s operation inprogress." % host.name)
+                return
+
+            if OPERATION_TYPE.FW_UPDATE_ABORT_HOSTS != self._host_operation.operation_type:
+                DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                             % (host.name, self._host_operation.operation_type))
+                return
+
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.host_fw_update_abort_failed(host)
+
+    def _nfvi_fw_update_abort_host(self, host_uuid, host_name):
+        """
+        NFVI Abort Firmware Update
+        """
+        nfvi.nfvi_host_device_image_update_abort(host_uuid, host_name, self._nfvi_fw_update_abort_callback())
+
     def host_operation_inprogress(self):
         """
         Returns true if a lock of hosts
@@ -659,6 +733,70 @@ class HostDirector(object):
 
             host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
             self._nfvi_swact_host(host.uuid, host.name)
+
+        if host_operation.is_inprogress():
+            self._host_operation = host_operation
+
+        return host_operation
+
+    def fw_update_hosts(self, host_names):
+        """
+        Firmware Update hosts
+        """
+        DLOG.info("Firmware Update hosts: %s" % host_names)
+
+        host_operation = Operation(OPERATION_TYPE.FW_UPDATE_HOSTS)
+
+        if self._host_operation is not None:
+            DLOG.debug("Canceling previous host operation %s, before "
+                       "continuing with host operation %s."
+                       % (self._host_operation.operation_type,
+                          host_operation.operation_type))
+            self._host_operation = None
+
+        host_table = tables.tables_get_host_table()
+        for host_name in host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                reason = "Unknown host %s given." % host_name
+                DLOG.info(reason)
+                host_operation.set_failed(reason)
+                return host_operation
+
+            host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
+            self._nfvi_fw_update_host(host.uuid, host.name)
+
+        if host_operation.is_inprogress():
+            self._host_operation = host_operation
+
+        return host_operation
+
+    def fw_update_abort_hosts(self, host_names):
+        """
+        Firmware Update Abort Hosts
+        """
+        DLOG.info("Firmware Update Abort for hosts: %s" % host_names)
+
+        host_operation = Operation(OPERATION_TYPE.FW_UPDATE_ABORT_HOSTS)
+
+        if self._host_operation is not None:
+            DLOG.debug("Canceling previous host operation %s, before "
+                       "continuing with host operation %s."
+                       % (self._host_operation.operation_type,
+                          host_operation.operation_type))
+            self._host_operation = None
+
+        host_table = tables.tables_get_host_table()
+        for host_name in host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                reason = "Unknown host %s given." % host_name
+                DLOG.info(reason)
+                host_operation.set_failed(reason)
+                return host_operation
+
+            host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
+            self._nfvi_fw_update_abort_host(host.uuid, host.name)
 
         if host_operation.is_inprogress():
             self._host_operation = host_operation

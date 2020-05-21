@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016,2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -227,6 +227,9 @@ def create_strategy(token_id, url, strategy_name, controller_apply_type,
     if 'sw-patch' == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['swift-apply-type'] = swift_apply_type
+        api_cmd_payload['default-instance-action'] = default_instance_action
+    elif 'fw-update' == strategy_name:
+        api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
     elif 'sw-upgrade' == strategy_name:
         if 'start_upgrade' in kwargs and kwargs['start_upgrade']:
