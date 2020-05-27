@@ -107,6 +107,7 @@ class Host(ObjectData):
     """
     def __init__(self, uuid, name, personality, admin_state, oper_state,
                  avail_status, action, uptime, software_load, target_load,
+                 device_image_update=None,
                  openstack_compute=False,
                  openstack_control=False,
                  remote_storage=False,
@@ -120,6 +121,7 @@ class Host(ObjectData):
                          uptime=uptime,
                          software_load=software_load,
                          target_load=target_load,
+                         device_image_update=device_image_update,
                          openstack_compute=openstack_compute,
                          openstack_control=openstack_control,
                          remote_storage=remote_storage))

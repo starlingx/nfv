@@ -45,8 +45,7 @@ class StrategyStepNames(Constants):
     WAIT_DATA_SYNC = Constant('wait-data-sync')
     QUERY_SW_PATCHES = Constant('query-sw-patches')
     QUERY_SW_PATCH_HOSTS = Constant('query-sw-patch-hosts')
-    QUERY_HOST_DEVICES = Constant('query-host-devices')
-    QUERY_HOST_DEVICE = Constant('query-host-device')
+    QUERY_FW_UPDATE_HOST = Constant('query-fw-update-host')
     QUERY_UPGRADE = Constant('query-upgrade')
     DISABLE_HOST_SERVICES = Constant('disable-host-services')
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
@@ -1751,19 +1750,18 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
         return data
 
 
-class QueryHostDeviceListStep(strategy.StrategyStep):
+class QueryFwUpdateHostStep(strategy.StrategyStep):
     """
-    Query Host Device List
+    Query Host
     """
 
-    # This step queries system inventory for each host's device list.
-    # Any hosts whose devices have a firmware update pending have its name
-    # added to _fw_update_hosts to build a list of host names that require
-    # firmware update.
+    # This step queries system inventory for the host in self._host_names
+    # If the host's 'device_image_update' field shows 'pending' then its
+    # hostname is added to the strategy's fw_update_hosts list.
 
     def __init__(self, host):
-        super(QueryHostDeviceListStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_HOST_DEVICES, timeout_in_secs=60)
+        super(QueryFwUpdateHostStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_FW_UPDATE_HOST, timeout_in_secs=60)
 
         self._host_names = list()
         self._host_uuids = list()
@@ -1771,38 +1769,36 @@ class QueryHostDeviceListStep(strategy.StrategyStep):
         self._host_uuids.append(host.uuid)
 
     @coroutine
-    def _get_host_devices_callback(self):
+    def _get_host_callback(self):
         """
-        Query Host Device List callback
+        Query Host callback
         """
-        from nfv_vim import tables
 
         response = (yield)
 
-        DLOG.verbose("get-host-devices %s callback response=%s." %
+        DLOG.verbose("Get-Host %s callback response=%s." %
                     (self._host_names[0], response))
 
         if response['completed']:
             if self.strategy is not None:
-                pci_devices = response['result-data'].get('pci_devices')
-                if pci_devices:
-                    host_added_to_fw_update_hosts_list = False
-                    for pci_device in pci_devices:
-                        if pci_device.get(FW_UPDATE_LABEL.DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE) is False:
-                            DLOG.verbose("%s:%s device is up-to-date" %
-                                        (self._host_names[0],
-                                         pci_device.get('name')))
-                            continue
-
-                        # using existing vim host inventory for host info
-                        host_table = tables.tables_get_host_table()
-                        for host in host_table.values():
-                            if host.uuid == pci_device['host_uuid']:
-                                DLOG.info("%s:%s device requires update" %
-                                          (host.name, pci_device.get('name')))
-                                if host_added_to_fw_update_hosts_list is False:
-                                    self.strategy.fw_update_hosts.append(host.name)
-                                    host_added_to_fw_update_hosts_list = True
+                hostname = response['result-data'].get('name')
+                if hostname:
+                    device_image_update = response['result-data'].get('device_image_update')
+                    # device_image_update = 'pending'
+                    if device_image_update is None:
+                        DLOG.verbose("%s no firmware update required" % hostname)
+                    elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_PENDING:
+                        self.strategy.fw_update_hosts.append(hostname)
+                        # DLOG.verbose("%s requires firmware update" % hostname)
+                        DLOG.info("%s requires firmware update" % hostname)
+                    elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
+                        DLOG.info("%s firmware update in-progress" % hostname)
+                    elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED:
+                        DLOG.info("%s firmware update complete" % hostname)
+                    elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_FAILED:
+                        DLOG.info("%s firmware update failed" % hostname)
+                    else:
+                        DLOG.error("%s firmware update ; unknown state '%s'" % (hostname, device_image_update))
 
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, "")
@@ -1812,23 +1808,23 @@ class QueryHostDeviceListStep(strategy.StrategyStep):
 
     def apply(self):
         """
-        Query Host Device List Apply
+        Query Host Apply
         """
         from nfv_vim import nfvi
 
         DLOG.info("%s %s step apply" % (self._host_names[0], self._name))
 
         # This step is only ever called with one host name.
-        nfvi.nfvi_get_host_devices(self._host_uuids[0],
-                                   self._host_names[0],
-                                   self._get_host_devices_callback())
+        nfvi.nfvi_get_host(self._host_uuids[0],
+                           self._host_names[0],
+                           self._get_host_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
         """
         Load the firmware update host device list step
         """
-        super(QueryHostDeviceListStep, self).from_dict(data)
+        super(QueryFwUpdateHostStep, self).from_dict(data)
         self._host_names = data['entity_names']
         self._host_uuids = data['entity_uuids']
         return self
@@ -1837,7 +1833,7 @@ class QueryHostDeviceListStep(strategy.StrategyStep):
         """
         Represent the object as a dictionary for the strategy
         """
-        data = super(QueryHostDeviceListStep, self).as_dict()
+        data = super(QueryFwUpdateHostStep, self).as_dict()
         data['entity_type'] = ''
         data['entity_names'] = self._host_names
         data['entity_uuids'] = self._host_uuids
@@ -1853,65 +1849,94 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         super(FwUpdateHostsStep, self).__init__(
             STRATEGY_STEP_NAME.FW_UPDATE_HOSTS, timeout_in_secs=3600)
 
-        # Constants
-        self.MONITOR_THRESHOLD = 0
-
         self._hosts = hosts
         self._host_names = list()
         self._host_uuids = list()
         self._monitoring_fw_update = False
         self._wait_time = 0
         self._host_failed_device_update = dict()
-        self._host_monitor_counter = dict()
         self._host_completed = dict()
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
             self._host_completed[host.name] = (False, False, '')
-            self._host_monitor_counter[host.uuid] = 0
             self._host_failed_device_update[host.name] = list()
 
     @coroutine
-    def _host_devices_list_callback(self):
+    def _get_host_callback(self):
         """
-        Query Host Device List callback used for monitoring update process
+        Query Host callback used for monitoring update process
         """
         response = (yield)
-        DLOG.debug("Host-Device-List callback response=%s." % response)
+        DLOG.debug("Get-Host callback response=%s." % response)
         try:
             if response['completed']:
                 if self.strategy is not None:
-                    # find the host for this callback response
-                    host_uuid = response['result-data']['pci_devices'][0].get('host_uuid')
-                    if host_uuid:
-                        if len(self._hosts):
-                            for host in self._hosts:
-                                if host.uuid == host_uuid:
-                                    # found it
-                                    self._host_monitor_counter[host.uuid] += 1
-                                    pci_devices = response['result-data'].get('pci_devices')
-                                    if len(pci_devices):
-                                        self._check_status(host.name,
-                                                           host.uuid,
-                                                           pci_devices)
-                                        return
-                                    else:
-                                        DLOG.info("failed to find any pci devices")
+                    hostname = response['result-data'].get('name')
+                    if hostname:
+                        device_image_update = response['result-data'].get('device_image_update')
+                        if device_image_update is None:
+                            DLOG.verbose("%s no firmware update required" % hostname)
+                        elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_PENDING:
+                            self.strategy.fw_update_hosts.append(hostname)
+                            DLOG.info("%s requires firmware update" % hostname)
+                        elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
+                            DLOG.info("%s firmware update in-progress" % hostname)
+                        elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED:
+                            if self._host_completed[hostname][0] is False:
+                                self._host_completed[hostname] = (True, True, '')
+                                DLOG.info("%s firmware update complete" % hostname)
+                        elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_FAILED:
+                            if self._host_completed[hostname][0] is False:
+                                failed_msg = hostname + ' firmware update failed'
+                                self._host_completed[hostname] = (True, False, failed_msg)
+                                DLOG.error(failed_msg)
                         else:
-                            DLOG.error("failed to find %s in hosts list" % host_uuid)
+                            if self._host_completed[hostname][0] is False:
+                                failed_msg = hostname + ' firmware update failed ; unknown state ' + device_image_update
+                                self._host_completed[hostname] = (True, False, failed_msg)
+                                DLOG.error(failed_msg)
+
+                        # Check for firmware upgrade step complete
+                        self._check_step_complete()
+                        return
                     else:
-                        DLOG.error("failed to get hostname in host device list response")
+                        DLOG.error("failed to get hostname or data from get host response")
                 else:
-                    DLOG.error("failed to get host-device-list ; no strategy")
+                    DLOG.error("failed to monitor firmware update ; no strategy")
             else:
-                DLOG.error("get host device list request did not complete")
+                DLOG.error("get host request did not complete")
         except Exception as e:
-            DLOG.exception("Caught exception interpreting host device list")
+            DLOG.exception("Caught exception interpreting host info")
             DLOG.error("Response: %s" % response)
 
         result = strategy.STRATEGY_STEP_RESULT.FAILED
         fail_msg = "failed to get or parse fw update info"
         self.stage.step_complete(result, fail_msg)
+
+    def _check_step_complete(self):
+        """
+        Check for firmware upgrade step complete
+        """
+
+        failed_hosts = ""
+        done = True
+        for hostname in self._host_names:
+            if self._host_completed[hostname][0] is False:
+                done = False
+            elif self._host_completed[hostname][1] is False:
+                failed_hosts += hostname + ' '
+            else:
+                DLOG.verbose("%s firmware update is complete" % hostname)
+
+        if done:
+            if len(failed_hosts) == 0:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, '')
+            else:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                failed_msg = 'Firmware update failed ; %s' % failed_hosts
+                self.stage.step_complete(result, failed_msg)
 
     def apply(self):
         """
@@ -1971,93 +1996,14 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                         DLOG.info("%s update already done")
                         continue
 
-                    DLOG.info("%s firmware update monitor request %d" %
-                              (host.name, self._host_monitor_counter[host.uuid] + 1))
-                    nfvi.nfvi_get_host_devices(host.uuid,
-                                               host.name,
-                                               self._host_devices_list_callback())
+                    nfvi.nfvi_get_host(host.uuid,
+                                       host.name,
+                                       self._get_host_callback())
                 return True
         else:
             DLOG.warn("Unexpected event (%s)" % event)
 
         return False
-
-    def _check_status(self, host_name, host_uuid, pci_devices):
-        """Check firmware update status for specified host"""
-
-        done = True
-        for pci_device in pci_devices:
-            if pci_device.get(FW_UPDATE_LABEL.DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE) is False:
-                continue
-
-            status = pci_device.get('status')
-            pci_device_name = pci_device.get('name')
-
-            # Handle simulated testing ; Remove after integration testing
-            if self.MONITOR_THRESHOLD > 0 or status is None:
-                if self._host_monitor_counter[host_uuid] >= self.MONITOR_THRESHOLD:
-                    status = FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED
-                else:
-                    status = FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS
-
-            # stop monitoring failed devices
-            if pci_device_name in self._host_failed_device_update[host_name]:
-                continue
-
-            elif status == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
-                done = False
-                DLOG.verbose("%s pci device %s firmware update in-progress" %
-                            (host_name, pci_device_name))
-
-            elif status == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED:
-                DLOG.verbose("%s %s firmware update complete" %
-                            (host_name, pci_device_name))
-
-            elif status == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_FAILED:
-                if pci_device_name not in self._host_failed_device_update[host_name]:
-                    DLOG.info("%s %s firmware update failed" %
-                             (host_name, pci_device_name))
-                    self._host_failed_device_update[host_name].append(pci_device_name)
-
-            else:
-                if pci_device_name not in self._host_failed_device_update[host_name]:
-                    self._host_failed_device_update[host_name].append(pci_device_name)
-                    DLOG.info('unexpected device image status (%s)' % status)
-
-        if done:
-            if len(self._host_failed_device_update[host_name]):
-                failed_msg = "firmware update failed for devices: "
-                failed_msg += str(self._host_failed_device_update[host_name])
-                self._host_completed[host_name] = (True, False, failed_msg)
-            else:
-                self._host_completed[host_name] = (True, True, '')
-
-        # Check for firmware upgrade step complete
-        self._check_step_complete()
-
-    def _check_step_complete(self):
-        """
-        Check for firmware upgrade step complete
-        """
-
-        failed_hosts = ""
-        done = True
-        for hostname in self._host_names:
-            if self._host_completed[hostname][0] is False:
-                done = False
-            elif self._host_completed[hostname][1] is False:
-                failed_hosts += hostname + ' '
-            else:
-                DLOG.info("%s firmware update is complete" % hostname)
-
-        if done:
-            if len(failed_hosts) == 0:
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, '')
-            else:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                failed_msg = 'Firmware update failed ; %s' % failed_hosts
-                self.stage.step_complete(result, failed_msg)
 
     def abort(self):
         """
@@ -2538,8 +2484,8 @@ def strategy_step_rebuild_from_dict(data):
     elif STRATEGY_STEP_NAME.FW_UPDATE_ABORT_HOSTS == data['name']:
         step_obj = object.__new__(FwUpdateAbortHostsStep)
 
-    elif STRATEGY_STEP_NAME.QUERY_HOST_DEVICES == data['name']:
-        step_obj = object.__new__(QueryHostDeviceListStep)
+    elif STRATEGY_STEP_NAME.QUERY_FW_UPDATE_HOST == data['name']:
+        step_obj = object.__new__(QueryFwUpdateHostStep)
 
     else:
         step_obj = object.__new__(strategy.StrategyStep)

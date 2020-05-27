@@ -11,12 +11,12 @@ from nfv_vim.database.model._base import AsDictMixin
 from nfv_vim.database.model._base import Base
 
 
-class Host_v6(AsDictMixin, Base):
+class Host_v7(AsDictMixin, Base):
     """
     Host Database Table Entry
-    Note: Changes are only in nfvi_host_data.
+    Note: Changes are only in nfvi_host_data to add device_image_update string
     """
-    __tablename__ = 'hosts_v6'
+    __tablename__ = 'hosts_v7'
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -36,12 +36,12 @@ class Host_v6(AsDictMixin, Base):
                                                   self.action, self.uptime)
 
 
-class Host_v5(AsDictMixin, Base):
+class Host_v6(AsDictMixin, Base):
     """
     Host Database Table Entry
-    Note: There were changes in both the attributes and the nfvi_host_data.
+    Note: Changes are only in nfvi_host_data.
     """
-    __tablename__ = 'hosts_v5'
+    __tablename__ = 'hosts_v6'
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)

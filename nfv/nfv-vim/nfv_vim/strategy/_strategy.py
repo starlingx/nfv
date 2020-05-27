@@ -1732,7 +1732,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
         for host in host_table.values():
             if HOST_PERSONALITY.WORKER in host.personality:
                 if host.is_unlocked() and host.is_enabled():
-                    stage.add_step(strategy.QueryHostDeviceListStep(host))
+                    stage.add_step(strategy.QueryFwUpdateHostStep(host))
 
         self.build_phase.add_stage(stage)
         super(FwUpdateStrategy, self).build()
