@@ -3,7 +3,7 @@ TENANT_ID=`openstack token issue | grep "| project_id |" | cut -f3 -d'|' | tr -d
 TOKEN_ID=`openstack token issue | grep "| id         |" | cut -f3 -d'|' | tr -d '[[:space:]]'`
 
 # Specify management IP
-MGMT_IP=192.168.204.2
+MGMT_IP=192.168.204.1
 
 1. Create a VM
 --------------

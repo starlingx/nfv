@@ -19,23 +19,23 @@ cat > live_migrate_request.txt
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
-http://192.168.204.2:18774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
+http://192.168.204.1:18774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
 -d @live_migrate_request.txt
 
 # Via Nova-API Proxy
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
-http://192.168.204.2:8774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
+http://192.168.204.1:8774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
 -d @live_migrate_request.txt
 
 # To VIM Directly
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
 http://localhost:30003/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
 -d @live_migrate_request.txt
 
@@ -50,23 +50,23 @@ cat > pause_request.txt
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
-http://192.168.204.2:18774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
+http://192.168.204.1:18774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
 -d @pause_request.txt
 
 # Via Nova-API Proxy
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
-http://192.168.204.2:8774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
+http://192.168.204.1:8774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
 -d @pause_request.txt
 
 # To VIM Directly
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
 http://localhost:30003/v2/${TENANT_ID}/servers/${VM_ID}/action \
 -d @pause_request.txt
 
@@ -82,23 +82,23 @@ cat > unpause_request.txt
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
-http://192.168.204.2:18774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
+http://192.168.204.1:18774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
 -d @unpause_request.txt
 
 # Via Nova-API Proxy
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
-http://192.168.204.2:8774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
+http://192.168.204.1:8774/v2.1/${TENANT_ID}/servers/${VM_ID}/action \
 -d @unpause_request.txt
 
 # To VIM Directly
 time curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
 http://localhost:30003/v2/${TENANT_ID}/servers/${VM_ID}/action \
 -d @unpause_request.txt
 
