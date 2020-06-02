@@ -64,10 +64,10 @@ def database_host_add(host_obj):
     """
     db = database_get()
     session = db.session()
-    query = session.query(model.Host_v6).filter(model.Host_v6.name == host_obj.name)
+    query = session.query(model.Host_v7).filter(model.Host_v7.name == host_obj.name)
     host = query.first()
     if not host:
-        host = model.Host_v6()
+        host = model.Host_v7()
         host.uuid = host_obj.uuid
         host.name = host_obj.name
         host.personality = host_obj.personality
@@ -98,8 +98,8 @@ def database_host_delete(host_name):
     """
     db = database_get()
     session = db.session()
-    query = session.query(model.Host_v6)
-    query.filter(model.Host_v6.name == host_name).delete()
+    query = session.query(model.Host_v7)
+    query.filter(model.Host_v7.name == host_name).delete()
     session.commit()
 
 
@@ -124,6 +124,7 @@ def database_host_get_list():
                                          nfvi_host_data['uptime'],
                                          nfvi_host_data['software_load'],
                                          nfvi_host_data['target_load'],
+                                         nfvi_host_data['device_image_update'],
                                          nfvi_host_data['openstack_compute'],
                                          nfvi_host_data['openstack_control'],
                                          nfvi_host_data['remote_storage'],

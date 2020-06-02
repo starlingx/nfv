@@ -16,7 +16,7 @@ from nfv_vim.strategy._strategy_steps import FwUpdateHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import LockHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import MigrateInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryAlarmsStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import QueryHostDeviceListStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import QueryFwUpdateHostStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryUpgradeStep  # noqa: F401

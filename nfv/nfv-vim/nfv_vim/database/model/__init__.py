@@ -5,8 +5,8 @@
 #
 from nfv_vim.database.model._base import Base  # noqa: F401
 from nfv_vim.database.model._base import lookup_class_by_table  # noqa: F401
-from nfv_vim.database.model._host import Host_v5  # noqa: F401
 from nfv_vim.database.model._host import Host_v6  # noqa: F401
+from nfv_vim.database.model._host import Host_v7  # noqa: F401
 from nfv_vim.database.model._host_aggregate import HostAggregate  # noqa: F401
 from nfv_vim.database.model._host_group import HostGroup  # noqa: F401
 from nfv_vim.database.model._hypervisor import Hypervisor  # noqa: F401
