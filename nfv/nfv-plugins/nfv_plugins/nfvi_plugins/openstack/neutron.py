@@ -569,7 +569,10 @@ def delete_host_services(token, host_uuid):
 
     api_cmd_headers = dict()
 
-    response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
+    # WARNING: Any change to the timeout must be reflected in the config.ini
+    # file for the nfvi plugins.
+    response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers,
+                                timeout_in_secs=40)
     return response
 
 
@@ -724,8 +727,11 @@ def disable_host_services(token, host_uuid):
     api_cmd_payload = dict()
     api_cmd_payload['host'] = payload
 
+    # WARNING: Any change to the timeout must be reflected in the config.ini
+    # file for the nfvi plugins.
     response = rest_api_request(token, "PUT", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=40)
     return response
 
 

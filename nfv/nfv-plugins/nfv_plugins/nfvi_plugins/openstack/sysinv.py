@@ -11,6 +11,10 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.sysinv')
 
+# WARNING: Any change to this timeout must be reflected in the config.ini
+# file for the nfvi plugins.
+REST_API_REQUEST_TIMEOUT = 45
+
 
 def get_datanetworks(token, host_uuid):
     """
@@ -25,7 +29,8 @@ def get_datanetworks(token, host_uuid):
     api_cmd_headers['Content-Type'] = "application/json"
     api_cmd_headers['User-Agent'] = "vim/1.0"
 
-    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
+    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     result_data = response.result_data['interface_datanetworks']
 
     return result_data
@@ -42,7 +47,8 @@ def get_system_info(token):
 
     api_cmd = url + "/isystems"
 
-    response = rest_api_request(token, "GET", api_cmd)
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -56,7 +62,8 @@ def get_hosts(token):
 
     api_cmd = url + "/ihosts"
 
-    response = rest_api_request(token, "GET", api_cmd)
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -70,7 +77,8 @@ def get_host(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    response = rest_api_request(token, "GET", api_cmd)
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -84,7 +92,8 @@ def get_host_labels(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s/labels" % host_uuid
 
-    response = rest_api_request(token, "GET", api_cmd)
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -98,7 +107,8 @@ def get_upgrade(token):
 
     api_cmd = url + "/upgrade"
 
-    response = rest_api_request(token, "GET", api_cmd)
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -120,7 +130,8 @@ def upgrade_start(token):
     api_cmd_payload['force'] = "false"
 
     response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -147,7 +158,8 @@ def upgrade_activate(token):
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -165,7 +177,8 @@ def upgrade_complete(token):
     api_cmd_headers['Content-Type'] = "application/json"
     api_cmd_headers['User-Agent'] = "vim/1.0"
 
-    response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
+    response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -179,7 +192,8 @@ def get_host_lvgs(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s/ilvgs" % host_uuid
 
-    response = rest_api_request(token, "GET", api_cmd)
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -206,7 +220,8 @@ def notify_host_services_enabled(token, host_uuid):
     api_cmd_list.append(api_cmd_payload)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_list))
+                                json.dumps(api_cmd_list),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -233,7 +248,8 @@ def notify_host_services_disabled(token, host_uuid):
     api_cmd_list.append(api_cmd_payload)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_list))
+                                json.dumps(api_cmd_list),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -260,7 +276,8 @@ def notify_host_services_disable_extend(token, host_uuid):
     api_cmd_list.append(api_cmd_payload_action)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_list))
+                                json.dumps(api_cmd_list),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -293,7 +310,8 @@ def notify_host_services_disable_failed(token, host_uuid, reason):
     api_cmd_list.append(api_cmd_payload_reason)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_list))
+                                json.dumps(api_cmd_list),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -311,7 +329,8 @@ def notify_host_services_deleted(token, host_uuid):
     api_cmd_headers['Content-Type'] = "application/json"
     api_cmd_headers['User-Agent'] = "vim/1.0"
 
-    response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
+    response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -344,7 +363,8 @@ def notify_host_services_delete_failed(token, host_uuid, reason):
     api_cmd_list.append(api_cmd_payload_reason)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_list))
+                                json.dumps(api_cmd_list),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -371,7 +391,8 @@ def lock_host(token, host_uuid):
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -398,7 +419,8 @@ def unlock_host(token, host_uuid):
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -425,7 +447,8 @@ def reboot_host(token, host_uuid):
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -447,7 +470,8 @@ def upgrade_host(token, host_uuid):
     api_cmd_payload['force'] = "false"
 
     response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -474,7 +498,8 @@ def swact_from_host(token, host_uuid):
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -492,7 +517,8 @@ def get_host_devices(token, host_uuid):
     api_cmd_headers['Content-Type'] = "application/json"
     api_cmd_headers['User-Agent'] = "vim/1.0"
 
-    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
+    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -510,7 +536,8 @@ def get_host_device(token, device_uuid):
     api_cmd_headers['Content-Type'] = "application/json"
     api_cmd_headers['User-Agent'] = "vim/1.0"
 
-    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
+    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -531,7 +558,8 @@ def host_device_image_update(token, host_uuid):
     api_cmd_payload = dict()
 
     response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
 
 
@@ -552,5 +580,6 @@ def host_device_image_update_abort(token, host_uuid):
     api_cmd_payload = dict()
 
     response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
