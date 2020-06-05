@@ -34,10 +34,9 @@ Summary: Maintenance Guest Agent Package
 Group: base
 Requires: dpkg
 Requires: time
-Requires: libjson-c.so.2()(64bit)
+Requires: libjson-c.so.4()(64bit)
 Requires: libstdc++.so.6(CXXABI_1.3)(64bit)
 Requires: librt.so.1(GLIBC_2.2.5)(64bit)
-Requires: libfmcommon.so.1()(64bit)
 Requires: libstdc++.so.6(GLIBCXX_3.4.9)(64bit)
 Requires: fm-common >= 1.0
 Requires: libc.so.6(GLIBC_2.2.5)(64bit)
@@ -49,8 +48,7 @@ Requires: libc.so.6(GLIBC_2.14)(64bit)
 Requires: libpthread.so.0(GLIBC_2.2.5)(64bit)
 Requires: librt.so.1(GLIBC_2.3.3)(64bit)
 Requires: libgcc_s.so.1(GCC_3.0)(64bit)
-Requires: libevent >= 2.0.21
-Requires: libevent-2.0.so.5()(64bit)
+Requires: libevent >= 2.1.8-5
 Requires: libuuid.so.1()(64bit)
 Requires: libm.so.6()(64bit)
 Requires: rtld(GNU_HASH)
@@ -74,10 +72,9 @@ Requires: util-linux
 Requires: /bin/bash
 Requires: /bin/systemctl
 Requires: dpkg
-Requires: libjson-c.so.2()(64bit)
+Requires: libjson-c.so.4()(64bit)
 Requires: libstdc++.so.6(CXXABI_1.3)(64bit)
 Requires: librt.so.1(GLIBC_2.2.5)(64bit)
-Requires: libfmcommon.so.1()(64bit)
 Requires: libstdc++.so.6(GLIBCXX_3.4.9)(64bit)
 Requires: fm-common >= 1.0
 Requires: libc.so.6(GLIBC_2.2.5)(64bit)
@@ -89,8 +86,7 @@ Requires: libc.so.6(GLIBC_2.14)(64bit)
 Requires: libpthread.so.0(GLIBC_2.2.5)(64bit)
 Requires: librt.so.1(GLIBC_2.3.3)(64bit)
 Requires: libgcc_s.so.1(GCC_3.0)(64bit)
-Requires: libevent >= 2.0.21
-Requires: libevent-2.0.so.5()(64bit)
+Requires: libevent >= 2.1.8-5
 Requires: libuuid.so.1()(64bit)
 Requires: libm.so.6()(64bit)
 Requires: rtld(GNU_HASH)
