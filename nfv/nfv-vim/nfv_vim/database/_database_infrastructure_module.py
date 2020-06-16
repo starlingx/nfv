@@ -109,7 +109,7 @@ def database_host_get_list():
     """
     db = database_get()
     session = db.session()
-    query = session.query(model.Host_v6)
+    query = session.query(model.Host_v7)
 
     host_objs = list()
     for host in query.all():
