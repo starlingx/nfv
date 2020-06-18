@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -238,6 +238,13 @@ class NFVIInfrastructureAPI(object):
     def register_host_update_callback(self, callback):
         """
         Register for host update notifications
+        """
+        pass
+
+    @abc.abstractmethod
+    def register_sw_update_get_callback(self, callback):
+        """
+        Register for software update get notifications
         """
         pass
 

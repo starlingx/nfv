@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2020 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,6 +8,7 @@ from nfv_common import timers
 
 from nfv_common.helpers import coroutine
 
+from nfv_vim import directors
 from nfv_vim import nfvi
 from nfv_vim import objects
 from nfv_vim import tables
@@ -103,6 +104,35 @@ def _nfvi_host_state_change_callback(nfvi_host_uuid, nfvi_host_name,
         host.nfvi_host_state_change(nfvi_admin_state, nfvi_oper_state,
                                     nfvi_avail_status, nfvi_data)
     return True
+
+
+def _nfvi_sw_update_get_callback():
+    """
+    NFVI Software update get callback
+    """
+
+    sw_mgmt_director = directors.get_sw_mgmt_director()
+    sw_update = sw_mgmt_director.sw_update
+
+    sw_update_type = None
+    in_progress = None
+
+    if sw_update is not None and sw_update.strategy is not None:
+        if sw_update.sw_update_type == objects.SW_UPDATE_TYPE.SW_PATCH:
+            sw_update_type = 'sw-patch'
+        elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.SW_UPGRADE:
+            sw_update_type = 'sw-upgrade'
+        elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.FW_UPDATE:
+            sw_update_type = 'fw-update'
+
+        if sw_update.strategy.is_applying() or sw_update.strategy.is_aborting():
+            in_progress = True
+        else:
+            in_progress = False
+
+    DLOG.debug("Software update type=%s, in_progress=%s."
+               % (sw_update_type, in_progress))
+    return sw_update_type, in_progress
 
 
 def _nfvi_host_get_callback(nfvi_host_uuid, nfvi_host_name):
@@ -503,6 +533,9 @@ def vim_nfvi_events_initialize():
 
     nfvi.nfvi_register_host_notification_callback(
         _nfvi_host_notification_callback)
+
+    nfvi.nfvi_register_sw_update_get_callback(
+        _nfvi_sw_update_get_callback)
 
     if not nfvi.nfvi_compute_plugin_disabled():
         nfvi.nfvi_register_instance_state_change_callback(

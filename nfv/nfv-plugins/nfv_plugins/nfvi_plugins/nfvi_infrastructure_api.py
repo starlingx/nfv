@@ -161,6 +161,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         self._host_action_callbacks = list()
         self._host_state_change_callbacks = list()
         self._host_get_callbacks = list()
+        self._sw_update_get_callbacks = list()
         self._host_upgrade_callbacks = list()
         self._host_update_callbacks = list()
         self._host_notification_callbacks = list()
@@ -2378,6 +2379,32 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def sw_update_rest_api_get_handler(self, request_dispatch):
+        """
+        Software update Rest-API GET handler callback
+        """
+
+        DLOG.debug("Sw-update rest-api get path: %s." % request_dispatch.path)
+
+        http_payload = None
+        http_response = httplib.OK
+
+        for callback in self._sw_update_get_callbacks:
+            sw_update_type, in_progress = callback()
+
+            http_payload = dict()
+            http_payload['status'] = 'success'
+            http_payload['sw-update-type'] = sw_update_type
+            http_payload['in-progress'] = in_progress
+
+        request_dispatch.send_response(http_response)
+
+        if http_payload is not None:
+            request_dispatch.send_header('Content-Type', 'application/json')
+            request_dispatch.end_headers()
+            request_dispatch.wfile.write(json.dumps(http_payload))
+        request_dispatch.done()
+
     def host_rest_api_get_handler(self, request_dispatch):
         """
         Host Rest-API GET handler callback
@@ -2672,6 +2699,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         """
         self._host_state_change_callbacks.append(callback)
 
+    def register_sw_update_get_callback(self, callback):
+        """
+        Register for software update get notifications
+        """
+        self._sw_update_get_callbacks.append(callback)
+
     def register_host_get_callback(self, callback):
         """
         Register for host get notifications
@@ -2731,6 +2764,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
         self._rest_api_server.add_handler('DELETE', '/nfvi-plugins/v1/hosts*',
                                           self.host_rest_api_delete_handler)
+
+        self._rest_api_server.add_handler('GET', '/nfvi-plugins/v1/sw-update*',
+                                          self.sw_update_rest_api_get_handler)
 
         auth_key = \
             config.CONF['host-listener'].get(
