@@ -61,7 +61,7 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
 
         request_info.add_data(payload)
 
-        request = urllib.request.urlopen(request_info)
+        request = urllib.request.urlopen(request_info, timeout=30)
         # Identity API v3 returns token id in X-Subject-Token
         # response header.
         token_id = request.info().getheader('X-Subject-Token')
