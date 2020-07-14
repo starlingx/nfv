@@ -1777,7 +1777,7 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
         response = (yield)
 
         DLOG.verbose("Get-Host %s callback response=%s." %
-                    (self._host_names[0], response))
+                     (self._host_names[0], response))
 
         if response['completed']:
             if self.strategy is not None:
@@ -1793,6 +1793,8 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
                         DLOG.info("%s requires firmware update" % hostname)
                     elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
                         DLOG.info("%s firmware update in-progress" % hostname)
+                    elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS_ABORTED:
+                        DLOG.info("%s firmware update in-progress-aborted" % hostname)
                     elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED:
                         DLOG.info("%s firmware update complete" % hostname)
                     elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_FAILED:
@@ -1878,10 +1880,14 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                         if device_image_update is None:
                             DLOG.verbose("%s no firmware update required" % hostname)
                         elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_PENDING:
-                            self.strategy.fw_update_hosts.append(hostname)
-                            DLOG.info("%s requires firmware update" % hostname)
+                            DLOG.warn("%s is still in pending state" % hostname)
                         elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
                             DLOG.info("%s firmware update in-progress" % hostname)
+                        elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS_ABORTED:
+                            if self._host_completed[hostname][0] is False:
+                                failed_msg = hostname + ' firmware update aborted while in progress'
+                                self._host_completed[hostname] = (True, False, failed_msg)
+                                DLOG.error(failed_msg)
                         elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED:
                             if self._host_completed[hostname][0] is False:
                                 self._host_completed[hostname] = (True, True, '')
@@ -1893,7 +1899,10 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                                 DLOG.error(failed_msg)
                         else:
                             if self._host_completed[hostname][0] is False:
-                                failed_msg = hostname + ' firmware update failed ; unknown state ' + device_image_update
+                                failed_msg = hostname + \
+                                    ' firmware update failed ;' \
+                                    ' unknown state [' + \
+                                    device_image_update + ']'
                                 self._host_completed[hostname] = (True, False, failed_msg)
                                 DLOG.error(failed_msg)
 
@@ -1993,7 +2002,9 @@ class FwUpdateHostsStep(strategy.StrategyStep):
 
                 for host in self._hosts:
                     if self._host_completed[host.name][0] is True:
-                        DLOG.info("%s update already done")
+                        DLOG.info("%s firmware update already done ; pass=%s" %
+                                  (host.name,
+                                   self._host_completed[host.name][1]))
                         continue
 
                     nfvi.nfvi_get_host(host.uuid,
@@ -2007,9 +2018,15 @@ class FwUpdateHostsStep(strategy.StrategyStep):
 
     def abort(self):
         """
-        Returns the abort step related to this step
+        Returns the abort step with applicable host list
         """
-        return [FwUpdateAbortHostsStep(self._hosts)]
+
+        # abort all hosts that are not in the completed state
+        hosts = list()
+        for host in self._hosts:
+            if self._host_completed[host.name][0] is False:
+                hosts.append(host)
+        return [FwUpdateAbortHostsStep(hosts)]
 
     def from_dict(self, data):
         """
@@ -2052,7 +2069,7 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
     """
     def __init__(self, hosts):
         super(FwUpdateAbortHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.FW_UPDATE_ABORT_HOSTS, timeout_in_secs=3600)
+            STRATEGY_STEP_NAME.FW_UPDATE_ABORT_HOSTS, timeout_in_secs=600)
 
         self._hosts = hosts
         self._host_names = list()
