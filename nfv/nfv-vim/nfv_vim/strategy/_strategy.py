@@ -1672,6 +1672,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
         # The following alarms will not prevent a firmware update operation
         IGNORE_ALARMS = ['700.004',  # VM stopped
                          '280.002',  # Subcloud resource out-of-sync
+                         '900.006',  # Device Image Update in progress
                          '900.301',  # Fw Update Auto Apply in progress
                          '200.001',  # Locked Host
                          ]
