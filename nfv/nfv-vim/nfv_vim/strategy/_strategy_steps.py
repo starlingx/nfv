@@ -1784,12 +1784,8 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
                 hostname = response['result-data'].get('name')
                 if hostname:
                     device_image_update = response['result-data'].get('device_image_update')
-                    # device_image_update = 'pending'
-                    if device_image_update is None:
-                        DLOG.verbose("%s no firmware update required" % hostname)
-                    elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_PENDING:
+                    if device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_PENDING:
                         self.strategy.fw_update_hosts.append(hostname)
-                        # DLOG.verbose("%s requires firmware update" % hostname)
                         DLOG.info("%s requires firmware update" % hostname)
                     elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
                         DLOG.info("%s firmware update in-progress" % hostname)
@@ -1799,8 +1795,11 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
                         DLOG.info("%s firmware update complete" % hostname)
                     elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_FAILED:
                         DLOG.info("%s firmware update failed" % hostname)
+                    elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_NULL:
+                        DLOG.info("%s no firmware update required" % hostname)
                     else:
-                        DLOG.error("%s firmware update ; unknown state '%s'" % (hostname, device_image_update))
+                        DLOG.info("%s unknown device_image_update state; %s" %
+                                  (hostname, device_image_update))
 
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, "")
@@ -1888,7 +1887,8 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                                 failed_msg = hostname + ' firmware update aborted while in progress'
                                 self._host_completed[hostname] = (True, False, failed_msg)
                                 DLOG.error(failed_msg)
-                        elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED:
+                        elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_COMPLETED or \
+                                device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_NULL:
                             if self._host_completed[hostname][0] is False:
                                 self._host_completed[hostname] = (True, True, '')
                                 DLOG.info("%s firmware update complete" % hostname)

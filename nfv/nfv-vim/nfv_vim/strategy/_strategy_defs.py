@@ -43,6 +43,7 @@ class FirmwareUpdateLabels(object):
     DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE = Constant('needs_firmware_update')
 
     # Device Image Status
+    DEVICE_IMAGE_UPDATE_NULL = Constant('')
     DEVICE_IMAGE_UPDATE_PENDING = Constant('pending')
     DEVICE_IMAGE_UPDATE_IN_PROGRESS = Constant('in-progress')
     DEVICE_IMAGE_UPDATE_COMPLETED = Constant('completed')
