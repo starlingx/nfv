@@ -1879,7 +1879,11 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                         if device_image_update is None:
                             DLOG.verbose("%s no firmware update required" % hostname)
                         elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_PENDING:
-                            DLOG.warn("%s is still in pending state" % hostname)
+                            if self._host_completed[hostname][0] is False:
+                                DLOG.warn("%s firmware update status went pending during update" % hostname)
+                                failed_msg = hostname + ' firmware update failed ; needs retry'
+                                self._host_completed[hostname] = (True, False, failed_msg)
+                                DLOG.error(failed_msg)
                         elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS:
                             DLOG.info("%s firmware update in-progress" % hostname)
                         elif device_image_update == FW_UPDATE_LABEL.DEVICE_IMAGE_UPDATE_IN_PROGRESS_ABORTED:
