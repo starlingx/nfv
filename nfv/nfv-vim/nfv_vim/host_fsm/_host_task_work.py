@@ -988,7 +988,7 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
     def __init__(self, task, host, service):
         super(WaitHostServicesDisabledTaskWork, self).__init__(
             'wait-host-services-disabled_%s_%s' % (host.name, service), task,
-            timeout_in_secs=180)
+            timeout_in_secs=600)
         self._host_reference = weakref.ref(host)
         self._service = service
         self._query_inprogress = False
