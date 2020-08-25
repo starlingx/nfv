@@ -1825,3 +1825,35 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
                     self._host.uuid, self._host.name, self._callback())
 
         return handled
+
+
+class WaitHostStabilizeTaskWork(state_machine.StateTaskWork):
+    """
+    Wait Host Stabilize Task Work
+    """
+    def __init__(self, task, host, timeout_in_secs=60):
+        super(WaitHostStabilizeTaskWork, self).__init__(
+            'wait-host-stabilize_%s' % host.name, task,
+            timeout_in_secs=timeout_in_secs)
+        self._host_reference = weakref.ref(host)
+
+    @property
+    def _host(self):
+        """
+        Returns the host
+        """
+        host = self._host_reference()
+        return host
+
+    def timeout(self):
+        """
+        Timeout is expected, so override to pass
+        """
+        return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
+
+    def run(self):
+        """
+        Run wait host stabilize
+        """
+        DLOG.verbose("Wait-Host-Stabilize for %s." % self._host.name)
+        return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
