@@ -130,8 +130,8 @@ def _nfvi_sw_update_get_callback():
         else:
             in_progress = False
 
-    DLOG.debug("Software update type=%s, in_progress=%s."
-               % (sw_update_type, in_progress))
+    DLOG.verbose("Software update type=%s, in_progress=%s."
+                 % (sw_update_type, in_progress))
     return sw_update_type, in_progress
 
 

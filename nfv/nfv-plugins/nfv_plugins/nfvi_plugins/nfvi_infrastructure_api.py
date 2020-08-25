@@ -2384,7 +2384,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         Software update Rest-API GET handler callback
         """
 
-        DLOG.debug("Sw-update rest-api get path: %s." % request_dispatch.path)
+        DLOG.verbose("Sw-update rest-api get path: %s." % request_dispatch.path)
 
         http_payload = None
         http_response = httplib.OK
