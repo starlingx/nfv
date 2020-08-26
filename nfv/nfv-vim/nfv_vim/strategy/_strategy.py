@@ -610,7 +610,14 @@ class SwPatchStrategy(SwUpdateStrategy):
                             stage.add_step(strategy.SystemStabilizeStep(
                                 timeout_in_secs=MTCE_DELAY))
                             stage.add_step(strategy.UnlockHostsStep(host_list))
-                            stage.add_step(strategy.SystemStabilizeStep())
+                            if host.openstack_control:
+                                # Wait extra time for services to go enabled and
+                                # alarms to clear.
+                                stage.add_step(strategy.WaitAlarmsClearStep(
+                                               timeout_in_secs=10 * 60,
+                                               ignore_alarms=self._ignore_alarms))
+                            else:
+                                stage.add_step(strategy.SystemStabilizeStep())
                         else:
                             # Less time required if host is not rebooting
                             stage.add_step(strategy.SystemStabilizeStep(
@@ -632,7 +639,14 @@ class SwPatchStrategy(SwUpdateStrategy):
                     stage.add_step(strategy.SystemStabilizeStep(
                                    timeout_in_secs=MTCE_DELAY))
                     stage.add_step(strategy.UnlockHostsStep(host_list))
-                    stage.add_step(strategy.SystemStabilizeStep())
+                    if host.openstack_control:
+                        # Wait extra time for services to go enabled and
+                        # alarms to clear.
+                        stage.add_step(strategy.WaitAlarmsClearStep(
+                                       timeout_in_secs=10 * 60,
+                                       ignore_alarms=self._ignore_alarms))
+                    else:
+                        stage.add_step(strategy.SystemStabilizeStep())
                 else:
                     # Less time required if host is not rebooting
                     stage.add_step(strategy.SystemStabilizeStep(
@@ -847,7 +861,15 @@ class SwPatchStrategy(SwUpdateStrategy):
                         stage.add_step(strategy.StartInstancesStep(
                             instance_list))
 
-                stage.add_step(strategy.SystemStabilizeStep())
+                if any(host.openstack_control for host in hosts_to_lock) or \
+                       any(host.openstack_control for host in hosts_to_reboot):
+                    # Wait extra time for services to go enabled
+                    # and alarms to clear.
+                    stage.add_step(strategy.WaitAlarmsClearStep(
+                                   timeout_in_secs=10 * 60,
+                                   ignore_alarms=self._ignore_alarms))
+                else:
+                    stage.add_step(strategy.SystemStabilizeStep())
             else:
                 # Less time required if host is not rebooting
                 stage.add_step(strategy.SystemStabilizeStep(

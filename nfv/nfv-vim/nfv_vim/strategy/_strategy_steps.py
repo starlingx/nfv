@@ -43,6 +43,7 @@ class StrategyStepNames(Constants):
     START_INSTANCES = Constant('start-instances')
     QUERY_ALARMS = Constant('query-alarms')
     WAIT_DATA_SYNC = Constant('wait-data-sync')
+    WAIT_ALARMS_CLEAR = Constant('wait-alarms-clear')
     QUERY_SW_PATCHES = Constant('query-sw-patches')
     QUERY_SW_PATCH_HOSTS = Constant('query-sw-patch-hosts')
     QUERY_FW_UPDATE_HOST = Constant('query-fw-update-host')
@@ -1656,6 +1657,114 @@ class WaitDataSyncStep(strategy.StrategyStep):
         return data
 
 
+class WaitAlarmsClearStep(strategy.StrategyStep):
+    """
+    Alarm Wait - Strategy Step
+    """
+    def __init__(self, timeout_in_secs=300, first_query_delay_in_secs=60, ignore_alarms=None):
+        super(WaitAlarmsClearStep, self).__init__(
+            STRATEGY_STEP_NAME.WAIT_ALARMS_CLEAR, timeout_in_secs=timeout_in_secs)
+        self._first_query_delay_in_secs = first_query_delay_in_secs
+        if ignore_alarms is None:
+            ignore_alarms = []
+        self._ignore_alarms = ignore_alarms
+        self._wait_time = 0
+        self._query_inprogress = False
+
+    @coroutine
+    def _query_alarms_callback(self):
+        """
+        Query Alarms Callback
+        """
+        response = (yield)
+        DLOG.debug("Query-Alarms callback response=%s." % response)
+
+        self._query_inprogress = False
+
+        if response['completed']:
+            if self.strategy is not None:
+                nfvi_alarms = list()
+                for nfvi_alarm in response['result-data']:
+                    if (self.strategy._alarm_restrictions ==
+                            strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED and
+                            nfvi_alarm.mgmt_affecting == 'False'):
+                        DLOG.warn("Ignoring non-management affecting alarm "
+                                  "%s - uuid %s due to relaxed alarm "
+                                  "strictness" % (nfvi_alarm.alarm_id,
+                                                  nfvi_alarm.alarm_uuid))
+                    elif nfvi_alarm.alarm_id not in self._ignore_alarms:
+                        nfvi_alarms.append(nfvi_alarm)
+                    else:
+                        DLOG.debug("Ignoring alarm %s - uuid %s" %
+                                   (nfvi_alarm.alarm_id, nfvi_alarm.alarm_uuid))
+                self.strategy.nfvi_alarms = nfvi_alarms
+
+            if self.strategy.nfvi_alarms:
+                # Keep waiting for alarms to clear
+                pass
+            else:
+                # Alarms have all cleared
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+        else:
+            # Unable to retrieve alarms
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, "")
+
+    def apply(self):
+        """
+        Alarm Wait
+        """
+        DLOG.info("Step (%s) apply." % self._name)
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) / 1000
+            # Wait before checking alarms for first time
+            if self._first_query_delay_in_secs <= secs_expired and not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_alarms(self._query_alarms_callback())
+            return True
+
+        return False
+
+    def from_dict(self, data):
+        """
+        Returns the alarm wait step object initialized using the given
+        dictionary
+        """
+        super(WaitAlarmsClearStep, self).from_dict(data)
+        self._first_query_delay_in_secs = data['first_query_delay_in_secs']
+        self._ignore_alarms = data['ignore_alarms']
+        self._wait_time = 0
+        self._query_inprogress = False
+        return self
+
+    def as_dict(self):
+        """
+        Represent the alarm wait step as a dictionary
+        """
+        data = super(WaitAlarmsClearStep, self).as_dict()
+        data['entity_type'] = ''
+        data['entity_names'] = list()
+        data['entity_uuids'] = list()
+        data['first_query_delay_in_secs'] = self._first_query_delay_in_secs
+        data['ignore_alarms'] = self._ignore_alarms
+        return data
+
+
 class QuerySwPatchesStep(strategy.StrategyStep):
     """
     Query Software Patches - Strategy Step
@@ -2483,6 +2592,9 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.WAIT_DATA_SYNC == data['name']:
         step_obj = object.__new__(WaitDataSyncStep)
+
+    elif STRATEGY_STEP_NAME.WAIT_ALARMS_CLEAR == data['name']:
+        step_obj = object.__new__(WaitAlarmsClearStep)
 
     elif STRATEGY_STEP_NAME.QUERY_SW_PATCHES == data['name']:
         step_obj = object.__new__(QuerySwPatchesStep)

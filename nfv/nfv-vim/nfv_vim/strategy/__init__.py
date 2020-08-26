@@ -32,4 +32,5 @@ from nfv_vim.strategy._strategy_steps import UpgradeActivateStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import UpgradeCompleteStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import UpgradeHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import UpgradeStartStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import WaitAlarmsClearStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import WaitDataSyncStep  # noqa: F401
