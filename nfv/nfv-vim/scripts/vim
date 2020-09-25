@@ -35,6 +35,7 @@ OCF_RESKEY_pid_default="/var/run/${binname}.pid"
 : ${OCF_RESKEY_pid=${OCF_RESKEY_pid_default}}
 
 mydaemon="/usr/bin/${OCF_RESKEY_binary}"
+TMP_DIR=/var/run/nfv-vim
 
 #######################################################################
 
@@ -97,6 +98,21 @@ END
 }
 
 PROCESS_NOT_RUNNING_FILE="/var/run/.nfv-vim.not_running"
+
+nfv_vim_tmpdir () {
+    local rc
+
+    if [ ! -d "$TMP_DIR" ]; then
+        mkdir -p "$TMP_DIR"
+        rc=$?
+        if [ $rc -ne 0 ]; then
+            ocf_log err "NFV Service (${OCF_RESKEY_binary}) failed to create temp dir (rc=${rc})"
+            return ${OCF_ERR_GENERIC}
+        fi
+    fi
+    export TMPDIR="$TMP_DIR"
+    return ${OCF_SUCCESS}
+}
 
 vim_validate() {
     check_binary ${OCF_RESKEY_binary}
@@ -296,6 +312,10 @@ esac
 
 # Anything except meta-data and help must pass validation
 vim_validate || exit $?
+
+# Set up tmpfiles directory to avoid temp files being
+# cleaned up by systemd tmpfiles clean service.
+nfv_vim_tmpdir || exit $?
 
 case ${__OCF_ACTION} in
 
