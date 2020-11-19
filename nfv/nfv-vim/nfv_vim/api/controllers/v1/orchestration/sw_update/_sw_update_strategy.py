@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -33,6 +33,7 @@ MIN_PARALLEL_HOSTS = 2
 MAX_PARALLEL_PATCH_HOSTS = 100
 MAX_PARALLEL_UPGRADE_HOSTS = 10
 MAX_PARALLEL_FW_UPDATE_HOSTS = 5
+MAX_PARALLEL_KUBE_UPGRADE_HOSTS = 10
 
 
 def _get_sw_update_type_from_path(path):
@@ -43,6 +44,8 @@ def _get_sw_update_type_from_path(path):
         return SW_UPDATE_NAME.SW_UPGRADE
     elif 'fw-update' in split_path:
         return SW_UPDATE_NAME.FW_UPDATE
+    elif 'kube-upgrade' in split_path:
+        return SW_UPDATE_NAME.KUBE_UPGRADE
     else:
         DLOG.error("Unknown sw_update_type in path: %s" % path)
         return 'unknown'
@@ -197,6 +200,30 @@ class FwUpdateStrategyCreateData(wsme_types.Base):
                                                 name='default-instance-action')
     alarm_restrictions = wsme_types.wsattr(
         SwUpdateAlarmRestrictionTypes, mandatory=False,
+        default=SW_UPDATE_ALARM_RESTRICTION_TYPES.STRICT,
+        name='alarm-restrictions')
+
+
+class KubeUpgradeStrategyCreateData(wsme_types.Base):
+    """
+    Kubernetes Upgrade Strategy - Create Data
+    """
+    to_version = wsme_types.wsattr(six.text_type,
+                                   mandatory=True,
+                                   name='to-version')
+    storage_apply_type = wsme_types.wsattr(SwUpdateApplyTypes,
+                                           mandatory=True,
+                                           name='storage-apply-type')
+    worker_apply_type = wsme_types.wsattr(SwUpdateApplyTypes,
+                                          mandatory=True,
+                                          name='worker-apply-type')
+    max_parallel_worker_hosts = wsme_types.wsattr(
+        int,
+        mandatory=False,
+        name='max-parallel-worker-hosts')
+    alarm_restrictions = wsme_types.wsattr(
+        SwUpdateAlarmRestrictionTypes,
+        mandatory=False,
         default=SW_UPDATE_ALARM_RESTRICTION_TYPES.STRICT,
         name='alarm-restrictions')
 
@@ -619,6 +646,65 @@ class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_RESPONSE != response.type:
+            DLOG.error("Unexpected message type received, msg_type=%s."
+                       % response.type)
+            return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+        if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
+            strategy = json.loads(response.strategy)
+            query_data = SwUpdateStrategyQueryData()
+            query_data.convert_strategy(strategy)
+            return query_data
+        elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
+            return pecan.abort(httplib.CONFLICT)
+
+        DLOG.error("Unexpected result received, result=%s." % response.result)
+        return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+
+class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
+    """
+    Kubernetes Upgrade Strategy Rest API
+    """
+    @wsme_pecan.wsexpose(SwUpdateStrategyQueryData,
+                         body=KubeUpgradeStrategyCreateData,
+                         status_code=httplib.OK)
+    def post(self, request_data):
+        rpc_request = rpc.APIRequestCreateKubeUpgradeStrategy()
+        rpc_request.sw_update_type = _get_sw_update_type_from_path(
+            pecan.request.path)
+        rpc_request.to_version = request_data.to_version
+        rpc_request.controller_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
+        rpc_request.storage_apply_type = request_data.storage_apply_type
+        rpc_request.worker_apply_type = request_data.worker_apply_type
+        if wsme_types.Unset != request_data.max_parallel_worker_hosts:
+            if request_data.max_parallel_worker_hosts < MIN_PARALLEL_HOSTS:
+                return pecan.abort(
+                    httplib.BAD_REQUEST,
+                    "Invalid value for max-parallel-worker-hosts:(%s) < (%s)"
+                    % (request_data.max_parallel_worker_hosts,
+                       MIN_PARALLEL_HOSTS))
+            if (request_data.max_parallel_worker_hosts >
+                MAX_PARALLEL_KUBE_UPGRADE_HOSTS):
+                return pecan.abort(
+                    httplib.BAD_REQUEST,
+                    "Invalid value for max-parallel-worker-hosts:(%s) > (%s)"
+                    % (request_data.max_parallel_worker_hosts,
+                       MAX_PARALLEL_KUBE_UPGRADE_HOSTS))
+            rpc_request.max_parallel_worker_hosts = \
+                request_data.max_parallel_worker_hosts
+        rpc_request.default_instance_action = SW_UPDATE_INSTANCE_ACTION.MIGRATE
+        rpc_request.alarm_restrictions = request_data.alarm_restrictions
+        vim_connection = pecan.request.vim.open_connection()
+        vim_connection.send(rpc_request.serialize())
+        msg = vim_connection.receive(timeout_in_secs=30)
+        if msg is None:
+            DLOG.error("No response received.")
+            return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+        response = rpc.RPCMessage.deserialize(msg)
+        if (rpc.RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_RESPONSE !=
+            response.type):
             DLOG.error("Unexpected message type received, msg_type=%s."
                        % response.type)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)

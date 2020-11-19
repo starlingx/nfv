@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -96,6 +96,111 @@ def nfvi_host_device_image_update_abort(host_uuid, host_name, callback):
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('host_device_image_update_abort',
                                                   host_uuid, host_name,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_host_upgrade_control_plane(host_uuid, host_name, force, callback):
+    """
+    Kube Host Upgrade Control Plane
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_host_upgrade_control_plane',
+        host_uuid,
+        host_name,
+        force,
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_host_upgrade_kubelet(host_uuid, host_name, force, callback):
+    """
+    Kube Host Upgrade Kubelet
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_host_upgrade_kubelet',
+        host_uuid,
+        host_name,
+        force,
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_upgrade_cleanup(callback):
+    """
+    Kube Upgrade Cleanup
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_upgrade_cleanup',
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_upgrade_complete(callback):
+    """
+    Kube Upgrade Complete
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_upgrade_complete',
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_upgrade_download_images(callback):
+    """
+    Kube Upgrade Download Images
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_upgrade_download_images',
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_upgrade_networking(callback):
+    """
+    Kube Upgrade Networking
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('kube_upgrade_networking',
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_upgrade_start(to_version, force, alarm_ignore_list, callback):
+    """
+    Kube Upgrade Start
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_upgrade_start',
+        to_version=to_version,
+        force=force,
+        alarm_ignore_list=alarm_ignore_list,
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_get_kube_host_upgrade_list(callback):
+    """
+    Get kube host upgrade list
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_kube_host_upgrade_list',
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_get_kube_upgrade(callback):
+    """
+    Get kube upgrade
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_kube_upgrade',
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_get_kube_version_list(callback):
+    """
+    Get kube version list
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_kube_version_list',
                                                   callback=callback)
     return cmd_id
 

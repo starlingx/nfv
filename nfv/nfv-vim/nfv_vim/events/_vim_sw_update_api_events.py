@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -113,6 +113,15 @@ def vim_sw_update_api_create_strategy(connection, msg):
             default_instance_action,
             alarm_restrictions,
             _vim_sw_update_api_create_strategy_callback)
+    elif 'kube-upgrade' == msg.sw_update_type:
+        to_version = msg.to_version
+        uuid, reason = sw_mgmt_director.create_kube_upgrade_strategy(
+            storage_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            alarm_restrictions,
+            to_version,
+            _vim_sw_update_api_create_strategy_callback)
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         response = rpc.APIResponseCreateSwUpdateStrategy()
@@ -164,13 +173,15 @@ def vim_sw_update_api_apply_strategy(connection, msg):
     """
     Handle Sw-Update Apply Strategy API request
     """
-    DLOG.info("Apply sw-update strategy.")
+    DLOG.info("Apply sw-update strategy: (%s) called." % msg.sw_update_type)
     if 'sw-patch' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
     elif 'sw-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-upgrade' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'
@@ -226,6 +237,8 @@ def vim_sw_update_api_abort_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-upgrade' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'
@@ -278,6 +291,8 @@ def vim_sw_update_api_delete_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-upgrade' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'
@@ -309,6 +324,8 @@ def vim_sw_update_api_get_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-upgrade' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'

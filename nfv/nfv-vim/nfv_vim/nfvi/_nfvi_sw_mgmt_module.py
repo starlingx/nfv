@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -33,6 +33,16 @@ def nfvi_sw_mgmt_update_host(host_name, callback):
     Apply Software Patch to a host
     """
     cmd_id = _sw_mgmt_plugin.invoke_plugin('update_host', host_name,
+                                           callback=callback)
+    return cmd_id
+
+
+def nfvi_sw_mgmt_apply_updates(patch_names, callback):
+    """
+    Apply Software Patches
+    """
+    cmd_id = _sw_mgmt_plugin.invoke_plugin('apply_patches',
+                                           patch_names,
                                            callback=callback)
     return cmd_id
 
