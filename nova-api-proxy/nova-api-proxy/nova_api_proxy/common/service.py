@@ -70,7 +70,7 @@ server_opts = [
                     "If an incoming connection is idle for this number of "
                     "seconds it will be closed. A value of '0' means "
                     "wait forever."),
-    ]
+]
 
 CONF = cfg.CONF
 CONF.register_opts(server_opts)
