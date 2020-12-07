@@ -122,7 +122,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
     @staticmethod
     def _host_supports_kubernetes(personality):
-        return ('worker' in personality or 'controller' in personality)
+        return False
+#        return ('worker' in personality or 'controller' in personality)
 
     @staticmethod
     def _get_host_labels(host_label_list):
@@ -365,9 +366,10 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     self._platform_token.is_expired():
                 future.work(openstack.get_token, self._platform_directory)
                 future.result = (yield)
-
+                DLOG.error("AR_TEST: future.result.data is %s, future.result.is_complete is %s" % (future.result.data, future.result.is_complete()) )
                 if not future.result.is_complete() or \
                         future.result.data is None:
+                    DLOG.error("AR_TEST: future.result.data is %s" % future.result.data )
                     return
 
                 self._platform_token = future.result.data
