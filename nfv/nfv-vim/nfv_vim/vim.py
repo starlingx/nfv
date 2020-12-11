@@ -217,9 +217,12 @@ def process_main():
         sys.exit(200)
 
     finally:
-        open(PROCESS_NOT_RUNNING_FILE, 'w').close()
         # Allow up to 10 seconds for the process to shut down. If the
         # process_finalize hangs, we will do a hard exit.
         signal.signal(signal.SIGALRM, _force_exit)
         signal.alarm(10)
+        # Touching this file after the SIGALRM timer is started. This is to
+        # ensure that in cases where we are terminating due to FD exhaustion
+        # we still shut down even if the open hangs.
+        open(PROCESS_NOT_RUNNING_FILE, 'w').close()
         process_finalize()

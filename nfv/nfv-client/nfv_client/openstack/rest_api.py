@@ -8,9 +8,13 @@ from six.moves import http_client as httplib
 from six.moves import urllib
 
 
-def request(token_id, method, api_cmd, api_cmd_headers=None, api_cmd_payload=None):
+def request(token_id, method, api_cmd, api_cmd_headers=None,
+            api_cmd_payload=None, timeout_in_secs=40):
     """
     Make a rest-api request
+    Note: Using a default timeout of 40 seconds. The VIM's internal handling
+    of these requests times out after 30 seconds - we want that to happen
+    first (if possible).
     """
     headers_per_hop = ['connection', 'keep-alive', 'proxy-authenticate',
                        'proxy-authorization', 'te', 'trailers',
@@ -30,7 +34,8 @@ def request(token_id, method, api_cmd, api_cmd_headers=None, api_cmd_payload=Non
         if api_cmd_payload is not None:
             request_info.add_data(api_cmd_payload)
 
-        url_request = urllib.request.urlopen(request_info)
+        url_request = urllib.request.urlopen(request_info,
+                                             timeout=timeout_in_secs)
 
         headers = list()  # list of tuples
         for key, value in url_request.info().items():

@@ -384,6 +384,14 @@ def nfvi_register_host_notification_callback(callback):
                                          callback=callback)
 
 
+def nfvi_register_sw_update_get_callback(callback):
+    """
+    Register for software update get notifications
+    """
+    _infrastructure_plugin.invoke_plugin('register_sw_update_get_callback',
+                                         callback=callback)
+
+
 def nfvi_infrastructure_initialize(config, pool):
     """
     Initialize the NFVI infrastructure package

@@ -55,10 +55,25 @@ class TaskFuture(object):
                     del kwargs['timeout_in_secs']
 
         if timeout_in_secs is None:
+            # WARNING: Any change to the default timeout must be reflected in
+            # the timeouts used for any work being done.
             timeout_in_secs = 20
 
         elif 0 >= timeout_in_secs:
             timeout_in_secs = None  # No timeout wanted, wait forever
+
+        # Note about timeouts. When the timeout expires, the VIM will terminate
+        # the worker process doing the work. Unfortunately, the python
+        # multiprocessing library used to manage these processes results in
+        # leaked file descriptors each time a process is terminated. That
+        # means this timeout should be a last resort - the work being done
+        # (e.g. sending a REST API request) must have its own timeout
+        # mechanism to ensure it completes before the worker process times
+        # out. Adding 5 seconds to the configured (or default) timeout to
+        # ensure the underlying timeout mechanism has the opportunity to
+        # abort the work being done.
+        if timeout_in_secs is not None:
+            timeout_in_secs += 5
 
         if self._scheduler.running_task is not None:
             task_work = TaskWork(timeout_in_secs, target, *args, **kwargs)

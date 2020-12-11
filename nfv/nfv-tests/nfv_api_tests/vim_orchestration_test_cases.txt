@@ -16,7 +16,7 @@ cat > create_serial.txt << EOF
   "alarm-restrictions": "relaxed"
 }
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy -d @create_serial.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy -d @create_serial.txt
 
 cat > create_parallel.txt << EOF
 {
@@ -29,46 +29,46 @@ cat > create_parallel.txt << EOF
   "alarm-restrictions": "relaxed"
 }
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy -d @create_parallel.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy -d @create_parallel.txt
 
 Show strategy
 -------------
-curl -i -X GET -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy
+curl -i -X GET -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy
 
 Abort strategy
 --------------
 cat > abort.txt << EOF
 {"action": "abort"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy/actions -d @abort.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy/actions -d @abort.txt
 
 Abort strategy stage
 --------------------
 cat > abort_stage.txt << EOF
 {"action": "abort-stage", "stage-id": "33"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy/actions -d @abort_stage.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy/actions -d @abort_stage.txt
 
 Apply strategy
 --------------
 cat > apply.txt << EOF
 {"action": "apply-all"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy/actions -d @apply.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy/actions -d @apply.txt
 
 Apply strategy stage
 --------------------
 cat > apply_stage.txt << EOF
 {"action": "apply-stage", "stage-id": "33"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy/actions -d @apply_stage.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy/actions -d @apply_stage.txt
 
 Delete strategy
 ---------------
 cat > delete.txt << EOF
 {}
 EOF
-curl -i -X DELETE -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-patch/strategy -d @delete.txt
+curl -i -X DELETE -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-patch/strategy -d @delete.txt
 
 Upgrade Orchestration
 =====================
@@ -81,51 +81,51 @@ Create strategy
 cat > create_serial.txt << EOF
 { "worker-apply-type": "serial", "storage-apply-type": "serial", "alarm-restrictions": "relaxed" }
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy -d @create_serial.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy -d @create_serial.txt
 
 cat > create_parallel.txt << EOF
 { "worker-apply-type": "parallel", "max-parallel-worker-hosts": "3", "storage-apply-type": "parallel", "alarm-restrictions": "relaxed" }
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy -d @create_parallel.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy -d @create_parallel.txt
 
 Show strategy
 -------------
-curl -i -X GET -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy
+curl -i -X GET -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy
 
 Abort strategy
 --------------
 cat > abort.txt << EOF
 {"action": "abort"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy/actions -d @abort.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy/actions -d @abort.txt
 
 Abort strategy stage
 --------------------
 cat > abort_stage.txt << EOF
 {"action": "abort-stage", "stage-id": "33"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy/actions -d @abort_stage.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy/actions -d @abort_stage.txt
 
 Apply strategy
 --------------
 cat > apply.txt << EOF
 {"action": "apply-all"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy/actions -d @apply.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy/actions -d @apply.txt
 
 Apply strategy stage
 --------------------
 cat > apply_stage.txt << EOF
 {"action": "apply-stage", "stage-id": "33"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy/actions -d @apply_stage.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy/actions -d @apply_stage.txt
 
 Delete strategy
 ---------------
 cat > delete.txt << EOF
 {}
 EOF
-curl -i -X DELETE -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/sw-upgrade/strategy -d @delete.txt
+curl -i -X DELETE -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/sw-upgrade/strategy -d @delete.txt
 
 Firmware Update Orchestration
 =============================
@@ -156,44 +156,44 @@ cat > create_parallel.txt << EOF
   "alarm-restrictions": "relaxed"
 }
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/fw-update/strategy -d @create_parallel.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/fw-update/strategy -d @create_parallel.txt
 
 Show strategy
 -------------
-curl -i -X GET -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/fw-update/strategy
+curl -i -X GET -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/fw-update/strategy
 
 Abort strategy
 --------------
 cat > abort.txt << EOF
 {"action": "abort"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/fw-update/strategy/actions -d @abort.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/fw-update/strategy/actions -d @abort.txt
 
 Abort strategy stage
 --------------------
 cat > abort_stage.txt << EOF
 {"action": "abort-stage", "stage-id": "3"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/fw-update/strategy/actions -d @abort_stage.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/fw-update/strategy/actions -d @abort_stage.txt
 
 Apply strategy
 --------------
 cat > apply.txt << EOF
 {"action": "apply-all"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/fw-update/strategy/actions -d @apply.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/fw-update/strategy/actions -d @apply.txt
 
 Apply strategy stage
 --------------------
 cat > apply_stage.txt << EOF
 {"action": "apply-stage", "stage-id": "3"}
 EOF
-curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/fw-update/strategy/actions -d @apply_stage.txt
+curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/fw-update/strategy/actions -d @apply_stage.txt
 
 Delete strategy
 ---------------
 cat > delete.txt << EOF
 {}
 EOF
-curl -i -X DELETE -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.2:4545/api/orchestration/fw-update/strategy -d @delete.txt
+curl -i -X DELETE -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" -H "Content-Type: application/json" http://192.168.204.1:4545/api/orchestration/fw-update/strategy -d @delete.txt
 

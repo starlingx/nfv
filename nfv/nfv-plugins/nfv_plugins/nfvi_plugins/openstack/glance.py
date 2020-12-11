@@ -204,8 +204,11 @@ def upload_image_data_by_url(token, image_id, image_data_url):
     operations.append(operation)
     api_cmd_payload = operations
 
+    # WARNING: Any change to the timeout must be reflected in the config.ini
+    # file for the nfvi plugins.
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=180)
     return response
 
 
@@ -227,8 +230,10 @@ def upload_image_data_by_file(token, image_id, image_file):
     file = open(image_file, "rb")
     api_cmd_payload = file
     try:
+        # WARNING: Any change to the timeout must be reflected in the config.ini
+        # file for the nfvi plugins.
         response = rest_api_request(token, "PUT", api_cmd, api_cmd_headers,
-                                    api_cmd_payload)
+                                    api_cmd_payload, timeout_in_secs=180)
     finally:
         file.close()
 

@@ -101,8 +101,8 @@ class Histogram(object):
         for idx, bucket_value in enumerate(self._buckets):
             if 0 != bucket_value:
                 LOG.info("    %03i [up to %03i secs]: %07i %s"
-                          % (idx, math.pow(2, idx), bucket_value,
-                             '*' * min(60, bucket_value)))
+                         % (idx, math.pow(2, idx), bucket_value,
+                            '*' * min(60, bucket_value)))
         LOG.info("%s" % '-' * 120)
 
 

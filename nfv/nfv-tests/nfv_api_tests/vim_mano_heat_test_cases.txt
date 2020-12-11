@@ -13,10 +13,10 @@ TOKEN_ID=`openstack token issue | grep "| id         |" | cut -f3 -d'|' | tr -d 
 :: OpenStack HEAT ::
 --------------------
 curl -i -X GET -H 'Content-Type: application/json' -H 'Accept: application/json' \
-http://192.168.204.2:8004
+http://192.168.204.1:8004
 
 curl -i -X GET -H 'Content-Type: application/json' -H 'Accept: application/json' \
-http://192.168.204.2:8004/
+http://192.168.204.1:8004/
 
 ---------------
 :: MANO HEAT ::
@@ -65,8 +65,8 @@ TOKEN_ID=`openstack token issue | grep "| id         |" | cut -f3 -d'|' | tr -d 
 curl -i -X POST -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
 -H "X-Region-Name: RegionOne" -H "X-Auth-Key: admin" -H "X-Auth-User: admin" \
 -H "User-Agent: python-heatclient" -H "Content-Type: application/json" \
--H "X-Auth-Url: http://192.168.204.2:5000/v2.0/" \
-http://192.168.204.2:8004/v1/${TENANT_ID}/stacks \
+-H "X-Auth-Url: http://192.168.204.1:5000/v2.0/" \
+http://192.168.204.1:8004/v1/${TENANT_ID}/stacks \
 -d @heat_create_stack_request.txt
 
 ---------------
@@ -89,7 +89,7 @@ TENANT_ID=`openstack token issue | grep "| project_id |" | cut -f3 -d'|' | tr -d
 TOKEN_ID=`openstack token issue | grep "| id         |" | cut -f3 -d'|' | tr -d '[[:space:]]'`
 
 curl -i -X DELETE -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
-http://192.168.204.2:8004/v1/${TENANT_ID}/stacks/TEST_STACK/${TEST_STACK_ID}
+http://192.168.204.1:8004/v1/${TENANT_ID}/stacks/TEST_STACK/${TEST_STACK_ID}
 
 ---------------
 :: MANO HEAT ::
@@ -110,7 +110,7 @@ TENANT_ID=`openstack token issue | grep "| project_id |" | cut -f3 -d'|' | tr -d
 TOKEN_ID=`openstack token issue | grep "| id         |" | cut -f3 -d'|' | tr -d '[[:space:]]'`
 
 curl -i -X GET -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
-http://192.168.204.2:8004/v1/${TENANT_ID}/stacks/TEST_STACK/${TEST_STACK_ID}
+http://192.168.204.1:8004/v1/${TENANT_ID}/stacks/TEST_STACK/${TEST_STACK_ID}
 
 ---------------
 :: MANO HEAT ::
@@ -133,7 +133,7 @@ TENANT_ID=`openstack token issue | grep "| project_id |" | cut -f3 -d'|' | tr -d
 TOKEN_ID=`openstack token issue | grep "| id         |" | cut -f3 -d'|' | tr -d '[[:space:]]'`
 
 curl -i -X GET -H "Content-Type: application/json" -H "Accept: application/json" -H "X-Auth-Token: ${TOKEN_ID}" \
-http://192.168.204.2:8004/v1/${TENANT_ID}/stacks
+http://192.168.204.1:8004/v1/${TENANT_ID}/stacks
 
 ---------------
 :: MANO HEAT ::

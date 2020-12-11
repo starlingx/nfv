@@ -183,7 +183,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
             help='defaults to serial')
 
         fw_update_create_strategy_cmd.add_argument(
-            '--max-parallel-worker-hosts', type=int, choices=range(2, 11),
+            '--max-parallel-worker-hosts', type=int, choices=range(2, 6),
             help='maximum worker hosts to update in parallel')
 
         fw_update_create_strategy_cmd.add_argument('--instance-action',

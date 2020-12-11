@@ -29,6 +29,7 @@ from nfv_vim.host_fsm._host_task_work import NotifyInstancesHostDisablingTaskWor
 from nfv_vim.host_fsm._host_task_work import QueryHypervisorTaskWork
 from nfv_vim.host_fsm._host_task_work import WaitHostServicesCreatedTaskWork
 from nfv_vim.host_fsm._host_task_work import WaitHostServicesDisabledTaskWork
+from nfv_vim.host_fsm._host_task_work import WaitHostStabilizeTaskWork
 
 DLOG = debug.debug_get_logger('nfv_vim.state_machine.host_task')
 
@@ -235,6 +236,10 @@ class DisableHostTask(state_machine.StateTask):
             task_work_list.append(NotifyHostDisabledTaskWork(
                 self, host, objects.HOST_SERVICES.NETWORK))
         task_work_list.append(NotifyInstancesHostDisabledTaskWork(self, host))
+        # Wait for latent post-live-migration cleanup
+        if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
+            task_work_list.append(WaitHostStabilizeTaskWork(
+                self, host, timeout_in_secs=10))
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
             # Only disable the container services if the host is being locked
             # (or is already locked) and we are not running in a single

@@ -79,14 +79,6 @@ Network Function Virtualization Client
 %prep
 %setup
 
-# use actual value of %{_sysconfdir} to repace @SYSCONFDIR@ in config files
-# use actual value of %{pythonroot} to replace @PYTHONROOT@ in config.ini.
-sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/scripts/vim
-sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/scripts/vim-api
-sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/scripts/vim-webserver
-sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/nfv_vim/config.ini
-sed -i -e 's|@PYTHONROOT@|%{pythonroot}|g' nfv-vim/nfv_vim/config.ini
-
 %build
 %build_python nfv-common
 %build_python nfv-plugins
@@ -118,6 +110,15 @@ install -d -m 755 %{buildroot}/
 install -p -D -m 644 nfv-plugins/scripts/nfvi-plugins.logrotate %{buildroot}/%{_sysconfdir}/logrotate.d/nfvi-plugins.logrotate
 
 # nfv-vim
+
+# use actual value of %{_sysconfdir} to replace @SYSCONFDIR@ in config files
+# use actual value of %{pythonroot} to replace @PYTHONROOT@ in config.ini
+sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/scripts/vim
+sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/scripts/vim-api
+sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/scripts/vim-webserver
+sed -i -e 's|@SYSCONFDIR@|%{_sysconfdir}|g' nfv-vim/nfv_vim/config.ini
+sed -i -e 's|@PYTHONROOT@|%{pythonroot}|g' nfv-vim/nfv_vim/config.ini
+
 install -d -m 755 %{buildroot}/usr/lib/ocf/resource.d/nfv
 install -p -D -m 755 nfv-vim/scripts/vim %{buildroot}/usr/lib/ocf/resource.d/nfv/vim
 install -p -D -m 755 nfv-vim/scripts/vim-api %{buildroot}/usr/lib/ocf/resource.d/nfv/vim-api

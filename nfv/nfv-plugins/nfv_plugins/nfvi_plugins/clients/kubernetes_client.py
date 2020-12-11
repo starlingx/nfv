@@ -5,6 +5,7 @@
 #
 
 import kubernetes
+from kubernetes.client.models.v1_container_image import V1ContainerImage
 from kubernetes.client.rest import ApiException
 from six.moves import http_client as httplib
 
@@ -12,6 +13,32 @@ from nfv_common import debug
 from nfv_common.helpers import Result
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.clients.kubernetes_client')
+
+
+# https://github.com/kubernetes-client/python/issues/895
+# If a container image contains no tag or digest, node
+# related requests sent via python Kubernetes client will be
+# returned with exception because python Kubernetes client
+# deserializes the ContainerImage response from kube-apiserver
+# and it fails the validation due to the empty image name.
+#
+# Implement this workaround to replace the V1ContainerImage.names
+# in the python Kubernetes client to bypass the "none image"
+# check because the error is not from kubernetes.
+#
+# This workaround should be removed if the proposed solutions
+# can be made in kubernetes or a workaround can be implemented
+# in containerd.
+# https://github.com/kubernetes/kubernetes/pull/79018
+# https://github.com/containerd/containerd/issues/4771
+def names(self, names):
+    """Monkey patch V1ContainerImage with this to set the names."""
+    self._names = names
+
+
+# Replacing address of "names" in V1ContainerImage
+# with the "names" defined above
+V1ContainerImage.names = V1ContainerImage.names.setter(names)
 
 
 def get_client():

@@ -610,7 +610,14 @@ class SwPatchStrategy(SwUpdateStrategy):
                             stage.add_step(strategy.SystemStabilizeStep(
                                 timeout_in_secs=MTCE_DELAY))
                             stage.add_step(strategy.UnlockHostsStep(host_list))
-                            stage.add_step(strategy.SystemStabilizeStep())
+                            if host.openstack_control:
+                                # Wait extra time for services to go enabled and
+                                # alarms to clear.
+                                stage.add_step(strategy.WaitAlarmsClearStep(
+                                               timeout_in_secs=10 * 60,
+                                               ignore_alarms=self._ignore_alarms))
+                            else:
+                                stage.add_step(strategy.SystemStabilizeStep())
                         else:
                             # Less time required if host is not rebooting
                             stage.add_step(strategy.SystemStabilizeStep(
@@ -632,7 +639,14 @@ class SwPatchStrategy(SwUpdateStrategy):
                     stage.add_step(strategy.SystemStabilizeStep(
                                    timeout_in_secs=MTCE_DELAY))
                     stage.add_step(strategy.UnlockHostsStep(host_list))
-                    stage.add_step(strategy.SystemStabilizeStep())
+                    if host.openstack_control:
+                        # Wait extra time for services to go enabled and
+                        # alarms to clear.
+                        stage.add_step(strategy.WaitAlarmsClearStep(
+                                       timeout_in_secs=10 * 60,
+                                       ignore_alarms=self._ignore_alarms))
+                    else:
+                        stage.add_step(strategy.SystemStabilizeStep())
                 else:
                     # Less time required if host is not rebooting
                     stage.add_step(strategy.SystemStabilizeStep(
@@ -847,7 +861,15 @@ class SwPatchStrategy(SwUpdateStrategy):
                         stage.add_step(strategy.StartInstancesStep(
                             instance_list))
 
-                stage.add_step(strategy.SystemStabilizeStep())
+                if any(host.openstack_control for host in hosts_to_lock) or \
+                       any(host.openstack_control for host in hosts_to_reboot):
+                    # Wait extra time for services to go enabled
+                    # and alarms to clear.
+                    stage.add_step(strategy.WaitAlarmsClearStep(
+                                   timeout_in_secs=10 * 60,
+                                   ignore_alarms=self._ignore_alarms))
+                else:
+                    stage.add_step(strategy.SystemStabilizeStep())
             else:
                 # Less time required if host is not rebooting
                 stage.add_step(strategy.SystemStabilizeStep(
@@ -1672,6 +1694,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
         # The following alarms will not prevent a firmware update operation
         IGNORE_ALARMS = ['700.004',  # VM stopped
                          '280.002',  # Subcloud resource out-of-sync
+                         '900.006',  # Device Image Update in progress
                          '900.301',  # Fw Update Auto Apply in progress
                          '200.001',  # Locked Host
                          ]
@@ -1732,7 +1755,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
         for host in host_table.values():
             if HOST_PERSONALITY.WORKER in host.personality:
                 if host.is_unlocked() and host.is_enabled():
-                    stage.add_step(strategy.QueryHostDeviceListStep(host))
+                    stage.add_step(strategy.QueryFwUpdateHostStep(host))
 
         self.build_phase.add_stage(stage)
         super(FwUpdateStrategy, self).build()

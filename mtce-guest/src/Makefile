@@ -52,16 +52,16 @@ install:
 	install -m 755 -p -D scripts/guestAgent.ocf $(DESTDIR)/usr/lib/ocf/resource.d/platform/guestAgent
 
 # config files
-	install -m 644 -p -D scripts/guest.ini $(SYSCONFDIR)/mtc/guestAgent.ini
-	install -m 644 -p -D scripts/guest.ini $(SYSCONFDIR)/mtc/guestServer.ini
+	install -m 600 -p -D scripts/guest.ini $(SYSCONFDIR)/mtc/guestAgent.ini
+	install -m 600 -p -D scripts/guest.ini $(SYSCONFDIR)/mtc/guestServer.ini
 
 # binaries
-	install -m 755 -p -D guestServer $(LOCALBINDIR)/guestServer
-	install -m 755 -p -D guestAgent $(LOCALBINDIR)/guestAgent
+	install -m 700 -p -D guestServer $(LOCALBINDIR)/guestServer
+	install -m 700 -p -D guestAgent $(LOCALBINDIR)/guestAgent
 
 # init script files
-	install -m 755 -p -D scripts/guestServer $(SYSCONFDIR)/init.d/guestServer
-	install -m 755 -p -D scripts/guestAgent $(SYSCONFDIR)/init.d/guestAgent
+	install -m 700 -p -D scripts/guestServer $(SYSCONFDIR)/init.d/guestServer
+	install -m 700 -p -D scripts/guestAgent $(SYSCONFDIR)/init.d/guestAgent
 
 # systemd service files
 	install -m 644 -p -D scripts/guestServer.service $(UNITDIR)/guestServer.service

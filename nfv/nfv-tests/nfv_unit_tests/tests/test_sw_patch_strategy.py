@@ -2681,8 +2681,118 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600},
+                 ]
+                },
+                {'name': 'sw-patch-controllers',
+                 'total_steps': 7,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
                      {'name': 'system-stabilize',
-                      'timeout': 60}
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600},
+                 ]
+                 },
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+        # Test no reboot patches
+        strategy = create_sw_patch_strategy(
+            controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
+        )
+
+        strategy._add_controller_strategy_stages(controllers=controller_hosts,
+                                                 reboot=False)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 2,
+            'stages': [
+                {'name': 'sw-patch-controllers',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30}
+                 ]
+                },
+                {'name': 'sw-patch-controllers',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30}
+                 ]
+                 },
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_patch_strategy_controller_stages_serial_openstack_not_installed(self):
+        """
+        Test the sw_patch strategy add controller strategy stages:
+        - serial apply
+        - test both reboot and no reboot cases
+        Verify:
+        - patch mate controller first
+        """
+        self.create_host('controller-0', openstack_installed=False)
+        self.create_host('controller-1', openstack_installed=False)
+
+        controller_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.CONTROLLER in host.personality:
+                controller_hosts.append(host)
+
+        # Test reboot patches
+        strategy = create_sw_patch_strategy(
+            controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
+        )
+
+        strategy._add_controller_strategy_stages(controllers=controller_hosts,
+                                                 reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 2,
+            'stages': [
+                {'name': 'sw-patch-controllers',
+                 'total_steps': 7,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60},
                  ]
                 },
                 {'name': 'sw-patch-controllers',
@@ -2700,7 +2810,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'system-stabilize',
-                      'timeout': 60}
+                      'timeout': 60},
                  ]
                  },
             ]
@@ -2805,8 +2915,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600},
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -2827,8 +2937,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                   ]
                  },
             ]
@@ -2930,8 +3040,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -2952,8 +3062,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                   ]
                  },
             ]
@@ -3007,8 +3117,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -3025,8 +3135,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                   ]
                  },
             ]
@@ -3102,8 +3212,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600},
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3124,8 +3234,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3266,8 +3376,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3288,8 +3398,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3369,7 +3479,6 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                              reboot=True)
 
         apply_phase = strategy.apply_phase.as_dict()
-
         expected_results = {
             'total_stages': 4,
             'stages': [
@@ -3387,8 +3496,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3405,8 +3514,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3581,8 +3690,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600},
                  ]
                 },
             ]
@@ -3632,8 +3741,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
             ]

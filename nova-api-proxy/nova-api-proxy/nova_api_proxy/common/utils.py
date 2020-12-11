@@ -17,5 +17,5 @@ def set_request_forward_environ(req, remote_host, remote_port):
     req.environ['SERVER_NAME'] = remote_host
     req.environ['SERVER_PORT'] = remote_port
     if ('REMOTE_ADDR' in req.environ and 'HTTP_X_FORWARDED_FOR' not in
-        req.environ):
+            req.environ):
         req.environ['HTTP_X_FORWARDED_FOR'] = req.environ['REMOTE_ADDR']

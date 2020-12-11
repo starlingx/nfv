@@ -60,7 +60,9 @@ def get_token(directory):
                     }}}})
         request_info.add_data(payload)
 
-        request = urllib.request.urlopen(request_info)
+        # WARNING: Any change to the timeout must be reflected in the config.ini
+        # file for the nfvi plugins.
+        request = urllib.request.urlopen(request_info, timeout=10)
         # Identity API v3 returns token id in X-Subject-Token
         # response header.
         token_id = request.info().getheader('X-Subject-Token')

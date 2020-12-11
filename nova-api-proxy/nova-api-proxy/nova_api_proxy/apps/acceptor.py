@@ -53,8 +53,8 @@ class APIController(Middleware):
     def __call__(self, req):
         self._generate_log(req)
         LOG.debug("Check if it is a NFVI action")
-        if (req.environ['REQUEST_METHOD'] == 'POST' and
-                self._is_nfvi_request(req)):
+        if (req.environ['REQUEST_METHOD'] == 'POST' and self._is_nfvi_request(
+                req)):
             remote_host = CONF.nfvi_compute_listen
             remote_port = CONF.nfvi_compute_listen_port
             return APIDispatcher(self.application, remote_host, remote_port)
@@ -169,7 +169,7 @@ class DebugHeaders(Middleware):
     translate_keys = {
         'CONTENT_LENGTH': 'HTTP_CONTENT_LENGTH',
         'CONTENT_TYPE': 'HTTP_CONTENT_TYPE',
-        }
+    }
 
     def __init__(self, app, conf):
         self._show_body = CONF.show_request_body

@@ -287,8 +287,8 @@ def rest_api_get_server(host, port):
     return RestAPIServer(host, port)
 
 
-def _rest_api_request(token_id, method, api_cmd, api_cmd_headers=None,
-                      api_cmd_payload=None):
+def _rest_api_request(token_id, method, api_cmd, api_cmd_headers,
+                      api_cmd_payload, timeout_in_secs):
     """
     Internal: make a rest-api request
     """
@@ -320,7 +320,7 @@ def _rest_api_request(token_id, method, api_cmd, api_cmd_headers=None,
         # opener = urllib.request.build_opener(handler)
         # urllib.request.install_opener(opener)
 
-        request = urllib.request.urlopen(request_info)
+        request = urllib.request.urlopen(request_info, timeout=timeout_in_secs)
 
         headers = list()  # list of tuples
         for key, value in request.info().items():
@@ -424,15 +424,29 @@ def _rest_api_request(token_id, method, api_cmd, api_cmd_headers=None,
         raise OpenStackException(method, api_cmd, api_cmd_headers,
                                  api_cmd_payload, str(e), str(e))
 
+    except Exception as e:
+        now_ms = timers.get_monotonic_timestamp_in_ms()
+        elapsed_ms = now_ms - start_ms
+
+        log_error("Rest-API failure, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
+                  % (method, api_cmd, api_cmd_headers, api_cmd_payload,
+                     int(elapsed_ms)))
+
+        raise OpenStackException(method, api_cmd, api_cmd_headers,
+                                 api_cmd_payload, str(e), str(e))
+
 
 def rest_api_request(token, method, api_cmd, api_cmd_headers=None,
-                     api_cmd_payload=None):
+                     api_cmd_payload=None, timeout_in_secs=20):
     """
     Make a rest-api request using the given token
+    WARNING: Any change to the default timeout must be reflected in the timeout
+    calculations done in the TaskFuture class.
     """
     try:
         return _rest_api_request(token.get_id(), method, api_cmd,
-                                 api_cmd_headers, api_cmd_payload)
+                                 api_cmd_headers, api_cmd_payload,
+                                 timeout_in_secs)
 
     except OpenStackRestAPIException as e:
         if httplib.UNAUTHORIZED == e.http_status_code:
@@ -441,9 +455,12 @@ def rest_api_request(token, method, api_cmd, api_cmd_headers=None,
 
 
 def rest_api_request_with_context(context, method, api_cmd,
-                                  api_cmd_headers=None, api_cmd_payload=None):
+                                  api_cmd_headers=None, api_cmd_payload=None,
+                                  timeout_in_secs=20):
     """
     Make a rest-api request using the given context
+    WARNING: Any change to the default timeout must be reflected in the timeout
+    calculations done in the TaskFuture class.
     """
     return _rest_api_request(context.token_id, method, api_cmd, api_cmd_headers,
-                             api_cmd_payload)
+                             api_cmd_payload, timeout_in_secs)
