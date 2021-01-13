@@ -1178,6 +1178,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['900.005',  # Upgrade in progress
                          '900.201',  # Software upgrade auto apply in progress
+                         '750.006',  # Configuration change requires reapply of cert-manager
                          ]
         self._ignore_alarms += IGNORE_ALARMS
 
@@ -1519,9 +1520,16 @@ class SwUpgradeStrategy(SwUpdateStrategy):
             if self._nfvi_alarms:
                 DLOG.warn(
                     "Active alarms found, can't apply software upgrade.")
+                alarm_id_list = ""
+                for alarm_data in self._nfvi_alarms:
+                    if alarm_id_list:
+                        alarm_id_list += ', '
+                    alarm_id_list += alarm_data['alarm_id']
+                DLOG.warn("... active alarms: %s" % alarm_id_list)
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = 'active alarms present'
+                self.build_phase.result_reason = 'active alarms present ; '
+                self.build_phase.result_reason += alarm_id_list
                 self.sw_update_obj.strategy_build_complete(
                     False, self.build_phase.result_reason)
                 self.save()
