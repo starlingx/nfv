@@ -610,14 +610,14 @@ class SwPatchStrategy(SwUpdateStrategy):
                             stage.add_step(strategy.SystemStabilizeStep(
                                 timeout_in_secs=MTCE_DELAY))
                             stage.add_step(strategy.UnlockHostsStep(host_list))
-                            if host.openstack_control:
-                                # Wait extra time for services to go enabled and
-                                # alarms to clear.
-                                stage.add_step(strategy.WaitAlarmsClearStep(
-                                               timeout_in_secs=10 * 60,
-                                               ignore_alarms=self._ignore_alarms))
-                            else:
-                                stage.add_step(strategy.SystemStabilizeStep())
+                            # After controller node(s) are unlocked, we need extra time to
+                            # allow the OSDs to go back in sync and the storage related
+                            # alarms to clear. Note: not all controller nodes will have
+                            # OSDs configured, but the alarms should clear quickly in
+                            # that case so this will not delay the patch strategy.
+                            stage.add_step(strategy.WaitAlarmsClearStep(
+                                           timeout_in_secs=30 * 60,
+                                           ignore_alarms=self._ignore_alarms))
                         else:
                             # Less time required if host is not rebooting
                             stage.add_step(strategy.SystemStabilizeStep(
@@ -639,14 +639,14 @@ class SwPatchStrategy(SwUpdateStrategy):
                     stage.add_step(strategy.SystemStabilizeStep(
                                    timeout_in_secs=MTCE_DELAY))
                     stage.add_step(strategy.UnlockHostsStep(host_list))
-                    if host.openstack_control:
-                        # Wait extra time for services to go enabled and
-                        # alarms to clear.
-                        stage.add_step(strategy.WaitAlarmsClearStep(
-                                       timeout_in_secs=10 * 60,
-                                       ignore_alarms=self._ignore_alarms))
-                    else:
-                        stage.add_step(strategy.SystemStabilizeStep())
+                    # After controller node(s) are unlocked, we need extra time to
+                    # allow the OSDs to go back in sync and the storage related
+                    # alarms to clear. Note: not all controller nodes will have
+                    # OSDs configured, but the alarms should clear quickly in
+                    # that case so this will not delay the patch strategy.
+                    stage.add_step(strategy.WaitAlarmsClearStep(
+                                   timeout_in_secs=30 * 60,
+                                   ignore_alarms=self._ignore_alarms))
                 else:
                     # Less time required if host is not rebooting
                     stage.add_step(strategy.SystemStabilizeStep(
@@ -860,18 +860,29 @@ class SwPatchStrategy(SwUpdateStrategy):
                             self._default_instance_action:
                         stage.add_step(strategy.StartInstancesStep(
                             instance_list))
-
-                if any(host.openstack_control or host.openstack_compute for host in hosts_to_lock) or \
-                       any(host.openstack_control or host.openstack_compute for host in hosts_to_reboot):
-                    # Wait extra time for services to go enabled
-                    # and alarms to clear.
+                # After controller node(s) are unlocked, we need extra time to
+                # allow the OSDs to go back in sync and the storage related
+                # alarms to clear. Note: not all controller nodes will have
+                # OSDs configured, but the alarms should clear quickly in
+                # that case so this will not delay the patch strategy.
+                if any([HOST_PERSONALITY.CONTROLLER in host.personality
+                        for host in hosts_to_lock + hosts_to_reboot]):
+                    # Multiple personality nodes that need to wait for OSDs to sync:
                     stage.add_step(strategy.WaitAlarmsClearStep(
-                                   timeout_in_secs=10 * 60,
+                                   timeout_in_secs=30 * 60,
                                    ignore_alarms=self._ignore_alarms))
                 else:
-                    stage.add_step(strategy.SystemStabilizeStep())
+                    if any([host.openstack_control or host.openstack_compute
+                            for host in hosts_to_lock + hosts_to_reboot]):
+                        # Hosts with openstack that just need to wait for services to start up:
+                        stage.add_step(strategy.WaitAlarmsClearStep(
+                                timeout_in_secs=10 * 60,
+                                ignore_alarms=self._ignore_alarms))
+                    else:
+                        # Worker host wihout multiple personalities or openstack:
+                        stage.add_step(strategy.SystemStabilizeStep())
             else:
-                # Less time required if host is not rebooting
+                # Less time required if host is not rebooting:
                 stage.add_step(strategy.SystemStabilizeStep(
                                timeout_in_secs=NO_REBOOT_DELAY))
             self.apply_phase.add_stage(stage)
