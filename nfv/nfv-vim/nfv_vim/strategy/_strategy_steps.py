@@ -1506,7 +1506,8 @@ class QueryAlarmsStep(strategy.StrategyStep):
 
             if self._fail_on_alarms and self.strategy.nfvi_alarms:
                 result = strategy.STRATEGY_STEP_RESULT.FAILED
-                reason = "alarms from %s are present" % fm_service
+                alarm_ids = [str(alarm.get('alarm_id')) for alarm in self.strategy.nfvi_alarms]
+                reason = "alarms %s from %s are present" % (alarm_ids, fm_service)
             else:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 reason = ""

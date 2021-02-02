@@ -861,8 +861,8 @@ class SwPatchStrategy(SwUpdateStrategy):
                         stage.add_step(strategy.StartInstancesStep(
                             instance_list))
 
-                if any(host.openstack_control for host in hosts_to_lock) or \
-                       any(host.openstack_control for host in hosts_to_reboot):
+                if any(host.openstack_control or host.openstack_compute for host in hosts_to_lock) or \
+                       any(host.openstack_control or host.openstack_compute for host in hosts_to_reboot):
                     # Wait extra time for services to go enabled
                     # and alarms to clear.
                     stage.add_step(strategy.WaitAlarmsClearStep(
