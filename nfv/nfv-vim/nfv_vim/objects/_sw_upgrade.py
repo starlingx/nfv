@@ -30,7 +30,7 @@ class SwUpgrade(SwUpdate):
     def strategy_build(self, strategy_uuid, storage_apply_type,
                        worker_apply_type, max_parallel_worker_hosts,
                        alarm_restrictions, start_upgrade,
-                       complete_upgrade, ignore_alarms):
+                       complete_upgrade, ignore_alarms, single_controller):
         """
         Create a software upgrade strategy
         """
@@ -43,7 +43,8 @@ class SwUpgrade(SwUpdate):
         self._strategy = strategy.SwUpgradeStrategy(
             strategy_uuid, storage_apply_type, worker_apply_type,
             max_parallel_worker_hosts,
-            alarm_restrictions, start_upgrade, complete_upgrade, ignore_alarms)
+            alarm_restrictions, start_upgrade, complete_upgrade,
+            ignore_alarms, single_controller)
 
         self._strategy.sw_update_obj = self
         self._strategy.build()

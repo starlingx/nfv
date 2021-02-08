@@ -95,7 +95,8 @@ class SwMgmtDirector(object):
             strategy_uuid, storage_apply_type,
             worker_apply_type, max_parallel_worker_hosts,
             alarm_restrictions, start_upgrade,
-            complete_upgrade, self._ignore_alarms)
+            complete_upgrade, self._ignore_alarms,
+            self._single_controller)
 
         schedule.schedule_function_call(callback, success, reason,
                                         self._sw_update.strategy)

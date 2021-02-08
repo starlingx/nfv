@@ -1159,7 +1159,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
     def __init__(self, uuid, storage_apply_type, worker_apply_type,
                  max_parallel_worker_hosts,
                  alarm_restrictions, start_upgrade, complete_upgrade,
-                 ignore_alarms):
+                 ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.SW_UPGRADE,
@@ -1192,7 +1192,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                          '750.006',  # Configuration change requires reapply of cert-manager
                          ]
         self._ignore_alarms += IGNORE_ALARMS
-
+        self._single_controller = single_controller
         self._nfvi_upgrade = None
 
     @property
@@ -1293,9 +1293,16 @@ class SwUpgradeStrategy(SwUpdateStrategy):
 
         for host in controllers:
             if HOST_PERSONALITY.WORKER in host.personality:
-                DLOG.warn("Cannot apply software upgrades to AIO configuration.")
-                reason = 'cannot apply software upgrades to AIO configuration'
-                return False, reason
+                # Do nothing for AIO hosts. We let the worker code handle everything.
+                # This is done to handle the case where stx-openstack is
+                # installed and there could be instances running on the
+                # AIO-DX controllers which need to be migrated.
+                if self._single_controller:
+                    DLOG.warn("Cannot apply software upgrades to AIO-SX deployment.")
+                    reason = 'cannot apply software upgrades to AIO-SX deployment'
+                    return False, reason
+                else:
+                    return True, ''
             elif HOST_NAME.CONTROLLER_1 == host.name:
                 controller_1_host = host
             elif HOST_NAME.CONTROLLER_0 == host.name:
@@ -1424,10 +1431,29 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                     strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS)
                 stage.add_step(strategy.QueryAlarmsStep(
                     True, ignore_alarms=self._ignore_alarms))
+                if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
+                    stage.add_step(strategy.SwactHostsStep(host_list))
                 stage.add_step(strategy.LockHostsStep(host_list))
                 stage.add_step(strategy.UpgradeHostsStep(host_list))
                 stage.add_step(strategy.UnlockHostsStep(host_list))
-                stage.add_step(strategy.SystemStabilizeStep())
+                if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
+                    # AIO Controller hosts will undergo WaitDataSyncStep step
+                    # Allow up to four hours for controller disks to synchronize
+                    stage.add_step(strategy.WaitDataSyncStep(
+                        timeout_in_secs=4 * 60 * 60,
+                        ignore_alarms=self._ignore_alarms))
+                else:
+                    # Worker hosts will undergo:
+                    # 1) WaitAlarmsClear step if openstack is installed.
+                    # 2) SystemStabilizeStep step if openstack is not installed.
+                    if any([host.openstack_control or host.openstack_compute
+                            for host in host_list]):
+                        # Hosts with openstack that just need to wait for services to start up:
+                        stage.add_step(strategy.WaitAlarmsClearStep(
+                                timeout_in_secs=10 * 60,
+                                ignore_alarms=self._ignore_alarms))
+                    else:
+                        stage.add_step(strategy.SystemStabilizeStep())
                 self.apply_phase.add_stage(stage)
                 continue
 
@@ -1452,10 +1478,30 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                 # kubernetes services will have to be added.
 
             stage.add_step(strategy.MigrateInstancesStep(instance_list))
+            if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
+                stage.add_step(strategy.SwactHostsStep(host_list))
             stage.add_step(strategy.LockHostsStep(host_list))
             stage.add_step(strategy.UpgradeHostsStep(host_list))
             stage.add_step(strategy.UnlockHostsStep(host_list))
-            stage.add_step(strategy.SystemStabilizeStep())
+            if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
+                # AIO Controller hosts will undergo WaitDataSyncStep step
+                # Allow up to four hours for controller disks to synchronize
+                stage.add_step(strategy.WaitDataSyncStep(
+                    timeout_in_secs=4 * 60 * 60,
+                    ignore_alarms=self._ignore_alarms))
+            else:
+                # Worker hosts will undergo:
+                # 1) WaitAlarmsClear step if openstack is installed.
+                # 2) SystemStabilizeStep step if openstack is not installed.
+                if any([host.openstack_control or host.openstack_compute
+                        for host in host_list]):
+                    # Hosts with openstack that just need to wait for
+                    # services to start up:
+                    stage.add_step(strategy.WaitAlarmsClearStep(
+                            timeout_in_secs=10 * 60,
+                            ignore_alarms=self._ignore_alarms))
+                else:
+                    stage.add_step(strategy.SystemStabilizeStep())
             self.apply_phase.add_stage(stage)
 
         return True, ''
@@ -1583,7 +1629,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                     elif HOST_PERSONALITY.STORAGE in host.personality:
                         storage_hosts.append(host)
 
-                    elif HOST_PERSONALITY.WORKER in host.personality:
+                    if HOST_PERSONALITY.WORKER in host.personality:
                         worker_hosts.append(host)
             else:
                 # Only hosts not yet upgraded will be upgraded
@@ -1599,7 +1645,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                     elif HOST_PERSONALITY.STORAGE in host.personality:
                         storage_hosts.append(host)
 
-                    elif HOST_PERSONALITY.WORKER in host.personality:
+                    if HOST_PERSONALITY.WORKER in host.personality:
                         worker_hosts.append(host)
 
             STRATEGY_CREATION_COMMANDS = [
