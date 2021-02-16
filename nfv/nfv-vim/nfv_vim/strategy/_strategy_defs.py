@@ -50,4 +50,5 @@ class FirmwareUpdateLabels(object):
     DEVICE_IMAGE_UPDATE_FAILED = Constant('failed')
     DEVICE_IMAGE_UPDATE_IN_PROGRESS_ABORTED = Constant('in-progress-aborted')
 
+
 FW_UPDATE_LABEL = FirmwareUpdateLabels()
