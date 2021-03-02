@@ -1700,6 +1700,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
 
         super(SwUpgradeStrategy, self).from_dict(data, build_phase, apply_phase,
                                                  abort_phase)
+        self._single_controller = data['single_controller']
         self._start_upgrade = data['start_upgrade']
         self._complete_upgrade = data['complete_upgrade']
         nfvi_upgrade_data = data['nfvi_upgrade_data']
@@ -1718,7 +1719,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         Represent the software upgrade strategy as a dictionary
         """
         data = super(SwUpgradeStrategy, self).as_dict()
-
+        data['single_controller'] = self._single_controller
         data['start_upgrade'] = self._start_upgrade
         data['complete_upgrade'] = self._complete_upgrade
         if self._nfvi_upgrade:
