@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -797,6 +797,161 @@ class HostDirector(object):
 
             host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
             self._nfvi_fw_update_abort_host(host.uuid, host.name)
+
+        if host_operation.is_inprogress():
+            self._host_operation = host_operation
+
+        return host_operation
+
+    @coroutine
+    def _nfvi_kube_host_upgrade_control_plane_callback(self):
+        """
+        NFVI Kube Host Upgrade Control Plane Callback
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.verbose("NFVI Kube Host Upgrade Control Plane response=%s."
+                     % response)
+        if not response['completed']:
+            DLOG.info("Kube Host Upgrade Control Plane failed. Host:%s, reason=%s."
+                      % (response['host_name'], response['reason']))
+
+            host_table = tables.tables_get_host_table()
+            host = host_table.get(response['host_name'], None)
+            if host is None:
+                DLOG.verbose("Host %s does not exist." % response['host_name'])
+                return
+
+            if self._host_operation is None:
+                DLOG.verbose("No host %s operation inprogress." % host.name)
+                return
+
+            if OPERATION_TYPE.KUBE_UPGRADE_HOSTS != self._host_operation.operation_type:
+                DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                             % (host.name, self._host_operation.operation_type))
+                return
+
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.kube_host_upgrade_control_plane_failed(host)
+
+    def _nfvi_kube_host_upgrade_control_plane(self,
+                                              host_uuid,
+                                              host_name,
+                                              force):
+        """
+        NFVI Kube Host Upgrade Control Plane
+        """
+        nfvi.nfvi_kube_host_upgrade_control_plane(
+            host_uuid,
+            host_name,
+            force,
+            self._nfvi_kube_host_upgrade_control_plane_callback())
+
+    def kube_upgrade_hosts_control_plane(self, host_names, force):
+        """
+        Kube Upgrade Hosts Control Plane for multiple hosts
+        """
+        DLOG.info("Kube Host Upgrade control plane for hosts: %s" % host_names)
+
+        host_operation = \
+            Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
+
+        if self._host_operation is not None:
+            DLOG.debug("Canceling previous host operation %s, before "
+                       "continuing with host operation %s."
+                       % (self._host_operation.operation_type,
+                          host_operation.operation_type))
+            self._host_operation = None
+
+        host_table = tables.tables_get_host_table()
+        for host_name in host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                reason = "Unknown host %s given." % host_name
+                DLOG.info(reason)
+                host_operation.set_failed(reason)
+                return host_operation
+
+            host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
+            self._nfvi_kube_host_upgrade_control_plane(host.uuid,
+                                                       host.name,
+                                                       force)
+
+        if host_operation.is_inprogress():
+            self._host_operation = host_operation
+
+        return host_operation
+
+    @coroutine
+    def _nfvi_kube_host_upgrade_kubelet_callback(self):
+        """
+        NFVI Kube Host Upgrade Kubelet Callback (for a single host)
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.verbose("NFVI Kube Host Upgrade Kubelet response=%s."
+                     % response)
+        if not response['completed']:
+            DLOG.info("Kube Host Upgrade Kubelet failed. Host:%s, reason=%s."
+                      % (response['host_name'], response['reason']))
+
+            host_table = tables.tables_get_host_table()
+            host = host_table.get(response['host_name'], None)
+            if host is None:
+                DLOG.verbose("Host %s does not exist." % response['host_name'])
+                return
+
+            if self._host_operation is None:
+                DLOG.verbose("No host %s operation inprogress." % host.name)
+                return
+
+            if OPERATION_TYPE.KUBE_UPGRADE_HOSTS != self._host_operation.operation_type:
+                DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                             % (host.name, self._host_operation.operation_type))
+                return
+
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.kube_host_upgrade_kubelet_failed(host)
+
+    def _nfvi_kube_host_upgrade_kubelet(self, host_uuid, host_name, force):
+        """
+        NFVI Kube Host Upgrade Kubelet
+        """
+        nfvi.nfvi_kube_host_upgrade_kubelet(
+            host_uuid,
+            host_name,
+            force,
+            self._nfvi_kube_host_upgrade_kubelet_callback())
+
+    def kube_upgrade_hosts_kubelet(self, host_names, force):
+        """
+        Kube Upgrade Hosts Kubelet for multiple hosts
+        """
+        DLOG.info("Kube Host Upgrade kubelet for hosts: %s" % host_names)
+
+        host_operation = \
+            Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
+
+        if self._host_operation is not None:
+            DLOG.debug("Canceling previous host operation %s, before "
+                       "continuing with host operation %s."
+                       % (self._host_operation.operation_type,
+                          host_operation.operation_type))
+            self._host_operation = None
+
+        host_table = tables.tables_get_host_table()
+        for host_name in host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                reason = "Unknown host %s given." % host_name
+                DLOG.info(reason)
+                host_operation.set_failed(reason)
+                return host_operation
+
+            host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
+            self._nfvi_kube_host_upgrade_kubelet(host.uuid, host.name, force)
 
         if host_operation.is_inprogress():
             self._host_operation = host_operation

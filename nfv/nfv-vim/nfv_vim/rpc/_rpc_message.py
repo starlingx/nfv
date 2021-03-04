@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -143,6 +143,7 @@ class RPCMessageFactory(object):
 
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestAbortSwUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestApplySwUpdateStrategy
+    from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateKubeUpgradeStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpgradeStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestDeleteSwUpdateStrategy
@@ -224,6 +225,7 @@ class RPCMessageFactory(object):
 
         # Software Update Mapping
         RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_REQUEST: APIRequestCreateSwUpdateStrategy,
+        RPC_MSG_TYPE.CREATE_KUBE_UPGRADE_STRATEGY_REQUEST: APIRequestCreateKubeUpgradeStrategy,
         RPC_MSG_TYPE.CREATE_SW_UPGRADE_STRATEGY_REQUEST: APIRequestCreateSwUpgradeStrategy,
         RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_RESPONSE: APIResponseCreateSwUpdateStrategy,
         RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_REQUEST: APIRequestApplySwUpdateStrategy,

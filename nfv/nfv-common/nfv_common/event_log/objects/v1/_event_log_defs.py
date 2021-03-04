@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -171,6 +171,17 @@ class _EventId(Constants):
     FW_UPDATE_AUTO_APPLY_ABORT_REJECTED = Constant('fw-update-auto-apply-abort-rejected')
     FW_UPDATE_AUTO_APPLY_ABORT_FAILED = Constant('fw-update-auto-apply-abort-failed')
     FW_UPDATE_AUTO_APPLY_ABORTED = Constant('fw-update-auto-apply-aborted')
+    KUBE_UPGRADE_AUTO_APPLY_START = Constant('kube-upgrade-auto-apply-started')
+    KUBE_UPGRADE_AUTO_APPLY_INPROGRESS = Constant('kube-upgrade-auto-apply-inprogress')
+    KUBE_UPGRADE_AUTO_APPLY_REJECTED = Constant('kube-upgrade-auto-apply-rejected')
+    KUBE_UPGRADE_AUTO_APPLY_CANCELLED = Constant('kube-upgrade-auto-apply-cancelled')
+    KUBE_UPGRADE_AUTO_APPLY_FAILED = Constant('kube-upgrade-auto-apply-failed')
+    KUBE_UPGRADE_AUTO_APPLY_COMPLETED = Constant('kube-upgrade-auto-apply-completed')
+    KUBE_UPGRADE_AUTO_APPLY_ABORT = Constant('kube-upgrade-auto-apply-abort')
+    KUBE_UPGRADE_AUTO_APPLY_ABORTING = Constant('kube-upgrade-auto-apply-aborting')
+    KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED = Constant('kube-upgrade-auto-apply-abort-rejected')
+    KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED = Constant('kube-upgrade-auto-apply-abort-failed')
+    KUBE_UPGRADE_AUTO_APPLY_ABORTED = Constant('kube-upgrade-auto-apply-aborted')
 
 
 @six.add_metaclass(Singleton)

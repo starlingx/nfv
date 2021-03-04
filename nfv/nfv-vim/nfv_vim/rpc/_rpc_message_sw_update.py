@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -82,6 +82,30 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
 
     def __str__(self):
         return "create-sw-upgrade-strategy request: %s" % self.deserialize_payload
+
+
+class APIRequestCreateKubeUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
+    """
+    RPC API Request Message - Create Kube Upgrade Strategy
+    """
+    to_version = None
+
+    def __init__(self, msg_version=RPC_MSG_VERSION.VERSION_1_0,
+                 msg_type=RPC_MSG_TYPE.CREATE_KUBE_UPGRADE_STRATEGY_REQUEST,
+                 msg_result=RPC_MSG_RESULT.SUCCESS):
+        super(APIRequestCreateKubeUpgradeStrategy, self).__init__(
+            msg_version, msg_type, msg_result)
+
+    def serialize_payload(self, msg):
+        super(APIRequestCreateKubeUpgradeStrategy, self).serialize_payload(msg)
+        msg['to_version'] = self.to_version
+
+    def deserialize_payload(self, msg):
+        super(APIRequestCreateKubeUpgradeStrategy, self).deserialize_payload(msg)
+        self.to_version = msg.get('to_version', None)
+
+    def __str__(self):
+        return "create-kube-upgrade-strategy request: %s" % self.deserialize_payload
 
 
 class APIResponseCreateSwUpdateStrategy(RPCMessage):

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -78,6 +78,12 @@ _fm_alarm_id_mapping = dict([
      fm_constants.FM_ALARM_ID_FW_UPDATE_AUTO_APPLY_ABORTING),
     (alarm_objects_v1.ALARM_TYPE.FW_UPDATE_AUTO_APPLY_FAILED,
      fm_constants.FM_ALARM_ID_FW_UPDATE_AUTO_APPLY_FAILED),
+    (alarm_objects_v1.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS,
+     fm_constants.FM_ALARM_ID_KUBE_UPGRADE_AUTO_APPLY_INPROGRESS),
+    (alarm_objects_v1.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_ABORTING,
+     fm_constants.FM_ALARM_ID_KUBE_UPGRADE_AUTO_APPLY_ABORTING),
+    (alarm_objects_v1.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_FAILED,
+     fm_constants.FM_ALARM_ID_KUBE_UPGRADE_AUTO_APPLY_FAILED),
 ])
 
 _fm_alarm_type_mapping = dict([

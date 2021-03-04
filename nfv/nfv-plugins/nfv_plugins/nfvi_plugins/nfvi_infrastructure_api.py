@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -834,6 +834,704 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             DLOG.exception("Caught exception requesting host device "
                            "image update abort, host=%s, error=%s." %
                            (host_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def _extract_kube_host_upgrade_list(self,
+                                        kube_host_upgrade_list,
+                                        host_list):
+        """
+        Return a list of KubeHostUpgrade objects from sysinv api results.
+        """
+
+        # Map the ID to the uuid from host_list
+        host_map = dict()
+        for host in host_list:
+            host_map[host['id']] = host['uuid']
+        result_list = []
+        for host_data in kube_host_upgrade_list:
+            host_uuid = host_map[host_data['host_id']]
+            result_list.append(
+                nfvi.objects.v1.KubeHostUpgrade(
+                    host_data['host_id'],
+                    host_uuid,
+                    host_data['target_version'],
+                    host_data['control_plane_version'],
+                    host_data['kubelet_version'],
+                    host_data['status'])
+            )
+        return result_list
+
+    def get_kube_host_upgrade_list(self, future, callback):
+        """
+        Get information about the kube host upgrade list from the plugin
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        activity = "SysInv get-kube-host-upgrades"
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            # Query the kube host upgrade list
+            future.work(sysinv.get_kube_host_upgrades, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("Sysinv Get Kube Host Upgrades did not complete.")
+                return
+            kube_host_upgrade_list = future.result.data["kube_host_upgrades"]
+
+            # Also query the host list, kube_host_upgrades does not have uuid
+            future.work(sysinv.get_hosts, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("Sysinv Get-Hosts did not complete.")
+                return
+            host_list = future.result.data["ihosts"]
+
+            results_obj = \
+                self._extract_kube_host_upgrade_list(kube_host_upgrade_list,
+                                                     host_list)
+            response['result-data'] = results_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception kube host upgrade list err=%s"
+                               % e)
+        except Exception as e:
+            DLOG.exception("Caught exception kube host upgrade list err=%s"
+                           % e)
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def _extract_kube_upgrade(self, kube_upgrade_data_list):
+        """
+        Return a KubeUpgrade object from sysinv api results.
+
+        Returns None if there are no items in the list.
+        Returns first kube upgrade object, but the API should never return
+        more than one object.
+        """
+
+        if 1 < len(kube_upgrade_data_list):
+            DLOG.critical("Too many kube upgrades returned, num=%i"
+                          % len(kube_upgrade_data_list))
+
+        elif 0 == len(kube_upgrade_data_list):
+            DLOG.info("No kube upgrade exists, num=%i"
+                      % len(kube_upgrade_data_list))
+
+        kube_upgrade_obj = None
+        for kube_upgrade_data in kube_upgrade_data_list:
+            kube_upgrade_obj = nfvi.objects.v1.KubeUpgrade(
+                kube_upgrade_data['state'],
+                kube_upgrade_data['from_version'],
+                kube_upgrade_data['to_version'])
+            break
+        return kube_upgrade_obj
+
+    def get_kube_upgrade(self, future, callback):
+        """
+        Get information about the kube upgrade from the plugin
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'get-kube-upgrade'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.get_kube_upgrade, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("SysInv get-kube-upgrade did not complete.")
+                return
+
+            kube_upgrade_data_list = future.result.data['kube_upgrades']
+            kube_upgrade_obj = \
+                self._extract_kube_upgrade(kube_upgrade_data_list)
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def _extract_kube_version(self, kube_data):
+        """
+        Return a KubeVersion from sysinv API results.
+        """
+        # sysinv api returns a field called 'version' which is a reserved field
+        # in vim object data structure.  It is stored as kube_version
+        return nfvi.objects.v1.KubeVersion(kube_data['version'],
+                                           kube_data['state'],
+                                           kube_data['target'],
+                                           kube_data['upgrade_from'],
+                                           kube_data['downgrade_to'],
+                                           kube_data['applied_patches'],
+                                           kube_data['available_patches'])
+
+    def get_kube_version_list(self, future, callback):
+        """
+        Get information about the kube versions list from the plugin
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'get-kube-versions'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+                self._platform_token = future.result.data
+
+            # get_kube_versions only returns a limited amount of data about the
+            # kubernetes versions.  Individual API calls get the patch info.
+            future.work(sysinv.get_kube_versions, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+
+            # walk the list of versions and get the patch info
+            kube_versions_list = list()
+            limited_kube_version_list = future.result.data['kube_versions']
+            for kube_list_entry in limited_kube_version_list:
+                kube_ver = kube_list_entry['version']
+                future.work(sysinv.get_kube_version,
+                            self._platform_token,
+                            kube_ver)
+                future.result = (yield)
+                if not future.result.is_complete():
+                    DLOG.error("%s for version:%s did not complete."
+                               % (action_type, kube_ver))
+                    return
+                # returns a single object
+                kube_ver_data = future.result.data
+                kube_versions_list.append(
+                    self._extract_kube_version(kube_ver_data))
+
+            response['result-data'] = kube_versions_list
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_host_upgrade_control_plane(self,
+                                        future,
+                                        host_uuid,
+                                        host_name,
+                                        force,
+                                        callback):
+        """
+        Start kube host upgrade 'control plane' for a particular controller
+        """
+        response = dict()
+        response['completed'] = False
+        response['host_uuid'] = host_uuid
+        response['host_name'] = host_name
+        response['reason'] = ''
+        action_type = 'kube-host-upgrade-control-plane'
+        sysinv_method = sysinv.kube_host_upgrade_control_plane
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            # invoke the actual kube_host_upgrade method
+            future.work(sysinv_method,
+                        self._platform_token,
+                        host_uuid,
+                        force)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            # result was a host object. Need to query to get kube upgrade obj
+            future.work(sysinv.get_kube_upgrade, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("SysInv get-kube-upgrade did not complete.")
+                return
+
+            kube_upgrade_data_list = future.result.data['kube_upgrades']
+            kube_upgrade_obj = \
+                self._extract_kube_upgrade(kube_upgrade_data_list)
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_host_upgrade_kubelet(self,
+                                  future,
+                                  host_uuid,
+                                  host_name,
+                                  force,
+                                  callback):
+        """
+        Start kube host upgrade 'kubelet' for a particular host
+        """
+        response = dict()
+        response['completed'] = False
+        response['host_uuid'] = host_uuid
+        response['host_name'] = host_name
+        response['reason'] = ''
+        action_type = 'kube-host-upgrade-kubelet'
+        sysinv_method = sysinv.kube_host_upgrade_kubelet
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            # invoke the actual kube_host_upgrade method
+            future.work(sysinv_method,
+                        self._platform_token,
+                        host_uuid,
+                        force)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            # result was a host object. Need to query to get kube upgrade obj
+            future.work(sysinv.get_kube_upgrade, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("SysInv get-kube-upgrade did not complete.")
+                return
+
+            kube_upgrade_data_list = future.result.data['kube_upgrades']
+            kube_upgrade_obj = \
+                self._extract_kube_upgrade(kube_upgrade_data_list)
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_upgrade_cleanup(self, future, callback):
+        """
+        kube upgrade cleanup
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-upgrade-cleanup'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.kube_upgrade_cleanup, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+
+            # The result should be empty. no result data to report back
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_upgrade_complete(self, future, callback):
+        """
+        kube upgrade complete
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-upgrade-complete'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.kube_upgrade_complete, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+
+            kube_upgrade_data = future.result.data
+            kube_upgrade_obj = nfvi.objects.v1.KubeUpgrade(
+                kube_upgrade_data['state'],
+                kube_upgrade_data['from_version'],
+                kube_upgrade_data['to_version'])
+
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_upgrade_download_images(self, future, callback):
+        """
+        Start kube upgrade download images
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-upgrade-download-images'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.kube_upgrade_download_images,
+                        self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+
+            kube_upgrade_data = future.result.data
+            kube_upgrade_obj = nfvi.objects.v1.KubeUpgrade(
+                kube_upgrade_data['state'],
+                kube_upgrade_data['from_version'],
+                kube_upgrade_data['to_version'])
+
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_upgrade_networking(self, future, callback):
+        """
+        Start kube upgrade networking
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-upgrade-networking'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.kube_upgrade_networking, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+
+            kube_upgrade_data = future.result.data
+            kube_upgrade_obj = nfvi.objects.v1.KubeUpgrade(
+                kube_upgrade_data['state'],
+                kube_upgrade_data['from_version'],
+                kube_upgrade_data['to_version'])
+
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_upgrade_start(self, future, to_version, force, alarm_ignore_list,
+                           callback):
+        """
+        Start a kube upgrade
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-upgrade-start'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.kube_upgrade_start,
+                        self._platform_token,
+                        to_version,
+                        force=force,
+                        alarm_ignore_list=alarm_ignore_list)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("SysInv kube-upgrade-start did not complete.")
+                response['reason'] = "did not complete."
+                return
+
+            future.work(sysinv.get_kube_upgrade, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("SysInv get-kube-upgrade did not complete.")
+                response['reason'] = "did not complete."
+                return
+
+            kube_upgrade_data_list = future.result.data['kube_upgrades']
+            kube_upgrade_obj = \
+                self._extract_kube_upgrade(kube_upgrade_data_list)
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
 
         finally:
             callback.send(response)

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -96,6 +96,7 @@ class _RPCMessageType(Constants):
 
     # Software Update Definitions
     CREATE_SW_UPDATE_STRATEGY_REQUEST = Constant('create-sw-update-strategy-request')
+    CREATE_KUBE_UPGRADE_STRATEGY_REQUEST = Constant('create-kube-upgrade-strategy-request')
     CREATE_SW_UPGRADE_STRATEGY_REQUEST = Constant('create-sw-upgrade-strategy-request')
     CREATE_SW_UPDATE_STRATEGY_RESPONSE = Constant('create-sw-update-strategy-response')
     APPLY_SW_UPDATE_STRATEGY_REQUEST = Constant('apply-sw-update-strategy-request')

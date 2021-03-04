@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2018 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -36,6 +36,20 @@ def query_hosts(token):
     api_cmd = url + "/v1/query_hosts"
 
     response = rest_api_request(token, "GET", api_cmd)
+    return response
+
+
+def apply_patch(token, patch_name):
+    """
+    Asks Patch Controller to apply a patch that is already uploaded
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.PATCHING, strip_version=True)
+    if url is None:
+        raise ValueError("OpenStack Patching URL is invalid")
+
+    api_cmd = url + "/v1/apply/%s" % str(patch_name)
+
+    response = rest_api_request(token, "POST", api_cmd)
     return response
 
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2020 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -30,6 +30,7 @@ class SwUpdateTypes(Constants):
     SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
     FW_UPDATE = Constant('fw-update')
+    KUBE_UPGRADE = Constant('kube-upgrade')
 
 
 @six.add_metaclass(Singleton)

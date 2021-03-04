@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -34,6 +34,20 @@ class StrategyStageNames(Constants):
     FW_UPDATE_HOSTS_QUERY = Constant('fw-update-hosts-query')
     FW_UPDATE_HOST_QUERY = Constant('fw-update-host-query')
     FW_UPDATE_WORKER_HOSTS = Constant('fw-update-worker-hosts')
+    KUBE_UPGRADE_QUERY = Constant('kube-upgrade-query')
+    KUBE_UPGRADE_START = Constant('kube-upgrade-start')
+    KUBE_UPGRADE_DOWNLOAD_IMAGES = Constant('kube-upgrade-download-images')
+    KUBE_UPGRADE_FIRST_CONTROL_PLANE = \
+        Constant('kube-upgrade-first-control-plane')
+    KUBE_UPGRADE_NETWORKING = Constant('kube-upgrade-networking')
+    KUBE_UPGRADE_SECOND_CONTROL_PLANE = \
+        Constant('kube-upgrade-second-control-plane')
+    KUBE_UPGRADE_PATCH = Constant('kube-upgrade-patch')
+    KUBE_UPGRADE_KUBELETS_CONTROLLERS = \
+       Constant('kube-upgrade-kubelets-controllers')
+    KUBE_UPGRADE_KUBELETS_WORKERS = Constant('kube-upgrade-kubelets-workers')
+    KUBE_UPGRADE_COMPLETE = Constant('kube-upgrade-complete')
+    KUBE_UPGRADE_CLEANUP = Constant('kube-upgrade-cleanup')
 
 
 # Constant Instantiation

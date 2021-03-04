@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -124,6 +124,8 @@ def _nfvi_sw_update_get_callback():
             sw_update_type = 'sw-upgrade'
         elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.FW_UPDATE:
             sw_update_type = 'fw-update'
+        elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.KUBE_UPGRADE:
+            sw_update_type = 'kube-upgrade'
 
         if sw_update.strategy.is_applying() or sw_update.strategy.is_aborting():
             in_progress = True
