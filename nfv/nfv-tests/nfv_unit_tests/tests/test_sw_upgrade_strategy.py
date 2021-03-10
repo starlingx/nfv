@@ -22,10 +22,27 @@ from nfv_vim.nfvi.objects.v1 import UPGRADE_STATE
 from . import sw_update_testcase  # noqa: H304
 
 
-@mock.patch('nfv_vim.event_log._instance._event_issue', sw_update_testcase.fake_event_issue)
-@mock.patch('nfv_vim.objects._sw_update.SwUpdate.save', sw_update_testcase.fake_save)
-@mock.patch('nfv_vim.objects._sw_update.timers.timers_create_timer', sw_update_testcase.fake_timer)
-@mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled', sw_update_testcase.fake_nfvi_compute_plugin_disabled)
+# utility method for the formatting of unlock-hosts stage as dict
+# workers default to 5 retries with 120 second delay between attempts
+# std controllers and storage have 0 retries
+def _unlock_hosts_stage_as_dict(host_names, retry_count=5, retry_delay=120):
+    return {
+        'name': 'unlock-hosts',
+        'entity_names': host_names,
+        'retry_count': retry_count,
+        'retry_delay': retry_delay,
+        'timeout': 1800,
+    }
+
+
+@mock.patch('nfv_vim.event_log._instance._event_issue',
+            sw_update_testcase.fake_event_issue)
+@mock.patch('nfv_vim.objects._sw_update.SwUpdate.save',
+            sw_update_testcase.fake_save)
+@mock.patch('nfv_vim.objects._sw_update.timers.timers_create_timer',
+            sw_update_testcase.fake_timer)
+@mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
+            sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     def create_sw_upgrade_strategy(self,
@@ -76,9 +93,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              "test_instance_1",
                              'compute-1')
 
-        self.create_instance_group('instance_group_1',
-                              ['test_instance_0', 'test_instance_1'],
-                              [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
+        self.create_instance_group(
+            'instance_group_1',
+            ['test_instance_0', 'test_instance_1'],
+            [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
         for host in self._host_table.values():
@@ -162,8 +180,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-2', 'compute-3']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-2', 'compute-3']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-2', 'compute-3']},
+                     _unlock_hosts_stage_as_dict(['compute-2', 'compute-3']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -179,8 +196,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0']},
+                     _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -196,8 +212,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-1']},
+                     _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -268,8 +283,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1', 'compute-5']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-1', 'compute-5']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-1', 'compute-5']},
+                     _unlock_hosts_stage_as_dict(['compute-1', 'compute-5']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -287,8 +301,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0', 'compute-2', 'compute-3']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-0', 'compute-2', 'compute-3']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0', 'compute-2', 'compute-3']},
+                     _unlock_hosts_stage_as_dict(
+                         ['compute-0', 'compute-2', 'compute-3']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -306,8 +320,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-4', 'compute-6', 'compute-7']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-4', 'compute-6', 'compute-7']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-4', 'compute-6', 'compute-7']},
+                     _unlock_hosts_stage_as_dict(
+                         ['compute-4', 'compute-6', 'compute-7']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -324,8 +338,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-8', 'compute-9']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-8', 'compute-9']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-8', 'compute-9']},
+                     _unlock_hosts_stage_as_dict(
+                         ['compute-8', 'compute-9']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -399,8 +413,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-0']},
+                     _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-data-sync',
                       'timeout': 14400}
                  ]
@@ -418,8 +431,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-1']},
+                     _unlock_hosts_stage_as_dict(['controller-1']),
                      {'name': 'wait-data-sync',
                       'timeout': 14400}
                  ]
@@ -432,8 +444,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-1']},
+                     _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -451,8 +462,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0', 'compute-2', 'compute-3']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-0', 'compute-2', 'compute-3']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0', 'compute-2', 'compute-3']},
+                     _unlock_hosts_stage_as_dict(
+                         ['compute-0', 'compute-2', 'compute-3']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -468,8 +479,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-4']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-4']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-4']},
+                     _unlock_hosts_stage_as_dict(['compute-4']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -558,8 +568,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': stage_hosts[0]},
                      {'name': 'upgrade-hosts',
                       'entity_names': stage_hosts[0]},
-                     {'name': 'unlock-hosts',
-                      'entity_names': stage_hosts[0]},
+                     _unlock_hosts_stage_as_dict(stage_hosts[0]),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -580,8 +589,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': stage_hosts[x]},
                      {'name': 'upgrade-hosts',
                       'entity_names': stage_hosts[x]},
-                     {'name': 'unlock-hosts',
-                      'entity_names': stage_hosts[x]},
+                     _unlock_hosts_stage_as_dict(stage_hosts[x]),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -644,8 +652,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-2']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-2']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-2']},
+                     _unlock_hosts_stage_as_dict(['compute-2']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -658,8 +665,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-3']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-3']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-3']},
+                     _unlock_hosts_stage_as_dict(['compute-3']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -674,8 +680,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0']},
+                     _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -690,8 +695,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-1']},
+                     _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -745,8 +749,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0']},
+                     _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'system-stabilize'}
                  ]
                 },
@@ -758,8 +761,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-1']},
+                     _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'system-stabilize'}
                  ]
                 },
@@ -771,8 +773,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-2']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-2']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-2']},
+                     _unlock_hosts_stage_as_dict(['compute-2']),
                      {'name': 'system-stabilize'}
                  ]
                 },
@@ -784,8 +785,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-3']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-3']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-3']},
+                     _unlock_hosts_stage_as_dict(['compute-3']),
                      {'name': 'system-stabilize'}
                  ]
                 }
@@ -936,8 +936,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-0']},
+                     _unlock_hosts_stage_as_dict(['storage-0'], retry_count=0),
                      {'name': 'wait-data-sync',
                       'timeout': 7200}
                  ]
@@ -950,8 +949,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-1', 'storage-2']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-1', 'storage-2']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-1', 'storage-2']},
+                     _unlock_hosts_stage_as_dict(['storage-1', 'storage-2'],
+                                                 retry_count=0),
                      {'name': 'wait-data-sync',
                       'timeout': 7200}
                  ]
@@ -964,8 +963,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-3']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-3']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-3']},
+                     _unlock_hosts_stage_as_dict(['storage-3'], retry_count=0),
                      {'name': 'wait-data-sync',
                       'timeout': 7200}
                  ]
@@ -1022,8 +1020,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-0']},
+                     _unlock_hosts_stage_as_dict(['storage-0'], retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 7200}
@@ -1037,8 +1034,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-1']},
+                     _unlock_hosts_stage_as_dict(['storage-1'], retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 7200}
@@ -1052,8 +1048,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-2']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-2']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-2']},
+                     _unlock_hosts_stage_as_dict(['storage-2'], retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 7200}
@@ -1067,8 +1062,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-3']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-3']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-3']},
+                     _unlock_hosts_stage_as_dict(['storage-3'], retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 7200}
@@ -1116,8 +1110,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-0']},
+                     _unlock_hosts_stage_as_dict(['controller-0'],
+                                                  retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1164,8 +1158,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-1']},
+                     _unlock_hosts_stage_as_dict(['controller-1'],
+                                                 retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1181,8 +1175,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-0']},
+                     _unlock_hosts_stage_as_dict(['controller-0'],
+                                                 retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1253,8 +1247,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-0']},
+                     _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1270,8 +1263,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-1']},
+                     _unlock_hosts_stage_as_dict(['controller-1']),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1372,8 +1364,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-1']},
+                     _unlock_hosts_stage_as_dict(['controller-1']),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1387,8 +1378,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-0']},
+                     _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1402,8 +1392,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-0']},
+                     _unlock_hosts_stage_as_dict(['storage-0']),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 7200}
@@ -1417,8 +1406,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['storage-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['storage-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['storage-1']},
+                     _unlock_hosts_stage_as_dict(['storage-1']),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 7200}
@@ -1432,8 +1420,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-1']},
+                     _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'system-stabilize',
                       'timeout': 60}
                  ]
@@ -1448,8 +1435,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0']},
+                     _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'system-stabilize',
                       'timeout': 60}
                  ]
@@ -1516,8 +1502,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-1']},
+                     _unlock_hosts_stage_as_dict(['controller-1'],
+                                                 retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1533,8 +1519,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['controller-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['controller-0']},
+                     _unlock_hosts_stage_as_dict(['controller-0'],
+                                                 retry_count=0),
                      {'name': 'wait-data-sync',
                       'ignore_alarms': ['900.005', '900.201', '750.006'],
                       'timeout': 14400}
@@ -1548,8 +1534,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-1']},
+                     _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -1564,8 +1549,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'upgrade-hosts',
                       'entity_names': ['compute-0']},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0']},
+                     _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
@@ -1794,7 +1778,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         expected_results = {
             'total_stages': 0,
             'result': 'failed',
-            'result_reason': 'all controller hosts must be unlocked-enabled-available'
+            'result_reason':
+                'all controller hosts must be unlocked-enabled-available'
         }
 
         sw_update_testcase.validate_phase(build_phase, expected_results)
@@ -1840,7 +1825,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         expected_results = {
             'total_stages': 0,
             'result': 'failed',
-            'result_reason': 'all worker hosts must be unlocked-enabled-available'
+            'result_reason':
+                'all worker hosts must be unlocked-enabled-available'
         }
 
         sw_update_testcase.validate_phase(build_phase, expected_results)

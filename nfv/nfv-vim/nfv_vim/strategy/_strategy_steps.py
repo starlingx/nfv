@@ -68,19 +68,152 @@ class StrategyStepNames(Constants):
 STRATEGY_STEP_NAME = StrategyStepNames()
 
 
-class UnlockHostsStep(strategy.StrategyStep):
-    """
-    Unlock Hosts - Strategy Step
-    """
-    def __init__(self, hosts):
-        super(UnlockHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.UNLOCK_HOSTS, timeout_in_secs=1800)
+class AbstractStrategyStep(strategy.StrategyStep):
+    """An abstract base class for strategy steps"""
+
+    def __init__(self, step_name, timeout_in_secs):
+        super(AbstractStrategyStep, self).__init__(
+            step_name,
+            timeout_in_secs=timeout_in_secs)
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractStrategyStep, self).from_dict(data)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractStrategyStep, self).as_dict()
+        # Next 3 lines are required for all strategy steps and may be
+        # overridden by subclass in some cases
+        data['entity_type'] = ''
+        data['entity_names'] = list()
+        data['entity_uuids'] = list()
+        return data
+
+
+class AbstractHostsStrategyStep(AbstractStrategyStep):
+    """An abstract base class for strategy steps performed on list of hosts"""
+
+    def __init__(self,
+                 step_name,
+                 hosts,
+                 timeout_in_secs=1800):
+        super(AbstractHostsStrategyStep, self).__init__(
+            step_name,
+            timeout_in_secs=timeout_in_secs)
         self._hosts = hosts
         self._host_names = list()
         self._host_uuids = list()
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractHostsStrategyStep, self).from_dict(data)
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractHostsStrategyStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        return data
+
+
+class UnlockHostsStep(AbstractHostsStrategyStep):
+    """
+    Unlock Hosts - Strategy Step
+    """
+
+    # During an upgrade, an unlock may need to be retried several times
+    # https://bugs.launchpad.net/starlingx/+bug/1914836
+    MAX_RETRIES = 5
+    RETRY_DELAY = 120
+
+    def __init__(self, hosts, retry_count=0, retry_delay=RETRY_DELAY):
+        """
+        hosts - the list of hosts to be unlocked
+        retry_count - the number of times to retry per host if unlock fails
+        retry_delay - the amount of time to delay before retrying unlock
+        """
+        super(UnlockHostsStep, self).__init__(STRATEGY_STEP_NAME.UNLOCK_HOSTS,
+                                              hosts,
+                                              timeout_in_secs=1800)
+        # step_name, hosts, timeout are serialized by parent classes
+        # retry_count and retry_delay must be serialized in from_dict/as_dict
+        self._retry_count = retry_count
+        self._retry_delay = retry_delay
+        # Do not persist: _retries, _wait_time _retrying
+        self._retries = dict()
+        for host_name in self._host_names:
+            self._retries[host_name] = retry_count
+        self._wait_time = 0
+        self._retry_requested = False
+
+    def from_dict(self, data):
+        """
+        Returns unlock hosts step object initialized using the given dictionary
+        """
+        super(UnlockHostsStep, self).from_dict(data)
+        # deserialize retry_delay
+        self._retry_count = data['retry_count']
+        self._retry_delay = data['retry_delay']
+
+        # Do not deserialize _retries, _wait_time and _retrying
+        self._wait_time = 0
+        self._retry_requested = False
+        self._retries = dict()
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._retries[host_name] = self._retry_count
+
+        return self
+
+    def as_dict(self):
+        """
+        Represent the unlock hosts step as a dictionary
+        """
+        data = super(UnlockHostsStep, self).as_dict()
+        # serialize retries
+        data['retry_count'] = self._retry_count
+        # serialize retry_delay
+        data['retry_delay'] = self._retry_delay
+        # Do not serialize _retries, _wait_time and _retrying
+        return data
+
+    def _get_hosts_to_retry(self):
+        hosts = []
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                continue
+            if host.is_locked() and self._retries[host_name] > 0:
+                self._retries[host_name] = self._retries[host_name] - 1
+                hosts.append(host_name)
+        return hosts
 
     def _total_hosts_unlocked_enabled(self):
         """
@@ -97,6 +230,16 @@ class UnlockHostsStep(strategy.StrategyStep):
                 total_hosts_enabled += 1
 
         return total_hosts_enabled
+
+    def _trigger_retry(self, host_name):
+        DLOG.info("Step (%s) retry due to failure for (%s)." % (self._name,
+                                                                host_name))
+        # set the retry trigger
+        self._retry_requested = True
+        # reset the retry "wait" delay
+        self._wait_time = timers.get_monotonic_timestamp_in_ms()
+        # decrement the number of allowed retries for the validated host
+        self._retries[host_name] = self._retries[host_name] - 1
 
     def apply(self):
         """
@@ -122,9 +265,12 @@ class UnlockHostsStep(strategy.StrategyStep):
         """
         Handle Host events
         """
+        from nfv_vim import directors
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
-        if event in [STRATEGY_EVENT.HOST_STATE_CHANGED, STRATEGY_EVENT.HOST_AUDIT]:
+        if event in [STRATEGY_EVENT.HOST_STATE_CHANGED,
+                     STRATEGY_EVENT.HOST_AUDIT]:
             total_hosts_enabled = self._total_hosts_unlocked_enabled()
 
             if -1 == total_hosts_enabled:
@@ -137,40 +283,35 @@ class UnlockHostsStep(strategy.StrategyStep):
                 self.stage.step_complete(result, '')
                 return True
 
+            # See if we have requested a retry and are not currently retrying
+            if self._retry_requested:
+                now_ms = timers.get_monotonic_timestamp_in_ms()
+                secs_expired = (now_ms - self._wait_time) / 1000
+                if self._retry_delay <= secs_expired:
+                    self._retry_requested = False
+                    # re-issue unlock for all hosts.
+                    # Hosts that are already unlocked or unlocking get skipped
+                    host_director = directors.get_host_director()
+                    operation = host_director.unlock_hosts(self._host_names)
+                    if operation.is_failed():
+                        result = strategy.STRATEGY_STEP_RESULT.FAILED
+                        self.stage.step_complete(result, "host unlock failed")
+            return True
+
         elif event == STRATEGY_EVENT.HOST_UNLOCK_FAILED:
             host = event_data
             if host is not None and host.name in self._host_names:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, "host unlock failed")
+                if host.is_locked() and self._retries[host.name] > 0:
+                    # if any unlock fails and we have retries, trigger it
+                    # even if the last round of unlocks has not returned
+                    self._trigger_retry(host.name)
+                else:
+                    # if ANY unlock fails and we are out of retries, fail
+                    result = strategy.STRATEGY_STEP_RESULT.FAILED
+                    self.stage.step_complete(result, "host unlock failed")
                 return True
 
         return False
-
-    def from_dict(self, data):
-        """
-        Returns the unlock hosts step object initialized using the given dictionary
-        """
-        super(UnlockHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
-        self._host_names = data['entity_names']
-        host_table = tables.tables_get_host_table()
-        for host_name in self._host_names:
-            host = host_table.get(host_name, None)
-            if host is not None:
-                self._hosts.append(host)
-                self._host_uuids.append(host.uuid)
-        return self
-
-    def as_dict(self):
-        """
-        Represent the unlock hosts step as a dictionary
-        """
-        data = super(UnlockHostsStep, self).as_dict()
-        data['entity_type'] = 'hosts'
-        data['entity_names'] = self._host_names
-        data['entity_uuids'] = self._host_uuids
-        return data
 
 
 class LockHostsStep(strategy.StrategyStep):
@@ -2558,33 +2699,6 @@ class EnableHostServicesStep(strategy.StrategyStep):
         return data
 
 
-class AbstractStrategyStep(strategy.StrategyStep):
-
-    def __init__(self, step_name, timeout_in_secs):
-        super(AbstractStrategyStep, self).__init__(
-            step_name,
-            timeout_in_secs=timeout_in_secs)
-
-    def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
-        super(AbstractStrategyStep, self).from_dict(data)
-        return self
-
-    def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
-        data = super(AbstractStrategyStep, self).as_dict()
-        # Next 3 lines are required for all strategy steps and may be
-        # overridden by subclass in some cases
-        data['entity_type'] = ''
-        data['entity_names'] = list()
-        data['entity_uuids'] = list()
-        return data
-
-
 class ApplySwPatchesStep(AbstractStrategyStep):
     """
     Apply Patches using patch API
@@ -3053,7 +3167,7 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
 
 
 class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Host - Abtsract Strategy Step
+    """Kube Upgrade Host - Abstract Strategy Step
 
     This operation issues a host command, which updates the kube upgrade object
     """

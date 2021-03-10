@@ -1321,6 +1321,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                 True, ignore_alarms=self._ignore_alarms))
             stage.add_step(strategy.LockHostsStep(host_list))
             stage.add_step(strategy.UpgradeHostsStep(host_list))
+            # Note: standard controllers do not need the same retry as AIO
             stage.add_step(strategy.UnlockHostsStep(host_list))
             # Allow up to four hours for controller disks to synchronize
             stage.add_step(strategy.WaitDataSyncStep(
@@ -1341,6 +1342,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                 stage.add_step(strategy.SwactHostsStep(host_list))
             stage.add_step(strategy.LockHostsStep(host_list))
             stage.add_step(strategy.UpgradeHostsStep(host_list))
+            # Note: standard controllers do not need the same retry as AIO
             stage.add_step(strategy.UnlockHostsStep(host_list))
             # Allow up to four hours for controller disks to synchronize
             stage.add_step(strategy.WaitDataSyncStep(
@@ -1390,7 +1392,9 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                 True, ignore_alarms=self._ignore_alarms))
             stage.add_step(strategy.LockHostsStep(host_list))
             stage.add_step(strategy.UpgradeHostsStep(host_list))
+            # storage hosts do not need the same retry logic as AIO
             stage.add_step(strategy.UnlockHostsStep(host_list))
+
             # After storage node(s) are unlocked, we need extra time to
             # allow the OSDs to go back in sync and the storage related
             # alarms to clear. We no longer wipe the OSD disks when upgrading
@@ -1440,7 +1444,11 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                     stage.add_step(strategy.SwactHostsStep(host_list))
                 stage.add_step(strategy.LockHostsStep(host_list))
                 stage.add_step(strategy.UpgradeHostsStep(host_list))
-                stage.add_step(strategy.UnlockHostsStep(host_list))
+                # During an upgrade, unlock may need to retry. Bug details:
+                # https://bugs.launchpad.net/starlingx/+bug/1914836
+                stage.add_step(strategy.UnlockHostsStep(
+                    host_list,
+                    retry_count=strategy.UnlockHostsStep.MAX_RETRIES))
                 if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
                     # AIO Controller hosts will undergo WaitDataSyncStep step
                     # Allow up to four hours for controller disks to synchronize
@@ -1487,7 +1495,11 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                 stage.add_step(strategy.SwactHostsStep(host_list))
             stage.add_step(strategy.LockHostsStep(host_list))
             stage.add_step(strategy.UpgradeHostsStep(host_list))
-            stage.add_step(strategy.UnlockHostsStep(host_list))
+            # During an upgrade, unlock may need to retry. Bug details:
+            # https://bugs.launchpad.net/starlingx/+bug/1914836
+            stage.add_step(strategy.UnlockHostsStep(
+                host_list,
+                retry_count=strategy.UnlockHostsStep.MAX_RETRIES))
             if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
                 # AIO Controller hosts will undergo WaitDataSyncStep step
                 # Allow up to four hours for controller disks to synchronize
