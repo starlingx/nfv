@@ -89,7 +89,7 @@ function _swmanager()
                             ;;
                         show)
                             if [ "${prev}" = "${action}" ]; then
-                              COMPREPLY=($(compgen -W "--details" -- ${cur}))
+                              COMPREPLY=($(compgen -W "--details --active" -- ${cur}))
                             fi
                             return 0
                             ;;
@@ -160,7 +160,7 @@ function _swmanager()
                             ;;
                         show)
                             if [ "${prev}" = "${action}" ]; then
-                              COMPREPLY=($(compgen -W "--details" -- ${cur}))
+                              COMPREPLY=($(compgen -W "--details --active" -- ${cur}))
                             fi
                             return 0
                             ;;
@@ -237,7 +237,7 @@ function _swmanager()
                             ;;
                         show)
                             if [ "${prev}" = "${action}" ]; then
-                              COMPREPLY=($(compgen -W "--details" -- ${cur}))
+                              COMPREPLY=($(compgen -W "--details --active" -- ${cur}))
                             fi
                             return 0
                             ;;
@@ -319,7 +319,7 @@ function _swmanager()
                             ;;
                         show)
                             if [ "${prev}" = "${action}" ]; then
-                              COMPREPLY=($(compgen -W "--details" -- ${cur}))
+                              COMPREPLY=($(compgen -W "--details --active" -- ${cur}))
                             fi
                             return 0
                             ;;
