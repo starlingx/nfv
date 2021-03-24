@@ -202,6 +202,9 @@ class SwPatch(SwUpdate):
             while self._nfvi_audit_inprogress:
                 timer_id = (yield)
 
+            # nfvi_alarms_callback sets timer to 2 seconds
+            # nfvi_sw_patch_hosts_callback sets it back to 30
+
             DLOG.info("Audit software patch hosts, timer_id=%s." % timer_id)
             nfvi.nfvi_sw_mgmt_query_hosts(
                 self.nfvi_sw_patch_hosts_callback(timer_id))

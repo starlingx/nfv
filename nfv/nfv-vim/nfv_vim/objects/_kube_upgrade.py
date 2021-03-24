@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
+from nfv_common import timers
 
 from nfv_common.helpers import coroutine
 
@@ -182,6 +183,9 @@ class KubeUpgrade(SwUpdate):
             self._nfvi_audit_inprogress = True
             while self._nfvi_audit_inprogress:
                 timer_id = (yield)
+
+            # nfvi_alarms_callback sets timer to 2 seconds. reset back to 30
+            timers.timers_reschedule_timer(timer_id, 30)
 
             if not self.nfvi_update():
                 DLOG.info("Audit no longer needed.")
