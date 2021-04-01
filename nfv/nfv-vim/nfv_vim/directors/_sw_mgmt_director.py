@@ -135,9 +135,11 @@ class SwMgmtDirector(object):
         return strategy_uuid, ''
 
     def create_kube_upgrade_strategy(self,
+                                     controller_apply_type,
                                      storage_apply_type,
                                      worker_apply_type,
                                      max_parallel_worker_hosts,
+                                     default_instance_action,
                                      alarm_restrictions,
                                      to_version,
                                      callback):
@@ -156,9 +158,11 @@ class SwMgmtDirector(object):
         self._sw_update = objects.KubeUpgrade()
         success, reason = self._sw_update.strategy_build(
             strategy_uuid,
+            controller_apply_type,
             storage_apply_type,
             worker_apply_type,
             max_parallel_worker_hosts,
+            default_instance_action,
             alarm_restrictions,
             self._ignore_alarms,
             to_version,

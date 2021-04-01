@@ -33,9 +33,11 @@ class KubeUpgrade(SwUpdate):
 
     def strategy_build(self,
                        strategy_uuid,
+                       controller_apply_type,
                        storage_apply_type,
                        worker_apply_type,
                        max_parallel_worker_hosts,
+                       default_instance_action,
                        alarm_restrictions,
                        ignore_alarms,
                        to_version,
@@ -51,9 +53,11 @@ class KubeUpgrade(SwUpdate):
 
         self._strategy = \
             strategy.KubeUpgradeStrategy(strategy_uuid,
+                                         controller_apply_type,
                                          storage_apply_type,
                                          worker_apply_type,
                                          max_parallel_worker_hosts,
+                                         default_instance_action,
                                          alarm_restrictions,
                                          ignore_alarms,
                                          to_version,
