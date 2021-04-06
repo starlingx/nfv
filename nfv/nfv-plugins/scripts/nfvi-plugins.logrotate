@@ -3,11 +3,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-nodateext
 
 /var/log/nfv-vim-alarms.log
 {
-    nodateext
     size 10M
     start 1
     missingok
@@ -18,7 +16,6 @@ nodateext
 
 /var/log/nfv-vim-events.log
 {
-    nodateext
     size 10M
     start 1
     missingok
@@ -29,7 +26,6 @@ nodateext
 
 /var/log/nfvi-openstack.log
 {
-    nodateext
     size 10M
     start 1
     missingok
