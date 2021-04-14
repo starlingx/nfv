@@ -3222,6 +3222,61 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
         return data
 
 
+class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Host List - Abstract Strategy Step
+
+    This operation issues a host command, which updates the kube upgrade object
+    It operates on a list of hosts
+    """
+    def __init__(self,
+                 hosts,
+                 force,
+                 step_name,
+                 success_state,
+                 fail_state,
+                 timeout_in_secs=600):
+        super(AbstractKubeHostListUpgradeStep, self).__init__(
+             step_name,
+             success_state,
+             fail_state,
+             timeout_in_secs=timeout_in_secs)
+        self._force = force
+        self._hosts = hosts
+        self._host_names = list()
+        self._host_uuids = list()
+        for host in hosts:
+            self._host_names.append(host.name)
+            self._host_uuids.append(host.uuid)
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractKubeHostListUpgradeStep, self).from_dict(data)
+        self._force = data['force']
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractKubeHostListUpgradeStep, self).as_dict()
+        data['force'] = self._force
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        return data
+
+
 class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
     """Kube Host Upgrade Control Plane - Strategy Step
 
@@ -3276,17 +3331,17 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
 
-class KubeHostUpgradeKubeletStep(AbstractKubeHostUpgradeStep):
+class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
     """Kube Host Upgrade Kubelet - Strategy Step
 
     This operation issues a host command, which indirectly updates the kube
     upgrade object, however additional calls to other hosts do not change it.
-    This step should only be invoked on a locked host.
+    This step should only be invoked on locked hosts.
     """
 
-    def __init__(self, host, force):
+    def __init__(self, hosts, force=True):
         super(KubeHostUpgradeKubeletStep, self).__init__(
-            host,
+            hosts,
             force,
             STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET,
             None,  # there is no kube upgrade success state for kubelets

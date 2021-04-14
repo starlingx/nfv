@@ -234,6 +234,7 @@ def create_strategy(token_id, url, strategy_name, controller_apply_type,
     elif 'kube-upgrade' == strategy_name:
         # required: 'to_version' passed to strategy as 'to-version'
         api_cmd_payload['to-version'] = kwargs['to_version']
+        api_cmd_payload['default-instance-action'] = default_instance_action
     elif 'sw-upgrade' == strategy_name:
         if 'start_upgrade' in kwargs and kwargs['start_upgrade']:
             api_cmd_payload['start-upgrade'] = True

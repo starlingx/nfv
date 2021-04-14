@@ -221,6 +221,9 @@ class KubeUpgradeStrategyCreateData(wsme_types.Base):
         int,
         mandatory=False,
         name='max-parallel-worker-hosts')
+    default_instance_action = wsme_types.wsattr(SwUpdateInstanceActionTypes,
+                                                mandatory=True,
+                                                name='default-instance-action')
     alarm_restrictions = wsme_types.wsattr(
         SwUpdateAlarmRestrictionTypes,
         mandatory=False,
@@ -693,7 +696,7 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
                        MAX_PARALLEL_KUBE_UPGRADE_HOSTS))
             rpc_request.max_parallel_worker_hosts = \
                 request_data.max_parallel_worker_hosts
-        rpc_request.default_instance_action = SW_UPDATE_INSTANCE_ACTION.MIGRATE
+        rpc_request.default_instance_action = request_data.default_instance_action
         rpc_request.alarm_restrictions = request_data.alarm_restrictions
         vim_connection = pecan.request.vim.open_connection()
         vim_connection.send(rpc_request.serialize())
