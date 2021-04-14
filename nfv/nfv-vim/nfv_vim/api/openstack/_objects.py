@@ -60,6 +60,7 @@ class OpenStackServices(Constants):
     HEAT = Constant('heat')
     FM = Constant('fm')
 
+
 # OpenStack Services Constant
 OPENSTACK_SERVICE = OpenStackServices()
 

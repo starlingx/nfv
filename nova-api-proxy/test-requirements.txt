@@ -10,4 +10,3 @@ fixtures>=3.0.0 # Apache-2.0/BSD
 mock>=2.0.0 # BSD
 pylint<2.1.0;python_version<"3.0" # GPLv2
 pylint<2.4.0;python_version>="3.0" # GPLv2
-testtools>=2.2.0 # MIT

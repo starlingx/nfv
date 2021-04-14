@@ -27,6 +27,7 @@ class AgentType(Constants):
     L3 = Constant('L3 agent')
     DHCP = Constant('DHCP agent')
 
+
 AGENT_TYPE = AgentType()
 
 
@@ -45,6 +46,7 @@ class L3RebalanceState(Constants):
     RESCHEDULE_NEW_AGENT = Constant('RESCHEDULE_NEW_AGENT')
     HOLD_OFF = Constant('HOLD_OFF')
     DONE = Constant('DONE')
+
 
 L3_REBALANCE_STATE = L3RebalanceState()
 

@@ -348,7 +348,7 @@ def setFilename(graphName):
         os.makedirs("Graphs/")
     os.chdir(os.path.join(dir, 'Graphs/'))
     if not graphName:
-            graphName = time.strftime("%m-%d-%Y")
+        graphName = time.strftime("%m-%d-%Y")
     if os.path.exists(str(graphName + ".html")):
         n = 1
         while(not validName):
