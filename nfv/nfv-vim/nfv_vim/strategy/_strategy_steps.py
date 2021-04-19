@@ -670,14 +670,15 @@ class SwPatchHostsStep(strategy.StrategyStep):
         if response['completed']:
             for sw_patch_host in response['result-data']:
                 if self._host_completed.get(sw_patch_host.name, False):
-                    if sw_patch_host.patch_current:
-                        self._host_completed[sw_patch_host.name] = \
-                            (True, True, '')
-
-                    elif sw_patch_host.patch_failed:
+                    # A patch can be listed as failed, and patch current
+                    # so check the failed state first.
+                    if sw_patch_host.patch_failed:
                         self._host_completed[sw_patch_host.name] = \
                             (True, False, "software update failed to apply on "
                                           "host %s" % sw_patch_host.name)
+                    elif sw_patch_host.patch_current:
+                        self._host_completed[sw_patch_host.name] = \
+                            (True, True, '')
 
             failed = False
             failed_reason = ''
