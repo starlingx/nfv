@@ -10,6 +10,10 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.patching')
 
+# WARNING: Any change to this timeout must be reflected in the config.ini
+# file for the nfvi plugins.
+REST_API_PATCH_APPLY_TIMEOUT = 180
+
 
 def query_patches(token):
     """
@@ -49,7 +53,8 @@ def apply_patch(token, patch_name):
 
     api_cmd = url + "/v1/apply/%s" % str(patch_name)
 
-    response = rest_api_request(token, "POST", api_cmd)
+    response = rest_api_request(token, "POST", api_cmd,
+                                timeout_in_secs=REST_API_PATCH_APPLY_TIMEOUT)
     return response
 
 
