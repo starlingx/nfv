@@ -175,9 +175,12 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         Returns unlock hosts step object initialized using the given dictionary
         """
         super(UnlockHostsStep, self).from_dict(data)
-        # deserialize retry_delay
-        self._retry_count = data['retry_count']
-        self._retry_delay = data['retry_delay']
+        # deserialize retry_delay and retry_count
+        # 'retry_delay' and 'retry_count' were added to this step since last
+        # release. Need to perform 'get' with a default value in case
+        # we are deserializing a strategy that does not contain these keys.
+        self._retry_count = data.get('retry_count', 0)
+        self._retry_delay = data.get('retry_delay', self.RETRY_DELAY)
 
         # Do not deserialize _retries, _wait_time and _retrying
         self._wait_time = 0

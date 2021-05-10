@@ -15,6 +15,7 @@ from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SwUpgrade
+from nfv_vim.strategy._strategy import strategy_rebuild_from_dict
 from nfv_vim.strategy._strategy import SwUpgradeStrategy
 
 from nfv_vim.nfvi.objects.v1 import UPGRADE_STATE
@@ -1830,3 +1831,50 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         }
 
         sw_update_testcase.validate_phase(build_phase, expected_results)
+
+    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
+                sw_update_testcase.fake_host_name_controller_1)
+    def test_sw_upgrade_strategy_controller_missing_strategy_fields(self):
+        """
+        Test the sw_upgrade strategy add controller strategy stages:
+        - serial apply
+        Verify:
+        - controller-0 upgraded
+        - the missing fields do not cause deserialization failures
+        """
+        self.create_host('controller-0')
+        self.create_host('controller-1')
+
+        controller_hosts = []
+        for host in self._host_table.values():
+            if (HOST_PERSONALITY.CONTROLLER in host.personality and
+                    HOST_NAME.CONTROLLER_0 == host.name):
+                controller_hosts.append(host)
+        strategy = self.create_sw_upgrade_strategy()
+        strategy._add_controller_strategy_stages(controllers=controller_hosts,
+                                                 reboot=True)
+
+        strategy_dict = strategy.as_dict()
+        # remove the fields that do not exist in the previous version
+        #  - the retry fields in 'unlock'
+        # in this strategy the unlock hosts stage is located at:
+        # - first stage of apply is sw-upgrade-controllers for controller-0
+        # - 4th step (index 3) in that stage is the unlock-hosts step
+
+        # Ensure the field exists before we remove it
+        self.assertEqual(
+            120,
+            strategy_dict['apply_phase']['stages'][0]['steps'][3]['retry_delay'])
+        # remove the fields that would not exist in an older version
+        strategy_dict['apply_phase']['stages'][0]['steps'][3].pop('retry_delay')
+        strategy_dict['apply_phase']['stages'][0]['steps'][3].pop('retry_count')
+
+        # rebuild from the dictionary. If the new code is not robust, it would
+        # raise an exception
+        new_strategy = strategy_rebuild_from_dict(strategy_dict)
+
+        # the default value should be re-populated
+        strategy_dict = new_strategy.as_dict()
+        self.assertEqual(
+            120,
+            strategy_dict['apply_phase']['stages'][0]['steps'][3]['retry_delay'])
