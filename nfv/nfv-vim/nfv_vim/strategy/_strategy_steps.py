@@ -2120,13 +2120,11 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         self._host_uuids = list()
         self._monitoring_fw_update = False
         self._wait_time = 0
-        self._host_failed_device_update = dict()
         self._host_completed = dict()
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
             self._host_completed[host.name] = (False, False, '')
-            self._host_failed_device_update[host.name] = list()
 
     @coroutine
     def _get_host_callback(self):
@@ -2306,7 +2304,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         self._hosts = list()
         self._host_uuids = list()
         self._host_completed = dict()
-
+        self._wait_time = 0
         self._monitoring_fw_update = False
 
         self._host_names = data['entity_names']
@@ -2402,7 +2400,7 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
         self._hosts = list()
         self._host_uuids = list()
         self._host_completed = dict()
-
+        self._wait_time = 0
         self._host_names = data['entity_names']
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
