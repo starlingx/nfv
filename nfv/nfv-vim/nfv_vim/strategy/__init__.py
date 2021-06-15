@@ -1,22 +1,34 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common.strategy import *  # noqa: F401,F403
 from nfv_vim.strategy._strategy import FwUpdateStrategy  # noqa: F401
+from nfv_vim.strategy._strategy import KubeUpgradeStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import strategy_rebuild_from_dict  # noqa: F401
 from nfv_vim.strategy._strategy import SwPatchStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import SwUpgradeStrategy  # noqa: F401
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT  # noqa: F401
 from nfv_vim.strategy._strategy_stages import STRATEGY_STAGE_NAME  # noqa: F401
+from nfv_vim.strategy._strategy_steps import ApplySwPatchesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import DisableHostServicesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import FwUpdateAbortHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import FwUpdateHostsStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeHostUpgradeControlPlaneStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeHostUpgradeKubeletStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeUpgradeCleanupStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeUpgradeCompleteStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeUpgradeDownloadImagesStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeUpgradeNetworkingStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeUpgradeStartStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import LockHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import MigrateInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryAlarmsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryFwUpdateHostStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import QueryKubeHostUpgradeStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import QueryKubeUpgradeStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import QueryKubeVersionsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryUpgradeStep  # noqa: F401

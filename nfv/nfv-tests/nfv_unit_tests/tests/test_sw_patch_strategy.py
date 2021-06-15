@@ -163,8 +163,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -182,8 +182,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -201,8 +201,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -273,8 +273,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1', 'compute-5']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -293,8 +293,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-0', 'compute-2']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -313,8 +313,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-3', 'compute-4']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -333,8 +333,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-6', 'compute-7']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -353,8 +353,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-8', 'compute-9']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
             ]
@@ -436,8 +436,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1', 'compute-5']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -456,8 +456,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-0', 'compute-6']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -476,8 +476,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2', 'compute-7']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -496,8 +496,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-3', 'compute-8']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -516,8 +516,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-4', 'compute-9']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
             ]
@@ -609,8 +609,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1', 'compute-5']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -629,8 +629,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-0', 'compute-6']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -649,8 +649,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2', 'compute-7']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -669,8 +669,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-3', 'compute-8']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -689,8 +689,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-4', 'compute-9']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
             ]
@@ -778,8 +778,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-0', 'compute-2']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -798,8 +798,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -818,8 +818,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-4', 'compute-7']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -838,8 +838,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-5', 'compute-8']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -858,8 +858,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-6', 'compute-9']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
             ]
@@ -925,8 +925,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -945,8 +945,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -965,8 +965,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -1076,8 +1076,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1096,8 +1096,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1116,8 +1116,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -1225,7 +1225,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-2']},
                      {'name': 'reboot-hosts',
                       'entity_names': ['compute-3']},
-                     {'name': 'system-stabilize', 'timeout': 60}
+                     {'name': 'wait-alarms-clear', 'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1243,7 +1243,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0', 'compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0', 'test_instance_1']},
-                     {'name': 'system-stabilize', 'timeout': 60}
+                     {'name': 'wait-alarms-clear', 'timeout': 600}
                  ]
                 },
             ]
@@ -1311,8 +1311,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1331,8 +1331,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1347,8 +1347,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  }
             ]
@@ -1414,8 +1414,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0', 'compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0', 'test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -1493,8 +1493,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0', 'compute-2', 'compute-3']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0', 'test_instance_2', 'test_instance_3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1513,8 +1513,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -1581,7 +1581,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2']},
-                     {'name': 'system-stabilize'}
+                     {'name': 'wait-alarms-clear'}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1596,7 +1596,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-3']},
-                     {'name': 'system-stabilize'}
+                     {'name': 'wait-alarms-clear'}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1615,7 +1615,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize'}
+                     {'name': 'wait-alarms-clear'}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1634,8 +1634,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -1704,6 +1704,286 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
+    def test_sw_patch_strategy_worker_stages_serial_no_openstack(self):
+        """
+        Test the sw_patch strategy with no openstack, add worker strategy stages:
+        - serial apply
+        - no stop start instance action
+        - test both reboot and no reboot cases
+        Verify:
+        - hosts are patched in order and and doesn't wait for alarms to clear
+        """
+        self.create_host('compute-0', openstack_installed=False)
+        self.create_host('compute-1', openstack_installed=False)
+        self.create_host('compute-2', openstack_installed=False)
+        self.create_host('compute-3', openstack_installed=False)
+
+        worker_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        # Sort worker hosts so the order of the steps is deterministic
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        # Test reboot patches
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                              reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 4,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-2']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-2']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-2']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-3']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                }
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+        # Test no reboot patches
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                              reboot=False)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 4,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-2']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30}
+                 ]
+                },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30}
+                 ]
+                }
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_patch_strategy_worker_stages_parallel_no_openstack(self):
+        """
+        Test the sw_patch strategy with no openstack add worker strategy stages:
+        - serial apply
+        - no migrate instance action
+        - test both reboot and no reboot cases
+        Verify:
+        - hosts are patched and and doesn't wait for alarms to clear
+        """
+        self.create_host('compute-0', openstack_installed=False)
+        self.create_host('compute-1', openstack_installed=False)
+        self.create_host('compute-2', openstack_installed=False)
+        self.create_host('compute-3', openstack_installed=False)
+
+        worker_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        # Sort worker hosts so the order of the steps is deterministic
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        # Test reboot patches
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
+            max_parallel_worker_hosts=2
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                              reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 2,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-2', 'compute-3']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-2', 'compute-3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-2', 'compute-3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 60}
+                 ]
+                }
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+        # Test no reboot patches
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
+            max_parallel_worker_hosts=2
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                              reboot=False)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 2,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0', 'compute-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30},
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-2', 'compute-3']},
+                     {'name': 'system-stabilize',
+                      'timeout': 30},
+                 ]
+                 }
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
     def test_sw_patch_strategy_worker_stages_serial_stop_start_locked_host(self):
         """
         Test the sw_patch strategy add worker strategy stages:
@@ -1766,8 +2046,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'reboot-hosts',
                       'entity_names': ['compute-2']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1786,8 +2066,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1806,8 +2086,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1826,8 +2106,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-3']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_2']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  }
             ]
@@ -1952,8 +2232,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                        'compute-02',
                                        'compute-03',
                                        'compute-04']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -1980,8 +2260,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                        'compute-07',
                                        'compute-08',
                                        'compute-09']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -2002,8 +2282,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-10',
                                        'compute-11',
                                        'compute-12']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -2070,8 +2350,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-2']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -2086,8 +2366,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -2104,8 +2384,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -2122,8 +2402,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                 }
             ]
@@ -2682,7 +2962,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 1800},
                  ]
                 },
                 {'name': 'sw-patch-controllers',
@@ -2700,7 +2980,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 1800},
                  ]
                  },
             ]
@@ -2791,8 +3071,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 1800},
                  ]
                 },
                 {'name': 'sw-patch-controllers',
@@ -2809,8 +3089,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 1800},
                  ]
                  },
             ]
@@ -2858,7 +3138,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_patch_strategy_aio_stages_parallel_stop_start(self):
+    def test_sw_patch_strategy_aio_duplex_stages_parallel_stop_start(self):
         """
         Test the sw_patch strategy add worker strategy stages:
         - aio hosts
@@ -2916,7 +3196,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 1800},
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -2938,7 +3218,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                   ]
                  },
             ]
@@ -2985,7 +3265,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_patch_strategy_aio_stages_serial_stop_start(self):
+    def test_sw_patch_strategy_aio_duplex_stages_serial_stop_start(self):
         """
         Test the sw_patch strategy add worker strategy stages:
         - aio hosts
@@ -3041,7 +3321,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -3063,7 +3343,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                   ]
                  },
             ]
@@ -3072,7 +3352,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_patch_strategy_aio_stages_serial_stop_start_no_instances(self):
+    def test_sw_patch_strategy_aio_duplex_stages_serial_stop_start_no_instances(self):
         """
         Test the sw_patch strategy add worker strategy stages:
         - aio hosts
@@ -3118,7 +3398,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -3136,7 +3416,80 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
+                  ]
+                 },
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_patch_strategy_aio_duplex_stages_serial_stop_start_no_openstack(self):
+        """
+        Test the sw_patch strategy add worker strategy stages:
+        - aio hosts
+        - no instances
+        - serial apply
+        - stop start instance action
+        """
+        self.create_host('controller-0', aio=True, openstack_installed=False)
+        self.create_host('controller-1', aio=True, openstack_installed=False)
+
+        worker_hosts = []
+        for host in self._host_table.values():
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        # Sort worker hosts so the order of the steps is deterministic
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        strategy = create_sw_patch_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START
+        )
+
+        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
+                                              reboot=True)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 2,
+            'stages': [
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 7,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-0']},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 1800}
+                 ]
+                },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 7,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['controller-1']},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 1800}
                   ]
                  },
             ]
@@ -3213,7 +3566,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 1800},
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3235,7 +3588,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3254,8 +3607,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0', 'compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_2', 'test_instance_3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
             ]
@@ -3377,7 +3730,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3399,6 +3752,26 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
+                      'timeout': 1800}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 8,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'stop-instances',
+                      'entity_names': ['test_instance_2']},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'start-instances',
+                      'entity_names': ['test_instance_2']},
+                     {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
                  },
@@ -3407,26 +3780,6 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'stop-instances',
-                      'entity_names': ['test_instance_2']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'sw-patch-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'start-instances',
-                      'entity_names': ['test_instance_2']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
-                 ]
-                 },
-                {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'stop-instances',
                       'entity_names': ['test_instance_3']},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-1']},
@@ -3438,8 +3791,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-1']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  }
             ]
@@ -3497,7 +3850,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3515,6 +3868,22 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
+                      'timeout': 1800}
+                 ]
+                 },
+                {'name': 'sw-patch-worker-hosts',
+                 'total_steps': 6,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'lock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'sw-patch-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'system-stabilize',
+                      'timeout': 15},
+                     {'name': 'unlock-hosts',
+                      'entity_names': ['compute-0']},
+                     {'name': 'wait-alarms-clear',
                       'timeout': 600}
                  ]
                  },
@@ -3523,22 +3892,6 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'lock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'sw-patch-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     {'name': 'unlock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
-                 ]
-                 },
-                {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 6,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'lock-hosts',
                       'entity_names': ['compute-1']},
                      {'name': 'sw-patch-hosts',
                       'entity_names': ['compute-1']},
@@ -3546,8 +3899,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  }
             ]
@@ -3591,13 +3944,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         assert success is False, "Strategy creation did not fail"
 
-    def test_sw_patch_strategy_aio_simplex_stages_serial_migrate_no_openstack(
+    def test_sw_patch_strategy_aio_simplex_stages_serial_no_openstack(
             self):
         """
         Test the sw_patch strategy add worker strategy stages:
         - simplex aio host (no openstack)
         - serial apply
-        - migrate instance action
+        - no migrate instance action
         """
         self.create_host('controller-0', aio=True, openstack_installed=False)
 
@@ -3632,8 +3985,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 1800},
                  ]
                 },
             ]
@@ -3691,7 +4044,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 1800},
                  ]
                 },
             ]
@@ -3742,7 +4095,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 1800}
                  ]
                 },
             ]
@@ -3808,8 +4161,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      {'name': 'unlock-hosts',
                       'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3828,8 +4181,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'entity_names': ['compute-0']},
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 60}
+                     {'name': 'wait-alarms-clear',
+                      'timeout': 600}
                  ]
                  }
             ]

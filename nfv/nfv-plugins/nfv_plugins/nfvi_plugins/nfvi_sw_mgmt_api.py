@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2018 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -212,6 +212,74 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
                            "software update to host %s, error=%s."
                            % (host_name, e))
 
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def apply_patches(self, future, patch_names, callback):
+        """
+        Apply a software patch that has already been uploaded
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._token is None or self._token.is_expired():
+                future.work(openstack.get_token, self._directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    return
+
+                self._token = future.result.data
+
+            for patch_name in patch_names:
+                future.work(patching.apply_patch, self._token, patch_name)
+                future.result = (yield)
+
+                if not future.result.is_complete():
+                    return
+
+            # query the patches and return their state
+            future.work(patching.query_patches, self._token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                return
+
+            sw_patches = list()
+
+            if future.result.data is not None:
+                sw_patch_data_list = future.result.data.get('pd', [])
+                for sw_patch_name in sw_patch_data_list.keys():
+                    sw_patch_data = sw_patch_data_list[sw_patch_name]
+                    sw_patch = nfvi.objects.v1.SwPatch(
+                        sw_patch_name, sw_patch_data['sw_version'],
+                        sw_patch_data['repostate'], sw_patch_data['patchstate'])
+                    sw_patches.append(sw_patch)
+
+            response['result-data'] = sw_patches
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._token is not None:
+                    self._token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception while trying to apply "
+                               "software patches [%s], error=%s."
+                               % (patch_names, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to apply "
+                           "software patches [%s], error=%s."
+                           % (patch_names, e))
         finally:
             callback.send(response)
             callback.close()

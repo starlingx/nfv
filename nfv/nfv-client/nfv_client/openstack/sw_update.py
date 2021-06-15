@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016,2020 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -230,6 +230,10 @@ def create_strategy(token_id, url, strategy_name, controller_apply_type,
         api_cmd_payload['default-instance-action'] = default_instance_action
     elif 'fw-update' == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
+        api_cmd_payload['default-instance-action'] = default_instance_action
+    elif 'kube-upgrade' == strategy_name:
+        # required: 'to_version' passed to strategy as 'to-version'
+        api_cmd_payload['to-version'] = kwargs['to_version']
         api_cmd_payload['default-instance-action'] = default_instance_action
     elif 'sw-upgrade' == strategy_name:
         if 'start_upgrade' in kwargs and kwargs['start_upgrade']:

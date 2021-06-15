@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,6 +11,7 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_vim.api._link import Link
 from nfv_vim.api.controllers.v1.orchestration.sw_update import FwUpdateAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update import KubeUpgradeAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SwPatchAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SwUpgradeAPI
 
@@ -32,6 +33,8 @@ class OrchestrationDescription(wsme_types.Base):
             Link.make_link('self', url, 'orchestration'),
             Link.make_link('sw-patch', url, 'orchestration/sw-patch', ''),
             Link.make_link('sw-upgrade', url, 'orchestration/sw-upgrade', ''),
+            Link.make_link('kube-upgrade',
+                           url, 'orchestration/kube-upgrade', ''),
             Link.make_link('fw-update', url, 'orchestration/fw-update', '')]
         return description
 
@@ -48,6 +51,8 @@ class OrchestrationAPI(rest.RestController):
             return SwUpgradeAPI(), remainder
         elif 'fw-update' == key:
             return FwUpdateAPI(), remainder
+        elif 'kube-upgrade' == key:
+            return KubeUpgradeAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)
 

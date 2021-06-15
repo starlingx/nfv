@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016,2020 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,6 +9,369 @@ from six.moves import urllib
 import sys
 
 from nfv_client import sw_update
+
+
+REGISTERED_STRATEGIES = {}
+
+
+def register_strategy(cmd_area, strategy_name):
+    """
+    Registers a parser command with an update strategy name
+
+    :param cmd_area: the parser command to register
+    :param strategy_name: the strategy to associate with this parser
+    """
+    REGISTERED_STRATEGIES[cmd_area] = strategy_name
+
+
+def get_strategy_name(cmd_area):
+    """
+    Determines the strategy name for a parser command
+
+    :param cmd_area: the parser command to lookup
+    :returns: the strategy name associated with the parser
+    :raises: ValueError if the parser was never registered
+    """
+    strategy_name = REGISTERED_STRATEGIES.get(cmd_area, None)
+    if strategy_name is None:
+        raise ValueError("Unknown command area, %s, given" % cmd_area)
+    return strategy_name
+
+
+def get_extra_create_args(cmd_area, args):
+    """
+    Return the extra create arguments supported by a strategy type
+
+    :param cmd_area: the strategy that supports additional create arguments
+    :param args: the parsed arguments to extract the additional fields from
+    :returns: a dictionary of additional kwargs for the create_strategy command
+    :raises: ValueError if a strategy has been registered but not update here
+    """
+    if 'patch-strategy' == cmd_area:
+        # no additional kwargs for patch
+        return {}
+    elif 'upgrade-strategy' == cmd_area:
+        # upgrade supports: complete_upgrade
+        return {'complete_upgrade': args.complete_upgrade}
+    elif 'fw-update-strategy' == cmd_area:
+        # no additional kwargs for firmware update
+        return {}
+    elif 'kube-upgrade-strategy' == cmd_area:
+        # kube upgrade supports: to_version
+        return {'to_version': args.to_version}
+    else:
+        raise ValueError("Unknown command area, %s, given" % cmd_area)
+
+
+def add_list_arg(some_cmd, some_arg, some_list):
+    """
+    Adds an argument to a command accepting a list of valid values.
+
+    :param some_cmd: a command parser object that is adding a new argument
+    :param some_arg: a string indicating the new argument. ex: --foo
+    :param some_list: a list of valid values for the argument.
+
+    The list cannot be empty.  The first item in the list is the default
+    """
+    default = some_list[0]
+    some_cmd.add_argument(some_arg,
+                          default=default,
+                          choices=some_list,
+                          help='defaults to ' + default)
+
+
+def setup_abort_cmd(parser):
+    """
+    Sets up an 'abort' command for a strategy command parser.
+
+    ex: sw-manager patch-strategy abort <some args>
+
+    :param parser: the strategy parser to add the create command to.
+    """
+    abort_cmd = parser.add_parser('abort',
+                                  help='Abort a strategy')
+    abort_cmd.set_defaults(cmd='abort')
+    abort_cmd.add_argument('--stage-id',
+                           help='stage identifier to abort')
+    return abort_cmd
+
+
+def setup_apply_cmd(parser):
+    """
+    Sets up an 'apply' command for a strategy command parser.
+
+    ex: sw-manager patch-strategy apply <some args>
+
+    :param parser: the strategy parser to register the command under
+    """
+    apply_cmd = parser.add_parser('apply',
+                                  help='Apply a strategy')
+    apply_cmd.set_defaults(cmd='apply')
+    apply_cmd.add_argument('--stage-id',
+                           default=None,
+                           help='stage identifier to apply')
+    return apply_cmd
+
+
+def setup_create_cmd(parser,
+                     controller_types,
+                     storage_types,
+                     worker_types,
+                     instance_actions,
+                     alarm_restrictions,
+                     min_parallel=1,
+                     max_parallel=5):
+    """
+    Sets up a 'create' command for a strategy command parser.
+
+    ex: sw-manager patch-strategy create <some args>
+
+    :param parser: the strategy parser to register the command under
+    :param controller_types: list of the valid apply types for controller
+    :param storage_types: list of the valid apply types for storage
+    :param worker_types: list of the valid apply types for worker
+    :param instance_actions: list of valid VM actions during worker apply
+    :param alarm_restrictions: list of valid alarm restrictions
+    :param min_parallel: minimum value (inclusive) for updating parallel hosts
+    :param max_parallel: maximum value (inclusive) for updating parallel hosts
+
+    The lists cannot be empty.  The first item in the lists is the default
+    """
+    create_cmd = parser.add_parser('create', help='Create a strategy')
+    create_cmd.set_defaults(cmd='create')
+
+    add_list_arg(create_cmd, '--controller-apply-type', controller_types)
+    add_list_arg(create_cmd, '--storage-apply-type', storage_types)
+    add_list_arg(create_cmd, '--worker-apply-type', worker_types)
+    add_list_arg(create_cmd, '--instance-action', instance_actions)
+    add_list_arg(create_cmd, '--alarm-restrictions', alarm_restrictions)
+    create_cmd.add_argument('--max-parallel-worker-hosts',
+                            type=int,
+                            choices=range(min_parallel, max_parallel + 1),
+                            help='maximum worker hosts to update in parallel')
+
+    return create_cmd
+
+
+def setup_delete_cmd(parser):
+    """
+    Sets up a 'delete' command for a strategy command parser.
+
+    ex: sw-manager patch-strategy delete <some args>
+
+    :param parser: the strategy parser to register the command under
+    """
+    delete_cmd = parser.add_parser('delete', help='Delete a strategy')
+    delete_cmd.set_defaults(cmd='delete')
+    delete_cmd.add_argument('--force',
+                            action='store_true',
+                            help=argparse.SUPPRESS)
+    return delete_cmd
+
+
+def setup_show_cmd(parser):
+    """
+    Sets up a 'show' command for a strategy command parser.
+
+    ex: sw-manager patch-strategy show <some args>
+
+    :param parser: the strategy parser to register the command under
+    """
+    show_cmd = parser.add_parser('show', help='Show a strategy')
+    show_cmd.set_defaults(cmd='show')
+    show_cmd.add_argument('--details',
+                          action='store_true',
+                          help='show strategy details')
+    show_cmd.add_argument('--active',
+                          action='store_true',
+                          help='show currently active strategy step')
+    return show_cmd
+
+
+def setup_fw_update_parser(commands):
+    """Firmware Update Strategy Commands"""
+
+    cmd_area = 'fw-update-strategy'
+    register_strategy(cmd_area, sw_update.STRATEGY_NAME_FW_UPDATE)
+    cmd_parser = commands.add_parser(cmd_area,
+                                     help='Firmware Update Strategy')
+    cmd_parser.set_defaults(cmd_area=cmd_area)
+
+    sub_cmds = cmd_parser.add_subparsers(title='Firmware Update Commands',
+                                         metavar='')
+    sub_cmds.required = True
+
+    # define the create command
+    # alarm restrictions, defaults to strict
+    create_strategy_cmd = setup_create_cmd(
+        sub_cmds,
+        [sw_update.APPLY_TYPE_IGNORE],  # controller supports ignore
+        [sw_update.APPLY_TYPE_IGNORE],  # storage supports ignore
+        [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
+         sw_update.INSTANCE_ACTION_MIGRATE],
+        [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
+         sw_update.ALARM_RESTRICTIONS_RELAXED],
+        min_parallel=2,
+        max_parallel=5  # fw update supports 2..5 workers in parallel
+    )
+    # There are no additional create options for firmware update
+
+    # define the delete command
+    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    # define the apply command
+    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    # define the abort command
+    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    # define the show command
+    show_strategy_cmd = setup_show_cmd(sub_cmds)
+
+
+def setup_kube_upgrade_parser(commands):
+    """Kubernetes Upgrade Strategy Commands"""
+
+    cmd_area = 'kube-upgrade-strategy'
+    register_strategy(cmd_area, sw_update.STRATEGY_NAME_KUBE_UPGRADE)
+    cmd_parser = commands.add_parser(cmd_area,
+                                     help='Kubernetes Upgrade Strategy')
+    cmd_parser.set_defaults(cmd_area=cmd_area)
+
+    sub_cmds = cmd_parser.add_subparsers(title='Kubernetes Upgrade Commands',
+                                         metavar='')
+    sub_cmds.required = True
+
+    # define the create command
+    create_strategy_cmd = setup_create_cmd(
+        sub_cmds,
+        [sw_update.APPLY_TYPE_SERIAL,  # controller supports serial only
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # storage supports serial only
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
+         sw_update.INSTANCE_ACTION_MIGRATE],
+        [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
+         sw_update.ALARM_RESTRICTIONS_RELAXED],
+        min_parallel=2,
+        max_parallel=10  # kube upgrade supports 2..10 workers in parallel
+    )
+
+    # add kube specific arguments to the create command
+    # The get_extra_create_args method is updated to align with these
+    # kube upgrade create requires 'to-version'
+    create_strategy_cmd.add_argument(
+        '--to-version',
+        required=True,
+        help='The kubernetes version')
+
+    # define the delete command
+    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    # define the apply command
+    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    # define the abort command
+    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    # define the show command
+    show_strategy_cmd = setup_show_cmd(sub_cmds)
+
+
+def setup_patch_parser(commands):
+    """Patch Strategy Commands"""
+
+    cmd_area = 'patch-strategy'
+    register_strategy(cmd_area, sw_update.STRATEGY_NAME_SW_PATCH)
+    cmd_parser = commands.add_parser(cmd_area,
+                                     help='Patch Strategy')
+    cmd_parser.set_defaults(cmd_area=cmd_area)
+
+    sub_cmds = cmd_parser.add_subparsers(title='Software Patch Commands',
+                                         metavar='')
+    sub_cmds.required = True
+
+    # define the create command
+    # alarm restrictions, defaults to strict
+    create_strategy_cmd = setup_create_cmd(
+        sub_cmds,
+        [sw_update.APPLY_TYPE_SERIAL,  # controller supports serial
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # storage supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
+         sw_update.INSTANCE_ACTION_MIGRATE],
+        [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
+         sw_update.ALARM_RESTRICTIONS_RELAXED],
+        min_parallel=2,
+        max_parallel=100  # patch supports 2..100 workers in parallel
+    )
+
+    # define the delete command
+    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    # define the apply command
+    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    # define the abort command
+    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    # define the show command
+    show_strategy_cmd = setup_show_cmd(sub_cmds)
+
+
+def setup_upgrade_parser(commands):
+    """Upgrade Strategy Commands"""
+
+    cmd_area = 'upgrade-strategy'
+    register_strategy(cmd_area, sw_update.STRATEGY_NAME_SW_UPGRADE)
+    cmd_parser = commands.add_parser(cmd_area,
+                                     help='Upgrade Strategy')
+    cmd_parser.set_defaults(cmd_area=cmd_area)
+
+    sub_cmds = cmd_parser.add_subparsers(title='Software Upgrade Commands',
+                                         metavar='')
+    sub_cmds.required = True
+
+    # define the create command
+    # alarm restrictions, defaults to strict
+    create_strategy_cmd = setup_create_cmd(
+        sub_cmds,
+        [sw_update.APPLY_TYPE_SERIAL],  # hard coded to serial
+        [sw_update.APPLY_TYPE_SERIAL,  # storage supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.INSTANCE_ACTION_MIGRATE],   # hardcoded to migrate
+        [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
+         sw_update.ALARM_RESTRICTIONS_RELAXED],
+        min_parallel=2,
+        max_parallel=10  # upgrade supports 2..10 workers in parallel
+    )
+
+    # add upgrade specific arguments to the create command
+    # The get_extra_create_args method is updated to align with these
+
+    # Disable support for --start-upgrade as it was not completed
+    # create_strategy_cmd.add_argument('--start-upgrade',
+    #                                  action='store_true',
+    #                                  help=argparse.SUPPRESS)
+
+    create_strategy_cmd.add_argument('--complete-upgrade',
+                                     action='store_true',
+                                     help=argparse.SUPPRESS)
+
+    # define the delete command
+    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    # define the apply command
+    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    # define the abort command
+    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    # define the show command
+    show_strategy_cmd = setup_show_cmd(sub_cmds)
 
 
 def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
@@ -30,197 +393,17 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
         commands = parser.add_subparsers(title='Commands', metavar='')
         commands.required = True
 
-        # Software Patch Commands
-        sw_patch_parser = commands.add_parser('patch-strategy',
-                                              help='Patch Strategy')
-        sw_patch_parser.set_defaults(cmd_area='patch-strategy')
+        # Add firmware update strategy commands
+        setup_fw_update_parser(commands)
 
-        sw_patch_cmds = sw_patch_parser.add_subparsers(
-            title='Software Patch Commands', metavar='')
-        sw_patch_cmds.required = True
+        # Add kubernetes upgrade strategy commands
+        setup_kube_upgrade_parser(commands)
 
-        sw_patch_create_strategy_cmd \
-            = sw_patch_cmds.add_parser('create', help='Create a strategy')
-        sw_patch_create_strategy_cmd.set_defaults(cmd='create')
-        sw_patch_create_strategy_cmd.add_argument(
-            '--controller-apply-type', default=sw_update.APPLY_TYPE_SERIAL,
-            choices=[sw_update.APPLY_TYPE_SERIAL, sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to serial')
-        sw_patch_create_strategy_cmd.add_argument(
-            '--storage-apply-type', default=sw_update.APPLY_TYPE_SERIAL,
-            choices=[sw_update.APPLY_TYPE_SERIAL, sw_update.APPLY_TYPE_PARALLEL,
-                     sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to serial')
-        sw_patch_create_strategy_cmd.add_argument(
-            '--worker-apply-type', default=sw_update.APPLY_TYPE_SERIAL,
-            choices=[sw_update.APPLY_TYPE_SERIAL, sw_update.APPLY_TYPE_PARALLEL,
-                     sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to serial')
-        sw_patch_create_strategy_cmd.add_argument(
-            '--max-parallel-worker-hosts', type=int, choices=range(2, 101),
-            help='maximum worker hosts to patch in parallel')
-        sw_patch_create_strategy_cmd.add_argument(
-            '--instance-action', default=sw_update.INSTANCE_ACTION_STOP_START,
-            choices=[sw_update.INSTANCE_ACTION_MIGRATE,
-                     sw_update.INSTANCE_ACTION_STOP_START],
-            help='defaults to stop-start')
-        sw_patch_create_strategy_cmd.add_argument(
-            '--alarm-restrictions', default=sw_update.ALARM_RESTRICTIONS_STRICT,
-            choices=[sw_update.ALARM_RESTRICTIONS_STRICT,
-                     sw_update.ALARM_RESTRICTIONS_RELAXED],
-            help='defaults to strict')
+        # Add software patch strategy commands
+        setup_patch_parser(commands)
 
-        sw_patch_delete_strategy_cmd \
-            = sw_patch_cmds.add_parser('delete', help='Delete a strategy')
-        sw_patch_delete_strategy_cmd.set_defaults(cmd='delete')
-        sw_patch_delete_strategy_cmd.add_argument(
-            '--force', action='store_true', help=argparse.SUPPRESS)
-
-        sw_patch_apply_strategy_cmd \
-            = sw_patch_cmds.add_parser('apply', help='Apply a strategy')
-        sw_patch_apply_strategy_cmd.set_defaults(cmd='apply')
-        sw_patch_apply_strategy_cmd.add_argument(
-            '--stage-id', default=None, help='stage identifier to apply')
-
-        sw_patch_abort_strategy_cmd \
-            = sw_patch_cmds.add_parser('abort', help='Abort a strategy')
-        sw_patch_abort_strategy_cmd.set_defaults(cmd='abort')
-        sw_patch_abort_strategy_cmd.add_argument(
-            '--stage-id', help='stage identifier to abort')
-
-        sw_patch_show_strategy_cmd \
-            = sw_patch_cmds.add_parser('show', help='Show a strategy')
-        sw_patch_show_strategy_cmd.set_defaults(cmd='show')
-        sw_patch_show_strategy_cmd.add_argument(
-            '--details', action='store_true', help='show strategy details')
-
-        # Software Upgrade Commands
-        sw_upgrade_parser = commands.add_parser('upgrade-strategy',
-                                                help='Upgrade Strategy')
-        sw_upgrade_parser.set_defaults(cmd_area='upgrade-strategy')
-
-        sw_upgrade_cmds = sw_upgrade_parser.add_subparsers(
-            title='Software Upgrade Commands', metavar='')
-        sw_upgrade_cmds.required = True
-
-        sw_upgrade_create_strategy_cmd \
-            = sw_upgrade_cmds.add_parser('create', help='Create a strategy')
-        sw_upgrade_create_strategy_cmd.set_defaults(cmd='create')
-        sw_upgrade_create_strategy_cmd.add_argument(
-            '--storage-apply-type', default=sw_update.APPLY_TYPE_SERIAL,
-            choices=[sw_update.APPLY_TYPE_SERIAL, sw_update.APPLY_TYPE_PARALLEL,
-                     sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to serial')
-        sw_upgrade_create_strategy_cmd.add_argument(
-            '--worker-apply-type', default=sw_update.APPLY_TYPE_SERIAL,
-            choices=[sw_update.APPLY_TYPE_SERIAL, sw_update.APPLY_TYPE_PARALLEL,
-                     sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to serial')
-        sw_upgrade_create_strategy_cmd.add_argument(
-            '--max-parallel-worker-hosts', type=int, choices=range(2, 11),
-            help='maximum worker hosts to upgrade in parallel')
-        # Disable support for --start-upgrade as it was not completed
-        # sw_upgrade_create_strategy_cmd.add_argument(
-        #     '--start-upgrade', action='store_true',
-        #     help=argparse.SUPPRESS)
-        sw_upgrade_create_strategy_cmd.add_argument(
-            '--complete-upgrade', action='store_true', help=argparse.SUPPRESS)
-        sw_upgrade_create_strategy_cmd.add_argument(
-            '--alarm-restrictions', default=sw_update.ALARM_RESTRICTIONS_STRICT,
-            choices=[sw_update.ALARM_RESTRICTIONS_STRICT,
-                     sw_update.ALARM_RESTRICTIONS_RELAXED],
-            help='defaults to strict')
-
-        sw_upgrade_delete_strategy_cmd \
-            = sw_upgrade_cmds.add_parser('delete', help='Delete a strategy')
-        sw_upgrade_delete_strategy_cmd.set_defaults(cmd='delete')
-        sw_upgrade_delete_strategy_cmd.add_argument(
-            '--force', action='store_true', help=argparse.SUPPRESS)
-
-        sw_upgrade_apply_strategy_cmd \
-            = sw_upgrade_cmds.add_parser('apply', help='Apply a strategy')
-        sw_upgrade_apply_strategy_cmd.set_defaults(cmd='apply')
-        sw_upgrade_apply_strategy_cmd.add_argument(
-            '--stage-id', default=None, help='stage identifier to apply')
-
-        sw_upgrade_abort_strategy_cmd \
-            = sw_upgrade_cmds.add_parser('abort', help='Abort a strategy')
-        sw_upgrade_abort_strategy_cmd.set_defaults(cmd='abort')
-        sw_upgrade_abort_strategy_cmd.add_argument(
-            '--stage-id', help='stage identifier to abort')
-
-        sw_upgrade_show_strategy_cmd \
-            = sw_upgrade_cmds.add_parser('show', help='Show a strategy')
-        sw_upgrade_show_strategy_cmd.set_defaults(cmd='show')
-        sw_upgrade_show_strategy_cmd.add_argument(
-            '--details', action='store_true', help='show strategy details')
-
-        # Firmware Update Commands
-        fw_update_parser = commands.add_parser('fw-update-strategy',
-            help='Firmware Update Strategy')
-        fw_update_parser.set_defaults(cmd_area='fw-update-strategy')
-
-        fw_update_cmds = fw_update_parser.add_subparsers(
-            title='Firmware Update Commands', metavar='')
-        fw_update_cmds.required = True
-
-        fw_update_create_strategy_cmd \
-            = fw_update_cmds.add_parser('create', help='Create a strategy')
-        fw_update_create_strategy_cmd.set_defaults(cmd='create')
-        fw_update_create_strategy_cmd.add_argument('--controller-apply-type',
-            default=sw_update.APPLY_TYPE_IGNORE,
-            choices=[sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to ignore')
-        fw_update_create_strategy_cmd.add_argument('--storage-apply-type',
-            default=sw_update.APPLY_TYPE_IGNORE,
-            choices=[sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to ignore')
-        fw_update_create_strategy_cmd.add_argument('--worker-apply-type',
-            default=sw_update.APPLY_TYPE_SERIAL,
-            choices=[sw_update.APPLY_TYPE_SERIAL,
-                     sw_update.APPLY_TYPE_PARALLEL,
-                     sw_update.APPLY_TYPE_IGNORE],
-            help='defaults to serial')
-
-        fw_update_create_strategy_cmd.add_argument(
-            '--max-parallel-worker-hosts', type=int, choices=range(2, 6),
-            help='maximum worker hosts to update in parallel')
-
-        fw_update_create_strategy_cmd.add_argument('--instance-action',
-            default=sw_update.INSTANCE_ACTION_STOP_START,
-            choices=[sw_update.INSTANCE_ACTION_MIGRATE,
-                     sw_update.INSTANCE_ACTION_STOP_START],
-            help='defaults to stop-start')
-
-        fw_update_create_strategy_cmd.add_argument('--alarm-restrictions',
-            default=sw_update.ALARM_RESTRICTIONS_STRICT,
-            choices=[sw_update.ALARM_RESTRICTIONS_STRICT,
-                     sw_update.ALARM_RESTRICTIONS_RELAXED],
-            help='defaults to strict')
-
-        fw_update_delete_strategy_cmd \
-            = fw_update_cmds.add_parser('delete', help='Delete a strategy')
-        fw_update_delete_strategy_cmd.set_defaults(cmd='delete')
-        fw_update_delete_strategy_cmd.add_argument(
-            '--force', action='store_true', help=argparse.SUPPRESS)
-
-        fw_update_apply_strategy_cmd \
-            = fw_update_cmds.add_parser('apply', help='Apply a strategy')
-        fw_update_apply_strategy_cmd.set_defaults(cmd='apply')
-        fw_update_apply_strategy_cmd.add_argument(
-            '--stage-id', default=None, help='stage identifier to apply')
-
-        fw_update_abort_strategy_cmd \
-            = fw_update_cmds.add_parser('abort', help='Abort a strategy')
-        fw_update_abort_strategy_cmd.set_defaults(cmd='abort')
-        fw_update_abort_strategy_cmd.add_argument(
-            '--stage-id', help='stage identifier to abort')
-
-        fw_update_show_strategy_cmd \
-            = fw_update_cmds.add_parser('show', help='Show a strategy')
-        fw_update_show_strategy_cmd.set_defaults(cmd='show')
-        fw_update_show_strategy_cmd.add_argument(
-            '--details', action='store_true', help='show strategy details')
+        # Add software upgrade strategy commands
+        setup_upgrade_parser(commands)
 
         args = parser.parse_args(argv)
 
@@ -287,189 +470,74 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
             print("Openstack interface not given")
             return
 
-        if 'patch-strategy' == args.cmd_area:
-            if 'create' == args.cmd:
-                sw_update.create_strategy(
-                    args.os_auth_url, args.os_project_name,
-                    args.os_project_domain_name, args.os_username, args.os_password,
-                    args.os_user_domain_name, args.os_region_name,
-                    args.os_interface,
-                    sw_update.STRATEGY_NAME_SW_PATCH,
-                    args.controller_apply_type,
-                    args.storage_apply_type, sw_update.APPLY_TYPE_IGNORE,
-                    args.worker_apply_type,
-                    args.max_parallel_worker_hosts,
-                    args.instance_action,
-                    args.alarm_restrictions)
-
-            elif 'delete' == args.cmd:
-                sw_update.delete_strategy(args.os_auth_url, args.os_project_name,
-                                          args.os_project_domain_name,
-                                          args.os_username, args.os_password,
-                                          args.os_user_domain_name,
-                                          args.os_region_name, args.os_interface,
-                                          sw_update.STRATEGY_NAME_SW_PATCH,
-                                          args.force)
-
-            elif 'apply' == args.cmd:
-                sw_update.apply_strategy(args.os_auth_url, args.os_project_name,
-                                         args.os_project_domain_name,
-                                         args.os_username, args.os_password,
-                                         args.os_user_domain_name,
-                                         args.os_region_name, args.os_interface,
-                                         sw_update.STRATEGY_NAME_SW_PATCH,
-                                         args.stage_id)
-
-            elif 'abort' == args.cmd:
-                sw_update.abort_strategy(args.os_auth_url, args.os_project_name,
-                                         args.os_project_domain_name,
-                                         args.os_username, args.os_password,
-                                         args.os_user_domain_name,
-                                         args.os_region_name, args.os_interface,
-                                         sw_update.STRATEGY_NAME_SW_PATCH,
-                                         args.stage_id)
-
-            elif 'show' == args.cmd:
-                sw_update.show_strategy(args.os_auth_url, args.os_project_name,
-                                        args.os_project_domain_name,
-                                        args.os_username, args.os_password,
-                                        args.os_user_domain_name,
-                                        args.os_region_name, args.os_interface,
-                                        sw_update.STRATEGY_NAME_SW_PATCH,
-                                        args.details)
-
-            else:
-                raise ValueError("Unknown command, %s, given for patch-strategy"
-                                 % args.cmd)
-        elif 'upgrade-strategy' == args.cmd_area:
-            if 'create' == args.cmd:
-                sw_update.create_strategy(
-                    args.os_auth_url, args.os_project_name,
-                    args.os_project_domain_name, args.os_username, args.os_password,
-                    args.os_user_domain_name, args.os_region_name,
-                    args.os_interface,
-                    sw_update.STRATEGY_NAME_SW_UPGRADE,
-                    sw_update.APPLY_TYPE_IGNORE,
-                    args.storage_apply_type, sw_update.APPLY_TYPE_IGNORE,
-                    args.worker_apply_type,
-                    args.max_parallel_worker_hosts,
-                    None, args.alarm_restrictions,
-                    # start_upgrade=args.start_upgrade,
-                    complete_upgrade=args.complete_upgrade
-                )
-
-            elif 'delete' == args.cmd:
-                sw_update.delete_strategy(args.os_auth_url, args.os_project_name,
-                                          args.os_project_domain_name,
-                                          args.os_username, args.os_password,
-                                          args.os_user_domain_name,
-                                          args.os_region_name, args.os_interface,
-                                          sw_update.STRATEGY_NAME_SW_UPGRADE,
-                                          args.force)
-
-            elif 'apply' == args.cmd:
-                sw_update.apply_strategy(args.os_auth_url, args.os_project_name,
-                                         args.os_project_domain_name,
-                                         args.os_username, args.os_password,
-                                         args.os_user_domain_name,
-                                         args.os_region_name, args.os_interface,
-                                         sw_update.STRATEGY_NAME_SW_UPGRADE,
-                                         args.stage_id)
-
-            elif 'abort' == args.cmd:
-                sw_update.abort_strategy(args.os_auth_url, args.os_project_name,
-                                         args.os_project_domain_name,
-                                         args.os_username, args.os_password,
-                                         args.os_user_domain_name,
-                                         args.os_region_name, args.os_interface,
-                                         sw_update.STRATEGY_NAME_SW_UPGRADE,
-                                         args.stage_id)
-
-            elif 'show' == args.cmd:
-                sw_update.show_strategy(args.os_auth_url, args.os_project_name,
-                                        args.os_project_domain_name,
-                                        args.os_username, args.os_password,
-                                        args.os_user_domain_name,
-                                        args.os_region_name, args.os_interface,
-                                        sw_update.STRATEGY_NAME_SW_UPGRADE,
-                                        args.details)
-
-            else:
-                raise ValueError("Unknown command, %s, given for upgrade-strategy"
-                                 % args.cmd)
-        elif 'fw-update-strategy' == args.cmd_area:
-            if 'create' == args.cmd:
-                sw_update.create_strategy(
-                    args.os_auth_url,
-                    args.os_project_name,
-                    args.os_project_domain_name,
-                    args.os_username,
-                    args.os_password,
-                    args.os_user_domain_name,
-                    args.os_region_name,
-                    args.os_interface,
-                    sw_update.STRATEGY_NAME_FW_UPDATE,
-                    args.controller_apply_type,
-                    args.storage_apply_type,
-                    sw_update.APPLY_TYPE_IGNORE,
-                    args.worker_apply_type,
-                    args.max_parallel_worker_hosts,
-                    args.instance_action,
-                    args.alarm_restrictions)
-
-            elif 'delete' == args.cmd:
-                sw_update.delete_strategy(args.os_auth_url,
-                    args.os_project_name,
-                    args.os_project_domain_name,
-                    args.os_username,
-                    args.os_password,
-                    args.os_user_domain_name,
-                    args.os_region_name,
-                    args.os_interface,
-                    sw_update.STRATEGY_NAME_FW_UPDATE,
-                    args.force)
-
-            elif 'apply' == args.cmd:
-                sw_update.apply_strategy(args.os_auth_url,
-                    args.os_project_name,
-                    args.os_project_domain_name,
-                    args.os_username,
-                    args.os_password,
-                    args.os_user_domain_name,
-                    args.os_region_name,
-                    args.os_interface,
-                    sw_update.STRATEGY_NAME_FW_UPDATE,
-                    args.stage_id)
-
-            elif 'abort' == args.cmd:
-                sw_update.abort_strategy(args.os_auth_url,
-                    args.os_project_name,
-                    args.os_project_domain_name,
-                    args.os_username,
-                    args.os_password,
-                    args.os_user_domain_name,
-                    args.os_region_name,
-                    args.os_interface,
-                    sw_update.STRATEGY_NAME_FW_UPDATE,
-                    args.stage_id)
-
-            elif 'show' == args.cmd:
-                sw_update.show_strategy(args.os_auth_url,
-                    args.os_project_name,
-                    args.os_project_domain_name,
-                    args.os_username,
-                    args.os_password,
-                    args.os_user_domain_name,
-                    args.os_region_name,
-                    args.os_interface,
-                    sw_update.STRATEGY_NAME_FW_UPDATE,
-                    args.details)
-            else:
-                raise ValueError("Unknown command, %s, "
-                                 "given for fw-update-strategy"
-                                 % args.cmd)
+        strategy_name = get_strategy_name(args.cmd_area)
+        if 'create' == args.cmd:
+            extra_create_args = get_extra_create_args(args.cmd_area, args)
+            sw_update.create_strategy(args.os_auth_url,
+                                      args.os_project_name,
+                                      args.os_project_domain_name,
+                                      args.os_username,
+                                      args.os_password,
+                                      args.os_user_domain_name,
+                                      args.os_region_name,
+                                      args.os_interface,
+                                      strategy_name,
+                                      args.controller_apply_type,
+                                      args.storage_apply_type,
+                                      sw_update.APPLY_TYPE_IGNORE,
+                                      args.worker_apply_type,
+                                      args.max_parallel_worker_hosts,
+                                      args.instance_action,
+                                      args.alarm_restrictions,
+                                      **extra_create_args)
+        elif 'delete' == args.cmd:
+            sw_update.delete_strategy(args.os_auth_url,
+                                      args.os_project_name,
+                                      args.os_project_domain_name,
+                                      args.os_username,
+                                      args.os_password,
+                                      args.os_user_domain_name,
+                                      args.os_region_name,
+                                      args.os_interface,
+                                      strategy_name,
+                                      force=args.force)
+        elif 'apply' == args.cmd:
+            sw_update.apply_strategy(args.os_auth_url,
+                                     args.os_project_name,
+                                     args.os_project_domain_name,
+                                     args.os_username,
+                                     args.os_password,
+                                     args.os_user_domain_name,
+                                     args.os_region_name,
+                                     args.os_interface,
+                                     strategy_name,
+                                     stage_id=args.stage_id)
+        elif 'abort' == args.cmd:
+            sw_update.abort_strategy(args.os_auth_url,
+                                     args.os_project_name,
+                                     args.os_project_domain_name,
+                                     args.os_username,
+                                     args.os_password,
+                                     args.os_user_domain_name,
+                                     args.os_region_name,
+                                     args.os_interface,
+                                     strategy_name,
+                                     stage_id=args.stage_id)
+        elif 'show' == args.cmd:
+            sw_update.show_strategy(args.os_auth_url,
+                                    args.os_project_name,
+                                    args.os_project_domain_name,
+                                    args.os_username,
+                                    args.os_password,
+                                    args.os_user_domain_name,
+                                    args.os_region_name,
+                                    args.os_interface,
+                                    strategy_name,
+                                    details=args.details,
+                                    active=args.active)
         else:
-            raise ValueError("Unknown command area, %s, given" % args.cmd_area)
+            raise ValueError("Unknown command, %s, given for %s"
+                             % (args.cmd, args.cmd_area))
 
     except KeyboardInterrupt:
         print("Keyboard Interrupt received.")

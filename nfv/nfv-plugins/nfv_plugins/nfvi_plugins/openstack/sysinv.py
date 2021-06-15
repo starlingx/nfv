@@ -1,8 +1,9 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import copy
 import json
 from nfv_common import debug
 
@@ -95,6 +96,211 @@ def get_host_labels(token, host_uuid):
     response = rest_api_request(token, "GET", api_cmd,
                                 timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
+
+
+def get_kube_host_upgrades(token):
+    """
+    Asks System Inventory for information about the kube host upgrades
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/kube_host_upgrades"
+
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def get_kube_upgrade(token):
+    """
+    Asks System Inventory for information about the kube upgrade
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/kube_upgrade"
+
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def get_kube_version(token, kube_version):
+    """
+    Asks System Inventory for information a kube version
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/kube_versions/" + kube_version
+
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def get_kube_versions(token):
+    """
+    Asks System Inventory for information about the kube versions
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/kube_versions"
+
+    response = rest_api_request(token, "GET", api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def kube_upgrade_start(token, to_version, force=False, alarm_ignore_list=None):
+    """
+    Ask System Inventory to start a kube upgrade
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/kube_upgrade"
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    api_cmd_payload = dict()
+    api_cmd_payload['to_version'] = to_version
+    api_cmd_payload['force'] = force
+    if alarm_ignore_list is not None:
+        api_cmd_payload['alarm_ignore_list'] = copy.copy(alarm_ignore_list)
+
+    response = rest_api_request(token,
+                                "POST",
+                                api_cmd,
+                                api_cmd_headers,
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def _patch_kube_upgrade_state(token, new_value):
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/kube_upgrade"
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    api_cmd_payload = list()
+    host_data = dict()
+    host_data['path'] = "/state"
+    host_data['value'] = new_value
+    host_data['op'] = "replace"
+    api_cmd_payload.append(host_data)
+
+    return rest_api_request(token,
+                            "PATCH",
+                            api_cmd,
+                            api_cmd_headers,
+                            json.dumps(api_cmd_payload),
+                            timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+
+
+def kube_upgrade_cleanup(token):
+    """
+    Ask System Inventory to delete the kube upgrade
+    """
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/kube_upgrade"
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def kube_upgrade_complete(token):
+    """
+    Ask System Inventory to kube upgrade complete
+    """
+    return _patch_kube_upgrade_state(token, "upgrade-complete")
+
+
+def kube_upgrade_download_images(token):
+    """
+    Ask System Inventory to kube upgrade download images
+    """
+    return _patch_kube_upgrade_state(token, "downloading-images")
+
+
+def kube_upgrade_networking(token):
+    """
+    Ask System Inventory to kube upgrade networking
+    """
+    return _patch_kube_upgrade_state(token, "upgrading-networking")
+
+
+def _kube_host_upgrade(token, host_uuid, target_operation, force):
+    """
+    Invoke a POST for a host kube-upgrade operation
+
+    target_operation one of: kube_upgrade_control_plane, kube_upgrade_kubelet
+    force is a 'string'
+    """
+
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+
+    api_cmd = url + "/ihosts/%s/%s" % (host_uuid, target_operation)
+
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+
+    api_cmd_payload = dict()
+    api_cmd_payload['force'] = force
+
+    response = rest_api_request(token,
+                                "POST",
+                                api_cmd,
+                                api_cmd_headers,
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def kube_host_upgrade_control_plane(token, host_uuid, force="true"):
+    """
+    Ask System Inventory to kube HOST upgrade control plane
+    """
+    return _kube_host_upgrade(token,
+                              host_uuid,
+                              "kube_upgrade_control_plane",
+                              force)
+
+
+def kube_host_upgrade_kubelet(token, host_uuid, force="true"):
+    """
+    Ask System Inventory to kube HOST upgrade kubelet
+    """
+    return _kube_host_upgrade(token,
+                              host_uuid,
+                              "kube_upgrade_kubelet",
+                              force)
 
 
 def get_upgrade(token):

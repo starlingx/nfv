@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -185,6 +185,9 @@ def _vim_api_message_handler(connection, msg):
 
     # Software Update API Requests
     elif rpc.RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_REQUEST == msg.type:
+        vim_sw_update_api_create_strategy(connection, msg)
+
+    elif rpc.RPC_MSG_TYPE.CREATE_KUBE_UPGRADE_STRATEGY_REQUEST == msg.type:
         vim_sw_update_api_create_strategy(connection, msg)
 
     elif rpc.RPC_MSG_TYPE.CREATE_SW_UPGRADE_STRATEGY_REQUEST == msg.type:

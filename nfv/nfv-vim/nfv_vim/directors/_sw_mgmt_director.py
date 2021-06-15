@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -95,7 +95,8 @@ class SwMgmtDirector(object):
             strategy_uuid, storage_apply_type,
             worker_apply_type, max_parallel_worker_hosts,
             alarm_restrictions, start_upgrade,
-            complete_upgrade, self._ignore_alarms)
+            complete_upgrade, self._ignore_alarms,
+            self._single_controller)
 
         schedule.schedule_function_call(callback, success, reason,
                                         self._sw_update.strategy)
@@ -130,6 +131,46 @@ class SwMgmtDirector(object):
             self._ignore_alarms, self._single_controller)
 
         schedule.schedule_function_call(callback, success, reason,
+                                        self._sw_update.strategy)
+        return strategy_uuid, ''
+
+    def create_kube_upgrade_strategy(self,
+                                     controller_apply_type,
+                                     storage_apply_type,
+                                     worker_apply_type,
+                                     max_parallel_worker_hosts,
+                                     default_instance_action,
+                                     alarm_restrictions,
+                                     to_version,
+                                     callback):
+        """
+        Create Kubernetes Upgrade Strategy
+        """
+        strategy_uuid = str(uuid.uuid4())
+
+        if self._sw_update is not None:
+            # Do not schedule the callback - if creation failed because a
+            # strategy already exists, the callback will attempt to operate
+            # on the old strategy, which is not what we want.
+            reason = "strategy already exists"
+            return None, reason
+
+        self._sw_update = objects.KubeUpgrade()
+        success, reason = self._sw_update.strategy_build(
+            strategy_uuid,
+            controller_apply_type,
+            storage_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            self._ignore_alarms,
+            to_version,
+            self._single_controller)
+
+        schedule.schedule_function_call(callback,
+                                        success,
+                                        reason,
                                         self._sw_update.strategy)
         return strategy_uuid, ''
 
@@ -243,6 +284,24 @@ class SwMgmtDirector(object):
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_FW_UPDATE_FAILED, host)
+
+    def kube_host_upgrade_control_plane_failed(self, host):
+        """
+        Called when a kube host upgrade for control plane fails
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.KUBE_HOST_UPGRADE_CONTROL_PLANE_FAILED,
+                host)
+
+    def kube_host_upgrade_kubelet_failed(self, host):
+        """
+        Called when a kube host upgrade for kubelet fails
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.KUBE_HOST_UPGRADE_KUBELET_FAILED,
+                host)
 
     def host_audit(self, host):
         """

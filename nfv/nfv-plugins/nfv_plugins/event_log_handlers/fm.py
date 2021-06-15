@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016,2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -334,6 +334,28 @@ _fm_event_id_mapping = dict([
      fm_constants.FM_LOG_ID_FW_UPDATE_AUTO_APPLY_ABORT_FAILED),
     (event_log_objects_v1.EVENT_ID.FW_UPDATE_AUTO_APPLY_ABORTED,
      fm_constants.FM_LOG_ID_FW_UPDATE_AUTO_APPLY_ABORTED),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_START,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_START),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_INPROGRESS),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_REJECTED,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_REJECTED),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_CANCELLED,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_CANCELLED),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_FAILED,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_FAILED),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_COMPLETED,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_COMPLETED),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_ABORT),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTING,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_ABORTING),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED),
+    (event_log_objects_v1.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTED,
+     fm_constants.FM_LOG_ID_KUBE_UPGRADE_AUTO_APPLY_ABORTED),
 ])
 
 _fm_event_type_mapping = dict([

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016, 2020 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,6 +9,7 @@ from nfv_client.openstack import sw_update
 STRATEGY_NAME_SW_PATCH = 'sw-patch'
 STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
 STRATEGY_NAME_FW_UPDATE = 'fw-update'
+STRATEGY_NAME_KUBE_UPGRADE = 'kube-upgrade'
 
 APPLY_TYPE_SERIAL = 'serial'
 APPLY_TYPE_PARALLEL = 'parallel'
@@ -27,10 +28,16 @@ def _print(indent_by, field, value, remains=''):
                            remains))
 
 
-def _display_strategy_step(strategy_step):
+def _display_strategy_step(strategy_step, active=False):
     """
     Software Update - Display Strategy Step Information
     """
+    # If active flag is passed
+    # skip steps that are not started:'initial' or completed cleanly: 'success'
+    # this leaves failed and in-progress states
+    if active:
+        if strategy_step.result in ['initial', 'success']:
+            return False
     _print(12, "step-id", strategy_step.step_id)
     _print(12, "step-name", strategy_step.step_name)
     if 0 < len(strategy_step.entity_type):
@@ -46,12 +53,17 @@ def _display_strategy_step(strategy_step):
         _print(12, "end-date-time", strategy_step.end_date_time)
     _print(12, "result", strategy_step.result)
     _print(12, "reason", strategy_step.reason)
+    return True
 
 
-def _display_strategy_stage(strategy_stage, details=False):
+def _display_strategy_stage(strategy_stage, details=False, active=False):
     """
     Software Update - Display Strategy Stage Information
     """
+    # If active flag is passed, only display a stage that is in progress
+    if active:
+        if not strategy_stage.inprogress:
+            return False
     _print(8, "stage-id", strategy_stage.stage_id)
     _print(8, "stage-name", strategy_stage.stage_name)
     _print(8, "total-steps", strategy_stage.total_steps)
@@ -65,17 +77,22 @@ def _display_strategy_stage(strategy_stage, details=False):
         _print(8, "result", strategy_stage.result)
         _print(8, "reason", strategy_stage.reason)
 
-    if details:
+    if details or active:
         print("        steps:")
         for step in strategy_stage.steps:
-            _display_strategy_step(step)
-            print("")
+            if _display_strategy_step(step, active):
+                print("")
+    return True
 
 
-def _display_strategy_phase(strategy_phase, details=False):
+def _display_strategy_phase(strategy_phase, details=False, active=False):
     """
     Software Update - Display Strategy Phase Information
     """
+    # If active flag is passed, only display a phase that is in progress
+    if active:
+        if not strategy_phase.inprogress:
+            return
     print("  %s-phase:" % strategy_phase.phase_name)
     _print(4, "total-stages", strategy_phase.total_stages)
     _print(4, "current-stage", strategy_phase.current_stage)
@@ -91,14 +108,14 @@ def _display_strategy_phase(strategy_phase, details=False):
         _print(4, "result", strategy_phase.result)
         _print(4, "reason", strategy_phase.reason)
 
-    if details:
+    if details or active:
         print("    stages:")
         for stage in strategy_phase.stages:
-            _display_strategy_stage(stage, details)
-            print("")
+            if _display_strategy_stage(stage, details, active):
+                print("")
 
 
-def _display_strategy(strategy, details=False):
+def _display_strategy(strategy, details=False, active=False):
     """
     Software Update - Display Strategy Information
     """
@@ -108,6 +125,8 @@ def _display_strategy(strategy, details=False):
         print("Strategy Upgrade Strategy:")
     elif strategy.name == STRATEGY_NAME_FW_UPDATE:
         print("Strategy Firmware Update Strategy:")
+    elif strategy.name == STRATEGY_NAME_KUBE_UPGRADE:
+        print("Strategy Kubernetes Upgrade Strategy:")
     else:
         print("Strategy Unknown Strategy:")
 
@@ -125,15 +144,15 @@ def _display_strategy(strategy, details=False):
            ("%s%%" % strategy.current_phase_completion_percentage))
     _print(2, "state", strategy.state)
 
-    if details:
+    if details or active:
         if 0 < strategy.build_phase.total_stages:
-            _display_strategy_phase(strategy.build_phase, details)
+            _display_strategy_phase(strategy.build_phase, details, active)
 
         if 0 < strategy.apply_phase.total_stages:
-            _display_strategy_phase(strategy.apply_phase, details)
+            _display_strategy_phase(strategy.apply_phase, details, active)
 
         if 0 < strategy.abort_phase.total_stages:
-            _display_strategy_phase(strategy.abort_phase, details)
+            _display_strategy_phase(strategy.abort_phase, details, active)
     else:
         if strategy.current_phase == strategy.build_phase.phase_name:
             if strategy.build_phase.inprogress:
@@ -273,7 +292,7 @@ def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
 def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                   os_username, os_password, os_user_domain_name, os_region_name,
-                  os_interface, strategy_name, details=False):
+                  os_interface, strategy_name, details=False, active=False):
     """
     Software Update - Show Strategy
     """
@@ -292,4 +311,4 @@ def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
         print("No strategy available")
         return
 
-    _display_strategy(strategy, details)
+    _display_strategy(strategy, details, active)

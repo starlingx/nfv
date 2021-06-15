@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -48,6 +48,10 @@ from nfv_vim.nfvi.objects.v1._instance_group import InstanceGroup  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import INSTANCE_TYPE_EXTENSION  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceType  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceTypeAttributes  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_upgrade import KUBE_UPGRADE_STATE  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_upgrade import KubeHostUpgrade  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_upgrade import KubeUpgrade  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_upgrade import KubeVersion  # noqa: F401
 from nfv_vim.nfvi.objects.v1._network import Network  # noqa: F401
 from nfv_vim.nfvi.objects.v1._network import NETWORK_ADMIN_STATE  # noqa: F401
 from nfv_vim.nfvi.objects.v1._network import NETWORK_AVAIL_STATUS  # noqa: F401

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -324,6 +324,8 @@ class StrategyStage(object):
                 self._step_timer_id = None
 
             step.start_date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            DLOG.debug("Stage (%s) Step (%s) (apply) called"
+                       % (self.name, step.name))
             step.result, step.result_reason = step.apply()
             self._current_step = idx
 

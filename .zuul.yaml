@@ -29,8 +29,8 @@
 - job:
     name: nfv-tox-py27
     parent: tox
-    nodeset: ubuntu-xenial
     description: Run py27 for nfv
+    nodeset: ubuntu-xenial
     required-projects:
       - starlingx/fault
     vars:
@@ -40,8 +40,8 @@
 - job:
     name: nfv-tox-py36
     parent: tox
-    nodeset: ubuntu-bionic
     description: Run py36 for nfv
+    nodeset: ubuntu-bionic
     required-projects:
       - starlingx/fault
     vars:
@@ -52,7 +52,6 @@
 
 - job:
     name: nfv-tox-pep8
-    nodeset: ubuntu-xenial
     parent: tox
     description: Run pep8 for nfv
     required-projects:
@@ -63,9 +62,9 @@
 
 - job:
     name: nfv-tox-pylint
-    nodeset: ubuntu-xenial
     parent: tox
     description: Run pylint for nfv
+    nodeset: ubuntu-xenial
     required-projects:
       - starlingx/fault
     vars:

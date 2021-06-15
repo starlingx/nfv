@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2020 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -50,25 +50,173 @@ class StrategyStepNames(Constants):
     QUERY_UPGRADE = Constant('query-upgrade')
     DISABLE_HOST_SERVICES = Constant('disable-host-services')
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
+    APPLY_PATCHES = Constant('apply-patches')
+    QUERY_KUBE_HOST_UPGRADE = Constant('query-kube-host-upgrade')
+    QUERY_KUBE_UPGRADE = Constant('query-kube-upgrade')
+    QUERY_KUBE_VERSIONS = Constant('query-kube-versions')
+    KUBE_UPGRADE_START = Constant('kube-upgrade-start')
+    KUBE_UPGRADE_CLEANUP = Constant('kube-upgrade-cleanup')
+    KUBE_UPGRADE_COMPLETE = Constant('kube-upgrade-complete')
+    KUBE_UPGRADE_DOWNLOAD_IMAGES = Constant('kube-upgrade-download-images')
+    KUBE_UPGRADE_NETWORKING = Constant('kube-upgrade-networking')
+    KUBE_HOST_UPGRADE_CONTROL_PLANE = \
+        Constant('kube-host-upgrade-control-plane')
+    KUBE_HOST_UPGRADE_KUBELET = Constant('kube-host-upgrade-kubelet')
 
 
 # Constant Instantiation
 STRATEGY_STEP_NAME = StrategyStepNames()
 
 
-class UnlockHostsStep(strategy.StrategyStep):
-    """
-    Unlock Hosts - Strategy Step
-    """
-    def __init__(self, hosts):
-        super(UnlockHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.UNLOCK_HOSTS, timeout_in_secs=1800)
+class AbstractStrategyStep(strategy.StrategyStep):
+    """An abstract base class for strategy steps"""
+
+    def __init__(self, step_name, timeout_in_secs):
+        super(AbstractStrategyStep, self).__init__(
+            step_name,
+            timeout_in_secs=timeout_in_secs)
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractStrategyStep, self).from_dict(data)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractStrategyStep, self).as_dict()
+        # Next 3 lines are required for all strategy steps and may be
+        # overridden by subclass in some cases
+        data['entity_type'] = ''
+        data['entity_names'] = list()
+        data['entity_uuids'] = list()
+        return data
+
+
+class AbstractHostsStrategyStep(AbstractStrategyStep):
+    """An abstract base class for strategy steps performed on list of hosts"""
+
+    def __init__(self,
+                 step_name,
+                 hosts,
+                 timeout_in_secs=1800):
+        super(AbstractHostsStrategyStep, self).__init__(
+            step_name,
+            timeout_in_secs=timeout_in_secs)
         self._hosts = hosts
         self._host_names = list()
         self._host_uuids = list()
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractHostsStrategyStep, self).from_dict(data)
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractHostsStrategyStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        return data
+
+
+class UnlockHostsStep(AbstractHostsStrategyStep):
+    """
+    Unlock Hosts - Strategy Step
+    """
+
+    # During an upgrade, an unlock may need to be retried several times
+    # https://bugs.launchpad.net/starlingx/+bug/1914836
+    MAX_RETRIES = 5
+    RETRY_DELAY = 120
+
+    def __init__(self, hosts, retry_count=0, retry_delay=RETRY_DELAY):
+        """
+        hosts - the list of hosts to be unlocked
+        retry_count - the number of times to retry per host if unlock fails
+        retry_delay - the amount of time to delay before retrying unlock
+        """
+        super(UnlockHostsStep, self).__init__(STRATEGY_STEP_NAME.UNLOCK_HOSTS,
+                                              hosts,
+                                              timeout_in_secs=1800)
+        # step_name, hosts, timeout are serialized by parent classes
+        # retry_count and retry_delay must be serialized in from_dict/as_dict
+        self._retry_count = retry_count
+        self._retry_delay = retry_delay
+        # Do not persist: _retries, _wait_time _retrying
+        self._retries = dict()
+        for host_name in self._host_names:
+            self._retries[host_name] = retry_count
+        self._wait_time = 0
+        self._retry_requested = False
+
+    def from_dict(self, data):
+        """
+        Returns unlock hosts step object initialized using the given dictionary
+        """
+        super(UnlockHostsStep, self).from_dict(data)
+        # deserialize retry_delay and retry_count
+        # 'retry_delay' and 'retry_count' were added to this step since last
+        # release. Need to perform 'get' with a default value in case
+        # we are deserializing a strategy that does not contain these keys.
+        self._retry_count = data.get('retry_count', 0)
+        self._retry_delay = data.get('retry_delay', self.RETRY_DELAY)
+
+        # Do not deserialize _retries, _wait_time and _retrying
+        self._wait_time = 0
+        self._retry_requested = False
+        self._retries = dict()
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._retries[host_name] = self._retry_count
+
+        return self
+
+    def as_dict(self):
+        """
+        Represent the unlock hosts step as a dictionary
+        """
+        data = super(UnlockHostsStep, self).as_dict()
+        # serialize retries
+        data['retry_count'] = self._retry_count
+        # serialize retry_delay
+        data['retry_delay'] = self._retry_delay
+        # Do not serialize _retries, _wait_time and _retrying
+        return data
+
+    def _get_hosts_to_retry(self):
+        hosts = []
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                continue
+            if host.is_locked() and self._retries[host_name] > 0:
+                self._retries[host_name] = self._retries[host_name] - 1
+                hosts.append(host_name)
+        return hosts
 
     def _total_hosts_unlocked_enabled(self):
         """
@@ -85,6 +233,16 @@ class UnlockHostsStep(strategy.StrategyStep):
                 total_hosts_enabled += 1
 
         return total_hosts_enabled
+
+    def _trigger_retry(self, host_name):
+        DLOG.info("Step (%s) retry due to failure for (%s)." % (self._name,
+                                                                host_name))
+        # set the retry trigger
+        self._retry_requested = True
+        # reset the retry "wait" delay
+        self._wait_time = timers.get_monotonic_timestamp_in_ms()
+        # decrement the number of allowed retries for the validated host
+        self._retries[host_name] = self._retries[host_name] - 1
 
     def apply(self):
         """
@@ -110,9 +268,12 @@ class UnlockHostsStep(strategy.StrategyStep):
         """
         Handle Host events
         """
+        from nfv_vim import directors
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
-        if event in [STRATEGY_EVENT.HOST_STATE_CHANGED, STRATEGY_EVENT.HOST_AUDIT]:
+        if event in [STRATEGY_EVENT.HOST_STATE_CHANGED,
+                     STRATEGY_EVENT.HOST_AUDIT]:
             total_hosts_enabled = self._total_hosts_unlocked_enabled()
 
             if -1 == total_hosts_enabled:
@@ -125,40 +286,35 @@ class UnlockHostsStep(strategy.StrategyStep):
                 self.stage.step_complete(result, '')
                 return True
 
+            # See if we have requested a retry and are not currently retrying
+            if self._retry_requested:
+                now_ms = timers.get_monotonic_timestamp_in_ms()
+                secs_expired = (now_ms - self._wait_time) / 1000
+                if self._retry_delay <= secs_expired:
+                    self._retry_requested = False
+                    # re-issue unlock for all hosts.
+                    # Hosts that are already unlocked or unlocking get skipped
+                    host_director = directors.get_host_director()
+                    operation = host_director.unlock_hosts(self._host_names)
+                    if operation.is_failed():
+                        result = strategy.STRATEGY_STEP_RESULT.FAILED
+                        self.stage.step_complete(result, "host unlock failed")
+            return True
+
         elif event == STRATEGY_EVENT.HOST_UNLOCK_FAILED:
             host = event_data
             if host is not None and host.name in self._host_names:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, "host unlock failed")
+                if host.is_locked() and self._retries[host.name] > 0:
+                    # if any unlock fails and we have retries, trigger it
+                    # even if the last round of unlocks has not returned
+                    self._trigger_retry(host.name)
+                else:
+                    # if ANY unlock fails and we are out of retries, fail
+                    result = strategy.STRATEGY_STEP_RESULT.FAILED
+                    self.stage.step_complete(result, "host unlock failed")
                 return True
 
         return False
-
-    def from_dict(self, data):
-        """
-        Returns the unlock hosts step object initialized using the given dictionary
-        """
-        super(UnlockHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
-        self._host_names = data['entity_names']
-        host_table = tables.tables_get_host_table()
-        for host_name in self._host_names:
-            host = host_table.get(host_name, None)
-            if host is not None:
-                self._hosts.append(host)
-                self._host_uuids.append(host.uuid)
-        return self
-
-    def as_dict(self):
-        """
-        Represent the unlock hosts step as a dictionary
-        """
-        data = super(UnlockHostsStep, self).as_dict()
-        data['entity_type'] = 'hosts'
-        data['entity_names'] = self._host_names
-        data['entity_uuids'] = self._host_uuids
-        return data
 
 
 class LockHostsStep(strategy.StrategyStep):
@@ -517,14 +673,15 @@ class SwPatchHostsStep(strategy.StrategyStep):
         if response['completed']:
             for sw_patch_host in response['result-data']:
                 if self._host_completed.get(sw_patch_host.name, False):
-                    if sw_patch_host.patch_current:
-                        self._host_completed[sw_patch_host.name] = \
-                            (True, True, '')
-
-                    elif sw_patch_host.patch_failed:
+                    # A patch can be listed as failed, and patch current
+                    # so check the failed state first.
+                    if sw_patch_host.patch_failed:
                         self._host_completed[sw_patch_host.name] = \
                             (True, False, "software update failed to apply on "
                                           "host %s" % sw_patch_host.name)
+                    elif sw_patch_host.patch_current:
+                        self._host_completed[sw_patch_host.name] = \
+                            (True, True, '')
 
             failed = False
             failed_reason = ''
@@ -1498,6 +1655,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
                                   "strictness" % (nfvi_alarm.alarm_id,
                                                   nfvi_alarm.alarm_uuid))
                     elif nfvi_alarm.alarm_id not in self._ignore_alarms:
+                        DLOG.warn("Alarm: %s" % nfvi_alarm.alarm_id)
                         nfvi_alarms.append(nfvi_alarm)
                     else:
                         DLOG.warn("Ignoring alarm %s - uuid %s" %
@@ -1506,7 +1664,8 @@ class QueryAlarmsStep(strategy.StrategyStep):
 
             if self._fail_on_alarms and self.strategy.nfvi_alarms:
                 result = strategy.STRATEGY_STEP_RESULT.FAILED
-                reason = "alarms from %s are present" % fm_service
+                alarm_ids = [str(alarm.get('alarm_id')) for alarm in self.strategy.nfvi_alarms]
+                reason = "alarms %s from %s are present" % (alarm_ids, fm_service)
             else:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 reason = ""
@@ -1964,13 +2123,11 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         self._host_uuids = list()
         self._monitoring_fw_update = False
         self._wait_time = 0
-        self._host_failed_device_update = dict()
         self._host_completed = dict()
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
             self._host_completed[host.name] = (False, False, '')
-            self._host_failed_device_update[host.name] = list()
 
     @coroutine
     def _get_host_callback(self):
@@ -2150,7 +2307,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         self._hosts = list()
         self._host_uuids = list()
         self._host_completed = dict()
-
+        self._wait_time = 0
         self._monitoring_fw_update = False
 
         self._host_names = data['entity_names']
@@ -2246,7 +2403,7 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
         self._hosts = list()
         self._host_uuids = list()
         self._host_completed = dict()
-
+        self._wait_time = 0
         self._host_names = data['entity_names']
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -2544,11 +2701,765 @@ class EnableHostServicesStep(strategy.StrategyStep):
         return data
 
 
+class ApplySwPatchesStep(AbstractStrategyStep):
+    """
+    Apply Patches using patch API
+    """
+    def __init__(self, patches_to_apply):
+        super(ApplySwPatchesStep, self).__init__(
+            STRATEGY_STEP_NAME.APPLY_PATCHES,
+            timeout_in_secs=600)
+        self._patches_to_apply = patches_to_apply
+
+    @coroutine
+    def _api_callback(self):
+        """
+        Callback for the API method invoked in apply
+        """
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_sw_patches = response['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """
+        Apply patches
+        """
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_sw_mgmt_apply_updates(self._patches_to_apply,
+                                        self._api_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(ApplySwPatchesStep, self).from_dict(data)
+        # only the names are serialized
+        self._patches_to_apply = data['entity_names']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(ApplySwPatchesStep, self).as_dict()
+        data['entity_type'] = 'patches'
+        data['entity_names'] = self._patches_to_apply
+        # there are no entity_uuids
+        return data
+
+
+class QueryKubeUpgradeStep(AbstractStrategyStep):
+    """
+    Query Kube Upgrade
+    """
+    def __init__(self):
+        super(QueryKubeUpgradeStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE, timeout_in_secs=60)
+
+    @coroutine
+    def _get_kube_upgrade_callback(self):
+        """
+        Get Kube Upgrade Callback
+        """
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """
+        Query Kube Upgrade
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_get_kube_upgrade(self._get_kube_upgrade_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class QueryKubeVersionsStep(AbstractStrategyStep):
+    """
+    Query Kube Versions
+    This step should be used with its matching QueryKubeVersionsMixin
+    """
+    def __init__(self):
+        super(QueryKubeVersionsStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS, timeout_in_secs=60)
+
+    @coroutine
+    def _query_callback(self):
+        """
+        Get Kube Versions List Callback
+        """
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_versions_list = response['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """
+        Query Kube Versions List
+        """
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_get_kube_version_list(self._query_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class QueryKubeHostUpgradeStep(AbstractStrategyStep):
+    """
+    Query Kube Host Upgrade list
+    """
+    def __init__(self):
+        super(QueryKubeHostUpgradeStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE, timeout_in_secs=60)
+
+    @coroutine
+    def _get_kube_host_upgrade_list_callback(self):
+        """
+        Get Kube Host Upgrade List Callback
+        """
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_host_upgrade_list = \
+                    response['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """
+        Query Kube Host Upgrade List
+        """
+        from nfv_vim import nfvi
+        nfvi.nfvi_get_kube_host_upgrade_list(
+            self._get_kube_host_upgrade_list_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class AbstractKubeUpgradeStep(AbstractStrategyStep):
+
+    def __init__(self,
+                 step_name,
+                 success_state,
+                 fail_state,
+                 timeout_in_secs=600):
+        super(AbstractKubeUpgradeStep, self).__init__(step_name,
+                                                      timeout_in_secs)
+        # These two attributes are not persisted
+        self._wait_time = 0
+        self._query_inprogress = False
+        # success  and fail state validators are persisted
+        self._success_state = success_state
+        self._fail_state = fail_state
+
+    @coroutine
+    def _get_kube_upgrade_callback(self):
+        """Get Upgrade Callback"""
+        response = (yield)
+        DLOG.debug("(%s) callback response=%s." % (self._name, response))
+
+        self._query_inprogress = False
+        if response['completed']:
+            if self.strategy is None:
+                # there is no longer a strategy.  abort.
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, 'strategy no longer exists')
+
+            kube_upgrade_obj = response['result-data']
+            # replace the object in the strategy with the most recent object
+            self.strategy.nfvi_kube_upgrade = kube_upgrade_obj
+
+            # break out of the loop if fail or success states match
+            if kube_upgrade_obj.state == self._success_state:
+                DLOG.debug("(%s) successfully reached (%s)."
+                           % (self._name, self._success_state))
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+            elif (self._fail_state is not None
+                  and kube_upgrade_obj.state == self._fail_state):
+                DLOG.warn("(%s) encountered failure state(%s)."
+                           % (self._name, self._fail_state))
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result,
+                    '(%s) failed:(%s)' % (self._name, self._fail_state)
+                )
+            else:
+                # Keep waiting for upgrade to reach success or fail state
+                # timeout will occur if it is never reached.
+                DLOG.debug("(%s) in state (%s) waiting for (%s) or (%s)."
+                           % (self._name,
+                              kube_upgrade_obj.state,
+                              self._success_state,
+                              self._fail_state))
+                pass
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def handle_event(self, event, event_data=None):
+        """Handle Host events"""
+
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) / 1000
+            # Wait at least 60 seconds before checking upgrade for first time
+            if 60 <= secs_expired and not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_kube_upgrade(self._get_kube_upgrade_callback())
+            return True
+        return False
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractKubeUpgradeStep, self).from_dict(data)
+        # these two attributes are not persisted
+        self._wait_time = 0
+        self._query_inprogress = False
+        # validation states are persisted
+        self._success_state = data['success_state']
+        self._fail_state = data['fail_state']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the kube upgrade step as a dictionary
+        """
+        data = super(AbstractKubeUpgradeStep, self).as_dict()
+        data['success_state'] = self._success_state
+        data['fail_state'] = self._fail_state
+        return data
+
+
+class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Start - Strategy Step"""
+
+    def __init__(self, to_version, force=False):
+
+        from nfv_vim import nfvi
+
+        super(KubeUpgradeStartStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_START,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
+            None)  # there is no failure state if upgrade-start fails
+        # next 2 attributes must be persisted through from_dict/as_dict
+        self._to_version = to_version
+        self._force = force
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(KubeUpgradeStartStep, self).from_dict(data)
+        self._to_version = data['to_version']
+        self._force = data['force']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the kube upgrade step as a dictionary
+        """
+        data = super(KubeUpgradeStartStep, self).as_dict()
+        data['to_version'] = self._to_version
+        data['force'] = self._force
+        return data
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade Start - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+            # We do not set 'success' here, let the handle_event do this
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Upgrade Start"""
+
+        from nfv_vim import nfvi
+
+        alarm_ignore_list = ["900.401", ]  # ignore the auto apply alarm
+        nfvi.nfvi_kube_upgrade_start(self._to_version,
+                                     self._force,
+                                     alarm_ignore_list,
+                                     self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Cleanup - Strategy Step"""
+
+    def __init__(self):
+        super(KubeUpgradeCleanupStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP,
+            None,  # there is no success state for this cleanup activity
+            None)  # there is no failure state for this cleanup activity
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade Cleanup - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                # cleanup deletes the kube upgrade, clear it from the strategy
+                self.strategy.nfvi_kube_upgrade = None
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Upgrade Cleanup"""
+
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_kube_upgrade_cleanup(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Complete - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeUpgradeCompleteStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_COMPLETE,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
+            None)  # there is no failure state for upgrade-complete
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade Complete - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Upgrade Complete """
+
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_kube_upgrade_complete(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Download Images - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeUpgradeDownloadImagesStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED)
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade Download Images - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Upgrade Download Images """
+
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_kube_upgrade_download_images(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Networking - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeUpgradeNetworkingStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_NETWORKING,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED)
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade Networking - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Upgrade Networking"""
+
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_kube_upgrade_networking(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Host - Abstract Strategy Step
+
+    This operation issues a host command, which updates the kube upgrade object
+    """
+    def __init__(self,
+                 host,
+                 force,
+                 step_name,
+                 success_state,
+                 fail_state,
+                 timeout_in_secs=600):
+        super(AbstractKubeHostUpgradeStep, self).__init__(
+            step_name,
+            success_state,
+            fail_state,
+            timeout_in_secs=timeout_in_secs)
+        self._force = force
+        # This class accepts only a single host
+        # but serializes as a list of hosts (list size of one)
+        self._hosts = list()
+        self._host_names = list()
+        self._host_uuids = list()
+        self._hosts.append(host)
+        self._host_names.append(host.name)
+        self._host_uuids.append(host.uuid)
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractKubeHostUpgradeStep, self).from_dict(data)
+        self._force = data['force']
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractKubeHostUpgradeStep, self).as_dict()
+        data['force'] = self._force
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        return data
+
+
+class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Host List - Abstract Strategy Step
+
+    This operation issues a host command, which updates the kube upgrade object
+    It operates on a list of hosts
+    """
+    def __init__(self,
+                 hosts,
+                 force,
+                 step_name,
+                 success_state,
+                 fail_state,
+                 timeout_in_secs=600):
+        super(AbstractKubeHostListUpgradeStep, self).__init__(
+             step_name,
+             success_state,
+             fail_state,
+             timeout_in_secs=timeout_in_secs)
+        self._force = force
+        self._hosts = hosts
+        self._host_names = list()
+        self._host_uuids = list()
+        for host in hosts:
+            self._host_names.append(host.name)
+            self._host_uuids.append(host.uuid)
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractKubeHostListUpgradeStep, self).from_dict(data)
+        self._force = data['force']
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractKubeHostListUpgradeStep, self).as_dict()
+        data['force'] = self._force
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        return data
+
+
+class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
+    """Kube Host Upgrade Control Plane - Strategy Step
+
+    This operation issues a host command, which updates the kube upgrade object
+    """
+
+    def __init__(self, host, force, target_state, target_failure_state):
+        super(KubeHostUpgradeControlPlaneStep, self).__init__(
+            host,
+            force,
+            STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE,
+            target_state,
+            target_failure_state,
+            timeout_in_secs=600)
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events  - does not query kube host upgrade list but
+        instead queries kube host upgrade directly.
+        """
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.KUBE_HOST_UPGRADE_CONTROL_PLANE_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result,
+                    "kube host upgrade control plane (%s) failed" % host.name)
+                return True
+        # return handle_event of parent class
+        return super(KubeHostUpgradeControlPlaneStep, self).handle_event(
+            event, event_data=event_data)
+
+    def apply(self):
+        """Kube Host Upgrade Control Plane"""
+
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply to hostnames (%s)."
+                  % (self._name, self._host_names))
+        host_director = directors.get_host_director()
+        operation = \
+            host_director.kube_upgrade_hosts_control_plane(self._host_names,
+                                                           self._force)
+
+        if operation.is_inprogress():
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        elif operation.is_failed():
+            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+
+class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
+    """Kube Host Upgrade Kubelet - Strategy Step
+
+    This operation issues a host command, which indirectly updates the kube
+    upgrade object, however additional calls to other hosts do not change it.
+    This step should only be invoked on locked hosts.
+    """
+
+    def __init__(self, hosts, force=True):
+        super(KubeHostUpgradeKubeletStep, self).__init__(
+            hosts,
+            force,
+            STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET,
+            None,  # there is no kube upgrade success state for kubelets
+            None,  # there is no kube upgrade failure state for kubelets
+            timeout_in_secs=900)  # kubelet takes longer than control plane
+
+    @coroutine
+    def _get_kube_host_upgrade_list_callback(self):
+        """Get Kube Host Upgrade List Callback"""
+
+        response = (yield)
+        DLOG.debug("(%s) callback response=%s." % (self._name, response))
+
+        self._query_inprogress = False
+        if response['completed']:
+            self.strategy.nfvi_kube_host_upgrade_list = response['result-data']
+
+            host_count = 0
+            match_count = 0
+            for host_uuid in self._host_uuids:
+                for k_host in self.strategy.nfvi_kube_host_upgrade_list:
+                    if k_host.host_uuid == host_uuid:
+                        if k_host.kubelet_version == self.strategy.to_version:
+                            match_count += 1
+                        host_count += 1
+                        # break out of inner loop, since uuids match
+                        break
+                if host_count == len(self._host_uuids):
+                    # this is a pointless break
+                    break
+            if match_count == len(self._host_uuids):
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+            else:
+                # keep waiting for kubelet state to change
+                pass
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events  - queries kube host upgrade list
+        Override to bypass checking for kube upgrade state.
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.KUBE_HOST_UPGRADE_KUBELET_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result,
+                    "kube host upgrade kubelet (%s) failed" % host.name)
+                return True
+        elif event == STRATEGY_EVENT.HOST_AUDIT:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) / 1000
+            # Wait at least 60 seconds before checking upgrade for first time
+            if 60 <= secs_expired and not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_kube_host_upgrade_list(
+                    self._get_kube_host_upgrade_list_callback())
+            return True
+        return False
+
+    def apply(self):
+        """Kube Upgrade Kubelet"""
+
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply to hostnames (%s)."
+                  % (self._name, self._host_names))
+        host_director = directors.get_host_director()
+        operation = \
+            host_director.kube_upgrade_hosts_kubelet(self._host_names,
+                                                     self._force)
+
+        if operation.is_inprogress():
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        elif operation.is_failed():
+            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+
 def strategy_step_rebuild_from_dict(data):
     """
     Returns the strategy step object initialized using the given dictionary
     """
-    if STRATEGY_STEP_NAME.SYSTEM_STABILIZE == data['name']:
+    rebuild_map = {
+        STRATEGY_STEP_NAME.APPLY_PATCHES: ApplySwPatchesStep,
+        STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE:
+            KubeHostUpgradeControlPlaneStep,
+        STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET:
+            KubeHostUpgradeKubeletStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP: KubeUpgradeCleanupStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_COMPLETE: KubeUpgradeCompleteStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES:
+            KubeUpgradeDownloadImagesStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_NETWORKING: KubeUpgradeNetworkingStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_START: KubeUpgradeStartStep,
+        STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE: QueryKubeHostUpgradeStep,
+        STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE: QueryKubeUpgradeStep,
+        STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS: QueryKubeVersionsStep,
+    }
+    obj_type = rebuild_map.get(data['name'])
+    if obj_type is not None:
+        step_obj = object.__new__(obj_type)
+
+    elif STRATEGY_STEP_NAME.SYSTEM_STABILIZE == data['name']:
         step_obj = object.__new__(SystemStabilizeStep)
 
     elif STRATEGY_STEP_NAME.UNLOCK_HOSTS == data['name']:
