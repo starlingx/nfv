@@ -126,6 +126,62 @@ def nfvi_kube_host_upgrade_kubelet(host_uuid, host_name, force, callback):
     return cmd_id
 
 
+def nfvi_kube_rootca_update_complete(callback):
+    """Kube RootCA Update - Complete"""
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_rootca_update_complete',
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_rootca_update_generate_cert(expiry_date, subject, callback):
+    """Kube RootCA Update - Generate Cert"""
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_rootca_update_generate_cert',
+        expiry_date=expiry_date,
+        subject=subject,
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_rootca_update_host(host_uuid, host_name, update_type, callback):
+    """Kube RootCA Update - Host"""
+    cmd_id = _infrastructure_plugin.invoke_plugin('kube_rootca_update_host',
+                                                  host_uuid,
+                                                  host_name,
+                                                  update_type,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_rootca_update_pods(phase, callback):
+    """Kube RootCA Update - Pods for a particular phase"""
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_rootca_update_pods',
+        phase,
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_rootca_update_start(force, alarm_ignore_list, callback):
+    """Kube RootCA Update - Start"""
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_rootca_update_start',
+        force=force,
+        alarm_ignore_list=alarm_ignore_list,
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_rootca_update_upload_cert(cert_file, callback):
+    """Kube RootCA Update - Upload Cert"""
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_rootca_update_upload_cert',
+        cert_file=cert_file,
+        callback=callback)
+    return cmd_id
+
+
 def nfvi_kube_upgrade_cleanup(callback):
     """
     Kube Upgrade Cleanup
@@ -183,6 +239,25 @@ def nfvi_get_kube_host_upgrade_list(callback):
     Get kube host upgrade list
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('get_kube_host_upgrade_list',
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_get_kube_rootca_host_update_list(callback):
+    """
+    Get kube rootca update host list
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'get_kube_rootca_host_update_list',
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_get_kube_rootca_update(callback):
+    """
+    Get kube rootca update
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_kube_rootca_update',
                                                   callback=callback)
     return cmd_id
 

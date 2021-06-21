@@ -124,6 +124,8 @@ def _nfvi_sw_update_get_callback():
             sw_update_type = 'sw-upgrade'
         elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.FW_UPDATE:
             sw_update_type = 'fw-update'
+        elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE:
+            sw_update_type = 'kube-rootca-update'
         elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.KUBE_UPGRADE:
             sw_update_type = 'kube-upgrade'
 

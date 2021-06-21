@@ -73,6 +73,7 @@ from nfv_vim.rpc._rpc_message_network import APIResponseUpdateNetwork  # noqa: F
 
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestAbortSwUpdateStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestApplySwUpdateStrategy  # noqa: F401
+from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateKubeRootcaUpdateStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateKubeUpgradeStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpdateStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpgradeStrategy  # noqa: F401

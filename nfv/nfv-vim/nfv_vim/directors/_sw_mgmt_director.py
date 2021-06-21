@@ -134,6 +134,50 @@ class SwMgmtDirector(object):
                                         self._sw_update.strategy)
         return strategy_uuid, ''
 
+    def create_kube_rootca_update_strategy(self,
+                                           controller_apply_type,
+                                           storage_apply_type,
+                                           worker_apply_type,
+                                           max_parallel_worker_hosts,
+                                           default_instance_action,
+                                           alarm_restrictions,
+                                           expiry_date,
+                                           subject,
+                                           cert_file,
+                                           callback):
+        """
+        Create Kubernetes Root CA Update Strategy
+        """
+        strategy_uuid = str(uuid.uuid4())
+
+        if self._sw_update is not None:
+            # Do not schedule the callback - if creation failed because a
+            # strategy already exists, the callback will attempt to operate
+            # on the old strategy, which is not what we want.
+            reason = "strategy already exists"
+            return None, reason
+
+        self._sw_update = objects.KubeRootcaUpdate()
+        success, reason = self._sw_update.strategy_build(
+            strategy_uuid,
+            controller_apply_type,
+            storage_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            self._ignore_alarms,
+            self._single_controller,
+            expiry_date,
+            subject,
+            cert_file)
+
+        schedule.schedule_function_call(callback,
+                                        success,
+                                        reason,
+                                        self._sw_update.strategy)
+        return strategy_uuid, ''
+
     def create_kube_upgrade_strategy(self,
                                      controller_apply_type,
                                      storage_apply_type,
@@ -284,6 +328,15 @@ class SwMgmtDirector(object):
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_FW_UPDATE_FAILED, host)
+
+    def kube_host_rootca_update_failed(self, host):
+        """
+        Called when a kube footca update for a host phase fails
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.KUBE_ROOTCA_UPDATE_HOST_FAILED,
+                host)
 
     def kube_host_upgrade_control_plane_failed(self, host):
         """

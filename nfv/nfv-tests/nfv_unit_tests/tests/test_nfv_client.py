@@ -263,6 +263,13 @@ class TestCLIFwUpdateStrategy(TestNFVClientShell,
         self.set_strategy('fw-update-strategy')
 
 
+class TestCLIKubeRootCAUpdateStrategy(TestNFVClientShell,
+                                      StrategyMixin):
+    def setUp(self):
+        super(TestCLIKubeRootCAUpdateStrategy, self).setUp()
+        self.set_strategy('kube-rootca-update-strategy')
+
+
 class TestCLIKubeUpgradeStrategy(TestNFVClientShell,
                                  StrategyMixin):
     def setUp(self):

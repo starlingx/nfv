@@ -69,6 +69,10 @@ def database_sw_update_get_list():
         elif objects.SW_UPDATE_TYPE.FW_UPDATE == sw_update.sw_update_type:
             fw_update_obj = objects.FwUpdate(sw_update.uuid, strategy_data)
             sw_update_objs.append(fw_update_obj)
+        elif objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE == sw_update.sw_update_type:
+            kube_rootca_obj = objects.KubeRootcaUpdate(sw_update.uuid,
+                                                        strategy_data)
+            sw_update_objs.append(kube_rootca_obj)
         elif objects.SW_UPDATE_TYPE.KUBE_UPGRADE == sw_update.sw_update_type:
             kube_upgrade_obj = objects.KubeUpgrade(sw_update.uuid,
                                                    strategy_data)

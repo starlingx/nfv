@@ -9,6 +9,7 @@ from nfv_client.openstack import sw_update
 STRATEGY_NAME_SW_PATCH = 'sw-patch'
 STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
 STRATEGY_NAME_FW_UPDATE = 'fw-update'
+STRATEGY_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update'
 STRATEGY_NAME_KUBE_UPGRADE = 'kube-upgrade'
 
 APPLY_TYPE_SERIAL = 'serial'
@@ -125,6 +126,8 @@ def _display_strategy(strategy, details=False, active=False):
         print("Strategy Upgrade Strategy:")
     elif strategy.name == STRATEGY_NAME_FW_UPDATE:
         print("Strategy Firmware Update Strategy:")
+    elif strategy.name == STRATEGY_NAME_KUBE_ROOTCA_UPDATE:
+        print("Strategy Kubernetes RootCA Update Strategy:")
     elif strategy.name == STRATEGY_NAME_KUBE_UPGRADE:
         print("Strategy Kubernetes Upgrade Strategy:")
     else:

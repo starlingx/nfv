@@ -210,10 +210,17 @@ def get_strategy(token_id, url, strategy_name, strategy_uuid):
     return _get_strategy_object_from_response(response)
 
 
-def create_strategy(token_id, url, strategy_name, controller_apply_type,
-                    storage_apply_type, swift_apply_type, worker_apply_type,
+def create_strategy(token_id,
+                    url,
+                    strategy_name,
+                    controller_apply_type,
+                    storage_apply_type,
+                    swift_apply_type,
+                    worker_apply_type,
                     max_parallel_worker_hosts,
-                    default_instance_action, alarm_restrictions, **kwargs):
+                    default_instance_action,
+                    alarm_restrictions,
+                    **kwargs):
     """
     Software Update - Create Strategy
     """
@@ -231,11 +238,21 @@ def create_strategy(token_id, url, strategy_name, controller_apply_type,
     elif 'fw-update' == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
+    elif 'kube-rootca-update' == strategy_name:
+        # Note that the payload contains '-' and not '_'
+        if 'expiry_date' in kwargs and kwargs['expiry_date']:
+            api_cmd_payload['expiry-date'] = kwargs['expiry_date']
+        if 'subject' in kwargs and kwargs['subject']:
+            api_cmd_payload['subject'] = kwargs['subject']
+        if 'cert_file' in kwargs and kwargs['cert_file']:
+            api_cmd_payload['cert-file'] = kwargs['cert_file']
+        api_cmd_payload['default-instance-action'] = default_instance_action
     elif 'kube-upgrade' == strategy_name:
         # required: 'to_version' passed to strategy as 'to-version'
         api_cmd_payload['to-version'] = kwargs['to_version']
         api_cmd_payload['default-instance-action'] = default_instance_action
     elif 'sw-upgrade' == strategy_name:
+        # for upgrade: default-instance-action is hardcoded to MIGRATE
         if 'start_upgrade' in kwargs and kwargs['start_upgrade']:
             api_cmd_payload['start-upgrade'] = True
         if 'complete_upgrade' in kwargs and kwargs['complete_upgrade']:

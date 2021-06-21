@@ -101,6 +101,8 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_host_device  # noq
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_host_devices  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_hosts  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_kube_host_upgrade_list  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_kube_rootca_host_update_list  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_kube_rootca_update  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_kube_upgrade  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_kube_version_list  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_logs  # noqa: F401
@@ -112,6 +114,12 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_upda
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_update_abort  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_upgrade_control_plane  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_upgrade_kubelet  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_complete  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_generate_cert  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_host  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_pods  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_start  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_upload_cert  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_cleanup  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_complete  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_download_images  # noqa: F401

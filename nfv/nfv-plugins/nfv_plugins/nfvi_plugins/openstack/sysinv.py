@@ -17,6 +17,87 @@ DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.sysinv')
 REST_API_REQUEST_TIMEOUT = 45
 
 
+KUBE_ROOTCA_UPDATE_ENDPOINT = "/kube_rootca_update"
+KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT = \
+    KUBE_ROOTCA_UPDATE_ENDPOINT + "/generate_cert"
+KUBE_ROOTCA_UPDATE_PODS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/pods"
+KUBE_ROOTCA_UPDATE_HOSTS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/hosts"
+KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT = \
+    KUBE_ROOTCA_UPDATE_ENDPOINT + "/upload"
+
+
+# todo(abailey): refactor _api_get, etc.. into rest_api.py
+def _api_cmd(token, endpoint):
+    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
+    if url is None:
+        raise ValueError("OpenStack SysInv URL is invalid")
+    api_cmd = url + endpoint
+    return api_cmd
+
+
+def _api_cmd_headers():
+    api_cmd_headers = dict()
+    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers['User-Agent'] = "vim/1.0"
+    return api_cmd_headers
+
+
+def _api_delete(token, endpoint):
+    """
+    Generic DELETE for a sysinv endpoint
+    """
+    api_cmd = _api_cmd(token, endpoint)
+    api_cmd_headers = _api_cmd_headers()
+    response = rest_api_request(token,
+                                "DELETE",
+                                api_cmd,
+                                api_cmd_headers,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def _api_get(token, endpoint):
+    """
+    Perform a generic GET for a particular sysinv API endpoint
+    """
+    api_cmd = _api_cmd(token, endpoint)
+    response = rest_api_request(token,
+                                "GET",
+                                api_cmd,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
+def _api_patch_dict(token, endpoint, patch_dict):
+    """
+    Generic PATCH for a sysinv endpoint that passes a json dict
+    Some endpoints expect a dict, while others expect a list
+    """
+    api_cmd = _api_cmd(token, endpoint)
+    api_cmd_headers = _api_cmd_headers()
+    return rest_api_request(token,
+                            "PATCH",
+                            api_cmd,
+                            api_cmd_headers,
+                            json.dumps(patch_dict),
+                            timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+
+
+def _api_post(token, endpoint, api_cmd_payload):
+    """
+    Generic POST to a sysinv endpoint with a payload
+    """
+    api_cmd = _api_cmd(token, endpoint)
+    api_cmd_headers = _api_cmd_headers()
+    response = rest_api_request(token,
+                                "POST",
+                                api_cmd,
+                                api_cmd_headers,
+                                json.dumps(api_cmd_payload),
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
 def get_datanetworks(token, host_uuid):
     """
     Get all data networks on a host.
@@ -113,10 +194,25 @@ def get_kube_host_upgrades(token):
     return response
 
 
+def get_kube_rootca_update(token):
+    """
+    Asks System Inventory for information about the kube rootca update
+    """
+    return _api_get(token, KUBE_ROOTCA_UPDATE_ENDPOINT)
+
+
+def get_kube_rootca_host_update_list(token):
+    """
+    Asks System Inventory for information about the kube rootca host updates
+    """
+    return _api_get(token, KUBE_ROOTCA_UPDATE_HOSTS_ENDPOINT)
+
+
 def get_kube_upgrade(token):
     """
     Asks System Inventory for information about the kube upgrade
     """
+    # todo(abailey): refactor using _api_get
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -132,6 +228,7 @@ def get_kube_version(token, kube_version):
     """
     Asks System Inventory for information a kube version
     """
+    # todo(abailey): refactor using _api_get
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -147,6 +244,7 @@ def get_kube_versions(token):
     """
     Asks System Inventory for information about the kube versions
     """
+    # todo(abailey): refactor using _api_get
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -158,10 +256,75 @@ def get_kube_versions(token):
     return response
 
 
+def kube_rootca_update_start(token, force=False, alarm_ignore_list=None):
+    """
+    Ask System Inventory to start a kube rootca update
+    """
+    api_cmd_payload = dict()
+    api_cmd_payload['force'] = force
+    if alarm_ignore_list is not None:
+        api_cmd_payload['alarm_ignore_list'] = copy.copy(alarm_ignore_list)
+    return _api_post(token, KUBE_ROOTCA_UPDATE_ENDPOINT, api_cmd_payload)
+
+
+def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
+    """
+    Ask System Inventory to kube rootca update generate a cert
+    """
+    api_cmd_payload = dict()
+    # even if these values are None, they need to be passed to sysinv API
+    api_cmd_payload['expiry_date'] = expiry_date
+    api_cmd_payload['subject'] = subject
+    return _api_post(token, KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT,
+                     api_cmd_payload)
+
+
+def kube_rootca_update_upload_cert(token, cert_file):
+    """
+    Ask System Inventory to kube rootca update upload a cert file
+    """
+    api_cmd_payload = dict()
+    api_cmd_payload['cert_file'] = cert_file
+    return _api_post(token, KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT,
+                     api_cmd_payload)
+
+
+def kube_rootca_update_complete(token):
+    """
+    Ask System Inventory to kube rootca update complete
+    """
+    return _api_patch_dict(token,
+                           KUBE_ROOTCA_UPDATE_ENDPOINT,
+                           {'force': 'True'})
+
+
+def kube_rootca_update_host(token, host_uuid, phase):
+    """
+    Utility method to post to kube rootca update pods endpoint phase
+    Valid phase values are:  [trust-both-cas, trust-new-ca, update-certs]
+    """
+    api_cmd = "/ihosts/%s/kube_update_ca " % host_uuid
+
+    api_cmd_payload = dict()
+    api_cmd_payload['phase'] = phase
+    return _api_post(token, api_cmd, api_cmd_payload)
+
+
+def kube_rootca_update_pods(token, phase):
+    """
+    Utility method to post to kube rootca update pods endpoint phase
+    Valid phase values are:  [trust-both-cas, trust-new-ca]
+    """
+    api_cmd_payload = dict()
+    api_cmd_payload['phase'] = phase
+    return _api_post(token, KUBE_ROOTCA_UPDATE_PODS_ENDPOINT, api_cmd_payload)
+
+
 def kube_upgrade_start(token, to_version, force=False, alarm_ignore_list=None):
     """
     Ask System Inventory to start a kube upgrade
     """
+    # todo(abailey): refactor using _post_api_request
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")

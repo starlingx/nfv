@@ -19,6 +19,11 @@ from nfv_vim import tables
 
 DLOG = debug.debug_get_logger('nfv_vim.strategy.step')
 
+# todo(abailey): create a kube rootca update constants file
+KUBE_CERT_UPDATE_TRUSTBOTHCAS = "trust-both-cas"
+KUBE_CERT_UPDATE_TRUSTNEWCA = "trust-new-ca"
+KUBE_CERT_UPDATE_UPDATECERTS = "update-certs"
+
 
 @six.add_metaclass(Singleton)
 class StrategyStepNames(Constants):
@@ -50,6 +55,19 @@ class StrategyStepNames(Constants):
     QUERY_UPGRADE = Constant('query-upgrade')
     DISABLE_HOST_SERVICES = Constant('disable-host-services')
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
+    # kube rootca update steps
+    KUBE_ROOTCA_UPDATE_COMPLETE = Constant('kube-rootca-update-complete')
+    KUBE_ROOTCA_UPDATE_GENERATE_CERT = Constant('kube-rootca-update-generate-cert')
+    KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS = Constant('kube-rootca-update-host-trustbothcas')
+    KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA = Constant('kube-rootca-update-host-trustnewca')
+    KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS = Constant('kube-rootca-update-host-update-certs')
+    KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS = Constant('kube-rootca-update-pods-trustbothcas')
+    KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA = Constant('kube-rootca-update-pods-trustnewca')
+    KUBE_ROOTCA_UPDATE_START = Constant('kube-rootca-update-start')
+    KUBE_ROOTCA_UPDATE_UPLOAD_CERT = Constant('kube-rootca-update-upload-cert')
+    QUERY_KUBE_ROOTCA_UPDATE = Constant('query-kube-rootca-update')
+    QUERY_KUBE_ROOTCA_HOST_UPDATES = Constant('query-kube-rootca-host-updates')
+    # kube upgrade steps
     APPLY_PATCHES = Constant('apply-patches')
     QUERY_KUBE_HOST_UPGRADE = Constant('query-kube-host-upgrade')
     QUERY_KUBE_UPGRADE = Constant('query-kube-upgrade')
@@ -2759,6 +2777,682 @@ class ApplySwPatchesStep(AbstractStrategyStep):
         return data
 
 
+##########################################################
+# Kube RootCA Update Steps
+##########################################################
+class QueryKubeRootcaUpdateStep(AbstractStrategyStep):
+    """
+    Query Kube RootCA Update
+    """
+    def __init__(self):
+        super(QueryKubeRootcaUpdateStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_UPDATE,
+            timeout_in_secs=60)
+
+    @coroutine
+    def _response_callback(self):
+        """
+        Get Kube Root CA Update Callback
+        """
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_rootca_update = response['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """
+        Query Kube Root CA Update
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_get_kube_rootca_update(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class QueryKubeRootcaHostUpdatesStep(AbstractStrategyStep):
+    """
+    Query Kube Rootca Host Update list
+    """
+    def __init__(self):
+        super(QueryKubeRootcaHostUpdatesStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_HOST_UPDATES,
+            timeout_in_secs=60)
+
+    @coroutine
+    def _get_kube_rootca_host_update_list_callback(self):
+        """
+        Get Kube RootCA Host Update List Callback
+        """
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_rootca_host_update_list = \
+                    response['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """
+        Query Kube Host Upgrade List
+        """
+        # todo(abailey): The API raises an exception if the kube rootca hosts
+        # are queried when there is no active update in progress
+        # therefore there are additional checks here
+        if self.strategy is None:
+            return strategy.STRATEGY_STEP_RESULT.SUCCESS, "No strategy"
+        if self.strategy.nfvi_kube_rootca_update is None:
+            return strategy.STRATEGY_STEP_RESULT.SUCCESS, "No update"
+
+        from nfv_vim import nfvi
+        nfvi.nfvi_get_kube_rootca_host_update_list(
+            self._get_kube_rootca_host_update_list_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
+    """
+    Abstract Step class for processing changes to kube root ca update
+    """
+
+    def __init__(self,
+                 step_name,
+                 success_state,
+                 fail_state,
+                 timeout_in_secs=600):
+        super(AbstractKubeRootcaUpdateStep, self).__init__(step_name,
+                                                           timeout_in_secs)
+        # _wait_time and _query_inprogress are NOT persisted
+        self._wait_time = 0
+        self._query_inprogress = False
+        # success and fail state validators are persisted
+        self._success_state = success_state
+        self._fail_state = fail_state
+
+    @coroutine
+    def _get_kube_rootca_update_callback(self):
+        """
+        Get Kube RootCA Update - Callback
+        """
+        response = (yield)
+        DLOG.debug("(%s) callback response=%s." % (self._name, response))
+
+        self._query_inprogress = False
+        if response['completed']:
+            if self.strategy is None:
+                # there is no longer a strategy.  abort.
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, 'strategy no longer exists')
+
+            result_obj = response['result-data']
+            # replace the object in the strategy with the most recent object
+            self.strategy.nfvi_kube_rootca_update = result_obj
+
+            if result_obj is None:
+                if self._success_state is None:
+                    DLOG.debug("(%s) successfully cleared" % self._name)
+                    result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                    self.stage.step_complete(result, "")
+                else:
+                    DLOG.debug("(%s) unexpectedly cleared" % self._name)
+                    result = strategy.STRATEGY_STEP_RESULT.FAILED
+                    self.stage.step_complete(result, "Result was cleared")
+            # break out of the loop if fail or success states match
+            elif result_obj.state == self._success_state:
+                DLOG.debug("(%s) successfully reached (%s)."
+                           % (self._name, self._success_state))
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+            elif (self._fail_state is not None
+                  and result_obj.state == self._fail_state):
+                DLOG.warn("(%s) encountered failure state(%s)."
+                           % (self._name, self._fail_state))
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result,
+                    '(%s) failed:(%s)' % (self._name, self._fail_state)
+                )
+            else:
+                # Keep waiting for object to reach success or fail state
+                # timeout will occur if it is never reached.
+                DLOG.debug("(%s) in state (%s) waiting for (%s) or (%s)."
+                           % (self._name,
+                              result_obj.state,
+                              self._success_state,
+                              self._fail_state))
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def handle_event(self, event, event_data=None):
+        """Handle Host events"""
+
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) / 1000
+            # Wait at least 60 seconds before checking update for first time
+            if 60 <= secs_expired and not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_kube_rootca_update(
+                    self._get_kube_rootca_update_callback())
+            return True
+        return False
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractKubeRootcaUpdateStep, self).from_dict(data)
+        # these two attributes are not persisted
+        self._wait_time = 0
+        self._query_inprogress = False
+        # validation states are persisted
+        self._success_state = data['success_state']
+        self._fail_state = data['fail_state']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractKubeRootcaUpdateStep, self).as_dict()
+        data['success_state'] = self._success_state
+        data['fail_state'] = self._fail_state
+        return data
+
+
+class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
+    def __init__(self,
+                 hosts,
+                 step_name,
+                 success_state,
+                 fail_state,
+                 update_type,
+                 timeout_in_secs=600):
+        super(AbstractKubeRootcaUpdateHostStep, self).__init__(
+             step_name,
+             success_state,
+             fail_state,
+             timeout_in_secs=timeout_in_secs)
+        self._hosts = hosts
+        self._host_names = list()
+        self._host_uuids = list()
+        for host in hosts:
+            self._host_names.append(host.name)
+            self._host_uuids.append(host.uuid)
+        self._update_type = update_type
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractKubeRootcaUpdateHostStep, self).from_dict(data)
+        self._hosts = list()
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+        self._update_type = data['update_type']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractKubeRootcaUpdateHostStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        data['update_type'] = self._update_type
+        return data
+
+    @coroutine
+    def _get_kube_rootca_host_update_list_callback(self):
+        """Get Kube RootCa Update Host List Callback"""
+
+        response = (yield)
+        DLOG.debug("(%s) callback response=%s." % (self._name, response))
+
+        self._query_inprogress = False
+        if response['completed']:
+            self.strategy.nfvi_kube_rootca_host_update_list = \
+                response['result-data']
+
+            host_count = 0
+            match_count = 0
+            fail_count = 0
+            for host_name in self._host_names:
+                for k_host in self.strategy.nfvi_kube_rootca_host_update_list:
+                    if k_host.hostname == host_name:
+                        if k_host.state == self._success_state:
+                            match_count += 1
+                        elif k_host.state == self._fail_state:
+                            # we should not have gotten here
+                            fail_count += 1
+                        host_count += 1
+                        # break out of inner loop, since uuids match
+                        break
+                if host_count == len(self._host_uuids):
+                    # this is a pointless break
+                    break
+            if match_count == len(self._host_uuids):
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+            elif fail_count != 0:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, response['reason'])
+            else:
+                # keep waiting for state to change
+                pass
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events  - check for a host failure event
+        Override to bypass checking for kube rootca update state.
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.KUBE_ROOTCA_UPDATE_HOST_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result,
+                    "%s for host(%s) failed"
+                    % (self._name, host.name))
+                return True
+        elif event == STRATEGY_EVENT.HOST_AUDIT:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) / 1000
+            # Wait at least 60 seconds before checking upgrade for first time
+            if 60 <= secs_expired and not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_kube_rootca_host_update_list(
+                    self._get_kube_rootca_host_update_list_callback())
+            return True
+        return False
+
+    def apply(self):
+        """Kube RootCA Update Hosts"""
+
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply to hostnames (%s)."
+                  % (self._name, self._host_names))
+        host_director = directors.get_host_director()
+        operation = host_director.kube_rootca_update_hosts_by_type(
+            self._host_names,
+            self._update_type)
+
+        if operation.is_inprogress():
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        elif operation.is_failed():
+            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+
+class KubeRootcaUpdateHostTrustBothcasStep(AbstractKubeRootcaUpdateHostStep):
+    """Kube RootCA Update - Host - trustBothCAs"""
+
+    def __init__(self, hosts):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdateHostTrustBothcasStep, self).__init__(
+            hosts,
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED,
+            KUBE_CERT_UPDATE_TRUSTBOTHCAS)
+
+
+class KubeRootcaUpdateHostUpdateCertsStep(AbstractKubeRootcaUpdateHostStep):
+    """Kube RootCA Update - Host - updateCerts"""
+
+    def __init__(self, hosts):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdateHostUpdateCertsStep, self).__init__(
+            hosts,
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED,
+            KUBE_CERT_UPDATE_UPDATECERTS)
+
+
+class KubeRootcaUpdateHostTrustNewcaStep(AbstractKubeRootcaUpdateHostStep):
+    """Kube RootCA Update - Host - trustNewCA"""
+
+    def __init__(self, hosts):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdateHostTrustNewcaStep, self).__init__(
+            hosts,
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED,
+            KUBE_CERT_UPDATE_TRUSTNEWCA)
+
+
+class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
+    """
+    Abstract Step class for processing changes to kube rootca update for pods
+    """
+
+    def __init__(self,
+                 step_name,
+                 success_state,
+                 fail_state,
+                 phase,
+                 timeout_in_secs=600):
+        super(AbstractKubeRootcaUpdatePodsStep, self).__init__(
+             step_name,
+             success_state,
+             fail_state,
+             timeout_in_secs=timeout_in_secs)
+        self._phase = phase
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(AbstractKubeRootcaUpdatePodsStep, self).from_dict(data)
+        self._phase = data['phase']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the step as a dictionary
+        """
+        data = super(AbstractKubeRootcaUpdatePodsStep, self).as_dict()
+        data['phase'] = self._phase
+        return data
+
+    @coroutine
+    def _pods_update_response_callback(self):
+        """Kube RootCA Update - Pods - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_rootca_update = response['result-data']
+            # We do not set 'success' here, let the handle_event do this
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube RootCA Update - Pods"""
+        from nfv_vim import nfvi
+        nfvi.nfvi_kube_rootca_update_pods(self._phase,
+                                          self._pods_update_response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeRootcaUpdatePodsTrustBothcasStep(AbstractKubeRootcaUpdatePodsStep):
+    """Kube RootCA Update - Pods - trustBothCAs - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdatePodsTrustBothcasStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED,
+            KUBE_CERT_UPDATE_TRUSTBOTHCAS)  # phase
+
+
+class KubeRootcaUpdatePodsTrustNewcaStep(AbstractKubeRootcaUpdatePodsStep):
+    """Kube RootCA Update - Pods - trustNewCA - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdatePodsTrustNewcaStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED,
+            KUBE_CERT_UPDATE_TRUSTNEWCA)  # phase
+
+
+class KubeRootcaUpdateStartStep(AbstractKubeRootcaUpdateStep):
+    """Kube RootCA Update - Start - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdateStartStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_START,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED,
+            None)  # there is no failure state if 'start' fails
+
+    @coroutine
+    def _response_callback(self):
+        """Kube RootCA Update - Start - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_rootca_update = response['result-data']
+            # We do not set 'success' here, let the handle_event do this
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube RootCA Update - Start"""
+
+        from nfv_vim import nfvi
+
+        force = True  # Ignore all non-management affecting alarms
+        alarm_ignore_list = ["900.501", ]  # ignore the auto apply alarm
+        nfvi.nfvi_kube_rootca_update_start(force,
+                                           alarm_ignore_list,
+                                           self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
+    """Kube RootCA Update - Complete - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdateCompleteStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_COMPLETE,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED,
+            None)  # there is no failure state if 'complete' fails
+
+    def handle_event(self, event, event_data=None):
+        """Override parent class and do not handle any events"""
+        return False
+
+    @coroutine
+    def _response_callback(self):
+        """Kube RootCA Update - Complete - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_rootca_update = response['result-data']
+            if self.strategy is None:
+                # return success if there is no more strategy
+                self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                         "no strategy")
+            elif self.strategy.nfvi_kube_rootca_update is None:
+                # return success if there is no more update
+                self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                         "no update")
+            elif self.strategy.nfvi_kube_rootca_update.state == self._success_state:
+                self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                         "")
+            else:
+                # We should not get here.
+                # If the state does not match, the response should have failed
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result,
+                                         "Unexpected state: %s"
+                                         % self.strategy.nfvi_kube_rootca_update.state)
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube RootCA Update - Complete"""
+
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_kube_rootca_update_complete(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
+    """Kube RootCA Update - Generate Cert - Strategy Step"""
+
+    def __init__(self, expiry_date, subject):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdateGenerateCertStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_GENERATE_CERT,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED,
+            None,  # sysinv API does not have a FAILED state for this action
+            timeout_in_secs=300)  # set a five minute timeout to detect failure
+        self._expiry_date = expiry_date
+        self._subject = subject
+
+    @coroutine
+    def _response_callback(self):
+        """
+        Note: Generate Cert is a blocking call that returns an identifier
+        however polling the update is how we proceed to next state
+        """
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+        if response['completed']:
+            # We do not set 'success' here, let the handle_event do this
+            # The API returns a certificate identifier
+            pass
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube RootCA Update - Generate Cert"""
+
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_kube_rootca_update_generate_cert(self._expiry_date,
+                                                   self._subject,
+                                                   self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(KubeRootcaUpdateGenerateCertStep, self).from_dict(data)
+        self._expiry_date = data['expiry_date']
+        self._subject = data['subject']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the kube upgrade step as a dictionary
+        """
+        data = super(KubeRootcaUpdateGenerateCertStep, self).as_dict()
+        data['expiry_date'] = self._expiry_date
+        data['subject'] = self._subject
+        return data
+
+
+class KubeRootcaUpdateUploadCertStep(AbstractStrategyStep):
+    """Kube RootCA Update - Upload Cert - Strategy Step"""
+
+    def __init__(self, cert_file):
+        super(KubeRootcaUpdateUploadCertStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_UPLOAD_CERT,
+            timeout_in_secs=120)
+        self._cert_file = cert_file
+
+    @coroutine
+    def _response_callback(self):
+        """Upload Cert is a blocking call"""
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_rootca_update = response['result-data']
+
+            # todo(abailey): iMay want to check if the state is now:
+            # nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_UPLOADED
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube RootCA Update - Upload Cert"""
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_kube_rootca_update_upload_cert(self._cert_file,
+                                                 self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """
+        Returns the step object initialized using the given dictionary
+        """
+        super(KubeRootcaUpdateUploadCertStep, self).from_dict(data)
+        self._cert_file = data['cert_file']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the kube upgrade step as a dictionary
+        """
+        data = super(KubeRootcaUpdateUploadCertStep, self).as_dict()
+        data['cert_file'] = self._cert_file
+        return data
+
+
+##########################################################
+# Kube Upgrade Steps
+##########################################################
 class QueryKubeUpgradeStep(AbstractStrategyStep):
     """
     Query Kube Upgrade
@@ -2882,7 +3576,7 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
         # These two attributes are not persisted
         self._wait_time = 0
         self._query_inprogress = False
-        # success  and fail state validators are persisted
+        # success and fail state validators are persisted
         self._success_state = success_state
         self._fail_state = fail_state
 
@@ -3441,6 +4135,30 @@ def strategy_step_rebuild_from_dict(data):
     """
     rebuild_map = {
         STRATEGY_STEP_NAME.APPLY_PATCHES: ApplySwPatchesStep,
+        # kube rootca update steps
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_COMPLETE:
+            KubeRootcaUpdateCompleteStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_GENERATE_CERT:
+            KubeRootcaUpdateGenerateCertStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS:
+            KubeRootcaUpdateHostTrustBothcasStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA:
+            KubeRootcaUpdateHostTrustNewcaStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS:
+            KubeRootcaUpdateHostUpdateCertsStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS:
+            KubeRootcaUpdatePodsTrustBothcasStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA:
+            KubeRootcaUpdatePodsTrustNewcaStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_START:
+            KubeRootcaUpdateStartStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_UPLOAD_CERT:
+            KubeRootcaUpdateUploadCertStep,
+        STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_UPDATE:
+            QueryKubeRootcaUpdateStep,
+        STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_HOST_UPDATES:
+            QueryKubeRootcaHostUpdatesStep,
+        # kube upgrade steps
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE:
             KubeHostUpgradeControlPlaneStep,
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET:

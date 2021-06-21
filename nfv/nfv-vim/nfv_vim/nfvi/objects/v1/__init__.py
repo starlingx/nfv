@@ -48,6 +48,9 @@ from nfv_vim.nfvi.objects.v1._instance_group import InstanceGroup  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import INSTANCE_TYPE_EXTENSION  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceType  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceTypeAttributes  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_rootca_update import KUBE_ROOTCA_UPDATE_STATE  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_rootca_update import KubeRootcaHostUpdate  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_rootca_update import KubeRootcaUpdate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._kube_upgrade import KUBE_UPGRADE_STATE  # noqa: F401
 from nfv_vim.nfvi.objects.v1._kube_upgrade import KubeHostUpgrade  # noqa: F401
 from nfv_vim.nfvi.objects.v1._kube_upgrade import KubeUpgrade  # noqa: F401

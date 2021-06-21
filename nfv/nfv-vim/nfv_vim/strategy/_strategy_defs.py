@@ -32,6 +32,7 @@ class EventNames(object):
         Constant('kube-host-upgrade-control-plane-failed')
     KUBE_HOST_UPGRADE_KUBELET_FAILED = \
         Constant('kube-host-upgrade-kubelet-failed')
+    KUBE_ROOTCA_UPDATE_HOST_FAILED = Constant('kube-rootca-update-host-failed')
 
 
 # Constants

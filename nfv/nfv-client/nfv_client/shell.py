@@ -56,6 +56,13 @@ def get_extra_create_args(cmd_area, args):
     elif 'fw-update-strategy' == cmd_area:
         # no additional kwargs for firmware update
         return {}
+    elif 'kube-rootca-update-strategy' == cmd_area:
+        # kube rootca update supports expiry_date, subject and cert_file
+        return {
+            'expiry_date': args.expiry_date,
+            'subject': args.subject,
+            'cert_file': args.cert_file
+        }
     elif 'kube-upgrade-strategy' == cmd_area:
         # kube upgrade supports: to_version
         return {'to_version': args.to_version}
@@ -218,6 +225,62 @@ def setup_fw_update_parser(commands):
         max_parallel=5  # fw update supports 2..5 workers in parallel
     )
     # There are no additional create options for firmware update
+
+    # define the delete command
+    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    # define the apply command
+    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    # define the abort command
+    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    # define the show command
+    show_strategy_cmd = setup_show_cmd(sub_cmds)
+
+
+def setup_kube_rootca_update_parser(commands):
+    """Kubernetes RootCA Update Strategy Commands"""
+
+    cmd_area = 'kube-rootca-update-strategy'
+    register_strategy(cmd_area, sw_update.STRATEGY_NAME_KUBE_ROOTCA_UPDATE)
+    cmd_parser = commands.add_parser(cmd_area,
+                                     help='Kubernetes RootCA Update Strategy')
+    cmd_parser.set_defaults(cmd_area=cmd_area)
+
+    sub_cmds = cmd_parser.add_subparsers(
+        title='Kubernetes RootCA Update Commands',
+        metavar='')
+    sub_cmds.required = True
+
+    # define the create command
+    create_strategy_cmd = setup_create_cmd(
+        sub_cmds,
+        [sw_update.APPLY_TYPE_SERIAL,  # controller supports serial only
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # storage supports serial only
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
+         sw_update.INSTANCE_ACTION_MIGRATE],
+        [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
+         sw_update.ALARM_RESTRICTIONS_RELAXED],
+        min_parallel=2,
+        max_parallel=10  # kube rootca update support 2..10 workers in parallel
+    )
+    # add specific arguments to the create command for kube root ca update
+    # The get_extra_create_args method is updated to align with these
+    create_strategy_cmd.add_argument(
+        '--expiry-date',
+        required=False,
+        help='When the generated certificate should expire')
+    create_strategy_cmd.add_argument(
+        '--subject',
+        required=False,
+        help='Subject for the generated certificate')
+    create_strategy_cmd.add_argument(
+        '--cert-file',
+        required=False,
+        help='Path to a file to be used, otherwise system will generate one')
 
     # define the delete command
     delete_strategy_cmd = setup_delete_cmd(sub_cmds)
@@ -395,6 +458,9 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
 
         # Add firmware update strategy commands
         setup_fw_update_parser(commands)
+
+        # Add kubernetes rootca update strategy commands
+        setup_kube_rootca_update_parser(commands)
 
         # Add kubernetes upgrade strategy commands
         setup_kube_upgrade_parser(commands)

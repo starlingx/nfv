@@ -96,6 +96,7 @@ class _RPCMessageType(Constants):
 
     # Software Update Definitions
     CREATE_SW_UPDATE_STRATEGY_REQUEST = Constant('create-sw-update-strategy-request')
+    CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST = Constant('create-kube-rootca-update-strategy-request')
     CREATE_KUBE_UPGRADE_STRATEGY_REQUEST = Constant('create-kube-upgrade-strategy-request')
     CREATE_SW_UPGRADE_STRATEGY_REQUEST = Constant('create-sw-upgrade-strategy-request')
     CREATE_SW_UPDATE_STRATEGY_RESPONSE = Constant('create-sw-update-strategy-response')

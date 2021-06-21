@@ -187,6 +187,9 @@ def _vim_api_message_handler(connection, msg):
     elif rpc.RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_REQUEST == msg.type:
         vim_sw_update_api_create_strategy(connection, msg)
 
+    elif rpc.RPC_MSG_TYPE.CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST == msg.type:
+        vim_sw_update_api_create_strategy(connection, msg)
+
     elif rpc.RPC_MSG_TYPE.CREATE_KUBE_UPGRADE_STRATEGY_REQUEST == msg.type:
         vim_sw_update_api_create_strategy(connection, msg)
 

@@ -17,21 +17,18 @@ from nfv_vim.objects._sw_update import SW_UPDATE_EVENT_IDS
 from nfv_vim.objects._sw_update import SW_UPDATE_TYPE
 from nfv_vim.objects._sw_update import SwUpdate
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.kube_upgrade')
+DLOG = debug.debug_get_logger('nfv_vim.objects.kube_rootca_update')
 
 
-class KubeUpgrade(SwUpdate):
+class KubeRootcaUpdate(SwUpdate):
     """
-    Kubernetes Upgrade Object
+    Kubernetes RootCA Update Object
     """
     def __init__(self, sw_update_uuid=None, strategy_data=None):
-        super(KubeUpgrade, self).__init__(
-            sw_update_type=SW_UPDATE_TYPE.KUBE_UPGRADE,
+        super(KubeRootcaUpdate, self).__init__(
+            sw_update_type=SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE,
             sw_update_uuid=sw_update_uuid,
             strategy_data=strategy_data)
-        # TODO(abailey): we do not appear to populate _kube_upgrade_hosts
-        # consider removing
-        self._kube_upgrade_hosts = list()
 
     def strategy_build(self,
                        strategy_uuid,
@@ -42,10 +39,12 @@ class KubeUpgrade(SwUpdate):
                        default_instance_action,
                        alarm_restrictions,
                        ignore_alarms,
-                       to_version,
-                       single_controller):
+                       single_controller,
+                       expiry_date,
+                       subject,
+                       cert_file):
         """
-        Create a kubernetes upgrade strategy
+        Create a kubernetes root ca update strategy
         """
         from nfv_vim import strategy
 
@@ -54,16 +53,18 @@ class KubeUpgrade(SwUpdate):
             return False, reason
 
         self._strategy = \
-            strategy.KubeUpgradeStrategy(strategy_uuid,
-                                         controller_apply_type,
-                                         storage_apply_type,
-                                         worker_apply_type,
-                                         max_parallel_worker_hosts,
-                                         default_instance_action,
-                                         alarm_restrictions,
-                                         ignore_alarms,
-                                         to_version,
-                                         single_controller)
+            strategy.KubeRootcaUpdateStrategy(strategy_uuid,
+                                              controller_apply_type,
+                                              storage_apply_type,
+                                              worker_apply_type,
+                                              max_parallel_worker_hosts,
+                                              default_instance_action,
+                                              alarm_restrictions,
+                                              ignore_alarms,
+                                              single_controller,
+                                              expiry_date,
+                                              subject,
+                                              cert_file)
         self._strategy.sw_update_obj = self
         self._strategy.build()
         self._persist()
@@ -71,9 +72,9 @@ class KubeUpgrade(SwUpdate):
 
     def strategy_build_complete(self, success, reason):
         """
-        Creation of a kubernetes upgrade strategy complete
+        Creation of a kubernetes root ca update strategy complete
         """
-        DLOG.info("Kubernetes upgrade strategy build complete.")
+        DLOG.info("Kubernetes root ca update strategy build complete.")
         pass
 
     @staticmethod
@@ -83,11 +84,11 @@ class KubeUpgrade(SwUpdate):
         """
         ALARM_TYPE_MAPPING = {
             SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS:
-                alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS,
+                alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS,
             SW_UPDATE_ALARM_TYPES.APPLY_ABORTING:
-                alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_ABORTING,
+                alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING,
             SW_UPDATE_ALARM_TYPES.APPLY_FAILED:
-                alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_FAILED,
+                alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED,
         }
         return ALARM_TYPE_MAPPING[alarm_type]
 
@@ -98,27 +99,27 @@ class KubeUpgrade(SwUpdate):
         """
         EVENT_ID_MAPPING = {
             SW_UPDATE_EVENT_IDS.APPLY_START:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_START,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_START,
             SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS,
             SW_UPDATE_EVENT_IDS.APPLY_REJECTED:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_REJECTED,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_REJECTED,
             SW_UPDATE_EVENT_IDS.APPLY_CANCELLED:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_CANCELLED,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_CANCELLED,
             SW_UPDATE_EVENT_IDS.APPLY_FAILED:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_FAILED,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED,
             SW_UPDATE_EVENT_IDS.APPLY_COMPLETED:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_COMPLETED,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_COMPLETED,
             SW_UPDATE_EVENT_IDS.APPLY_ABORT:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT,
             SW_UPDATE_EVENT_IDS.APPLY_ABORTING:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTING,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING,
             SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_REJECTED,
             SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_FAILED,
             SW_UPDATE_EVENT_IDS.APPLY_ABORTED:
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTED,
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTED,
         }
         return EVENT_ID_MAPPING[event_id]
 
@@ -140,18 +141,9 @@ class KubeUpgrade(SwUpdate):
 
         elif (self.strategy.is_apply_failed() or
               self.strategy.is_apply_timed_out()):
-            for kube_upgrade_host in self._kube_upgrade_hosts:
-                if not self._alarms:
-                    self._alarms = alarm.raise_sw_update_alarm(
-                        self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_FAILED))
-                    event_log.sw_update_issue_log(
-                        self.event_id(SW_UPDATE_EVENT_IDS.APPLY_FAILED))
-                break
-
-            else:
-                if self._alarms:
-                    alarm.clear_sw_update_alarm(self._alarms)
-                return False
+            if self._alarms:
+                alarm.clear_sw_update_alarm(self._alarms)
+            return False
 
         elif self.strategy.is_aborting():
             if not self._alarms:
@@ -192,7 +184,7 @@ class KubeUpgrade(SwUpdate):
                 DLOG.info("Audit no longer needed.")
                 break
 
-            DLOG.verbose("Audit kube upgrade still running, timer_id=%s." %
-                         timer_id)
+            DLOG.verbose("Audit kube rootca update still running, timer_id=%s."
+                         % timer_id)
 
         self._nfvi_timer_id = None

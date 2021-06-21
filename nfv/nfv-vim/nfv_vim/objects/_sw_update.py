@@ -30,6 +30,7 @@ class SwUpdateTypes(Constants):
     SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
     FW_UPDATE = Constant('fw-update')
+    KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
     KUBE_UPGRADE = Constant('kube-upgrade')
 
 

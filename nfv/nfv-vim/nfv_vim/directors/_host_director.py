@@ -958,6 +958,75 @@ class HostDirector(object):
 
         return host_operation
 
+    @coroutine
+    def _nfvi_kube_rootca_update_host_callback(self):
+        """
+        NFVI Kube Root CA Update Host Callback (for a single host)
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.verbose("NFVI Kube Root CA Update Host response=%s." % response)
+        if not response['completed']:
+            DLOG.info("Kube Root CA Update failed. Host:%s, reason=%s."
+                      % (response['host_name'], response['reason']))
+
+            host_table = tables.tables_get_host_table()
+            host = host_table.get(response['host_name'], None)
+            if host is None:
+                DLOG.verbose("Host %s does not exist." % response['host_name'])
+                return
+
+            if self._host_operation is None:
+                DLOG.verbose("No host %s operation inprogress." % host.name)
+                return
+
+            if OPERATION_TYPE.KUBE_ROOTCA_UPDATE_HOSTS \
+               != self._host_operation.operation_type:
+                DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                             % (host.name, self._host_operation.operation_type))
+                return
+
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.kube_host_rootca_update_failed(host)
+
+    def _nfvi_kube_rootca_update_host(self, host_uuid, host_name, update_type):
+        """NFVI Kube Root CA Update - Host"""
+        nfvi.nfvi_kube_rootca_update_host(
+            host_uuid,
+            host_name,
+            update_type,
+            self._nfvi_kube_rootca_update_host_callback())
+
+    def kube_rootca_update_hosts_by_type(self, host_names, update_type):
+        """Utility method for Kube Root CA Update - Host"""
+        DLOG.info("Kube RootCA Update %s for hosts: %s" % (update_type,
+                                                           host_names))
+        host_operation = Operation(OPERATION_TYPE.KUBE_ROOTCA_UPDATE_HOSTS)
+        if self._host_operation is not None:
+            DLOG.debug("Canceling previous host operation %s, before "
+                       "continuing with host operation %s."
+                       % (self._host_operation.operation_type,
+                          host_operation.operation_type))
+            self._host_operation = None
+
+        host_table = tables.tables_get_host_table()
+        for host_name in host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                reason = "Unknown host %s given." % host_name
+                DLOG.info(reason)
+                host_operation.set_failed(reason)
+                return host_operation
+            host_operation.add_host(host.name,
+                                    OPERATION_STATE.INPROGRESS)
+            self._nfvi_kube_rootca_update_host(host.uuid,
+                                               host.name,
+                                               update_type)
+        if host_operation.is_inprogress():
+            self._host_operation = host_operation
+        return host_operation
+
     def disable_host_services(self, host_names, service):
         """
         Disable a host service on a list of hosts

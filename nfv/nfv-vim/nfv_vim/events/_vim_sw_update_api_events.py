@@ -113,6 +113,21 @@ def vim_sw_update_api_create_strategy(connection, msg):
             default_instance_action,
             alarm_restrictions,
             _vim_sw_update_api_create_strategy_callback)
+    elif 'kube-rootca-update' == msg.sw_update_type:
+        expiry_date = msg.expiry_date
+        subject = msg.subject
+        cert_file = msg.cert_file
+        uuid, reason = sw_mgmt_director.create_kube_rootca_update_strategy(
+            controller_apply_type,
+            storage_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            expiry_date,
+            subject,
+            cert_file,
+            _vim_sw_update_api_create_strategy_callback)
     elif 'kube-upgrade' == msg.sw_update_type:
         to_version = msg.to_version
         uuid, reason = sw_mgmt_director.create_kube_upgrade_strategy(
@@ -182,6 +197,8 @@ def vim_sw_update_api_apply_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-rootca-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
     elif 'kube-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:
@@ -239,6 +256,8 @@ def vim_sw_update_api_abort_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-rootca-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
     elif 'kube-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:
@@ -293,6 +312,8 @@ def vim_sw_update_api_delete_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-rootca-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
     elif 'kube-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:
@@ -326,6 +347,8 @@ def vim_sw_update_api_get_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif 'fw-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
+    elif 'kube-rootca-update' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
     elif 'kube-upgrade' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     else:

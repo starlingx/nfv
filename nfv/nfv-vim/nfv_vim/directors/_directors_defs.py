@@ -27,6 +27,7 @@ class OperationTypes(Constants):
     SWACT_HOSTS = Constant('swact-hosts')
     FW_UPDATE_HOSTS = Constant('fw-update-hosts')
     FW_UPDATE_ABORT_HOSTS = Constant('fw-update-abort-hosts')
+    KUBE_ROOTCA_UPDATE_HOSTS = Constant('kube-rootca-update-hosts')
     KUBE_UPGRADE_HOSTS = Constant('kube-upgrade-hosts')
     START_INSTANCES = Constant('start-instances')
     START_INSTANCES_SERIAL = Constant('start-instances-serial')

@@ -839,6 +839,353 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def kube_rootca_update_complete(self, future, callback):
+        """Invokes sysinv kube-rootca-update-complete"""
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-rootca-update-complete'
+        sysinv_method = sysinv.kube_rootca_update_complete
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            api_data = future.result.data
+            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
+            response['result-data'] = result_obj
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_rootca_update_generate_cert(self, future,
+                                         expiry_date, subject, callback):
+        """Invokes sysinv kube-rootca-update-generate-cert"""
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-rootca-update-generate-cert'
+        sysinv_method = sysinv.kube_rootca_update_generate_cert
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method, self._platform_token,
+                        expiry_date=expiry_date,
+                        subject=subject)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            api_data = future.result.data
+            new_cert_identifier = api_data['success']
+            response['result-data'] = new_cert_identifier
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_rootca_update_upload_cert(self, future, cert_file, callback):
+        """Invokes sysinv kube-rootca-update-upload-cert"""
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-rootca-update-upload-cert'
+        sysinv_method = sysinv.kube_rootca_update_upload_cert
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method, self._platform_token,
+                        cert_file=cert_file)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            api_data = future.result.data
+            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
+            response['result-data'] = result_obj
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_rootca_update_host(self, future, host_uuid, host_name,
+                               update_type, callback):
+        """
+        Kube Root CA Update a host for a particular update_type (phase)
+        """
+        response = dict()
+        response['completed'] = False
+        response['host_uuid'] = host_uuid
+        response['host_name'] = host_name
+        response['reason'] = ''
+        action_type = 'kube-rootca-update-host'
+        sysinv_method = sysinv.kube_rootca_update_host
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method,
+                        self._platform_token,
+                        host_uuid,
+                        update_type)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            api_data = future.result.data
+            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
+            response['result-data'] = result_obj
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_rootca_update_pods(self, future, phase, callback):
+        """Invokes sysinv kube-rootca-update-pods for a certain phase"""
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-rootca-update-pods'
+        sysinv_method = sysinv.kube_rootca_update_pods
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method, self._platform_token, phase)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            api_data = future.result.data
+            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
+            response['result-data'] = result_obj
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_rootca_update_start(self, future, force, alarm_ignore_list,
+                                 callback):
+        """Invokes sysinv kube-rootca-update-start"""
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-rootca-update-start'
+        sysinv_method = sysinv.kube_rootca_update_start
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method,
+                        self._platform_token,
+                        force=force,
+                        alarm_ignore_list=alarm_ignore_list)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+            api_data = future.result.data
+            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
+            response['result-data'] = result_obj
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def _extract_kube_rootca_host_updates(self, kube_rootca_update_host_list):
+        """
+        Return a list of KubeRootcaHostUpdate objects from sysinv api results.
+        """
+        result_list = []
+        for host_data in kube_rootca_update_host_list:
+            result_list.append(
+                nfvi.objects.v1.KubeRootcaHostUpdate(
+                    host_data['id'],  # host_id
+                    host_data['hostname'],
+                    host_data['target_rootca_cert'],
+                    host_data['effective_rootca_cert'],
+                    host_data['state']
+                )
+            )
+        return result_list
+
+    def get_kube_rootca_host_update_list(self, future, callback):
+        """
+        Get information about the kube rootca host update list from the plugin
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        activity = "SysInv get-kube-rootca-host-updates"
+        sysinv_method = sysinv.get_kube_rootca_host_update_list
+        sysinv_result_key = "kube_host_updates"
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    error_string = "OpenStack get-token  did not complete"
+                    DLOG.error(error_string)
+                    response['reason'] = error_string
+                    return
+                self._platform_token = future.result.data
+
+            # Query the sysinv method
+            future.work(sysinv_method, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                error_string = "{} did not complete".format(activity)
+                DLOG.error(error_string)
+                response['reason'] = error_string
+                return
+            results_list = future.result.data[sysinv_result_key]
+            results_obj = self._extract_kube_rootca_host_updates(results_list)
+            response['result-data'] = results_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+                response['reason'] = "token expired"
+            else:
+                DLOG.exception("Caught exception %s err=%s" % (activity, e))
+                response['reason'] = repr(e)
+        except Exception as e:
+            DLOG.exception("Caught exception %s err=%s" % (activity, e))
+            response['reason'] = repr(e)
+        finally:
+            callback.send(response)
+            callback.close()
+
     def _extract_kube_host_upgrade_list(self,
                                         kube_host_upgrade_list,
                                         host_list):
@@ -953,6 +1300,92 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             break
         return kube_upgrade_obj
 
+    def _extract_kube_rootca_update(self, data_list):
+        """
+        Return a KubeRootCaUpdate object from sysinv api results.
+
+        Returns None if there are no items in the list.
+        Returns first object, but the API should never return
+        more than one object.
+        """
+        description = 'kube rootca update'
+        if 1 < len(data_list):
+            DLOG.critical("Too many %s returned, num=%i"
+                          % (description, len(data_list)))
+
+        elif 0 == len(data_list):
+            DLOG.info("No %s exists, num=%i"
+                      % (description, len(data_list)))
+
+        # todo(abailey): refactor this code to to reusable for other objects
+        result_obj = None
+        for result_data in data_list:
+            result_obj = nfvi.objects.v1.KubeRootcaUpdate(result_data['state'])
+            break
+        return result_obj
+
+    def get_kube_rootca_update(self, future, callback):
+        """
+        Get information about the kube rootca update from the plugin
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'get-kube-rootca-update'
+        sysinv_method = sysinv.get_kube_rootca_update
+        result_key = 'kube_rootca_updates'
+        extraction_method = self._extract_kube_rootca_update
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    response['reason'] = "OpenStack get-token did not complete"
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv_method, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                response['reason'] = "{} did not complete".format(action_type)
+                return
+
+            result_obj_data_list = future.result.data[result_key]
+            result_obj = extraction_method(result_obj_data_list)
+            response['result-data'] = result_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            # todo(abailey): refactor the code for uniform error handling
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+                response['reason'] = 'token expired'
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+                response['reason'] = repr(e)
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+            response['reason'] = repr(e)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
     def get_kube_upgrade(self, future, callback):
         """
         Get information about the kube upgrade from the plugin
@@ -961,6 +1394,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         response['completed'] = False
         response['reason'] = ''
         action_type = 'get-kube-upgrade'
+        # todo(abailey): refactor to use sysinv_method
 
         try:
             future.set_timeouts(config.CONF.get('nfvi-timeouts', None))

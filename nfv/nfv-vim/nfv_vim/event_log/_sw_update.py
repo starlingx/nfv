@@ -342,6 +342,172 @@ _event_templates = {
             }
         }
     },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_START: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply start",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply start",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply inprogress",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply inprogress",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_REJECTED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply rejected",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply rejected%(reason)s",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_CANCELLED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply cancelled",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply cancelled%(reason)s",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply failed",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply failed%(reason)s",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_COMPLETED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply completed",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply completed",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply abort",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply abort",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply aborting",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply aborting",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_REJECTED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply abort rejected",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply abort "
+                               "rejected%(reason)s",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_FAILED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply abort failed",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply abort failed%(reason)s",
+            }
+        }
+    },
+    event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=kube-rootca update",
+        'event_type': event_log.EVENT_TYPE.ACTION_EVENT,
+        'importance': event_log.EVENT_IMPORTANCE.HIGH,
+        'reason_text': "Kubernetes rootca update auto-apply aborted",
+        'exclude_event_context': [],
+        'event_context_data': {
+            event_log.EVENT_CONTEXT.ADMIN: {
+                'entity_type': "orchestration",
+                'entity': "orchestration=kube-rootca update",
+                'reason_text': "Kubernetes rootca update auto-apply aborted",
+            }
+        }
+    },
     event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_START: {
         'entity_type': "orchestration",
         'entity': "orchestration=kube-upgrade",

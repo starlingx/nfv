@@ -13,6 +13,7 @@ from nfv_common.helpers import Constants
 from nfv_common.helpers import get_local_host_name
 from nfv_common.helpers import Singleton
 from nfv_common import strategy
+from nfv_vim.nfvi.objects.v1 import KUBE_ROOTCA_UPDATE_STATE
 from nfv_vim.nfvi.objects.v1 import UPGRADE_STATE
 from nfv_vim.objects import HOST_GROUP_POLICY
 from nfv_vim.objects import HOST_NAME
@@ -33,6 +34,7 @@ class StrategyNames(Constants):
     SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
     FW_UPDATE = Constant('fw-update')
+    KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
     KUBE_UPGRADE = Constant('kube-upgrade')
 
 
@@ -608,6 +610,104 @@ class QuerySwPatchHostsMixin(QueryMixinBase):
         data['nfvi_sw_patch_hosts_data'] = mixin_data
 
 
+class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
+    """This mixin is used through the QueryKubeRootcaHostUpdatesStep class"""
+
+    def initialize_mixin(self):
+        super(QueryKubeRootcaHostUpdatesMixin, self).initialize_mixin()
+        self._nfvi_kube_rootca_host_update_list = list()
+
+    @property
+    def nfvi_kube_rootca_host_update_list(self):
+        """
+        Returns the kube rootca host update list from the NFVI layer
+        """
+        return self._nfvi_kube_rootca_host_update_list
+
+    @nfvi_kube_rootca_host_update_list.setter
+    def nfvi_kube_rootca_host_update_list(self, new_list):
+        """
+        Save the kube rootca host update list from the NFVI Layer
+        """
+        self._nfvi_kube_rootca_host_update_list = new_list
+
+    def mixin_from_dict(self, data):
+        """
+        Extracts this mixin data from a dictionary
+        """
+        super(QueryKubeRootcaHostUpdatesMixin, self).mixin_from_dict(data)
+
+        from nfv_vim import nfvi
+
+        mixin_data = list()
+        for list_data in data['nfvi_kube_rootca_host_update_list_data']:
+            new_object = nfvi.objects.v1.KubeRootcaHostUpdate(
+                list_data['host_id'],
+                list_data['hostname'],
+                list_data['target_rootca_cert'],
+                list_data['effective_rootca_cert'],
+                list_data['state'])
+            mixin_data.append(new_object)
+        self._nfvi_kube_rootca_host_update_list = mixin_data
+
+    def mixin_as_dict(self, data):
+        """
+        Updates the dictionary with this mixin data
+        """
+        super(QueryKubeRootcaHostUpdatesMixin, self).mixin_as_dict(data)
+        mixin_data = list()
+        for list_entry in self._nfvi_kube_rootca_host_update_list:
+            mixin_data.append(list_entry.as_dict())
+        data['nfvi_kube_rootca_host_update_list_data'] = mixin_data
+
+
+class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
+    """This mixin is used through the QueryKubeRootcaUpdatesStep class"""
+
+    def initialize_mixin(self):
+        super(QueryKubeRootcaUpdatesMixin, self).initialize_mixin()
+        self._nfvi_kube_rootca_update = None
+
+    @property
+    def nfvi_kube_rootca_update(self):
+        """
+        Returns the kube rootca update from the NFVI layer
+        """
+        return self._nfvi_kube_rootca_update
+
+    @nfvi_kube_rootca_update.setter
+    def nfvi_kube_rootca_update(self, nfvi_kube_rootca_update):
+        """
+        Save the kube rootca update from the NFVI Layer
+        """
+        self._nfvi_kube_rootca_update = nfvi_kube_rootca_update
+
+    def mixin_from_dict(self, data):
+        """
+        Extracts this mixin data from a dictionary
+        """
+        super(QueryKubeRootcaUpdatesMixin, self).mixin_from_dict(data)
+
+        from nfv_vim import nfvi
+
+        mixin_data = data['nfvi_kube_rootca_update_data']
+        if mixin_data:
+            self._nfvi_kube_rootca_update = nfvi.objects.v1.KubeRootcaUpdate(
+                mixin_data['state'])
+        else:
+            self._nfvi_kube_rootca_update = None
+
+    def mixin_as_dict(self, data):
+        """
+        Updates the dictionary with this mixin data
+        """
+        super(QueryKubeRootcaUpdatesMixin, self).mixin_as_dict(data)
+        mixin_data = None
+        if self._nfvi_kube_rootca_update:
+            mixin_data = self._nfvi_kube_rootca_update.as_dict()
+        data['nfvi_kube_rootca_update_data'] = mixin_data
+
+
 class QueryKubeUpgradesMixin(QueryMixinBase):
     """This mixin is used through the QueryKubeUpgradesStep class"""
 
@@ -892,17 +992,23 @@ class UpgradeKubeletControllerHostsMixin(UpdateControllerHostsMixin):
             strategy.KubeHostUpgradeKubeletStep)
 
 
-class PatchStorageHostsMixin(object):
+class UpdateStorageHostsMixin(object):
     """
-    Adds the ability to add patch steps for storage hosts to a strategy.
+    Adds the ability to add steps for storage hosts to a strategy.
 
     This mixin can only be used classes that subclass or mixin with:
     - SwUpdateStrategy: - provides _create_storage_host_lists
     """
 
-    def _add_storage_strategy_stages(self, storage_hosts, reboot):
+    def _add_update_storage_strategy_stages(self,
+                                            storage_hosts,
+                                            reboot,
+                                            strategy_stage_name,
+                                            host_action_step):
         """
-        Add storage software patch stages to a strategy
+        Add storage update stages to a strategy
+        The strategy_stage_name is the type of stage (patch, kube, etc..)
+        The host_action_step is the step to invoke once hosts are locked, etc..
         """
         from nfv_vim import strategy
 
@@ -911,15 +1017,15 @@ class PatchStorageHostsMixin(object):
             return False, reason
 
         for host_list in host_lists:
-            stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.SW_PATCH_STORAGE_HOSTS)
+            stage = strategy.StrategyStage(strategy_stage_name)
             stage.add_step(strategy.QueryAlarmsStep(
                 True, ignore_alarms=self._ignore_alarms))
             if reboot:
                 stage.add_step(strategy.LockHostsStep(host_list))
-            stage.add_step(strategy.SwPatchHostsStep(host_list))
+            # Add the action step for these hosts (patch, etc..)
+            stage.add_step(host_action_step(host_list))
             if reboot:
-                # Cannot unlock right away after SwPatchHostsStep
+                # Cannot unlock right away after the host action
                 stage.add_step(strategy.SystemStabilizeStep(
                                timeout_in_secs=MTCE_DELAY))
                 stage.add_step(strategy.UnlockHostsStep(host_list))
@@ -934,6 +1040,19 @@ class PatchStorageHostsMixin(object):
                                timeout_in_secs=NO_REBOOT_DELAY))
             self.apply_phase.add_stage(stage)
         return True, ''
+
+
+class PatchStorageHostsMixin(UpdateStorageHostsMixin):
+    def _add_storage_strategy_stages(self, storage_hosts, reboot):
+        """
+        Add storage software patch stages to a strategy
+        """
+        from nfv_vim import strategy
+        return self._add_update_storage_strategy_stages(
+            storage_hosts,
+            reboot,
+            strategy.STRATEGY_STAGE_NAME.SW_PATCH_STORAGE_HOSTS,
+            strategy.SwPatchHostsStep)
 
 
 class UpdateWorkerHostsMixin(object):
@@ -2411,6 +2530,415 @@ class FwUpdateStrategy(SwUpdateStrategy):
 
 ###################################################################
 #
+# The Kubernetes RootCa Update Strategy
+#
+###################################################################
+class KubeRootcaUpdateStrategy(SwUpdateStrategy,
+                               QueryKubeRootcaUpdatesMixin,
+                               QueryKubeRootcaHostUpdatesMixin):
+    """
+    Kubernetes RootCa Update - Strategy
+    """
+    def __init__(self,
+                 uuid,
+                 controller_apply_type,
+                 storage_apply_type,
+                 worker_apply_type,
+                 max_parallel_worker_hosts,
+                 default_instance_action,
+                 alarm_restrictions,
+                 ignore_alarms,
+                 single_controller,
+                 expiry_date,
+                 subject,
+                 cert_file):
+        super(KubeRootcaUpdateStrategy, self).__init__(
+            uuid,
+            STRATEGY_NAME.KUBE_ROOTCA_UPDATE,
+            controller_apply_type,
+            storage_apply_type,
+            SW_UPDATE_APPLY_TYPE.IGNORE,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            ignore_alarms)
+
+        # The following alarms will NOT prevent a kube rootca update operation
+        # todo(abailey): remove memory alarm from this list if possible
+        IGNORE_ALARMS = [
+            '100.103',  # Memory threshold exceeded
+            '200.001',  # Locked Host
+            '280.001',  # Subcloud resource off-line
+            '280.002',  # Subcloud resource out-of-sync
+            '700.004',  # VM stopped
+            '750.006',  # Configuration change requires reapply of cert-manager
+            '900.008',  # Kubernetes rootca update in progress
+            '900.501',  # Kubernetes rootca update auto-apply inprogress
+        ]
+        # self._ignore_alarms is declared in parent class
+        self._ignore_alarms += IGNORE_ALARMS
+
+        # the following attributes need to be handled in from_dict/as_dict
+        self._single_controller = single_controller
+        self._expiry_date = expiry_date
+        self._subject = subject
+        self._cert_file = cert_file
+
+        # initialize the variables required by the mixins
+        self.initialize_mixin()
+
+    def report_build_failure(self, reason):
+        """
+        Report a build failure for the strategy
+
+        todo(abailey): this should be in the superclass
+        """
+        DLOG.warn("Strategy Build Failed: %s" % reason)
+        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+        self.build_phase.result_reason = reason
+        self.sw_update_obj.strategy_build_complete(
+            False,
+            self.build_phase.result_reason)
+        self.save()
+
+    def build(self):
+        """Build the strategy"""
+        from nfv_vim import strategy
+
+        # Initial stage is a query of existing kube rootca update
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_QUERY)
+        stage.add_step(strategy.QueryAlarmsStep(
+            ignore_alarms=self._ignore_alarms))
+        # these query steps are paired with mixins that process their results
+        stage.add_step(strategy.QueryKubeRootcaUpdateStep())
+        stage.add_step(strategy.QueryKubeRootcaHostUpdatesStep())
+        self.build_phase.add_stage(stage)
+        super(KubeRootcaUpdateStrategy, self).build()
+
+    def _add_kube_rootca_update_start_stage(self):
+        """
+        Add kube-rootca-update start strategy stage
+        This stage only occurs when no kube rootca update has been initiated.
+        """
+        from nfv_vim import strategy
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_START)
+        stage.add_step(strategy.KubeRootcaUpdateStartStep())
+        self.apply_phase.add_stage(stage)
+        # Proceed to the next stage
+        self._add_kube_rootca_update_cert_stage()
+
+    def _add_kube_rootca_update_cert_stage(self):
+        """
+        Add kube-rootca-update cert strategy stage
+        This stage either uploads an existing cert, or generates one.
+        The upload option requires the path for the file to upload.
+        The generate option supports a expiry_date and subject  option.
+        This stage is skipped if a previous update has already performed this
+        activity.
+        """
+        from nfv_vim import strategy
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_CERT)
+        # if there is an existing cert file, upload it
+        if self._cert_file:
+            stage.add_step(
+                strategy.KubeRootcaUpdateUploadCertStep(self._cert_file))
+        else:
+            stage.add_step(
+                strategy.KubeRootcaUpdateGenerateCertStep(self._expiry_date,
+                                                          self._subject))
+        self.apply_phase.add_stage(stage)
+        # Proceed to the next stage
+        self._add_kube_rootca_hosts_trustbothcas_stage()
+
+    def _determine_kube_rootca_host_lists(self, success_state):
+        """
+        Utility method to get host lists (list of lists) for a rootca update
+        Storage hosts are excluded
+        """
+        from nfv_vim import tables
+        host_table = tables.tables_get_host_table()
+
+        hosts_to_update = list()
+
+        rootca_host_map = dict()
+        if self.nfvi_kube_rootca_host_update_list:
+            for k_host in self.nfvi_kube_rootca_host_update_list:
+                rootca_host_map[k_host.hostname] = k_host.state
+
+        for host in host_table.values():
+            # if we do not have the host in the map or its state does not match
+            # then we need to process it
+            if rootca_host_map.get(host.name) != success_state:
+                if HOST_PERSONALITY.CONTROLLER in host.personality:
+                    hosts_to_update.append(host)
+                elif HOST_PERSONALITY.WORKER in host.personality:
+                    hosts_to_update.append(host)
+                else:
+                    DLOG.info("Skipping host: %s of personality: %s"
+                              % (host.name, host.personality))
+            else:
+                DLOG.info("Skipping up to date host: %s (%s)"
+                          % (host.name, success_state))
+
+        host_lists = list()
+        if hosts_to_update:
+            # sort the hosts by name, to provide predicability
+            sorted_hosts = sorted(hosts_to_update, key=lambda host: host.name)
+            for host in sorted_hosts:
+                host_lists.append([host])
+        return host_lists
+
+    def _add_kube_rootca_hosts_trustbothcas_stage(self):
+        """
+        Add kube-rootca-update host trustbothcas strategy stages
+        This stage is performed on the hosts
+        """
+        host_lists = self._determine_kube_rootca_host_lists(
+            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS)
+        if host_lists:
+            from nfv_vim import strategy
+            stage = strategy.StrategyStage(
+                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_TRUSTBOTHCAS)
+            for hosts in host_lists:
+                stage.add_step(
+                    strategy.KubeRootcaUpdateHostTrustBothcasStep(hosts))
+            # todo(abailey) consider adding a host query
+            self.apply_phase.add_stage(stage)
+        # Proceed to the next stage
+        self._add_kube_rootca_update_pods_trustbothcas_stage()
+
+    def _add_kube_rootca_update_pods_trustbothcas_stage(self):
+        """
+        Add kube-rootca-update 'pods' trustbothcas strategy stage
+        This stage is performed on the pods.
+        """
+        from nfv_vim import strategy
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS)
+        stage.add_step(strategy.KubeRootcaUpdatePodsTrustBothcasStep())
+        self.apply_phase.add_stage(stage)
+        # Proceed to the next stage
+        self._add_kube_rootca_hosts_update_certs_stage()
+
+    def _add_kube_rootca_hosts_update_certs_stage(self):
+        """
+        Add kube-rootca-update host update certs strategy stages
+        This stage is performed on the hosts
+        """
+        host_lists = self._determine_kube_rootca_host_lists(
+            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS)
+        if host_lists:
+            from nfv_vim import strategy
+            stage = strategy.StrategyStage(
+                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_UPDATECERTS)
+            for hosts in host_lists:
+                stage.add_step(
+                    strategy.KubeRootcaUpdateHostUpdateCertsStep(hosts))
+            self.apply_phase.add_stage(stage)
+        # Proceed to the next stage
+        self._add_kube_rootca_hosts_trustnewca_stage()
+
+    def _add_kube_rootca_hosts_trustnewca_stage(self):
+        """
+        Add kube-rootca-update host trustnewca strategy stages
+        This stage is performed on the hosts
+        """
+        host_lists = self._determine_kube_rootca_host_lists(
+            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA)
+        if host_lists:
+            from nfv_vim import strategy
+            stage = strategy.StrategyStage(
+                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_TRUSTNEWCA)
+            for hosts in host_lists:
+                stage.add_step(
+                    strategy.KubeRootcaUpdateHostTrustNewcaStep(hosts))
+            self.apply_phase.add_stage(stage)
+        # Proceed to the next stage
+        self._add_kube_rootca_update_pods_trustnewca_stage()
+
+    def _add_kube_rootca_update_pods_trustnewca_stage(self):
+        """
+        Add kube-rootca-update 'pods' trustnewca strategy stage
+        This stage is performed on the pods.
+        """
+        from nfv_vim import strategy
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA)
+        stage.add_step(strategy.KubeRootcaUpdatePodsTrustNewcaStep())
+        self.apply_phase.add_stage(stage)
+        # Proceed to the next stage
+        self._add_kube_rootca_update_complete_stage()
+
+    def _add_kube_rootca_update_complete_stage(self):
+        """
+        Add kube rootca update complete strategy stage
+        This stage occurs after all kube rootca are updated
+        """
+        from nfv_vim import strategy
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_COMPLETE)
+        stage.add_step(strategy.KubeRootcaUpdateCompleteStep())
+        self.apply_phase.add_stage(stage)
+        # There is no next stage. this is the final stage of the strategy
+
+    def build_complete(self, result, result_reason):
+        """
+        Strategy Build Complete
+        """
+        from nfv_vim import nfvi
+        from nfv_vim import strategy
+
+        RESUME_STATE = {
+            # after update-started -> generate or upload cert
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED:
+                self._add_kube_rootca_update_cert_stage,
+
+            # after generated or uploaded, host trustbothcas stage
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED:
+                self._add_kube_rootca_hosts_trustbothcas_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_UPLOADED:
+                self._add_kube_rootca_hosts_trustbothcas_stage,
+
+            # handle interruption updating hosts trustbothcas -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS:
+                self._add_kube_rootca_hosts_trustbothcas_stage,
+            # handle failure updating hosts trustbothcas -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED:
+                self._add_kube_rootca_hosts_trustbothcas_stage,
+            # handle success updating hosts trustbothcas -> pods trustbothcas
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS:
+                self._add_kube_rootca_update_pods_trustbothcas_stage,
+
+            # handle interruption updating the pods for trust both ca -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS:
+                self._add_kube_rootca_update_pods_trustbothcas_stage,
+            # handle failure updating the pods for trust both ca -> retry)
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED:
+                self._add_kube_rootca_update_pods_trustbothcas_stage,
+            # handle success updating pods trust both ca - > update certs
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS:
+                self._add_kube_rootca_hosts_update_certs_stage,
+
+            # handle interruption updating the certs for hosts -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS:
+                self._add_kube_rootca_hosts_update_certs_stage,
+            # handle failure updating the certs for hosts -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED:
+                self._add_kube_rootca_hosts_update_certs_stage,
+            # handle success updating the certs for hosts -> hosts trust new ca
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS:
+                self._add_kube_rootca_hosts_trustnewca_stage,
+
+            # handle interruption updating hosts trust new ca -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA:
+                self._add_kube_rootca_hosts_trustnewca_stage,
+            # handle failure updating hosts trust new ca -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED:
+                self._add_kube_rootca_hosts_trustnewca_stage,
+            # handle success updating hosts trust new ca -> pods trust new ca
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA:
+                self._add_kube_rootca_update_pods_trustnewca_stage,
+
+            # handle interruption updating the pods for trust new ca -> retry
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA:
+                self._add_kube_rootca_update_pods_trustnewca_stage,
+            # handle failure updating the pods for trust new ca -> retry)
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED:
+                self._add_kube_rootca_update_pods_trustnewca_stage,
+            # handle success while updating pods trust new ca - > complete
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA:
+                self._add_kube_rootca_update_complete_stage,
+
+            # update is completed, usually this gets deleted.
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED:
+                self._add_kube_rootca_update_complete_stage,
+        }
+
+        result, result_reason = \
+            super(KubeRootcaUpdateStrategy, self).build_complete(result,
+                                                                 result_reason)
+
+        DLOG.verbose("Build Complete Callback, result=%s, reason=%s."
+                     % (result, result_reason))
+
+        if result in [strategy.STRATEGY_RESULT.SUCCESS,
+                      strategy.STRATEGY_RESULT.DEGRADED]:
+
+            if self._nfvi_alarms:
+                # Fail create strategy if unignored alarms present
+                # add the alarm ids to the result reason.
+                # eliminate duplicates  using a set, and sort the list
+                alarm_id_set = set()
+                for alarm_data in self._nfvi_alarms:
+                    alarm_id_set.add(alarm_data['alarm_id'])
+                alarm_id_list = ", ".join(sorted(alarm_id_set))
+
+                DLOG.warn("kube rootca update: Active alarms present [ %s ]"
+                          % alarm_id_list)
+                self.report_build_failure("active alarms present [ %s ]"
+                                          % alarm_id_list)
+                return
+
+            if self.nfvi_kube_rootca_update is None:
+                # Start kube rootca update at the first stage
+                self._add_kube_rootca_update_start_stage()
+            else:
+                # Determine which stage to resume at
+                current_state = self.nfvi_kube_rootca_update.state
+                resume_from_stage = RESUME_STATE.get(current_state)
+                if resume_from_stage is None:
+                    self.report_build_failure(
+                        "Unable to resume kube rootca update from state: %s"
+                        % current_state)
+                    return
+                else:
+                    # Invoke the method that resumes the build from the stage
+                    resume_from_stage()
+        else:
+            # build did not succeed. set failed.
+            self.report_build_failure(result_reason)
+            return
+
+        # successful build
+        self.sw_update_obj.strategy_build_complete(True, '')
+        self.save()
+
+    def from_dict(self, data, build_phase=None, apply_phase=None,
+                  abort_phase=None):
+        """
+        Initializes a kube rootca update strategy object from a dictionary
+        """
+        super(KubeRootcaUpdateStrategy, self).from_dict(data,
+                                                        build_phase,
+                                                        apply_phase,
+                                                        abort_phase)
+        self._single_controller = data['single_controller']
+        self._expiry_date = data.get('expiry_date')
+        self._subject = data.get('subject')
+        self._cert_file = data.get('cert_file')
+        self.mixin_from_dict(data)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the kube rootca update strategy as a dictionary
+        """
+        data = super(KubeRootcaUpdateStrategy, self).as_dict()
+        data['single_controller'] = self._single_controller
+        data['expiry_date'] = self._expiry_date
+        data['subject'] = self._subject
+        data['cert_file'] = self._cert_file
+        self.mixin_as_dict(data)
+        return data
+
+
+###################################################################
+#
 # The Kubernetes Upgrade Strategy
 #
 ###################################################################
@@ -2454,6 +2982,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # The following alarms will NOT prevent a kube upgrade operation
         # Note: if an alarm is critical (ex: memory), it will still block the
         # kube upgrade due to the host being degraded.
+        # todo(abailey): remove memory alarm from this list if possible
         IGNORE_ALARMS = [
             '100.103',  # Memory threshold exceeded
             '200.001',  # Locked Host
@@ -3145,6 +3674,8 @@ def strategy_rebuild_from_dict(data):
         strategy_obj = object.__new__(SwUpgradeStrategy)
     elif STRATEGY_NAME.FW_UPDATE == data['name']:
         strategy_obj = object.__new__(FwUpdateStrategy)
+    elif STRATEGY_NAME.KUBE_ROOTCA_UPDATE == data['name']:
+        strategy_obj = object.__new__(KubeRootcaUpdateStrategy)
     elif STRATEGY_NAME.KUBE_UPGRADE == data['name']:
         strategy_obj = object.__new__(KubeUpgradeStrategy)
     else:

@@ -16,10 +16,11 @@ class SwUpdateNames(Constants):
     """
     Software Update - Name Constants
     """
+    FW_UPDATE = Constant('fw-update')
+    KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
+    KUBE_UPGRADE = Constant('kube-upgrade')
     SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
-    FW_UPDATE = Constant('fw-update')
-    KUBE_UPGRADE = Constant('kube-upgrade')
 
 
 @six.add_metaclass(Singleton)
@@ -71,10 +72,11 @@ SW_UPDATE_ALARM_RESTRICTION_TYPES = SwUpdateAlarmRestrictionTypes()
 
 # WSME Types
 SwUpdateNames = wsme_types.Enum(str,
-                                SW_UPDATE_NAME.SW_PATCH,
-                                SW_UPDATE_NAME.SW_UPGRADE,
                                 SW_UPDATE_NAME.FW_UPDATE,
-                                SW_UPDATE_NAME.KUBE_UPGRADE)
+                                SW_UPDATE_NAME.KUBE_ROOTCA_UPDATE,
+                                SW_UPDATE_NAME.KUBE_UPGRADE,
+                                SW_UPDATE_NAME.SW_PATCH,
+                                SW_UPDATE_NAME.SW_UPGRADE)
 SwUpdateApplyTypes = wsme_types.Enum(str,
                                      SW_UPDATE_APPLY_TYPE.SERIAL,
                                      SW_UPDATE_APPLY_TYPE.PARALLEL,
