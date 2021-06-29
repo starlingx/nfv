@@ -58,7 +58,7 @@ def get_token(directory):
                         "name": directory.auth_project,
                         "domain": {"name": directory.auth_project_domain_name}
                     }}}})
-        request_info.add_data(payload)
+        request_info.data = payload
 
         # WARNING: Any change to the timeout must be reflected in the config.ini
         # file for the nfvi plugins.
