@@ -100,7 +100,7 @@ class StopState(state_machine.State):
 
             else:
                 now_ms = timers.get_monotonic_timestamp_in_ms()
-                secs_expired = (now_ms - instance.action_fsm.start_time) / 1000
+                secs_expired = (now_ms - instance.action_fsm.start_time) // 1000
                 # Wait up to 5 minutes for the VM to stop
                 max_wait = 300
                 if max_wait <= secs_expired or instance.task.timed_out():

@@ -72,7 +72,7 @@ def _system_state_query_callback():
                             dor_complete_hosts += 1
 
             if 0 < total_hosts:
-                completion_percentage = (dor_complete_hosts * 100 / total_hosts)
+                completion_percentage = (dor_complete_hosts * 100 // total_hosts)
             else:
                 completion_percentage = 0
 
@@ -150,7 +150,7 @@ def _dor_timer():
             break
 
         now_ms = timers.get_monotonic_timestamp_in_ms()
-        elapsed_secs = (now_ms - _process_start_timestamp_ms) / 1000
+        elapsed_secs = (now_ms - _process_start_timestamp_ms) // 1000
 
         if not _dor_stabilized and elapsed_secs > _dor_stabilize_uptime:
             _dor_stabilized = True

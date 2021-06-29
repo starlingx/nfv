@@ -99,7 +99,7 @@ class StartState(state_machine.State):
                 else:
                     now_ms = timers.get_monotonic_timestamp_in_ms()
                     secs_expired = \
-                        (now_ms - instance.action_fsm.wait_time) / 1000
+                        (now_ms - instance.action_fsm.wait_time) // 1000
                     # Only wait 60 seconds for the instance to start.
                     if 60 <= secs_expired:
                         instance.fail_action(instance.action_fsm_action_type,

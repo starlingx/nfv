@@ -338,7 +338,7 @@ def _rest_api_request(token_id, method, api_cmd, api_cmd_headers,
 
         now_ms = timers.get_monotonic_timestamp_in_ms()
         elapsed_ms = now_ms - start_ms
-        elapsed_secs = elapsed_ms / 1000
+        elapsed_secs = elapsed_ms // 1000
 
         DLOG.verbose("Rest-API code=%s, headers=%s, response=%s"
                      % (request.code, headers, response))

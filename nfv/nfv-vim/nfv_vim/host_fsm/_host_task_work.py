@@ -1098,7 +1098,7 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
             if self._service == objects.HOST_SERVICES.CONTAINER:
                 if not self._query_inprogress:
                     now_ms = timers.get_monotonic_timestamp_in_ms()
-                    elapsed_secs = (now_ms - self._start_timestamp) / 1000
+                    elapsed_secs = (now_ms - self._start_timestamp) // 1000
                     # Wait 10s before doing our first query
                     if 10 <= elapsed_secs:
                         DLOG.verbose("Wait-Host-Services-Disabled for %s for "
@@ -1111,7 +1111,7 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
 
         elif HOST_EVENT.AUDIT == event:
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            elapsed_secs = (now_ms - self._host.disable_extend_timestamp) / 1000
+            elapsed_secs = (now_ms - self._host.disable_extend_timestamp) // 1000
             if 120 <= elapsed_secs:
                 nfvi.nfvi_notify_host_services_disable_extend(
                     self._host.uuid, self._host.name, self._extend_callback())
@@ -1661,7 +1661,7 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
 
             else:
                 now_ms = timers.get_monotonic_timestamp_in_ms()
-                elapsed_secs = (now_ms - self._host.disable_extend_timestamp) / 1000
+                elapsed_secs = (now_ms - self._host.disable_extend_timestamp) // 1000
                 if 120 <= elapsed_secs:
                     nfvi.nfvi_notify_host_services_disable_extend(
                         self._host.uuid, self._host.name, self._callback())
@@ -1819,7 +1819,7 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
 
         elif HOST_EVENT.AUDIT == event:
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            elapsed_secs = (now_ms - self._host.disable_extend_timestamp) / 1000
+            elapsed_secs = (now_ms - self._host.disable_extend_timestamp) // 1000
             if 120 <= elapsed_secs:
                 nfvi.nfvi_notify_host_services_disable_extend(
                     self._host.uuid, self._host.name, self._callback())

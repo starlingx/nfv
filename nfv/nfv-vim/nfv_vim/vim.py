@@ -198,9 +198,9 @@ def process_main():
             if not init_complete:
                 # Retry initialization for up to 3 minutes.
                 now_ms = timers.get_monotonic_timestamp_in_ms()
-                secs_expired = (now_ms - process_start_time) / 1000
+                secs_expired = (now_ms - process_start_time) // 1000
                 if secs_expired < 180:
-                    time_since_init = (now_ms - last_init_time) / 1000
+                    time_since_init = (now_ms - last_init_time) // 1000
                     # Reattempt initialization every 10 seconds.
                     if time_since_init > 10:
                         init_complete = process_reinitialize()

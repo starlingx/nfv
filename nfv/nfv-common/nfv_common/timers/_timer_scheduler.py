@@ -75,7 +75,7 @@ class TimerScheduler(object):
                 rearm = timer.callback(now_ms)
                 elapsed_ms = get_monotonic_timestamp_in_ms() - start_ms
                 histogram.add_histogram_data("timer callback: " + timer.timer_name,
-                                             elapsed_ms / 100, "decisecond")
+                                             elapsed_ms // 100, "decisecond")
                 if not rearm and timer.timer_id not in self._timers_to_delete:
                     self._timers_to_delete.append(timer.timer_id)
         finally:
@@ -89,7 +89,7 @@ class TimerScheduler(object):
 
             elapsed_ms = get_monotonic_timestamp_in_ms() - overall_start_ms
             histogram.add_histogram_data("timer overall time per dispatch: ",
-                                         elapsed_ms / 100, "decisecond")
+                                         elapsed_ms // 100, "decisecond")
 
     def add_timer(self, timer):
         """
