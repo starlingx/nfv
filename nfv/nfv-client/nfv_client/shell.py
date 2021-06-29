@@ -147,7 +147,7 @@ def setup_create_cmd(parser,
     add_list_arg(create_cmd, '--alarm-restrictions', alarm_restrictions)
     create_cmd.add_argument('--max-parallel-worker-hosts',
                             type=int,
-                            choices=range(min_parallel, max_parallel + 1),
+                            choices=list(range(min_parallel, max_parallel + 1)),
                             help='maximum worker hosts to update in parallel')
 
     return create_cmd

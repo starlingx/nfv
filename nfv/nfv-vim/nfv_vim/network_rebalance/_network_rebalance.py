@@ -359,7 +359,7 @@ class L3AgentRebalance(object):
 
     def routers_are_balanced(self):
 
-        possible_agent_targets = range(0, len(self.num_routers_on_agents))
+        possible_agent_targets = list(range(0, len(self.num_routers_on_agents)))
 
         # find the agent with the least amount of routers.
         agent_with_least_routers = \

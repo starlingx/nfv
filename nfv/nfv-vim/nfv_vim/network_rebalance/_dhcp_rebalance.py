@@ -267,7 +267,7 @@ class DHCPAgentRebalance(object):
 
     def networks_are_balanced(self):
 
-        possible_agent_targets = range(0, len(self.num_networks_on_agents))
+        possible_agent_targets = list(range(0, len(self.num_networks_on_agents)))
 
         # find the agent with the least amount of networks.
         agent_with_least_networks = \
