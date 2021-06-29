@@ -89,7 +89,7 @@ class TaskWorkerThread(thread.Thread):
                 result.ancillary_result_data.execution_time, 'secs')
 
         now_ms = timers.get_monotonic_timestamp_in_ms()
-        elapsed_secs = (now_ms - result.create_timestamp_ms) / 1000
+        elapsed_secs = (now_ms - result.create_timestamp_ms) // 1000
         histogram.add_histogram_data(result.name + ' [execution-time]',
                                      elapsed_secs, 'secs')
 

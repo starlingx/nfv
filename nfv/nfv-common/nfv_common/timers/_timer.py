@@ -60,7 +60,7 @@ class Timer(object):
         time has elapsed
         """
         rearm = True
-        secs_expired = (now_ms - self._arm_timestamp) / 1000
+        secs_expired = (now_ms - self._arm_timestamp) // 1000
         if secs_expired > self._next_expiry_in_secs:
             DLOG.verbose("Timer %s with timer id %s fired." % (self._timer_name,
                                                                self._timer_id))

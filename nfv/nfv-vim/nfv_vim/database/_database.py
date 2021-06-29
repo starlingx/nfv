@@ -96,7 +96,7 @@ class Database(object):
             self._session.commit()
             elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
             histogram.add_histogram_data("database-commits (periodic)",
-                                         elapsed_ms / 100, "decisecond")
+                                         elapsed_ms // 100, "decisecond")
             self._commit_timer_id = None
 
     def commit(self):
@@ -105,7 +105,7 @@ class Database(object):
             self._session.commit()
             elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
             histogram.add_histogram_data("database-commits (inline)",
-                                         elapsed_ms / 100, "decisecond")
+                                         elapsed_ms // 100, "decisecond")
         else:
             if self._commit_timer_id is None:
                 self._commit_timer_id \

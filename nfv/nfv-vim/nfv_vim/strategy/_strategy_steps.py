@@ -289,7 +289,7 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
             # See if we have requested a retry and are not currently retrying
             if self._retry_requested:
                 now_ms = timers.get_monotonic_timestamp_in_ms()
-                secs_expired = (now_ms - self._wait_time) / 1000
+                secs_expired = (now_ms - self._wait_time) // 1000
                 if self._retry_delay <= secs_expired:
                     self._retry_requested = False
                     # re-issue unlock for all hosts.
@@ -419,7 +419,7 @@ class LockHostsStep(strategy.StrategyStep):
                     self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
                 now_ms = timers.get_monotonic_timestamp_in_ms()
-                secs_expired = (now_ms - self._wait_time) / 1000
+                secs_expired = (now_ms - self._wait_time) // 1000
                 if 15 >= secs_expired:
                     return True
 
@@ -517,7 +517,7 @@ class RebootHostsStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             if 60 <= secs_expired:
                 # Wait 60 seconds, which should be enough time for the host
                 # to shutdown and reboot. No need to wait for the host to
@@ -606,7 +606,7 @@ class SwactHostsStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             if 120 <= secs_expired:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 self.stage.step_complete(result, '')
@@ -845,7 +845,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 2 minutes for the host to go offline before
             # checking whether the upgrade is complete.
             if 120 <= secs_expired:
@@ -969,7 +969,7 @@ class UpgradeStartStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 60 seconds before checking upgrade for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
@@ -1077,7 +1077,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 60 seconds before checking upgrade for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
@@ -1182,7 +1182,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 60 seconds before checking upgrade for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
@@ -1784,7 +1784,7 @@ class WaitDataSyncStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 120 seconds before checking alarms for first time
             if 120 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
@@ -1890,7 +1890,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait before checking alarms for first time
             if self._first_query_delay_in_secs <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
@@ -2265,7 +2265,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
             if 0 == self._wait_time:
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             if 60 <= secs_expired:
                 # force timer reload on next audit
                 self._wait_time = 0
@@ -2942,7 +2942,7 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 60 seconds before checking upgrade for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
@@ -3406,7 +3406,7 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 60 seconds before checking upgrade for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True

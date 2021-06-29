@@ -54,7 +54,7 @@ class Histogram(object):
 
         self._sample_total += sample_as_int
         self._num_samples += 1
-        self._average_sample = (self._sample_total / self._num_samples)
+        self._average_sample = (self._sample_total // self._num_samples)
 
         self._buckets[bucket_idx] += 1
 
