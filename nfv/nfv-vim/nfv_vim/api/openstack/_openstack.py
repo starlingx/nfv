@@ -58,7 +58,7 @@ def validate_token(directory, admin_token, token_id):
         request = urllib.request.urlopen(request_info)
         # Identity API v3 returns token id in X-Subject-Token
         # response header.
-        token_id = request.info().getheader('X-Subject-Token')
+        token_id = request.headers.get('X-Subject-Token')
         response = json.loads(request.read())
         request.close()
         return Token(response, directory, token_id)
@@ -119,7 +119,7 @@ def get_token(directory):
         request = urllib.request.urlopen(request_info)
         # Identity API v3 returns token id in X-Subject-Token
         # response header.
-        token_id = request.info().getheader('X-Subject-Token')
+        token_id = request.headers.get('X-Subject-Token')
         response = json.loads(request.read())
         request.close()
         return Token(response, directory, token_id)
