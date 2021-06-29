@@ -78,7 +78,7 @@ class Thread(object):
         """
         if self._stall_timestamp_ms is not None:
             now = timers.get_monotonic_timestamp_in_ms()
-            return int((now - self._stall_timestamp_ms) / 1000)
+            return int((now - self._stall_timestamp_ms) // 1000)
         return 0
 
     @coroutine

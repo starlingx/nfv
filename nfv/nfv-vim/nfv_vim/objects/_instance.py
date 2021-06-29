@@ -1071,7 +1071,7 @@ class Instance(ObjectData):
 
         if 0 != self._last_state_timestamp:
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._last_state_timestamp) / 1000
+            secs_expired = (now_ms - self._last_state_timestamp) // 1000
             elapsed_time_in_state += int(secs_expired)
 
         return elapsed_time_in_state
@@ -2615,7 +2615,7 @@ class Instance(ObjectData):
 
         else:
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._last_state_timestamp) / 1000
+            secs_expired = (now_ms - self._last_state_timestamp) // 1000
             if 15 <= secs_expired:
                 if 0 != self._last_state_timestamp:
                     self._elapsed_time_in_state += int(secs_expired)

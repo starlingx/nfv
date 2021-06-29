@@ -238,7 +238,7 @@ class TCPConnection(object):
                     pass
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - start_ms) / 1000
+            secs_expired = (now_ms - start_ms) // 1000
             if timeout_in_secs <= secs_expired:
                 DLOG.info("Timed out waiting for a message.")
                 break

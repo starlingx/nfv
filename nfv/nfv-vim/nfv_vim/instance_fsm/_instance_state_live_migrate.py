@@ -150,7 +150,7 @@ class LiveMigrateState(state_machine.State):
                         = timers.get_monotonic_timestamp_in_ms()
 
                 now_ms = timers.get_monotonic_timestamp_in_ms()
-                secs_expired = (now_ms - instance.action_fsm.wait_time) / 1000
+                secs_expired = (now_ms - instance.action_fsm.wait_time) // 1000
                 if 60 <= secs_expired:
                     instance.fail_action(instance.action_fsm_action_type, 'timeout')
                     instance_director.instance_migrate_complete(
@@ -160,7 +160,7 @@ class LiveMigrateState(state_machine.State):
 
             else:
                 now_ms = timers.get_monotonic_timestamp_in_ms()
-                secs_expired = (now_ms - instance.action_fsm.start_time) / 1000
+                secs_expired = (now_ms - instance.action_fsm.start_time) // 1000
                 max_live_migrate_wait_in_secs = \
                     instance.max_live_migrate_wait_in_secs
                 if 0 != max_live_migrate_wait_in_secs:

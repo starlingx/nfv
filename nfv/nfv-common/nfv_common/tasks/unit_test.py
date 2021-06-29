@@ -85,7 +85,7 @@ def _task_coroutine_with_timer(future, arg1, callback):
     if future.result.is_complete():
         if future.result.is_timer:
             if future.result.data == timer_id:
-                elapsed_secs = (end_ms - start_ms) / 1000
+                elapsed_secs = (end_ms - start_ms) // 1000
                 if 2 < elapsed_secs:
                     callback.send("FUNCTION PASSED")
                     return

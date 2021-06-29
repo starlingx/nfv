@@ -179,7 +179,7 @@ class StrategyPhase(object):
         if 0 == total_steps:
             return 100
 
-        return int((completed_steps * 100) / total_steps)
+        return int((completed_steps * 100) // total_steps)
 
     def is_inprogress(self):
         """

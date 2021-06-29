@@ -78,7 +78,7 @@ class DeletingState(state_machine.State):
                 host.fsm_start_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - host.fsm_start_time) / 1000
+            secs_expired = (now_ms - host.fsm_start_time) // 1000
 
             if max_wait > secs_expired:
                 if not host.task.inprogress():

@@ -107,7 +107,7 @@ def selobj_dispatch(timeout_in_ms):
                     _read_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
                 histogram.add_histogram_data("selobj read: " + callback.__name__,
-                                             elapsed_ms / 100, "decisecond")
+                                             elapsed_ms // 100, "decisecond")
 
         for selobj in writeable:
             callback = _write_callbacks.get(selobj, None)
@@ -119,7 +119,7 @@ def selobj_dispatch(timeout_in_ms):
                     _write_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
                 histogram.add_histogram_data("selobj write: " + callback.__name__,
-                                             elapsed_ms / 100, "decisecond")
+                                             elapsed_ms // 100, "decisecond")
 
         for selobj in in_error:
             callback = _error_callbacks.get(selobj, None)
@@ -131,7 +131,7 @@ def selobj_dispatch(timeout_in_ms):
                     _error_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
                 histogram.add_histogram_data("selobj error: " + callback.__name__,
-                                             elapsed_ms / 100, "decisecond")
+                                             elapsed_ms // 100, "decisecond")
 
             if selobj in list(_read_callbacks):
                 _read_callbacks.pop(selobj)

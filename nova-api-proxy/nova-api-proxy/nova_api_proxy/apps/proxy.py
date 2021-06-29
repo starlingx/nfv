@@ -41,7 +41,7 @@ class Proxy(Application):
         start_ms = get_monotonic_timestamp_in_ms()
         result = self.proxy_app(environ, start_response)
         now_ms = get_monotonic_timestamp_in_ms()
-        elapsed_secs = (now_ms - start_ms) / 1000
+        elapsed_secs = (now_ms - start_ms) // 1000
         histogram.add_histogram_data("%s" % environ['HTTP_HOST'], elapsed_secs)
         if environ.get('REQUEST_METHOD') == 'POST':
             if 'os-keypairs' in environ.get('PATH_INFO', ''):
