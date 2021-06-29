@@ -3257,13 +3257,12 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         """
         Instance Action Rest-API POST handler callback
         """
-        token_id = request_dispatch.headers.getheader('X-Auth-Token', None)
+        token_id = request_dispatch.headers.get('X-Auth-Token')
 
         version \
-            = request_dispatch.headers.getheader("X-OpenStack-Nova-API-Version",
-                                                 None)
+            = request_dispatch.headers.get("X-OpenStack-Nova-API-Version")
         content_len \
-            = int(request_dispatch.headers.getheader('content-length', 0))
+            = int(request_dispatch.headers.get('content-length', 0))
 
         content = request_dispatch.rfile.read(content_len)
         if 'action' != request_dispatch.path.split('/')[-1]:

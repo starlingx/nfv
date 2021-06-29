@@ -967,8 +967,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         """
         Host-Services Rest-API GET handler
         """
-        content_len = int(request_dispatch.headers.getheader('content-length',
-                                                             0))
+        content_len = int(request_dispatch.headers.get('content-length', 0))
         content = request_dispatch.rfile.read(content_len)
 
         DLOG.info("Content=%s, len=%s" % (content, content_len))
@@ -1059,8 +1058,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         """
         Guest-Services Rest-API PATCH handler callback
         """
-        content_len = int(request_dispatch.headers.getheader('content-length',
-                                                             0))
+        content_len = int(request_dispatch.headers.get('content-length', 0))
         content = request_dispatch.rfile.read(content_len)
         http_payload = None
         http_response = httplib.OK

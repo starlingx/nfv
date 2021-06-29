@@ -3107,7 +3107,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         """
         Host Rest-API GET handler callback
         """
-        content_len = int(request_dispatch.headers.getheader('content-length', 0))
+        content_len = int(request_dispatch.headers.get('content-length', 0))
         content = request_dispatch.rfile.read(content_len)
         http_payload = None
         http_response = httplib.OK
@@ -3149,7 +3149,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         """
         Host Rest-API PATCH handler callback
         """
-        content_len = int(request_dispatch.headers.getheader('content-length', 0))
+        content_len = int(request_dispatch.headers.get('content-length', 0))
         content = request_dispatch.rfile.read(content_len)
         http_payload = None
         http_response = httplib.OK
@@ -3281,7 +3281,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         """
         Host Rest-API POST handler callback
         """
-        content_len = int(request_dispatch.headers.getheader('content-length', 0))
+        content_len = int(request_dispatch.headers.get('content-length', 0))
         content = request_dispatch.rfile.read(content_len)
         http_response = httplib.OK
         if content:
@@ -3314,7 +3314,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         """
         Host Rest-API DELETE handler callback
         """
-        content_len = int(request_dispatch.headers.getheader('content-length', 0))
+        content_len = int(request_dispatch.headers.get('content-length', 0))
         content = request_dispatch.rfile.read(content_len)
         http_response = httplib.OK
 
