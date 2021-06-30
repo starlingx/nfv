@@ -128,7 +128,7 @@ class DebugConfig(object):
 
         if self._config is not None:
             try:
-                for name, level_str in self._config.items('debug-loggers'):
+                for name, level_str in list(self._config.items('debug-loggers')):
                     debug_list.append((name, self.debug_level_mapping.get(
                         level_str, DEBUG_LEVEL.NONE)))
 

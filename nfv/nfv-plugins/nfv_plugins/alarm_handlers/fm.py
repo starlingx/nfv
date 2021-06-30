@@ -322,7 +322,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
                            "error=%s." % e)
 
         # Check for missing alarms needing to be raised
-        for alarm_uuid, (alarm_data, fm_uuid) in self._openstack_alarm_db.items():
+        for alarm_uuid, (alarm_data, fm_uuid) in list(self._openstack_alarm_db.items()):
             if fm_uuid is None:
                 self.raise_alarm(alarm_uuid, alarm_data)
             else:
@@ -335,7 +335,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
 
         # Check for stale alarms needing to be cleared
         for fm_alarm in fm_alarms:
-            for alarm_uuid, (alarm_data, fm_uuid) in self._openstack_alarm_db.items():
+            for alarm_uuid, (alarm_data, fm_uuid) in list(self._openstack_alarm_db.items()):
                 if fm_uuid == fm_alarm["uuid"]:
                     break
             else:
@@ -357,7 +357,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
                 continue
 
             # Check for missing alarms needing to be raised
-            for alarm_uuid, (alarm_data, fm_uuid) in self._platform_alarm_db.items():
+            for alarm_uuid, (alarm_data, fm_uuid) in list(self._platform_alarm_db.items()):
                 if alarm_type == alarm_data.alarm_type:
                     if fm_uuid is None:
                         self.raise_alarm(alarm_uuid, alarm_data)
@@ -372,7 +372,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
 
             # Check for stale alarms needing to be cleared
             for fm_fault in fm_faults:
-                for alarm_uuid, (alarm_data, fm_uuid) in self._platform_alarm_db.items():
+                for alarm_uuid, (alarm_data, fm_uuid) in list(self._platform_alarm_db.items()):
                     if fm_uuid == fm_fault.uuid:
                         break
                 else:

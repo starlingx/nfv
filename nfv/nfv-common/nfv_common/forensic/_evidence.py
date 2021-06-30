@@ -17,7 +17,7 @@ def evidence_from_files(files, start_date, end_date, progress=None):
     file_ctrl = dict()
 
     total_lines = 0
-    for parser_name, file_name in files.items():
+    for parser_name, file_name in list(files.items()):
         total_lines += sum(1 for _ in open(file_name))
         file_ctrl[file_name] = (parser_name, open(file_name), None)
 

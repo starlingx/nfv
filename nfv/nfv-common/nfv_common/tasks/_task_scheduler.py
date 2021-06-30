@@ -83,22 +83,22 @@ class TaskScheduler(object):
         """
         DLOG.debug("Pool %s: Delete Task, name=%s."
                    % (self._task_worker_pool.name, task.name))
-        for timer_id, timer_owner in self._task_timers.items():
+        for timer_id, timer_owner in list(self._task_timers.items()):
             if timer_owner.id == task.id:
                 timers.timers_delete_timer(timer_id)
                 del self._task_timers[timer_id]
 
-        for timer_id, timer_owner in self._task_work_timers.items():
+        for timer_id, timer_owner in list(self._task_work_timers.items()):
             if timer_owner.task_id == task.id:
                 timers.timers_delete_timer(timer_id)
                 del self._task_work_timers[timer_id]
 
-        for select_obj, select_obj_owner in self._task_read_selobjs.items():
+        for select_obj, select_obj_owner in list(self._task_read_selobjs.items()):
             if select_obj_owner.id == task.id:
                 selobj.selobj_del_read_obj(select_obj)
                 del self._task_read_selobjs[select_obj]
 
-        for select_obj, select_obj_owner in self._task_write_selobjs.items():
+        for select_obj, select_obj_owner in list(self._task_write_selobjs.items()):
             if select_obj_owner.id == task.id:
                 selobj.selobj_del_write_obj(select_obj)
                 del self._task_write_selobjs[select_obj]
@@ -319,7 +319,7 @@ class TaskScheduler(object):
 
                 task_work = worker.get_task_work_result()
                 if task_work is not None:
-                    for timer_id, timer_owner in self._task_work_timers.items():
+                    for timer_id, timer_owner in list(self._task_work_timers.items()):
                         if timer_owner.id == task_work.id:
                             timers.timers_delete_timer(timer_id)
                             del self._task_work_timers[timer_id]
