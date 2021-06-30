@@ -180,7 +180,7 @@ class GuestServices(ObjectData):
             return current_state
 
         overall_state = None
-        for _, service_state in self._services.items():
+        for _, service_state in list(self._services.items()):
             overall_state = update_overall_state(overall_state, service_state)
 
         return overall_state
@@ -321,7 +321,7 @@ class GuestServices(ObjectData):
         Returns a listing of nfvi guest services and their state
         """
         nfvi_service_names = list()
-        for service_name, service_state in self._services.items():
+        for service_name, service_state in list(self._services.items()):
             nfvi_name = self._get_nfvi_service_name(service_name)
             if nfvi_name is not None:
                 nfvi_service_names.append(nfvi_name)
@@ -333,7 +333,7 @@ class GuestServices(ObjectData):
         Returns a listing of nfvi guest services and their state
         """
         nfvi_services = list()
-        for service_name, service_state in self._services.items():
+        for service_name, service_state in list(self._services.items()):
             nfvi_name = self._get_nfvi_service_name(service_name)
             nfvi_admin_state = self._get_nfvi_service_admin_state(service_state)
 

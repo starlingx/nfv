@@ -167,7 +167,7 @@ class Task(object):
         # target.  It is possible to have many task work outstanding at
         # the same time.  Results are returned in the order that task
         # work was scheduled.
-        for key, (state, task_work) in self._work_list.items():
+        for key, (state, task_work) in list(self._work_list.items()):
             if Task._READY == state:
                 self._scheduler.schedule_task(self)
                 break
@@ -215,7 +215,7 @@ class Task(object):
             self._started = True
         else:
             # Schedule work that is ready
-            for key, (state, task_work) in self._work_list.items():
+            for key, (state, task_work) in list(self._work_list.items()):
                 if Task._READY == state:
                     scheduled = self._scheduler.schedule_task_work(task_work)
                     if scheduled:
