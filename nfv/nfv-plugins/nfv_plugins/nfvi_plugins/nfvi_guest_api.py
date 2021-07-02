@@ -1005,7 +1005,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         if http_payload is not None:
             request_dispatch.send_header('Content-Type', 'application/json')
             request_dispatch.end_headers()
-            request_dispatch.wfile.write(json.dumps(http_payload))
+            request_dispatch.wfile.write(json.dumps(http_payload).encode())
         request_dispatch.done()
 
     def guest_services_rest_api_get_handler(self, request_dispatch):
@@ -1051,7 +1051,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         if http_payload is not None:
             request_dispatch.send_header('Content-Type', 'application/json')
             request_dispatch.end_headers()
-            request_dispatch.wfile.write(json.dumps(http_payload))
+            request_dispatch.wfile.write(json.dumps(http_payload).encode())
         request_dispatch.done()
 
     def guest_services_rest_api_patch_handler(self, request_dispatch):
@@ -1184,7 +1184,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         if http_payload is not None:
             request_dispatch.send_header('Content-Type', 'application/json')
             request_dispatch.end_headers()
-            request_dispatch.wfile.write(json.dumps(http_payload))
+            request_dispatch.wfile.write(json.dumps(http_payload).encode())
         request_dispatch.done()
 
     def register_host_services_query_callback(self, callback):
