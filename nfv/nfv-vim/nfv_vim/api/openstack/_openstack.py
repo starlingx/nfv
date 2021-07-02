@@ -53,7 +53,7 @@ def validate_token(directory, admin_token, token_id):
                 }
             }})
 
-        request_info.data = payload
+        request_info.data = payload.encode()
 
         request = urllib.request.urlopen(request_info)
         # Identity API v3 returns token id in X-Subject-Token
@@ -114,7 +114,7 @@ def get_token(directory):
                         "name": directory.auth_project,
                         "domain": {"name": directory.auth_project_domain_name}
                     }}}})
-        request_info.data = payload
+        request_info.data = payload.encode()
 
         request = urllib.request.urlopen(request_info)
         # Identity API v3 returns token id in X-Subject-Token

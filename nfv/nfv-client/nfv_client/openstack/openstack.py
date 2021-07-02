@@ -59,7 +59,7 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
                         "domain": {"name": project_domain_name}
                     }}}})
 
-        request_info.data = payload
+        request_info.data = payload.encode()
 
         request = urllib.request.urlopen(request_info, timeout=30)
         # Identity API v3 returns token id in X-Subject-Token
