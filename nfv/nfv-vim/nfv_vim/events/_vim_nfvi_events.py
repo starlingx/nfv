@@ -507,7 +507,7 @@ def _nfvi_periodic_timer_event():
         DLOG.verbose("NFVI periodic timer called, timer_id=%s." % timer_id)
 
         host_table = tables.tables_get_host_table()
-        for host in host_table.values():
+        for host in list(host_table.values()):
             host.periodic_timer()
 
 

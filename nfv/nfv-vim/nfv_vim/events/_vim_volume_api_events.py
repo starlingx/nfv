@@ -161,7 +161,7 @@ def vim_volume_api_get_volumes(connection, msg):
     """
     DLOG.verbose("Get volume, all=%s." % msg.get_all)
     volume_table = tables.tables_get_volume_table()
-    for volume in volume_table.values():
+    for volume in list(volume_table.values()):
         response = rpc.APIResponseGetVolume()
         response.uuid = volume.uuid
         response.name = volume.name

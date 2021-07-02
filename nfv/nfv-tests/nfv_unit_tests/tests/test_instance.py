@@ -109,9 +109,9 @@ class TestInstance(testcase.NFVTestCase):
         tenant = objects.Tenant(tenant_uuid, "%s_name" % tenant_uuid, '', True)
         self._tenant_table[tenant_uuid] = tenant
 
-        for instance_type in self._instance_type_table.values():
+        for instance_type in list(self._instance_type_table.values()):
             if instance_type.name == instance_type_name:
-                for image in self._image_table.values():
+                for image in list(self._image_table.values()):
                     if image.name == image_name:
                         instance_uuid = str(uuid.uuid4())
 

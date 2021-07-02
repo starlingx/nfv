@@ -268,7 +268,7 @@ class SwUpdateStrategy(strategy.Strategy):
             # service disruption when the remaining instances are stopped or
             # migrated.
             if reboot:
-                for instance in instance_table.values():
+                for instance in list(instance_table.values()):
                     if instance.is_locked():
                         for instance_group in instance_group_table.get_by_instance(
                                 instance.uuid):
@@ -1268,7 +1268,7 @@ class SwPatchStrategy(SwUpdateStrategy,
                 self.save()
                 return
 
-            for host in host_table.values():
+            for host in list(host_table.values()):
                 if HOST_PERSONALITY.WORKER in host.personality and \
                         HOST_PERSONALITY.CONTROLLER not in host.personality:
                     # Allow patch orchestration when worker hosts are available,
@@ -1922,7 +1922,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                 return
 
             host_table = tables.tables_get_host_table()
-            for host in host_table.values():
+            for host in list(host_table.values()):
                 # Only allow upgrade orchestration when all hosts are
                 # available. It is not safe to automate upgrade application
                 # when we do not have full redundancy.
@@ -1951,7 +1951,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                 self._add_upgrade_start_stage()
 
                 # All hosts will be upgraded
-                for host in host_table.values():
+                for host in list(host_table.values()):
                     if HOST_PERSONALITY.CONTROLLER in host.personality:
                         controller_hosts.append(host)
 
@@ -1963,7 +1963,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
             else:
                 # Only hosts not yet upgraded will be upgraded
                 to_load = self.nfvi_upgrade.to_release
-                for host in host_table.values():
+                for host in list(host_table.values()):
                     if host.software_load == to_load:
                         # No need to upgrade this host
                         continue
@@ -2147,7 +2147,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
 
         # using existing vim host inventory add a step for each host
         host_table = tables.tables_get_host_table()
-        for host in host_table.values():
+        for host in list(host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 if host.is_unlocked() and host.is_enabled():
                     stage.add_step(strategy.QueryFwUpdateHostStep(host))
@@ -2334,7 +2334,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
 
             worker_hosts = list()
             host_table = tables.tables_get_host_table()
-            for host in host_table.values():
+            for host in list(host_table.values()):
                 if host.name in self._fw_update_hosts:
                     worker_hosts.append(host)
 
@@ -2742,7 +2742,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
 
             # todo(abailey): refactor the code duplication from  SwPatch
             host_table = tables.tables_get_host_table()
-            for host in host_table.values():
+            for host in list(host_table.values()):
                 # filter the host out if we do not need to patch it
                 current, reboot = self._check_host_patch(host,
                                                          patches_to_apply)
@@ -2842,7 +2842,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # group the hosts by their type (controller, storage, worker)
         # place each controller in a separate list
         # there are no kubelets running on storage nodes
-        for host in host_table.values():
+        for host in list(host_table.values()):
             if kubelet_map.get(host.uuid) == self._to_version:
                 DLOG.info("Host %s kubelet already up to date" % host.name)
                 continue
