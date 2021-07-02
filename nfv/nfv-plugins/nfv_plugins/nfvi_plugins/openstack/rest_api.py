@@ -309,7 +309,7 @@ def _rest_api_request(token_id, method, api_cmd, api_cmd_headers,
                 request_info.add_header(header_type, header_value)
 
         if api_cmd_payload is not None:
-            request_info.data = api_cmd_payload
+            request_info.data = api_cmd_payload.encode()
 
         DLOG.verbose("Rest-API method=%s, api_cmd=%s, api_cmd_headers=%s, "
                      "api_cmd_payload=%s" % (method, api_cmd, api_cmd_headers,
