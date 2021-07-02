@@ -3290,7 +3290,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                              content=content)
 
             instance_action_data = None
-            for vm_action in action_data.keys():
+            for vm_action in list(action_data.keys()):
                 vm_action_data = action_data[vm_action]
                 action_type, action_params \
                     = instance_get_action_type(vm_action, vm_action_data)

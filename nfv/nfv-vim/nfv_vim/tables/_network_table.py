@@ -18,7 +18,7 @@ class NetworkTable(Table):
         super(NetworkTable, self).__init__()
 
     def get_by_name(self, network_name):
-        for network_uuid in _network_table.keys():
+        for network_uuid in list(_network_table.keys()):
             if _network_table[network_uuid].name == network_name:
                 return _network_table[network_uuid]
         return None

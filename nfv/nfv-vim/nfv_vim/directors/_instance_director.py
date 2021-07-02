@@ -114,7 +114,7 @@ class InstanceDirector(object):
         host_table = tables.tables_get_host_table()
         hypervisor_table = tables.tables_get_hypervisor_table()
 
-        for host_name in host_table.keys():
+        for host_name in list(host_table.keys()):
             if host_name in excluded_hosts:
                 continue
 
@@ -134,7 +134,7 @@ class InstanceDirector(object):
         """
         host_table = tables.tables_get_host_table()
 
-        for host_name in host_table.keys():
+        for host_name in list(host_table.keys()):
             host = host_table.get(host_name, None)
             if host is not None:
                 if host.upgrade_inprogress and not host.recover_instances:

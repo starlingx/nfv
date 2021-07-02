@@ -19,14 +19,14 @@ class HostAggregateTable(Table):
 
     @staticmethod
     def get_by_host(host_name):
-        for host_aggregate_name in _host_aggregate_table.keys():
+        for host_aggregate_name in list(_host_aggregate_table.keys()):
             host_aggregate = _host_aggregate_table[host_aggregate_name]
             if host_name in host_aggregate.host_names:
                 yield host_aggregate
 
     @staticmethod
     def same_aggregate(host_name, peer_host_name):
-        for host_aggregate_name in _host_aggregate_table.keys():
+        for host_aggregate_name in list(_host_aggregate_table.keys()):
             host_aggregate = _host_aggregate_table[host_aggregate_name]
 
             if host_name in host_aggregate.host_names and \

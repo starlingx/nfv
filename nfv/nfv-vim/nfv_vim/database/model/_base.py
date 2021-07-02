@@ -19,7 +19,7 @@ class AsDictMixin(object):
 
     @data.setter
     def data(self, data):
-        for column in data.keys():
+        for column in list(data.keys()):
             setattr(self, column, data[column])
 
 
