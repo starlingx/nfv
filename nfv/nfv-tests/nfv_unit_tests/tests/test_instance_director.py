@@ -65,7 +65,7 @@ class TestInstanceDirector(testcase.NFVTestCase):
         tenant = objects.Tenant(tenant_uuid, "%s_name" % tenant_uuid, '', True)
         self._tenant_table[tenant_uuid] = tenant
 
-        for instance_type in self._instance_type_table.values():
+        for instance_type in list(self._instance_type_table.values()):
             if instance_type.name == instance_type_name:
                 instance_uuid = uuid.uuid4()
 

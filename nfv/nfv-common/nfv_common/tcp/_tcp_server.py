@@ -110,7 +110,7 @@ class TCPServer(object):
         Shutdown the TCP Server
         """
         connections = self._client_connections.copy()
-        for client_connection in connections.values():
+        for client_connection in list(connections.values()):
             selobj.selobj_del_read_obj(client_connection.selobj)
             selobj.selobj_del_error_callback(client_connection.selobj)
             client_connection.close()

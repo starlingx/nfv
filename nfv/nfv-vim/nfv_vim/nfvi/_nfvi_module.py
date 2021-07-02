@@ -137,5 +137,5 @@ def nfvi_finalize():
     nfvi_sw_mgmt_finalize()
     nfvi_fault_mgmt_finalize()
 
-    for pool in _task_worker_pools.values():
+    for pool in list(_task_worker_pools.values()):
         pool.shutdown()
