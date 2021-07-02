@@ -19,7 +19,7 @@ class HostGroupTable(Table):
 
     @staticmethod
     def get_by_host(host_name):
-        for host_group_name in _host_group_table.keys():
+        for host_group_name in list(_host_group_table.keys()):
             host_group = _host_group_table[host_group_name]
             for member_name in host_group.member_names:
                 if host_name == member_name:
@@ -27,7 +27,7 @@ class HostGroupTable(Table):
 
     @staticmethod
     def get_by_policy(host_policy):
-        for host_group_name in _host_group_table.keys():
+        for host_group_name in list(_host_group_table.keys()):
             host_group = _host_group_table[host_group_name]
             for policy in host_group.policies:
                 if host_policy == policy:
@@ -35,7 +35,7 @@ class HostGroupTable(Table):
 
     @staticmethod
     def same_group(host_policy, host_name, peer_host_name):
-        for host_group_name in _host_group_table.keys():
+        for host_group_name in list(_host_group_table.keys()):
             host_group = _host_group_table[host_group_name]
 
             if host_policy not in host_group.policies:

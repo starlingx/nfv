@@ -19,7 +19,7 @@ class InstanceGroupTable(Table):
 
     @staticmethod
     def get_by_instance(instance_uuid):
-        for instance_group_uuid in _instance_group_table.keys():
+        for instance_group_uuid in list(_instance_group_table.keys()):
             instance_group = _instance_group_table[instance_group_uuid]
             for member_uuid in instance_group.member_uuids:
                 if instance_uuid == member_uuid:
@@ -27,7 +27,7 @@ class InstanceGroupTable(Table):
 
     @staticmethod
     def get_by_policy(instance_policy):
-        for instance_group_uuid in _instance_group_table.keys():
+        for instance_group_uuid in list(_instance_group_table.keys()):
             instance_group = _instance_group_table[instance_group_uuid]
             for policy in instance_group.policies:
                 if instance_policy == policy:
@@ -35,7 +35,7 @@ class InstanceGroupTable(Table):
 
     @staticmethod
     def same_group(instance_policy, instance_uuid, peer_instance_uuid):
-        for instance_group_uuid in _instance_group_table.keys():
+        for instance_group_uuid in list(_instance_group_table.keys()):
             instance_group = _instance_group_table[instance_group_uuid]
 
             if instance_policy not in instance_group.policies:

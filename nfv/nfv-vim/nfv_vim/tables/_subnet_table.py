@@ -18,13 +18,13 @@ class SubnetTable(Table):
         super(SubnetTable, self).__init__()
 
     def get_by_name(self, subnet_name):
-        for subnet_uuid in _subnet_table.keys():
+        for subnet_uuid in list(_subnet_table.keys()):
             if _subnet_table[subnet_uuid].name == subnet_name:
                 return _subnet_table[subnet_uuid]
         return None
 
     def get_by_network_and_ip(self, network_uuid, subnet_ip, subnet_prefix):
-        for subnet_uuid in _subnet_table.keys():
+        for subnet_uuid in list(_subnet_table.keys()):
             subnet = _subnet_table[subnet_uuid]
             if subnet.network_uuid == network_uuid:
                 if str(subnet.subnet_ip).lower() == str(subnet_ip).lower():

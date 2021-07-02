@@ -1160,7 +1160,7 @@ class Instance(ObjectData):
         """
         if self._nfvi_instance.instance_type_guest_services:
             for service in \
-                    self._nfvi_instance.instance_type_guest_services.keys():
+                    list(self._nfvi_instance.instance_type_guest_services.keys()):
                 self._guest_services.provision(service)
         else:
             if self._guest_services.are_provisioned():

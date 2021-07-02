@@ -143,7 +143,7 @@ class StrategyMixin(object):
     def test_shell_strategy_show_incomplete_env(self):
         """Test that if any required env variable is missing, it fails"""
         shell_args = [self.strategy, 'show', ]
-        for pop_env in self.MOCK_ENV.keys():
+        for pop_env in list(self.MOCK_ENV.keys()):
             # remove the pop_env variable from the environment
             self._test_shell_show_incomplete_env(shell_args=shell_args,
                                                  pop_env=pop_env)

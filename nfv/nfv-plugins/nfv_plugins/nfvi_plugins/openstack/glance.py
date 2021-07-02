@@ -138,7 +138,7 @@ def update_image(token, image_id, image_description, min_disk_size_gb,
     operations.append(operation)
 
     if properties:
-        for k in properties.keys():
+        for k in list(properties.keys()):
             if properties[k] is not None:
                 operation = dict()
                 operation['op'] = 'replace'

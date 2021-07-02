@@ -46,7 +46,7 @@ class Database(object):
 
         metadata = MetaData()
         metadata.reflect(bind=self._engine)
-        for table_name in metadata.tables.keys():
+        for table_name in list(metadata.tables.keys()):
             db_data['tables'][table_name] = list()
             table_class = lookup_class_by_table(table_name)
             if table_class is not None:
@@ -60,7 +60,7 @@ class Database(object):
         with open(filename, 'r') as f:
             db_data = json.load(f)
 
-        for table_name in db_data['tables'].keys():
+        for table_name in list(db_data['tables'].keys()):
             table_class = lookup_class_by_table(table_name)
             if table_class is None:
                 for row_data in db_data['tables'][table_name]:

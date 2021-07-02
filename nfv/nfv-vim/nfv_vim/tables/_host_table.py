@@ -19,21 +19,21 @@ class HostTable(Table):
 
     @staticmethod
     def get_by_uuid(host_uuid):
-        for hostname in _host_table.keys():
+        for hostname in list(_host_table.keys()):
             if _host_table[hostname].uuid == host_uuid:
                 return _host_table[hostname]
         return None
 
     @staticmethod
     def get_by_personality(host_personality):
-        for hostname in _host_table.keys():
+        for hostname in list(_host_table.keys()):
             if host_personality in _host_table[hostname].personality:
                 yield _host_table[hostname]
 
     @staticmethod
     def total_by_personality(host_personality):
         count = 0
-        for hostname in _host_table.keys():
+        for hostname in list(_host_table.keys()):
             if host_personality in _host_table[hostname].personality:
                 count += 1
         return count

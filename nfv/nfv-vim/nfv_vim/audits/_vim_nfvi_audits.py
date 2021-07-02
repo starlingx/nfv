@@ -983,7 +983,7 @@ def _audit_nfvi_instance():
         DLOG.verbose("Audit instance called, timer_id=%s." % timer_id)
 
         instance_table = tables.tables_get_instance_table()
-        for instance_uuid in _nfvi_instance_outstanding.keys():
+        for instance_uuid in list(_nfvi_instance_outstanding.keys()):
             instance = instance_table.get(instance_uuid, None)
             if instance is None:
                 del _nfvi_instance_outstanding[instance_uuid]
@@ -995,7 +995,7 @@ def _audit_nfvi_instance():
         else:
             _audit_dump_debug_info(do_dump=False)
 
-        for instance_uuid in _nfvi_instances_to_audit.keys():
+        for instance_uuid in list(_nfvi_instances_to_audit.keys()):
             if 4 <= len(_nfvi_instance_outstanding):
                 break
 
@@ -1052,7 +1052,7 @@ def _audit_nfvi_hypervisor_details():
         timer_id = (yield)
         DLOG.verbose("Audit hypervisor details called, timer_id=%s." % timer_id)
 
-        for hypervisor_uuid in _nfvi_hypervisors_to_audit.keys():
+        for hypervisor_uuid in list(_nfvi_hypervisors_to_audit.keys()):
             nfvi.nfvi_get_hypervisor(hypervisor_uuid,
                                      _audit_nfvi_hypervisor_callback())
             del _nfvi_hypervisors_to_audit[hypervisor_uuid]
@@ -1106,13 +1106,13 @@ def _audit_nfvi_instance_type_details():
         DLOG.verbose("Audit instance type details called, timer_id=%s."
                      % timer_id)
 
-        for instance_type_uuid in _nfvi_instance_types_outstanding.keys():
+        for instance_type_uuid in list(_nfvi_instance_types_outstanding.keys()):
             instance_type_table = tables.tables_get_instance_type_table()
             instance_type = instance_type_table.get(instance_type_uuid, None)
             if instance_type is None:
                 del _nfvi_instance_types_outstanding[instance_type_uuid]
 
-        for instance_type_uuid in _nfvi_instance_types_to_audit.keys():
+        for instance_type_uuid in list(_nfvi_instance_types_to_audit.keys()):
             if 4 <= len(_nfvi_instance_types_outstanding):
                 break
 
@@ -1165,13 +1165,13 @@ def _audit_nfvi_volume():
         timer_id = (yield)
         DLOG.verbose("Audit volume called, timer_id=%s." % timer_id)
 
-        for volume_uuid in _nfvi_volumes_outstanding.keys():
+        for volume_uuid in list(_nfvi_volumes_outstanding.keys()):
             volume_table = tables.tables_get_volume_table()
             volume = volume_table.get(volume_uuid, None)
             if volume is None:
                 del _nfvi_volumes_outstanding[volume_uuid]
 
-        for volume_uuid in _nfvi_volumes_to_audit.keys():
+        for volume_uuid in list(_nfvi_volumes_to_audit.keys()):
             if 4 <= len(_nfvi_volumes_outstanding):
                 break
 
@@ -1220,7 +1220,7 @@ def _audit_nfvi_guest_services():
         timer_id = (yield)
         DLOG.verbose("Audit guest services called, timer_id=%s." % timer_id)
         instance_table = tables.tables_get_instance_table()
-        for instance_uuid in instance_table.keys():
+        for instance_uuid in list(instance_table.keys()):
             instance = instance_table[instance_uuid]
             if instance is not None:
                 if not instance.is_deleted():

@@ -78,7 +78,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
 
             if future.result.data is not None:
                 sw_patch_data_list = future.result.data.get('pd', [])
-                for sw_patch_name in sw_patch_data_list.keys():
+                for sw_patch_name in list(sw_patch_data_list.keys()):
                     sw_patch_data = sw_patch_data_list[sw_patch_name]
                     sw_patch = nfvi.objects.v1.SwPatch(
                         sw_patch_name, sw_patch_data['sw_version'],
@@ -255,7 +255,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
 
             if future.result.data is not None:
                 sw_patch_data_list = future.result.data.get('pd', [])
-                for sw_patch_name in sw_patch_data_list.keys():
+                for sw_patch_name in list(sw_patch_data_list.keys()):
                     sw_patch_data = sw_patch_data_list[sw_patch_name]
                     sw_patch = nfvi.objects.v1.SwPatch(
                         sw_patch_name, sw_patch_data['sw_version'],
