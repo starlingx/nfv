@@ -38,7 +38,7 @@ def names(self, names):
 
 # Replacing address of "names" in V1ContainerImage
 # with the "names" defined above
-V1ContainerImage.names = V1ContainerImage.names.setter(names)
+V1ContainerImage.names = V1ContainerImage.names.setter(names)  # pylint: disable=no-member
 
 
 def get_client():
