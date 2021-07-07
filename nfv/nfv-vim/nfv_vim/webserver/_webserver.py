@@ -51,13 +51,13 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                self.wfile.write(f.read())
+                self.wfile.write(f.read().encode())
         elif self.path == '/StarlingX_Icon_RGB_Stacked_2color.png':
             with open(_webserver_src_dir + '/images' + self.path, 'r') as f:
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'image/x-icon')
                 self.end_headers()
-                self.wfile.write(f.read())
+                self.wfile.write(f.read().encode())
 
         elif re.search('/vim/overview', self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
@@ -174,7 +174,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(
-                    query_obj.group(1) + "(" +
+                    (query_obj.group(1) + "(" +
                     json.dumps(
                         {'locked_hosts': locked_hosts,
                          'unlocked_hosts': unlocked_hosts,
@@ -204,7 +204,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                          'deleted_instances': deleted_instances,
                          'total_instances': total_instances,
                          'datetime': str(datetime.datetime.now())[:-3]
-                         }) + ")")
+                         }) + ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -243,7 +243,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
                 self.wfile.write(
-                    query_obj.group(1) + "(" +
+                    (query_obj.group(1) + "(" +
                     json.dumps(
                         {'critical_alarms': critical_alarms,
                          'major_alarms': major_alarms,
@@ -251,7 +251,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                          'warning_alarms': warning_alarms,
                          'indeterminate_alarms': indeterminate_alarms,
                          'datetime': str(datetime.datetime.now())[:-3]
-                         }) + ")")
+                         }) + ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -269,8 +269,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
-                                 json.dumps({'systems': system_list}) + ")")
+                self.wfile.write((query_obj.group(1) + "(" +
+                                 json.dumps({'systems': system_list}) +
+                                  ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -288,8 +289,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
-                                 json.dumps({'hosts': host_list}) + ")")
+                self.wfile.write((query_obj.group(1) + "(" +
+                                 json.dumps({'hosts': host_list}) +
+                                  ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -307,9 +309,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'host_groups': host_group_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -327,10 +329,10 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'host_aggregates':
                                              host_aggregate_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -348,9 +350,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'hypervisors': hypervisor_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -368,9 +370,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'instances': instance_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -388,10 +390,10 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'instance_types':
                                              instance_type_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -409,10 +411,10 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'instance_groups':
                                              instance_group_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -430,9 +432,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'images': image_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -450,9 +452,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'volumes': volume_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -470,10 +472,10 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'volume_snapshots':
                                             volume_snapshot_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -491,9 +493,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'subnets': subnet_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -511,9 +513,9 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(query_obj.group(1) + "(" +
+                self.wfile.write((query_obj.group(1) + "(" +
                                  json.dumps({'networks': network_list}) +
-                                 ")")
+                                 ")").encode())
             else:
                 self.send_response(httplib.BAD_REQUEST,
                                    'Bad Request: does not exist')
@@ -525,7 +527,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 self.send_response(httplib.OK)
                 self.send_header('Content-Type', 'application/font-woff')
                 self.end_headers()
-                self.wfile.write(f.read())
+                self.wfile.write(f.read().encode())
 
         else:
             mime_type = 'unsupported'
@@ -563,7 +565,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     self.send_response(httplib.OK)
                     self.send_header('Content-Type', mime_type)
                     self.end_headers()
-                    self.wfile.write(f.read())
+                    self.wfile.write(f.read().encode())
 
 
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, BaseHTTPServer.HTTPServer):
