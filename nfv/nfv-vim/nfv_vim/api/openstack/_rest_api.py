@@ -35,7 +35,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
             request_info.add_header("X-Auth-Token", token.get_id())
 
         if body is not None and '' != body:
-            request_info.data = body
+            request_info.data = body.encode()
 
         # Enable Debug
         # handler = urllib.request.HTTPHandler(debuglevel=1)

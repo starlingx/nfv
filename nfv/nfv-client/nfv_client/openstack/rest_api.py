@@ -32,7 +32,7 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
                 request_info.add_header(header_type, header_value)
 
         if api_cmd_payload is not None:
-            request_info.data = api_cmd_payload
+            request_info.data = api_cmd_payload.encode()
 
         url_request = urllib.request.urlopen(request_info,
                                              timeout=timeout_in_secs)
