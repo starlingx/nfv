@@ -24,7 +24,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
         request_info.get_method = lambda: method
 
         if headers is not None:
-            for header_type, header_value in headers.items():
+            for header_type, header_value in list(headers.items()):
                 # Allow the Content-Length to be set by urllib
                 if 'Content-Length' != header_type and 'Host' != header_type:
                     request_info.add_header(header_type, header_value)

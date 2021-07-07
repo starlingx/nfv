@@ -193,7 +193,7 @@ class Host(ObjectData):
             ignore_services = []
         all_enabled = True
         at_least_one_failed = False
-        for service, service_state in self._host_service_state.items():
+        for service, service_state in list(self._host_service_state.items()):
             # Ignore state of kubernetes, plugin as
             # there is no query function for that sevice.
             if service == HOST_SERVICES.CONTAINER:
@@ -745,7 +745,7 @@ class Host(ObjectData):
         """
         at_least_one_change = False
 
-        for service, state in self._host_service_state.items():
+        for service, state in list(self._host_service_state.items()):
             if state != host_service_state:
                 at_least_one_change = True
                 self._host_service_state[service] = host_service_state

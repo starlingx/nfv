@@ -305,7 +305,7 @@ def _rest_api_request(token_id, method, api_cmd, api_cmd_headers,
         request_info.add_header("Accept", "application/json")
 
         if api_cmd_headers is not None:
-            for header_type, header_value in api_cmd_headers.items():
+            for header_type, header_value in list(api_cmd_headers.items()):
                 request_info.add_header(header_type, header_value)
 
         if api_cmd_payload is not None:

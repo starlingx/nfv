@@ -257,7 +257,7 @@ def debug_trace(trace_level):
                                end='', sep='')
 
                 six.print_(" kwargs=", file=Debug().output, end='', sep='')
-                for name, value in kwargs.items():
+                for name, value in list(kwargs.items()):
                     six.print_("{0}={1} ".format(name, value),
                                file=Debug().output, end='', sep='')
 
