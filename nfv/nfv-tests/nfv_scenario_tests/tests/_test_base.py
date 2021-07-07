@@ -63,7 +63,7 @@ class Test(object):
         """
         Clears the log files so that they are empty, expected to be overloaded
         """
-        for file_name in self.LOG_FILES.values():
+        for file_name in list(self.LOG_FILES.values()):
             with open(file_name, 'w'):
                 pass
 

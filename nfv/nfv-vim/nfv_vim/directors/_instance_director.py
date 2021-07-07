@@ -1834,7 +1834,7 @@ class InstanceDirector(object):
                 instance_table = tables.tables_get_instance_table()
                 instance_uuids = list()
 
-                for instance in instance_table.values():
+                for instance in list(instance_table.values()):
                     if instance.unlock_to_recover and instance.is_locked():
                         instance_uuids.append(instance.uuid)
                     instance.unlock_to_recover = False

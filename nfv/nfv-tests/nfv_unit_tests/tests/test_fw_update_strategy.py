@@ -69,7 +69,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy = create_fw_update_strategy()
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
 
@@ -113,7 +113,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -216,7 +216,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=3)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -292,7 +292,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -393,7 +393,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=4)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -481,7 +481,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -640,7 +640,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=10)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -738,7 +738,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=10)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -865,7 +865,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=4)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1021,7 +1021,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=2)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1152,7 +1152,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=True)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1203,7 +1203,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=True)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1259,7 +1259,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=True)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1295,7 +1295,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=True)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1345,7 +1345,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1416,7 +1416,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=False)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1490,7 +1490,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=False)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1565,7 +1565,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=False)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1642,7 +1642,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=False)
 
         fw_update_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 fw_update_host_list.append(host)
 
@@ -1731,7 +1731,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=2)
 
         fw_update_worker_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if host._nfvi_host.admin_state == nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED:
                 if HOST_PERSONALITY.WORKER in host.personality:
                     fw_update_worker_host_list.append(host)
@@ -1851,7 +1851,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=2)
 
         fw_update_worker_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if host._nfvi_host.admin_state == nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED:
                 if HOST_PERSONALITY.WORKER in host.personality:
                     fw_update_worker_host_list.append(host)
@@ -1990,7 +1990,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         fw_update_controller_host_list = []
         fw_update_worker_host_list = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if host._nfvi_host.admin_state == nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED:
                 if HOST_PERSONALITY.WORKER in host.personality:
                     fw_update_worker_host_list.append(host)

@@ -24,7 +24,7 @@ class AsDictMixin(object):
 
 
 def lookup_class_by_table(table_name):
-    for c in Base._decl_class_registry.values():
+    for c in list(Base._decl_class_registry.values()):
         if hasattr(c, '__table__'):
             if table_name == str(c.__table__):
                 return c

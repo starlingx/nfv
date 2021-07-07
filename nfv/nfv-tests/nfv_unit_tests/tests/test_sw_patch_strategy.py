@@ -79,7 +79,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -131,7 +131,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -241,7 +241,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_instance('small', "test_instance_9", 'compute-9')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -404,7 +404,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_instance('small', "test_instance_9", 'compute-9')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -577,7 +577,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_instance('small', "test_instance_9", 'compute-9')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -742,7 +742,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_instance('small', "test_instance_9", 'compute-9')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -894,7 +894,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1002,7 +1002,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1044,7 +1044,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'compute-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1192,7 +1192,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'compute-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1279,7 +1279,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.LOCKED)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1379,7 +1379,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'compute-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1458,7 +1458,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1549,7 +1549,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1719,7 +1719,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('compute-3', openstack_installed=False)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -1884,7 +1884,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('compute-3', openstack_installed=False)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -2016,7 +2016,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -2188,7 +2188,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             self.create_host('compute-%02d' % x)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -2318,7 +2318,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -2503,7 +2503,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                    [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -2601,7 +2601,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
 
         storage_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.STORAGE in host.personality:
                 storage_hosts.append(host)
         # Sort hosts so the order of the steps is deterministic
@@ -2648,7 +2648,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
 
         storage_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.STORAGE in host.personality:
                 storage_hosts.append(host)
         # Sort hosts so the order of the steps is deterministic
@@ -2772,7 +2772,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
 
         storage_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.STORAGE in host.personality:
                 storage_hosts.append(host)
         # Sort hosts so the order of the steps is deterministic
@@ -2895,7 +2895,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('controller-1')
 
         controller_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.CONTROLLER in host.personality:
                 controller_hosts.append(host)
 
@@ -2930,7 +2930,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('controller-1')
 
         controller_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.CONTROLLER in host.personality:
                 controller_hosts.append(host)
 
@@ -3040,7 +3040,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('controller-1', openstack_installed=False)
 
         controller_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.CONTROLLER in host.personality:
                 controller_hosts.append(host)
 
@@ -3157,7 +3157,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'controller-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -3283,7 +3283,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'controller-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -3364,7 +3364,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('controller-1', aio=True)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -3437,7 +3437,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('controller-1', aio=True, openstack_installed=False)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -3527,7 +3527,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'compute-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -3692,7 +3692,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'compute-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -3817,7 +3817,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('compute-1')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
         # Sort worker hosts so the order of the steps is deterministic
@@ -3928,7 +3928,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'controller-0')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
 
@@ -3955,7 +3955,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('controller-0', aio=True, openstack_installed=False)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
 
@@ -4009,7 +4009,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                              'controller-0')
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
 
@@ -4064,7 +4064,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.create_host('controller-0', aio=True)
 
         worker_hosts = []
-        for host in self._host_table.values():
+        for host in list(self._host_table.values()):
             if HOST_PERSONALITY.WORKER in host.personality:
                 worker_hosts.append(host)
 
