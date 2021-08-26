@@ -10,6 +10,7 @@
         - nfv-tox-pep8
         - nfv-tox-py27
         - nfv-tox-py36
+        - nfv-tox-py39
         - nfv-tox-pylint
         - nova-api-proxy-tox-pep8
         - nova-api-proxy-tox-pylint
@@ -19,6 +20,7 @@
         - nfv-tox-pep8
         - nfv-tox-py27
         - nfv-tox-py36
+        - nfv-tox-py39
         - nfv-tox-pylint
         - nova-api-proxy-tox-pep8
         - nova-api-proxy-tox-pylint
@@ -49,6 +51,20 @@
       tox_extra_args: -c nfv/tox.ini
       bindep_profile: test py36
       python_version: 3.6
+
+- job:
+    name: nfv-tox-py39
+    parent: tox-py39
+    description: Run py39 for nfv
+    nodeset: debian-bullseye
+    required-projects:
+      - starlingx/fault
+      - starlingx/root
+    vars:
+      tox_envlist: py39
+      tox_extra_args: -c nfv/tox.ini
+      bindep_profile: test py39
+      python_version: 3.9
 
 - job:
     name: nfv-tox-pep8
