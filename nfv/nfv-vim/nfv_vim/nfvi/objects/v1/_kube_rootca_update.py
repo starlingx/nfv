@@ -21,22 +21,24 @@ class KubeRootcaUpdateState(Constants):
     KUBE_ROOTCA_UPDATE_STARTED = Constant('update-started')
     KUBE_ROOTCA_UPDATE_CERT_UPLOADED = Constant('update-new-rootca-cert-uploaded')
     KUBE_ROOTCA_UPDATE_CERT_GENERATED = Constant('update-new-rootca-cert-generated')
-    KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS = Constant('updating-pods-trustBothCAs')
-    KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS = Constant('updated-pods-trustBothCAs')
-    KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED = Constant('updating-pods-trustBothCAs-failed')
-    KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA = Constant('updating-pods-trustNewCA')
-    KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA = Constant('updated-pods-trustNewCA')
-    KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED = Constant('updating-pods-trustNewCA-failed')
-    KUBE_ROOTCA_UPDATE_COMPLETED = Constant('update-completed')
-    KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS = Constant('updating-host-trustBothCAs')
-    KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS = Constant('updated-host-trustBothCAs')
-    KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED = Constant('updating-host-trustBothCAs-failed')
-    KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS = Constant('updating-host-updateCerts')
-    KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS = Constant('updated-host-updateCerts')
-    KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED = Constant('updating-host-updateCerts-failed')
-    KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA = Constant('updating-host-trustNewCA')
-    KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA = Constant('updated-host-trustNewCA')
-    KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED = Constant('updating-host-trustNewCA-failed')
+    KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS = 'updating-pods-trust-both-cas'
+    KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS = 'updated-pods-trust-both-cas'
+    KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED = 'updating-pods-trust-both-cas-failed'
+    KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA = 'updating-pods-trust-new-ca'
+    KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA = 'updated-pods-trust-new-ca'
+    KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED = 'updating-pods-trust-new-ca-failed'
+    KUBE_ROOTCA_UPDATE_COMPLETED = 'update-completed'
+    KUBE_ROOTCA_UPDATE_ABORTED = 'update-aborted'
+
+    KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS = 'updating-host-trust-both-cas'
+    KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS = 'updated-host-trust-both-cas'
+    KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED = 'updating-host-trust-both-cas-failed'
+    KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS = 'updating-host-update-certs'
+    KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS = 'updated-host-update-certs'
+    KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED = 'updating-host-update-certs-failed'
+    KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA = 'updating-host-trust-new-ca'
+    KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA = 'updated-host-trust-new-ca'
+    KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED = 'updating-host-trust-new-ca-failed'
 
 
 # Kube Upgrade Constant Instantiation

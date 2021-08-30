@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+import os
+
 from nfv_client.openstack import rest_api
 
 
@@ -245,7 +247,10 @@ def create_strategy(token_id,
         if 'subject' in kwargs and kwargs['subject']:
             api_cmd_payload['subject'] = kwargs['subject']
         if 'cert_file' in kwargs and kwargs['cert_file']:
-            api_cmd_payload['cert-file'] = kwargs['cert_file']
+            # The cert file needs to be converted to an absolute path.
+            # If the path is not accessible from both controllers, the strategy
+            # may not succeed if a SWACT occurs.
+            api_cmd_payload['cert-file'] = os.path.abspath(kwargs['cert_file'])
         api_cmd_payload['default-instance-action'] = default_instance_action
     elif 'kube-upgrade' == strategy_name:
         # required: 'to_version' passed to strategy as 'to-version'

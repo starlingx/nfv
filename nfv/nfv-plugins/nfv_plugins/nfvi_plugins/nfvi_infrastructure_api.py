@@ -953,8 +953,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 DLOG.error("%s did not complete." % action_type)
                 return
             api_data = future.result.data
-            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
-            response['result-data'] = result_obj
+            new_cert_identifier = api_data['success']
+            response['result-data'] = new_cert_identifier
             response['completed'] = True
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:

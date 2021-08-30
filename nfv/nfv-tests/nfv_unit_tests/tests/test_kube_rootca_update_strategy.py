@@ -236,8 +236,8 @@ class ApplyStageMixin(object):
                 {'name': 'kube-rootca-update-host-trustbothcas',
                  'entity_type': 'hosts',
                  'entity_names': [host, ],
-                 'success_state': 'updated-host-trustBothCAs',
-                 'fail_state': 'updating-host-trustBothCAs-failed',
+                 'success_state': 'updated-host-trust-both-cas',
+                 'fail_state': 'updating-host-trust-both-cas-failed',
                 })
         return {
             'name': 'kube-rootca-update-hosts-trustbothcas',
@@ -248,8 +248,8 @@ class ApplyStageMixin(object):
     def _kube_rootca_update_pods_trustbothcas_stage(self):
         steps = [
             {'name': 'kube-rootca-update-pods-trustbothcas',
-             'success_state': 'updated-pods-trustBothCAs',
-             'fail_state': 'updating-pods-trustBothCAs-failed',
+             'success_state': 'updated-pods-trust-both-cas',
+             'fail_state': 'updating-pods-trust-both-cas-failed',
             },
         ]
         return {
@@ -265,8 +265,8 @@ class ApplyStageMixin(object):
                 {'name': 'kube-rootca-update-host-trustnewca',
                  'entity_type': 'hosts',
                  'entity_names': [host, ],
-                 'success_state': 'updated-host-trustNewCA',
-                 'fail_state': 'updating-host-trustNewCA-failed',
+                 'success_state': 'updated-host-trust-new-ca',
+                 'fail_state': 'updating-host-trust-new-ca-failed',
                 })
         return {
             'name': 'kube-rootca-update-hosts-trustnewca',
@@ -277,8 +277,8 @@ class ApplyStageMixin(object):
     def _kube_rootca_update_pods_trustnewca_stage(self):
         steps = [
             {'name': 'kube-rootca-update-pods-trustnewca',
-             'success_state': 'updated-pods-trustNewCA',
-             'fail_state': 'updating-pods-trustNewCA-failed',
+             'success_state': 'updated-pods-trust-new-ca',
+             'fail_state': 'updating-pods-trust-new-ca-failed',
             },
         ]
         return {
@@ -294,8 +294,8 @@ class ApplyStageMixin(object):
                 {'name': 'kube-rootca-update-host-update-certs',
                  'entity_type': 'hosts',
                  'entity_names': [host, ],
-                 'success_state': 'updated-host-updateCerts',
-                 'fail_state': 'updating-host-updateCerts-failed',
+                 'success_state': 'updated-host-update-certs',
+                 'fail_state': 'updating-host-update-certs-failed',
                 })
         return {
             'name': 'kube-rootca-update-hosts-updatecerts',

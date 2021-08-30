@@ -23,7 +23,7 @@ KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT = \
 KUBE_ROOTCA_UPDATE_PODS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/pods"
 KUBE_ROOTCA_UPDATE_HOSTS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/hosts"
 KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT = \
-    KUBE_ROOTCA_UPDATE_ENDPOINT + "/upload"
+    KUBE_ROOTCA_UPDATE_ENDPOINT + "/upload_cert"
 
 
 # todo(abailey): refactor _api_get, etc.. into rest_api.py
@@ -282,20 +282,38 @@ def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
 def kube_rootca_update_upload_cert(token, cert_file):
     """
     Ask System Inventory to kube rootca update upload a cert file
+    This uses POST for a file, which urllib does not work well with.
     """
+    api_cmd = _api_cmd(token, KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT)
+    api_cmd_headers = _api_cmd_headers()
     api_cmd_payload = dict()
-    api_cmd_payload['cert_file'] = cert_file
-    return _api_post(token, KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT,
-                     api_cmd_payload)
+
+    # The API is expecting requests.post formatted data
+    with open(cert_file, "rb") as cert_file_handle:
+        # file handle automatically closed once this request is sent
+        response = rest_api_request(token,
+                                    "POST",
+                                    api_cmd,
+                                    api_cmd_headers,
+                                    json.dumps(api_cmd_payload),
+                                    timeout_in_secs=REST_API_REQUEST_TIMEOUT,
+                                    file_to_post=cert_file_handle)
+    return response
 
 
 def kube_rootca_update_complete(token):
     """
     Ask System Inventory to kube rootca update complete
     """
+    api_cmd_payload = list()
+    state_data = dict()
+    state_data['path'] = "/state"
+    state_data['value'] = 'update-completed'
+    state_data['op'] = "replace"
+    api_cmd_payload.append(state_data)
     return _api_patch_dict(token,
-                           KUBE_ROOTCA_UPDATE_ENDPOINT,
-                           {'force': 'True'})
+                           KUBE_ROOTCA_UPDATE_ENDPOINT + "?force=True",
+                           api_cmd_payload)
 
 
 def kube_rootca_update_host(token, host_uuid, phase):

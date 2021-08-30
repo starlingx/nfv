@@ -14,6 +14,8 @@ BuildRequires: python-setuptools
 BuildRequires: python2-pip
 BuildRequires: python2-wheel
 
+Requires:      python-requests
+
 %description
 StarlingX Network Function Virtualization
 

@@ -272,7 +272,7 @@ def setup_kube_rootca_update_parser(commands):
     create_strategy_cmd.add_argument(
         '--expiry-date',
         required=False,
-        help='When the generated certificate should expire')
+        help='When the generated certificate should expire (yyyy-mm-dd)')
     create_strategy_cmd.add_argument(
         '--subject',
         required=False,

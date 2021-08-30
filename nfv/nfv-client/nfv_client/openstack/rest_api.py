@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -89,7 +89,7 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
                         response = json.loads(response_raw)
                         message = response.get('faultstring', None)
                         if message is not None:
-                            reason = str(message.lower().rstrip('.'))
+                            reason = str(message.rstrip('.'))
                             print("Operation failed: %s" % reason)
                             return
 

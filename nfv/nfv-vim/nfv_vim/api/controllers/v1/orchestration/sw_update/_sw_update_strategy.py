@@ -705,6 +705,7 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
     """
     Kubernetes Root CA Update Strategy Rest API
     """
+
     @wsme_pecan.wsexpose(SwUpdateStrategyQueryData,
                          body=KubeRootcaUpdateStrategyCreateData,
                          status_code=httplib.OK)
@@ -713,10 +714,21 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
         rpc_request.sw_update_type = _get_sw_update_type_from_path(
             pecan.request.path)
         if wsme_types.Unset != request_data.expiry_date:
+            # Validate the expiry_date
+            is_valid, reason = validate.validate_expiry_date(
+                request_data.expiry_date)
+            if not is_valid:
+                return pecan.abort(httplib.BAD_REQUEST, reason)
             rpc_request.expiry_date = request_data.expiry_date
         if wsme_types.Unset != request_data.subject:
+            # Validate the subject
+            is_valid, reason = validate.validate_certificate_subject(
+                request_data.subject)
+            if not is_valid:
+                return pecan.abort(httplib.BAD_REQUEST, reason)
             rpc_request.subject = request_data.subject
         if wsme_types.Unset != request_data.cert_file:
+            # todo(abailey): Should investigate if cert_file can be validated
             rpc_request.cert_file = request_data.cert_file
         rpc_request.controller_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
         rpc_request.storage_apply_type = request_data.storage_apply_type

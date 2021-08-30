@@ -2794,6 +2794,9 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         RESUME_STATE = {
+            # update was aborted, this means it needs to be recreated
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_ABORTED:
+                self._add_kube_rootca_update_start_stage,
             # after update-started -> generate or upload cert
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED:
                 self._add_kube_rootca_update_cert_stage,

@@ -3352,9 +3352,8 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
 
     @coroutine
     def _response_callback(self):
-        """
-        Note: Generate Cert is a blocking call that returns an identifier
-        however polling the update is how we proceed to next state
+        """Generate Cert is a blocking call that returns an identifier
+        Polling the update is how we proceed to next state
         """
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -3396,30 +3395,29 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
         return data
 
 
-class KubeRootcaUpdateUploadCertStep(AbstractStrategyStep):
+class KubeRootcaUpdateUploadCertStep(AbstractKubeRootcaUpdateStep):
     """Kube RootCA Update - Upload Cert - Strategy Step"""
 
     def __init__(self, cert_file):
+        from nfv_vim import nfvi
         super(KubeRootcaUpdateUploadCertStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_UPLOAD_CERT,
-            timeout_in_secs=120)
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_UPLOADED,
+            None,  # sysinv API does not have a FAILED state for this action
+            timeout_in_secs=300)
         self._cert_file = cert_file
 
     @coroutine
     def _response_callback(self):
-        """Upload Cert is a blocking call"""
+        """Upload Cert is a blocking call that returns an identifier
+        Polling the update is how we proceed to next state
+        """
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
-
         if response['completed']:
-            if self.strategy is not None:
-                self.strategy.nfvi_kube_rootca_update = response['result-data']
-
-            # todo(abailey): iMay want to check if the state is now:
-            # nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_UPLOADED
-
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
+            # We do not set 'success' here, let the handle_event do this
+            # The API returns a certificate identifier
+            pass
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response['reason'])

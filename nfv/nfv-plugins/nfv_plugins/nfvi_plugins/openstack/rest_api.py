@@ -5,6 +5,7 @@
 #
 import json
 import re
+import requests
 from six.moves import BaseHTTPServer
 from six.moves import http_client as httplib
 from six.moves import socketserver as SocketServer
@@ -287,8 +288,13 @@ def rest_api_get_server(host, port):
     return RestAPIServer(host, port)
 
 
-def _rest_api_request(token_id, method, api_cmd, api_cmd_headers,
-                      api_cmd_payload, timeout_in_secs):
+def _rest_api_request(token_id,
+                      method,
+                      api_cmd,
+                      api_cmd_headers,
+                      api_cmd_payload,
+                      timeout_in_secs,
+                      file_to_post):
     """
     Internal: make a rest-api request
     """
@@ -320,34 +326,44 @@ def _rest_api_request(token_id, method, api_cmd, api_cmd_headers,
         # opener = urllib.request.build_opener(handler)
         # urllib.request.install_opener(opener)
 
-        request = urllib.request.urlopen(request_info, timeout=timeout_in_secs)
+        if file_to_post is not None:
+            headers = {"X-Auth-Token": token_id}
+            files = {'file': ("for_upload", file_to_post)}
+            request = requests.post(api_cmd, headers=headers, files=files,
+                                    timeout=timeout_in_secs)
+            status_code = request.status_code
+            response_raw = request.text
+            request.close()
+        else:
+            request = urllib.request.urlopen(request_info,
+                                             timeout=timeout_in_secs)
+            headers = list()  # list of tuples
+            for key, value in request.info().items():
+                if key not in headers_per_hop:
+                    cap_key = '-'.join((ck.capitalize() for ck in key.split('-')))
+                    headers.append((cap_key, value))
 
-        headers = list()  # list of tuples
-        for key, value in request.info().items():
-            if key not in headers_per_hop:
-                cap_key = '-'.join((ck.capitalize() for ck in key.split('-')))
-                headers.append((cap_key, value))
+            response_raw = request.read()
+            status_code = request.code
+            request.close()
 
-        response_raw = request.read()
         if response_raw == "":
             response = dict()
         else:
             response = json.loads(response_raw)
-
-        request.close()
 
         now_ms = timers.get_monotonic_timestamp_in_ms()
         elapsed_ms = now_ms - start_ms
         elapsed_secs = elapsed_ms // 1000
 
         DLOG.verbose("Rest-API code=%s, headers=%s, response=%s"
-                     % (request.code, headers, response))
+                     % (status_code, headers, response))
 
         log_info("Rest-API status=%s, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
-                 % (request.code, method, api_cmd, api_cmd_headers,
+                 % (status_code, method, api_cmd, api_cmd_headers,
                     api_cmd_payload, int(elapsed_ms)))
 
-        return Result(response, Object(status_code=request.code,
+        return Result(response, Object(status_code=status_code,
                                        headers=headers,
                                        response=response_raw,
                                        execution_time=elapsed_secs))
@@ -436,8 +452,13 @@ def _rest_api_request(token_id, method, api_cmd, api_cmd_headers,
                                  api_cmd_payload, str(e), str(e))
 
 
-def rest_api_request(token, method, api_cmd, api_cmd_headers=None,
-                     api_cmd_payload=None, timeout_in_secs=20):
+def rest_api_request(token,
+                     method,
+                     api_cmd,
+                     api_cmd_headers=None,
+                     api_cmd_payload=None,
+                     timeout_in_secs=20,
+                     file_to_post=None):
     """
     Make a rest-api request using the given token
     WARNING: Any change to the default timeout must be reflected in the timeout
@@ -446,7 +467,7 @@ def rest_api_request(token, method, api_cmd, api_cmd_headers=None,
     try:
         return _rest_api_request(token.get_id(), method, api_cmd,
                                  api_cmd_headers, api_cmd_payload,
-                                 timeout_in_secs)
+                                 timeout_in_secs, file_to_post)
 
     except OpenStackRestAPIException as e:
         if httplib.UNAUTHORIZED == e.http_status_code:
@@ -454,13 +475,18 @@ def rest_api_request(token, method, api_cmd, api_cmd_headers=None,
         raise
 
 
-def rest_api_request_with_context(context, method, api_cmd,
-                                  api_cmd_headers=None, api_cmd_payload=None,
-                                  timeout_in_secs=20):
+def rest_api_request_with_context(context,
+                                  method,
+                                  api_cmd,
+                                  api_cmd_headers=None,
+                                  api_cmd_payload=None,
+                                  timeout_in_secs=20,
+                                  file_to_post=None):
     """
     Make a rest-api request using the given context
     WARNING: Any change to the default timeout must be reflected in the timeout
     calculations done in the TaskFuture class.
     """
-    return _rest_api_request(context.token_id, method, api_cmd, api_cmd_headers,
-                             api_cmd_payload, timeout_in_secs)
+    return _rest_api_request(context.token_id, method, api_cmd,
+                             api_cmd_headers, api_cmd_payload,
+                             timeout_in_secs, file_to_post)
