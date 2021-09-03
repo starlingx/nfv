@@ -3075,13 +3075,28 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES)
         stage.add_step(strategy.KubeUpgradeDownloadImagesStep())
         self.apply_phase.add_stage(stage)
-        # Next stage after download images is upgrade control plane for first
+        # Next stage after download images is upgrade networking
+        self._add_kube_upgrade_networking_stage()
+
+    def _add_kube_upgrade_networking_stage(self):
+        """
+        Add kube upgrade networking stage.
+        This stage only occurs after download images
+        It then proceeds to the next stage
+        """
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING)
+        stage.add_step(strategy.KubeUpgradeNetworkingStep())
+        self.apply_phase.add_stage(stage)
+        # Next stage after networking is second control plane (if duplex)
         self._add_kube_upgrade_first_control_plane_stage()
 
     def _add_kube_upgrade_first_control_plane_stage(self):
         """
         Add first controller control plane kube upgrade stage
-        This stage only occurs after images are downloaded.
+        This stage only occurs after networking
         It then proceeds to the next stage
         """
         from nfv_vim import nfvi
@@ -3099,22 +3114,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED)
         )
         self.apply_phase.add_stage(stage)
-        # Next stage after first control plane is networking
-        self._add_kube_upgrade_networking_stage()
-
-    def _add_kube_upgrade_networking_stage(self):
-        """
-        Add kube upgrade networking stage.
-        This stage only occurs after the first control plane is upgraded.
-        It then proceeds to the next stage
-        """
-        from nfv_vim import strategy
-
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING)
-        stage.add_step(strategy.KubeUpgradeNetworkingStep())
-        self.apply_phase.add_stage(stage)
-        # Next stage after networking is second control plane (if duplex)
+        # Next stage after first control plane is second control plane
         self._add_kube_upgrade_second_control_plane_stage()
 
     def _add_kube_upgrade_second_control_plane_stage(self):
@@ -3522,24 +3522,24 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED:
                 self._add_kube_upgrade_download_images_stage,
 
-            # After downloaing images -> upgrade first control plane
+            # After downloading images -> upgrade networking
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES:
+                self._add_kube_upgrade_networking_stage,
+
+            # if networking state failed, resync at networking state
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED:
+                self._add_kube_upgrade_networking_stage,
+
+            # After networking -> upgrade first control plane
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING:
                 self._add_kube_upgrade_first_control_plane_stage,
 
             # if upgrading first control plane failed, resume there
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED:
                 self._add_kube_upgrade_first_control_plane_stage,
 
-            # After first control plane, upgrade networking
+            # After first control plane -> upgrade second control plane
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER:
-                self._add_kube_upgrade_networking_stage,
-
-            # if networking state failed, resyne at networking state
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED:
-                self._add_kube_upgrade_networking_stage,
-
-            # After networking , upgrade second control plane
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING:
                 self._add_kube_upgrade_second_control_plane_stage,
 
             # if upgrading second control plane failed, resume there

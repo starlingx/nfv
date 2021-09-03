@@ -552,10 +552,10 @@ class ApplyStageMixin(object):
             stages.append(self._kube_upgrade_start_stage())
         if add_download:
             stages.append(self._kube_upgrade_download_images_stage())
-        if add_first_plane:
-            stages.append(self._kube_upgrade_first_control_plane_stage())
         if add_networking:
             stages.append(self._kube_upgrade_networking_stage())
+        if add_first_plane:
+            stages.append(self._kube_upgrade_first_control_plane_stage())
         if add_second_plane:
             stages.append(self._kube_upgrade_second_control_plane_stage())
         if add_patches:
@@ -661,8 +661,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED)
         stages = [
             self._kube_upgrade_download_images_stage(),
-            self._kube_upgrade_first_control_plane_stage(),
             self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_first_control_plane_stage(),
         ]
         stages.extend(
             self._kube_upgrade_patch_stage(
@@ -688,8 +688,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES)
         stages = [
-            self._kube_upgrade_first_control_plane_stage(),
             self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_first_control_plane_stage(),
         ]
         stages.extend(
             self._kube_upgrade_patch_stage(
@@ -716,7 +716,6 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED)
         stages = [
             self._kube_upgrade_first_control_plane_stage(),
-            self._kube_upgrade_networking_stage(),
         ]
         stages.extend(
             self._kube_upgrade_patch_stage(
@@ -737,13 +736,11 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         """
         Test the kube_upgrade strategy creation when there is only a simplex
         and the upgrade had previously stopped after the first control plane.
-        It is expected to resume at the networking stage
+        It is expected to resume at the second control plane stage in duplex
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER)
-        stages = [
-            self._kube_upgrade_networking_stage()
-        ]
+        stages = []
         stages.extend(
             self._kube_upgrade_patch_stage(
                 std_controller_list=self.std_controller_list,
@@ -769,6 +766,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED)
         stages = [
             self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_first_control_plane_stage(),
         ]
         stages.extend(
             self._kube_upgrade_patch_stage(
@@ -793,7 +791,9 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING)
-        stages = []
+        stages = [
+            self._kube_upgrade_first_control_plane_stage(),
+        ]
         stages.extend(
             self._kube_upgrade_patch_stage(
                 std_controller_list=self.std_controller_list,
