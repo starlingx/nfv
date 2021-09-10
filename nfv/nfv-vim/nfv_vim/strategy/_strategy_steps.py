@@ -3802,7 +3802,8 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
         super(KubeUpgradeDownloadImagesStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES,
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED)
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED,
+            timeout_in_secs=1800)
 
     @coroutine
     def _response_callback(self):
