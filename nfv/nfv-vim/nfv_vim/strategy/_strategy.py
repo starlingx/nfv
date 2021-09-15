@@ -2574,6 +2574,7 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
             '700.004',  # VM stopped
             '750.006',  # Configuration change requires reapply of cert-manager
             '900.008',  # Kubernetes rootca update in progress
+            '900.009',  # Kubernetes rootca update aborted
             '900.501',  # Kubernetes rootca update auto-apply inprogress
         ]
         # self._ignore_alarms is declared in parent class
