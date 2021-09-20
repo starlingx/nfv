@@ -13,6 +13,23 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 @six.add_metaclass(Singleton)
+class KubeHostUpgradeState(Constants):
+    """
+    Kube Host Upgrade State Constants
+    These values are copied from sysinv/common/kubernetes.py
+    """
+    KUBE_HOST_UPGRADING_CONTROL_PLANE = Constant('upgrading-control-plane')
+    KUBE_HOST_UPGRADING_CONTROL_PLANE_FAILED = Constant('upgrading-control-plane-failed')
+    KUBE_HOST_UPGRADING_KUBELET = Constant('upgrading-kubelet')
+    KUBE_HOST_UPGRADING_KUBELET_FAILED = Constant('upgrading-kubelet-failed')
+    KUBE_HOST_UPGRADED_KUBELET = Constant('upgraded-kubelet')
+
+
+# Kube Host Upgrade Constant Instantiation
+KUBE_HOST_UPGRADE_STATE = KubeHostUpgradeState()
+
+
+@six.add_metaclass(Singleton)
 class KubeUpgradeState(Constants):
     """
     Kube Upgrade State Constants

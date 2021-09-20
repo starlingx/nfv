@@ -3042,11 +3042,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
            since that means the kubelet may not be running the version
            indicated.  ie: upgrading-kubelet-failed
            """
+        from nfv_vim import nfvi
+
         kubelet_map = dict()
         for host in self.nfvi_kube_host_upgrade_list:
-            # if host status is anything but None, it means the kubelet may
-            # not yet be fully upgraded to the version indicated.
-            if host.status is None:
+            # host status can be None if the activity has not been started,
+            # or has been completed, in both cases the host version is correct.
+            # for the other three states (upgrading, upgraded, failed) only
+            # the upgraded state indicates the accurate kubelet version
+            if host.status is None \
+            or host.status == nfvi.objects.v1.KUBE_HOST_UPGRADE_STATE.KUBE_HOST_UPGRADED_KUBELET:
                 kubelet_map[host.host_uuid] = host.kubelet_version
         return kubelet_map
 
