@@ -23,6 +23,9 @@ class Secret(str):
             return str.__eq__(self, other)
         return sha512_crypt.verify(other, self)
 
+    def __hash__(self):
+        return hash(self)
+
     def __ne__(self, other):
         return not self.__eq__(other)
 

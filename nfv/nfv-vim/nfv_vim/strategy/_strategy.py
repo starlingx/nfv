@@ -204,7 +204,7 @@ class SwUpdateStrategy(strategy.Strategy):
             num_worker_hosts = host_table.total_by_personality(
                 HOST_PERSONALITY.WORKER)
             aggregate_ratio = \
-                float(self._max_parallel_worker_hosts) / num_worker_hosts
+                float(self._max_parallel_worker_hosts) / num_worker_hosts  # pylint: disable=W1619
             # Limit the ratio to half the worker hosts in an aggregate
             if aggregate_ratio > 0.5:
                 aggregate_ratio = 0.5

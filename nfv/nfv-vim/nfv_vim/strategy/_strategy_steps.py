@@ -2949,7 +2949,7 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 60 seconds before checking update for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
@@ -3095,7 +3095,7 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) / 1000
+            secs_expired = (now_ms - self._wait_time) // 1000
             # Wait at least 60 seconds before checking upgrade for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True

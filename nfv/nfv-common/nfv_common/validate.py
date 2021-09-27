@@ -85,7 +85,7 @@ def validate_certificate_subject(subject):
                        "format of 'C=<Country> ST=<State/Province> "
                        "L=<Locality> O=<Organization> OU=<OrganizationUnit> "
                        "CN=<commonName>")
-    if 'CN' not in subject_dict.keys():
+    if 'CN' not in list(subject_dict.keys()):
         return False, ("The CN=<commonName> parameter is required to be "
                        "specified in subject argument")
     return True, ""

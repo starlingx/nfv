@@ -83,7 +83,7 @@ class Histogram(object):
         if sample_min == sample_max:
             return sample
 
-        return ((((scale_max - scale_min) * (sample - sample_min)) /
+        return ((((scale_max - scale_min) * (sample - sample_min)) //
                  (sample_max - sample_min)) + sample_max)
 
     def display_data(self, pretty_format=True):
