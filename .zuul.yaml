@@ -9,7 +9,6 @@
         - openstack-tox-linters
         - nfv-tox-pep8
         - nfv-tox-py27
-        - nfv-tox-py36
         - nfv-tox-py39
         - nfv-tox-pylint
         - nova-api-proxy-tox-pep8
@@ -19,7 +18,6 @@
         - openstack-tox-linters
         - nfv-tox-pep8
         - nfv-tox-py27
-        - nfv-tox-py36
         - nfv-tox-py39
         - nfv-tox-pylint
         - nova-api-proxy-tox-pep8
@@ -38,19 +36,6 @@
     vars:
       tox_envlist: py27
       tox_extra_args: -c nfv/tox.ini
-
-- job:
-    name: nfv-tox-py36
-    parent: tox
-    description: Run py36 for nfv
-    nodeset: ubuntu-bionic
-    required-projects:
-      - starlingx/fault
-    vars:
-      tox_envlist: py36
-      tox_extra_args: -c nfv/tox.ini
-      bindep_profile: test py36
-      python_version: 3.6
 
 - job:
     name: nfv-tox-py39
