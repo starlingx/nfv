@@ -1,0 +1,29 @@
+Source: mtce-guest
+Section: admin
+Priority: optional
+Maintainer: StarlingX Developers <starlingx-discuss@lists.starlingx.io>
+Build-Depends: debhelper-compat (= 13),
+ fm-common-dev,
+ libevent-dev,
+ libjson-c-dev,
+ libssl-dev,
+ libsystemd-dev,
+ mtce-common-dev,
+ uuid-dev,
+ cppcheck
+Standards-Version: 4.5.1
+Homepage: https://www.starlingx.io
+
+Package: mtce-guest-agent
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: StarlingX Maintenance Guest Agent
+ The StarlingX Maintenance Guest Agent Service assists with VM guest heartbeat
+ control and failure reporting at the controller level.
+
+Package: mtce-guest-server
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: StarlingX Maintenance Guest Server
+ The StarlingX Maintenance Guest Server assists with VM guest heartbeat control
+ and failure reporting at the controller level.

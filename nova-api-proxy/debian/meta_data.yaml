@@ -1,0 +1,7 @@
+---
+debname: nova-api-proxy
+debver: 1.0
+src_path: nova-api-proxy
+revision:
+  dist: $STX_DIST
+  PKG_GITREVCOUNT: true

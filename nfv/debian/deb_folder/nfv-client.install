@@ -1,0 +1,4 @@
+usr/bin/sw-manager
+usr/lib/python3/dist-packages/nfv_client/*
+usr/lib/python3/dist-packages/nfv_client-1.0.0.egg-info/*
+usr/share/bash-completion/completions/sw-manager

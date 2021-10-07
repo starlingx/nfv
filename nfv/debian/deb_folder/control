@@ -1,0 +1,48 @@
+Source: nfv
+Section: libs
+Priority: optional
+Maintainer: StarlingX Developers <starlingx-discuss@lists.starlingx.io>
+Build-Depends: debhelper-compat (= 13),
+ dh-python,
+ python3-all,
+ python3-requests,
+ python3-setuptools
+Standards-Version: 4.5.1
+Homepage: https://www.starlingx.io
+
+Package: nfv-client
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: StarlingX Network Function Virtualization Client
+ A python client library for network function virtualization.
+
+Package: nfv-common
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: StarlingX Network Function Virtualization Common
+ Common network functon virtualization classes used by other NFV libraries.
+
+Package: nfv-plugins
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: StarlingX Network Function Virtualization Plugins
+ Network function virtualization plugins use for interfacing with components
+ such as infrastructure, fault and patching.
+
+Package: nfv-tools
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: StarlingX Network Function Virtualization Tools
+ Developer tools for network function virtualization.
+
+Package: nfv-vim
+Architecture: any
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: StarlingX Virtual Infrastructure Manager
+ Virtual infrastructure manager for network function virtualization.
+
+Package: nfv-wheels
+Architecture: any
+Depends: ${python3-depends}, ${misc:Depends}, python3-wheel
+Description: Network Function Virtualization Wheels
+ Contains python wheels for the Network Function Virtualization project.

@@ -674,7 +674,7 @@ int _get_url_info ( struct evhttp_request * req,
     }
     else
     {
-        ilog ("Failed to parse URL (%s)", url_ptr); // DLOG
+        ilog ("Failed to parse URL"); // DLOG
         return (FAIL_INVALID_UUID) ;
     }
     /**
@@ -1081,8 +1081,9 @@ int guestHttpSvr_init ( int port )
         }
         else if ( guest_request.fd > 0 )
         {
+            char* ip_addr = inet_ntoa(guest_request.addr.sin_addr);
             ilog ("Listening for 'http command' messages on %s:%d\n", 
-                   inet_ntoa(guest_request.addr.sin_addr), guest_request.port );
+                   ip_addr, guest_request.port );
             rc = PASS ;
             break ;
         }

@@ -1,0 +1,74 @@
+#!/usr/bin/make -f
+export DH_VERBOSE = 1
+
+export PYBUILD_NAME=nfv
+export PYTHONROOT=/usr/lib/python3/dist-packages
+export ROOT=$(CURDIR)/debian/tmp
+export SYSCONFDIR=/etc
+
+export BASHCONFDIR=$(ROOT)/usr/share/bash-completion/completions
+export LOGDIR=$(ROOT)/etc/logrotate.d
+export PLUGINDIR=$(ROOT)/etc/nfv/nfv_plugins
+export RESOURCEDIR=$(ROOT)/usr/lib/ocf/resource.d/nfv
+export VIMCONFDIR=$(ROOT)/etc/nfv/vim
+
+%:
+	dh $@ --with=python3 --buildsystem=pybuild
+
+override_dh_auto_build:
+	cd nfv-client && python3 setup.py build
+	cd nfv-common && python3 setup.py build
+	cd nfv-plugins && python3 setup.py build
+	cd nfv-tools && python3 setup.py build
+	cd nfv-vim && python3 setup.py build
+
+override_dh_auto_clean:
+	cd nfv-client && python3 setup.py clean
+	cd nfv-common && python3 setup.py clean
+	cd nfv-plugins && python3 setup.py clean
+	cd nfv-tools && python3 setup.py clean
+	cd nfv-vim && python3 setup.py clean
+
+override_dh_auto_configure:
+	echo "CONFIGURE NOT REQUIRED"
+
+override_dh_auto_install:
+	# Package installs.
+	cd nfv-client && python3 setup.py install -f --root=$(ROOT) --install-layout=deb && \
+		python3 setup.py bdist_wheel --universal -d $(ROOT)/usr/share/python-wheels
+	cd nfv-common && python3 setup.py install -f --root=$(ROOT) --install-layout=deb && \
+		python3 setup.py bdist_wheel --universal -d $(ROOT)/usr/share/python-wheels
+	cd nfv-plugins && python3 setup.py install -f --root=$(ROOT) --install-layout=deb && \
+		python3 setup.py bdist_wheel --universal -d $(ROOT)/usr/share/python-wheels
+	cd nfv-tools && python3 setup.py install -f --root=$(ROOT) --install-layout=deb && \
+		python3 setup.py bdist_wheel --universal -d $(ROOT)/usr/share/python-wheels
+	cd nfv-vim && python3 setup.py install -f --root=$(ROOT) --install-layout=deb && \
+		python3 setup.py bdist_wheel --universal -d $(ROOT)/usr/share/python-wheels
+	# nfv-client files
+	install -d -m 755 $(BASHCONFDIR)
+	install -p -D -m 644 nfv-client/scripts/sw-manager.completion $(BASHCONFDIR)/sw-manager
+	# nfv-plugin files
+	install -d -m 755 $(LOGDIR)
+	install -p -D -m 644 nfv-plugins/scripts/nfvi-plugins.logrotate $(LOGDIR)/nfvi-plugins.logrotate
+	install -d -m 755 $(PLUGINDIR)/alarm_handlers
+	install -p -D -m 644 nfv-plugins/nfv_plugins/alarm_handlers/config.ini $(PLUGINDIR)/alarm_handlers/config.ini
+	install -d -m 755 $(PLUGINDIR)/event_log_handlers
+	install -p -D -m 644 nfv-plugins/nfv_plugins/event_log_handlers/config.ini $(PLUGINDIR)/event_log_handlers/config.ini
+	install -d -m 755 $(PLUGINDIR)/nfvi_plugins
+	install -p -D -m 644 nfv-plugins/nfv_plugins/nfvi_plugins/config.ini $(PLUGINDIR)/nfvi_plugins/config.ini
+	# nfv-vim files
+	sed -i -e 's|@SYSCONFDIR@|$(SYSCONFDIR)|g' nfv-vim/scripts/vim
+	sed -i -e 's|@SYSCONFDIR@|$(SYSCONFDIR)|g' nfv-vim/scripts/vim-api
+	sed -i -e 's|@SYSCONFDIR@|$(SYSCONFDIR)|g' nfv-vim/scripts/vim-webserver
+	sed -i -e 's|@SYSCONFDIR@|$(SYSCONFDIR)|g' nfv-vim/nfv_vim/config.ini
+	sed -i -e 's|@PYTHONROOT@|$(PYTHONROOT)|g' nfv-vim/nfv_vim/config.ini
+	install -d -m 755 $(RESOURCEDIR)
+	install -p -D -m 644 nfv-vim/scripts/vim $(RESOURCEDIR)/vim
+	install -p -D -m 644 nfv-vim/scripts/vim-api $(RESOURCEDIR)/vim-api
+	install -p -D -m 644 nfv-vim/scripts/vim-webserver $(RESOURCEDIR)/vim-webserver
+	install -d -m 755 $(VIMCONFDIR)
+	install -p -D -m 644 nfv-vim/nfv_vim/config.ini $(VIMCONFDIR)/config.ini
+	install -p -D -m 644 nfv-vim/nfv_vim/debug.ini $(VIMCONFDIR)/debug.ini
+
+override_dh_auto_test:
+	echo "AUTO TEST NOT REQUIRED"

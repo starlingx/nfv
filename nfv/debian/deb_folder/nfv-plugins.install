@@ -1,0 +1,6 @@
+etc/logrotate.d/nfvi-plugins.logrotate
+etc/nfv/nfv_plugins/alarm_handlers/config.ini
+etc/nfv/nfv_plugins/event_log_handlers/config.ini
+etc/nfv/nfv_plugins/nfvi_plugins/config.ini
+usr/lib/python3/dist-packages/nfv_plugins/*
+usr/lib/python3/dist-packages/windriver_nfv_plugins-1.0.0.egg-info/*
