@@ -116,9 +116,7 @@ enable=E1603,E1609,E1610,E1602,E1606,E1608,E1607,E1605,E1604,E1601,E1611,W1652,
 # W0703 broad except warning
 # Disable Python3 checkers:
 #  W1618: no-absolute-import
-#  W1645: exception-message-attribute
-disable=C, R, E1101, E1121, W0404, W0601, W0603, W0613, W0621, W0703, W1618,
-        W1645
+disable=C, R, E1101, E1121, W0404, W0601, W0603, W0613, W0621, W0703, W1618
 
 
 [REPORTS]

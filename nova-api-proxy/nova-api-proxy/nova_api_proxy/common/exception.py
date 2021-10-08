@@ -29,6 +29,7 @@ class ProxyException(Exception):
     code = 500
     headers = {}
     safe = False
+    message = ("An unknown exception occurred.")
 
     def __init__(self, message=None, **kwargs):
         self.kwargs = kwargs
@@ -41,7 +42,7 @@ class ProxyException(Exception):
 
         if not message:
             try:
-                message = self.message % kwargs
+                message = self.message % kwargs  # pylint: disable=W1645
 
             except Exception as e:
                 raise e
