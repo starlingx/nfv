@@ -2580,6 +2580,8 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
             '200.001',  # Locked Host
             '280.001',  # Subcloud resource off-line
             '280.002',  # Subcloud resource out-of-sync
+            '500.200',  # Certificate expiring soon
+            '500.210',  # Certificate expired
             '700.004',  # VM stopped
             '750.006',  # Configuration change requires reapply of cert-manager
             '900.008',  # Kubernetes rootca update in progress
