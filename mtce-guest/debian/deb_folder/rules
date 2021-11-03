@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+# export DH_VERBOSE = 1
+
+export ROOT=debian/tmp
+
+export BINDIR=/usr/bin
+export INITDIR=$(ROOT)/etc/init.d
+export LOGDIR=$(ROOT)/etc/logrotate.d
+export MTCDIR=$(ROOT)/etc/mtc
+export PMONDIR=$(ROOT)/etc/pmon.d
+export SYSCONFDIR=/etc
+export UNITDIR=/lib/systemd/system
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	make DESTDIR=$(ROOT) \
+		PREFIX=$(ROOT)/usr/local \
+		SYSCONFIGDIR=$(ROOT)/$(SYSCONFDIR) \
+		LOCALBINDIR=$(ROOT)/$(BINDIR) \
+		UNITDIR=$(ROOT)/$(UNITDIR) install
+	install -d -m 755 $(INITDIR)
+	install -p -D -m 700 scripts/guestAgent $(INITDIR)/guestAgent
+	install -p -D -m 700 scripts/guestServer $(INITDIR)/guestServer
+	install -d -m 755 $(LOGDIR)
+	install -p -D -m 644 scripts/guestAgent.logrotate $(LOGDIR)/guestAgent.logrotate
+	install -p -D -m 644 scripts/guestServer.logrotate $(LOGDIR)/guestServer.logrotate
+	install -d -m 755 $(MTCDIR)
+	install -d -m 755 $(MTCDIR)/tmp
+	install -p -D -m 644 scripts/guest.ini $(MTCDIR)/guestAgent.ini
+	install -p -D -m 644 scripts/guest.ini $(MTCDIR)/guestServer.ini
+	install -d -m 755 $(PMONDIR)
+	install -p -D -m 644 scripts/guestServer.pmon $(PMONDIR)/guestServer.conf
+
+override_dh_fixperms:
+	dh_fixperms -XguestAgent -XguestServer

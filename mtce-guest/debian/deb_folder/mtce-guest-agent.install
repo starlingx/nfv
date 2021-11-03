@@ -1,0 +1,7 @@
+usr/bin/guestAgent
+usr/lib/ocf/resource.d/platform/guestAgent
+lib/systemd/system/guestAgent.service
+etc/init.d/guestAgent
+etc/logrotate.d/guestAgent.logrotate
+etc/mtc/guestAgent.ini
+etc/mtc/tmp

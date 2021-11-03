@@ -1,0 +1,7 @@
+usr/bin/guestServer
+lib/systemd/system/guestServer.service
+etc/init.d/guestServer
+etc/logrotate.d/guestServer.logrotate
+etc/mtc/guestServer.ini
+etc/pmon.d/guestServer.conf
+etc/mtc/tmp

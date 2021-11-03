@@ -1,0 +1,8 @@
+etc/nfv/vim/config.ini
+etc/nfv/vim/debug.ini
+usr/bin/nfv-vim*
+usr/lib/ocf/resource.d/nfv/vim
+usr/lib/ocf/resource.d/nfv/vim-api
+usr/lib/ocf/resource.d/nfv/vim-webserver
+usr/lib/python3/dist-packages/nfv_vim/*
+usr/lib/python3/dist-packages/nfv_vim-1.0.0.egg-info/*

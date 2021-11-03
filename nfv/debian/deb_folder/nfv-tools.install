@@ -1,0 +1,4 @@
+usr/bin/nfv-forensic
+usr/bin/nfv-notify
+usr/lib/python3/dist-packages/nfv_tools/*
+usr/lib/python3/dist-packages/nfv_tools-1.0.0.egg-info/*

@@ -1,0 +1,34 @@
+Source: nova-api-proxy
+Section: libs
+Priority: optional
+Maintainer: StarlingX Developers <starlingx-discuss@lists.starlingx.io>
+Build-Depends: debhelper-compat (= 13),
+ dh-python,
+ python3-all,
+ python3-setuptools,
+ python3-wheel
+Standards-Version: 4.5.1
+Homepage: https://www.starlingx.io
+
+Package: nova-api-proxy
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}, ${python3:Depends},
+ python3-eventlet,
+ python3-routes,
+ python3-webob,
+ python3-paste
+Description: Nova Compute API Proxy
+ API proxy for the Nova compute instance manager.
+
+Package: nova-api-proxy-wheels
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}, ${python3:Depends},
+ python3-eventlet,
+ python3-routes,
+ python3-webob,
+ python3-paste,
+ python3-wheel
+Description: Nova Compute API Proxy Wheels
+ Contains python wheels for the Nova compute instance manager API proxy.
