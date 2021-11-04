@@ -646,7 +646,9 @@ class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
                 list_data['hostname'],
                 list_data['target_rootca_cert'],
                 list_data['effective_rootca_cert'],
-                list_data['state'])
+                list_data['state'],
+                list_data['created_at'],
+                list_data['updated_at'])
             mixin_data.append(new_object)
         self._nfvi_kube_rootca_host_update_list = mixin_data
 

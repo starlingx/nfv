@@ -56,6 +56,7 @@ class StrategyStepNames(Constants):
     DISABLE_HOST_SERVICES = Constant('disable-host-services')
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
     # kube rootca update steps
+    KUBE_ROOTCA_UPDATE_ABORT = Constant('kube-rootca-update-abort')
     KUBE_ROOTCA_UPDATE_COMPLETE = Constant('kube-rootca-update-complete')
     KUBE_ROOTCA_UPDATE_GENERATE_CERT = Constant('kube-rootca-update-generate-cert')
     KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS = Constant('kube-rootca-update-host-trustbothcas')
@@ -2868,10 +2869,14 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
     """
     Abstract Step class for processing changes to kube root ca update
     """
+    # todo(abailey):  The hosts and pod steps have in_progress_state and
+    # fail_state but the majority of the transition steps do not so there
+    # should be an abstract class defined above this which adds those.
 
     def __init__(self,
                  step_name,
                  success_state,
+                 in_progress_state,
                  fail_state,
                  timeout_in_secs=600):
         super(AbstractKubeRootcaUpdateStep, self).__init__(step_name,
@@ -2879,8 +2884,9 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
         # _wait_time and _query_inprogress are NOT persisted
         self._wait_time = 0
         self._query_inprogress = False
-        # success and fail state validators are persisted
+        # success, in-progress and fail state validators are persisted
         self._success_state = success_state
+        self._in_progress_state = in_progress_state
         self._fail_state = fail_state
 
     @coroutine
@@ -2968,6 +2974,7 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
         self._query_inprogress = False
         # validation states are persisted
         self._success_state = data['success_state']
+        self._in_progress_state = data['in_progress_state']
         self._fail_state = data['fail_state']
         return self
 
@@ -2977,6 +2984,7 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
         """
         data = super(AbstractKubeRootcaUpdateStep, self).as_dict()
         data['success_state'] = self._success_state
+        data['in_progress_state'] = self._in_progress_state
         data['fail_state'] = self._fail_state
         return data
 
@@ -2986,12 +2994,14 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
                  hosts,
                  step_name,
                  success_state,
+                 in_progress_state,
                  fail_state,
                  update_type,
                  timeout_in_secs=600):
         super(AbstractKubeRootcaUpdateHostStep, self).__init__(
              step_name,
              success_state,
+             in_progress_state,
              fail_state,
              timeout_in_secs=timeout_in_secs)
         self._hosts = hosts
@@ -3053,6 +3063,8 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
                         elif k_host.state == self._fail_state:
                             # we should not have gotten here
                             fail_count += 1
+                        # todo(abailey): We can add an in-progress check here
+                        # and treat as failed if the time is too long
                         host_count += 1
                         # break out of inner loop, since uuids match
                         break
@@ -3096,7 +3108,7 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
             secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 60 seconds before checking upgrade for first time
+            # Wait at least 60 seconds before checking update for first time
             if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
                 nfvi.nfvi_get_kube_rootca_host_update_list(
@@ -3114,7 +3126,10 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
         host_director = directors.get_host_director()
         operation = host_director.kube_rootca_update_hosts_by_type(
             self._host_names,
-            self._update_type)
+            self._update_type,
+            self._in_progress_state,
+            self._success_state,
+            self._fail_state)
 
         if operation.is_inprogress():
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -3133,8 +3148,15 @@ class KubeRootcaUpdateHostTrustBothcasStep(AbstractKubeRootcaUpdateHostStep):
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED,
             KUBE_CERT_UPDATE_TRUSTBOTHCAS)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeRootcaUpdateAbortStep()]
 
 
 class KubeRootcaUpdateHostUpdateCertsStep(AbstractKubeRootcaUpdateHostStep):
@@ -3146,8 +3168,15 @@ class KubeRootcaUpdateHostUpdateCertsStep(AbstractKubeRootcaUpdateHostStep):
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED,
             KUBE_CERT_UPDATE_UPDATECERTS)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeRootcaUpdateAbortStep()]
 
 
 class KubeRootcaUpdateHostTrustNewcaStep(AbstractKubeRootcaUpdateHostStep):
@@ -3159,8 +3188,15 @@ class KubeRootcaUpdateHostTrustNewcaStep(AbstractKubeRootcaUpdateHostStep):
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED,
             KUBE_CERT_UPDATE_TRUSTNEWCA)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeRootcaUpdateAbortStep()]
 
 
 class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
@@ -3171,12 +3207,14 @@ class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
     def __init__(self,
                  step_name,
                  success_state,
+                 in_progress_state,
                  fail_state,
                  phase,
                  timeout_in_secs=600):
         super(AbstractKubeRootcaUpdatePodsStep, self).__init__(
              step_name,
              success_state,
+             in_progress_state,
              fail_state,
              timeout_in_secs=timeout_in_secs)
         self._phase = phase
@@ -3228,6 +3266,7 @@ class KubeRootcaUpdatePodsTrustBothcasStep(AbstractKubeRootcaUpdatePodsStep):
         super(KubeRootcaUpdatePodsTrustBothcasStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED,
             KUBE_CERT_UPDATE_TRUSTBOTHCAS)  # phase
 
@@ -3240,6 +3279,7 @@ class KubeRootcaUpdatePodsTrustNewcaStep(AbstractKubeRootcaUpdatePodsStep):
         super(KubeRootcaUpdatePodsTrustNewcaStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED,
             KUBE_CERT_UPDATE_TRUSTNEWCA)  # phase
 
@@ -3252,6 +3292,7 @@ class KubeRootcaUpdateStartStep(AbstractKubeRootcaUpdateStep):
         super(KubeRootcaUpdateStartStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_START,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED,
+            None,  # sysinv API does not have in-progress state for this action
             None)  # there is no failure state if 'start' fails
 
     @coroutine
@@ -3282,6 +3323,57 @@ class KubeRootcaUpdateStartStep(AbstractKubeRootcaUpdateStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
 
+class KubeRootcaUpdateAbortStep(AbstractKubeRootcaUpdateStep):
+    """Kube RootCA Update - Abort - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeRootcaUpdateAbortStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_ABORT,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_ABORTED,
+            None,  # sysinv API does not have in-progress state for this action
+            None)  # there is no failure state if 'abort' fails
+
+    @coroutine
+    def _response_callback(self):
+        """Kube RootCA Update - Abort - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_rootca_update = response['result-data']
+
+        # Calling abort on an aborted update returns a failure so we check
+        # the rootca update object on success AND failure.
+        if self.strategy is None:
+            # return success if there is no more strategy
+            self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                     "no strategy")
+        elif self.strategy.nfvi_kube_rootca_update is None:
+            # return success if there is no more update
+            self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                     "no update")
+        elif self.strategy.nfvi_kube_rootca_update.state == self._success_state:
+            self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                     "")
+        else:
+            # If the state does not match, the abort failed.
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result,
+                                     "Unexpected state: %s"
+                                     % self.strategy.nfvi_kube_rootca_update.state)
+
+    def apply(self):
+        """Kube RootCA Update - Abort"""
+
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_kube_rootca_update_abort(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
 class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
     """Kube RootCA Update - Complete - Strategy Step"""
 
@@ -3290,6 +3382,7 @@ class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
         super(KubeRootcaUpdateCompleteStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_COMPLETE,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED,
+            None,  # sysinv API does not have in-progress state for this action
             None)  # there is no failure state if 'complete' fails
 
     def handle_event(self, event, event_data=None):
@@ -3345,6 +3438,7 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
         super(KubeRootcaUpdateGenerateCertStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_GENERATE_CERT,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED,
+            None,  # sysinv API does not have in-progress state for this action
             None,  # sysinv API does not have a FAILED state for this action
             timeout_in_secs=300)  # set a five minute timeout to detect failure
         self._expiry_date = expiry_date
@@ -3403,6 +3497,7 @@ class KubeRootcaUpdateUploadCertStep(AbstractKubeRootcaUpdateStep):
         super(KubeRootcaUpdateUploadCertStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_UPLOAD_CERT,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_UPLOADED,
+            None,  # sysinv API does not have in-progress state for this action
             None,  # sysinv API does not have a FAILED state for this action
             timeout_in_secs=300)
         self._cert_file = cert_file
@@ -4135,6 +4230,8 @@ def strategy_step_rebuild_from_dict(data):
     rebuild_map = {
         STRATEGY_STEP_NAME.APPLY_PATCHES: ApplySwPatchesStep,
         # kube rootca update steps
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_ABORT:
+            KubeRootcaUpdateAbortStep,
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_COMPLETE:
             KubeRootcaUpdateCompleteStep,
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_GENERATE_CERT:

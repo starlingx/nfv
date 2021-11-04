@@ -990,18 +990,25 @@ class HostDirector(object):
             sw_mgmt_director = directors.get_sw_mgmt_director()
             sw_mgmt_director.kube_host_rootca_update_failed(host)
 
-    def _nfvi_kube_rootca_update_host(self, host_uuid, host_name, update_type):
+    def _nfvi_kube_rootca_update_host(self, host_uuid, host_name, update_type,
+                                      in_progress_state, completed_state,
+                                      failed_state):
         """NFVI Kube Root CA Update - Host"""
         nfvi.nfvi_kube_rootca_update_host(
             host_uuid,
             host_name,
             update_type,
+            in_progress_state,
+            completed_state,
+            failed_state,
             self._nfvi_kube_rootca_update_host_callback())
 
-    def kube_rootca_update_hosts_by_type(self, host_names, update_type):
+    def kube_rootca_update_hosts_by_type(self, host_names, update_type,
+                                         in_progress_state, completed_state,
+                                         failed_state):
         """Utility method for Kube Root CA Update - Host"""
-        DLOG.info("Kube RootCA Update %s for hosts: %s" % (update_type,
-                                                           host_names))
+        DLOG.info("Kube RootCA Update %s (%s) for hosts: %s"
+                   % (update_type, in_progress_state, host_names))
         host_operation = Operation(OPERATION_TYPE.KUBE_ROOTCA_UPDATE_HOSTS)
         if self._host_operation is not None:
             DLOG.debug("Canceling previous host operation %s, before "
@@ -1022,7 +1029,10 @@ class HostDirector(object):
                                     OPERATION_STATE.INPROGRESS)
             self._nfvi_kube_rootca_update_host(host.uuid,
                                                host.name,
-                                               update_type)
+                                               update_type,
+                                               in_progress_state,
+                                               completed_state,
+                                               failed_state)
         if host_operation.is_inprogress():
             self._host_operation = host_operation
         return host_operation

@@ -301,6 +301,21 @@ def kube_rootca_update_upload_cert(token, cert_file):
     return response
 
 
+def kube_rootca_update_abort(token):
+    """
+    Ask System Inventory to kube rootca update abort
+    """
+    api_cmd_payload = list()
+    state_data = dict()
+    state_data['path'] = "/state"
+    state_data['value'] = 'update-aborted'
+    state_data['op'] = "replace"
+    api_cmd_payload.append(state_data)
+    return _api_patch_dict(token,
+                           KUBE_ROOTCA_UPDATE_ENDPOINT,
+                           api_cmd_payload)
+
+
 def kube_rootca_update_complete(token):
     """
     Ask System Inventory to kube rootca update complete
@@ -312,7 +327,7 @@ def kube_rootca_update_complete(token):
     state_data['op'] = "replace"
     api_cmd_payload.append(state_data)
     return _api_patch_dict(token,
-                           KUBE_ROOTCA_UPDATE_ENDPOINT + "?force=True",
+                           KUBE_ROOTCA_UPDATE_ENDPOINT,
                            api_cmd_payload)
 
 

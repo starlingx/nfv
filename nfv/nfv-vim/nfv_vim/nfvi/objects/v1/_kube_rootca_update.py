@@ -61,16 +61,20 @@ class KubeRootcaHostUpdate(ObjectData):
     NFVI Kube RootCA Host Update Object
     """
     def __init__(self,
-                 host_id,
+                 host_id,   # this ID is not the same as the sysinv ID
                  hostname,
                  target_rootca_cert,
                  effective_rootca_cert,
-                 state):
+                 state,
+                 created_at,
+                 updated_at):
         super(KubeRootcaHostUpdate, self).__init__('1.0.0')
         self.update(
             dict(host_id=host_id,
                  hostname=hostname,
                  target_rootca_cert=target_rootca_cert,
                  effective_rootca_cert=effective_rootca_cert,
-                 state=state)
+                 state=state,
+                 created_at=created_at,
+                 updated_at=updated_at)
         )

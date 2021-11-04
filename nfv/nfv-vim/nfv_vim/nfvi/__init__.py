@@ -114,6 +114,7 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_upda
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_update_abort  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_upgrade_control_plane  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_upgrade_kubelet  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_abort  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_complete  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_generate_cert  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_host  # noqa: F401

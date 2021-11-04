@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import datetime
+import iso8601
 import json
 from six.moves import http_client as httplib
 
@@ -25,6 +27,9 @@ from nfv_plugins.nfvi_plugins.openstack import sysinv
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.infrastructure_api')
+
+# Allow 600 seconds to determine if a kube rootca host update has stalled
+MAX_KUBE_ROOTCA_HOST_UPDATE_DURATION = 600
 
 
 def host_state(host_uuid, host_name, host_personality, host_sub_functions,
@@ -173,6 +178,16 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         return (('worker' in personality) and
                 (self._openstack_directory.get_service_info(
                     OPENSTACK_SERVICE.NOVA) is not None))
+
+    def set_response_error(self, response, activity, issue="did not complete"):
+        """Utility method to consistently log and report an API error activity
+
+        :param str activity: the API action that failed
+        :param dict response: The response dict to store the error 'reason'
+        """
+        error_string = "{} {}.".format(activity, issue)
+        DLOG.error(error_string)
+        response['reason'] = error_string
 
     def get_datanetworks(self, future, host_uuid, callback):
         """
@@ -839,6 +854,49 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def kube_rootca_update_abort(self, future, callback):
+        """Invokes sysinv kube-rootca-update-abort"""
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-rootca-update-abort'
+        sysinv_method = sysinv.kube_rootca_update_abort
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    self.set_response_error(response, "Openstack get-token")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                self.set_response_error(response, action_type)
+                return
+            api_data = future.result.data
+            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
+            response['result-data'] = result_obj
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
     def kube_rootca_update_complete(self, future, callback):
         """Invokes sysinv kube-rootca-update-complete"""
         response = dict()
@@ -973,7 +1031,11 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_rootca_update_host(self, future, host_uuid, host_name,
-                               update_type, callback):
+                               update_type,
+                               in_progress_state,
+                               completed_state,
+                               failed_state,
+                               callback):
         """
         Kube Root CA Update a host for a particular update_type (phase)
         """
@@ -992,19 +1054,80 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 future.result = (yield)
                 if not future.result.is_complete() or \
                         future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete.")
+                    self.set_response_error(response, "Openstack get-token")
                     return
                 self._platform_token = future.result.data
-            future.work(sysinv_method,
-                        self._platform_token,
-                        host_uuid,
-                        update_type)
+
+            # This is wasteful but we need to check if host updating/updated,
+            # so we can skip or wait for it, rather than issue an action.
+            # todo(abailey): Update sysinv API to support a single host query
+            # todo(abailey): update vim schema for a table for these entries
+            # todo(abailey): this should be removed and put in directory once
+            # schema is updated
+            future.work(sysinv.get_kube_rootca_host_update_list,
+                        self._platform_token)
             future.result = (yield)
             if not future.result.is_complete():
-                DLOG.error("%s did not complete." % action_type)
+                self.set_response_error(response,
+                                        "SysInv get-kube-rootca-host-updates")
                 return
-            api_data = future.result.data
-            result_obj = nfvi.objects.v1.KubeRootcaUpdate(api_data['state'])
+            sysinv_result_key = "kube_host_updates"
+            results_list = future.result.data[sysinv_result_key]
+            results_obj = self._extract_kube_rootca_host_updates(results_list)
+            # walk the list and find the object for this host
+            # Do the match based on hostname since the id will not match
+            host_state = None
+            for host_obj in results_obj:
+                if host_obj.hostname == host_name:
+                    host_state = host_obj.state
+                    result_obj = host_obj
+                    break
+            DLOG.info("Existing Host state for %s is %s"
+                      % (host_name, host_state))
+
+            if host_state == in_progress_state:
+                # Do not re-invoke the action.  It is already in progress
+                # the host_obj in the loop above can be returned as result_obj
+
+                # the operation may have stalled and the kube rootca code in
+                # sysinv does not have code to detect this, so we check
+                # last_updated  and abort if too much time spent in-progress
+                # the updated_at field must exist is we are in-progress
+                updated_at = iso8601.parse_date(result_obj['updated_at'])
+                now = iso8601.parse_date(datetime.datetime.utcnow().isoformat())
+                delta = (now - updated_at).total_seconds()
+                if delta > MAX_KUBE_ROOTCA_HOST_UPDATE_DURATION:
+                    # still in progress after this amount of time, it is likely
+                    # a broken state.  Need to abort.
+                    self.set_response_error(response, action_type,
+                                            issue="timed out (in-progress)")
+                    return
+                pass
+            elif host_state == completed_state:
+                # Do not re-invoke the action.  It is already completed
+                # the host_obj in the loop above can be returned as result_obj
+                pass
+            else:
+                # Every other state (including failed) means we invoke API
+                future.work(sysinv_method,
+                            self._platform_token,
+                            host_uuid,
+                            update_type)
+                future.result = (yield)
+                if not future.result.is_complete():
+                    self.set_response_error(response, action_type)
+                    return
+                api_data = future.result.data
+                result_obj = nfvi.objects.v1.KubeRootcaHostUpdate(
+                    api_data['id'],
+                    api_data['hostname'],
+                    api_data['target_rootca_cert'],
+                    api_data['effective_rootca_cert'],
+                    api_data['state'],
+                    api_data['created_at'],
+                    api_data['updated_at']
+                )
+            # result_obj is the host_obj from the loop, or the API result
             response['result-data'] = result_obj
             response['completed'] = True
         except exceptions.OpenStackRestAPIException as e:
@@ -1125,7 +1248,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     host_data['hostname'],
                     host_data['target_rootca_cert'],
                     host_data['effective_rootca_cert'],
-                    host_data['state']
+                    host_data['state'],
+                    host_data['created_at'],
+                    host_data['updated_at']
                 )
             )
         return result_list

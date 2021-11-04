@@ -126,6 +126,14 @@ def nfvi_kube_host_upgrade_kubelet(host_uuid, host_name, force, callback):
     return cmd_id
 
 
+def nfvi_kube_rootca_update_abort(callback):
+    """Kube RootCA Update - Abort"""
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_rootca_update_abort',
+        callback=callback)
+    return cmd_id
+
+
 def nfvi_kube_rootca_update_complete(callback):
     """Kube RootCA Update - Complete"""
     cmd_id = _infrastructure_plugin.invoke_plugin(
@@ -144,16 +152,23 @@ def nfvi_kube_rootca_update_generate_cert(expiry_date, subject, callback):
     return cmd_id
 
 
-def nfvi_kube_rootca_update_host(host_uuid, host_name, update_type, callback):
+def nfvi_kube_rootca_update_host(host_uuid, host_name, update_type,
+                                 in_progress_state, completed_state,
+                                 failed_state, callback):
     """Kube RootCA Update - Host"""
     cmd_id = _infrastructure_plugin.invoke_plugin('kube_rootca_update_host',
                                                   host_uuid,
                                                   host_name,
                                                   update_type,
+                                                  in_progress_state,
+                                                  completed_state,
+                                                  failed_state,
                                                   callback=callback)
     return cmd_id
 
 
+# todo(abailey): Similar in-progress/complete/failed handling as used for hosts
+# would protect stalled pod states from blocking orchestration
 def nfvi_kube_rootca_update_pods(phase, callback):
     """Kube RootCA Update - Pods for a particular phase"""
     cmd_id = _infrastructure_plugin.invoke_plugin(
