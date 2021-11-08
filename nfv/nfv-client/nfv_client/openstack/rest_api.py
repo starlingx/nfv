@@ -91,7 +91,7 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
                         if message is not None:
                             reason = str(message.rstrip('.'))
                             print("Operation failed: %s" % reason)
-                            return
+                            break
 
                     except ValueError:
                         pass
