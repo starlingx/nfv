@@ -11,7 +11,7 @@ export UNITDIR=$(ROOT)/lib/systemd/system
 %:
 	dh $@ --with=python3 --buildsystem=pybuild
 
-override_dh_auto_install:
+override_dh_install:
 	install -d -m 755 $(UNITDIR)
 	install -p -D -m 644 nova_api_proxy/scripts/api-proxy.service $(UNITDIR)/api-proxy.service
 	install -d -m 755 $(INITDIR)
@@ -19,7 +19,10 @@ override_dh_auto_install:
 	install -d -m 755 $(PROXYDIR)
 	install -p -D -m 600 nova_api_proxy/nova-api-proxy.conf $(PROXYDIR)/nova-api-proxy.conf
 	install -p -D -m 600 nova_api_proxy/api-proxy-paste.ini $(PROXYDIR)/api-proxy-paste.ini
+	python3 setup.py install -f --install-layout=deb \
+		--root=$(CURDIR)/debian/tmp
 	python3 setup.py bdist_wheel \
 		--universal \
 		-d $(ROOT)/usr/share/python-wheels
+	dh_install
 
