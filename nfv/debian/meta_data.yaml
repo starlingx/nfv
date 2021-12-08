@@ -1,7 +1,15 @@
 ---
 debname: nfv
 debver: 1.0
-dl_hook: dl_hook
+src_path: null
+src_files:
+  - nfv-client
+  - nfv-common
+  - nfv-debug-tools
+  - nfv-plugins
+  - nfv-tests
+  - nfv-tools
+  - nfv-vim
 revision:
   dist: $STX_DIST
   PKG_GITREVCOUNT: true
