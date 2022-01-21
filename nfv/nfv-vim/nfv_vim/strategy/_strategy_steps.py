@@ -44,6 +44,7 @@ class StrategyStepNames(Constants):
     FW_UPDATE_HOSTS = Constant('fw-update-hosts')
     FW_UPDATE_ABORT_HOSTS = Constant('fw-update-abort-hosts')
     MIGRATE_INSTANCES = Constant('migrate-instances')
+    MIGRATE_INSTANCES_FROM_HOST = Constant('migrate-instances-from-host')
     STOP_INSTANCES = Constant('stop-instances')
     START_INSTANCES = Constant('start-instances')
     QUERY_ALARMS = Constant('query-alarms')
@@ -1228,6 +1229,153 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
+        return data
+
+
+class MigrateInstancesFromHostStep(strategy.StrategyStep):
+    """
+    Migrate Instances From Host - Strategy Step
+    """
+    def __init__(self, hosts, instances):
+        super(MigrateInstancesFromHostStep, self).__init__(
+            STRATEGY_STEP_NAME.MIGRATE_INSTANCES_FROM_HOST, timeout_in_secs=1800)
+        self._hosts = hosts
+        self._host_names = list()
+        self._instances = instances
+        self._instance_names = list()
+        self._instance_uuids = list()
+        self._instance_host_names = dict()
+        for host in hosts:
+            self._host_names.append(host.name)
+        for instance in instances:
+            self._instance_names.append(instance.name)
+            self._instance_uuids.append(instance.uuid)
+            self._instance_host_names[instance.uuid] = instance.host_name
+
+    def _all_instances_migrated(self):
+        """
+        Returns true if all instances have migrated from the source hosts
+        """
+        instance_table = tables.tables_get_instance_table()
+        for host_name in self._host_names:
+            if instance_table.exist_on_host(host_name):
+                return False, ""
+
+        return True, ""
+
+    def apply(self):
+        """
+        Migrate all instances
+        """
+        from nfv_vim import directors
+
+        if(self._instance_names):
+            DLOG.info("Step (%s) apply for instances %s running on hosts %s." % (
+                self._name,
+                self._instance_names,
+                self._host_names,
+            ))
+        else:
+            DLOG.info("Step (%s) apply in no instances on empty hosts %s." % (
+                self._name,
+                self._host_names,
+            ))
+
+        migrate_complete, reason = self._all_instances_migrated()
+        if migrate_complete:
+            return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+        # Ensure none of the instances have moved since the strategy step was
+        # created. The instance_director.migrate_instances will migrate ALL
+        # instances on each host containing one of the self._instance_uuids. We
+        # want to ensure we are only migrating instances from the host(s) they
+        # were originally located on..
+        for instance in self._instances:
+            if instance.host_name != self._instance_host_names[instance.uuid]:
+                reason = ("instance %s has moved from %s to %s after strategy "
+                          "created" %
+                          (instance.name, self._instance_host_names[instance.uuid],
+                           instance.host_name))
+                return strategy.STRATEGY_STEP_RESULT.FAILED, reason
+
+        instance_director = directors.get_instance_director()
+        operation = instance_director.migrate_instances_from_hosts(self._host_names)
+        if operation.is_inprogress():
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        elif operation.is_failed():
+            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Instance events
+        """
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event in [STRATEGY_EVENT.INSTANCE_STATE_CHANGED,
+                     STRATEGY_EVENT.INSTANCE_AUDIT,
+                     STRATEGY_EVENT.HOST_AUDIT]:
+            migrate_complete, reason = self._all_instances_migrated()
+
+            if not migrate_complete and reason:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, reason)
+                return True
+
+            if migrate_complete:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, '')
+                return True
+
+        elif STRATEGY_EVENT.MIGRATE_INSTANCES_FAILED == event:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, event_data)
+            return True
+
+        return False
+
+    def from_dict(self, data):
+        """
+        Returns the migrate instances from hosts step object initialized using the given
+        dictionary
+        """
+        super(MigrateInstancesFromHostStep, self).from_dict(data)
+        self._hosts = list()
+        self._host_names = data['host_names']
+        self._instance_uuids = data['entity_uuids']
+        self._instances = list()
+        self._instance_names = list()
+        self._instance_host_names = dict()
+
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host:
+                self._hosts.append(host)
+
+        instance_table = tables.tables_get_instance_table()
+        for instance_uuid in self._instance_uuids:
+            instance = instance_table.get(instance_uuid, None)
+            if instance is not None:
+                self._instances.append(instance)
+                self._instance_names.append(instance.name)
+                # Retrieve the host this instance was on when the step was
+                # created.
+                self._instance_host_names[instance.uuid] = \
+                    data['instance_host_names'][instance.uuid]
+        return self
+
+    def as_dict(self):
+        """
+        Represent the migrate instances from hosts step as a dictionary
+        """
+        data = super(MigrateInstancesFromHostStep, self).as_dict()
+        data['entity_type'] = 'instances'
+        data['entity_names'] = self._instance_names
+        data['entity_uuids'] = self._instance_uuids
+        data['instance_host_names'] = self._instance_host_names
+        data['host_names'] = self._host_names
         return data
 
 
@@ -4305,6 +4453,9 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.MIGRATE_INSTANCES == data['name']:
         step_obj = object.__new__(MigrateInstancesStep)
+
+    elif STRATEGY_STEP_NAME.MIGRATE_INSTANCES_FROM_HOST == data['name']:
+        step_obj = object.__new__(MigrateInstancesFromHostStep)
 
     elif STRATEGY_STEP_NAME.START_INSTANCES == data['name']:
         step_obj = object.__new__(StartInstancesStep)
