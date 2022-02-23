@@ -1,5 +1,4 @@
-usr/bin/guestServer
-lib/systemd/system/guestServer.service
+usr/local/bin/guestServer
 etc/init.d/guestServer
 etc/logrotate.d/guestServer.logrotate
 etc/mtc/guestServer.ini

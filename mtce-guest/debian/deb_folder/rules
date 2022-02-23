@@ -3,7 +3,7 @@
 
 export ROOT=debian/tmp
 
-export BINDIR=/usr/bin
+export BINDIR=/usr/local/bin
 export INITDIR=$(ROOT)/etc/init.d
 export LOGDIR=$(ROOT)/etc/logrotate.d
 export MTCDIR=$(ROOT)/etc/mtc
@@ -33,5 +33,12 @@ override_dh_auto_install:
 	install -d -m 755 $(PMONDIR)
 	install -p -D -m 644 scripts/guestServer.pmon $(PMONDIR)/guestServer.conf
 
+override_dh_installsystemd:
+	dh_installsystemd --name guestServer
+	dh_installsystemd --no-enable --name guestAgent
+
 override_dh_fixperms:
 	dh_fixperms -XguestAgent -XguestServer
+
+override_dh_usrlocal:
+	echo "SKIPPING DH USRLOCAL"

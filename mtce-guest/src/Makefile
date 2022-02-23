@@ -63,10 +63,6 @@ install:
 	install -m 700 -p -D scripts/guestServer $(SYSCONFDIR)/init.d/guestServer
 	install -m 700 -p -D scripts/guestAgent $(SYSCONFDIR)/init.d/guestAgent
 
-# systemd service files
-	install -m 644 -p -D scripts/guestServer.service $(UNITDIR)/guestServer.service
-	install -m 644 -p -D scripts/guestAgent.service $(UNITDIR)/guestAgent.service
-
 # process monitor config files
 	install -m 755 -d $(SYSCONFDIR)/pmon.d
 	install -m 644 -p -D scripts/guestServer.pmon $(SYSCONFDIR)/pmon.d/guestServer.conf
