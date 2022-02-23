@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,7 +20,8 @@ def create_app():
     pecan.configuration.set_config(dict(pecan_conf), overwrite=True)
 
     app_hooks = [_hooks.ConnectionHook(),
-                 _hooks.ContextHook(pecan_conf.app.acl_public_routes)]
+                 _hooks.ContextHook(pecan_conf.app.acl_public_routes),
+                 _hooks.AuditLoggingHook()]
 
     app = pecan.make_app(
         pecan_conf.app.root,
