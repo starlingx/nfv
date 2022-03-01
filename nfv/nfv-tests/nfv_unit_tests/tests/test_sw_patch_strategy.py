@@ -152,9 +152,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 3,
             'stages': [
                 {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 6,
+                 'total_steps': 8,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'disable-host-services'},
+                     {'name': 'migrate-instances-from-host',
+                      'entity_names': []},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-2', 'compute-3']},
                      {'name': 'sw-patch-hosts',
@@ -172,7 +175,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_0']},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-0']},
@@ -191,7 +194,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_1']},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-1']},
@@ -262,9 +265,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 5,
             'stages': [
                 {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 6,
+                 'total_steps': 8,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'disable-host-services'},
+                     {'name': 'migrate-instances-from-host',
+                      'entity_names': []},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-1', 'compute-5']},
                      {'name': 'sw-patch-hosts',
@@ -282,7 +288,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_0',
                                        'test_instance_2']},
                      {'name': 'lock-hosts',
@@ -302,7 +308,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_3',
                                        'test_instance_4']},
                      {'name': 'lock-hosts',
@@ -322,7 +328,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_6',
                                        'test_instance_7']},
                      {'name': 'lock-hosts',
@@ -342,7 +348,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_8',
                                        'test_instance_9']},
                      {'name': 'lock-hosts',
@@ -425,9 +431,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 5,
             'stages': [
                 {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 6,
+                 'total_steps': 8,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'disable-host-services'},
+                     {'name': 'migrate-instances-from-host',
+                      'entity_names': []},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-1', 'compute-5']},
                      {'name': 'sw-patch-hosts',
@@ -445,7 +454,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_0',
                                        'test_instance_6']},
                      {'name': 'lock-hosts',
@@ -465,7 +474,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_2',
                                        'test_instance_7']},
                      {'name': 'lock-hosts',
@@ -485,7 +494,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_3',
                                        'test_instance_8']},
                      {'name': 'lock-hosts',
@@ -505,7 +514,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_4',
                                        'test_instance_9']},
                      {'name': 'lock-hosts',
@@ -598,9 +607,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 5,
             'stages': [
                 {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 6,
+                 'total_steps': 8,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'disable-host-services'},
+                     {'name': 'migrate-instances-from-host',
+                      'entity_names': []},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-1', 'compute-5']},
                      {'name': 'sw-patch-hosts',
@@ -618,7 +630,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_0',
                                        'test_instance_6']},
                      {'name': 'lock-hosts',
@@ -638,7 +650,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_2',
                                        'test_instance_7']},
                      {'name': 'lock-hosts',
@@ -658,7 +670,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_3',
                                        'test_instance_8']},
                      {'name': 'lock-hosts',
@@ -678,7 +690,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_4',
                                        'test_instance_9']},
                      {'name': 'lock-hosts',
@@ -767,7 +779,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_0',
                                        'test_instance_2']},
                      {'name': 'lock-hosts',
@@ -787,7 +799,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_1',
                                        'test_instance_3']},
                      {'name': 'lock-hosts',
@@ -807,7 +819,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_4',
                                        'test_instance_7']},
                      {'name': 'lock-hosts',
@@ -827,7 +839,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_5',
                                        'test_instance_8']},
                      {'name': 'lock-hosts',
@@ -847,7 +859,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_6',
                                        'test_instance_9']},
                      {'name': 'lock-hosts',
@@ -2339,9 +2351,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 4,
             'stages': [
                 {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 6,
+                 'total_steps': 7,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'migrate-instances-from-host',
+                      'entity_names': []},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-2']},
                      {'name': 'sw-patch-hosts',
@@ -2355,9 +2369,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
-                 'total_steps': 6,
+                 'total_steps': 7,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'migrate-instances-from-host',
+                      'entity_names': []},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-3']},
                      {'name': 'sw-patch-hosts',
@@ -2374,7 +2390,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'total_steps': 7,
                  'steps': [
                      {'name': 'query-alarms'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_0']},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-0']},
@@ -2392,7 +2408,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  'total_steps': 7,
                  'steps': [
                      {'name': 'query-alarms'},
-                     {'name': 'migrate-instances',
+                     {'name': 'migrate-instances-from-host',
                       'entity_names': ['test_instance_1']},
                      {'name': 'lock-hosts',
                       'entity_names': ['compute-1']},

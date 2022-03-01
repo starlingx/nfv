@@ -33,6 +33,7 @@ from nfv_vim.strategy._strategy_steps import KubeUpgradeDownloadImagesStep  # no
 from nfv_vim.strategy._strategy_steps import KubeUpgradeNetworkingStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeStartStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import LockHostsStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import MigrateInstancesFromHostStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import MigrateInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryAlarmsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryFwUpdateHostStep  # noqa: F401

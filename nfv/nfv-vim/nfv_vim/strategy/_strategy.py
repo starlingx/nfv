@@ -1109,8 +1109,11 @@ class UpdateWorkerHostsMixin(object):
 
         for host_list in host_lists:
             instance_list = list()
+            openstack_hosts = list()
 
             for host in host_list:
+                if host.host_service_configured(HOST_SERVICES.COMPUTE):
+                    openstack_hosts.append(host)
                 for instance in instance_table.on_host(host.name):
                     # Do not take action (migrate or stop-start) on an instance
                     # if it is locked (i.e. stopped).
@@ -1135,28 +1138,23 @@ class UpdateWorkerHostsMixin(object):
                             # Swact controller before locking
                             stage.add_step(strategy.SwactHostsStep(host_list))
 
-                if 0 != len(instance_list):
-                    # Migrate or stop instances as necessary
-                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE == \
-                            self._default_instance_action:
-                        if SW_UPDATE_APPLY_TYPE.PARALLEL == \
-                                self._worker_apply_type:
+                # Migrate or stop instances as necessary
+                if SW_UPDATE_INSTANCE_ACTION.MIGRATE == self._default_instance_action:
+                    if len(openstack_hosts):
+                        if SW_UPDATE_APPLY_TYPE.PARALLEL == self._worker_apply_type:
                             # Disable host services before migrating to ensure
                             # instances do not migrate to worker hosts in the
                             # same set of hosts.
-                            if host_list[0].host_service_configured(
-                                    HOST_SERVICES.COMPUTE):
-                                stage.add_step(strategy.DisableHostServicesStep(
-                                    host_list, HOST_SERVICES.COMPUTE))
+                            stage.add_step(strategy.DisableHostServicesStep(
+                                openstack_hosts, HOST_SERVICES.COMPUTE))
                             # TODO(ksmith)
                             # When support is added for orchestration on
                             # non-OpenStack worker nodes, support for disabling
                             # kubernetes services will have to be added.
-                        stage.add_step(strategy.MigrateInstancesStep(
-                            instance_list))
-                    else:
-                        stage.add_step(strategy.StopInstancesStep(
-                            instance_list))
+                        stage.add_step(strategy.MigrateInstancesFromHostStep(
+                            openstack_hosts, instance_list))
+                elif len(instance_list):
+                    stage.add_step(strategy.StopInstancesStep(instance_list))
 
                 if hosts_to_lock:
                     wait_until_disabled = True
@@ -1185,12 +1183,10 @@ class UpdateWorkerHostsMixin(object):
                     # Reboot hosts that were already locked
                     stage.add_step(strategy.RebootHostsStep(hosts_to_reboot))
 
-                if 0 != len(instance_list):
+                if len(instance_list):
                     # Start any instances that were stopped
-                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE != \
-                            self._default_instance_action:
-                        stage.add_step(strategy.StartInstancesStep(
-                            instance_list))
+                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE != self._default_instance_action:
+                        stage.add_step(strategy.StartInstancesStep(instance_list))
                 # After controller node(s) are unlocked, we need extra time to
                 # allow the OSDs to go back in sync and the storage related
                 # alarms to clear. Note: not all controller nodes will have

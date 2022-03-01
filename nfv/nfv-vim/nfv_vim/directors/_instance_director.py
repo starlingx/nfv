@@ -1889,6 +1889,76 @@ class InstanceDirector(object):
             DLOG.info("Recover-Instances-Audit triggered by instance deletion.")
             self.recover_instances()
 
+    def migrate_instances_from_hosts(self, hosts):
+        """
+        Migrate Instances out of specific hosts
+        """
+        host_table = tables.tables_get_host_table()
+        instance_table = tables.tables_get_instance_table()
+
+        # get instances running on each host, as this list may
+        # be different from the original instances list running
+        # on each hosts at the start of the patching operation
+        instance_uuids = []
+        for host in hosts:
+            for instance in instance_table.on_host(host):
+                instance_uuids.append(instance.uuid)
+
+        DLOG.info("Migrate instances uuids=%s." % instance_uuids)
+
+        overall_operation = Operation(OPERATION_TYPE.MIGRATE_INSTANCES)
+
+        host_operations = dict()
+        for instance_uuid in instance_uuids:
+            instance = instance_table.get(instance_uuid, None)
+            if instance is None:
+                reason = "Instance %s does not exist." % instance_uuid
+                DLOG.info(reason)
+                overall_operation.set_failed(reason)
+                return overall_operation
+
+            host = host_table.get(instance.host_name, None)
+            if host is None:
+                reason = "Host %s does not exist." % instance.host_name
+                DLOG.info(reason)
+                overall_operation.set_failed(reason)
+                return overall_operation
+
+            host_operation = self._host_operations.get(instance.host_name, None)
+            if host_operation is not None:
+                if host_operation.is_inprogress():
+                    reason = ("Another host operation %s is already inprogress "
+                              "for host %s." % (host_operation.operation_type,
+                                                instance.host_name))
+                    DLOG.info(reason)
+                    overall_operation.set_failed(reason)
+                    return overall_operation
+                else:
+                    del self._host_operations[instance.host_name]
+
+            host_operation = host_operations.get(instance.host_name, None)
+            if host_operation is None:
+                host_operation = Operation(OPERATION_TYPE.MIGRATE_INSTANCES)
+                host_operations[instance.host_name] = host_operation
+
+        for host_name, host_operation in host_operations.items():
+            self._host_operations[host_name] = host_operation
+            self._host_migrate_instances(host_table[host_name], host_operation)
+            if host_operation.is_inprogress():
+                overall_operation.add_host(host_name, OPERATION_STATE.INPROGRESS)
+            elif host_operation.is_failed():
+                overall_operation.add_host(host_name, OPERATION_STATE.FAILED)
+                overall_operation.update_failure_reason(host_operation.reason)
+                break
+            elif host_operation.is_timed_out():
+                overall_operation.add_host(host_name, OPERATION_STATE.TIMED_OUT)
+                overall_operation.update_failure_reason(host_operation.reason)
+                break
+            else:
+                overall_operation.add_host(host_name, OPERATION_STATE.COMPLETED)
+
+        return overall_operation
+
     def migrate_instances(self, instance_uuids):
         """
         Migrate Instances
