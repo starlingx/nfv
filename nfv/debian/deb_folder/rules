@@ -63,9 +63,9 @@ override_dh_auto_install:
 	sed -i -e 's|@SYSCONFDIR@|$(SYSCONFDIR)|g' nfv-vim/nfv_vim/config.ini
 	sed -i -e 's|@PYTHONROOT@|$(PYTHONROOT)|g' nfv-vim/nfv_vim/config.ini
 	install -d -m 755 $(RESOURCEDIR)
-	install -p -D -m 644 nfv-vim/scripts/vim $(RESOURCEDIR)/vim
-	install -p -D -m 644 nfv-vim/scripts/vim-api $(RESOURCEDIR)/vim-api
-	install -p -D -m 644 nfv-vim/scripts/vim-webserver $(RESOURCEDIR)/vim-webserver
+	install -p -D -m 755 nfv-vim/scripts/vim $(RESOURCEDIR)/vim
+	install -p -D -m 755 nfv-vim/scripts/vim-api $(RESOURCEDIR)/vim-api
+	install -p -D -m 755 nfv-vim/scripts/vim-webserver $(RESOURCEDIR)/vim-webserver
 	install -d -m 755 $(VIMCONFDIR)
 	install -p -D -m 644 nfv-vim/nfv_vim/config.ini $(VIMCONFDIR)/config.ini
 	install -p -D -m 644 nfv-vim/nfv_vim/debug.ini $(VIMCONFDIR)/debug.ini
