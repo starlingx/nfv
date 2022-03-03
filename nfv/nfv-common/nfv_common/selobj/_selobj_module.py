@@ -103,7 +103,7 @@ def selobj_dispatch(timeout_in_ms):
                 start_ms = timers.get_monotonic_timestamp_in_ms()
                 try:
                     callback.send(selobj)
-                except StopIteration:
+                except (StopIteration, RuntimeError):
                     _read_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
                 histogram.add_histogram_data("selobj read: " + callback.__name__,
@@ -115,7 +115,7 @@ def selobj_dispatch(timeout_in_ms):
                 start_ms = timers.get_monotonic_timestamp_in_ms()
                 try:
                     callback.send(selobj)
-                except StopIteration:
+                except (StopIteration, RuntimeError):
                     _write_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
                 histogram.add_histogram_data("selobj write: " + callback.__name__,
@@ -127,7 +127,7 @@ def selobj_dispatch(timeout_in_ms):
                 start_ms = timers.get_monotonic_timestamp_in_ms()
                 try:
                     callback.send(selobj)
-                except StopIteration:
+                except (StopIteration, RuntimeError):
                     _error_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
                 histogram.add_histogram_data("selobj error: " + callback.__name__,

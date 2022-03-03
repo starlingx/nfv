@@ -134,7 +134,7 @@ class TaskScheduler(object):
                 break
             try:
                 task.timer_fired(timer_id)
-            except StopIteration:
+            except (StopIteration, RuntimeError):
                 self.delete_task(task)
                 break
 
@@ -187,7 +187,7 @@ class TaskScheduler(object):
                     break
             try:
                 task.io_wait_complete(select_obj)
-            except StopIteration:
+            except (StopIteration, RuntimeError):
                 self.delete_task(task)
                 break
 
@@ -330,7 +330,7 @@ class TaskScheduler(object):
                         self._running_task = task
                         try:
                             task.task_work_complete(task_work)
-                        except StopIteration:
+                        except (StopIteration, RuntimeError):
                             self.delete_task(task)
 
             if self._task_worker_pool.available_workers():
@@ -356,7 +356,7 @@ class TaskScheduler(object):
                     try:
                         task.task_work_timeout(task_work)
                         del self._task_work_timers[timer_id]
-                    except StopIteration:
+                    except (StopIteration, RuntimeError):
                         self.delete_task(task)
 
             if self._task_worker_pool.available_workers():
@@ -384,7 +384,7 @@ class TaskScheduler(object):
                                             self._running_task.name))
                             self._running_task.run()
 
-                        except StopIteration:
+                        except (StopIteration, RuntimeError):
                             self.delete_task(self._running_task)
 
                         finally:

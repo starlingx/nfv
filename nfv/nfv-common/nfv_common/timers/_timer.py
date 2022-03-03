@@ -68,6 +68,6 @@ class Timer(object):
                 self._callback.send(self._timer_id)
                 self._arm_timestamp = get_monotonic_timestamp_in_ms()
                 self._next_expiry_in_secs = self._interval_secs
-            except StopIteration:
+            except (StopIteration, RuntimeError):
                 rearm = False
         return rearm
