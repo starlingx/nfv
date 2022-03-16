@@ -1,16 +1,19 @@
 #
-# Copyright (c) 2018 Wind River Systems, Inc.
+# Copyright (c) 2018-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 
 import kubernetes
+from kubernetes import __version__ as K8S_MODULE_VERSION
 from kubernetes.client.models.v1_container_image import V1ContainerImage
 from kubernetes.client.rest import ApiException
 from six.moves import http_client as httplib
 
 from nfv_common import debug
 from nfv_common.helpers import Result
+
+K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split('.')[0])
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.clients.kubernetes_client')
 
@@ -45,7 +48,10 @@ def get_client():
     kubernetes.config.load_kube_config('/etc/kubernetes/admin.conf')
 
     # Workaround: Turn off SSL/TLS verification
-    c = kubernetes.client.Configuration()
+    if K8S_MODULE_MAJOR_VERSION < 12:
+        c = kubernetes.client.Configuration()
+    else:
+        c = kubernetes.client.Configuration().get_default_copy()
     c.verify_ssl = False
     kubernetes.client.Configuration.set_default(c)
 
