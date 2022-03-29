@@ -179,13 +179,19 @@ def _get_strategy_object_from_response(response):
     return strategy
 
 
-def get_strategies(token_id, url, strategy_name):
+def get_strategies(token_id, url, strategy_name, username=None,
+                   user_domain_name=None):
     """
     Software Update - Get Strategies
     """
     api_cmd = url + "/api/orchestration/%s/strategy" % strategy_name
 
     api_cmd_headers = dict()
+    if username:
+        api_cmd_headers['X-User'] = username
+        api_cmd_headers['X-Tenant'] = username
+    if user_domain_name:
+        api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
 
     response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers)
@@ -195,7 +201,8 @@ def get_strategies(token_id, url, strategy_name):
     return _get_strategy_object_from_response(response)
 
 
-def get_strategy(token_id, url, strategy_name, strategy_uuid):
+def get_strategy(token_id, url, strategy_name, strategy_uuid, username=None,
+                 user_domain_name=None):
     """
     Software Update - Get Strategy
     """
@@ -203,6 +210,11 @@ def get_strategy(token_id, url, strategy_name, strategy_uuid):
                                                            strategy_uuid)
 
     api_cmd_headers = dict()
+    if username:
+        api_cmd_headers['X-User'] = username
+        api_cmd_headers['X-Tenant'] = username
+    if user_domain_name:
+        api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
 
     response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers)
@@ -222,6 +234,8 @@ def create_strategy(token_id,
                     max_parallel_worker_hosts,
                     default_instance_action,
                     alarm_restrictions,
+                    username=None,
+                    user_domain_name=None,
                     **kwargs):
     """
     Software Update - Create Strategy
@@ -230,6 +244,11 @@ def create_strategy(token_id,
 
     api_cmd_headers = dict()
     api_cmd_headers['Content-Type'] = "application/json"
+    if username:
+        api_cmd_headers['X-User'] = username
+        api_cmd_headers['X-Tenant'] = username
+    if user_domain_name:
+        api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
@@ -277,7 +296,8 @@ def create_strategy(token_id,
     return _get_strategy_object_from_response(response)
 
 
-def delete_strategy(token_id, url, strategy_name, force=False):
+def delete_strategy(token_id, url, strategy_name, force=False,
+                    username=None, user_domain_name=None):
     """
     Software Update - Delete Strategy
     """
@@ -285,6 +305,11 @@ def delete_strategy(token_id, url, strategy_name, force=False):
 
     api_cmd_headers = dict()
     api_cmd_headers['Content-Type'] = "application/json"
+    if username:
+        api_cmd_headers['X-User'] = username
+        api_cmd_headers['X-Tenant'] = username
+    if user_domain_name:
+        api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
@@ -301,7 +326,8 @@ def delete_strategy(token_id, url, strategy_name, force=False):
     return True
 
 
-def apply_strategy(token_id, url, strategy_name, stage_id=None):
+def apply_strategy(token_id, url, strategy_name, stage_id=None,
+                   username=None, user_domain_name=None):
     """
     Software Update - Apply Strategy
     """
@@ -309,6 +335,11 @@ def apply_strategy(token_id, url, strategy_name, stage_id=None):
 
     api_cmd_headers = dict()
     api_cmd_headers['Content-Type'] = "application/json"
+    if username:
+        api_cmd_headers['X-User'] = username
+        api_cmd_headers['X-Tenant'] = username
+    if user_domain_name:
+        api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
@@ -326,7 +357,8 @@ def apply_strategy(token_id, url, strategy_name, stage_id=None):
     return _get_strategy_object_from_response(response)
 
 
-def abort_strategy(token_id, url, strategy_name, stage_id):
+def abort_strategy(token_id, url, strategy_name, stage_id, username=None,
+                   user_domain_name=None):
     """
     Software Update - Abort Strategy
     """
@@ -334,6 +366,11 @@ def abort_strategy(token_id, url, strategy_name, stage_id):
 
     api_cmd_headers = dict()
     api_cmd_headers['Content-Type'] = "application/json"
+    if username:
+        api_cmd_headers['X-User'] = username
+        api_cmd_headers['X-Tenant'] = username
+    if user_domain_name:
+        api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()

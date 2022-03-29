@@ -120,10 +120,8 @@ class AuditLoggingHook(hooks.PecanHook):
 
         response_content_length = state.response.content_length
 
-        user_id = state.request.headers.get('X-User-Id')
-        user_name = state.request.headers.get('X-User', user_id)
-        tenant_id = state.request.headers.get('X-Tenant-Id')
-        tenant = state.request.headers.get('X-Tenant', tenant_id)
+        user_name = state.request.headers.get('X-User')
+        tenant = state.request.headers.get('X-Tenant')
         domain_name = state.request.headers.get('X-User-Domain-Name')
 
         url_path = urlparse(state.request.path_qs).path
