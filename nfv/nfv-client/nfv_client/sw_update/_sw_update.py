@@ -211,6 +211,7 @@ def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                                          default_instance_action,
                                          alarm_restrictions,
                                          os_username, os_user_domain_name,
+                                         os_username,
                                          **kwargs)
     if not strategy:
         raise Exception("Strategy creation failed")
@@ -235,7 +236,8 @@ def delete_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
     success = sw_update.delete_strategy(token.get_id(), url,
                                         strategy_name, force,
-                                        os_username, os_user_domain_name)
+                                        os_username, os_user_domain_name,
+                                        os_username)
     if success:
         print("Strategy deleted")
         return
@@ -260,7 +262,8 @@ def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
     strategy = sw_update.apply_strategy(token.get_id(), url,
                                         strategy_name, stage_id,
-                                        os_username, os_user_domain_name)
+                                        os_username, os_user_domain_name,
+                                        os_username)
     if not strategy:
         if stage_id is None:
             raise Exception("Strategy apply failed")
@@ -287,7 +290,8 @@ def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
     strategy = sw_update.abort_strategy(token.get_id(), url,
                                         strategy_name, stage_id,
-                                        os_username, os_user_domain_name)
+                                        os_username, os_user_domain_name,
+                                        os_username)
     if not strategy:
         if stage_id is None:
             raise Exception("Strategy abort failed")
@@ -313,7 +317,8 @@ def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
         raise ValueError("NFV-VIM URL is invalid")
 
     strategy = sw_update.get_strategies(token.get_id(), url, strategy_name,
-                                        os_username, os_user_domain_name)
+                                        os_username, os_user_domain_name,
+                                        os_username)
     if not strategy:
         print("No strategy available")
         return

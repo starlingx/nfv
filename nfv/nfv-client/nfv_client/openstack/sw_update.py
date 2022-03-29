@@ -180,7 +180,7 @@ def _get_strategy_object_from_response(response):
 
 
 def get_strategies(token_id, url, strategy_name, username=None,
-                   user_domain_name=None):
+                   user_domain_name=None, tenant=None):
     """
     Software Update - Get Strategies
     """
@@ -189,7 +189,8 @@ def get_strategies(token_id, url, strategy_name, username=None,
     api_cmd_headers = dict()
     if username:
         api_cmd_headers['X-User'] = username
-        api_cmd_headers['X-Tenant'] = username
+    if tenant:
+        api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
@@ -202,7 +203,7 @@ def get_strategies(token_id, url, strategy_name, username=None,
 
 
 def get_strategy(token_id, url, strategy_name, strategy_uuid, username=None,
-                 user_domain_name=None):
+                 user_domain_name=None, tenant=None):
     """
     Software Update - Get Strategy
     """
@@ -212,7 +213,8 @@ def get_strategy(token_id, url, strategy_name, strategy_uuid, username=None,
     api_cmd_headers = dict()
     if username:
         api_cmd_headers['X-User'] = username
-        api_cmd_headers['X-Tenant'] = username
+    if tenant:
+        api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
@@ -236,6 +238,7 @@ def create_strategy(token_id,
                     alarm_restrictions,
                     username=None,
                     user_domain_name=None,
+                    tenant=None,
                     **kwargs):
     """
     Software Update - Create Strategy
@@ -246,7 +249,8 @@ def create_strategy(token_id,
     api_cmd_headers['Content-Type'] = "application/json"
     if username:
         api_cmd_headers['X-User'] = username
-        api_cmd_headers['X-Tenant'] = username
+    if tenant:
+        api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
@@ -297,7 +301,7 @@ def create_strategy(token_id,
 
 
 def delete_strategy(token_id, url, strategy_name, force=False,
-                    username=None, user_domain_name=None):
+                    username=None, user_domain_name=None, tenant=None):
     """
     Software Update - Delete Strategy
     """
@@ -307,7 +311,8 @@ def delete_strategy(token_id, url, strategy_name, force=False,
     api_cmd_headers['Content-Type'] = "application/json"
     if username:
         api_cmd_headers['X-User'] = username
-        api_cmd_headers['X-Tenant'] = username
+    if tenant:
+        api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
@@ -327,7 +332,7 @@ def delete_strategy(token_id, url, strategy_name, force=False,
 
 
 def apply_strategy(token_id, url, strategy_name, stage_id=None,
-                   username=None, user_domain_name=None):
+                   username=None, user_domain_name=None, tenant=None):
     """
     Software Update - Apply Strategy
     """
@@ -337,7 +342,8 @@ def apply_strategy(token_id, url, strategy_name, stage_id=None,
     api_cmd_headers['Content-Type'] = "application/json"
     if username:
         api_cmd_headers['X-User'] = username
-        api_cmd_headers['X-Tenant'] = username
+    if tenant:
+        api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
@@ -358,7 +364,7 @@ def apply_strategy(token_id, url, strategy_name, stage_id=None,
 
 
 def abort_strategy(token_id, url, strategy_name, stage_id, username=None,
-                   user_domain_name=None):
+                   user_domain_name=None, tenant=None):
     """
     Software Update - Abort Strategy
     """
@@ -368,7 +374,8 @@ def abort_strategy(token_id, url, strategy_name, stage_id, username=None,
     api_cmd_headers['Content-Type'] = "application/json"
     if username:
         api_cmd_headers['X-User'] = username
-        api_cmd_headers['X-Tenant'] = username
+    if tenant:
+        api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
     api_cmd_headers['X-Auth-Token'] = token_id
