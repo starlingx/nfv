@@ -6,6 +6,7 @@
 import json
 import re
 import requests
+
 from six.moves import BaseHTTPServer
 from six.moves import http_client as httplib
 from six.moves import socketserver as SocketServer
@@ -82,6 +83,10 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         DLOG.error(format, *args)
 
     def done(self):
+        # todo:abailey  Remove the calls to 'done' in the plugins
+        DLOG.debug("Deprecated: 'done' method no longer supported")
+
+    def _done(self):
         """
         Finished with processing the request.
         """
@@ -112,7 +117,8 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         Override finish so that the socket is not closed, until we respond.
         """
         if not self._response_delayed:
-            self.done()
+            # Clean up the request
+            self._done()
 
     def _dispatch(self, handlers):
         """
