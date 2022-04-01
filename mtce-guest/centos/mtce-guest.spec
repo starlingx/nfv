@@ -127,6 +127,9 @@ make install \
      LOCALBINDIR=%{buildroot}%{local_bindir} \
      UNITDIR=%{buildroot}%{_unitdir}
 
+install -m 644 -p -D scripts/guestServer.service %{buildroot}%{_unitdir}/guestServer.service
+install -m 644 -p -D scripts/guestAgent.service %{buildroot}%{_unitdir}/guestAgent.service
+
 # enable all services in systemd
 %post -n mtce-guestServer
 /bin/systemctl enable guestServer.service
