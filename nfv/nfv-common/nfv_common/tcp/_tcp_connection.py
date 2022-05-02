@@ -8,6 +8,7 @@ import errno
 import hashlib
 import hmac
 import select
+import six
 import socket
 import struct
 
@@ -119,20 +120,27 @@ class TCPConnection(object):
         """
         Send a message into the TCP connection, assumes the following
         messaging format:  | length (4-bytes) | string of bytes |
+        struct.pack returns string in python2 and bytes in python3
         """
         bytes_sent = 0
 
         if self._socket is not None:
             if self._auth_key is None:
                 msg = struct.pack('!L', socket.htonl(len(payload)))
-                msg += payload
+                if six.PY3:
+                    msg += bytes(payload, 'utf-8')
+                else:
+                    msg += payload
             else:
                 auth_vector = hmac.new(self._auth_key, msg=payload,
                                        digestmod=hashlib.sha512).digest()
                 msg_len = len(auth_vector) + len(payload)
                 msg = struct.pack('!L', socket.htonl(msg_len))
                 msg += auth_vector[:self.AUTH_VECTOR_MAX_SIZE]
-                msg += payload
+                if six.PY3:
+                    msg += bytes(payload, 'utf-8')
+                else:
+                    msg += payload
 
             bytes_sent = self._socket.send(bytes(msg))
         return bytes_sent
