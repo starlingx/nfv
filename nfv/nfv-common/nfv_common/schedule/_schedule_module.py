@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import six
 import socket
 
 from nfv_common import selobj
@@ -13,6 +14,12 @@ _send_socket = None
 _receive_socket = None
 _pending_function_calls = list()
 
+if six.PY3:
+    # python3 requires the string be converted to bytes
+    MESSAGE_ONE = '1'.encode('utf-8')
+else:
+    MESSAGE_ONE = '1'
+
 
 def schedule_function_call(func, *args, **kwargs):
     """
@@ -22,7 +29,7 @@ def schedule_function_call(func, *args, **kwargs):
 
     function_data = (func, args, kwargs)
     _pending_function_calls.append(function_data)
-    _send_socket.send('1')
+    _send_socket.send(MESSAGE_ONE)
 
 
 @coroutine
