@@ -45,7 +45,9 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
 
         response_raw = url_request.read()
 
-        if response_raw == "":
+        # python2 the reponse may be an empty string
+        # python3 the response may be an empty byte string
+        if response_raw == "" or response_raw == b"":
             response = dict()
         else:
             response = json.loads(response_raw)
