@@ -4079,7 +4079,8 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
         super(KubeUpgradeNetworkingStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_NETWORKING,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED)
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED,
+            timeout_in_secs=900)
 
     @coroutine
     def _response_callback(self):
