@@ -145,6 +145,15 @@ vim_status() {
         return $OCF_NOT_RUNNING
     fi
 
+    ocf_run nc -z -v -w 15 localhost 4343 >/dev/null 2>&1
+    rc=$?
+    if [ $rc -ne 0 ]; then
+        ocf_log info "VIM is running but not responding"
+        vim_confirm_stop
+        rm -f $OCF_RESKEY_pid
+        return $OCF_ERR_GENERIC
+    fi
+
     return $OCF_SUCCESS
 }
 
