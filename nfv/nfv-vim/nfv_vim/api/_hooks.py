@@ -3,14 +3,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import pecan
 from pecan import hooks
 import re
+from six.moves import http_client as httplib
 from six.moves.urllib.parse import urlparse
 import time
 
 from nfv_common import config
 from nfv_common import debug
 from nfv_common import tcp
+from nfv_vim.api.acl import policy
 
 from nfv_common.helpers import Object
 
@@ -167,3 +170,25 @@ class AuditLoggingHook(hooks.PecanHook):
 
     def on_error(self, state, e):
         DLOG.exception("Exception in AuditLoggingHook passed to event 'on_error': " + str(e))
+
+
+class AccessPolicyHook(hooks.PecanHook):
+    """Verify that the user has rights.
+
+    Checks if the user has rights to perform the current action based on rules
+    specified. The rules enforcement is done using the openstack policy engine.
+
+    """
+    def before(self, state):
+        controller = state.controller.__self__
+        try:
+            if hasattr(controller, 'enforce_policy'):
+                controller_method = state.controller.__name__
+                controller.enforce_policy(controller_method, state.request.environ['auth_context'])
+            else:
+                policy.check("admin_in_system_projects", {}, state.request.environ['auth_context'],
+                               exc=policy.PolicyForbidden)
+
+        except policy.PolicyForbidden:
+            DLOG.warn("caught forbidden exception")
+            return pecan.abort(httplib.FORBIDDEN)

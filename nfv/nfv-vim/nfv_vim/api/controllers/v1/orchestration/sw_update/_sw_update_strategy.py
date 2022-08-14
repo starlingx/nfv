@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,6 +13,8 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_common import validate
+from nfv_vim.api.acl.policies import sw_update_strategy_policy
+from nfv_vim.api.acl import policy
 
 from nfv_vim import rpc
 
@@ -433,6 +435,27 @@ class SwUpdateStrategyActionAPI(rest.RestController):
         DLOG.error("Unexpected action received, result=%s." % request_data.action)
         return pecan.abort(httplib.BAD_REQUEST)
 
+    def enforce_policy(self, method_name, auth_context_dict):
+        """Check policy rules for each action of this controller."""
+        if method_name == "apply":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "apply", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "delete":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "delete", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name in ["get_all", "get_one"]:
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "get", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "patch":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "modify", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        # this handles the apply and abort requests
+        elif method_name == "post":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "apply", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        else:
+            policy.check('admin_in_system_projects', {}, auth_context_dict)
+
 
 class SwUpdateStrategyAPI(rest.RestController):
     """
@@ -595,6 +618,26 @@ class SwPatchStrategyAPI(SwUpdateStrategyAPI):
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+    def enforce_policy(self, method_name, auth_context_dict):
+        """Check policy rules for each action of this controller."""
+        if method_name == "apply":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "apply", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "delete":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "delete", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name in ["get_all", "get_one"]:
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "get", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "patch":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "modify", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "post":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "add", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        else:
+            policy.check('admin_in_system_projects', {}, auth_context_dict)
 
 
 class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
