@@ -14,7 +14,7 @@ DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.sysinv')
 
 # WARNING: Any change to this timeout must be reflected in the config.ini
 # file for the nfvi plugins.
-REST_API_REQUEST_TIMEOUT = 45
+REST_API_REQUEST_TIMEOUT = 60
 
 
 KUBE_ROOTCA_UPDATE_ENDPOINT = "/kube_rootca_update"
