@@ -23,6 +23,9 @@ def create_app():
                  _hooks.ContextHook(pecan_conf.app.acl_public_routes),
                  _hooks.AuditLoggingHook()]
 
+    if pecan_conf.app.enable_acl:
+        app_hooks.append(_hooks.AccessPolicyHook())
+
     app = pecan.make_app(
         pecan_conf.app.root,
         static_root=pecan_conf.app.static_root,

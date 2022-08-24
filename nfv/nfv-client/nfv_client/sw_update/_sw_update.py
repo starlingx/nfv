@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -197,6 +197,9 @@ def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                                 os_project_domain_name, os_username, os_password,
                                 os_user_domain_name)
 
+    if token is None:
+        raise ValueError("Invalid keystone token")
+
     url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
                                 openstack.SERVICE_TYPE.NFV, os_interface)
     if url is None:
@@ -229,6 +232,9 @@ def delete_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                                 os_project_domain_name, os_username, os_password,
                                 os_user_domain_name)
 
+    if token is None:
+        raise ValueError("Invalid keystone token")
+
     url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
                                 openstack.SERVICE_TYPE.NFV, os_interface)
     if url is None:
@@ -254,6 +260,9 @@ def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
     token = openstack.get_token(os_auth_uri, os_project_name,
                                 os_project_domain_name, os_username, os_password,
                                 os_user_domain_name)
+
+    if token is None:
+        raise ValueError("Invalid keystone token")
 
     url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
                                 openstack.SERVICE_TYPE.NFV, os_interface)
@@ -283,6 +292,9 @@ def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                                 os_project_domain_name, os_username, os_password,
                                 os_user_domain_name)
 
+    if token is None:
+        raise ValueError("Invalid keystone token")
+
     url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
                                 openstack.SERVICE_TYPE.NFV, os_interface)
     if url is None:
@@ -310,6 +322,9 @@ def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
     token = openstack.get_token(os_auth_uri, os_project_name,
                                 os_project_domain_name, os_username, os_password,
                                 os_user_domain_name)
+
+    if token is None:
+        raise ValueError("Invalid keystone token")
 
     url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
                                 openstack.SERVICE_TYPE.NFV, os_interface)

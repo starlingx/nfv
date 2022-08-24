@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2019, 2021-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -347,3 +347,10 @@ class Token(object):
             return endpoint
 
         return None
+
+    def get_roles(self):
+        # keystone names are unique. shouldn't need to check uuid
+        return [role['name'] for role in self._data['token']['roles']]
+
+    def get_user(self):
+        return self._data['token']['user']['name']
