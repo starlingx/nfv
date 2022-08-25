@@ -13,7 +13,12 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_common import validate
+from nfv_vim.api.acl.policies import fw_update_strategy_policy
+from nfv_vim.api.acl.policies import kube_rootca_update_strategy_policy
+from nfv_vim.api.acl.policies import kube_upgrade_strategy_policy
+from nfv_vim.api.acl.policies import sw_patch_strategy_policy
 from nfv_vim.api.acl.policies import sw_update_strategy_policy
+from nfv_vim.api.acl.policies import sw_upgrade_strategy_policy
 from nfv_vim.api.acl import policy
 
 from nfv_vim import rpc
@@ -437,21 +442,9 @@ class SwUpdateStrategyActionAPI(rest.RestController):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
-        if method_name == "apply":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "apply", {},
-                           auth_context_dict, exc=policy.PolicyForbidden)
-        elif method_name == "delete":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "delete", {},
-                           auth_context_dict, exc=policy.PolicyForbidden)
-        elif method_name in ["get_all", "get_one"]:
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "get", {},
-                           auth_context_dict, exc=policy.PolicyForbidden)
-        elif method_name == "patch":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "modify", {},
-                           auth_context_dict, exc=policy.PolicyForbidden)
         # this handles the apply and abort requests
-        elif method_name == "post":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "apply", {},
+        if method_name == "post":
+            policy.check(sw_update_strategy_policy.POLICY_ROOT % "post", {},
                            auth_context_dict, exc=policy.PolicyForbidden)
         else:
             policy.check('admin_in_system_projects', {}, auth_context_dict)
@@ -621,20 +614,14 @@ class SwPatchStrategyAPI(SwUpdateStrategyAPI):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
-        if method_name == "apply":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "apply", {},
-                           auth_context_dict, exc=policy.PolicyForbidden)
-        elif method_name == "delete":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "delete", {},
+        if method_name == "delete":
+            policy.check(sw_patch_strategy_policy.POLICY_ROOT % "delete", {},
                            auth_context_dict, exc=policy.PolicyForbidden)
         elif method_name in ["get_all", "get_one"]:
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "get", {},
-                           auth_context_dict, exc=policy.PolicyForbidden)
-        elif method_name == "patch":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "modify", {},
+            policy.check(sw_patch_strategy_policy.POLICY_ROOT % "get", {},
                            auth_context_dict, exc=policy.PolicyForbidden)
         elif method_name == "post":
-            policy.check(sw_update_strategy_policy.POLICY_ROOT % "add", {},
+            policy.check(sw_patch_strategy_policy.POLICY_ROOT % "add", {},
                            auth_context_dict, exc=policy.PolicyForbidden)
         else:
             policy.check('admin_in_system_projects', {}, auth_context_dict)
@@ -693,6 +680,20 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
+    def enforce_policy(self, method_name, auth_context_dict):
+        """Check policy rules for each action of this controller."""
+        if method_name == "delete":
+            policy.check(sw_upgrade_strategy_policy.POLICY_ROOT % "delete", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name in ["get_all", "get_one"]:
+            policy.check(sw_upgrade_strategy_policy.POLICY_ROOT % "get", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "post":
+            policy.check(sw_upgrade_strategy_policy.POLICY_ROOT % "add", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        else:
+            policy.check('admin_in_system_projects', {}, auth_context_dict)
+
 
 class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
     """
@@ -742,6 +743,20 @@ class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+    def enforce_policy(self, method_name, auth_context_dict):
+        """Check policy rules for each action of this controller."""
+        if method_name == "delete":
+            policy.check(fw_update_strategy_policy.POLICY_ROOT % "delete", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name in ["get_all", "get_one"]:
+            policy.check(fw_update_strategy_policy.POLICY_ROOT % "get", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "post":
+            policy.check(fw_update_strategy_policy.POLICY_ROOT % "add", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        else:
+            policy.check('admin_in_system_projects', {}, auth_context_dict)
 
 
 class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
@@ -819,6 +834,20 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
+    def enforce_policy(self, method_name, auth_context_dict):
+        """Check policy rules for each action of this controller."""
+        if method_name == "delete":
+            policy.check(kube_rootca_update_strategy_policy.POLICY_ROOT % "delete", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name in ["get_all", "get_one"]:
+            policy.check(kube_rootca_update_strategy_policy.POLICY_ROOT % "get", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "post":
+            policy.check(kube_rootca_update_strategy_policy.POLICY_ROOT % "add", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        else:
+            policy.check('admin_in_system_projects', {}, auth_context_dict)
+
 
 class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
     """
@@ -877,3 +906,17 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+    def enforce_policy(self, method_name, auth_context_dict):
+        """Check policy rules for each action of this controller."""
+        if method_name == "delete":
+            policy.check(kube_upgrade_strategy_policy.POLICY_ROOT % "delete", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name in ["get_all", "get_one"]:
+            policy.check(kube_upgrade_strategy_policy.POLICY_ROOT % "get", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        elif method_name == "post":
+            policy.check(kube_upgrade_strategy_policy.POLICY_ROOT % "add", {},
+                           auth_context_dict, exc=policy.PolicyForbidden)
+        else:
+            policy.check('admin_in_system_projects', {}, auth_context_dict)

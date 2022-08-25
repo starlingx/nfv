@@ -13,6 +13,23 @@
 # under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
+#
+# "SwUpdateStrategyActionAPI" need to handle the post "controller api method"
+#  common to all 5 apply and aborts "sw-manager commands"
+#
+# FwUpdateStrategyAPI
+# KubeRootcaUpdateStrategyAPI
+# KubeUpgradeStrategyAPI
+# SwPatchStrategyAPI
+# SwUpgradeStrategyAPI
+#
+# those 5 classes needs to handle get_all, post, delete "controller api methods"
+# for show, create, delete "sw-manager commands" respectively
+#
+# There are 5 sw-manager commands and 6 controller api classes.
+# We need 6 policy classes because the 5 controller api classes handle 3/5
+# of their commands and inherit from this 6th class to handle the other 2.
+# This policy class is for "SwUpdateStrategyActionAPI"
 
 from nfv_vim.api.acl.policies import base
 
@@ -20,30 +37,12 @@ POLICY_ROOT = 'nfv_api:sw_update_strategy:%s'
 
 
 sw_update_strategy_rules = [
+    # this rule handles the 'apply' and 'abort' commands, both of which
+    # comes into the controller as 'post' requests.
     base.RuleDefault(
-        name=POLICY_ROOT % 'add',
-        check_str='rule:' + base.ADMIN_IN_SYSTEM_PROJECTS,
-        description="Add a sw_update_strategy",
-    ),
-    base.RuleDefault(
-        name=POLICY_ROOT % 'apply',
+        name=POLICY_ROOT % 'post',
         check_str='rule:' + base.ADMIN_IN_SYSTEM_PROJECTS,
         description="Apply sw_update_strategy",
-    ),
-    base.RuleDefault(
-        name=POLICY_ROOT % 'delete',
-        check_str='rule:' + base.ADMIN_IN_SYSTEM_PROJECTS,
-        description="Delete a sw_update_strategy",
-    ),
-    base.RuleDefault(
-        name=POLICY_ROOT % 'get',
-        check_str='rule:' + base.READER_IN_SYSTEM_PROJECTS,
-        description="Get a sw_update_strategy",
-    ),
-    base.RuleDefault(
-        name=POLICY_ROOT % 'modify',
-        check_str='rule:' + base.ADMIN_IN_SYSTEM_PROJECTS,
-        description="Modify Service Parameter value.",
     )
 ]
 

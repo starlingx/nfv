@@ -7,7 +7,13 @@
 import itertools
 
 from nfv_vim.api.acl.policies import base
+from nfv_vim.api.acl.policies import fw_update_strategy_policy
+from nfv_vim.api.acl.policies import kube_rootca_update_strategy_policy
+from nfv_vim.api.acl.policies import kube_upgrade_strategy_policy
+from nfv_vim.api.acl.policies import sw_patch_strategy_policy
 from nfv_vim.api.acl.policies import sw_update_strategy_policy
+from nfv_vim.api.acl.policies import sw_upgrade_strategy_policy
+
 from nfv_vim.api.acl import policy
 from nfv_vim.api import openstack
 
@@ -35,7 +41,12 @@ class AuthenticationApplication(object):
 
         nfv_vim_rules = itertools.chain(
             base.list_rules(),
-            sw_update_strategy_policy.list_rules()
+            sw_update_strategy_policy.list_rules(),
+            fw_update_strategy_policy.list_rules(),
+            kube_rootca_update_strategy_policy.list_rules(),
+            kube_upgrade_strategy_policy.list_rules(),
+            sw_patch_strategy_policy.list_rules(),
+            sw_upgrade_strategy_policy.list_rules()
         )
         rules = policy.Rules.load_rules(policy_file_contents,
             default_rule,
