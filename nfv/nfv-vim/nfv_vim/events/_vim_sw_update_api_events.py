@@ -142,6 +142,7 @@ def vim_sw_update_api_create_strategy(connection, msg):
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         response = rpc.APIResponseCreateSwUpdateStrategy()
+        # todo(abailey): consider adding error_string to other error types
         response.result = rpc.RPC_MSG_RESULT.FAILED
         connection.send(response.serialize())
         DLOG.verbose("Sent response=%s." % response)
@@ -150,10 +151,13 @@ def vim_sw_update_api_create_strategy(connection, msg):
 
     if uuid is None:
         response = rpc.APIResponseCreateSwUpdateStrategy()
-        if reason == "strategy already exists":
+        # change this to a prefix...
+        if reason is not None and reason.startswith("strategy already exists"):
             response.result = rpc.RPC_MSG_RESULT.CONFLICT
+            response.error_string = reason
         else:
             response.result = rpc.RPC_MSG_RESULT.FAILED
+            # todo(abailey): consider adding error_string to other error types
         connection.send(response.serialize())
         DLOG.verbose("Sent response=%s." % response)
         connection.close()

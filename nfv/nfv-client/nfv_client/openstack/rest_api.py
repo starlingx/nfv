@@ -59,16 +59,32 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
     except urllib.error.HTTPError as e:
         headers = list()
         response_raw = dict()
+        json_response = False
 
         if e.fp is not None:
             headers = list()  # list of tuples
             for key, value in e.fp.info().items():
                 if key not in headers_per_hop:
-                    cap_key = '-'.join((ck.capitalize()
-                                        for ck in key.split('-')))
-                    headers.append((cap_key, value))
+                    header = '-'.join((ck.capitalize()
+                                       for ck in key.split('-')))
+                    headers.append((header, value))
+                    # set a flag if the response is json
+                    # to assist with extracting faultString
+                    if 'Content-Type' == header:
+                        if 'application/json' == value.split(';')[0]:
+                            json_response = True
 
             response_raw = e.fp.read()
+
+        reason = ''
+        if json_response:
+            try:
+                response = json.loads(response_raw)
+                message = response.get('faultstring', None)
+                if message is not None:
+                    reason = str(message.rstrip('.'))
+            except ValueError:
+                pass
 
         if httplib.FOUND == e.code:
             return response_raw
@@ -77,26 +93,10 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
             return None
 
         elif httplib.CONFLICT == e.code:
-            raise Exception("Operation failed: conflict detected")
+            raise Exception("Operation failed: conflict detected. %s" % reason)
 
         elif httplib.FORBIDDEN == e.code:
             raise Exception("Authorization failed")
-
-        # Attempt to get the reason for the http error from the response
-        reason = ''
-        for header, value in headers:
-            if 'Content-Type' == header:
-                if 'application/json' == value.split(';')[0]:
-                    try:
-                        response = json.loads(response_raw)
-                        message = response.get('faultstring', None)
-                        if message is not None:
-                            reason = str(message.rstrip('.'))
-                            print("Operation failed: %s" % reason)
-                            break
-
-                    except ValueError:
-                        pass
 
         print("Rest-API status=%s, %s, %s, headers=%s, payload=%s, response=%s"
               % (e.code, method, api_cmd, api_cmd_headers, api_cmd_payload,

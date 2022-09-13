@@ -553,6 +553,8 @@ class SwUpdateStrategyAPI(rest.RestController):
 
         elif rpc.RPC_MSG_RESULT.FAILED == response.result:
             DLOG.info("Strategy delete failed")
+            # TODO(abailey): consider adding error_string to
+            #     DELETE_SW_UPDATE_STRATEGY_RESPONSE
             return pecan.abort(httplib.CONFLICT)
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
@@ -607,7 +609,7 @@ class SwPatchStrategyAPI(SwUpdateStrategyAPI):
             query_data.convert_strategy(strategy)
             return query_data
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
-            return pecan.abort(httplib.CONFLICT)
+            return pecan.abort(httplib.CONFLICT, response.error_string)
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
@@ -675,7 +677,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
             query_data.convert_strategy(strategy)
             return query_data
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
-            return pecan.abort(httplib.CONFLICT)
+            return pecan.abort(httplib.CONFLICT, response.error_string)
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
@@ -739,7 +741,7 @@ class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
             query_data.convert_strategy(strategy)
             return query_data
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
-            return pecan.abort(httplib.CONFLICT)
+            return pecan.abort(httplib.CONFLICT, response.error_string)
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
@@ -829,7 +831,7 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
             query_data.convert_strategy(strategy)
             return query_data
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
-            return pecan.abort(httplib.CONFLICT)
+            return pecan.abort(httplib.CONFLICT, response.error_string)
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
@@ -902,7 +904,7 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
             query_data.convert_strategy(strategy)
             return query_data
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
-            return pecan.abort(httplib.CONFLICT)
+            return pecan.abort(httplib.CONFLICT, response.error_string)
 
         DLOG.error("Unexpected result received, result=%s." % response.result)
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)

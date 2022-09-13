@@ -143,6 +143,7 @@ class APIResponseCreateSwUpdateStrategy(RPCMessage):
     RPC API Response Message - Create Software Update Strategy
     """
     strategy = None
+    error_string = None
 
     def __init__(self, msg_version=RPC_MSG_VERSION.VERSION_1_0,
                  msg_type=RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_RESPONSE,
@@ -152,9 +153,11 @@ class APIResponseCreateSwUpdateStrategy(RPCMessage):
 
     def serialize_payload(self, msg):
         msg['strategy'] = self.strategy
+        msg['error_string'] = self.error_string
 
     def deserialize_payload(self, msg):
         self.strategy = msg.get('strategy', None)
+        self.error_string = msg.get('error_string', None)
 
     def __str__(self):
         return "create-sw-update-strategy response: %s" % self.strategy

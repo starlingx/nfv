@@ -59,7 +59,7 @@ class SwMgmtDirector(object):
             # Do not schedule the callback - if creation failed because a
             # strategy already exists, the callback will attempt to operate
             # on the old strategy, which is not what we want.
-            reason = "strategy already exists"
+            reason = "strategy already exists of type:%s" % self._sw_update._sw_update_type
             return None, reason
 
         self._sw_update = objects.SwPatch()
@@ -87,7 +87,7 @@ class SwMgmtDirector(object):
             # Do not schedule the callback - if creation failed because a
             # strategy already exists, the callback will attempt to operate
             # on the old strategy, which is not what we want.
-            reason = "strategy already exists"
+            reason = "strategy already exists of type:%s" % self._sw_update._sw_update_type
             return None, reason
 
         self._sw_update = objects.SwUpgrade()
@@ -119,7 +119,7 @@ class SwMgmtDirector(object):
             # Do not schedule the callback - if creation failed because a
             # strategy already exists, the callback will attempt to operate
             # on the old strategy, which is not what we want.
-            reason = "strategy already exists"
+            reason = "strategy already exists of type:%s" % self._sw_update._sw_update_type
             return None, reason
 
         self._sw_update = objects.FwUpdate()
@@ -154,7 +154,7 @@ class SwMgmtDirector(object):
             # Do not schedule the callback - if creation failed because a
             # strategy already exists, the callback will attempt to operate
             # on the old strategy, which is not what we want.
-            reason = "strategy already exists"
+            reason = "strategy already exists of type:%s" % self._sw_update._sw_update_type
             return None, reason
 
         self._sw_update = objects.KubeRootcaUpdate()
@@ -196,7 +196,7 @@ class SwMgmtDirector(object):
             # Do not schedule the callback - if creation failed because a
             # strategy already exists, the callback will attempt to operate
             # on the old strategy, which is not what we want.
-            reason = "strategy already exists"
+            reason = "strategy already exists of type:%s" % self._sw_update._sw_update_type
             return None, reason
 
         self._sw_update = objects.KubeUpgrade()
