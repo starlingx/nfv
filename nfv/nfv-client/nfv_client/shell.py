@@ -487,7 +487,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
 
         if args.os_project_domain_name is None:
             args.os_project_domain_name \
-                = os.environ.get('OS_PROJECT_DOMAIN_NAME', None)
+                = os.environ.get('OS_PROJECT_DOMAIN_NAME', 'Default')
 
         if args.os_username is None:
             args.os_username = os.environ.get('OS_USERNAME', None)
