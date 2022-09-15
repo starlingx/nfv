@@ -38,8 +38,8 @@ override_dh_auto_install:
 	install -p -D -m 644 scripts/guestServer.pmon $(PMONDIR_2)/guestServer.conf
 
 override_dh_installsystemd:
-	dh_installsystemd --name guestServer
-	dh_installsystemd --no-enable --name guestAgent
+	dh_installsystemd -pmtce-guest-server --name guestServer guestServer.service
+	dh_installsystemd -pmtce-guest-agent --no-enable --name guestAgent guestAgent.service
 
 override_dh_fixperms:
 	dh_fixperms -XguestAgent -XguestServer
