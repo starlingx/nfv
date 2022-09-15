@@ -7,8 +7,7 @@ export BINDIR=/usr/local/bin
 export INITDIR=$(ROOT)/etc/init.d
 export LOGDIR=$(ROOT)/etc/logrotate.d
 export MTCDIR=$(ROOT)/etc/mtc
-export PMONDIR_1=${ROOT}/usr/share/starlingx/pmon.d
-export PMONDIR_2=$(ROOT)/etc/pmon.d
+export PMONDIR=${ROOT}/usr/share/starlingx/pmon.d
 export SYSCONFDIR=/etc
 export UNITDIR=/lib/systemd/system
 
@@ -32,10 +31,8 @@ override_dh_auto_install:
 	install -d -m 755 $(MTCDIR)/tmp
 	install -p -D -m 644 scripts/guest.ini $(MTCDIR)/guestAgent.ini
 	install -p -D -m 644 scripts/guest.ini $(MTCDIR)/guestServer.ini
-	install -d -m 755 $(PMONDIR_1)
-	install -p -D -m 644 scripts/guestServer.pmon $(PMONDIR_1)/guestServer.conf
-	install -d -m 755 $(PMONDIR_2)
-	install -p -D -m 644 scripts/guestServer.pmon $(PMONDIR_2)/guestServer.conf
+	install -d -m 755 $(PMONDIR)
+	install -p -D -m 644 scripts/guestServer.pmon $(PMONDIR)/guestServer.conf
 
 override_dh_installsystemd:
 	dh_installsystemd --name guestServer
