@@ -144,6 +144,9 @@ class StrategyMixin(object):
         """Test that if any required env variable is missing, it fails"""
         shell_args = [self.strategy, 'show', ]
         for pop_env in list(self.MOCK_ENV.keys()):
+            # OS_PROJECT_DOMAIN_NAME was made optional
+            if pop_env == "OS_PROJECT_DOMAIN_NAME":
+                continue
             # remove the pop_env variable from the environment
             self._test_shell_show_incomplete_env(shell_args=shell_args,
                                                  pop_env=pop_env)
