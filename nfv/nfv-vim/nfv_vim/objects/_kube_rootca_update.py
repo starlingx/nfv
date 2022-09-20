@@ -49,7 +49,7 @@ class KubeRootcaUpdate(SwUpdate):
         from nfv_vim import strategy
 
         if self._strategy:
-            reason = "strategy already exists"
+            reason = "strategy already exists of type:%s" % self._sw_update_type
             return False, reason
 
         self._strategy = \
