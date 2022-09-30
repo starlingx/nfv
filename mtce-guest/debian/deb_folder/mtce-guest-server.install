@@ -2,6 +2,5 @@ etc/init.d/guestServer
 etc/logrotate.d/guestServer.logrotate
 etc/mtc/guestServer.ini
 etc/mtc/tmp
-etc/pmon.d/guestServer.conf
 usr/local/bin/guestServer
 usr/share/starlingx/pmon.d/guestServer.conf
