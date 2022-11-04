@@ -154,7 +154,10 @@ def delete_node(node_name):
     body = kubernetes.client.V1DeleteOptions()
 
     try:
-        response = kube_client.delete_node(node_name, body)
+        if K8S_MODULE_MAJOR_VERSION < 12:
+            response = kube_client.delete_node(node_name, body)
+        else:
+            response = kube_client.delete_node(node_name, body=body)
     except ApiException as e:
         if e.status == httplib.NOT_FOUND:
             # In some cases we may attempt to delete a node that exists in
