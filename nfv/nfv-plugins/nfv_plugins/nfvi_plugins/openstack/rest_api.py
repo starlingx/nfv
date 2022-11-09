@@ -353,7 +353,7 @@ def _rest_api_request(token_id,
             status_code = request.code
             request.close()
 
-        if response_raw == "":
+        if response_raw == "" or response_raw == b"":
             response = dict()
         else:
             response = json.loads(response_raw)
