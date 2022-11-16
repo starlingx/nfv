@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -76,7 +76,7 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
 
             response_raw = e.fp.read()
 
-        reason = ''
+        reason = e.reason
         if json_response:
             try:
                 response = json.loads(response_raw)
@@ -98,12 +98,8 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
         elif httplib.FORBIDDEN == e.code:
             raise Exception("Authorization failed")
 
-        print("Rest-API status=%s, %s, %s, headers=%s, payload=%s, response=%s"
-              % (e.code, method, api_cmd, api_cmd_headers, api_cmd_payload,
-                 response_raw))
-        raise
+        raise Exception(reason)
 
     except urllib.error.URLError as e:
-        print("Rest-API status=ERR, %s, %s, headers=%s, payload=%s"
-              % (method, api_cmd, api_cmd_headers, api_cmd_payload,))
-        raise
+        reason = e.reason
+        raise Exception(reason)
