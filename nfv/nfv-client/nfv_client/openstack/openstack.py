@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016-2022 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -32,6 +32,14 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
     """
     Ask OpenStack for a token
     """
+    try:
+        request_url = urllib.request.urlopen(auth_uri)
+    except urllib.error.HTTPError as e:
+        if e.code == 300:
+            auth_uri = e.headers['location']
+            if auth_uri.endswith('/'):
+                auth_uri = auth_uri[:-1]
+
     try:
         url = auth_uri + "/auth/tokens"
 
