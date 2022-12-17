@@ -13,6 +13,7 @@ from six.moves import socketserver as SocketServer
 from six.moves import urllib
 
 import socket
+import ssl
 import struct
 
 from nfv_common import debug
@@ -20,6 +21,7 @@ from nfv_common import selobj
 from nfv_common import timers
 
 from nfv_common.helpers import coroutine
+from nfv_common.helpers import get_system_ca_file
 from nfv_common.helpers import Object
 from nfv_common.helpers import Result
 
@@ -341,8 +343,13 @@ def _rest_api_request(token_id,
             response_raw = request.text
             request.close()
         else:
+            ca_file = get_system_ca_file()
+            ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH,
+                                                     cafile=ca_file)
+
             request = urllib.request.urlopen(request_info,
-                                             timeout=timeout_in_secs)
+                                             timeout=timeout_in_secs,
+                                             context=ssl_context)
             headers = list()  # list of tuples
             for key, value in request.info().items():
                 if key not in headers_per_hop:

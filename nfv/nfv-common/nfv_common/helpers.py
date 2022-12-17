@@ -5,6 +5,7 @@
 #
 import errno
 import functools
+import os
 import select
 import socket
 
@@ -114,3 +115,17 @@ def get_local_host_name():
     Returns the name of the local host
     """
     return socket.gethostname()
+
+
+def get_system_ca_file():
+    """Return path to system default CA file."""
+    # Standard CA file locations for Debian/Ubuntu, RedHat/Fedora,
+    # Suse, FreeBSD/OpenBSD
+    ca_path = ['/etc/ssl/certs/ca-certificates.crt',
+               '/etc/pki/tls/certs/ca-bundle.crt',
+               '/etc/ssl/ca-bundle.pem',
+               '/etc/ssl/cert.pem']
+    for ca in ca_path:
+        if os.path.exists(ca):
+            return ca
+    return None
