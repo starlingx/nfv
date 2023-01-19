@@ -57,6 +57,6 @@ def evidence_from_files(files, start_date, end_date, progress=None):
             records.append(record)
 
         if progress is not None:
-            progress((float(lines_read) / total_lines) * 100)  # pylint: disable=W1619
+            progress((float(lines_read) / total_lines) * 100)
 
     return records
