@@ -1,4 +1,6 @@
 #
+# Copyright (c) 2023 Wind River Systems, Inc.
+#
 # SPDX-License-Identifier: Apache-2.0
 #
 # Copyright (C) 2019 Intel Corporation
@@ -6,7 +8,7 @@
 
 import kubernetes
 from kubernetes.client.rest import ApiException
-import mock
+from unittest import mock
 
 from nfv_plugins.nfvi_plugins.clients import kubernetes_client
 

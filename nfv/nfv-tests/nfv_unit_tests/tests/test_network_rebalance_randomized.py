@@ -1,10 +1,10 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import mock
 import random
+from unittest import mock
 
 from nfv_vim.network_rebalance._network_rebalance import _add_router_to_agent_callback_body  # noqa: H501
 from nfv_vim.network_rebalance._network_rebalance import _get_agent_routers_callback_body  # noqa: H501

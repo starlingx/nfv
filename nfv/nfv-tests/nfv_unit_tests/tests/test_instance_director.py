@@ -1,9 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import mock
+from unittest import mock
 import uuid
 
 from nfv_vim import nfvi

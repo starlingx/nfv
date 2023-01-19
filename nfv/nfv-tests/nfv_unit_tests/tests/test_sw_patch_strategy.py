@@ -1,9 +1,9 @@
 #
-# Copyright (c) 2016-2020 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import mock
+from unittest import mock
 import uuid
 
 from nfv_common import strategy as common_strategy
