@@ -622,7 +622,7 @@ def process_main():
             sys.exit(1)
 
         if args.data:
-            data_fill = yaml.load(open(data_dir + '/data/' + args.data + '.yaml'))
+            data_fill = yaml.safe_load(open(data_dir + '/data/' + args.data + '.yaml'))
         else:
             print("No data file given.")
             sys.exit(1)
@@ -630,7 +630,7 @@ def process_main():
         if args.setup:
             setup_template = j2_env.get_template(args.setup + '.template')
             setup_yaml = setup_template.render(data_fill)
-            setup_data = yaml.load(setup_yaml)
+            setup_data = yaml.safe_load(setup_yaml)
         else:
             print("No setup file given.")
             sys.exit(1)
@@ -638,7 +638,7 @@ def process_main():
         if args.tests:
             tests_template = j2_env.get_template(args.tests + '.template')
             tests_yaml = tests_template.render(data_fill)
-            test_data = yaml.load(tests_yaml)
+            test_data = yaml.safe_load(tests_yaml)
         else:
             print("No tests given.")
             sys.exit(1)

@@ -44,6 +44,18 @@
       tox_extra_args: -c nfv/tox.ini
 
 - job:
+    name: nfv-tox-bandit
+    parent: tox
+    description: Run bandit for nfv
+    nodeset: debian-bullseye
+    required-projects:
+      - starlingx/root
+    vars:
+      tox_envlist: bandit
+      tox_extra_args: -c nfv/tox.ini
+      tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
+
+- job:
     name: nfv-tox-pylint
     parent: tox
     description: Run pylint for nfv

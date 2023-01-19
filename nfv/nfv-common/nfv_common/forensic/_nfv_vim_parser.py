@@ -108,7 +108,7 @@ def parser_initialize():
     path = os.path.abspath(__file__)
     config_file = os.path.dirname(path) + "/config/nfv-vim.yaml"
     if os.path.isfile(config_file):
-        config_data = yaml.load(open(config_file))
+        config_data = yaml.safe_load(open(config_file))
         return NfvVimParser(config_data)
     return None
 
