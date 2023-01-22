@@ -19,7 +19,7 @@ from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.strategy._strategy import KubeUpgradeStrategy
 
-from . import sw_update_testcase  # noqa: H304
+from nfv_unit_tests.tests import sw_update_testcase
 
 
 FROM_KUBE_VERSION = '1.2.3'

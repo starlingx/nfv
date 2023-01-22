@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,7 +23,7 @@ from nfv_common import debug
 from nfv_common import forensic
 from nfv_plugins.nfvi_plugins import config
 
-import tests  # pylint: disable=relative-import
+import tests
 
 
 DLOG = debug.debug_get_logger('nfv_tests')

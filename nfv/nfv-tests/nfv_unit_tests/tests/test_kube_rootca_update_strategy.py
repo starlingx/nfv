@@ -16,7 +16,7 @@ from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.strategy._strategy import KubeRootcaUpdateStrategy
 
-from . import sw_update_testcase  # noqa: H304
+from nfv_unit_tests.tests import sw_update_testcase
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',

@@ -16,11 +16,14 @@ from nfv_vim.network_rebalance._dhcp_rebalance import _run_state_machine
 from nfv_vim.network_rebalance._dhcp_rebalance import add_rebalance_work_dhcp
 from nfv_vim.network_rebalance._dhcp_rebalance import DHCP_REBALANCE_STATE
 
-from . import testcase  # noqa: H304
-from . import utils  # noqa: H304
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
+
 
 DEBUG_PRINTING = False
-# DEBUG_PRINTING = True
+MAX_AGENTS = 40
+MAX_NETWORKS = 200
+MAX_LOOPCOUNT = 2 * MAX_AGENTS * MAX_NETWORKS
 
 _fake_host_table = dict()
 
@@ -28,11 +31,6 @@ _fake_host_table = dict()
 class _fake_host(object):
     def __init__(self, uuid):
         self.uuid = uuid
-
-
-MAX_AGENTS = 40
-MAX_NETWORKS = 200
-MAX_LOOPCOUNT = 2 * MAX_AGENTS * MAX_NETWORKS
 
 
 def build_get_agents_response():

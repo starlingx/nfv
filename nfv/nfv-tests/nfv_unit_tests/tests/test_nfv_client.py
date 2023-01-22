@@ -9,7 +9,7 @@ from unittest import mock
 
 from nfv_client import shell
 
-from . import testcase  # noqa: H304
+from nfv_unit_tests.tests import testcase
 
 
 class TestNFVClientShell(testcase.NFVTestCase):

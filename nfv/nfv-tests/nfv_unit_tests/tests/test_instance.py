@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,8 +23,8 @@ from nfv_vim.tables._instance_table import InstanceTable
 from nfv_vim.tables._instance_type_table import InstanceTypeTable
 from nfv_vim.tables._table import Table
 
-from . import testcase  # noqa: H304
-from . import utils  # noqa: H304
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
 
 
 def fake_event_issue(a, b, c, d):

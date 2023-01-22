@@ -20,7 +20,7 @@ from nfv_vim.strategy._strategy import SwUpgradeStrategy
 
 from nfv_vim.nfvi.objects.v1 import UPGRADE_STATE
 
-from . import sw_update_testcase  # noqa: H304
+from nfv_unit_tests.tests import sw_update_testcase
 
 
 # utility method for the formatting of unlock-hosts stage as dict
