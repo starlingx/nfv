@@ -97,7 +97,6 @@ disable=
   W1505, # deprecated-method
   W1514, # unspecified-encoding
   W0237, # arguments-renamed
-  W4904, # deprecated-class
   W4905, # deprecated-decorator
   E1101, # no-member
   E1111, # assignment-from-no-return
