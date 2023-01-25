@@ -12,7 +12,7 @@ from unittest import mock
 
 from nfv_plugins.nfvi_plugins.clients import kubernetes_client
 
-from . import testcase  # noqa: H304
+from nfv_unit_tests.tests import testcase
 
 
 def mock_load_kube_config(path):

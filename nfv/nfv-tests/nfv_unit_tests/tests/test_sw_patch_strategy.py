@@ -16,7 +16,7 @@ from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.objects import SwPatch
 from nfv_vim.strategy._strategy import SwPatchStrategy
 
-from . import sw_update_testcase  # noqa: H304
+from nfv_unit_tests.tests import sw_update_testcase
 
 
 def create_sw_patch_strategy(

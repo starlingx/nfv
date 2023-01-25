@@ -16,7 +16,7 @@ from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 
-from . import sw_update_testcase  # noqa: H304
+from nfv_unit_tests.tests import sw_update_testcase
 
 
 def create_fw_update_strategy(

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 Wind River Systems, Inc.
+# Copyright (c) 2020-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,6 +13,7 @@ from nfv_vim import host_fsm
 from nfv_vim import nfvi
 from nfv_vim import objects
 
+from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.strategy._strategy import strategy_rebuild_from_dict
 from nfv_vim.tables._host_aggregate_table import HostAggregateTable
 from nfv_vim.tables._host_group_table import HostGroupTable
@@ -21,10 +22,9 @@ from nfv_vim.tables._instance_group_table import InstanceGroupTable
 from nfv_vim.tables._instance_table import InstanceTable
 from nfv_vim.tables._table import Table
 
-from . import testcase  # noqa: H304
-from . import utils  # noqa: H304
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
 
-from nfv_vim.objects import HOST_PERSONALITY
 
 DEBUG_PRINTING = False
 

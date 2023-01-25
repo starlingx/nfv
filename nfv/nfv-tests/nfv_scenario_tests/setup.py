@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from setuptools import find_packages
 from setuptools import setup
 
 setup(
@@ -12,7 +11,9 @@ setup(
     version='1.0.0',
     license='Apache-2.0',
     platforms=['any'],
-    provides='nfv_scenario_tests',
+    provides=['nfv_scenario_tests'],
     data_files=['./config.ini'],
-    packages=find_packages()
+    packages=['nfv_scenario_tests.tests'],
+    package_dir={'nfv_scenario_tests.tests': 'tests'},
+    scripts=['main.py']
 )

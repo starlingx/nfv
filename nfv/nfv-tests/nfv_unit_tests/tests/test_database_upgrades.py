@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,7 +11,7 @@ import tempfile
 from nfv_vim import database
 from nfv_vim import tables
 
-from . import testcase  # noqa: H304
+from nfv_unit_tests.tests import testcase
 
 
 class TestNFVDatabaseUpgrade(testcase.NFVTestCase):

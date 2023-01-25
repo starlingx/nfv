@@ -18,8 +18,8 @@ from nfv_vim.network_rebalance._network_rebalance import _run_state_machine
 from nfv_vim.network_rebalance._network_rebalance import add_rebalance_work_l3
 from nfv_vim.network_rebalance._network_rebalance import L3_REBALANCE_STATE
 
-from . import testcase  # noqa: H304
-from . import utils  # noqa:H304
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
 
 DEBUG_PRINTING = False
 

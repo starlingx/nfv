@@ -11,7 +11,8 @@ from nfv_vim.network_rebalance._network_rebalance import _reschedule_down_agent
 from nfv_vim.network_rebalance._network_rebalance import _reschedule_new_agent
 from nfv_vim.network_rebalance._network_rebalance import L3_REBALANCE_STATE
 
-from . import testcase  # noqa: H304
+from nfv_unit_tests.tests import testcase
+
 
 DEBUG_PRINTING = False
 
