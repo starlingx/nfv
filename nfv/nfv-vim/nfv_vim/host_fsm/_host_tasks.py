@@ -12,7 +12,6 @@ from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_task_work import AuditHostServicesCompleteTaskWork
 from nfv_vim.host_fsm._host_task_work import AuditHostServicesTaskWork
 from nfv_vim.host_fsm._host_task_work import AuditInstancesTaskWork
-from nfv_vim.host_fsm._host_task_work import CreateHostServicesTaskWork
 from nfv_vim.host_fsm._host_task_work import DeleteHostServicesTaskWork
 from nfv_vim.host_fsm._host_task_work import DisableHostServicesTaskWork
 from nfv_vim.host_fsm._host_task_work import EnableHostServicesTaskWork
@@ -40,13 +39,8 @@ class AddHostTask(state_machine.StateTask):
     """
 
     def __init__(self, host):
-        from nfv_vim import objects
-
         self._host_reference = weakref.ref(host)
         task_work_list = list()
-        if host.host_service_configured(objects.HOST_SERVICES.GUEST):
-            task_work_list.append(CreateHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.GUEST))
         super(AddHostTask, self).__init__(
             'add-host_%s' % host.name, task_work_list)
 
@@ -92,9 +86,6 @@ class DeleteHostTask(state_machine.StateTask):
         if host.host_service_configured(objects.HOST_SERVICES.NETWORK):
             task_work_list.append(DeleteHostServicesTaskWork(
                 self, host, objects.HOST_SERVICES.NETWORK))
-        if host.host_service_configured(objects.HOST_SERVICES.GUEST):
-            task_work_list.append(DeleteHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.GUEST))
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
             task_work_list.append(DeleteHostServicesTaskWork(
                 self, host, objects.HOST_SERVICES.CONTAINER))
@@ -158,9 +149,6 @@ class EnableHostTask(state_machine.StateTask):
                 self, host, objects.HOST_SERVICES.NETWORK))
             task_work_list.append(EnableHostServicesTaskWork(
                 self, host, objects.HOST_SERVICES.NETWORK))
-        if host.host_service_configured(objects.HOST_SERVICES.GUEST):
-            task_work_list.append(EnableHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.GUEST))
         task_work_list.append(NotifyHostServicesEnabledTaskWork(
             self, host, force_pass=True))
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
@@ -222,9 +210,6 @@ class DisableHostTask(state_machine.StateTask):
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             task_work_list.append(DisableHostServicesTaskWork(
                 self, host, objects.HOST_SERVICES.COMPUTE))
-        if host.host_service_configured(objects.HOST_SERVICES.GUEST):
-            task_work_list.append(DisableHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.GUEST))
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             task_work_list.append(QueryHypervisorTaskWork(
                 self, host, force_pass=True))
@@ -561,9 +546,6 @@ class AuditEnabledHostTask(state_machine.StateTask):
         if host.host_service_configured(objects.HOST_SERVICES.NETWORK):
             task_work_list.append(AuditHostServicesTaskWork(
                 self, host, objects.HOST_SERVICES.NETWORK, force_pass=True))
-        if host.host_service_configured(objects.HOST_SERVICES.GUEST):
-            task_work_list.append(AuditHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.GUEST, force_pass=True))
         task_work_list.append(AuditHostServicesCompleteTaskWork(
             self, host))
         super(AuditEnabledHostTask, self).__init__(
