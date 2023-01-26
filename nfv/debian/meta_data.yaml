@@ -12,4 +12,6 @@ src_files:
   - nfv-vim
 revision:
   dist: $STX_DIST
-  PKG_GITREVCOUNT: true
+  GITREVCOUNT:
+    BASE_SRCREV: a2d39ebd1f3453aa36bc0b789930be18242f6ed2
+    SRC_DIR: ${MY_REPO}/stx/nfv/nfv
