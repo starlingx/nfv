@@ -1,10 +1,10 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import configparser
 import six
-from six.moves import configparser
 
 from nfv_common.debug._debug_defs import DEBUG_LEVEL
 
@@ -65,7 +65,7 @@ class DebugConfig(object):
         Load debug configuration
         """
         if self._config is None:
-            self._config = configparser.SafeConfigParser()
+            self._config = configparser.ConfigParser()
         self._config.read(self._filename)
 
     @property
