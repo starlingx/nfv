@@ -41,7 +41,7 @@ class OpenStackException(exceptions.PickleableException):
         Return a tuple so that we can properly pickle the exception
         """
         return (OpenStackException, (self._method, self._url, self._headers,
-                                     self._body, self.message, self._reason))  # pylint: disable=W1645
+                                     self._body, self.message, self._reason))
 
     @property
     def message(self):
@@ -101,7 +101,7 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         """
         return (OpenStackRestAPIException, (self._method, self._url,
                                             self._headers, self._body,
-                                            self._status_code, self.message,  # pylint: disable=W1645
+                                            self._status_code, self.message,
                                             self._reason,
                                             self._response_headers,
                                             self._response_body,
@@ -170,7 +170,7 @@ class NotFound(exceptions.PickleableException):
         """
         Return a tuple so that we can properly pickle the exception
         """
-        return NotFound, (self.message,)  # pylint: disable=W1645
+        return NotFound, (self.message,)
 
     @property
     def message(self):
