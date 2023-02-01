@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -816,7 +816,9 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                                 request_dispatch.send_header(key, value)
                         request_dispatch.end_headers()
                     if http_body is not None:
-                        request_dispatch.wfile.write(http_body.encode())
+                        if hasattr(http_body, "encode"):
+                            http_body = http_body.encode()
+                        request_dispatch.wfile.write(http_body)
                     request_dispatch.done()
                     DLOG.info("Sent response for request %s." % request_uuid)
 

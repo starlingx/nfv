@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -61,7 +61,7 @@ class APIController(Middleware):
         return self._default_dispatcher
 
     def _is_nfvi_request(self, request):
-        body = get_jason_request_body(request)
+        body = get_json_request_body(request)
         data = json.loads(body)
         for action in self._actions:
             if action in list(data):
@@ -86,7 +86,7 @@ class APIController(Middleware):
 
     def _generate_log(self, req):
         environ = req.environ
-        body = get_jason_request_body(req)
+        body = get_json_request_body(req)
         if CONF.debug and body is not None:
             data = json.loads(body)
             self._print_data(data)
@@ -203,12 +203,12 @@ class DebugHeaders(Middleware):
             LOG.info('-' * 70 + '\n')
 
 
-def get_jason_request_body(request):
+def get_json_request_body(request):
     content_type = request.content_type
     if not content_type or content_type.startswith('text/plain'):
         LOG.info("Content type null or plain text")
         content_type = 'application/json'
     if content_type in ('JSON', 'application/json') and \
-            request.body.startswith('{'):
+            request.body.startswith(b'{'):
         LOG.debug("Req body: (%s)" % request.body)
         return request.body

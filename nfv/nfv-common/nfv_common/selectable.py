@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,6 +11,8 @@ from six.moves import queue as threading_queue
 
 class ThreadQueue(object):
     def __init__(self, queue_id):
+        if hasattr(queue_id, "encode"):
+            queue_id = queue_id.encode()
         self._queue_id = queue_id
         self._send_socket, self._receive_socket = socket.socketpair()
         self._receive_socket.setblocking(False)

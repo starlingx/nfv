@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -379,7 +379,19 @@ class InstanceActionData(ObjectData):
         if self.context is None:
             data['context'] = dict()
         else:
-            data['context'] = self.context.as_dict()
+            context = self.context.as_dict().copy()
+
+            # In Python 3, it has been observed that some values present
+            # in the `context` dictionary are bytes instead of strings.
+            # This can lead to some exceptions later in the code when
+            # attempting to serialize this object into JSON.
+            if six.PY3:
+                for key, value in context.items():
+                    if isinstance(value, bytes):
+                        context[key] = value.decode()
+
+            data['context'] = context
+
         return data
 
     def __str__(self):

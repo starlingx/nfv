@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -323,7 +323,10 @@ def _rest_api_request(token_id,
                 request_info.add_header(header_type, header_value)
 
         if api_cmd_payload is not None:
-            request_info.data = api_cmd_payload.encode()
+            if hasattr(api_cmd_payload, "encode"):
+                request_info.data = api_cmd_payload.encode()
+            else:
+                request_info.data = api_cmd_payload
 
         DLOG.verbose("Rest-API method=%s, api_cmd=%s, api_cmd_headers=%s, "
                      "api_cmd_payload=%s" % (method, api_cmd, api_cmd_headers,

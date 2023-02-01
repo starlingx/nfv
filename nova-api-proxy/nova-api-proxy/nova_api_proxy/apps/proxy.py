@@ -7,7 +7,7 @@
 # (c) 2005 Ian Bicking and contributors; written for Paste (http://pythonpaste.org)
 # Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -39,6 +39,15 @@ class Proxy(Application):
         LOG.debug("Proxy the request to the remote host: (%s)", environ[
             'HTTP_HOST'])
         start_ms = get_monotonic_timestamp_in_ms()
+
+        # In Python 3, the builtin `http` library raises an exception if one
+        # or more headers are set to `NoneType`. See:
+        # https://github.com/python/cpython/blob/3.9/Lib/http/client.py#L1253
+        for key, value in environ.items():
+            if key.startswith("HTTP_"):
+                if value is None:
+                    environ[key] = ""
+
         result = self.proxy_app(environ, start_response)
         now_ms = get_monotonic_timestamp_in_ms()
         elapsed_secs = (now_ms - start_ms) // 1000
