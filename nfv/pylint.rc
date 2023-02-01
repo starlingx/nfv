@@ -88,9 +88,10 @@ disable=
   W0613, # unused-argument
   W0621, # redefined-outer-name
   W0622, # redefined-builtin
-  W0703, # broad-except
+  W0703, # broad-except (renamed in pylint 2.16 to broad-exception-caught)
   W0706, # try-except-raise
   W0707, # raise-missing-from
+  W0719, # broad-exception-raised
   W1310, # format-string-without-interpolation
   W1401, # anomalous-backslash-in-string
   W1406, # redundant-u-string-prefix
