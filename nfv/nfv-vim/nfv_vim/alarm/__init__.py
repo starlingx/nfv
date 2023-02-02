@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,8 +7,6 @@ from nfv_common.alarm import *  # noqa: F401,F403
 
 from nfv_vim.alarm._general import clear_general_alarm  # noqa: F401
 from nfv_vim.alarm._general import raise_general_alarm  # noqa: F401
-from nfv_vim.alarm._host import host_clear_alarm  # noqa: F401
-from nfv_vim.alarm._host import host_raise_alarm  # noqa: F401
 from nfv_vim.alarm._instance import instance_clear_alarm  # noqa: F401
 from nfv_vim.alarm._instance import instance_manage_alarms  # noqa: F401
 from nfv_vim.alarm._instance import instance_raise_alarm  # noqa: F401

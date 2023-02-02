@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -32,8 +32,6 @@ _fm_event_id_mapping = dict([
      fm_constants.FM_LOG_ID_HOST_SERVICES_ENABLED),
     (event_log_objects_v1.EVENT_ID.HOST_SERVICES_DISABLED,
      fm_constants.FM_LOG_ID_HOST_SERVICES_DISABLED),
-    (event_log_objects_v1.EVENT_ID.HOST_SERVICES_FAILED,
-     fm_constants.FM_LOG_ID_HOST_SERVICES_FAILED),
     (event_log_objects_v1.EVENT_ID.HYPERVISOR_STATE_CHANGE,
      fm_constants.FM_LOG_ID_HYPERVISOR_STATE_CHANGE),
     (event_log_objects_v1.EVENT_ID.INSTANCE_RENAMED,
