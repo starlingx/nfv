@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,6 @@ from nfv_common.helpers import Singleton
 
 from nfv_vim.objects._object import ObjectData
 
-from nfv_vim import alarm
 from nfv_vim import event_log
 from nfv_vim import host_fsm
 from nfv_vim import nfvi
@@ -124,7 +123,6 @@ class Host(ObjectData):
                 HOST_SERVICE_STATE.ENABLED if self.is_enabled() else \
                 HOST_SERVICE_STATE.DISABLED
 
-        self._alarms = list()
         self._events = list()
 
     @property
@@ -730,7 +728,6 @@ class Host(ObjectData):
         """
         NFVI Host Delete
         """
-        alarm.host_clear_alarm(self._alarms)
         self._fsm.handle_event(host_fsm.HOST_EVENT.DELETE)
 
     def periodic_timer(self):
@@ -774,43 +771,11 @@ class Host(ObjectData):
             if HOST_SERVICE_STATE.ENABLED == host_service_state:
                 self._events = event_log.host_issue_log(
                     self, event_log.EVENT_ID.HOST_SERVICES_ENABLED)
-                alarm.host_clear_alarm(self._alarms)
-                self._alarms[:] = list()
 
             elif HOST_SERVICE_STATE.DISABLED == host_service_state:
                 # Always log the disabled compute service
                 self._events = event_log.host_issue_log(
                     self, event_log.EVENT_ID.HOST_SERVICES_DISABLED)
-                # Clear any previous alarms for this host
-                alarm.host_clear_alarm(self._alarms)
-                self._alarms[:] = list()
-                # Alarm the disabled compute service if the host is still
-                # enabled and is not being locked. Alarm it as a failure.
-                if self.nfvi_host_is_enabled():
-                    if reason is None:
-                        additional_text = ''
-                    else:
-                        additional_text = ", %s" % reason
-                    self._alarms = alarm.host_raise_alarm(
-                        self, alarm.ALARM_TYPE.HOST_SERVICES_FAILED,
-                        additional_text=additional_text)
-
-            elif HOST_SERVICE_STATE.FAILED == host_service_state:
-                if reason is None:
-                    additional_text = ''
-                else:
-                    additional_text = ", %s" % reason
-
-                self._events = event_log.host_issue_log(
-                    self, event_log.EVENT_ID.HOST_SERVICES_FAILED,
-                    additional_text=additional_text)
-                # Clear any previous alarms for this host
-                alarm.host_clear_alarm(self._alarms)
-                self._alarms[:] = list()
-                # Alarm the failed compute service
-                self._alarms = alarm.host_raise_alarm(
-                    self, alarm.ALARM_TYPE.HOST_SERVICES_FAILED,
-                    additional_text=additional_text)
 
     def nfvi_host_upgrade_status(self, upgrade_inprogress, recover_instances):
         """

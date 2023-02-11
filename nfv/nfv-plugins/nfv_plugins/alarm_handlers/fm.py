@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -24,8 +24,6 @@ DLOG = debug.debug_get_logger('nfv_plugins.alarm_handlers.fm')
 _fm_alarm_id_mapping = dict([
     (alarm_objects_v1.ALARM_TYPE.MULTI_NODE_RECOVERY_MODE,
      fm_constants.FM_ALARM_ID_VM_MULTI_NODE_RECOVERY_MODE),
-    (alarm_objects_v1.ALARM_TYPE.HOST_SERVICES_FAILED,
-     fm_constants.FM_ALARM_ID_HOST_SERVICES_FAILED),
     (alarm_objects_v1.ALARM_TYPE.INSTANCE_FAILED,
      fm_constants.FM_ALARM_ID_VM_FAILED),
     (alarm_objects_v1.ALARM_TYPE.INSTANCE_SCHEDULING_FAILED,
