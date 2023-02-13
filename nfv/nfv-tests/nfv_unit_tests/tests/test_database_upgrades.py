@@ -26,6 +26,20 @@ class TestNFVDatabaseUpgrade(testcase.NFVTestCase):
         super(TestNFVDatabaseUpgrade, self).tearDown()
         shutil.rmtree(self.db_dir)
 
+    def test_nfv_vim_database_load_and_dump(self):
+        """
+        Test VIM database load
+        """
+        root_dir = os.environ['VIRTUAL_ENV']
+        config = dict()
+        config['database_dir'] = self.db_dir
+        database.database_initialize(config)
+        data_input = "%s/nfv_vim_db_stx_19.12" % root_dir
+        data_output = "%s/nfv_vim_db_stx_19.12.dump" % root_dir
+        database.database_load_data(data_input)
+        database.database_dump_data(data_output)
+        database.database_finalize()
+
     def test_nfv_vim_database_upgrade_from_19_12(self):
         """
         Test VIM database upgrades from stx 19_12
