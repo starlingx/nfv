@@ -67,12 +67,13 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         """
         Create an OpenStack Rest-API exception
         """
-        super(OpenStackRestAPIException, self).__init__(message)
+        super(OpenStackRestAPIException, self).__init__(message, reason)
         self._method = method
         self._url = url
         self._headers = headers
         self._body = body
         self._status_code = status_code  # as defined in RFC 2616
+        self._message = message
         self._reason = reason  # a message string or another exception
         self._response_headers = response_headers
         self._response_body = response_body
@@ -99,9 +100,12 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         """
         Return a tuple so that we can properly pickle the exception
         """
-        return (OpenStackRestAPIException, (self._method, self._url,
-                                            self._headers, self._body,
-                                            self._status_code, self.message,
+        return (OpenStackRestAPIException, (self._method,
+                                            self._url,
+                                            self._headers,
+                                            self._body,
+                                            self._status_code,
+                                            self.message,
                                             self._reason,
                                             self._response_headers,
                                             self._response_body,
@@ -134,6 +138,13 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         Returns the HTTP response reason
         """
         return self._response_reason
+
+    @property
+    def message(self):
+        """
+        Returns the message for the exception
+        """
+        return self._message
 
     @property
     def reason(self):
