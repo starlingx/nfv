@@ -3358,7 +3358,7 @@ class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
                  in_progress_state,
                  fail_state,
                  phase,
-                 timeout_in_secs=600):
+                 timeout_in_secs=3600):
         super(AbstractKubeRootcaUpdatePodsStep, self).__init__(
              step_name,
              success_state,

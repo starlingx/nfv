@@ -28,8 +28,8 @@ from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.infrastructure_api')
 
-# Allow 600 seconds to determine if a kube rootca host update has stalled
-MAX_KUBE_ROOTCA_HOST_UPDATE_DURATION = 600
+# Allow 3600 seconds to determine if a kube rootca host update has stalled
+MAX_KUBE_ROOTCA_HOST_UPDATE_DURATION = 3600
 
 
 def host_state(host_uuid, host_name, host_personality, host_sub_functions,
