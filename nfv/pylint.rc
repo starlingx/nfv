@@ -100,7 +100,6 @@ disable=
   W0237, # arguments-renamed
   W4905, # deprecated-decorator
   E1101, # no-member
-  E1111, # assignment-from-no-return
   E1121  # too-many-function-args
 
 [REPORTS]
@@ -277,6 +276,5 @@ valid-classmethod-first-arg=cls
 
 
 [EXCEPTIONS]
-# Exceptions that will emit a warning when being caught. Defaults to
-# "Exception"
-overgeneral-exceptions=Exception
+# Exceptions that will emit a warning when caught.
+overgeneral-exceptions=builtins.BaseException,builtins.Exception

@@ -46,5 +46,5 @@ class TestDebugConfig(testcase.NFVTestCase):
         self.assertEqual(Debug()._debug_level, DEBUG_LEVEL.VERBOSE)
 
         # call reload_config to undo the local modification
-        config = debug.debug_reload_config()
+        debug.debug_reload_config()
         self.assertNotEqual(Debug()._debug_level, DEBUG_LEVEL.VERBOSE)

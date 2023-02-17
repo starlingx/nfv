@@ -29,11 +29,8 @@ DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.clients.kubernetes_clien
 # in the python Kubernetes client to bypass the "none image"
 # check because the error is not from kubernetes.
 #
-# This workaround should be removed if the proposed solutions
-# can be made in kubernetes or a workaround can be implemented
-# in containerd.
-# https://github.com/kubernetes/kubernetes/pull/79018
-# https://github.com/containerd/containerd/issues/4771
+# This workaround should be removed when we update to
+# kubernetes client v22
 def names(self, names):
     """Monkey patch V1ContainerImage with this to set the names."""
     self._names = names
@@ -41,7 +38,7 @@ def names(self, names):
 
 # Replacing address of "names" in V1ContainerImage
 # with the "names" defined above
-V1ContainerImage.names = V1ContainerImage.names.setter(names)  # pylint: disable=no-member
+V1ContainerImage.names = V1ContainerImage.names.setter(names)  # pylint: disable=assignment-from-no-return
 
 
 def get_client():
