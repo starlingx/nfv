@@ -9,10 +9,8 @@ import uuid
 from nfv_common import strategy as common_strategy
 from nfv_vim import nfvi
 
-from nfv_vim.nfvi.objects.v1 import HostSwPatch
 from nfv_vim.nfvi.objects.v1 import KUBE_UPGRADE_STATE
 from nfv_vim.nfvi.objects.v1 import KubeVersion
-from nfv_vim.nfvi.objects.v1 import SwPatch
 from nfv_vim.objects import KubeUpgrade
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
@@ -23,12 +21,10 @@ from nfv_unit_tests.tests import sw_update_testcase
 
 
 FROM_KUBE_VERSION = '1.2.3'
-TO_KUBE_VERSION = '1.2.4'
-
+MID_KUBE_VERSION = '1.2.4'
+HIGH_KUBE_VERSION = '1.2.5'
+DEFAULT_TO_VERSION = MID_KUBE_VERSION
 FAKE_LOAD = '12.01'
-
-KUBE_PATCH_1 = 'KUBE.1'  # the control plane patch
-KUBE_PATCH_2 = 'KUBE.2'  # the kubelet patch
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -49,7 +45,7 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=10,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
-            to_version=TO_KUBE_VERSION,
+            to_version=MID_KUBE_VERSION,
             single_controller=False,
             nfvi_kube_upgrade=None):
         """
@@ -97,8 +93,6 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             {'name': 'query-kube-versions'},
             {'name': 'query-kube-upgrade'},
             {'name': 'query-kube-host-upgrade'},
-            {'name': 'query-sw-patches'},
-            {'name': 'query-sw-patch-hosts'},
         ]
         expected_results = {
             'total_stages': 1,
@@ -113,17 +107,38 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
 
 class SimplexKubeUpgradeMixin(object):
-    FAKE_PATCH_HOSTS_LIST = [
-        HostSwPatch('controller-0',  # name
-                    'controller',  # personality
-                    FAKE_LOAD,  # sw_version
-                    False,  # requires reboot
-                    False,  # patch_current
-                    'idle',   # state
-                    False,    # patch_failed
-                    False),   # interim_state
-    ]
     FAKE_KUBE_HOST_UPGRADES_LIST = []
+
+    # simplex sets the versions as available
+    FAKE_KUBE_VERSIONS_LIST = [
+        KubeVersion(
+            FROM_KUBE_VERSION,  # kube_version
+            'active',  # state
+            True,  # target
+            [],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []   # available_patches
+        ),
+        KubeVersion(
+            MID_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [FROM_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
+            HIGH_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [MID_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+    ]
 
     def setUp(self):
         super(SimplexKubeUpgradeMixin, self).setUp()
@@ -136,27 +151,9 @@ class SimplexKubeUpgradeMixin(object):
 
 
 class DuplexKubeUpgradeMixin(object):
-    FAKE_PATCH_HOSTS_LIST = [
-        HostSwPatch('controller-0', 'controller', FAKE_LOAD,
-                    False, False, 'idle', False, False),
-        HostSwPatch('controller-1', 'controller', FAKE_LOAD,
-                    False, False, 'idle', False, False),
-    ]
     FAKE_KUBE_HOST_UPGRADES_LIST = []
 
-    def setUp(self):
-        super(DuplexKubeUpgradeMixin, self).setUp()
-
-    def is_simplex(self):
-        return False
-
-    def is_duplex(self):
-        return True
-
-
-class KubePatchMixin(object):
-    """This Mixin represents the patches for a kube upgrade in proper state"""
-
+    # duplex sets only one version as available
     FAKE_KUBE_VERSIONS_LIST = [
         KubeVersion(
             FROM_KUBE_VERSION,  # kube_version
@@ -168,111 +165,38 @@ class KubePatchMixin(object):
             []   # available_patches
         ),
         KubeVersion(
-            TO_KUBE_VERSION,  # kube_version
+            MID_KUBE_VERSION,  # kube_version
             'available',  # state
             False,  # target
             [FROM_KUBE_VERSION],  # upgrade_from
             [],  # downgrade_to
-            [KUBE_PATCH_1],  # applied_patches
-            [KUBE_PATCH_2]  # available_patches
-        )
-    ]
-
-    FAKE_PATCHES_LIST = [
-        SwPatch(KUBE_PATCH_1, FAKE_LOAD, 'Applied', 'Applied'),
-        SwPatch(KUBE_PATCH_2, FAKE_LOAD, 'Available', 'Available'),
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
+            HIGH_KUBE_VERSION,  # kube_version
+            'unavailable',  # state
+            False,  # target
+            [MID_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
     ]
 
     def setUp(self):
-        super(KubePatchMixin, self).setUp()
+        super(DuplexKubeUpgradeMixin, self).setUp()
 
-    def _kube_upgrade_patch_storage_stage(self, host_list, reboot):
-        steps = [
-            {'name': 'query-alarms', },
-            {'name': 'sw-patch-hosts',
-             'entity_type': 'hosts',
-             'entity_names': host_list,
-            },
-            {'name': 'system-stabilize',
-             'timeout': 30,
-            },
-        ]
-        return {
-            'name': 'sw-patch-storage-hosts',
-            'total_steps': len(steps),
-            'steps': steps,
-        }
+    def is_simplex(self):
+        return False
 
-    def _kube_upgrade_patch_worker_stage(self, host_list, reboot):
-        steps = [
-            {'name': 'query-alarms', },
-            {'name': 'sw-patch-hosts',
-             'entity_type': 'hosts',
-             'entity_names': host_list,
-            },
-            {'name': 'system-stabilize',
-             'timeout': 30,
-            },
-        ]
-        return {
-            'name': 'sw-patch-worker-hosts',
-            'total_steps': len(steps),
-            'steps': steps,
-        }
-
-    def _kube_upgrade_patch_controller_stage(self, host_list, reboot):
-        steps = [
-            {'name': 'query-alarms', },
-            {'name': 'sw-patch-hosts',
-             'entity_type': 'hosts',
-             'entity_names': host_list,
-            },
-            {'name': 'system-stabilize',
-             'timeout': 30,
-            },
-        ]
-        return {
-            'name': 'sw-patch-controllers',
-            'total_steps': len(steps),
-            'steps': steps,
-        }
-
-    def _kube_upgrade_patch_stage(self,
-                                  std_controller_list=None,
-                                  worker_list=None,
-                                  storage_list=None):
-        """hosts are patched in the following order
-           controllers, storage, then workers
-        """
-        patch_stages = []
-        patch_stage = {
-            'name': 'kube-upgrade-patch',
-            'total_steps': 1,
-            'steps': [{'name': 'apply-patches',
-                       'entity_type': 'patches',
-                       'entity_names': ['KUBE.2']},
-                     ],
-        }
-        patch_stages.append(patch_stage)
-
-        for host_name in std_controller_list:
-            patch_stages.append(
-                self._kube_upgrade_patch_controller_stage([host_name], False))
-        if storage_list:
-            for sub_list in storage_list:
-                patch_stages.append(
-                    self._kube_upgrade_patch_storage_stage(sub_list, False))
-        if worker_list:
-            for sub_list in worker_list:
-                patch_stages.append(
-                    self._kube_upgrade_patch_worker_stage(sub_list, False))
-        return patch_stages
+    def is_duplex(self):
+        return True
 
 
 class ApplyStageMixin(object):
     """This Mixin will not work unless combined with other mixins.
-    PatchMixin - to provide the setup patches and kube versions
-    HostMixin - to provide the patch hosts and kube host upgrade states
+    HostMixin - to provide the kube host upgrade states
     """
 
     # override any of these prior to calling setup in classes that use mixin
@@ -283,28 +207,27 @@ class ApplyStageMixin(object):
     worker_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
     default_instance_action = SW_UPDATE_INSTANCE_ACTION.STOP_START
 
+    # for multi-kube upgrade: 'to' and 'kube_versions' should be updated
+    default_from_version = FROM_KUBE_VERSION
+    default_to_version = MID_KUBE_VERSION
+    # steps when performing control plane and kubelet upversion
+    kube_versions = [MID_KUBE_VERSION, ]
+
     def setUp(self):
         super(ApplyStageMixin, self).setUp()
 
-    def _create_kube_upgrade_obj(self,
-                                 state,
-                                 from_version=FROM_KUBE_VERSION,
-                                 to_version=TO_KUBE_VERSION):
-        """
-        Create a kube upgrade db object
-        """
+    def _create_kube_upgrade_obj(self, state, from_version, to_version):
+        """Create a kube upgrade db object"""
         return nfvi.objects.v1.KubeUpgrade(state=state,
                                            from_version=from_version,
                                            to_version=to_version)
 
     def _create_built_kube_upgrade_strategy(self,
                                             sw_update_obj,
-                                            to_version=TO_KUBE_VERSION,
+                                            to_version,
                                             single_controller=False,
                                             kube_upgrade=None,
                                             alarms_list=None,
-                                            patch_list=None,
-                                            patch_hosts_list=None,
                                             kube_versions_list=None,
                                             kube_hosts_list=None):
         """
@@ -328,13 +251,6 @@ class ApplyStageMixin(object):
 
         # If any of the input lists are None, replace with defaults
         # this is done to prevent passing a list as a default
-        if patch_list is None:
-            patch_list = self.FAKE_PATCHES_LIST
-        strategy.nfvi_sw_patches = patch_list
-
-        if patch_hosts_list is None:
-            patch_hosts_list = self.FAKE_PATCH_HOSTS_LIST
-        strategy.nfvi_sw_patch_hosts = patch_hosts_list
 
         if kube_versions_list is None:
             kube_versions_list = self.FAKE_KUBE_VERSIONS_LIST
@@ -367,14 +283,26 @@ class ApplyStageMixin(object):
             ],
         }
 
-    def _kube_upgrade_first_control_plane_stage(self):
+    def _kube_upgrade_first_control_plane_stage(self, ver):
         return {
-            'name': 'kube-upgrade-first-control-plane',
+            'name': 'kube-upgrade-first-control-plane %s' % ver,
             'total_steps': 1,
             'steps': [
                 {'name': 'kube-host-upgrade-control-plane',
                  'success_state': 'upgraded-first-master',
                  'fail_state': 'upgrading-first-master-failed'},
+            ],
+        }
+
+    def _kube_upgrade_second_control_plane_stage(self, ver):
+        """This stage only executes on a duplex system"""
+        return {
+            'name': 'kube-upgrade-second-control-plane %s' % ver,
+            'total_steps': 1,
+            'steps': [
+                {'name': 'kube-host-upgrade-control-plane',
+                 'success_state': 'upgraded-second-master',
+                 'fail_state': 'upgrading-second-master-failed'},
             ],
         }
 
@@ -386,18 +314,6 @@ class ApplyStageMixin(object):
                 {'name': 'kube-upgrade-networking',
                  'success_state': 'upgraded-networking',
                  'fail_state': 'upgrading-networking-failed'},
-            ],
-        }
-
-    def _kube_upgrade_second_control_plane_stage(self):
-        """This stage only executes on a duplex system"""
-        return {
-            'name': 'kube-upgrade-second-control-plane',
-            'total_steps': 1,
-            'steps': [
-                {'name': 'kube-host-upgrade-control-plane',
-                 'success_state': 'upgraded-second-master',
-                 'fail_state': 'upgrading-second-master-failed'},
             ],
         }
 
@@ -420,7 +336,7 @@ class ApplyStageMixin(object):
             ],
         }
 
-    def _kube_upgrade_kubelet_controller_stage(self, host, do_lock=True):
+    def _kube_upgrade_kubelet_controller_stage(self, host, ver, do_lock=True):
         """duplex needs to swact/lock/unlock whereas simplex does not"""
         if do_lock:
             steps = [
@@ -448,14 +364,16 @@ class ApplyStageMixin(object):
                  'entity_type': 'hosts', },
                 {'name': 'system-stabilize', },
             ]
+        stage_name = "kube-upgrade-kubelet %s" % ver
         return {
-            'name': 'kube-upgrade-kubelets-controllers',
+            'name': stage_name,
             'total_steps': len(steps),
             'steps': steps,
         }
 
     def _kube_upgrade_kubelet_worker_stage(self,
                                            hosts,
+                                           ver,
                                            do_lock=True,
                                            do_swact=False):
         steps = [{'name': 'query-alarms', }]
@@ -477,13 +395,15 @@ class ApplyStageMixin(object):
                            'entity_type': 'hosts', })
             steps.append({'name': 'wait-alarms-clear', })
 
+        stage_name = "kube-upgrade-kubelet %s" % ver
         return {
-            'name': 'kube-upgrade-kubelets-workers',
+            'name': stage_name,
             'total_steps': len(steps),
             'steps': steps,
         }
 
     def _kube_upgrade_kubelet_stages(self,
+                                     ver,
                                      std_controller_list,
                                      aio_controller_list,
                                      worker_list):
@@ -495,17 +415,19 @@ class ApplyStageMixin(object):
             kubelet_stages.append(
                 self._kube_upgrade_kubelet_controller_stage(
                     host_name,
+                    ver,
                     self.is_duplex()))  # lock is duplex only
         for host_name in aio_controller_list:
             kubelet_stages.append(
                 self._kube_upgrade_kubelet_worker_stage(
                     [host_name],
+                    ver,
                     do_lock=self.is_duplex(),  # lock is duplex only
                     do_swact=self.is_duplex()))  # swact only if we lock
         for sub_list in worker_list:
             # kubelet workers are lock but not controllers, so no swact
             kubelet_stages.append(
-                self._kube_upgrade_kubelet_worker_stage(sub_list, True, False))
+                self._kube_upgrade_kubelet_worker_stage(sub_list, ver, True, False))
         return kubelet_stages
 
     def validate_apply_phase(self, single_controller, kube_upgrade, stages):
@@ -515,6 +437,7 @@ class ApplyStageMixin(object):
         # create a strategy for a system with no existing kube_upgrade
         strategy = self._create_built_kube_upgrade_strategy(
             update_obj,
+            self.default_to_version,
             single_controller=single_controller,
             kube_upgrade=kube_upgrade)
 
@@ -534,19 +457,20 @@ class ApplyStageMixin(object):
     def build_stage_list(self,
                          std_controller_list=None,
                          aio_controller_list=None,
-                         patch_worker_list=None,
                          worker_list=None,
                          storage_list=None,
                          add_start=True,
                          add_download=True,
-                         add_first_plane=True,
                          add_networking=True,
-                         add_second_plane=True,
-                         add_patches=True,
+                         add_first_control_plane=True,
+                         add_second_control_plane=True,
                          add_kubelets=True,
                          add_complete=True,
                          add_cleanup=True):
-        """The order of the host_list determines the patch and kubelets"""
+        """The order of the host_list determines the kubelets"""
+        # We never add a second control plane on a simplex
+        if self.is_simplex():
+            add_second_control_plane = False
         stages = []
         if add_start:
             stages.append(self._kube_upgrade_start_stage())
@@ -554,22 +478,17 @@ class ApplyStageMixin(object):
             stages.append(self._kube_upgrade_download_images_stage())
         if add_networking:
             stages.append(self._kube_upgrade_networking_stage())
-        if add_first_plane:
-            stages.append(self._kube_upgrade_first_control_plane_stage())
-        if add_second_plane:
-            stages.append(self._kube_upgrade_second_control_plane_stage())
-        if add_patches:
-            # patches are not processed like kubelets.
-            # AIO controllers are processed with the worker list
-            stages.extend(self._kube_upgrade_patch_stage(
-                std_controller_list=std_controller_list,
-                worker_list=patch_worker_list,
-                storage_list=storage_list))
-        if add_kubelets:
-            # there are no kubelets on storage
-            stages.extend(self._kube_upgrade_kubelet_stages(std_controller_list,
-                                                            aio_controller_list,
-                                                            worker_list))
+        for ver in self.kube_versions:
+            if add_first_control_plane:
+                stages.append(self._kube_upgrade_first_control_plane_stage(ver))
+            if add_second_control_plane:
+                stages.append(self._kube_upgrade_second_control_plane_stage(ver))
+            if add_kubelets:
+                # there are no kubelets on storage
+                stages.extend(self._kube_upgrade_kubelet_stages(ver,
+                                                                std_controller_list,
+                                                                aio_controller_list,
+                                                                worker_list))
         if add_complete:
             stages.append(self._kube_upgrade_complete_stage())
         if add_cleanup:
@@ -587,10 +506,8 @@ class ApplyStageMixin(object):
         stages = self.build_stage_list(
             std_controller_list=self.std_controller_list,
             aio_controller_list=self.aio_controller_list,
-            patch_worker_list=self.patch_worker_list,
             worker_list=self.worker_list,
-            storage_list=self.storage_list,
-            add_second_plane=self.is_duplex())
+            storage_list=self.storage_list)
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_upgrade_started(self):
@@ -601,16 +518,16 @@ class ApplyStageMixin(object):
         'downloading images' stage
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
+            self.default_from_version,
+            self.default_to_version)
         # explicity bypass the start stage
         stages = self.build_stage_list(
             std_controller_list=self.std_controller_list,
             aio_controller_list=self.aio_controller_list,
-            patch_worker_list=self.patch_worker_list,
             worker_list=self.worker_list,
             storage_list=self.storage_list,
-            add_start=False,
-            add_second_plane=self.is_duplex())
+            add_start=False)
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_upgrade_complete(self):
@@ -620,12 +537,22 @@ class ApplyStageMixin(object):
         It is expected to resume at the cleanup stage
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
+            self.default_from_version,
+            self.default_to_version)
         # not using build_stage_list utility since the list of stages is small
         stages = [
             self._kube_upgrade_cleanup_stage(),
         ]
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+
+class MultiApplyStageMixin(ApplyStageMixin):
+    default_to_version = HIGH_KUBE_VERSION
+    kube_versions = [MID_KUBE_VERSION, HIGH_KUBE_VERSION, ]
+
+    def setUp(self):
+        super(MultiApplyStageMixin, self).setUp()
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -637,7 +564,6 @@ class ApplyStageMixin(object):
 @mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
-                               KubePatchMixin,
                                ApplyStageMixin,
                                SimplexKubeUpgradeMixin):
     def setUp(self):
@@ -645,7 +571,6 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         self.create_host('controller-0', aio=True)
         # AIO will be patched in the worker list
         self.std_controller_list = []
-        self.patch_worker_list = [['controller-0']]  # nested list
         # AIO kubelet phase does not process controller with the workers
         self.aio_controller_list = ['controller-0']
         self.worker_list = []
@@ -658,21 +583,20 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         It is expected to resume at the 'downloading images' stage
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED,
+            self.default_from_version,
+            self.default_to_version)
         stages = [
             self._kube_upgrade_download_images_stage(),
             self._kube_upgrade_networking_stage(),
-            self._kube_upgrade_first_control_plane_stage(),
         ]
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -686,20 +610,20 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         It is expected to resume at the 'first control plane' stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES,
+            self.default_from_version,
+            self.default_to_version)
         stages = [
             self._kube_upgrade_networking_stage(),
-            self._kube_upgrade_first_control_plane_stage(),
         ]
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(
+                ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -713,19 +637,18 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         It is expected to resume and retry the 'first control plane' stage
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED)
-        stages = [
-            self._kube_upgrade_first_control_plane_stage(),
-        ]
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+            KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED,
+            self.default_from_version,
+            self.default_to_version)
+        stages = []
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(
+                ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -739,17 +662,16 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         It is expected to resume at the second control plane stage in duplex
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+            self.default_from_version,
+            self.default_to_version)
         stages = []
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+        for ver in self.kube_versions:
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -763,20 +685,20 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         It is expected to retry and resume at the networking stage
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED,
+            self.default_from_version,
+            self.default_to_version)
         stages = [
             self._kube_upgrade_networking_stage(),
-            self._kube_upgrade_first_control_plane_stage(),
         ]
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(
+                ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -787,22 +709,21 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         """
         Test the kube_upgrade strategy creation when there is only a simplex
         and the upgrade had previously stopped after successful networking.
-        It is expected to resume at the patch stage
+        It is expected to resume at the first control plane
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING)
-        stages = [
-            self._kube_upgrade_first_control_plane_stage(),
-        ]
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+            KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
+            self.default_from_version,
+            self.default_to_version)
+        stages = []
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(
+                ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -815,20 +736,19 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         and the upgrade had previously stopped after a second control plane
         state is encountered.
         There should never be a second control plane state in a simplex, so
-        the stages should skip over it to the patch stage.
+        the stages should skip over it to the kubelet stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
+            self.default_from_version,
+            self.default_to_version)
         stages = []
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+        for ver in self.kube_versions:
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -840,21 +760,20 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         Test the kube_upgrade strategy creation when there is only a simplex
         and the upgrade had previously stopped after a second control plane
         failure state is encountered.
-        There should never be a second control plane state in a simplex, so
-        the stages should skip over it to the patch stage.
+        There should never be a second control plane state in a simplex
+        so the logic should just proceed to the kubelets
         """
         kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED)
+            KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED,
+            self.default_from_version,
+            self.default_to_version)
         stages = []
-        stages.extend(
-            self._kube_upgrade_patch_stage(
-                std_controller_list=self.std_controller_list,
-                worker_list=self.patch_worker_list,
-                storage_list=self.storage_list))
-        stages.extend(
-           self._kube_upgrade_kubelet_stages(self.std_controller_list,
-                                             self.aio_controller_list,
-                                             self.worker_list))
+        for ver in self.kube_versions:
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -870,19 +789,39 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             sw_update_testcase.fake_timer)
 @mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
+class TestSimplexMultiApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
+                                    MultiApplyStageMixin,
+                                    SimplexKubeUpgradeMixin):
+    """This test class can be updated to resume from partial control plane"""
+
+    def setUp(self):
+        super(TestSimplexMultiApplyStrategy, self).setUp()
+        self.create_host('controller-0', aio=True)
+        # AIO kubelet phase does not process controller with the workers
+        self.std_controller_list = []
+        self.aio_controller_list = ['controller-0', ]
+        self.worker_list = []
+        self.storage_list = []
+
+
+@mock.patch('nfv_vim.event_log._instance._event_issue',
+            sw_update_testcase.fake_event_issue)
+@mock.patch('nfv_vim.objects._sw_update.SwUpdate.save',
+            sw_update_testcase.fake_save)
+@mock.patch('nfv_vim.objects._sw_update.timers.timers_create_timer',
+            sw_update_testcase.fake_timer)
+@mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
+            sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestDuplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
-                              KubePatchMixin,
                               ApplyStageMixin,
                               DuplexKubeUpgradeMixin):
     def setUp(self):
         super(TestDuplexApplyStrategy, self).setUp()
         self.create_host('controller-0', aio=True)
         self.create_host('controller-1', aio=True)
-        # AIO will be patched in the worker list
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
         self.aio_controller_list = ['controller-1', 'controller-0']
-        self.patch_worker_list = [['controller-0'], ['controller-1']]
         self.worker_list = []
         self.storage_list = []
 
@@ -896,7 +835,6 @@ class TestDuplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
 @mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestDuplexPlusApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
-                              KubePatchMixin,
                               ApplyStageMixin,
                               DuplexKubeUpgradeMixin):
     def setUp(self):
@@ -908,19 +846,9 @@ class TestDuplexPlusApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         # AIO will be patched in the worker list
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
-        self.patch_worker_list = [['controller-0'], ['controller-1'], ['compute-0']]
         self.aio_controller_list = ['controller-1', 'controller-0']
         self.worker_list = [['compute-0']]  # A nested list
         self.storage_list = []
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('compute-0',  # name
-                        'worker',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -933,7 +861,6 @@ class TestDuplexPlusApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestDuplexPlusApplyStrategyTwoWorkers(
         sw_update_testcase.SwUpdateStrategyTestCase,
-        KubePatchMixin,
         ApplyStageMixin,
         DuplexKubeUpgradeMixin):
 
@@ -947,28 +874,8 @@ class TestDuplexPlusApplyStrategyTwoWorkers(
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
         self.aio_controller_list = ['controller-1', 'controller-0']
-        self.patch_worker_list = [['controller-0'], ['controller-1'], ['compute-0'], ['compute-1']]
         self.worker_list = [['compute-0'], ['compute-1']]  # nested serial list
         self.storage_list = []
-
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('compute-0',  # name
-                        'worker',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('compute-1',  # name
-                        'worker',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -981,7 +888,6 @@ class TestDuplexPlusApplyStrategyTwoWorkers(
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestDuplexPlusApplyStrategyTwoWorkersParallel(
         sw_update_testcase.SwUpdateStrategyTestCase,
-        KubePatchMixin,
         ApplyStageMixin,
         DuplexKubeUpgradeMixin):
 
@@ -997,27 +903,8 @@ class TestDuplexPlusApplyStrategyTwoWorkersParallel(
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
         self.aio_controller_list = ['controller-1', 'controller-0']
-        self.patch_worker_list = [['controller-0'], ['controller-1'], ['compute-0', 'compute-1']]
         self.worker_list = [['compute-0', 'compute-1']]  # nested parallel list
         self.storage_list = []
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('compute-0',  # name
-                        'worker',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('compute-1',  # name
-                        'worker',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -1030,7 +917,6 @@ class TestDuplexPlusApplyStrategyTwoWorkersParallel(
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestDuplexPlusApplyStrategyTwoStorage(
         sw_update_testcase.SwUpdateStrategyTestCase,
-        KubePatchMixin,
         ApplyStageMixin,
         DuplexKubeUpgradeMixin):
 
@@ -1044,27 +930,8 @@ class TestDuplexPlusApplyStrategyTwoStorage(
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
         self.aio_controller_list = ['controller-1', 'controller-0']
-        self.patch_worker_list = [['controller-0'], ['controller-1']]
         self.worker_list = []
         self.storage_list = [['storage-0'], ['storage-1']]  # serial
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('storage-0',  # name
-                        'storage',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('storage-1',  # name
-                        'storage',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -1077,7 +944,6 @@ class TestDuplexPlusApplyStrategyTwoStorage(
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestDuplexPlusApplyStrategyTwoStorageParallel(
         sw_update_testcase.SwUpdateStrategyTestCase,
-        KubePatchMixin,
         ApplyStageMixin,
         DuplexKubeUpgradeMixin):
 
@@ -1093,27 +959,8 @@ class TestDuplexPlusApplyStrategyTwoStorageParallel(
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
         self.aio_controller_list = ['controller-1', 'controller-0']
-        self.patch_worker_list = [['controller-0'], ['controller-1']]
         self.worker_list = []
         self.storage_list = [['storage-0', 'storage-1']]  # parallel
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('storage-0',  # name
-                        'storage',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('storage-1',  # name
-                        'storage',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -1126,7 +973,6 @@ class TestDuplexPlusApplyStrategyTwoStorageParallel(
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
 class TestStandardTwoWorkerTwoStorage(
         sw_update_testcase.SwUpdateStrategyTestCase,
-        KubePatchMixin,
         ApplyStageMixin,
         DuplexKubeUpgradeMixin):
 
@@ -1141,42 +987,5 @@ class TestStandardTwoWorkerTwoStorage(
         self.create_host('storage-1')
         self.std_controller_list = ['controller-1', 'controller-0']
         self.aio_controller_list = []
-        self.patch_worker_list = [['compute-0'], ['compute-1']]
         self.worker_list = [['compute-0'], ['compute-1']]
         self.storage_list = [['storage-0'], ['storage-1']]
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('storage-0',  # name
-                        'storage',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('storage-1',  # name
-                        'storage',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('compute-0',  # name
-                        'worker',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state
-        self.FAKE_PATCH_HOSTS_LIST.append(
-            HostSwPatch('compute-1',  # name
-                        'worker',  # personality
-                        FAKE_LOAD,  # sw_version
-                        False,  # requires reboot
-                        False,  # patch_current
-                        'idle',  # state
-                        False,  # patch_failed
-                        False))  # interim_state

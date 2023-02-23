@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -869,7 +869,8 @@ class UpdateControllerHostsMixin(object):
                                                controllers,
                                                reboot,
                                                strategy_stage_name,
-                                               host_action_step):
+                                               host_action_step,
+                                               extra_args=None):
         """
         Add controller software stages for a controller list to a strategy
         """
@@ -911,7 +912,10 @@ class UpdateControllerHostsMixin(object):
                             stage.add_step(strategy.SwactHostsStep(host_list))
                             stage.add_step(strategy.LockHostsStep(host_list))
                         # Add the action step for these hosts (patch, etc..)
-                        stage.add_step(host_action_step(host_list))
+                        if extra_args is None:
+                            stage.add_step(host_action_step(host_list))
+                        else:
+                            stage.add_step(host_action_step(host_list, extra_args))
                         if reboot:
                             # Cannot unlock right away after certain actions
                             # like SwPatchHostsStep
@@ -941,7 +945,10 @@ class UpdateControllerHostsMixin(object):
                     stage.add_step(strategy.SwactHostsStep(host_list))
                     stage.add_step(strategy.LockHostsStep(host_list))
                 # Add the action step for the local_hosts (patch, etc..)
-                stage.add_step(host_action_step(host_list))
+                if extra_args is None:
+                    stage.add_step(host_action_step(host_list))
+                else:
+                    stage.add_step(host_action_step(host_list, extra_args))
                 if reboot:
                     # Cannot unlock right away after certain actions
                     # like SwPatchHostsStep
@@ -984,13 +991,14 @@ class PatchControllerHostsMixin(UpdateControllerHostsMixin):
 
 
 class UpgradeKubeletControllerHostsMixin(UpdateControllerHostsMixin):
-    def _add_kubelet_controller_strategy_stages(self, controllers, reboot):
+    def _add_kubelet_controller_strategy_stages(self, controllers, to_version, reboot, stage_name):
         from nfv_vim import strategy
         return self._add_update_controller_strategy_stages(
             controllers,
             reboot,
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_KUBELETS_CONTROLLERS,
-            strategy.KubeHostUpgradeKubeletStep)
+            stage_name,
+            strategy.KubeHostUpgradeKubeletStep,
+            extra_args=to_version)
 
 
 class UpdateStorageHostsMixin(object):
@@ -1075,7 +1083,8 @@ class UpdateWorkerHostsMixin(object):
                                            worker_hosts,
                                            reboot,
                                            strategy_stage_name,
-                                           host_action_step):
+                                           host_action_step,
+                                           extra_args=None):
         """
         Add worker update stages to a strategy
         The strategy_stage_name is the type of stage (patch, kube, etc..)
@@ -1169,7 +1178,10 @@ class UpdateWorkerHostsMixin(object):
                         hosts_to_lock, wait_until_disabled=wait_until_disabled))
 
             # Add the action step for these hosts (patch, etc..)
-            stage.add_step(host_action_step(host_list))
+            if extra_args is None:
+                stage.add_step(host_action_step(host_list))
+            else:
+                stage.add_step(host_action_step(host_list, extra_args))
 
             if reboot:
                 # Cannot unlock right away after the action step
@@ -1226,13 +1238,14 @@ class PatchWorkerHostsMixin(UpdateWorkerHostsMixin):
 
 
 class UpgradeKubeletWorkerHostsMixin(UpdateWorkerHostsMixin):
-    def _add_kubelet_worker_strategy_stages(self, worker_hosts, reboot):
+    def _add_kubelet_worker_strategy_stages(self, worker_hosts, to_version, reboot, stage_name):
         from nfv_vim import strategy
         return self._add_update_worker_strategy_stages(
             worker_hosts,
             reboot,
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_KUBELETS_WORKERS,
-            strategy.KubeHostUpgradeKubeletStep)
+            stage_name,
+            strategy.KubeHostUpgradeKubeletStep,
+            extra_args=to_version)
 
 
 ###################################################################
@@ -2958,11 +2971,6 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                           QueryKubeUpgradesMixin,
                           QueryKubeHostUpgradesMixin,
                           QueryKubeVersionsMixin,
-                          QuerySwPatchesMixin,
-                          QuerySwPatchHostsMixin,
-                          PatchControllerHostsMixin,
-                          PatchStorageHostsMixin,
-                          PatchWorkerHostsMixin,
                           UpgradeKubeletControllerHostsMixin,
                           UpgradeKubeletWorkerHostsMixin):
     """
@@ -3002,7 +3010,6 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             '280.002',  # Subcloud resource out-of-sync
             '700.004',  # VM stopped
             '750.006',  # Configuration change requires reapply of cert-manager
-            '900.001',  # Patch in progress (kube orch uses patching)
             '900.007',  # Kube Upgrade in progress
             '900.401',  # kube-upgrade-auto-apply-inprogress
         ]
@@ -3038,11 +3045,68 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         stage.add_step(strategy.QueryKubeVersionsStep())
         stage.add_step(strategy.QueryKubeUpgradeStep())
         stage.add_step(strategy.QueryKubeHostUpgradeStep())
-        stage.add_step(strategy.QuerySwPatchesStep())
-        stage.add_step(strategy.QuerySwPatchHostsStep())
 
         self.build_phase.add_stage(stage)
         super(KubeUpgradeStrategy, self).build()
+
+    def _get_kube_version_steps(self, target_version, kube_list):
+        """Returns an ordered list for a multi-version kubernetes upgrade
+
+        Returns an ordered list of kubernetes versions to complete the upgrade
+         If the target is already the active version, the list will be empty
+        Raises an exception if the kubernetes chain is broken
+        """
+        # convert the kube_list into a dictionary indexed by version
+        kube_dict = {}
+        for kube in kube_list:
+            kube_dict[kube['kube_version']] = kube
+
+        # Populate the kube_sequence
+        # Start with the target version and traverse based on the
+        # 'upgrade_from' field.
+        # The loop ends when we reach the active/partial version
+        # The loop always inserts at the 'front' of the kube_sequence
+        kube_sequence = []
+        ver = target_version
+        loop_count = 0
+        while True:
+            # We should never encounter a version that is not in the dict
+            kube = kube_dict.get(ver)
+            if kube is None:
+                # We do not raise an exception. if the lowest version is
+                # 'partial' its 'upgrade_from' will not exist in the dict,
+                # so we can stop iterating
+                break
+
+            # We do not add the 'active' version to the front of the list
+            # since it will not be updated
+            if kube['state'] == 'active':
+                # active means we are at the end of the sequence
+                break
+
+            # Add to the kube_sequence if it is any state other than 'active'
+            kube_sequence.insert(0, ver)
+
+            # 'partial' means we have started updating that version
+            # There can be two partial states if the control plane
+            # was updated, but the kubelet was not, so add  only the first
+            if kube['state'] == 'partial':
+                # if its partial there is no need for another loop
+                break
+
+            # 'upgrade_from' value is a list of versions however the
+            # list should only ever be a single entry so we get the first
+            # value and allow an exception to  be raised if the list is empty
+            ver = kube['upgrade_from'][0]
+            # go around the loop again...
+
+            # We should NEVER get into an infinite loop, but if the kube-version entries
+            # in sysinv are malformed, we do not want to spin forever
+            loop_count += 1
+            if loop_count > 100:
+                raise Exception("Invalid kubernetes dependency chain detected")
+
+        return kube_sequence
 
     def _kubelet_map(self):
         """Map the host kubelet versions by the host uuid.
@@ -3104,34 +3168,87 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING)
         stage.add_step(strategy.KubeUpgradeNetworkingStep())
         self.apply_phase.add_stage(stage)
-        # Next stage after networking is second control plane (if duplex)
-        self._add_kube_upgrade_first_control_plane_stage()
 
-    def _add_kube_upgrade_first_control_plane_stage(self):
-        """
-        Add first controller control plane kube upgrade stage
-        This stage only occurs after networking
-        It then proceeds to the next stage
-        """
+        # need to update control plane and kubelet per-version
+        self._add_kube_update_stages()
+
+    def _add_kube_update_stages(self):
+        # for a particular version, the order is:
+        # - first control plane
+        # - second control plane
+        # - kubelets
+
+        from nfv_vim import nfvi
+        from nfv_vim import strategy
+        first_host = self.get_first_host()
+        second_host = self.get_second_host()
+        ver_list = self._get_kube_version_steps(self._to_version,
+                                               self._nfvi_kube_versions_list)
+
+        prev_state = None
+        if self.nfvi_kube_upgrade is not None:
+            prev_state = self.nfvi_kube_upgrade.state
+
+        skip_first = False
+        skip_second = False
+        if prev_state in [nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+                          nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER,
+                          nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED]:
+            # we have already proceeded past first control plane
+            skip_first = True
+        elif prev_state in [nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
+                            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS]:
+            # we have already proceeded past first control plane and second control plane
+            skip_first = True
+            skip_second = True
+
+        for kube_ver in ver_list:
+            DLOG.info("Examining %s " % kube_ver)
+
+            # first control plane
+            if skip_first:
+                # skip only occurs on the first loop
+                skip_first = False
+            else:
+                self._add_kube_upgrade_first_control_plane_stage(first_host, kube_ver)
+
+            # second control plane
+            if skip_second:
+                skip_second = False
+            else:
+                self._add_kube_upgrade_second_control_plane_stage(second_host, kube_ver)
+
+            # kubelets
+            self._add_kube_upgrade_kubelets_stage(kube_ver)
+            # kubelets can 'fail' the build. Return abruptly if it does
+            # todo(abailey): change this once all lock/unlock are removed from kubelet
+            if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
+                return
+
+        # after this loop is kube upgrade complete stage
+        self._add_kube_upgrade_complete_stage()
+
+    def _add_kube_upgrade_first_control_plane_stage(self, first_host, kube_ver):
+        """Add first controller control plane kube upgrade stage"""
         from nfv_vim import nfvi
         from nfv_vim import strategy
 
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_FIRST_CONTROL_PLANE)
+        stage_name = "%s %s" % (strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_FIRST_CONTROL_PLANE, kube_ver)
+        stage = strategy.StrategyStage(stage_name)
         first_host = self.get_first_host()
         # force argument is ignored by control plane API
         force = True
         stage.add_step(strategy.KubeHostUpgradeControlPlaneStep(
             first_host,
+            kube_ver,
             force,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED)
         )
         self.apply_phase.add_stage(stage)
-        # Next stage after first control plane is second control plane
-        self._add_kube_upgrade_second_control_plane_stage()
+        return True
 
-    def _add_kube_upgrade_second_control_plane_stage(self):
+    def _add_kube_upgrade_second_control_plane_stage(self, second_host, kube_ver):
         """
         Add second control plane kube upgrade stage
         This stage only occurs after networking and if this is a duplex.
@@ -3140,236 +3257,26 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import nfvi
         from nfv_vim import strategy
 
-        second_host = self.get_second_host()
         if second_host is not None:
             # force argument is ignored by control plane API
             force = True
-            stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_SECOND_CONTROL_PLANE)
+            stage_name = "%s %s" % (strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_SECOND_CONTROL_PLANE, kube_ver)
+            stage = strategy.StrategyStage(stage_name)
             stage.add_step(strategy.KubeHostUpgradeControlPlaneStep(
                 second_host,
+                kube_ver,
                 force,
                 nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
                 nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED)
             )
             self.apply_phase.add_stage(stage)
-        # Next stage after second control plane is to apply kube patch
-        self._add_kube_upgrade_patch_stage()
+            return True
+        return False
 
-    def _check_host_patch(self, host, new_patches):
-        """
-        Check a host for whether it is patch current.
-        :returns: (Boolean,Boolean) host is patch current, host needs reboot
-        """
-        # If any new patches have been applied, assume the host will need it.
-        # If a patch was controller or worker only then this assumption
-        # may not be true.
+    def _add_kube_upgrade_kubelets_stage(self, kube_ver):
+        # todo(abailey): This can be completely redone when lock
+        # and unlock are completely obsoleted
 
-        # There is no way in the vim to determine from a patch if a reboot
-        # will be required until after the patch is applied
-        if new_patches:
-            return (False, False)
-
-        for host_entry in self._nfvi_sw_patch_hosts:
-            if host_entry['name'] == host.name:
-                return (host_entry['patch_current'],
-                        host_entry['requires_reboot'])
-
-        # Did not find a matching entry in the sw patch hosts list.
-        # We cannot determine if it is patch current
-        return (False, False)
-
-    def _add_kube_upgrade_patch_stage(self):
-        """
-        Add patch steps for the kubelet patch
-        If required 'applied' patches have not already been applied, fail this
-        stage.  This stage is meant to apply the patches tagged as 'available'
-        for the kube upgrade.  The patches are then installed on the hosts.
-        """
-        from nfv_vim import strategy
-        from nfv_vim import tables
-
-        applied_patches = None
-        available_patches = None
-        for kube_version_object in self.nfvi_kube_versions_list:
-            if kube_version_object['kube_version'] == self._to_version:
-                applied_patches = kube_version_object['applied_patches']
-                available_patches = kube_version_object['available_patches']
-                break
-
-        # todo(abailey): handle 'committed' state
-
-        # This section validates the 'applied_patches' for a kube upgrade.
-        # Note: validation fails on the first required patch in wrong state
-        # it does not indicate all pre-requisite patches that are invalid.
-        if applied_patches:
-            for kube_patch in applied_patches:
-                matching_patch = None
-                for patch in self.nfvi_sw_patches:
-                    if patch['name'] == kube_patch:
-                        matching_patch = patch
-                        break
-                # - Fail if the required patch is missing
-                # - Fail if the required patch is not applied
-                # - Fail if the required patch is not installed on all hosts
-                if matching_patch is None:
-                    self.report_build_failure("Missing a required patch: [%s]"
-                                              % kube_patch)
-                    return
-                elif matching_patch['repo_state'] != PATCH_REPO_STATE_APPLIED:
-                    self.report_build_failure(
-                         "Required pre-applied patch: [%s] is not applied."
-                         % kube_patch)
-                    return
-                elif matching_patch['patch_state'] != PATCH_STATE_APPLIED:
-                    self.report_build_failure(
-                         "Required patch: [%s] is not installed on all hosts."
-                         % kube_patch)
-                    return
-                else:
-                    DLOG.debug("Verified patch: [%s] is applied and installed"
-                               % kube_patch)
-
-        # This section validates the 'available_patches' for a kube upgrade.
-        # It also sets up the apply and install steps.
-        # 'available_patches' are the patches that need to be applied and
-        # installed on all hosts during kube upgrade orchestration after the
-        # control plane has been setup.
-        patches_to_apply = []
-        patches_need_host_install = False
-        if available_patches:
-            for kube_patch in available_patches:
-                matching_patch = None
-                for patch in self.nfvi_sw_patches:
-                    if patch['name'] == kube_patch:
-                        matching_patch = patch
-                        break
-                # - Fail if the required patch is missing
-                # - Apply the patch if it is not yet applied
-                # - Install the patch on any hosts where it is not installed.
-                if matching_patch is None:
-                    self.report_build_failure("Missing a required patch: [%s]"
-                                              % kube_patch)
-                    return
-                # if there is an applied_patch that is not applied, fail
-                elif matching_patch['repo_state'] != PATCH_REPO_STATE_APPLIED:
-                    DLOG.debug("Preparing to apply available patch %s"
-                               % kube_patch)
-                    patches_to_apply.append(kube_patch)
-                    # we apply the patch, so it must be installed on the hosts
-                    patches_need_host_install = True
-                elif matching_patch['patch_state'] != PATCH_STATE_APPLIED:
-                    # One of the patches is not fully installed on all hosts
-                    patches_need_host_install = True
-                else:
-                    DLOG.debug("Skipping available patch %s already applied"
-                               % kube_patch)
-
-        if patches_to_apply:
-            # Add a stage to 'apply' the patches
-            stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_PATCH)
-            stage.add_step(strategy.ApplySwPatchesStep(patches_to_apply))
-            self.apply_phase.add_stage(stage)
-
-        if patches_to_apply or patches_need_host_install:
-            # add stages to host-install the patches on the different hosts
-
-            # each of the lists has its own stage if it is not empty
-            # kubernetes does not run on storage hosts, but it has kube rpms
-            controller_0_reboot = []
-            controller_0_no_reboot = []
-            controller_1_reboot = []
-            controller_1_no_reboot = []
-            worker_hosts_reboot = []
-            worker_hosts_no_reboot = []
-            storage_hosts_reboot = []
-            storage_hosts_no_reboot = []
-
-            # todo(abailey): refactor the code duplication from  SwPatch
-            host_table = tables.tables_get_host_table()
-            for host in list(host_table.values()):
-                # filter the host out if we do not need to patch it
-                current, reboot = self._check_host_patch(host,
-                                                         patches_to_apply)
-                if not current:
-                    if HOST_NAME.CONTROLLER_0 == host.name:
-                        if reboot:
-                            controller_0_reboot.append(host)
-                        else:
-                            controller_0_no_reboot.append(host)
-                    elif HOST_NAME.CONTROLLER_1 == host.name:
-                        if reboot:
-                            controller_1_reboot.append(host)
-                        else:
-                            controller_1_no_reboot.append(host)
-                    elif HOST_PERSONALITY.STORAGE in host.personality:
-                        if reboot:
-                            storage_hosts_reboot.append(host)
-                        else:
-                            storage_hosts_no_reboot.append(host)
-
-                    # above, An AIO will be added to the controller list, but
-                    # ignored internally by _add_controller_strategy_stages
-                    # so we add it also to the worker list
-                    if HOST_PERSONALITY.WORKER in host.personality:
-                        # Ignore worker hosts that are powered down
-                        if not host.is_offline():
-                            if reboot:
-                                worker_hosts_reboot.append(host)
-                            else:
-                                worker_hosts_no_reboot.append(host)
-
-            # always process but no-reboot before reboot
-            # for controllers of same mode, controller-1 before controller-0
-            STRATEGY_CREATION_COMMANDS = [
-                # controller-1 no-reboot
-                (self._add_controller_strategy_stages,
-                 controller_1_no_reboot,
-                 False),
-                (self._add_controller_strategy_stages,
-                 controller_0_no_reboot,
-                 False),
-                (self._add_controller_strategy_stages,
-                 controller_1_reboot,
-                 True),
-                (self._add_controller_strategy_stages,
-                 controller_0_reboot,
-                 True),
-                # then storage
-                (self._add_storage_strategy_stages,
-                 storage_hosts_no_reboot,
-                 False),
-                (self._add_storage_strategy_stages,
-                 storage_hosts_reboot,
-                 True),
-                # workers last
-                (self._add_worker_strategy_stages,
-                 worker_hosts_no_reboot,
-                 False),
-                (self._add_worker_strategy_stages,
-                 worker_hosts_reboot,
-                 True)
-            ]
-
-            for add_strategy_stages_function, host_list, reboot in \
-                    STRATEGY_CREATION_COMMANDS:
-                if host_list:
-                    # sort each host list by name before adding stages
-                    sorted_host_list = sorted(host_list,
-                                              key=lambda host: host.name)
-                    success, reason = add_strategy_stages_function(
-                        sorted_host_list, reboot)
-                    if not success:
-                        self.report_build_failure(reason)
-                        return
-        else:
-            DLOG.info("No 'available_patches' need to be applied or installed")
-
-        # next stage after this are kubelets, which are updated for all hosts
-        self._add_kube_upgrade_kubelets_stage()
-
-    def _add_kube_upgrade_kubelets_stage(self):
         from nfv_vim import tables
 
         host_table = tables.tables_get_host_table()
@@ -3392,6 +3299,9 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             if kubelet_map.get(host.uuid) == self._to_version:
                 DLOG.info("Host %s kubelet already up to date" % host.name)
                 continue
+            if kubelet_map.get(host.uuid) == kube_ver:
+                DLOG.info("Host %s kubelet already at interim version" % host.name)
+                continue
             if HOST_PERSONALITY.CONTROLLER in host.personality:
                 if HOST_NAME.CONTROLLER_0 == host.name:
                     if HOST_PERSONALITY.WORKER in host.personality:
@@ -3412,34 +3322,38 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
 
         # kubelet order is: controller-1, controller-0 then workers
         # storage nodes can be skipped
+        # we only include 'reboot' in a duplex env (includes workers)
+        reboot_default = not self._single_controller  # We do NOT reboot an AIO-SX host
         HOST_STAGES = [
             (self._add_kubelet_controller_strategy_stages,
              controller_1_std,
-             True),
+             reboot_default),
             (self._add_kubelet_controller_strategy_stages,
              controller_0_std,
-             True),
+             reboot_default),
             (self._add_kubelet_worker_strategy_stages,
              controller_1_workers,
-             True),
+             reboot_default),
             (self._add_kubelet_worker_strategy_stages,
              controller_0_workers,
-             not self._single_controller),  # We do NOT reboot an AIO-SX host
+             reboot_default),
             (self._add_kubelet_worker_strategy_stages,
              worker_hosts,
-             True)
+             reboot_default)
         ]
+        stage_name = "kube-upgrade-kubelet %s" % kube_ver
         for add_kubelet_stages_function, host_list, reboot in HOST_STAGES:
             if host_list:
                 sorted_host_list = sorted(host_list,
                                           key=lambda host: host.name)
                 success, reason = add_kubelet_stages_function(sorted_host_list,
-                                                              reboot)
+                                                              kube_ver,
+                                                              reboot,
+                                                              stage_name)
+                # todo(abailey): We need revisit if this can never fail
                 if not success:
                     self.report_build_failure(reason)
                     return
-        # stage after kubelets is kube upgrade complete stage
-        self._add_kube_upgrade_complete_stage()
 
     def _add_kube_upgrade_complete_stage(self):
         """
@@ -3546,29 +3460,29 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
 
             # After networking -> upgrade first control plane
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING:
-                self._add_kube_upgrade_first_control_plane_stage,
+                self._add_kube_update_stages,
 
             # if upgrading first control plane failed, resume there
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED:
-                self._add_kube_upgrade_first_control_plane_stage,
+                self._add_kube_update_stages,
 
             # After first control plane -> upgrade second control plane
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER:
-                self._add_kube_upgrade_second_control_plane_stage,
+                self._add_kube_update_stages,
 
-            # if upgrading second control plane failed, resume there
+            # Re-attempt second control plane
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED:
-                self._add_kube_upgrade_second_control_plane_stage,
+                self._add_kube_update_stages,
 
-            # After second control plane , proceed with patching
+            # After second control plane , do kubelets
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER:
-                self._add_kube_upgrade_patch_stage,
+                self._add_kube_update_stages,
 
-            # kubelets are next kube upgrade phase after second patch applied
+            # kubelets transition to 'complete' when they are done
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS:
-                self._add_kube_upgrade_kubelets_stage,
+                self._add_kube_update_stages,
 
-            # kubelets applied and upgrade is completed, delete the upgrade
+            # upgrade is completed, delete the upgrade
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE:
                 self._add_kube_upgrade_cleanup_stage,
         }
@@ -3627,6 +3541,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                 self._add_kube_upgrade_start_stage()
             else:
                 # Determine which stage to resume at
+                # this is complicated due to the 'loop'
                 current_state = self.nfvi_kube_upgrade.state
                 resume_from_stage = RESUME_STATE.get(current_state)
                 if resume_from_stage is None:

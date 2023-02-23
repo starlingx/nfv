@@ -25,8 +25,10 @@ from nfv_vim.tables._table import Table
 from nfv_unit_tests.tests import testcase
 from nfv_unit_tests.tests import utils
 
-
+# change the following 2 values to assist with
+# unit test comparison between json structures
 DEBUG_PRINTING = False
+DEBUG_DEPTH = 3
 
 
 def validate_strategy_persists(strategy):
@@ -42,9 +44,9 @@ def validate_strategy_persists(strategy):
     if DEBUG_PRINTING:
         if strategy.as_dict() != new_strategy.as_dict():
             print("==================== Strategy ====================")
-            pprint.pprint(strategy.as_dict())
+            pprint.pprint(strategy.as_dict(), depth=DEBUG_DEPTH)
             print("============== Converted Strategy ================")
-            pprint.pprint(new_strategy.as_dict())
+            pprint.pprint(new_strategy.as_dict(), depth=DEBUG_DEPTH)
     assert strategy.as_dict() == new_strategy.as_dict(), \
         "Strategy changed when converting to/from dict"
 
@@ -57,9 +59,9 @@ def validate_phase(phase, expected_results):
     """
     if DEBUG_PRINTING:
         print("====================== Phase Results ========================")
-        pprint.pprint(phase)
+        pprint.pprint(phase, depth=DEBUG_DEPTH)
         print("===================== Expected Results ======================")
-        pprint.pprint(expected_results)
+        pprint.pprint(expected_results, depth=DEBUG_DEPTH)
 
     for key in expected_results:
         if key == 'stages':
