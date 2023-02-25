@@ -99,7 +99,6 @@ disable=
   W1514, # unspecified-encoding
   W0237, # arguments-renamed
   W4905, # deprecated-decorator
-  E1101, # no-member
   E1121  # too-many-function-args
 
 [REPORTS]

@@ -2262,7 +2262,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
             self._state = strategy.STRATEGY_STATE.BUILD_FAILED
             self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
             self.build_phase.result_reason = "Worker " + msg
-            self.sw_update_obj.strategy_build_complete(
+            self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
                 False, self.build_phase.result_reason)
             self.save()
             return
@@ -2442,7 +2442,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                 self.build_phase.result_reason = 'active alarms present ; '
                 self.build_phase.result_reason += alarm_id_list
-                self.sw_update_obj.strategy_build_complete(
+                self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
                     False, self.build_phase.result_reason)
                 self.save()
                 return
@@ -2453,7 +2453,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
                 DLOG.warn(self.build_phase.result_reason)
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.sw_update_obj.strategy_build_complete(
+                self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
                     False, self.build_phase.result_reason)
                 self.save()
                 return
@@ -2478,15 +2478,15 @@ class FwUpdateStrategy(SwUpdateStrategy):
                         self.build_phase.result = \
                             strategy.STRATEGY_PHASE_RESULT.FAILED
                         self.build_phase.result_reason = reason
-                        self.sw_update_obj.strategy_build_complete(
+                        self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
                             False, self.build_phase.result_reason)
                         self.save()
                         return
         else:
-            self.sw_update_obj.strategy_build_complete(
+            self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
                 False, self.build_phase.result_reason)
 
-        self.sw_update_obj.strategy_build_complete(True, '')
+        self.sw_update_obj.strategy_build_complete(True, '')  # pylint: disable=no-member
         self.save()
 
     def from_dict(self,

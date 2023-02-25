@@ -233,7 +233,7 @@ class StrategyPhase(object):
         Phase Save
         """
         if self.strategy is not None:
-            self.strategy.phase_save()
+            self.strategy.phase_save()  # pylint: disable=no-member
         else:
             DLOG.info("Strategy reference is invalid for phase (%s)." % self._name)
 
@@ -456,7 +456,7 @@ class StrategyPhase(object):
         Strategy Stage Extend Timeout
         """
         if self.strategy is not None:
-            self.strategy.phase_extend_timeout(self)
+            self.strategy.phase_extend_timeout(self)  # pylint: disable=no-member
         else:
             self.refresh_timeouts()
 
@@ -546,7 +546,7 @@ class StrategyPhase(object):
         """
         DLOG.debug("Strategy Phase (%s) complete." % self._name)
         if self.strategy is not None:
-            self.strategy.phase_complete(self, result, reason)
+            self.strategy.phase_complete(self, result, reason)  # pylint: disable=no-member
         else:
             DLOG.info("Strategy reference is invalid for phase (%s)." % self._name)
         return self._result, self._result_reason
