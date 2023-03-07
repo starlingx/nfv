@@ -210,7 +210,7 @@ def setup_fw_update_parser(commands):
 
     # define the create command
     # alarm restrictions, defaults to strict
-    create_strategy_cmd = setup_create_cmd(
+    _ = setup_create_cmd(
         sub_cmds,
         [sw_update.APPLY_TYPE_IGNORE],  # controller supports ignore
         [sw_update.APPLY_TYPE_IGNORE],  # storage supports ignore
@@ -227,13 +227,13 @@ def setup_fw_update_parser(commands):
     # There are no additional create options for firmware update
 
     # define the delete command
-    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    _ = setup_delete_cmd(sub_cmds)
     # define the apply command
-    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    _ = setup_apply_cmd(sub_cmds)
     # define the abort command
-    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    _ = setup_abort_cmd(sub_cmds)
     # define the show command
-    show_strategy_cmd = setup_show_cmd(sub_cmds)
+    _ = setup_show_cmd(sub_cmds)
 
 
 def setup_kube_rootca_update_parser(commands):
@@ -283,13 +283,13 @@ def setup_kube_rootca_update_parser(commands):
         help='Path to a file to be used, otherwise system will generate one')
 
     # define the delete command
-    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    _ = setup_delete_cmd(sub_cmds)
     # define the apply command
-    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    _ = setup_apply_cmd(sub_cmds)
     # define the abort command
-    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    _ = setup_abort_cmd(sub_cmds)
     # define the show command
-    show_strategy_cmd = setup_show_cmd(sub_cmds)
+    _ = setup_show_cmd(sub_cmds)
 
 
 def setup_kube_upgrade_parser(commands):
@@ -332,13 +332,13 @@ def setup_kube_upgrade_parser(commands):
         help='The kubernetes version')
 
     # define the delete command
-    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    _ = setup_delete_cmd(sub_cmds)
     # define the apply command
-    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    _ = setup_apply_cmd(sub_cmds)
     # define the abort command
-    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    _ = setup_abort_cmd(sub_cmds)
     # define the show command
-    show_strategy_cmd = setup_show_cmd(sub_cmds)
+    _ = setup_show_cmd(sub_cmds)
 
 
 def setup_patch_parser(commands):
@@ -356,7 +356,7 @@ def setup_patch_parser(commands):
 
     # define the create command
     # alarm restrictions, defaults to strict
-    create_strategy_cmd = setup_create_cmd(
+    _ = setup_create_cmd(
         sub_cmds,
         [sw_update.APPLY_TYPE_SERIAL,  # controller supports serial
          sw_update.APPLY_TYPE_IGNORE],
@@ -375,13 +375,13 @@ def setup_patch_parser(commands):
     )
 
     # define the delete command
-    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    _ = setup_delete_cmd(sub_cmds)
     # define the apply command
-    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    _ = setup_apply_cmd(sub_cmds)
     # define the abort command
-    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    _ = setup_abort_cmd(sub_cmds)
     # define the show command
-    show_strategy_cmd = setup_show_cmd(sub_cmds)
+    _ = setup_show_cmd(sub_cmds)
 
 
 def setup_upgrade_parser(commands):
@@ -428,13 +428,13 @@ def setup_upgrade_parser(commands):
                                      help=argparse.SUPPRESS)
 
     # define the delete command
-    delete_strategy_cmd = setup_delete_cmd(sub_cmds)
+    _ = setup_delete_cmd(sub_cmds)
     # define the apply command
-    apply_strategy_cmd = setup_apply_cmd(sub_cmds)
+    _ = setup_apply_cmd(sub_cmds)
     # define the abort command
-    abort_strategy_cmd = setup_abort_cmd(sub_cmds)
+    _ = setup_abort_cmd(sub_cmds)
     # define the show command
-    show_strategy_cmd = setup_show_cmd(sub_cmds)
+    _ = setup_show_cmd(sub_cmds)
 
 
 def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value

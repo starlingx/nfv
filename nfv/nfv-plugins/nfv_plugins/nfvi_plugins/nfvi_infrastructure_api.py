@@ -1365,7 +1365,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             future.work(sysinv.get_kube_host_upgrades, self._platform_token)
             future.result = (yield)
             if not future.result.is_complete():
-                DLOG.error("Sysinv Get Kube Host Upgrades did not complete.")
+                error_string = "{} did not complete".format(activity)
+                DLOG.error(error_string)
+                response['reason'] = error_string
                 return
             kube_host_upgrade_list = future.result.data["kube_host_upgrades"]
 

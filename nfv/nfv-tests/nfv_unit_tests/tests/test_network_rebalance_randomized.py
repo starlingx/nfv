@@ -71,7 +71,6 @@ def build_get_agent_routers_response(agent_id):
     get_agent_routers_response['result-data'] = list()
 
     for x in range(0, random.randint(0, MAX_ROUTERS - 1)):
-        host_name = "compute-" + str(x)
         get_agent_routers_response_entry = \
             {"id": agent_id + "_router_" + str(x)}
         get_agent_routers_response['result-data'].append(

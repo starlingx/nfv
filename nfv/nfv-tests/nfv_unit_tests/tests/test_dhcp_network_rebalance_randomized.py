@@ -66,7 +66,6 @@ def build_get_dhcp_agent_networks_response(agent_id,
     get_dhcp_agent_networks_response['result-data'] = list()
 
     for x in range(0, random.randint(0, MAX_NETWORKS - 1)):
-        host_name = "compute-" + str(x)
         net_idx = 0
         net = "physnet0"
         if use_strange_networks:

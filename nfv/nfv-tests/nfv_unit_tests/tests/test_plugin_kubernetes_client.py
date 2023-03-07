@@ -90,7 +90,7 @@ class TestNFVPluginsK8SNodeTaint(testcase.NFVTestCase):
         try:
             kube_client = kubernetes_client.get_client()
             response = kube_client.read_node(node_name)
-        except ApiException as e:
+        except ApiException:
             return False
 
         taints = response.spec.taints

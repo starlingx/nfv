@@ -33,7 +33,8 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
     Ask OpenStack for a token
     """
     try:
-        request_url = urllib.request.urlopen(auth_uri)
+        # handle auth_uri re-direct (300)
+        urllib.request.urlopen(auth_uri)
     except urllib.error.HTTPError as e:
         if e.code == 300:
             auth_uri = e.headers['location']

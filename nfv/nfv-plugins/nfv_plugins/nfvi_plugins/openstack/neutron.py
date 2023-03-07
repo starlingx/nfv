@@ -590,7 +590,7 @@ def delete_network_agents(token, host_name):
             if (agent['host'] == host_name and
                     agent['agent_type'] in supported_agents):
                 api_cmd = url + "/v2.0/agents/%s" % agent['id']
-                response = rest_api_request(token, "DELETE", api_cmd,
+                rest_api_request(token, "DELETE", api_cmd,
                                             api_cmd_headers)
                 num_agents_found = num_agents_found + 1
 
