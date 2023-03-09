@@ -31,7 +31,6 @@ disable=
   C0201, # consider-iterating-dictionary
   C0204, # bad-mcs-classmethod-argument
   C0206, # consider-using-dict-items
-  C0207, # use-maxsplit-arg  !!!
   C0209, # consider-using-f-string
   C0301, # line-too-long
   C0302, # too-many-lines
@@ -65,8 +64,6 @@ disable=
   R1724, # no-else-continue
   R1725, # super-with-arguments
   R1729, # use-a-generator
-  R1730, # consider-using-min-builtin !!!
-  R1731, # consider-using-max-builtin !!!
   R1732, # consider-using-with
   R1734, # use-list-literal
   R1735, # use-dict-literal

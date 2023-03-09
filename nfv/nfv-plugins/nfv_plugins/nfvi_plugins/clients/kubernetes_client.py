@@ -13,7 +13,7 @@ from six.moves import http_client as httplib
 from nfv_common import debug
 from nfv_common.helpers import Result
 
-K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split('.')[0])
+K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split('.', maxsplit=1)[0])
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.clients.kubernetes_client')
 

@@ -1326,15 +1326,13 @@ class Instance(ObjectData):
                     = int(section.get('max_live_migrate_wait_in_secs', 800))
             else:
                 # Ensure specified timeout is between the configured min/max.
-                if self._max_live_migrate_wait_in_secs \
-                        <= max_live_migrate_wait_in_secs_min:
-                    self._max_live_migrate_wait_in_secs \
-                        = max_live_migrate_wait_in_secs_min
+                self._max_live_migrate_wait_in_secs \
+                    = max(self._max_live_migrate_wait_in_secs,
+                          max_live_migrate_wait_in_secs_min)
 
-                if self._max_live_migrate_wait_in_secs \
-                        >= max_live_migrate_wait_in_secs_max:
-                    self._max_live_migrate_wait_in_secs \
-                        = max_live_migrate_wait_in_secs_max
+                self._max_live_migrate_wait_in_secs \
+                    = min(self._max_live_migrate_wait_in_secs,
+                          max_live_migrate_wait_in_secs_max)
 
         if self._max_live_migrate_wait_in_secs is None:
             # No timeout specified and no configured default so use 800.
