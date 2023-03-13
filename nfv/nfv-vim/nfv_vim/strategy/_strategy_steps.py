@@ -2352,7 +2352,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                     DLOG.error("failed to monitor firmware update ; no strategy")
             else:
                 DLOG.error("get host request did not complete")
-        except Exception as e:
+        except Exception:
             DLOG.exception("Caught exception interpreting host info")
             DLOG.error("Response: %s" % response)
 

@@ -462,7 +462,6 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
             fm_probable_cause = fm_constants.ALARM_PROBABLE_CAUSE_65
             fm_event_state = fm_constants.FM_ALARM_STATE_MSG
             fm_severity = _fm_event_importance_mapping[log_data.importance]
-            fm_uuid = None
             fm_reason_text = six.text_type(log_data.reason_text)
             format_log = fm_api.Fault(fm_event_id, fm_event_state,
                                  log_data.entity_type, log_data.entity,

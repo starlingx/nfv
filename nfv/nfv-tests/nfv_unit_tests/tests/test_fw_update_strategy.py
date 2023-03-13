@@ -1988,7 +1988,6 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             max_parallel_worker_hosts=10)
 
-        fw_update_controller_host_list = []
         fw_update_worker_host_list = []
         for host in list(self._host_table.values()):
             if host._nfvi_host.admin_state == nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED:
