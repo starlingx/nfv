@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -383,7 +383,12 @@ def kube_upgrade_start(token, to_version, force=False, alarm_ignore_list=None):
     return response
 
 
-def _patch_kube_upgrade_state(token, new_value):
+def api_data_patch(path, value, op="replace"):
+    # the 'path' is prefixed with a leading '/'
+    return {'path': '/' + path, 'value': value, 'op': op}
+
+
+def _patch_kube_upgrade_state(token, new_value, hostname=None):
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -395,11 +400,10 @@ def _patch_kube_upgrade_state(token, new_value):
     api_cmd_headers['User-Agent'] = "vim/1.0"
 
     api_cmd_payload = list()
-    host_data = dict()
-    host_data['path'] = "/state"
-    host_data['value'] = new_value
-    host_data['op'] = "replace"
-    api_cmd_payload.append(host_data)
+    api_cmd_payload.append(api_data_patch('state', new_value))
+    # some kube upgrade patch commands take a hostname
+    if hostname is not None:
+        api_cmd_payload.append(api_data_patch('hostname', hostname))
 
     return rest_api_request(token,
                             "PATCH",
@@ -447,6 +451,23 @@ def kube_upgrade_networking(token):
     Ask System Inventory to kube upgrade networking
     """
     return _patch_kube_upgrade_state(token, "upgrading-networking")
+
+
+def kube_host_cordon(token, hostname, force):
+    """
+    system kube-host-cordon <host>
+    force is a 'string' but is currently unused
+    """
+    # cordon needs a 'hostname'
+    return _patch_kube_upgrade_state(token, "cordon-started", hostname=hostname)
+
+
+def kube_host_uncordon(token, hostname, force):
+    """
+    system kube-host-uncordon <host>
+    force is a 'string' but is currently unused
+    """
+    return _patch_kube_upgrade_state(token, "uncordon-started", hostname=hostname)
 
 
 def _kube_host_upgrade(token, host_uuid, target_operation, force):

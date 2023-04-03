@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -3178,6 +3178,120 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         except Exception as e:
             DLOG.exception("Caught exception while trying to notify "
                            "host that a host is failed, error=%s." % e)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_host_cordon(self, future, host_uuid, host_name, force, callback):
+        """
+        Cordon a host
+        """
+
+        # ignoring the force argument for now
+        response = dict()
+        response['completed'] = False
+        response['host_uuid'] = host_uuid
+        response['host_name'] = host_name
+        response['reason'] = ''
+
+        action_type = 'kube-host-cordon'
+        sysinv_method = sysinv.kube_host_cordon
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete, "
+                               "host_uuid=%s." % host_uuid)
+                    return
+
+                self._platform_token = future.result.data
+
+            # cordon wants a hostname and not a host_uuid
+            future.work(sysinv_method, self._platform_token, host_name, force)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                return
+
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception while trying to %s "
+                               "a host %s, error=%s." % (action_type, host_name, e))
+                response['reason'] = e.http_response_reason
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to %s a "
+                           "host %s, error=%s." % (action_type, host_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_host_uncordon(self, future, host_uuid, host_name, force, callback):
+        """
+        Uncordon a host
+        """
+        response = dict()
+        response['completed'] = False
+        response['host_uuid'] = host_uuid
+        response['host_name'] = host_name
+        response['reason'] = ''
+
+        action_type = 'kube-host-uncordon'
+        sysinv_method = sysinv.kube_host_uncordon
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete, "
+                               "host_uuid=%s." % host_uuid)
+                    return
+
+                self._platform_token = future.result.data
+
+            # uncordon wants a hostname and not a host_uuid
+            future.work(sysinv_method, self._platform_token, host_name, force)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                return
+
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception while trying to %s "
+                               "a host %s, error=%s." % (action_type, host_name, e))
+                response['reason'] = e.http_response_reason
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to %s a "
+                           "host %s, error=%s." % (action_type, host_name, e))
 
         finally:
             callback.send(response)

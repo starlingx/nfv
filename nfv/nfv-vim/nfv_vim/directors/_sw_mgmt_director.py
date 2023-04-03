@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -280,6 +280,22 @@ class SwMgmtDirector(object):
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.ENABLE_HOST_SERVICES_FAILED, host)
+
+    def kube_host_cordon_failed(self, host):
+        """
+        Called when a kube host cordon fails
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.KUBE_HOST_CORDON_FAILED, host)
+
+    def kube_host_uncordon_failed(self, host):
+        """
+        Called when a kube host uncordon fails
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.KUBE_HOST_UNCORDON_FAILED, host)
 
     def host_unlock_failed(self, host):
         """

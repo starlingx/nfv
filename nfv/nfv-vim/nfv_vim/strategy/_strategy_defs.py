@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -28,6 +28,8 @@ class EventNames(object):
     DISABLE_HOST_SERVICES_FAILED = Constant('disable-host-services-failed')
     ENABLE_HOST_SERVICES_FAILED = Constant('enable-host-services-failed')
     MIGRATE_INSTANCES_FAILED = Constant('migrate-instances-failed')
+    KUBE_HOST_CORDON_FAILED = Constant('kube-host-cordon-failed')
+    KUBE_HOST_UNCORDON_FAILED = Constant('kube-host-uncordon-failed')
     KUBE_HOST_UPGRADE_CONTROL_PLANE_FAILED = \
         Constant('kube-host-upgrade-control-plane-failed')
     KUBE_HOST_UPGRADE_KUBELET_FAILED = \

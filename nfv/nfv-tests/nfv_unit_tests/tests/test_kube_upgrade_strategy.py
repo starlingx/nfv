@@ -283,6 +283,28 @@ class ApplyStageMixin(object):
             ],
         }
 
+    def _kube_host_cordon_stage(self, ver="N/A"):
+        return {
+            'name': 'kube-host-cordon',
+            'total_steps': 1,
+            'steps': [
+                {'name': 'kube-host-cordon',
+                 'success_state': 'cordon-complete',
+                 'fail_state': 'cordon-failed'},
+            ],
+        }
+
+    def _kube_host_uncordon_stage(self, ver="N/A"):
+        return {
+            'name': 'kube-host-uncordon',
+            'total_steps': 1,
+            'steps': [
+                {'name': 'kube-host-uncordon',
+                 'success_state': 'uncordon-complete',
+                 'fail_state': 'uncordon-failed'},
+            ],
+        }
+
     def _kube_upgrade_first_control_plane_stage(self, ver):
         return {
             'name': 'kube-upgrade-first-control-plane %s' % ver,
@@ -462,15 +484,21 @@ class ApplyStageMixin(object):
                          add_start=True,
                          add_download=True,
                          add_networking=True,
+                         add_cordon=True,
                          add_first_control_plane=True,
                          add_second_control_plane=True,
                          add_kubelets=True,
+                         add_uncordon=True,
                          add_complete=True,
                          add_cleanup=True):
         """The order of the host_list determines the kubelets"""
         # We never add a second control plane on a simplex
         if self.is_simplex():
             add_second_control_plane = False
+        # we do not support cordon and uncordon in duplex
+        if self.is_duplex():
+            add_cordon = False
+            add_uncordon = False
         stages = []
         if add_start:
             stages.append(self._kube_upgrade_start_stage())
@@ -478,6 +506,8 @@ class ApplyStageMixin(object):
             stages.append(self._kube_upgrade_download_images_stage())
         if add_networking:
             stages.append(self._kube_upgrade_networking_stage())
+        if add_cordon:
+            stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
             if add_first_control_plane:
                 stages.append(self._kube_upgrade_first_control_plane_stage(ver))
@@ -489,6 +519,8 @@ class ApplyStageMixin(object):
                                                                 std_controller_list,
                                                                 aio_controller_list,
                                                                 worker_list))
+        if add_uncordon:
+            stages.append(self._kube_host_uncordon_stage())
         if add_complete:
             stages.append(self._kube_upgrade_complete_stage())
         if add_cleanup:
@@ -590,6 +622,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self._kube_upgrade_download_images_stage(),
             self._kube_upgrade_networking_stage(),
         ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(ver))
             stages.extend(self._kube_upgrade_kubelet_stages(
@@ -597,6 +631,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -616,6 +652,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         stages = [
             self._kube_upgrade_networking_stage(),
         ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
@@ -624,6 +662,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -649,6 +689,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -672,6 +714,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -691,6 +735,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         stages = [
             self._kube_upgrade_networking_stage(),
         ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
@@ -699,6 +745,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -716,6 +764,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_from_version,
             self.default_to_version)
         stages = []
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
@@ -724,6 +774,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -749,6 +801,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),
@@ -774,6 +828,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
                 self.std_controller_list,
                 self.aio_controller_list,
                 self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
             self._kube_upgrade_cleanup_stage(),

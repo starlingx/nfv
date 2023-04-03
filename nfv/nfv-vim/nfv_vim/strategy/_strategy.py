@@ -3097,13 +3097,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             # 'upgrade_from' value is a list of versions however the
             # list should only ever be a single entry so we get the first
             # value and allow an exception to  be raised if the list is empty
+            # todo(abailey): if the list contains more than one entry the
+            # algorithm may not work, since it may not converge at the active version.
             ver = kube['upgrade_from'][0]
+
             # go around the loop again...
 
             # We should NEVER get into an infinite loop, but if the kube-version entries
             # in sysinv are malformed, we do not want to spin forever
             loop_count += 1
-            if loop_count > 100:
+            if loop_count > 10:
                 raise Exception("Invalid kubernetes dependency chain detected")
 
         return kube_sequence
@@ -3169,21 +3172,55 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         stage.add_step(strategy.KubeUpgradeNetworkingStep())
         self.apply_phase.add_stage(stage)
 
-        # need to update control plane and kubelet per-version
-        self._add_kube_update_stages()
+        # Next stage after networking is cordon
+        self._add_kube_host_cordon_stage()
 
-    def _add_kube_update_stages(self):
-        # for a particular version, the order is:
-        # - first control plane
-        # - second control plane
-        # - kubelets
+    def _add_kube_host_cordon_stage(self):
+        """Add host cordon stage for a host"""
+        # simplex only
 
         from nfv_vim import nfvi
         from nfv_vim import strategy
+
+        first_host = self.get_first_host()
+        second_host = self.get_second_host()
+        is_simplex = second_host is None
+        if is_simplex:
+            # todo(abailey): add rollback support to trigger uncordon
+            stage = strategy.StrategyStage(
+                strategy.STRATEGY_STAGE_NAME.KUBE_HOST_CORDON)
+            stage.add_step(strategy.KubeHostCordonStep(
+                first_host,
+                self._to_version,
+                False,  # force
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_COMPLETE,
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_FAILED)
+            )
+            self.apply_phase.add_stage(stage)
+        self._add_kube_update_stages()
+
+    def _add_kube_update_stages(self):
+        """Stages for control plane, kubelet and cordon"""
+        # Algorithm
+        # -------------------------
+        # Simplex:
+        # - loop over kube versions
+        #   - control plane
+        #   - kubelet
+        # -------------------------
+        # Duplex:
+        # - loop over kube versions
+        #   - first control plane
+        #   - second control plane
+        #   - kubelets
+        # -------------------------
+        from nfv_vim import nfvi
+        from nfv_vim import strategy
+
         first_host = self.get_first_host()
         second_host = self.get_second_host()
         ver_list = self._get_kube_version_steps(self._to_version,
-                                               self._nfvi_kube_versions_list)
+                                                self._nfvi_kube_versions_list)
 
         prev_state = None
         if self.nfvi_kube_upgrade is not None:
@@ -3225,6 +3262,29 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
                 return
 
+        self._add_kube_host_uncordon_stage()
+
+    def _add_kube_host_uncordon_stage(self):
+        """Add host uncordon stage for a host"""
+        # simplex only
+
+        from nfv_vim import nfvi
+        from nfv_vim import strategy
+
+        first_host = self.get_first_host()
+        second_host = self.get_second_host()
+        is_simplex = second_host is None
+        if is_simplex:
+            stage = strategy.StrategyStage(
+                strategy.STRATEGY_STAGE_NAME.KUBE_HOST_UNCORDON)
+            stage.add_step(strategy.KubeHostUncordonStep(
+                first_host,
+                self._to_version,
+                False,  # force
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE,
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED)
+            )
+            self.apply_phase.add_stage(stage)
         # after this loop is kube upgrade complete stage
         self._add_kube_upgrade_complete_stage()
 
@@ -3458,8 +3518,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED:
                 self._add_kube_upgrade_networking_stage,
 
-            # After networking -> upgrade first control plane
+            # After networking -> cordon
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING:
+                self._add_kube_host_cordon_stage,
+
+            # If the state is cordon-failed, resume at cordon stage
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_FAILED:
+                self._add_kube_host_cordon_stage,
+
+            # If the state is cordon-complete, resume at update stages
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_COMPLETE:
                 self._add_kube_update_stages,
 
             # if upgrading first control plane failed, resume there
@@ -3478,9 +3546,17 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER:
                 self._add_kube_update_stages,
 
-            # kubelets transition to 'complete' when they are done
+            # kubelets transition to 'uncordon after they are done
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS:
                 self._add_kube_update_stages,
+
+            # If the state is uncordon-failed, resume at uncordon stage
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED:
+                self._add_kube_host_uncordon_stage,
+
+            # If the state is uncordon-complete, resume at complete stage
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE:
+                self._add_kube_upgrade_complete_stage,
 
             # upgrade is completed, delete the upgrade
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE:

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -50,7 +50,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.LOCK_HOSTS != self._host_operation.operation_type:
@@ -89,7 +89,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.DISABLE_HOST_SERVICES != \
@@ -145,7 +145,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.ENABLE_HOST_SERVICES != \
@@ -206,7 +206,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.UNLOCK_HOSTS != self._host_operation.operation_type:
@@ -244,7 +244,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.REBOOT_HOSTS != self._host_operation.operation_type:
@@ -282,7 +282,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.UPGRADE_HOSTS != self._host_operation.operation_type:
@@ -320,7 +320,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.SWACT_HOSTS != self._host_operation.operation_type:
@@ -358,7 +358,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.FW_UPDATE_HOSTS != self._host_operation.operation_type:
@@ -395,7 +395,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.FW_UPDATE_ABORT_HOSTS != self._host_operation.operation_type:
@@ -515,11 +515,11 @@ class HostDirector(object):
     @staticmethod
     def host_audit(host):
         """
-        Notifies the host director that a host audit is inprogress
+        Notifies the host director that a host audit is in progress
         """
         from nfv_vim import directors
 
-        DLOG.verbose("Notify other directors that a host %s audit is inprogress."
+        DLOG.verbose("Notify other directors that a host %s audit is in progress."
                      % host.name)
         instance_director = directors.get_instance_director()
         instance_director.host_audit(host)
@@ -530,11 +530,11 @@ class HostDirector(object):
     @staticmethod
     def host_abort(host):
         """
-        Notifies the host director that a host abort is inprogress
+        Notifies the host director that a host abort is in progress
         """
         from nfv_vim import directors
 
-        DLOG.info("Notify other directors that a host %s abort is inprogress."
+        DLOG.info("Notify other directors that a host %s abort is in progress."
                   % host.name)
         instance_director = directors.get_instance_director()
         instance_director.host_operation_cancel(host.name)
@@ -824,7 +824,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.KUBE_UPGRADE_HOSTS != self._host_operation.operation_type:
@@ -883,6 +883,162 @@ class HostDirector(object):
 
         return host_operation
 
+    # cordon
+    @coroutine
+    def _nfvi_kube_host_cordon_callback(self):
+        """
+        NFVI Kube Host Cordon Callback
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.verbose("NFVI Kube Host Cordon response=%s." % response)
+        if not response['completed']:
+            DLOG.info("Kube Host Upgrade Cordon failed. Host:%s, reason=%s."
+                      % (response['host_name'], response['reason']))
+
+            host_table = tables.tables_get_host_table()
+            host = host_table.get(response['host_name'], None)
+            if host is None:
+                DLOG.verbose("Host %s does not exist." % response['host_name'])
+                return
+
+            if self._host_operation is None:
+                DLOG.verbose("No host %s operation in progress." % host.name)
+                return
+
+            if OPERATION_TYPE.KUBE_UPGRADE_HOSTS != self._host_operation.operation_type:
+                DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                             % (host.name, self._host_operation.operation_type))
+                return
+
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.kube_host_cordon_failed(host)
+
+    def _nfvi_kube_host_cordon(self,
+                               host_uuid,
+                               host_name,
+                               force):
+        """
+        NFVI Kube Host Cordon
+        """
+        nfvi.nfvi_kube_host_cordon(
+            host_uuid,
+            host_name,
+            force,
+            self._nfvi_kube_host_cordon_callback())
+
+    def kube_host_cordon(self, host_names, force):
+        """
+        Kube Host Cordon for multiple hosts
+        """
+        DLOG.info("Kube Host Cordon for hosts: %s" % host_names)
+
+        host_operation = \
+            Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
+
+        if self._host_operation is not None:
+            DLOG.debug("Canceling previous host operation %s, before "
+                       "continuing with host operation %s."
+                       % (self._host_operation.operation_type,
+                          host_operation.operation_type))
+            self._host_operation = None
+
+        host_table = tables.tables_get_host_table()
+        for host_name in host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                reason = "Unknown host %s given." % host_name
+                DLOG.info(reason)
+                host_operation.set_failed(reason)
+                return host_operation
+
+            host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
+            self._nfvi_kube_host_cordon(host.uuid,
+                                        host.name,
+                                        force)
+        if host_operation.is_inprogress():
+            self._host_operation = host_operation
+        return host_operation
+
+    # uncordon
+    @coroutine
+    def _nfvi_kube_host_uncordon_callback(self):
+        """
+        NFVI Kube Host Uncordon Callback
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.verbose("NFVI Kube Host Uncordon response=%s." % response)
+        if not response['completed']:
+            DLOG.info("Kube Host Upgrade Uncordon failed. Host:%s, reason=%s."
+                      % (response['host_name'], response['reason']))
+
+            host_table = tables.tables_get_host_table()
+            host = host_table.get(response['host_name'], None)
+            if host is None:
+                DLOG.verbose("Host %s does not exist." % response['host_name'])
+                return
+
+            if self._host_operation is None:
+                DLOG.verbose("No host %s operation in progress." % host.name)
+                return
+
+            if OPERATION_TYPE.KUBE_UPGRADE_HOSTS != self._host_operation.operation_type:
+                DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                             % (host.name, self._host_operation.operation_type))
+                return
+
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.kube_host_uncordon_failed(host)
+
+    def _nfvi_kube_host_uncordon(self,
+                                 host_uuid,
+                                 host_name,
+                                 force):
+        """
+        NFVI Kube Host Uncordon
+        """
+        nfvi.nfvi_kube_host_uncordon(
+            host_uuid,
+            host_name,
+            force,
+            self._nfvi_kube_host_uncordon_callback())
+
+    def kube_host_uncordon(self, host_names, force):
+        """
+        Kube Host Uncordon for multiple hosts
+        """
+        DLOG.info("Kube Host Uncordon for hosts: %s" % host_names)
+
+        host_operation = \
+            Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
+
+        if self._host_operation is not None:
+            DLOG.debug("Canceling previous host operation %s, before "
+                       "continuing with host operation %s."
+                       % (self._host_operation.operation_type,
+                          host_operation.operation_type))
+            self._host_operation = None
+
+        host_table = tables.tables_get_host_table()
+        for host_name in host_names:
+            host = host_table.get(host_name, None)
+            if host is None:
+                reason = "Unknown host %s given." % host_name
+                DLOG.info(reason)
+                host_operation.set_failed(reason)
+                return host_operation
+
+            host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
+            self._nfvi_kube_host_uncordon(host.uuid,
+                                        host.name,
+                                        force)
+        if host_operation.is_inprogress():
+            self._host_operation = host_operation
+        return host_operation
+
     @coroutine
     def _nfvi_kube_host_upgrade_kubelet_callback(self):
         """
@@ -904,7 +1060,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.KUBE_UPGRADE_HOSTS != self._host_operation.operation_type:
@@ -978,7 +1134,7 @@ class HostDirector(object):
                 return
 
             if self._host_operation is None:
-                DLOG.verbose("No host %s operation inprogress." % host.name)
+                DLOG.verbose("No host %s operation in progress." % host.name)
                 return
 
             if OPERATION_TYPE.KUBE_ROOTCA_UPDATE_HOSTS \

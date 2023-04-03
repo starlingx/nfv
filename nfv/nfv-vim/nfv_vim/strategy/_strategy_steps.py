@@ -74,6 +74,8 @@ class StrategyStepNames(Constants):
     QUERY_KUBE_HOST_UPGRADE = Constant('query-kube-host-upgrade')
     QUERY_KUBE_UPGRADE = Constant('query-kube-upgrade')
     QUERY_KUBE_VERSIONS = Constant('query-kube-versions')
+    KUBE_HOST_CORDON = Constant('kube-host-cordon')
+    KUBE_HOST_UNCORDON = Constant('kube-host-uncordon')
     KUBE_UPGRADE_START = Constant('kube-upgrade-start')
     KUBE_UPGRADE_CLEANUP = Constant('kube-upgrade-cleanup')
     KUBE_UPGRADE_COMPLETE = Constant('kube-upgrade-complete')
@@ -86,6 +88,14 @@ class StrategyStepNames(Constants):
 
 # Constant Instantiation
 STRATEGY_STEP_NAME = StrategyStepNames()
+
+
+def validate_operation(operation):
+    if operation.is_inprogress():
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+    elif operation.is_failed():
+        return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+    return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
 
 class AbstractStrategyStep(strategy.StrategyStep):
@@ -4225,6 +4235,100 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
         return data
 
 
+class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
+    """Kube Host Cordon - Strategy Step"""
+
+    def __init__(self, host, to_version, force, target_state, target_failure_state,
+                 timeout_in_secs=600):
+        super(KubeHostCordonStep, self).__init__(
+            host,
+            to_version,
+            force,
+            STRATEGY_STEP_NAME.KUBE_HOST_CORDON,
+            target_state,
+            target_failure_state,
+            timeout_in_secs)
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events  - does not query kube host upgrade list but
+        instead queries kube host upgrade directly.
+        """
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.KUBE_HOST_CORDON_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result,
+                    "kube host cordon (%s) failed" % host.name)
+                return True
+        # return handle_event of parent class
+        return super(KubeHostCordonStep, self).handle_event(
+            event, event_data=event_data)
+
+    def apply(self):
+        """Kube Host Cordon"""
+
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply to hostnames (%s)."
+                  % (self._name, self._host_names))
+        host_director = directors.get_host_director()
+        operation = \
+            host_director.kube_host_cordon(self._host_names,
+                                           self._force)
+        return validate_operation(operation)
+
+
+class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
+    """Kube Host Uncordon - Strategy Step"""
+
+    def __init__(self, host, to_version, force, target_state, target_failure_state,
+                 timeout_in_secs=600):
+        super(KubeHostUncordonStep, self).__init__(
+            host,
+            to_version,
+            force,
+            STRATEGY_STEP_NAME.KUBE_HOST_UNCORDON,
+            target_state,
+            target_failure_state,
+            timeout_in_secs)
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events  - does not query kube host upgrade list but
+        instead queries kube host upgrade directly.
+        """
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.KUBE_HOST_UNCORDON_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result,
+                    "kube host uncordon (%s) failed" % host.name)
+                return True
+        # return handle_event of parent class
+        return super(KubeHostUncordonStep, self).handle_event(
+            event, event_data=event_data)
+
+    def apply(self):
+        """Kube Host Uncordon"""
+
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply to hostnames (%s)."
+                  % (self._name, self._host_names))
+        host_director = directors.get_host_director()
+        operation = \
+            host_director.kube_host_uncordon(self._host_names,
+                                             self._force)
+        return validate_operation(operation)
+
+
 class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
     """Kube Host Upgrade Control Plane - Strategy Step
 
@@ -4272,13 +4376,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         operation = \
             host_director.kube_upgrade_hosts_control_plane(self._host_names,
                                                            self._force)
-
-        if operation.is_inprogress():
-            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-        elif operation.is_failed():
-            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
-
-        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        return validate_operation(operation)
 
 
 class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
@@ -4419,6 +4517,8 @@ def strategy_step_rebuild_from_dict(data):
         #
         # kube upgrade steps
         #
+        STRATEGY_STEP_NAME.KUBE_HOST_CORDON: KubeHostCordonStep,
+        STRATEGY_STEP_NAME.KUBE_HOST_UNCORDON: KubeHostUncordonStep,
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE:
             KubeHostUpgradeControlPlaneStep,
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET:

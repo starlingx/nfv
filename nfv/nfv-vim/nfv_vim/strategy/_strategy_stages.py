@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -53,6 +53,8 @@ class StrategyStageNames(Constants):
     KUBE_ROOTCA_UPDATE_QUERY = Constant('kube-rootca-update-query')
     KUBE_ROOTCA_UPDATE_START = Constant('kube-rootca-update-start')
     # kube upgrade stages
+    KUBE_HOST_CORDON = Constant('kube-host-cordon')
+    KUBE_HOST_UNCORDON = Constant('kube-host-uncordon')
     KUBE_UPGRADE_QUERY = Constant('kube-upgrade-query')
     KUBE_UPGRADE_START = Constant('kube-upgrade-start')
     KUBE_UPGRADE_DOWNLOAD_IMAGES = Constant('kube-upgrade-download-images')

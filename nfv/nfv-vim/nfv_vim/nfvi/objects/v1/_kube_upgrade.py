@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -51,6 +51,12 @@ class KubeUpgradeState(Constants):
     KUBE_UPGRADED_SECOND_MASTER = Constant('upgraded-second-master')
     KUBE_UPGRADING_KUBELETS = Constant('upgrading-kubelets')
     KUBE_UPGRADE_COMPLETE = Constant('upgrade-complete')
+    KUBE_HOST_CORDON = Constant('cordon-started')
+    KUBE_HOST_CORDON_COMPLETE = Constant('cordon-complete')
+    KUBE_HOST_CORDON_FAILED = Constant('cordon-failed')
+    KUBE_HOST_UNCORDON = Constant('uncordon-started')
+    KUBE_HOST_UNCORDON_COMPLETE = Constant('uncordon-complete')
+    KUBE_HOST_UNCORDON_FAILED = Constant('uncordon-failed')
 
 
 # Kube Upgrade Constant Instantiation

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -112,6 +112,8 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_terminating_pods  
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_upgrade  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_update  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_host_device_image_update_abort  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_cordon  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_uncordon  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_upgrade_control_plane  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_host_upgrade_kubelet  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_abort  # noqa: F401
