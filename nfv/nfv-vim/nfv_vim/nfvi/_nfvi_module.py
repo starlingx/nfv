@@ -49,7 +49,7 @@ def nfvi_initialize(config):
     network_plugin_disabled = (config.get('network_plugin_disabled',
                                           'False') in DISABLED_LIST)
     guest_plugin_disabled = (config.get('guest_plugin_disabled',
-                                        'False') in DISABLED_LIST)
+                                        'True') in DISABLED_LIST)
     # 'fault_management_pod_disabled' is used to disable get alarms
     # from containerized fm and will be removed in future.
     fault_mgmt_plugin_disabled = (config.get('fault_mgmt_plugin_disabled',
