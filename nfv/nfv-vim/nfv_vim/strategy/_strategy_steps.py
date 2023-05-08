@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2022 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -4112,6 +4112,7 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
     """
     def __init__(self,
                  host,
+                 to_version,
                  force,
                  step_name,
                  success_state,
@@ -4122,6 +4123,7 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
             success_state,
             fail_state,
             timeout_in_secs=timeout_in_secs)
+        self._to_version = to_version
         self._force = force
         # This class accepts only a single host
         # but serializes as a list of hosts (list size of one)
@@ -4137,6 +4139,7 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
         Returns the step object initialized using the given dictionary
         """
         super(AbstractKubeHostUpgradeStep, self).from_dict(data)
+        self._to_version = data['to_version']
         self._force = data['force']
         self._hosts = list()
         self._host_uuids = list()
@@ -4154,6 +4157,7 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
         Represent the step as a dictionary
         """
         data = super(AbstractKubeHostUpgradeStep, self).as_dict()
+        data['to_version'] = self._to_version
         data['force'] = self._force
         data['entity_type'] = 'hosts'
         data['entity_names'] = self._host_names
@@ -4166,9 +4170,11 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
 
     This operation issues a host command, which updates the kube upgrade object
     It operates on a list of hosts
+    Kube host operations can have intermediate (to_version) steps
     """
     def __init__(self,
                  hosts,
+                 to_version,
                  force,
                  step_name,
                  success_state,
@@ -4179,6 +4185,7 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
              success_state,
              fail_state,
              timeout_in_secs=timeout_in_secs)
+        self._to_version = to_version
         self._force = force
         self._hosts = hosts
         self._host_names = list()
@@ -4192,6 +4199,7 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
         Returns the step object initialized using the given dictionary
         """
         super(AbstractKubeHostListUpgradeStep, self).from_dict(data)
+        self._to_version = data['to_version']
         self._force = data['force']
         self._hosts = list()
         self._host_uuids = list()
@@ -4209,6 +4217,7 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
         Represent the step as a dictionary
         """
         data = super(AbstractKubeHostListUpgradeStep, self).as_dict()
+        data['to_version'] = self._to_version
         data['force'] = self._force
         data['entity_type'] = 'hosts'
         data['entity_names'] = self._host_names
@@ -4222,14 +4231,16 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
     This operation issues a host command, which updates the kube upgrade object
     """
 
-    def __init__(self, host, force, target_state, target_failure_state):
+    def __init__(self, host, to_version, force, target_state, target_failure_state,
+                 timeout_in_secs=600):
         super(KubeHostUpgradeControlPlaneStep, self).__init__(
             host,
+            to_version,
             force,
             STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE,
             target_state,
             target_failure_state,
-            timeout_in_secs=600)
+            timeout_in_secs)
 
     def handle_event(self, event, event_data=None):
         """
@@ -4275,12 +4286,12 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
 
     This operation issues a host command, which indirectly updates the kube
     upgrade object, however additional calls to other hosts do not change it.
-    This step should only be invoked on locked hosts.
     """
 
-    def __init__(self, hosts, force=True):
+    def __init__(self, hosts, to_version, force=True):
         super(KubeHostUpgradeKubeletStep, self).__init__(
             hosts,
+            to_version,
             force,
             STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET,
             None,  # there is no kube upgrade success state for kubelets
@@ -4303,7 +4314,7 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
             for host_uuid in self._host_uuids:
                 for k_host in self.strategy.nfvi_kube_host_upgrade_list:
                     if k_host.host_uuid == host_uuid:
-                        if k_host.kubelet_version == self.strategy.to_version:
+                        if k_host.kubelet_version == self._to_version:
                             match_count += 1
                         host_count += 1
                         # break out of inner loop, since uuids match
@@ -4378,7 +4389,9 @@ def strategy_step_rebuild_from_dict(data):
     """
     rebuild_map = {
         STRATEGY_STEP_NAME.APPLY_PATCHES: ApplySwPatchesStep,
+        #
         # kube rootca update steps
+        #
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_ABORT:
             KubeRootcaUpdateAbortStep,
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_COMPLETE:
@@ -4403,7 +4416,9 @@ def strategy_step_rebuild_from_dict(data):
             QueryKubeRootcaUpdateStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_HOST_UPDATES:
             QueryKubeRootcaHostUpdatesStep,
+        #
         # kube upgrade steps
+        #
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE:
             KubeHostUpgradeControlPlaneStep,
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET:
