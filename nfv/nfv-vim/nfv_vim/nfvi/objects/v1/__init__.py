@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,6 +22,7 @@ from nfv_vim.nfvi.objects.v1._host_fw_update import HostFwUpdate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_group import HOST_GROUP_POLICY  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_group import HostGroup  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_sw_patch import HostSwPatch  # noqa: F401
+from nfv_vim.nfvi.objects.v1._host_system_config_update import HostSystemConfigUpdate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._hypervisor import Hypervisor  # noqa: F401
 from nfv_vim.nfvi.objects.v1._hypervisor import HYPERVISOR_ADMIN_STATE  # noqa: F401
 from nfv_vim.nfvi.objects.v1._hypervisor import HYPERVISOR_OPER_STATE  # noqa: F401

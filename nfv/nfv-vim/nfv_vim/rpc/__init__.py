@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -77,6 +77,7 @@ from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateKubeRootcaUpdateS
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateKubeUpgradeStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpdateStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpgradeStrategy  # noqa: F401
+from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSystemConfigUpdateStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestDeleteSwUpdateStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIRequestGetSwUpdateStrategy  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import APIResponseAbortSwUpdateStrategy  # noqa: F401

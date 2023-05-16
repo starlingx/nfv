@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -195,6 +195,18 @@ class _EventId(Constants):
     KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED = Constant('kube-upgrade-auto-apply-abort-rejected')
     KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED = Constant('kube-upgrade-auto-apply-abort-failed')
     KUBE_UPGRADE_AUTO_APPLY_ABORTED = Constant('kube-upgrade-auto-apply-aborted')
+
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_START = Constant('system-config-update-auto-apply-started')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS = Constant('system-config-update-auto-apply-inprogress')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_REJECTED = Constant('system-config-update-auto-apply-rejected')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_CANCELLED = Constant('system-config-update-auto-apply-cancelled')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED = Constant('system-config-update-auto-apply-failed')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_COMPLETED = Constant('system-config-update-auto-apply-completed')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT = Constant('system-config-update-auto-apply-abort')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING = Constant('system-config-update-auto-apply-aborting')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_REJECTED = Constant('system-config-update-auto-apply-abort-rejected')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_FAILED = Constant('system-config-update-auto-apply-abort-failed')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTED = Constant('system-config-update-auto-apply-aborted')
 
 
 @six.add_metaclass(Singleton)

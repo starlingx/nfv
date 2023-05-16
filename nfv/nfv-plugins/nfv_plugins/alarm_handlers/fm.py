@@ -97,6 +97,18 @@ _fm_kube_rootca_update_alarm_id_mapping = dict([
 # Merge the kube rootca update mapping with the entire mapping
 _fm_alarm_id_mapping.update(_fm_kube_rootca_update_alarm_id_mapping)
 
+_fm_system_config_update_alarm_id_mapping = dict([
+    (alarm_objects_v1.ALARM_TYPE.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS,
+     fm_constants.FM_ALARM_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS),
+    (alarm_objects_v1.ALARM_TYPE.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING,
+     fm_constants.FM_ALARM_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING),
+    (alarm_objects_v1.ALARM_TYPE.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED,
+     fm_constants.FM_ALARM_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED),
+])
+
+# Merge the system config update mapping with the entire mapping
+_fm_alarm_id_mapping.update(_fm_system_config_update_alarm_id_mapping)
+
 _fm_alarm_type_mapping = dict([
     (alarm_objects_v1.ALARM_EVENT_TYPE.COMMUNICATIONS_ALARM,
      fm_constants.FM_ALARM_TYPE_1),

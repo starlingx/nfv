@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -50,6 +50,9 @@ class _AlarmType(Constants):
     KUBE_UPGRADE_AUTO_APPLY_INPROGRESS = Constant('kube-upgrade-auto-apply-inprogress')
     KUBE_UPGRADE_AUTO_APPLY_ABORTING = Constant('kube-upgrade-auto-apply-aborting')
     KUBE_UPGRADE_AUTO_APPLY_FAILED = Constant('kube-upgrade-auto-apply-failed')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS = Constant('system-config-update-auto-apply-inprogress')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING = Constant('system-config-update-auto-apply-aborting')
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED = Constant('system-config-update-auto-apply-failed')
 
 
 @six.add_metaclass(Singleton)

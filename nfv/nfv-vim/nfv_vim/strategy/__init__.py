@@ -10,6 +10,7 @@ from nfv_vim.strategy._strategy import KubeUpgradeStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import strategy_rebuild_from_dict  # noqa: F401
 from nfv_vim.strategy._strategy import SwPatchStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import SwUpgradeStrategy  # noqa: F401
+from nfv_vim.strategy._strategy import SystemConfigUpdateStrategy  # noqa: F401
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT  # noqa: F401
 from nfv_vim.strategy._strategy_stages import STRATEGY_STAGE_NAME  # noqa: F401
 from nfv_vim.strategy._strategy_steps import ApplySwPatchesStep  # noqa: F401
@@ -47,6 +48,7 @@ from nfv_vim.strategy._strategy_steps import QueryKubeUpgradeStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryKubeVersionsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchHostsStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import QuerySystemConfigUpdateHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryUpgradeStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import RebootHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import StartInstancesStep  # noqa: F401
@@ -54,6 +56,7 @@ from nfv_vim.strategy._strategy_steps import StopInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import STRATEGY_STEP_NAME  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwactHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwPatchHostsStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import SystemConfigUpdateHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SystemStabilizeStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import UnlockHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import UpgradeActivateStep  # noqa: F401

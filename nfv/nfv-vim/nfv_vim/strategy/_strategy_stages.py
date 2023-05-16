@@ -37,6 +37,11 @@ class StrategyStageNames(Constants):
     FW_UPDATE_HOSTS_QUERY = Constant('fw-update-hosts-query')
     FW_UPDATE_HOST_QUERY = Constant('fw-update-host-query')
     FW_UPDATE_WORKER_HOSTS = Constant('fw-update-worker-hosts')
+    # system config update stages
+    SYSTEM_CONFIG_UPDATE_QUERY = Constant('system-config-update-query')
+    SYSTEM_CONFIG_UPDATE_CONTROLLERS = Constant('system-config-update-controllers')
+    SYSTEM_CONFIG_UPDATE_STORAGE_HOSTS = Constant('system-config-update-storage-hosts')
+    SYSTEM_CONFIG_UPDATE_WORKER_HOSTS = Constant('system-config-update-worker-hosts')
     # kube root ca update stages
     KUBE_ROOTCA_UPDATE_CERT = Constant('kube-rootca-update-cert')
     KUBE_ROOTCA_UPDATE_COMPLETE = Constant('kube-rootca-update-complete')

@@ -3806,6 +3806,118 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def get_deployment_host(self, future, host_name, callback):
+        """
+        Get a host resource from the deployment namespace space
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            future.work(kubernetes_client.get_deployment_host, host_name)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("Kubernetes get_deployment_host failed, operation "
+                           "did not complete, host_name=%s" % host_name)
+                self.set_response_error(response, "Kubernetes get-deployment-host")
+                return
+
+            response['result-data'] = future.result.data
+            response['completed'] = True
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to get "
+                           "deployment hosts: %s, error=%s." % (host_name, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def list_deployment_hosts(self, future, callback):
+        """
+        List a hosts resource from the deployment namespace space
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            future.work(kubernetes_client.list_deployment_hosts)
+            future.result = (yield)
+
+            if not future.result.is_complete() or future.result.data is None:
+                DLOG.error("Kubernetes list_deployment_hosts failed, operation "
+                           "did not complete.")
+                self.set_response_error(response, "Kubernetes list-deployment-hosts")
+                return
+
+            hosts = list()
+            for host_data in future.result.data:
+                host = nfvi.objects.v1.HostSystemConfigUpdate(
+                    host_data['name'], host_data['unlock_request'])
+                hosts.append(host)
+
+            response['result-data'] = hosts
+            response['completed'] = True
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to list "
+                           "deployment hosts, error=%s." % (e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def get_system_config_unlock_request(self, future, host_names, callback):
+        """
+        Get unlock request from host resource status
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            result = list()
+            for host_name in host_names:
+                future.work(kubernetes_client.get_deployment_host, host_name)
+                future.result = (yield)
+
+                if not future.result.is_complete():
+                    DLOG.error("Cannot get resource of host: %s from deployment "
+                               "namespace." % host_name)
+                    self.set_response_error(response, "Kubernetes get-deployment-host")
+                    return
+
+                if future.result.data['unlock_request'] != 'unlock_required':
+                    # The host is not ready for unlock, do not update the reason
+                    # as the the transitional status is expected.
+                    DLOG.debug("Host: %s is not ready for unlock." % host_name)
+                    return
+
+                host_resource = nfvi.objects.v1.HostSystemConfigUpdate(
+                    future.result.data['name'],
+                    future.result.data['unlock_request']
+                )
+                result.append(host_resource)
+
+            response['completed'] = True
+            response['result-data'] = result
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to check the unlock "
+                           "requst from kubernetes deployment namespace %s, "
+                           "error=%s." % (host_name, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
     def sw_update_rest_api_get_handler(self, request_dispatch):
         """
         Software update Rest-API GET handler callback

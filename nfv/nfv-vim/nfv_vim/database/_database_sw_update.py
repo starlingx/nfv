@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -77,4 +77,8 @@ def database_sw_update_get_list():
             kube_upgrade_obj = objects.KubeUpgrade(sw_update.uuid,
                                                    strategy_data)
             sw_update_objs.append(kube_upgrade_obj)
+        elif objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE == sw_update.sw_update_type:
+            system_config_update_obj = objects.SystemConfigUpdate(sw_update.uuid,
+                                                                  strategy_data)
+            sw_update_objs.append(system_config_update_obj)
     return sw_update_objs

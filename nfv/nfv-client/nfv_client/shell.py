@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -55,6 +55,9 @@ def get_extra_create_args(cmd_area, args):
         return {'complete_upgrade': args.complete_upgrade}
     elif 'fw-update-strategy' == cmd_area:
         # no additional kwargs for firmware update
+        return {}
+    elif 'system-config-update-strategy' == cmd_area:
+        # no additional kwargs for system config update
         return {}
     elif 'kube-rootca-update-strategy' == cmd_area:
         # kube rootca update supports expiry_date, subject and cert_file
@@ -384,6 +387,48 @@ def setup_patch_parser(commands):
     _ = setup_show_cmd(sub_cmds)
 
 
+def setup_system_config_update_parser(commands):
+    """System config update Strategy Commands"""
+
+    cmd_area = 'system-config-update-strategy'
+    register_strategy(cmd_area, sw_update.STRATEGY_NAME_SYSTEM_CONFIG_UPDATE)
+    cmd_parser = commands.add_parser(cmd_area,
+                                     help='system config update Strategy')
+    cmd_parser.set_defaults(cmd_area=cmd_area)
+
+    sub_cmds = cmd_parser.add_subparsers(title='Sytem Config Update Commands',
+                                         metavar='')
+    sub_cmds.required = True
+
+    # define the create command
+    # alarm restrictions, defaults to strict
+    _ = setup_create_cmd(
+        sub_cmds,
+        [sw_update.APPLY_TYPE_SERIAL,  # controller supports serial only
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # storage supports serial only
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
+         sw_update.APPLY_TYPE_PARALLEL,
+         sw_update.APPLY_TYPE_IGNORE],
+        [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
+         sw_update.INSTANCE_ACTION_MIGRATE],
+        [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
+         sw_update.ALARM_RESTRICTIONS_RELAXED],
+        min_parallel=2,
+        max_parallel=100  # config update supports 2..100 workers in parallel
+    )
+
+    # define the delete command
+    _ = setup_delete_cmd(sub_cmds)
+    # define the apply command
+    _ = setup_apply_cmd(sub_cmds)
+    # define the abort command
+    _ = setup_abort_cmd(sub_cmds)
+    # define the show command
+    _ = setup_show_cmd(sub_cmds)
+
+
 def setup_upgrade_parser(commands):
     """Upgrade Strategy Commands"""
 
@@ -467,6 +512,9 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
 
         # Add software patch strategy commands
         setup_patch_parser(commands)
+
+        # Add system config update strategy commands
+        setup_system_config_update_parser(commands)
 
         # Add software upgrade strategy commands
         setup_upgrade_parser(commands)

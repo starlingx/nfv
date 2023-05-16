@@ -59,6 +59,35 @@ def nfvi_get_host(host_uuid, host_name, callback):
     return cmd_id
 
 
+def nfvi_get_deployment_host(host_name, callback):
+    """
+    Get host resource from deployment namespace
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_deployment_host',
+                                                  host_name,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_list_deployment_hosts(callback):
+    """
+    Get host resource from deployment namespace
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('list_deployment_hosts',
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_get_system_config_unlock_request(host_names, callback):
+    """
+    Get host unlock request from deployment namespace
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('get_system_config_unlock_request',
+                                                  host_names,
+                                                  callback=callback)
+    return cmd_id
+
+
 def nfvi_get_host_devices(host_uuid, host_name, callback):
     """
     Get host device list details

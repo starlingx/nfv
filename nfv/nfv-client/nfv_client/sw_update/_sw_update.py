@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2022 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,6 +11,7 @@ STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
 STRATEGY_NAME_FW_UPDATE = 'fw-update'
 STRATEGY_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update'
 STRATEGY_NAME_KUBE_UPGRADE = 'kube-upgrade'
+STRATEGY_NAME_SYSTEM_CONFIG_UPDATE = 'system-config-update'
 
 APPLY_TYPE_SERIAL = 'serial'
 APPLY_TYPE_PARALLEL = 'parallel'
@@ -130,6 +131,8 @@ def _display_strategy(strategy, details=False, active=False):
         print("Strategy Kubernetes RootCA Update Strategy:")
     elif strategy.name == STRATEGY_NAME_KUBE_UPGRADE:
         print("Strategy Kubernetes Upgrade Strategy:")
+    elif strategy.name == STRATEGY_NAME_SYSTEM_CONFIG_UPDATE:
+        print("Strategy System Config Upgrade Strategy:")
     else:
         print("Strategy Unknown Strategy:")
 

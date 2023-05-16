@@ -86,6 +86,9 @@ class StrategyStepNames(Constants):
     KUBE_HOST_UPGRADE_CONTROL_PLANE = \
         Constant('kube-host-upgrade-control-plane')
     KUBE_HOST_UPGRADE_KUBELET = Constant('kube-host-upgrade-kubelet')
+    # system config update specific steps
+    QUERY_SYSTEM_CONFIG_UPDATE_HOSTS = Constant('query-system-config-update-hosts')
+    SYSTEM_CONFIG_UPDATE_HOSTS = Constant('system-config-update-hosts')
 
 
 # Constant Instantiation
@@ -806,6 +809,108 @@ class SwPatchHostsStep(strategy.StrategyStep):
         data['entity_names'] = self._host_names
         data['entity_uuids'] = self._host_uuids
         data['hosts_completed'] = self._host_completed
+        return data
+
+
+class SystemConfigUpdateHostsStep(strategy.StrategyStep):
+    """
+    System Config Update Hosts - Strategy Step
+    """
+    def __init__(self, hosts):
+        super(SystemConfigUpdateHostsStep, self).__init__(
+            STRATEGY_STEP_NAME.SYSTEM_CONFIG_UPDATE_HOSTS, timeout_in_secs=1800)
+        self._hosts = hosts
+        self._wait_time = 0
+        self._host_names = list()
+        self._host_uuids = list()
+        self._query_inprogress = False
+
+        for host in hosts:
+            self._host_names.append(host.name)
+            self._host_uuids.append(host.uuid)
+
+    @coroutine
+    def _query_hosts_callback(self):
+        """
+        Query System Config Update Hosts Callback
+        """
+        response = (yield)
+        DLOG.debug("Query-Hosts callback response=%s." % response)
+
+        self._query_inprogress = False
+
+        if response['completed']:
+            for host in response['result-data']:
+                if host.unlock_request != 'unlock_required':
+                    # Keep waiting for the hosts to reach the unlock required
+                    # status
+                    pass
+
+            # Ready to unlock the hosts
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+
+    def apply(self):
+        """
+        System Config Update Hosts
+        """
+        DLOG.info("Step (%s) apply for hosts %s." % (self._name,
+                                                     self._host_names))
+        # Do nothing, wait for the callback to check the unlock request status
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) // 1000
+            # Wait at least 30 seconds before checking the unlock status for
+            # first time
+            if 30 <= secs_expired and not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_system_config_unlock_request(
+                    self._host_names, self._query_hosts_callback())
+            return True
+
+        return False
+
+    def from_dict(self, data):
+        """
+        Returns the system config update hosts step object initialized using
+        the given dictionary
+        """
+        super(SystemConfigUpdateHostsStep, self).from_dict(data)
+        self._hosts = list()
+        self._wait_time = 0
+        self._host_uuids = list()
+        self._query_inprogress = False
+
+        self._host_names = data['entity_names']
+        host_table = tables.tables_get_host_table()
+        for host_name in self._host_names:
+            host = host_table.get(host_name, None)
+            if host is not None:
+                self._hosts.append(host)
+                self._host_uuids.append(host.uuid)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the system config update hosts step as a dictionary
+        """
+        data = super(SystemConfigUpdateHostsStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
         return data
 
 
@@ -2195,6 +2300,45 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
         data['entity_names'] = list()
         data['entity_uuids'] = list()
         return data
+
+
+class QuerySystemConfigUpdateHostsStep(AbstractStrategyStep):
+    """
+    Query System Config Update Hosts - Strategy Step
+    """
+    def __init__(self):
+        super(QuerySystemConfigUpdateHostsStep, self).__init__(
+            STRATEGY_STEP_NAME.QUERY_SYSTEM_CONFIG_UPDATE_HOSTS,
+            timeout_in_secs=60)
+
+    @coroutine
+    def _query_hosts_callback(self):
+        """
+        Query System Config Update Hosts Callback
+        """
+        response = (yield)
+        DLOG.debug("Query-Hosts callback response=%s." % response)
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_system_config_update_hosts = \
+                    response['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, "")
+
+    def apply(self):
+        """
+        Query System Config Update Hosts
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_list_deployment_hosts(self._query_hosts_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
 
 class QueryFwUpdateHostStep(strategy.StrategyStep):
@@ -4711,6 +4855,13 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE: QueryKubeHostUpgradeStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE: QueryKubeUpgradeStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS: QueryKubeVersionsStep,
+        #
+        # system config update steps
+        #
+        STRATEGY_STEP_NAME.QUERY_SYSTEM_CONFIG_UPDATE_HOSTS:
+            QuerySystemConfigUpdateHostsStep,
+        STRATEGY_STEP_NAME.SYSTEM_CONFIG_UPDATE_HOSTS:
+            SystemConfigUpdateHostsStep,
     }
     obj_type = rebuild_map.get(data['name'])
     if obj_type is not None:

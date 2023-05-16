@@ -386,6 +386,35 @@ _fm_kube_rootca_update_event_id_mapping = dict([
 # Merge the kube rootca update mapping with the entire mapping
 _fm_event_id_mapping.update(_fm_kube_rootca_update_event_id_mapping)
 
+# define system config update event mapping
+_fm_system_config_update_event_id_mapping = dict([
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_START,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_START),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_REJECTED,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_REJECTED),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_CANCELLED,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_CANCELLED),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_COMPLETED,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_COMPLETED),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_REJECTED,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_REJECTED),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_FAILED,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_FAILED),
+    (event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTED,
+     fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTED),
+])
+
+# Merge the system config update mapping with the entire mapping
+_fm_event_id_mapping.update(_fm_system_config_update_event_id_mapping)
+
 _fm_event_type_mapping = dict([
     (event_log_objects_v1.EVENT_TYPE.STATE_EVENT,
      fm_constants.FM_ALARM_TYPE_4),

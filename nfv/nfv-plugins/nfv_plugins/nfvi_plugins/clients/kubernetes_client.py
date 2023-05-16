@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018-2022 Wind River Systems, Inc.
+# Copyright (c) 2018-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -53,6 +53,28 @@ def get_client():
     kubernetes.client.Configuration.set_default(c)
 
     return kubernetes.client.CoreV1Api()
+
+
+def get_kubertnetes_https_client():
+    """
+    Get Kubernetes client with HTTPS enabled
+    """
+    kubernetes.config.load_kube_config('/etc/kubernetes/admin.conf')
+
+    if K8S_MODULE_MAJOR_VERSION < 12:
+        c = kubernetes.client.Configuration()
+    else:
+        c = kubernetes.client.Configuration().get_default_copy()
+    kubernetes.client.Configuration.set_default(c)
+    return kubernetes.client
+
+
+def get_customobjects_api_instance():
+    """
+    Get a custom objects API instance
+    """
+    client = get_kubertnetes_https_client()
+    return client.CustomObjectsApi()
 
 
 def taint_node(node_name, effect, key, value):
@@ -231,3 +253,132 @@ def get_terminating_pods(node_name):
                 terminating_pods.append(pod.metadata.name)
 
     return Result(','.join(terminating_pods))
+
+
+def get_namespaced_custom_object(name, plural, group, version, namespace):
+    """
+    Get a custom resource object in a namespace
+    """
+    # Get a CustomObjectsApi instance
+    api_instance = get_customobjects_api_instance()
+
+    try:
+        resource = api_instance.get_namespaced_custom_object(
+            group=group,
+            version=version,
+            name=name,
+            namespace=namespace,
+            plural=plural
+        )
+        return Result(resource)
+    except ApiException as e:
+        DLOG.exception(
+            "Failed to get object %s from namespace %s, "
+            "reason: %s" % (name, namespace, e.reason))
+        return None
+
+
+def get_deployment_host(name):
+    """
+    Get a host in the deployment namespace
+    """
+    # Get a CustomObjectsApi instance
+    api_instance = get_customobjects_api_instance()
+
+    try:
+        resource = api_instance.get_namespaced_custom_object(
+            group='starlingx.windriver.com',
+            version='v1',
+            name=name,
+            namespace='deployment',
+            plural='hosts'
+        )
+        unlock_request = resource.get('status').get('strategyRequired')
+        result = {'name': name, 'unlock_request': unlock_request}
+        return Result(result)
+    except ApiException as e:
+        DLOG.exception(
+            "Failed to get object %s from namespace deployment, "
+            "reason: %s" % (name, e.reason))
+        return None
+
+
+def list_namespaced_custom_objects(plural, group, version, namespace):
+    """
+    List custom resource objects in a namespace
+    """
+    # Get a CustomObjectsApi instance
+    api_instance = get_customobjects_api_instance()
+
+    try:
+        resources = api_instance.list_namespaced_custom_object(
+            group=group,
+            version=version,
+            namespace=namespace,
+            plural=plural
+        )
+        return Result(resources)
+    except ApiException as e:
+        DLOG.exception(
+            "Failed to list objects %s from namespace %s, "
+            "reason: %s" % (plural, namespace, e.reason))
+        return None
+
+
+def list_deployment_hosts():
+    """
+    List hosts in a deployment namespace
+    """
+    # Get a CustomObjectsApi instance
+    api_instance = get_customobjects_api_instance()
+
+    try:
+        resources = api_instance.list_namespaced_custom_object(
+            group='starlingx.windriver.com',
+            version='v1',
+            namespace='deployment',
+            plural='hosts'
+        )
+
+        if not resources:
+            return None
+
+        results = list()
+        for resource in resources.get('items'):
+            name = resource.get('metadata').get('name')
+            unlock_request = resource.get('status').get('strategyRequired')
+            results.append({'name': name,
+                            'unlock_request': unlock_request})
+
+        return Result(results)
+    except ApiException as e:
+        DLOG.exception(
+            "Failed to list hosts from deployment namespace, "
+            "reason: %s" % e.reason)
+        return None
+
+
+def get_namespaced_running_pods(namespace, name):
+    """
+    Get running pods in a namespace
+    """
+    api_instance = get_client()
+
+    try:
+        response = api_instance.list_namespaced_pod(
+            namespace=namespace,
+            field_selector="status.phase=Running",)
+    except ApiException as e:
+        DLOG.exception(
+            "Failed to list pods from namespace %s, "
+            "reason: %s" % (namespace, e.reason))
+        return None
+
+    pods = response.items
+    found = list()
+    if pods is not None:
+        for pod in pods:
+            if name in pod.metadata.name:
+                found.append(pod.metadata.name)
+
+    return Result(','.join(found))

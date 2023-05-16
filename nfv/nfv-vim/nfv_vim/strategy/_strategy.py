@@ -36,6 +36,7 @@ class StrategyNames(Constants):
     FW_UPDATE = Constant('fw-update')
     KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
     KUBE_UPGRADE = Constant('kube-upgrade')
+    SYSYTEM_CONFIG_UPDATE = Constant('system-config-update')
 
 
 # Constant Instantiation
@@ -432,6 +433,21 @@ class SwUpdateStrategy(strategy.Strategy):
         else:
             self.sw_update_obj.strategy_abort_complete(
                 False, self.abort_phase.result_reason)
+
+    def report_build_failure(self, reason):
+        """
+        Report a build failure for the strategy
+
+        todo(yuxing): report all build failure use this method
+        """
+        DLOG.warn("Strategy Build Failed: %s" % reason)
+        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+        self.build_phase.result_reason = reason
+        self.sw_update_obj.strategy_build_complete(
+            False,
+            self.build_phase.result_reason)
+        self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """
@@ -863,6 +879,54 @@ class QueryKubeVersionsMixin(QueryMixinBase):
         data['nfvi_kube_versions_list_data'] = mixin_data
 
 
+class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
+    """This mixin is used through the QuerySystemConfigUpdateHostsMixin class"""
+
+    def initialize_mixin(self):
+        super(QuerySystemConfigUpdateHostsMixin, self).initialize_mixin()
+        self._nfvi_system_config_update_hosts = list()
+
+    @property
+    def nfvi_system_config_update_hosts(self):
+        """
+        Returns the System Config Update hosts from the NFVI layer
+        """
+        return self._nfvi_system_config_update_hosts
+
+    @nfvi_system_config_update_hosts.setter
+    def nfvi_system_config_update_hosts(self, nfvi_system_config_update_hosts):
+        """
+        Save the System Config Update hosts from the NFVI Layer
+        """
+        self._nfvi_system_config_update_hosts = nfvi_system_config_update_hosts
+
+    def mixin_from_dict(self, data):
+        """
+        Extracts this mixin data from a dictionary
+        """
+        super(QuerySystemConfigUpdateHostsMixin, self).mixin_from_dict(data)
+
+        from nfv_vim import nfvi
+
+        mixin_data = list()
+        for host_data in data['nfvi_system_config_update_hosts_data']:
+            host = nfvi.objects.v1.HostSystemConfigUpdate(
+                host_data['name'],
+                host_data['unlock_request'])
+            mixin_data.append(host)
+        self._nfvi_system_config_update_hosts = mixin_data
+
+    def mixin_as_dict(self, data):
+        """
+        Updates the dictionary with this mixin data
+        """
+        super(QuerySystemConfigUpdateHostsMixin, self).mixin_as_dict(data)
+        mixin_data = list()
+        for host in self._nfvi_system_config_update_hosts:
+            mixin_data.append(host.as_dict())
+        data['nfvi_system_config_update_hosts_data'] = mixin_data
+
+
 class UpdateControllerHostsMixin(object):
 
     def _add_update_controller_strategy_stages(self,
@@ -990,6 +1054,19 @@ class PatchControllerHostsMixin(UpdateControllerHostsMixin):
             strategy.SwPatchHostsStep)
 
 
+class UpdateSystemConfigControllerHostsMixin(UpdateControllerHostsMixin):
+    def _add_system_config_controller_strategy_stages(self, controllers):
+        """
+        Add controller system config update stages to a strategy
+        """
+        from nfv_vim import strategy
+        return self._add_update_controller_strategy_stages(
+            controllers,
+            True,
+            strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_CONTROLLERS,
+            strategy.SystemConfigUpdateHostsStep)
+
+
 class UpgradeKubeletControllerHostsMixin(UpdateControllerHostsMixin):
     def _add_kubelet_controller_strategy_stages(self, controllers, to_version, reboot, stage_name):
         from nfv_vim import strategy
@@ -1062,6 +1139,19 @@ class PatchStorageHostsMixin(UpdateStorageHostsMixin):
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_PATCH_STORAGE_HOSTS,
             strategy.SwPatchHostsStep)
+
+
+class UpdateSystemConfigStorageHostsMixin(UpdateStorageHostsMixin):
+    def _add_system_config_storage_strategy_stages(self, storage_hosts):
+        """
+        Add storage system config update stages to a strategy
+        """
+        from nfv_vim import strategy
+        return self._add_update_storage_strategy_stages(
+            storage_hosts,
+            True,
+            strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_STORAGE_HOSTS,
+            strategy.SystemConfigUpdateHostsStep)
 
 
 class UpdateWorkerHostsMixin(object):
@@ -1246,6 +1336,19 @@ class UpgradeKubeletWorkerHostsMixin(UpdateWorkerHostsMixin):
             stage_name,
             strategy.KubeHostUpgradeKubeletStep,
             extra_args=to_version)
+
+
+class UpdateSystemConfigWorkerHostsMixin(UpdateWorkerHostsMixin):
+    def _add_system_config_worker_strategy_stages(self, worker_hosts):
+        """
+        Add worker system config update stages to a strategy
+        """
+        from nfv_vim import strategy
+        return self._add_update_worker_strategy_stages(
+            worker_hosts,
+            True,
+            strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_WORKER_HOSTS,
+            strategy.SystemConfigUpdateHostsStep)
 
 
 ###################################################################
@@ -2200,6 +2303,199 @@ class SwUpgradeStrategy(SwUpdateStrategy):
 
 ###################################################################
 #
+# The System Config Update Strategy
+#
+###################################################################
+class SystemConfigUpdateStrategy(SwUpdateStrategy,
+                                 QuerySystemConfigUpdateHostsMixin,
+                                 UpdateSystemConfigControllerHostsMixin,
+                                 UpdateSystemConfigStorageHostsMixin,
+                                 UpdateSystemConfigWorkerHostsMixin):
+    """
+    System Config Update - Strategy
+    """
+    def __init__(self, uuid, controller_apply_type, storage_apply_type,
+                 worker_apply_type, max_parallel_worker_hosts,
+                 default_instance_action, alarm_restrictions,
+                 ignore_alarms, single_controller):
+        super(SystemConfigUpdateStrategy, self).__init__(
+            uuid,
+            STRATEGY_NAME.SYSYTEM_CONFIG_UPDATE,
+            controller_apply_type,
+            storage_apply_type,
+            SW_UPDATE_APPLY_TYPE.IGNORE,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            ignore_alarms)
+
+        # The following alarms will not prevent a system config update operation
+        IGNORE_ALARMS = ['100.103',  # Memory threshold exceeded
+                         '200.001',  # Locked Host
+                         '250.001',  # System Config out of date
+                         '260.001',  # Unreconciled resource
+                         '260.002',  # Unsynchronized resource
+                         '280.001',  # Subcloud resource off-line
+                         '280.002',  # Subcloud resource out-of-sync
+                         '280.003',  # Subcloud backup failed
+                         '500.200',  # Certificate expiring soon
+                         '700.004',  # VM stopped
+                         '750.006',  # Configuration change requires reapply of an application
+                         '900.010',  # System Config Update in progress
+                         '900.601',  # System Config Update Auto Apply in progress
+                         ]
+        self._ignore_alarms += IGNORE_ALARMS
+        self._single_controller = single_controller
+
+        # initialize the variables required by the mixins
+        self.initialize_mixin()
+
+    def build(self):
+        """
+        Build the strategy
+        """
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_QUERY)
+        stage.add_step(strategy.QueryAlarmsStep(
+            ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.QuerySystemConfigUpdateHostsStep())
+        self.build_phase.add_stage(stage)
+        super(SystemConfigUpdateStrategy, self).build()
+
+    def build_complete(self, result, result_reason):
+        """
+        Strategy Build Complete
+        """
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        result, result_reason = \
+            super(SystemConfigUpdateStrategy, self).build_complete(result, result_reason)
+
+        DLOG.info("Build Complete Callback, result=%s, reason=%s."
+                  % (result, result_reason))
+
+        if result in [strategy.STRATEGY_RESULT.SUCCESS,
+                      strategy.STRATEGY_RESULT.DEGRADED]:
+
+            if self._nfvi_alarms:
+                alarm_id_set = set()
+                for alarm_data in self._nfvi_alarms:
+                    alarm_id_set.add(alarm_data['alarm_id'])
+                alarm_id_list = ", ".join(sorted(alarm_id_set))
+                DLOG.warn("System config update: Active alarms present [ %s ]"
+                          % alarm_id_list)
+                self.report_build_failure("active alarms present [ %s ]"
+                                          % alarm_id_list)
+
+                return
+
+            host_table = tables.tables_get_host_table()
+            for host in list(host_table.values()):
+                if HOST_PERSONALITY.WORKER in host.personality and \
+                        HOST_PERSONALITY.CONTROLLER not in host.personality:
+                    # Allow system config update orchestration when worker
+                    # hosts are available, locked or powered down.
+                    if not ((host.is_unlocked() and host.is_enabled() and
+                             host.is_available()) or
+                            (host.is_locked() and host.is_disabled() and
+                             host.is_offline()) or
+                            (host.is_locked() and host.is_disabled() and
+                             host.is_online())):
+                        self.report_build_failure(
+                            "all worker hosts must be unlocked-enabled-available, "
+                            "locked-disabled-online or locked-disabled-offline")
+                        return
+                else:
+                    # Only allow system config update orchestration when all
+                    # controller and storage hosts are available. The config
+                    # update wil be blocked when we do not have full redundancy.
+                    if not (host.is_unlocked() and host.is_enabled() and
+                            host.is_available()):
+                        self.report_build_failure(
+                            "all %s hosts must be unlocked-enabled-available, "
+                            % host.personality)
+                        return
+
+            controller_hosts = list()
+            storage_hosts = list()
+            worker_hosts = list()
+            host_list = list(host_table.values())
+
+            for host_resource in self.nfvi_system_config_update_hosts:
+                for host in host_list:
+                    if host_resource.name == host.name:
+                        if HOST_PERSONALITY.CONTROLLER in host.personality and \
+                                host_resource.unlock_request != 'not_required':
+                            controller_hosts.append(host)
+
+                        elif HOST_PERSONALITY.STORAGE in host.personality and \
+                                host_resource.unlock_request != 'not_required':
+                            storage_hosts.append(host)
+
+                        if HOST_PERSONALITY.WORKER in host.personality and \
+                                host_resource.unlock_request != 'not_required':
+                            worker_hosts.append(host)
+
+                        host_list.remove(host)
+                        break
+
+            STRATEGY_CREATION_COMMANDS = [
+                (self._add_system_config_controller_strategy_stages,
+                 controller_hosts),
+                (self._add_system_config_storage_strategy_stages,
+                 storage_hosts),
+                (self._add_system_config_worker_strategy_stages,
+                 worker_hosts)
+            ]
+
+            for add_strategy_stages_function, host_list in \
+                    STRATEGY_CREATION_COMMANDS:
+                if host_list:
+                    success, reason = add_strategy_stages_function(host_list)
+                    if not success:
+                        self.report_build_failure(reason)
+                        return
+
+            if 0 == len(self.apply_phase.stages):
+                self.report_build_failure(
+                    "no system config updates need to be applied")
+                return
+        else:
+            self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
+                False, self.build_phase.result_reason)
+
+        self.sw_update_obj.strategy_build_complete(True, '')  # pylint: disable=no-member
+        self.save()
+
+    def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
+        """
+        Initializes a system config update strategy object using the given
+        dictionary
+        """
+        super(SystemConfigUpdateStrategy, self).from_dict(
+            data, build_phase, apply_phase, abort_phase)
+        self._single_controller = data['single_controller']
+
+        self.mixin_from_dict(data)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the software upgrade strategy as a dictionary
+        """
+        data = super(SystemConfigUpdateStrategy, self).as_dict()
+        data['single_controller'] = self._single_controller
+
+        self.mixin_as_dict(data)
+        return data
+
+
+###################################################################
+#
 # The Firmware Update Strategy
 #
 ###################################################################
@@ -2609,21 +2905,6 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
 
         # initialize the variables required by the mixins
         self.initialize_mixin()
-
-    def report_build_failure(self, reason):
-        """
-        Report a build failure for the strategy
-
-        todo(abailey): this should be in the superclass
-        """
-        DLOG.warn("Strategy Build Failed: %s" % reason)
-        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-        self.build_phase.result_reason = reason
-        self.sw_update_obj.strategy_build_complete(
-            False,
-            self.build_phase.result_reason)
-        self.save()
 
     def build(self):
         """Build the strategy"""
@@ -3444,16 +3725,6 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         stage.add_step(strategy.KubeUpgradeCleanupStep())
         self.apply_phase.add_stage(stage)
 
-    def report_build_failure(self, reason):
-        DLOG.warn("Strategy Build Failed: %s" % reason)
-        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-        self.build_phase.result_reason = reason
-        self.sw_update_obj.strategy_build_complete(
-            False,
-            self.build_phase.result_reason)
-        self.save()
-
     def get_first_host(self):
         """
         This corresponds to the first host that should be updated.
@@ -3685,6 +3956,8 @@ def strategy_rebuild_from_dict(data):
         strategy_obj = object.__new__(SwPatchStrategy)
     elif STRATEGY_NAME.SW_UPGRADE == data['name']:
         strategy_obj = object.__new__(SwUpgradeStrategy)
+    elif STRATEGY_NAME.SYSYTEM_CONFIG_UPDATE == data['name']:
+        strategy_obj = object.__new__(SystemConfigUpdateStrategy)
     elif STRATEGY_NAME.FW_UPDATE == data['name']:
         strategy_obj = object.__new__(FwUpdateStrategy)
     elif STRATEGY_NAME.KUBE_ROOTCA_UPDATE == data['name']:

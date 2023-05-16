@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,3 +19,4 @@ from nfv_client.sw_update._sw_update import STRATEGY_NAME_KUBE_ROOTCA_UPDATE  # 
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_KUBE_UPGRADE  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_SW_PATCH  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_SW_UPGRADE  # noqa: F401
+from nfv_client.sw_update._sw_update import STRATEGY_NAME_SYSTEM_CONFIG_UPDATE  # noqa: F401

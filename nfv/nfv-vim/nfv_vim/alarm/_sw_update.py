@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -186,6 +186,42 @@ _alarm_templates = {
         'reason_text': "Kubernetes upgrade auto-apply failed",
         'repair_action': ("Attempt to apply kubernetes upgrade manually; if "
                           "problem persists contact next level of support"),
+        'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
+    },
+
+    alarm.ALARM_TYPE.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=system-config-update",
+        'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
+        'severity': alarm.ALARM_SEVERITY.MAJOR,
+        'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
+        'reason_text': "System config update auto-apply inprogress",
+        'repair_action': ("Wait for system config update auto-apply to "
+                          "complete; if problem persists contact next "
+                          "level of support"),
+        'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
+    },
+    alarm.ALARM_TYPE.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=system-config-update",
+        'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
+        'severity': alarm.ALARM_SEVERITY.MAJOR,
+        'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
+        'reason_text': "System config update auto-apply aborting",
+        'repair_action': ("Wait for system config update auto-apply abort "
+                          "to complete; if problem persists contact next "
+                          "level of support"),
+        'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
+    },
+    alarm.ALARM_TYPE.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED: {
+        'entity_type': "orchestration",
+        'entity': "orchestration=system-config-update",
+        'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
+        'severity': alarm.ALARM_SEVERITY.CRITICAL,
+        'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
+        'reason_text': "System config update auto-apply failed",
+        'repair_action': ("Attempt to apply system config update manually; "
+                          "if problem persists contact next level of support"),
         'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
     },
 }

@@ -434,3 +434,67 @@ class TestNFVPluginsK8SGetTerminatingPods(testcase.NFVTestCase):
 
         assert result.result_data == \
                'test-pod-terminating,test-pod-terminating-2'
+
+
+@mock.patch('kubernetes.config.load_kube_config', mock_load_kube_config)
+class TestNFVPluginsK8SGetNamespacedRunningPods(testcase.NFVTestCase):
+
+    list_namespaced_pod_result = kubernetes.client.V1PodList(
+            api_version="v1",
+            items=[
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-not-found-1",
+                        namespace="test-namespace-1"),
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-not-found-2",
+                        namespace="test-namespace-1"),
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-found-1",
+                        namespace="test-namespace-1"),
+                ),
+                kubernetes.client.V1Pod(
+                    api_version="v1",
+                    kind="Pod",
+                    metadata=kubernetes.client.V1ObjectMeta(
+                        name="test-pod-found-2",
+                        namespace="test-namespace-1"),
+                ),
+            ]
+        )
+
+    def setUp(self):
+        super(TestNFVPluginsK8SGetNamespacedRunningPods, self).setUp()
+
+        def mock_list_namespaced_pod(obj, namespace, field_selector=""):
+            return self.list_namespaced_pod_result
+
+        self.mocked_list_namespaced_pod = mock.patch(
+            'kubernetes.client.CoreV1Api.list_namespaced_pod',
+            mock_list_namespaced_pod)
+        self.mocked_list_namespaced_pod.start()
+
+    def tearDown(self):
+        super(TestNFVPluginsK8SGetNamespacedRunningPods, self).tearDown()
+
+        self.mocked_list_namespaced_pod.stop()
+
+    def test_get_terminating_with_two_terminating(self):
+
+        result = kubernetes_client.get_namespaced_running_pods(
+            namespace="test-namespace-1",
+            name="test-pod-found"
+        )
+
+        assert result.result_data == \
+               'test-pod-found-1,test-pod-found-2'

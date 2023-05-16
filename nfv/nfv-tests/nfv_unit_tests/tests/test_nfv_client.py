@@ -282,3 +282,10 @@ class TestCLIKubeUpgradeStrategy(TestNFVClientShell,
     def required_create_fields(self):
         """Kube Upgrade requires a to-version for create"""
         return ['--to-version=1.2.3']
+
+
+class TestSystemConfigUpdateStrategy(TestNFVClientShell,
+                                     StrategyMixin):
+    def setUp(self):
+        super(TestSystemConfigUpdateStrategy, self).setUp()
+        self.set_strategy('system-config-update-strategy')

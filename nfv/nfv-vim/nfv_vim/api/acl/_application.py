@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2022 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,6 +13,7 @@ from nfv_vim.api.acl.policies import kube_upgrade_strategy_policy
 from nfv_vim.api.acl.policies import sw_patch_strategy_policy
 from nfv_vim.api.acl.policies import sw_update_strategy_policy
 from nfv_vim.api.acl.policies import sw_upgrade_strategy_policy
+from nfv_vim.api.acl.policies import system_config_update_strategy_policy
 
 from nfv_vim.api.acl import policy
 from nfv_vim.api import openstack
@@ -46,7 +47,8 @@ class AuthenticationApplication(object):
             kube_rootca_update_strategy_policy.list_rules(),
             kube_upgrade_strategy_policy.list_rules(),
             sw_patch_strategy_policy.list_rules(),
-            sw_upgrade_strategy_policy.list_rules()
+            sw_upgrade_strategy_policy.list_rules(),
+            system_config_update_strategy_policy.list_rules()
         )
         rules = policy.Rules.load_rules(policy_file_contents,
             default_rule,

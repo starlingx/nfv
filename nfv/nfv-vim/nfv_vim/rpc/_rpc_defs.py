@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -99,6 +99,7 @@ class _RPCMessageType(Constants):
     CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST = Constant('create-kube-rootca-update-strategy-request')
     CREATE_KUBE_UPGRADE_STRATEGY_REQUEST = Constant('create-kube-upgrade-strategy-request')
     CREATE_SW_UPGRADE_STRATEGY_REQUEST = Constant('create-sw-upgrade-strategy-request')
+    CREATE_SYSTEM_CONFIG_UPDATE_STRATEGY_REQUEST = Constant('create-system-config-update-strategy-request')
     CREATE_SW_UPDATE_STRATEGY_RESPONSE = Constant('create-sw-update-strategy-response')
     APPLY_SW_UPDATE_STRATEGY_REQUEST = Constant('apply-sw-update-strategy-request')
     APPLY_SW_UPDATE_STRATEGY_RESPONSE = Constant('apply-sw-update-strategy-response')

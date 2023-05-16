@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -40,6 +40,7 @@ from nfv_vim.objects._sw_update import SW_UPDATE_TYPE  # noqa: F401
 from nfv_vim.objects._sw_update import SwUpdate  # noqa: F401
 from nfv_vim.objects._sw_upgrade import SwUpgrade  # noqa: F401
 from nfv_vim.objects._system import System  # noqa: F401
+from nfv_vim.objects._system_config_update import SystemConfigUpdate  # noqa: F401
 from nfv_vim.objects._tenant import Tenant  # noqa: F401
 from nfv_vim.objects._volume import Volume  # noqa: F401
 from nfv_vim.objects._volume_snapshot import VolumeSnapshot  # noqa: F401

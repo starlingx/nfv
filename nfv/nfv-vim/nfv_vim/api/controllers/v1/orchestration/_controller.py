@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -15,6 +15,7 @@ from nfv_vim.api.controllers.v1.orchestration.sw_update import KubeRootcaUpdateA
 from nfv_vim.api.controllers.v1.orchestration.sw_update import KubeUpgradeAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SwPatchAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SwUpgradeAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update import SystemConfigUpdateAPI
 
 
 class OrchestrationDescription(wsme_types.Base):
@@ -34,6 +35,8 @@ class OrchestrationDescription(wsme_types.Base):
             Link.make_link('self', url, 'orchestration'),
             Link.make_link('sw-patch', url, 'orchestration/sw-patch', ''),
             Link.make_link('sw-upgrade', url, 'orchestration/sw-upgrade', ''),
+            Link.make_link('system-config-update',
+                           url, 'orchestration/system-config-update', ''),
             Link.make_link('kube-rootca-update',
                            url, 'orchestration/kube-rootca-update', ''),
             Link.make_link('kube-upgrade',
@@ -52,6 +55,8 @@ class OrchestrationAPI(rest.RestController):
             return SwPatchAPI(), remainder
         elif 'sw-upgrade' == key:
             return SwUpgradeAPI(), remainder
+        elif 'system-config-update' == key:
+            return SystemConfigUpdateAPI(), remainder
         elif 'fw-update' == key:
             return FwUpdateAPI(), remainder
         elif 'kube-rootca-update' == key:
