@@ -3958,10 +3958,13 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
+        # kube-upgrade-start will return a result when it completes,
+        # so we do not want to use handle_event
         if response['completed']:
             if self.strategy is not None:
                 self.strategy.nfvi_kube_upgrade = response['result-data']
-            # We do not set 'success' here, let the handle_event do this
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response['reason'])
@@ -3995,6 +3998,8 @@ class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
+        # kube-upgrade-cleanup will return a result when it completes,
+        # so we do not want to use handle_event
         if response['completed']:
             if self.strategy is not None:
                 # cleanup deletes the kube upgrade, clear it from the strategy
@@ -4031,9 +4036,13 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
+        # kube-upgrade-complete will return a result when it completes,
+        # so we do not want to use handle_event
         if response['completed']:
             if self.strategy is not None:
                 self.strategy.nfvi_kube_upgrade = response['result-data']
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response['reason'])

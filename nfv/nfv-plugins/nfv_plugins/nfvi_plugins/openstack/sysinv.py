@@ -16,7 +16,6 @@ DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.sysinv')
 # file for the nfvi plugins.
 REST_API_REQUEST_TIMEOUT = 60
 
-
 KUBE_ROOTCA_UPDATE_ENDPOINT = "/kube_rootca_update"
 KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT = \
     KUBE_ROOTCA_UPDATE_ENDPOINT + "/generate_cert"
@@ -24,6 +23,8 @@ KUBE_ROOTCA_UPDATE_PODS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/pods"
 KUBE_ROOTCA_UPDATE_HOSTS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/hosts"
 KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT = \
     KUBE_ROOTCA_UPDATE_ENDPOINT + "/upload_cert"
+
+KUBE_UPGRADE_ENDPOINT = "/kube_upgrade"
 
 
 # todo(abailey): refactor _api_get, etc.. into rest_api.py
@@ -96,6 +97,11 @@ def _api_post(token, endpoint, api_cmd_payload):
                                 json.dumps(api_cmd_payload),
                                 timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
+
+
+def _api_data_patch(path, value, op="replace"):
+    # the 'path' is prefixed with a leading '/'
+    return {'path': '/' + path, 'value': value, 'op': op}
 
 
 def get_datanetworks(token, host_uuid):
@@ -357,35 +363,12 @@ def kube_upgrade_start(token, to_version, force=False, alarm_ignore_list=None):
     """
     Ask System Inventory to start a kube upgrade
     """
-    # todo(abailey): refactor using _post_api_request
-    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
-    if url is None:
-        raise ValueError("OpenStack SysInv URL is invalid")
-
-    api_cmd = url + "/kube_upgrade"
-
-    api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
-    api_cmd_headers['User-Agent'] = "vim/1.0"
-
     api_cmd_payload = dict()
     api_cmd_payload['to_version'] = to_version
     api_cmd_payload['force'] = force
     if alarm_ignore_list is not None:
         api_cmd_payload['alarm_ignore_list'] = copy.copy(alarm_ignore_list)
-
-    response = rest_api_request(token,
-                                "POST",
-                                api_cmd,
-                                api_cmd_headers,
-                                json.dumps(api_cmd_payload),
-                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
-    return response
-
-
-def api_data_patch(path, value, op="replace"):
-    # the 'path' is prefixed with a leading '/'
-    return {'path': '/' + path, 'value': value, 'op': op}
+    return _api_post(token, KUBE_UPGRADE_ENDPOINT, api_cmd_payload)
 
 
 def _patch_kube_upgrade_state(token, new_value, hostname=None):
@@ -400,10 +383,10 @@ def _patch_kube_upgrade_state(token, new_value, hostname=None):
     api_cmd_headers['User-Agent'] = "vim/1.0"
 
     api_cmd_payload = list()
-    api_cmd_payload.append(api_data_patch('state', new_value))
+    api_cmd_payload.append(_api_data_patch('state', new_value))
     # some kube upgrade patch commands take a hostname
     if hostname is not None:
-        api_cmd_payload.append(api_data_patch('hostname', hostname))
+        api_cmd_payload.append(_api_data_patch('hostname', hostname))
 
     return rest_api_request(token,
                             "PATCH",
