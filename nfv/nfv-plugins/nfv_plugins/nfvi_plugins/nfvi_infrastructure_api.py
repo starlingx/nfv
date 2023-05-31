@@ -2394,7 +2394,11 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                             host_name, "NoExecute", "services")
                 future.result = (yield)
 
-                if not future.result.is_complete():
+                if future.result.is_complete():
+                    DLOG.info("Taint services=disabled:NoExecute successfully "
+                              "removed from host, host_uuid=%s, host_name=%s."
+                               % (host_uuid, host_name))
+                else:
                     DLOG.error("Kubernetes untaint_node failed, operation "
                                "did not complete, host_uuid=%s, host_name=%s."
                                % (host_uuid, host_name))
@@ -2437,7 +2441,11 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 future.result = (yield)
 
-                if not future.result.is_complete():
+                if future.result.is_complete():
+                    DLOG.info("Taint services=disabled:NoExecute successfully "
+                              "added to host, host_uuid=%s, host_name=%s."
+                               % (host_uuid, host_name))
+                else:
                     DLOG.error("Kubernetes taint_node failed, operation "
                                "did not complete, host_uuid=%s, host_name=%s."
                                % (host_uuid, host_name))
