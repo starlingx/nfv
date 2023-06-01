@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2021 Wind River Systems, Inc.
+# Copyright (c) 2020-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,6 +18,7 @@ from nfv_vim.objects._sw_update import SW_UPDATE_TYPE
 from nfv_vim.objects._sw_update import SwUpdate
 
 DLOG = debug.debug_get_logger('nfv_vim.objects.kube_upgrade')
+DEFAULT_KUBE_AUDIT_RATE = 5
 
 
 class KubeUpgrade(SwUpdate):
@@ -29,8 +30,8 @@ class KubeUpgrade(SwUpdate):
             sw_update_type=SW_UPDATE_TYPE.KUBE_UPGRADE,
             sw_update_uuid=sw_update_uuid,
             strategy_data=strategy_data)
-        # TODO(abailey): we do not appear to populate _kube_upgrade_hosts
-        # consider removing
+        # these next two values are used by the audit
+        self._kube_upgrade = None
         self._kube_upgrade_hosts = list()
 
     def strategy_build(self,
@@ -140,18 +141,10 @@ class KubeUpgrade(SwUpdate):
 
         elif (self.strategy.is_apply_failed() or
               self.strategy.is_apply_timed_out()):
-            for kube_upgrade_host in self._kube_upgrade_hosts:
-                if not self._alarms:
-                    self._alarms = alarm.raise_sw_update_alarm(
-                        self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_FAILED))
-                    event_log.sw_update_issue_log(
-                        self.event_id(SW_UPDATE_EVENT_IDS.APPLY_FAILED))
-                break
-
-            else:
-                if self._alarms:
-                    alarm.clear_sw_update_alarm(self._alarms)
-                return False
+            # we do not raise additional alarms
+            if self._alarms:
+                alarm.clear_sw_update_alarm(self._alarms)
+            return False
 
         elif self.strategy.is_aborting():
             if not self._alarms:
@@ -166,6 +159,48 @@ class KubeUpgrade(SwUpdate):
             return False
 
         return True
+
+    @coroutine
+    def nfvi_kube_upgrade_callback(self, timer_id):
+        """
+        Audit Kube Upgrade Callback
+        """
+        from nfv_vim import strategy
+        response = (yield)
+
+        if response['completed']:
+            DLOG.debug("Audit-Kube-Upgrade callback, response=%s." % response)
+            last_state = self._kube_upgrade.state if self._kube_upgrade else None
+            self._kube_upgrade = response['result-data']
+            current_state = self._kube_upgrade.state if self._kube_upgrade else None
+            if last_state != current_state:
+                self.handle_event(strategy.STRATEGY_EVENT.KUBE_UPGRADE_CHANGED,
+                                  self._kube_upgrade)
+        else:
+            DLOG.error("Audit-Kube-Upgrade callback, not completed, "
+                       "response=%s." % response)
+
+        self._nfvi_audit_inprogress = False
+
+    @coroutine
+    def nfvi_kube_host_upgrade_list_callback(self, timer_id):
+        """
+        Audit Kube Host Upgrade Callback
+        """
+        from nfv_vim import strategy
+        response = (yield)
+
+        if response['completed']:
+            DLOG.debug("Audit-Kube-Host-Upgrade callback, response=%s." % response)
+            self._kube_upgrade_hosts = response['result-data']
+            # todo(abailey): this needs to detect the change
+            self.handle_event(strategy.STRATEGY_EVENT.KUBE_HOST_UPGRADE_CHANGED,
+                              self._kube_upgrade)
+        else:
+            DLOG.error("Audit-Kube-Upgrade callback, not completed, "
+                       "response=%s." % response)
+
+        self._nfvi_audit_inprogress = False
 
     @coroutine
     def nfvi_audit(self):
@@ -184,15 +219,35 @@ class KubeUpgrade(SwUpdate):
             self._nfvi_audit_inprogress = True
             while self._nfvi_audit_inprogress:
                 timer_id = (yield)
+            # nfvi_alarms_callback sets timer to 2 seconds
+            # leave timer at 2 seconds for the next two audit calls
 
-            # nfvi_alarms_callback sets timer to 2 seconds. reset back to 30
-            timers.timers_reschedule_timer(timer_id, 30)
+            DLOG.debug("Audit kube upgrade, timer_id=%s." % timer_id)
+            nfvi.nfvi_get_kube_upgrade(
+                self.nfvi_kube_upgrade_callback(timer_id))
+            self._nfvi_audit_inprogress = True
+            while self._nfvi_audit_inprogress:
+                timer_id = (yield)
 
+            current_state = self._kube_upgrade.state if self._kube_upgrade else None
+            # only audit the kube hosts when upgrading kubelets
+            if current_state in ["upgrading-kubelets",
+                                 "upgraded-kubelets"]:
+                DLOG.debug("Audit kube upgrade hosts, timer_id=%s." % timer_id)
+                nfvi.nfvi_get_kube_host_upgrade_list(
+                    self.nfvi_kube_host_upgrade_list_callback(timer_id))
+
+                self._nfvi_audit_inprogress = True
+                while self._nfvi_audit_inprogress:
+                    timer_id = (yield)
+
+            # set timer to DEFAULT_KUBE_AUDIT_RATE
+            timers.timers_reschedule_timer(timer_id, DEFAULT_KUBE_AUDIT_RATE)
             if not self.nfvi_update():
                 DLOG.info("Audit no longer needed.")
                 break
 
-            DLOG.verbose("Audit kube upgrade still running, timer_id=%s." %
-                         timer_id)
+            DLOG.debug("Audit kube upgrade still running, timer_id=%s." %
+                       timer_id)
 
         self._nfvi_timer_id = None

@@ -3882,14 +3882,18 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
-        if event == STRATEGY_EVENT.HOST_AUDIT:
+        if event == STRATEGY_EVENT.KUBE_UPGRADE_CHANGED:
+            # todo(abailey): use event data rather than re-querying
+            self._query_inprogress = True
+            nfvi.nfvi_get_kube_upgrade(self._get_kube_upgrade_callback())
+            return True
+        elif event == STRATEGY_EVENT.HOST_AUDIT:
             if 0 == self._wait_time:
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
             now_ms = timers.get_monotonic_timestamp_in_ms()
             secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 60 seconds before checking upgrade for first time
-            if 60 <= secs_expired and not self._query_inprogress:
+            # Wait 30 seconds before checking kube upgrade for first time
+            if 30 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
                 nfvi.nfvi_get_kube_upgrade(self._get_kube_upgrade_callback())
             return True
@@ -4379,8 +4383,8 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
 
         from nfv_vim import directors
 
-        DLOG.info("Step (%s) apply to hostnames (%s)."
-                  % (self._name, self._host_names))
+        DLOG.debug("Step (%s) apply to hostnames (%s)."
+                   % (self._name, self._host_names))
         host_director = directors.get_host_director()
         operation = \
             host_director.kube_upgrade_hosts_control_plane(self._host_names,
@@ -4456,14 +4460,19 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
                     result,
                     "kube host upgrade kubelet (%s) failed" % host.name)
                 return True
+        elif event == STRATEGY_EVENT.KUBE_HOST_UPGRADE_CHANGED:
+            self._query_inprogress = True
+            nfvi.nfvi_get_kube_host_upgrade_list(
+                self._get_kube_host_upgrade_list_callback())
+            return True
         elif event == STRATEGY_EVENT.HOST_AUDIT:
             if 0 == self._wait_time:
                 self._wait_time = timers.get_monotonic_timestamp_in_ms()
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
             secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 60 seconds before checking upgrade for first time
-            if 60 <= secs_expired and not self._query_inprogress:
+            # Wait at least 30 seconds before checking kube hosts for first time
+            if 30 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
                 nfvi.nfvi_get_kube_host_upgrade_list(
                     self._get_kube_host_upgrade_list_callback())
@@ -4475,13 +4484,12 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
 
         from nfv_vim import directors
 
-        DLOG.info("Step (%s) apply to hostnames (%s)."
-                  % (self._name, self._host_names))
+        DLOG.debug("Step (%s) apply to hostnames (%s)."
+                   % (self._name, self._host_names))
         host_director = directors.get_host_director()
         operation = \
             host_director.kube_upgrade_hosts_kubelet(self._host_names,
                                                      self._force)
-
         if operation.is_inprogress():
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
         elif operation.is_failed():

@@ -30,11 +30,13 @@ class EventNames(object):
     MIGRATE_INSTANCES_FAILED = Constant('migrate-instances-failed')
     KUBE_HOST_CORDON_FAILED = Constant('kube-host-cordon-failed')
     KUBE_HOST_UNCORDON_FAILED = Constant('kube-host-uncordon-failed')
+    KUBE_HOST_UPGRADE_CHANGED = Constant('kube-host-upgrade-changed')
     KUBE_HOST_UPGRADE_CONTROL_PLANE_FAILED = \
         Constant('kube-host-upgrade-control-plane-failed')
     KUBE_HOST_UPGRADE_KUBELET_FAILED = \
         Constant('kube-host-upgrade-kubelet-failed')
     KUBE_ROOTCA_UPDATE_HOST_FAILED = Constant('kube-rootca-update-host-failed')
+    KUBE_UPGRADE_CHANGED = Constant('kube-upgrade-changed')
 
 
 # Constants
