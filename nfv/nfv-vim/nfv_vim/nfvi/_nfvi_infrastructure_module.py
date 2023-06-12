@@ -223,6 +223,14 @@ def nfvi_kube_rootca_update_upload_cert(cert_file, callback):
     return cmd_id
 
 
+def nfvi_kube_upgrade_abort(callback):
+    """Kube Upgrade - Abort"""
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_upgrade_abort',
+        callback=callback)
+    return cmd_id
+
+
 def nfvi_kube_upgrade_cleanup(callback):
     """
     Kube Upgrade Cleanup

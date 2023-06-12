@@ -1799,6 +1799,52 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def kube_upgrade_abort(self, future, callback):
+        """Invokes sysinv kube-upgrade-abort"""
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-upgrade-abort'
+        sysinv_method = sysinv.kube_upgrade_abort
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    self.set_response_error(response, "Openstack get-token")
+                    return
+                self._platform_token = future.result.data
+            future.work(sysinv_method, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                self.set_response_error(response, action_type)
+                return
+            api_data = future.result.data
+            result_obj = nfvi.objects.v1.KubeUpgrade(
+                api_data['state'],
+                api_data['from_version'],
+                api_data['to_version'])
+            response['result-data'] = result_obj
+            response['completed'] = True
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+            response['reason'] = e.http_response_reason
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+        finally:
+            callback.send(response)
+            callback.close()
+
     def kube_upgrade_cleanup(self, future, callback):
         """
         kube upgrade cleanup

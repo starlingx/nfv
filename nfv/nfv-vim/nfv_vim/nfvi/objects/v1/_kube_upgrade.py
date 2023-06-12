@@ -34,23 +34,27 @@ class KubeUpgradeState(Constants):
     """
     Kube Upgrade State Constants
     These values are copied from sysinv/common/kubernetes.py
+    Maintaining the same order as defined in kubernetes.py
     """
 
     KUBE_UPGRADE_STARTED = Constant('upgrade-started')
     KUBE_UPGRADE_DOWNLOADING_IMAGES = Constant('downloading-images')
     KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED = Constant('downloading-images-failed')
     KUBE_UPGRADE_DOWNLOADED_IMAGES = Constant('downloaded-images')
-    KUBE_UPGRADING_FIRST_MASTER = Constant('upgrading-first-master')
-    KUBE_UPGRADING_FIRST_MASTER_FAILED = Constant('upgrading-first-master-failed')
-    KUBE_UPGRADED_FIRST_MASTER = Constant('upgraded-first-master')
     KUBE_UPGRADING_NETWORKING = Constant('upgrading-networking')
     KUBE_UPGRADING_NETWORKING_FAILED = Constant('upgrading-networking-failed')
     KUBE_UPGRADED_NETWORKING = Constant('upgraded-networking')
+    KUBE_UPGRADING_FIRST_MASTER = Constant('upgrading-first-master')
+    KUBE_UPGRADING_FIRST_MASTER_FAILED = Constant('upgrading-first-master-failed')
+    KUBE_UPGRADED_FIRST_MASTER = Constant('upgraded-first-master')
     KUBE_UPGRADING_SECOND_MASTER = Constant('upgrading-second-master')
     KUBE_UPGRADING_SECOND_MASTER_FAILED = Constant('upgrading-second-master-failed')
     KUBE_UPGRADED_SECOND_MASTER = Constant('upgraded-second-master')
     KUBE_UPGRADING_KUBELETS = Constant('upgrading-kubelets')
     KUBE_UPGRADE_COMPLETE = Constant('upgrade-complete')
+    KUBE_UPGRADE_ABORTING = Constant('upgrade-aborting')
+    KUBE_UPGRADE_ABORTING_FAILED = Constant('upgrade-aborting-failed')
+    KUBE_UPGRADE_ABORTED = Constant('upgrade-aborted')
     KUBE_HOST_CORDON = Constant('cordon-started')
     KUBE_HOST_CORDON_COMPLETE = Constant('cordon-complete')
     KUBE_HOST_CORDON_FAILED = Constant('cordon-failed')

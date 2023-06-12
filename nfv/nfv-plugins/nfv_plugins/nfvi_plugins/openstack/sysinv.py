@@ -396,6 +396,13 @@ def _patch_kube_upgrade_state(token, new_value, hostname=None):
                             timeout_in_secs=REST_API_REQUEST_TIMEOUT)
 
 
+def kube_upgrade_abort(token):
+    """
+    Ask System Inventory to kube upgrade abort
+    """
+    return _patch_kube_upgrade_state(token, "upgrade-aborting")
+
+
 def kube_upgrade_cleanup(token):
     """
     Ask System Inventory to delete the kube upgrade

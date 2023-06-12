@@ -29,6 +29,7 @@ from nfv_vim.strategy._strategy_steps import KubeRootcaUpdatePodsTrustBothcasSte
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdatePodsTrustNewcaStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateStartStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateUploadCertStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubeUpgradeCleanupAbortedStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeCleanupStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeCompleteStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeDownloadImagesStep  # noqa: F401

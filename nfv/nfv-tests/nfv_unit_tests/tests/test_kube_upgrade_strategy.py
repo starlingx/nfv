@@ -92,6 +92,7 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             {'name': 'query-alarms'},
             {'name': 'query-kube-versions'},
             {'name': 'query-kube-upgrade'},
+            {'name': 'kube-upgrade-cleanup-aborted'},
             {'name': 'query-kube-host-upgrade'},
         ]
         expected_results = {

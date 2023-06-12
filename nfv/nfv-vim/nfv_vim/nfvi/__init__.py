@@ -123,6 +123,7 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_hos
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_pods  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_start  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_rootca_update_upload_cert  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_abort  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_cleanup  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_complete  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_download_images  # noqa: F401

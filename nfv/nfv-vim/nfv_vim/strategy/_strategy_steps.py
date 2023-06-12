@@ -76,8 +76,10 @@ class StrategyStepNames(Constants):
     QUERY_KUBE_VERSIONS = Constant('query-kube-versions')
     KUBE_HOST_CORDON = Constant('kube-host-cordon')
     KUBE_HOST_UNCORDON = Constant('kube-host-uncordon')
+    KUBE_UPGRADE_ABORT = Constant('kube-upgrade-abort')
     KUBE_UPGRADE_START = Constant('kube-upgrade-start')
     KUBE_UPGRADE_CLEANUP = Constant('kube-upgrade-cleanup')
+    KUBE_UPGRADE_CLEANUP_ABORTED = Constant('kube-upgrade-cleanup-aborted')
     KUBE_UPGRADE_COMPLETE = Constant('kube-upgrade-complete')
     KUBE_UPGRADE_DOWNLOAD_IMAGES = Constant('kube-upgrade-download-images')
     KUBE_UPGRADE_NETWORKING = Constant('kube-upgrade-networking')
@@ -3774,6 +3776,7 @@ class QueryKubeVersionsStep(AbstractStrategyStep):
         """
         from nfv_vim import nfvi
 
+        DLOG.info("Step (%s) apply." % self._name)
         nfvi.nfvi_get_kube_version_list(self._query_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
@@ -3810,6 +3813,7 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
         Query Kube Host Upgrade List
         """
         from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
         nfvi.nfvi_get_kube_host_upgrade_list(
             self._get_kube_host_upgrade_list_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -3922,6 +3926,56 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
         return data
 
 
+class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade - Abort - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeUpgradeAbortStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_ABORT,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTED,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTING_FAILED)
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade - Abort - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+
+        # Calling abort on an aborted update returns a failure so we check
+        if self.strategy is None:
+            # return success if there is no more strategy
+            self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                     "no strategy")
+        elif self.strategy.nfvi_kube_upgrade is None:
+            # return success if there is no more kube upgrade
+            self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                     "no kube upgrade")
+        elif self.strategy.nfvi_kube_upgrade.state == self._success_state:
+            self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                     "")
+        else:
+            # If the state does not match, the abort failed.
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result,
+                                     "Unexpected state: %s"
+                                     % self.strategy.nfvi_kube_upgrade.state)
+
+    def apply(self):
+        """Kube Upgrade - Abort"""
+
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_kube_upgrade_abort(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
 class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
     """Kube Upgrade Start - Strategy Step"""
 
@@ -3936,6 +3990,12 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         # next 2 attributes must be persisted through from_dict/as_dict
         self._to_version = to_version
         self._force = force
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()]
 
     def from_dict(self, data):
         """
@@ -3977,6 +4037,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         """Kube Upgrade Start"""
 
         from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
 
         alarm_ignore_list = ["900.401", ]  # ignore the auto apply alarm
         nfvi.nfvi_kube_upgrade_start(self._to_version,
@@ -3984,6 +4045,54 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
                                      alarm_ignore_list,
                                      self._response_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubeUpgradeCleanupAbortedStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Cleanup Aborted - Strategy Step"""
+
+    # todo(abailey): this class could be replaced by KubeUpgradeCleanupStep
+    # if it was enhanced to take an optional 'filter'
+    def __init__(self):
+        super(KubeUpgradeCleanupAbortedStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP_ABORTED,
+            None,  # there is no success state for this cleanup activity
+            None)  # there is no failure state for this cleanup activity
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade Cleanup Aborted - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        # kube-upgrade-cleanup-aborted will return a result when it completes,
+        # so we do not want to use handle_event
+        if response['completed']:
+            if self.strategy is not None:
+                # cleanup deletes the kube upgrade, clear it from the strategy
+                self.strategy.nfvi_kube_upgrade = None
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Upgrade Cleanup Aborted"""
+        DLOG.info("Step (%s) apply." % self._name)
+
+        from nfv_vim import nfvi
+        # We only invoke this step if the state matches our filter
+        filter_state = nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTED
+        if self.strategy is not None:
+            if self.strategy.nfvi_kube_upgrade is not None:
+                if self.strategy.nfvi_kube_upgrade.state == filter_state:
+                    DLOG.info("%s cleaning up %s" % (self._name, self.strategy.nfvi_kube_upgrade.state))
+                    nfvi.nfvi_kube_upgrade_cleanup(self._response_callback())
+                    return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+        # All other cases, we claim success since the filter did not match
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
 
 class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
@@ -4018,6 +4127,7 @@ class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
         """Kube Upgrade Cleanup"""
 
         from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
 
         nfvi.nfvi_kube_upgrade_cleanup(self._response_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -4032,6 +4142,12 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
             STRATEGY_STEP_NAME.KUBE_UPGRADE_COMPLETE,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
             None)  # there is no failure state for upgrade-complete
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()]
 
     @coroutine
     def _response_callback(self):
@@ -4055,6 +4171,7 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
         """Kube Upgrade Complete """
 
         from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
 
         nfvi.nfvi_kube_upgrade_complete(self._response_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -4070,6 +4187,12 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED,
             timeout_in_secs=1800)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()]
 
     @coroutine
     def _response_callback(self):
@@ -4089,6 +4212,7 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
         """Kube Upgrade Download Images """
 
         from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
 
         nfvi.nfvi_kube_upgrade_download_images(self._response_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -4104,6 +4228,12 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED,
             timeout_in_secs=900)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()]
 
     @coroutine
     def _response_callback(self):
@@ -4123,6 +4253,7 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
         """Kube Upgrade Networking"""
 
         from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
 
         nfvi.nfvi_kube_upgrade_networking(self._response_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -4262,6 +4393,13 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
             target_failure_state,
             timeout_in_secs)
 
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        # todo(abailey): Unknown if this should include an uncordon if it fails
+        return [KubeUpgradeAbortStep()]
+
     def handle_event(self, event, event_data=None):
         """
         Handle Host events  - does not query kube host upgrade list but
@@ -4308,6 +4446,13 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
             target_state,
             target_failure_state,
             timeout_in_secs)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        # todo(abailey): Unknown if this should include a cordon if it fails
+        return [KubeUpgradeAbortStep()]
 
     def handle_event(self, event, event_data=None):
         """
@@ -4359,6 +4504,13 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
             target_failure_state,
             timeout_in_secs)
 
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        # todo(abailey): Unknown if this should include an uncordon if it fails
+        return [KubeUpgradeAbortStep()]
+
     def handle_event(self, event, event_data=None):
         """
         Handle Host events  - does not query kube host upgrade list but
@@ -4383,8 +4535,8 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
 
         from nfv_vim import directors
 
-        DLOG.debug("Step (%s) apply to hostnames (%s)."
-                   % (self._name, self._host_names))
+        DLOG.info("Step (%s) apply to hostnames (%s)."
+                  % (self._name, self._host_names))
         host_director = directors.get_host_director()
         operation = \
             host_director.kube_upgrade_hosts_control_plane(self._host_names,
@@ -4408,6 +4560,13 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
             None,  # there is no kube upgrade success state for kubelets
             None,  # there is no kube upgrade failure state for kubelets
             timeout_in_secs=900)  # kubelet takes longer than control plane
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        # todo(abailey): Unknown if this should include an uncordon if it fails
+        return [KubeUpgradeAbortStep()]
 
     @coroutine
     def _get_kube_host_upgrade_list_callback(self):
@@ -4484,8 +4643,8 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
 
         from nfv_vim import directors
 
-        DLOG.debug("Step (%s) apply to hostnames (%s)."
-                   % (self._name, self._host_names))
+        DLOG.info("Step (%s) apply to hostnames (%s)."
+                  % (self._name, self._host_names))
         host_director = directors.get_host_director()
         operation = \
             host_director.kube_upgrade_hosts_kubelet(self._host_names,
@@ -4540,7 +4699,10 @@ def strategy_step_rebuild_from_dict(data):
             KubeHostUpgradeControlPlaneStep,
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET:
             KubeHostUpgradeKubeletStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_ABORT: KubeUpgradeAbortStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP: KubeUpgradeCleanupStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP_ABORTED:
+            KubeUpgradeCleanupAbortedStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_COMPLETE: KubeUpgradeCompleteStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES:
             KubeUpgradeDownloadImagesStep,

@@ -3039,11 +3039,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # Initial stage is a query of existing kube upgrade
         stage = strategy.StrategyStage(
             strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_QUERY)
+
+        # these query steps are paired with mixins that process their results
         stage.add_step(strategy.QueryAlarmsStep(
             ignore_alarms=self._ignore_alarms))
-        # these query steps are paired with mixins that process their results
         stage.add_step(strategy.QueryKubeVersionsStep())
         stage.add_step(strategy.QueryKubeUpgradeStep())
+        # cleanup kube upgrade if 'upgrade-aborted'
+        stage.add_step(strategy.KubeUpgradeCleanupAbortedStep())
+
+        # query hosts last, after any aborted upgrade is cleaned up
         stage.add_step(strategy.QueryKubeHostUpgradeStep())
 
         self.build_phase.add_stage(stage)
