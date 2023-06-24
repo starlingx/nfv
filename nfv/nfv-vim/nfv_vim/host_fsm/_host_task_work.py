@@ -1105,8 +1105,8 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
                                      "service %s. Doing query." %
                                      (self._host.name, self._service))
                         self._query_inprogress = True
-                        nfvi.nfvi_get_terminating_pods(self._host.name,
-                                                       self._get_callback())
+#                        nfvi.nfvi_get_terminating_pods(self._host.name,
+#                                                       self._get_callback())
             handled = True
 
         elif HOST_EVENT.AUDIT == event:
