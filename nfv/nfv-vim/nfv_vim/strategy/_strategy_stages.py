@@ -66,6 +66,7 @@ class StrategyStageNames(Constants):
     KUBE_UPGRADE_FIRST_CONTROL_PLANE = \
         Constant('kube-upgrade-first-control-plane')
     KUBE_UPGRADE_NETWORKING = Constant('kube-upgrade-networking')
+    KUBE_UPGRADE_STORAGE = Constant('kube-upgrade-storage')
     KUBE_UPGRADE_SECOND_CONTROL_PLANE = \
         Constant('kube-upgrade-second-control-plane')
     KUBE_UPGRADE_PATCH = Constant('kube-upgrade-patch')

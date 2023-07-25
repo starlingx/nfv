@@ -130,6 +130,7 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_complete 
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_download_images  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_networking  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_start  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_kube_upgrade_storage  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_list_deployment_hosts  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_lock_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_notify_host_failed  # noqa: F401
