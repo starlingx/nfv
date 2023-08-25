@@ -1,11 +1,14 @@
 #
-# Copyright (c) 2016-2022 Wind River Systems, Inc.
+# Copyright (c) 2016-2023 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+import os
 from six.moves import http_client as httplib
 from six.moves import urllib
+
+CAFILE = os.environ.get('REQUESTS_CA_BUNDLE')
 
 
 def request(token_id, method, api_cmd, api_cmd_headers=None,
@@ -35,7 +38,8 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
             request_info.data = api_cmd_payload.encode()
 
         url_request = urllib.request.urlopen(request_info,
-                                             timeout=timeout_in_secs)
+                                             timeout=timeout_in_secs,
+                                             cafile=CAFILE)
 
         headers = list()  # list of tuples
         for key, value in url_request.info().items():
