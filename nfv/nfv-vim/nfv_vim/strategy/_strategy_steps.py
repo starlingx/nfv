@@ -3997,7 +3997,7 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
             self.strategy.nfvi_kube_upgrade = kube_upgrade_obj
 
             # break out of the loop if fail or success states match
-            if kube_upgrade_obj.state == self._success_state:
+            if kube_upgrade_obj and kube_upgrade_obj.state == self._success_state:
                 DLOG.debug("(%s) successfully reached (%s)."
                            % (self._name, self._success_state))
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
@@ -4014,9 +4014,13 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
             else:
                 # Keep waiting for upgrade to reach success or fail state
                 # timeout will occur if it is never reached.
+                if kube_upgrade_obj:
+                    kube_upgrade_obj_state = kube_upgrade_obj.state
+                else:
+                    kube_upgrade_obj_state = None
                 DLOG.debug("(%s) in state (%s) waiting for (%s) or (%s)."
                            % (self._name,
-                              kube_upgrade_obj.state,
+                              kube_upgrade_obj_state,
                               self._success_state,
                               self._fail_state))
                 pass
