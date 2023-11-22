@@ -4720,6 +4720,8 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
     def _get_kube_host_upgrade_list_callback(self):
         """Get Kube Host Upgrade List Callback"""
 
+        from nfv_vim import nfvi
+
         response = (yield)
         DLOG.debug("(%s) callback response=%s." % (self._name, response))
 
@@ -4732,7 +4734,9 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
             for host_uuid in self._host_uuids:
                 for k_host in self.strategy.nfvi_kube_host_upgrade_list:
                     if k_host.host_uuid == host_uuid:
-                        if k_host.kubelet_version == self._to_version:
+                        if (k_host.kubelet_version == self._to_version and
+                            k_host.status == nfvi.objects.v1.KUBE_HOST_UPGRADE_STATE.
+                            KUBE_HOST_UPGRADED_KUBELET):
                             match_count += 1
                         host_count += 1
                         # break out of inner loop, since uuids match
@@ -4778,8 +4782,9 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
 
             now_ms = timers.get_monotonic_timestamp_in_ms()
             secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 30 seconds before checking kube hosts for first time
-            if 30 <= secs_expired and not self._query_inprogress:
+            # Wait at least 60 seconds before checking kube hosts for first time
+            # todo: reduce the delay to 15 and retry for 2mins.
+            if 60 <= secs_expired and not self._query_inprogress:
                 self._query_inprogress = True
                 nfvi.nfvi_get_kube_host_upgrade_list(
                     self._get_kube_host_upgrade_list_callback())
