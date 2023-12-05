@@ -4737,6 +4737,8 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
                         if (k_host.kubelet_version == self._to_version and
                             k_host.status == nfvi.objects.v1.KUBE_HOST_UPGRADE_STATE.
                             KUBE_HOST_UPGRADED_KUBELET):
+                            DLOG.info("Kubelet upgraded to version %s for host %s"
+                                    % (self._to_version, host_uuid))
                             match_count += 1
                         host_count += 1
                         # break out of inner loop, since uuids match
@@ -4746,12 +4748,14 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
                     break
             if match_count == len(self._host_uuids):
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                DLOG.info("Kubelet upgrade completed")
                 self.stage.step_complete(result, "")
             else:
                 # keep waiting for kubelet state to change
                 pass
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            DLOG.info("Kubelet upgrade failed")
             self.stage.step_complete(result, response['reason'])
 
     def handle_event(self, event, event_data=None):
@@ -4772,19 +4776,16 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
                     "kube host upgrade kubelet (%s) failed" % host.name)
                 return True
         elif event == STRATEGY_EVENT.KUBE_HOST_UPGRADE_CHANGED:
+            DLOG.info("Event %s in progress" % (STRATEGY_EVENT.KUBE_HOST_UPGRADE_CHANGED))
             self._query_inprogress = True
             nfvi.nfvi_get_kube_host_upgrade_list(
                 self._get_kube_host_upgrade_list_callback())
             return True
         elif event == STRATEGY_EVENT.HOST_AUDIT:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 60 seconds before checking kube hosts for first time
-            # todo: reduce the delay to 15 and retry for 2mins.
-            if 60 <= secs_expired and not self._query_inprogress:
+            DLOG.info("Event %s in progress" % (STRATEGY_EVENT.HOST_AUDIT))
+            # Wait time not required as we have a timeout initialized
+            # in init method.
+            if not self._query_inprogress:
                 self._query_inprogress = True
                 nfvi.nfvi_get_kube_host_upgrade_list(
                     self._get_kube_host_upgrade_list_callback())
