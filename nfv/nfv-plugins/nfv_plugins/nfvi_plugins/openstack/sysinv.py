@@ -443,6 +443,13 @@ def kube_upgrade_networking(token):
     return _patch_kube_upgrade_state(token, "upgrading-networking")
 
 
+def kube_upgrade_storage(token):
+    """
+    Ask System Inventory to kube upgrade storage
+    """
+    return _patch_kube_upgrade_state(token, "upgrading-storage")
+
+
 def kube_host_cordon(token, hostname, force):
     """
     system kube-host-cordon <host>

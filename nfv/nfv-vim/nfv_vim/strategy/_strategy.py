@@ -3458,6 +3458,22 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         stage.add_step(strategy.KubeUpgradeNetworkingStep())
         self.apply_phase.add_stage(stage)
 
+        # Next stage after networking is upgrade storage
+        self._add_kube_upgrade_storage_stage()
+
+    def _add_kube_upgrade_storage_stage(self):
+        """
+        Add kube upgrade storage stage.
+        This stage only occurs after upgrade networking
+        It then proceeds to the next stage
+        """
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_STORAGE)
+        stage.add_step(strategy.KubeUpgradeStorageStep())
+        self.apply_phase.add_stage(stage)
+
         # Next stage after networking is cordon
         self._add_kube_host_cordon_stage()
 
@@ -3794,8 +3810,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED:
                 self._add_kube_upgrade_networking_stage,
 
-            # After networking -> cordon
+            # After networking -> upgrade storage
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING:
+                self._add_kube_upgrade_storage_stage,
+
+            # if storage state failed, resync at storage state
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED:
+                self._add_kube_upgrade_storage_stage,
+
+            # After storage -> cordon
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE:
                 self._add_kube_host_cordon_stage,
 
             # If the state is cordon-failed, resume at cordon stage

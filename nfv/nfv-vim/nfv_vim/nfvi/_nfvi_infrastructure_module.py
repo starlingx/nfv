@@ -299,6 +299,15 @@ def nfvi_kube_upgrade_networking(callback):
     return cmd_id
 
 
+def nfvi_kube_upgrade_storage(callback):
+    """
+    Kube Upgrade Storage
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('kube_upgrade_storage',
+                                                  callback=callback)
+    return cmd_id
+
+
 def nfvi_kube_upgrade_start(to_version, force, alarm_ignore_list, callback):
     """
     Kube Upgrade Start

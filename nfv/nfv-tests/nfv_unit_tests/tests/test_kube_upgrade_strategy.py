@@ -340,6 +340,17 @@ class ApplyStageMixin(object):
             ],
         }
 
+    def _kube_upgrade_storage_stage(self):
+        return {
+            'name': 'kube-upgrade-storage',
+            'total_steps': 1,
+            'steps': [
+                {'name': 'kube-upgrade-storage',
+                 'success_state': 'upgraded-storage',
+                 'fail_state': 'upgrading-storage-failed'},
+            ],
+        }
+
     def _kube_upgrade_complete_stage(self):
         return {
             'name': 'kube-upgrade-complete',
@@ -485,6 +496,7 @@ class ApplyStageMixin(object):
                          add_start=True,
                          add_download=True,
                          add_networking=True,
+                         add_storage=True,
                          add_cordon=True,
                          add_first_control_plane=True,
                          add_second_control_plane=True,
@@ -507,6 +519,8 @@ class ApplyStageMixin(object):
             stages.append(self._kube_upgrade_download_images_stage())
         if add_networking:
             stages.append(self._kube_upgrade_networking_stage())
+        if add_storage:
+            stages.append(self._kube_upgrade_storage_stage())
         if add_cordon:
             stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
@@ -622,6 +636,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         stages = [
             self._kube_upgrade_download_images_stage(),
             self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_storage_stage(),
         ]
         if self.is_simplex():
             stages.append(self._kube_host_cordon_stage())
@@ -652,6 +667,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_to_version)
         stages = [
             self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_storage_stage(),
         ]
         if self.is_simplex():
             stages.append(self._kube_host_cordon_stage())
@@ -735,6 +751,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_to_version)
         stages = [
             self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_storage_stage()
         ]
         if self.is_simplex():
             stages.append(self._kube_host_cordon_stage())
@@ -758,10 +775,72 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         """
         Test the kube_upgrade strategy creation when there is only a simplex
         and the upgrade had previously stopped after successful networking.
-        It is expected to resume at the first control plane
+        It is expected to resume at the storage stage
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
+            self.default_from_version,
+            self.default_to_version)
+        stages = [
+            self._kube_upgrade_storage_stage()
+        ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(
+                ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
+        stages.extend([
+            self._kube_upgrade_complete_stage(),
+            self._kube_upgrade_cleanup_stage(),
+        ])
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+    def test_resume_after_storage_failed(self):
+        """
+        Test the kube_upgrade strategy creation when there is only a simplex
+        and the upgrade had previously failed during storage.
+        It is expected to retry and resume at the storage stage
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED,
+            self.default_from_version,
+            self.default_to_version)
+        stages = [
+            self._kube_upgrade_storage_stage(),
+        ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(
+                ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
+        stages.extend([
+            self._kube_upgrade_complete_stage(),
+            self._kube_upgrade_cleanup_stage(),
+        ])
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+    def test_resume_after_storage_succeeded(self):
+        """
+        Test the kube_upgrade strategy creation when there is only a simplex
+        and the upgrade had previously stopped after successful storage.
+        It is expected to resume at the first control plane
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE,
             self.default_from_version,
             self.default_to_version)
         stages = []

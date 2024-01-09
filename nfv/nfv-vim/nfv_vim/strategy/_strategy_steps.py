@@ -83,6 +83,7 @@ class StrategyStepNames(Constants):
     KUBE_UPGRADE_COMPLETE = Constant('kube-upgrade-complete')
     KUBE_UPGRADE_DOWNLOAD_IMAGES = Constant('kube-upgrade-download-images')
     KUBE_UPGRADE_NETWORKING = Constant('kube-upgrade-networking')
+    KUBE_UPGRADE_STORAGE = Constant('kube-upgrade-storage')
     KUBE_HOST_UPGRADE_CONTROL_PLANE = \
         Constant('kube-host-upgrade-control-plane')
     KUBE_HOST_UPGRADE_KUBELET = Constant('kube-host-upgrade-kubelet')
@@ -4407,6 +4408,40 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
 
+class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
+    """Kube Upgrade Storage - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubeUpgradeStorageStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_UPGRADE_STORAGE,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED,
+            timeout_in_secs=900)
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Upgrade Storage - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Upgrade Storage"""
+
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_kube_upgrade_storage(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
 class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
     """Kube Upgrade Host - Abstract Strategy Step
 
@@ -4861,6 +4896,7 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES:
             KubeUpgradeDownloadImagesStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_NETWORKING: KubeUpgradeNetworkingStep,
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_STORAGE: KubeUpgradeStorageStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_START: KubeUpgradeStartStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE: QueryKubeHostUpgradeStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE: QueryKubeUpgradeStep,
