@@ -37,6 +37,8 @@ class KubeUpgradeState(Constants):
     Maintaining the same order as defined in kubernetes.py
     """
 
+    KUBE_UPGRADE_STARTING = Constant('upgrade-starting')
+    KUBE_UPGRADE_STARTING_FAILED = Constant('upgrade-starting-failed')
     KUBE_UPGRADE_STARTED = Constant('upgrade-started')
     KUBE_UPGRADE_DOWNLOADING_IMAGES = Constant('downloading-images')
     KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED = Constant('downloading-images-failed')

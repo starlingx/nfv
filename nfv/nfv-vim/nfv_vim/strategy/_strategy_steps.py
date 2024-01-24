@@ -4135,7 +4135,8 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         super(KubeUpgradeStartStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_START,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
-            None)  # there is no failure state if upgrade-start fails
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTING_FAILED,
+            timeout_in_secs=1800)
         # next 2 attributes must be persisted through from_dict/as_dict
         self._to_version = to_version
         self._force = force
@@ -4171,13 +4172,9 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
-        # kube-upgrade-start will return a result when it completes,
-        # so we do not want to use handle_event
         if response['completed']:
             if self.strategy is not None:
                 self.strategy.nfvi_kube_upgrade = response['result-data']
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response['reason'])

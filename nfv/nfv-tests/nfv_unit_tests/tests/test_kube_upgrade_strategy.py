@@ -269,7 +269,8 @@ class ApplyStageMixin(object):
             'total_steps': 1,
             'steps': [
                 {'name': 'kube-upgrade-start',
-                 'success_state': 'upgrade-started'},
+                 'success_state': 'upgrade-started',
+                 'fail_state': 'upgrade-starting-failed'},
             ],
         }
 
@@ -622,6 +623,39 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         self.aio_controller_list = ['controller-0']
         self.worker_list = []
         self.storage_list = []
+
+    def test_resume_after_starting_failed(self):
+        """
+        Test the kube_upgrade strategy creation when the upgrade had previously
+        stopped with 'upgrade-starting-failed'
+        It is expected to resume at the 'upgrade-starting' stage
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTING_FAILED,
+            self.default_from_version,
+            self.default_to_version)
+        stages = [
+            self._kube_upgrade_start_stage(),
+            self._kube_upgrade_download_images_stage(),
+            self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_storage_stage(),
+        ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
+        stages.extend([
+            self._kube_upgrade_complete_stage(),
+            self._kube_upgrade_cleanup_stage(),
+        ])
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_download_images_failed(self):
         """

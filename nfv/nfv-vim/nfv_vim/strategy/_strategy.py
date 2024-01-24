@@ -3800,6 +3800,10 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # Note: there are no resume states for actions that are still running
         # ie:  KUBE_UPGRADE_DOWNLOADING_IMAGES
         RESUME_STATE = {
+            # If upgrade start failed, allow to restart
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTING_FAILED:
+                self._add_kube_upgrade_start_stage,
+
             # after upgrade-started -> download images
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED:
                 self._add_kube_upgrade_download_images_stage,
