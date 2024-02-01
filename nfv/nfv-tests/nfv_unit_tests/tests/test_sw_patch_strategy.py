@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -2700,7 +2700,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '900.101',
                                         '200.001',
                                         '700.004',
-                                        '280.002'],
+                                        '280.002',
+                                        '100.119'],
                       'timeout': 1800}
                  ]
                 },
@@ -2721,7 +2722,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '900.101',
                                         '200.001',
                                         '700.004',
-                                        '280.002'],
+                                        '280.002',
+                                        '100.119'],
                       'timeout': 1800}
                  ]
                 }
@@ -2824,7 +2826,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '900.101',
                                         '200.001',
                                         '700.004',
-                                        '280.002'],
+                                        '280.002',
+                                        '100.119'],
                       'timeout': 1800}
                  ]
                 },
@@ -2846,7 +2849,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '900.101',
                                         '200.001',
                                         '700.004',
-                                        '280.002'],
+                                        '280.002',
+                                        '100.119'],
                       'timeout': 1800}
                  ]
                  },
@@ -2868,7 +2872,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '900.101',
                                         '200.001',
                                         '700.004',
-                                        '280.002'],
+                                        '280.002',
+                                        '100.119'],
                       'timeout': 1800}
                  ]
                  },
@@ -2890,7 +2895,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '900.101',
                                         '200.001',
                                         '700.004',
-                                        '280.002'],
+                                        '280.002',
+                                        '100.119'],
                       'timeout': 1800}
                  ]
                  },

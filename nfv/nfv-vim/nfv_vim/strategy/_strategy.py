@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -1390,6 +1390,7 @@ class SwPatchStrategy(SwUpdateStrategy,
                          '200.001',  # Maintenance host lock alarm
                          '700.004',  # VM stopped
                          '280.002',  # Subcloud resource out-of-sync
+                         '100.119',  # PTP alarm for SyncE
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -1739,6 +1740,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         IGNORE_ALARMS = ['900.005',  # Upgrade in progress
                          '900.201',  # Software upgrade auto apply in progress
                          '750.006',  # Configuration change requires reapply of cert-manager
+                         '100.119',  # PTP alarm for SyncE
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -2332,6 +2334,7 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
 
         # The following alarms will not prevent a system config update operation
         IGNORE_ALARMS = ['100.103',  # Memory threshold exceeded
+                         '100.119',  # PTP alarm for SyncE
                          '200.001',  # Locked Host
                          '250.001',  # System Config out of date
                          '260.001',  # Unreconciled resource
@@ -2526,6 +2529,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
                          '900.006',  # Device Image Update in progress
                          '900.301',  # Fw Update Auto Apply in progress
                          '200.001',  # Locked Host
+                         '100.119',  # PTP alarm for SyncE
                          ]
 
         self._ignore_alarms += IGNORE_ALARMS
@@ -2883,6 +2887,7 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         # todo(abailey): remove memory alarm from this list if possible
         IGNORE_ALARMS = [
             '100.103',  # Memory threshold exceeded
+            '100.119',  # PTP alarm for SyncE
             '200.001',  # Locked Host
             '280.001',  # Subcloud resource off-line
             '280.002',  # Subcloud resource out-of-sync
@@ -3286,6 +3291,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # todo(abailey): remove memory alarm from this list if possible
         IGNORE_ALARMS = [
             '100.103',  # Memory threshold exceeded
+            '100.119',  # PTP alarm for SyncE
             '200.001',  # Locked Host
             '280.001',  # Subcloud resource off-line
             '280.002',  # Subcloud resource out-of-sync
