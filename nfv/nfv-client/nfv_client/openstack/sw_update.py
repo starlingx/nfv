@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -177,6 +177,22 @@ def _get_strategy_object_from_response(response):
         = _get_strategy_phase_object_from_response(strategy_data['abort-phase'])
 
     return strategy
+
+
+def _get_current_strategy_from_response(response):
+    """
+    Returns Strategy Type and State
+    """
+    current_strategy = {}
+    strategy_data = response.get('strategy', None)
+    if strategy_data is None:
+        return None
+    strategy = Strategy()
+    strategy.name = strategy_data['name']
+    strategy.state = strategy_data['state']
+    if strategy.name is not None:
+        current_strategy[strategy.name] = strategy.state
+    return current_strategy
 
 
 def get_strategies(token_id, url, strategy_name, username=None,
@@ -393,3 +409,26 @@ def abort_strategy(token_id, url, strategy_name, stage_id, username=None,
         return None
 
     return _get_strategy_object_from_response(response)
+
+
+def get_current_strategy(token_id, url, username=None,
+                   user_domain_name=None, tenant=None):
+    """
+    Get The Current Active Strategy Type And State
+    """
+    api_cmd = url + "/api/orchestration/current-strategy/strategy"
+
+    api_cmd_headers = dict()
+    if username:
+        api_cmd_headers['X-User'] = username
+    if tenant:
+        api_cmd_headers['X-Tenant'] = tenant
+    if user_domain_name:
+        api_cmd_headers['X-User-Domain-Name'] = user_domain_name
+    api_cmd_headers['X-Auth-Token'] = token_id
+
+    response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers)
+    if response['strategy'] is not None:
+        return _get_current_strategy_from_response(response)
+
+    return None

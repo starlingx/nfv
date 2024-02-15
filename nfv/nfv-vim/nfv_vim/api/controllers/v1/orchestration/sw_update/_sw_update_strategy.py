@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -60,6 +60,8 @@ def _get_sw_update_type_from_path(path):
         return SW_UPDATE_NAME.KUBE_ROOTCA_UPDATE
     elif 'kube-upgrade' in split_path:
         return SW_UPDATE_NAME.KUBE_UPGRADE
+    elif 'current-strategy' in split_path:
+        return SW_UPDATE_NAME.CURRENT_STRATEGY
     else:
         DLOG.error("Unknown sw_update_type in path: %s" % path)
         return 'unknown'
@@ -380,6 +382,12 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
             self.convert_strategy_phase(strategy_data['apply_phase'])
         strategy.abort_phase = \
             self.convert_strategy_phase(strategy_data['abort_phase'])
+        self.strategy = strategy
+
+    def convert_current_strategy(self, strategy_data):
+        strategy = SwUpdateStrategyData()
+        strategy.name = strategy_data['name']
+        strategy.state = strategy_data['state']
         self.strategy = strategy
 
 
@@ -1011,3 +1019,40 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
                            auth_context_dict, exc=policy.PolicyForbidden)
         else:
             policy.check('admin_in_system_projects', {}, auth_context_dict)
+
+
+class CurrentStrategyAPI(SwUpdateStrategyAPI):
+    """
+    Current Strategy Rest API
+    """
+    @wsme_pecan.wsexpose(SwUpdateStrategyQueryData, status_code=httplib.OK)
+    def get_all(self):
+        rpc_request = rpc.APIRequestGetSwUpdateStrategy()
+        rpc_request.sw_update_type = _get_sw_update_type_from_path(
+            pecan.request.path)
+        vim_connection = pecan.request.vim.open_connection()
+        vim_connection.send(rpc_request.serialize())
+        msg = vim_connection.receive(timeout_in_secs=30)
+        if msg is None:
+            DLOG.error("No response received.")
+            return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+        response = rpc.RPCMessage.deserialize(msg)
+        if rpc.RPC_MSG_TYPE.GET_SW_UPDATE_STRATEGY_RESPONSE != response.type:
+            DLOG.error("Unexpected message type received, msg_type=%s."
+                       % response.type)
+            return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
+
+        if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
+            strategy = json.loads(response.strategy)
+            query_data = SwUpdateStrategyQueryData()
+            query_data.convert_current_strategy(strategy)
+            return query_data
+
+        elif rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
+            DLOG.verbose("No strategy exists.")
+            query_data = SwUpdateStrategyQueryData()
+            return query_data
+
+        DLOG.error("Unexpected result received, result=%s." % response.result)
+        return pecan.abort(httplib.INTERNAL_SERVER_ERROR)

@@ -122,6 +122,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
        {
          "href": "http://192.168.204.2:4545/orchestration/system-config-update/",
          "rel": "system-config-update"
+       },
+       {
+         "href": "http://192.168.204.2:4545/orchestration/current-strategy/",
+         "rel": "current-strategy"
        }
      ]
    }
@@ -253,6 +257,39 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
        },
        {
          "href": "http://192.168.204.2:4545/orchestration/system-config-update/strategy/",
+         "rel": "strategy"
+       }
+     ]
+   }
+
+This operation does not accept a request body.
+
+*********************************************************************************
+Lists information about all NFV VIM API orchestration current-strategy links
+*********************************************************************************
+
+.. rest_method:: GET /api/orchestration/current-strategy
+
+**Normal response codes**
+
+200
+
+**Error response codes**
+
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+
+::
+
+   {
+     "id": "current-strategy",
+     "links": [
+       {
+         "href": "http://192.168.204.2:4545/orchestration/current-strategy/",
+         "rel": "self"
+       },
+       {
+         "href": "http://192.168.204.2:4545/orchestration/current-strategy/strategy/",
          "rel": "strategy"
        }
      ]
@@ -3781,3 +3818,44 @@ forbidden (403), badMethod (405), overLimit (413)
      }
    }
 
+-----------------
+Current Strategy
+-----------------
+
+Current Strategy REST API shows the current active strategy
+type and its corresponding state.
+
+****************************************************************
+Shows detailed information about the current active strategy
+****************************************************************
+
+.. rest_method:: GET /api/orchestration/current-strategy/strategy
+
+**Normal response codes**
+
+200
+
+**Error response codes**
+
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+
+::
+
+   {
+     "strategy": {
+       "name": "sw-patch"
+       "state": "applying"
+     }
+   }
+
+The result shows current active strategy name and type.
+::
+
+   {
+     "strategy": null
+   }
+
+The result shows there is no current strategy.
+
+This operation does not accept a request body.

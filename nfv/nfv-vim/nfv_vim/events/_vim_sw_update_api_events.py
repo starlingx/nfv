@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -370,6 +370,8 @@ def vim_sw_update_api_get_strategy(connection, msg):
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
     elif 'system-config-update' == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE
+    elif 'current-strategy' == msg.sw_update_type:
+        sw_update_type = objects.SW_UPDATE_TYPE.CURRENT_STRATEGY
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         sw_update_type = 'unknown'

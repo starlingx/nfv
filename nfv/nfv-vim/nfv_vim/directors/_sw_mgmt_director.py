@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -283,6 +283,8 @@ class SwMgmtDirector(object):
         """
         if self._sw_update is not None:
             if self._sw_update.sw_update_type == sw_update_type:
+                return self._sw_update.strategy
+            elif sw_update_type == objects.SW_UPDATE_TYPE.CURRENT_STRATEGY:
                 return self._sw_update.strategy
         return None
 

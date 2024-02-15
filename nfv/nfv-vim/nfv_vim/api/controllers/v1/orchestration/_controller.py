@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2021 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,6 +13,7 @@ from nfv_vim.api._link import Link
 from nfv_vim.api.controllers.v1.orchestration.sw_update import FwUpdateAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import KubeRootcaUpdateAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import KubeUpgradeAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update import StrategyAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SwPatchAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SwUpgradeAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SystemConfigUpdateAPI
@@ -41,7 +42,8 @@ class OrchestrationDescription(wsme_types.Base):
                            url, 'orchestration/kube-rootca-update', ''),
             Link.make_link('kube-upgrade',
                            url, 'orchestration/kube-upgrade', ''),
-            Link.make_link('fw-update', url, 'orchestration/fw-update', '')]
+            Link.make_link('fw-update', url, 'orchestration/fw-update', ''),
+            Link.make_link('current-strategy', url, 'orchestration/current-strategy', '')]
         return description
 
 
@@ -63,6 +65,8 @@ class OrchestrationAPI(rest.RestController):
             return KubeRootcaUpdateAPI(), remainder
         elif 'kube-upgrade' == key:
             return KubeUpgradeAPI(), remainder
+        elif 'current-strategy' == key:
+            return StrategyAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)
 

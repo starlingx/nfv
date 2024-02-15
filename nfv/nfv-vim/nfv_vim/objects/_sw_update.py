@@ -33,6 +33,7 @@ class SwUpdateTypes(Constants):
     FW_UPDATE = Constant('fw-update')
     KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
     KUBE_UPGRADE = Constant('kube-upgrade')
+    CURRENT_STRATEGY = Constant('current-strategy')
 
 
 @six.add_metaclass(Singleton)

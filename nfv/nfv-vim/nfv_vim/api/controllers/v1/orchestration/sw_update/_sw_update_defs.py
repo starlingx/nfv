@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,6 +22,7 @@ class SwUpdateNames(Constants):
     SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
     SYSTEM_CONFIG_UPDATE = Constant('system-config-update')
+    CURRENT_STRATEGY = Constant('current-strategy')
 
 
 @six.add_metaclass(Singleton)
@@ -78,7 +79,8 @@ SwUpdateNames = wsme_types.Enum(str,
                                 SW_UPDATE_NAME.KUBE_UPGRADE,
                                 SW_UPDATE_NAME.SW_PATCH,
                                 SW_UPDATE_NAME.SW_UPGRADE,
-                                SW_UPDATE_NAME.SYSTEM_CONFIG_UPDATE)
+                                SW_UPDATE_NAME.SYSTEM_CONFIG_UPDATE,
+                                SW_UPDATE_NAME.CURRENT_STRATEGY)
 SwUpdateApplyTypes = wsme_types.Enum(str,
                                      SW_UPDATE_APPLY_TYPE.SERIAL,
                                      SW_UPDATE_APPLY_TYPE.PARALLEL,
