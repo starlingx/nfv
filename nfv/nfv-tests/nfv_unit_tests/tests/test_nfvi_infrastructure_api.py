@@ -3,16 +3,19 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import sys
 import uuid
 
-from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import host_state
-from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import NFVIInfrastructureAPI
 from nfv_vim.nfvi.objects.v1 import HOST_AVAIL_STATUS
 from nfv_vim.nfvi.objects.v1 import HOST_LABEL_KEYS
 from nfv_vim.nfvi.objects.v1 import HOST_LABEL_VALUES
 from nfv_vim.nfvi.objects.v1 import HOST_OPER_STATE
 
 from nfv_unit_tests.tests import testcase
+from unittest import mock
+sys.modules['fm_core'] = mock.Mock()
+from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import host_state  # noqa: H306,E402  pylint: disable=C0413
+from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import NFVIInfrastructureAPI  # noqa: H306,E402  pylint: disable=C0413
 
 # todo(abailey): use already existing constants
 CONTROLLER_PERSONALITY = 'controller'

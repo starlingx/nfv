@@ -2701,7 +2701,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '200.001',
                                         '700.004',
                                         '280.002',
-                                        '100.119'],
+                                        '100.119',
+                                        '900.701'],
                       'timeout': 1800}
                  ]
                 },
@@ -2723,7 +2724,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '200.001',
                                         '700.004',
                                         '280.002',
-                                        '100.119'],
+                                        '100.119',
+                                        '900.701'],
                       'timeout': 1800}
                  ]
                 }
@@ -2827,7 +2829,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '200.001',
                                         '700.004',
                                         '280.002',
-                                        '100.119'],
+                                        '100.119',
+                                        '900.701'],
                       'timeout': 1800}
                  ]
                 },
@@ -2850,7 +2853,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '200.001',
                                         '700.004',
                                         '280.002',
-                                        '100.119'],
+                                        '100.119',
+                                        '900.701'],
                       'timeout': 1800}
                  ]
                  },
@@ -2873,7 +2877,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '200.001',
                                         '700.004',
                                         '280.002',
-                                        '100.119'],
+                                        '100.119',
+                                        '900.701'],
                       'timeout': 1800}
                  ]
                  },
@@ -2896,7 +2901,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                                         '200.001',
                                         '700.004',
                                         '280.002',
-                                        '100.119'],
+                                        '100.119',
+                                        '900.701'],
                       'timeout': 1800}
                  ]
                  },

@@ -1391,6 +1391,7 @@ class SwPatchStrategy(SwUpdateStrategy,
                          '700.004',  # VM stopped
                          '280.002',  # Subcloud resource out-of-sync
                          '100.119',  # PTP alarm for SyncE
+                         '900.701',  # Node tainted
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -1741,6 +1742,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                          '900.201',  # Software upgrade auto apply in progress
                          '750.006',  # Configuration change requires reapply of cert-manager
                          '100.119',  # PTP alarm for SyncE
+                         '900.701',  # Node tainted
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -2347,6 +2349,7 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
                          '750.006',  # Configuration change requires reapply of an application
                          '900.010',  # System Config Update in progress
                          '900.601',  # System Config Update Auto Apply in progress
+                         '900.701',  # Node tainted
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -2530,6 +2533,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
                          '900.301',  # Fw Update Auto Apply in progress
                          '200.001',  # Locked Host
                          '100.119',  # PTP alarm for SyncE
+                         '900.701',  # Node tainted
                          ]
 
         self._ignore_alarms += IGNORE_ALARMS
@@ -2898,6 +2902,7 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
             '900.008',  # Kubernetes rootca update in progress
             '900.009',  # Kubernetes rootca update aborted
             '900.501',  # Kubernetes rootca update auto-apply inprogress
+            '900.701',  # Node tainted
         ]
         # self._ignore_alarms is declared in parent class
         self._ignore_alarms += IGNORE_ALARMS
@@ -3299,6 +3304,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             '750.006',  # Configuration change requires reapply of cert-manager
             '900.007',  # Kube Upgrade in progress
             '900.401',  # kube-upgrade-auto-apply-inprogress
+            '900.701',  # Node tainted
         ]
         # self._ignore_alarms is declared in parent class
         self._ignore_alarms += IGNORE_ALARMS

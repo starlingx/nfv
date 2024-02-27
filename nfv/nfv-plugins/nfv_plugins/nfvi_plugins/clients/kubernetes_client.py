@@ -4,7 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from fm_api import constants as fm_constants
+from fm_api import fm_api
 import kubernetes
+
 from kubernetes import __version__ as K8S_MODULE_VERSION
 from kubernetes.client.models.v1_container_image import V1ContainerImage
 from kubernetes.client.rest import ApiException
@@ -14,6 +17,8 @@ from nfv_common import debug
 from nfv_common.helpers import Result
 
 K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split('.', maxsplit=1)[0])
+
+fmapi = fm_api.FaultAPIs()
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.clients.kubernetes_client')
 
@@ -77,13 +82,42 @@ def get_customobjects_api_instance():
     return client.CustomObjectsApi()
 
 
+def raise_alarm(node_name):
+
+    entity_instance_id = "%s=%s" % (fm_constants.FM_ENTITY_TYPE_HOST,
+            node_name)
+    fault = fm_api.Fault(
+        alarm_id=fm_constants.FM_ALARM_ID_USM_NODE_TAINTED,
+        alarm_state=fm_constants.FM_ALARM_STATE_SET,
+        entity_type_id=fm_constants.FM_ENTITY_TYPE_HOST,
+        entity_instance_id=entity_instance_id,
+        severity=fm_constants.FM_ALARM_SEVERITY_MAJOR,
+        reason_text=("Node tainted."),
+        alarm_type=fm_constants.FM_ALARM_TYPE_7,
+        probable_cause=fm_constants.ALARM_PROBABLE_CAUSE_8,
+        proposed_repair_action=("Execute 'kubectl taint nodes %s services=disabled:NoExecute-'. "
+            "If it fails, Execute 'system host-lock %s' followed by 'system host-unlock %s'. "
+            "If issue still persists, contact next level of support."
+            % (node_name, node_name, node_name)),
+        service_affecting=True)
+    DLOG.info("Raising alarm %s on %s " % (fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, node_name))
+    fmapi.set_fault(fault)
+
+
+def clear_alarm(node_name):
+
+    entity_instance_id = "%s=%s" % (fm_constants.FM_ENTITY_TYPE_HOST,
+            node_name)
+    DLOG.info("Clearing alarm %s on %s " % (fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, node_name))
+    fmapi.clear_fault(fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, entity_instance_id)
+
+
 def taint_node(node_name, effect, key, value):
     """
     Apply a taint to a node
     """
     # Get the client.
     kube_client = get_client()
-
     # Retrieve the node to access any existing taints.
     try:
         response = kube_client.read_node(node_name)
@@ -127,6 +161,10 @@ def taint_node(node_name, effect, key, value):
         new_taint = {"key": key, "value": value, "effect": effect}
         body["spec"]["taints"].append(new_taint)
         response = kube_client.patch_node(node_name, body)
+        # Clear taint node alarm if tainting is successful.
+        # Alarm not cleared if taint is already present in the system
+        # or the node is under configuration.
+        clear_alarm(node_name)
 
     return Result(response)
 
@@ -156,8 +194,27 @@ def untaint_node(node_name, effect, key):
         # Preserve any existing taints
         updated_taints = [taint for taint in taints if taint.key != key or
                           taint.effect != effect]
+        DLOG.info("Updated taints %s" % (updated_taints))
         body = {"spec": {"taints": updated_taints}}
         response = kube_client.patch_node(node_name, body)
+        check_taints = kube_client.read_node(node_name)
+        taints = check_taints.spec.taints
+        DLOG.info("Existing taint %s" % (taints))
+        if taints is not None:
+            for taint in taints:
+                if (taint.key == key and taint.effect == effect):
+                    DLOG.info("Removing %s:%s taint from node %s failed" % (key,
+                        effect, node_name))
+                    raise_alarm(node_name)
+                    break
+            else:
+                # Taint removed successfully. If there are multiple taints
+                # on the system, removing the 'services' taint will clear the alarm.
+                clear_alarm(node_name)
+        else:
+            # If there is only 'services' taint on the system , then removing the taint
+            # should clear the alarm.
+            clear_alarm(node_name)
 
     return Result(response)
 

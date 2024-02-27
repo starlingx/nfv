@@ -8,11 +8,12 @@
 
 import kubernetes
 from kubernetes.client.rest import ApiException
-from unittest import mock
-
-from nfv_plugins.nfvi_plugins.clients import kubernetes_client
 
 from nfv_unit_tests.tests import testcase
+import sys
+from unittest import mock
+sys.modules['fm_core'] = mock.Mock()
+from nfv_plugins.nfvi_plugins.clients import kubernetes_client  # noqa: H306,E402  pylint: disable=C0413
 
 
 def mock_load_kube_config(path):
