@@ -450,6 +450,18 @@ class SwMgmtDirector(object):
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.MIGRATE_INSTANCES_FAILED, reason)
 
+    def kube_host_upgrade_list(self, event_data):
+        """
+        Kubernetes host upgrade list handle_event called
+        """
+        if event_data['completed']:
+            event = strategy.STRATEGY_EVENT.QUERY_KUBE_HOST_UPGRADE_COMPLETED
+        else:
+            event = strategy.STRATEGY_EVENT.QUERY_KUBE_HOST_UPGRADE_FAILED
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                event, event_data)
+
 
 def get_sw_mgmt_director():
     """
