@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -3930,9 +3930,12 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
     """
     Query Kube Host Upgrade list
     """
-    def __init__(self):
+    MAX_RETRIES = 3
+
+    def __init__(self, retry_count=MAX_RETRIES):
         super(QueryKubeHostUpgradeStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE, timeout_in_secs=60)
+            STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE, timeout_in_secs=200)
+        self._retry_count = retry_count
 
     @coroutine
     def _get_kube_host_upgrade_list_callback(self):
@@ -3957,11 +3960,45 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
         """
         Query Kube Host Upgrade List
         """
-        from nfv_vim import nfvi
+        from nfv_vim import directors
+
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_get_kube_host_upgrade_list(
-            self._get_kube_host_upgrade_list_callback())
+
+        host_director = directors.get_host_director()
+        host_director._nfvi_get_kube_host_upgrade_list()
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Query Kube Host upgrade event
+        """
+        from nfv_vim import directors
+
+        if event == STRATEGY_EVENT.QUERY_KUBE_HOST_UPGRADE_FAILED:
+            if event_data is not None and self._retry_count > 0:
+                # if kube host upgrade list fails and we have retries,
+                # re-trigger the function
+                DLOG.info("Step (%s) retry due to failure for (%s)." % (self._name,
+                                                                        str(event_data["reason"])))
+
+                self._retry_count = self._retry_count - 1
+                host_director = directors.get_host_director()
+                host_director._nfvi_get_kube_host_upgrade_list()
+            else:
+                # if kube host upgrade list fails and we are out of retries, fail
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, event_data['reason'])
+            return True
+
+        elif event == STRATEGY_EVENT.QUERY_KUBE_HOST_UPGRADE_COMPLETED:
+            if event_data is not None and self.strategy is not None:
+                self.strategy.nfvi_kube_host_upgrade_list = \
+                    event_data['result-data']
+
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+
+        return False
 
 
 class AbstractKubeUpgradeStep(AbstractStrategyStep):

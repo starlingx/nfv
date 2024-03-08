@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -27,6 +27,7 @@ class HostDirector(object):
     """
     Host Director
     """
+
     def __init__(self):
         self._host_operation = None
 
@@ -1279,6 +1280,25 @@ class HostDirector(object):
             self._host_operation = host_operation
 
         return host_operation
+
+    @coroutine
+    def _nfvi_get_kube_host_upgrade_list_callback(self):
+        """
+        Get Kube Host Upgrade List Callback
+        """
+        from nfv_vim import directors
+
+        response = (yield)
+        DLOG.debug("Get kube host upgrade list callback response=%s." % response)
+        sw_mgmt_director = directors.get_sw_mgmt_director()
+        sw_mgmt_director.kube_host_upgrade_list(response)
+
+    def _nfvi_get_kube_host_upgrade_list(self):
+        """
+        NFVI Kube host upgrade list
+        """
+        nfvi.nfvi_get_kube_host_upgrade_list(
+            self._nfvi_get_kube_host_upgrade_list_callback())
 
 
 def get_host_director():

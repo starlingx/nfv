@@ -37,6 +37,9 @@ class EventNames(object):
         Constant('kube-host-upgrade-kubelet-failed')
     KUBE_ROOTCA_UPDATE_HOST_FAILED = Constant('kube-rootca-update-host-failed')
     KUBE_UPGRADE_CHANGED = Constant('kube-upgrade-changed')
+    QUERY_KUBE_HOST_UPGRADE_FAILED = Constant('query-kube-host-upgrade-failed')
+    QUERY_KUBE_HOST_UPGRADE_COMPLETED = \
+        Constant('query-kube-host-upgrade-completed')
 
 
 # Constants
