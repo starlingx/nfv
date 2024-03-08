@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023 Wind River Systems, Inc.
+# Copyright (c) 2023-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -245,11 +245,11 @@ class StrategyMixin(object):
         self._test_shell_create(shell_args=shell_args)
 
 
-class TestCLIUpgradeStrategy(TestNFVClientShell,
+class TestCLISwDeployStrategy(TestNFVClientShell,
                              StrategyMixin):
     def setUp(self):
-        super(TestCLIUpgradeStrategy, self).setUp()
-        self.set_strategy('upgrade-strategy')
+        super(TestCLISwDeployStrategy, self).setUp()
+        self.set_strategy('sw-deploy-strategy')
 
 
 class TestCLIPatchStrategy(TestNFVClientShell,
