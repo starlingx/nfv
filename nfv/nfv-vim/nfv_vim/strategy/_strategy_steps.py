@@ -4711,7 +4711,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
     """
 
     def __init__(self, host, to_version, force, target_state, target_failure_state,
-                 timeout_in_secs=600):
+                 timeout_in_secs=420):
         super(KubeHostUpgradeControlPlaneStep, self).__init__(
             host,
             to_version,
