@@ -36,6 +36,7 @@ class StrategyStepNames(Constants):
     UNLOCK_HOSTS = Constant('unlock-hosts')
     REBOOT_HOSTS = Constant('reboot-hosts')
     UPGRADE_HOSTS = Constant('upgrade-hosts')
+    SW_DEPLOY_PRECHECK = Constant('sw-deploy-precheck')
     START_UPGRADE = Constant('start-upgrade')
     ACTIVATE_UPGRADE = Constant('activate-upgrade')
     COMPLETE_UPGRADE = Constant('complete-upgrade')
@@ -54,7 +55,6 @@ class StrategyStepNames(Constants):
     QUERY_SW_PATCH_HOSTS = Constant('query-sw-patch-hosts')
     QUERY_FW_UPDATE_HOST = Constant('query-fw-update-host')
     QUERY_UPGRADE = Constant('query-upgrade')
-    QUERY_SOFTWARE_RELEASE = Constant('query-software-release')
     DISABLE_HOST_SERVICES = Constant('disable-host-services')
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
     # kube rootca update steps
@@ -935,6 +935,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
         """
         Returns the number of hosts that are upgraded
         """
+
+        # TODO(jkraitbe): Use deploy/host_list instead
         total_hosts_upgraded = 0
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -943,8 +945,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
                 return -1
 
             if (host.is_online() and
-                    host.target_load == self.strategy.nfvi_upgrade.to_release and
-                    host.software_load == self.strategy.nfvi_upgrade.to_release):
+                    host.target_load == self.strategy.nfvi_upgrade.release and
+                    host.software_load == self.strategy.nfvi_upgrade.release):
                 total_hosts_upgraded += 1
 
         return total_hosts_upgraded
@@ -1031,16 +1033,72 @@ class UpgradeHostsStep(strategy.StrategyStep):
         return data
 
 
+class SwDeployPrecheckStep(strategy.StrategyStep):
+    """
+    Software Deploy Precheck - Strategy Step
+    """
+    def __init__(self, release):
+        super(SwDeployPrecheckStep, self).__init__(
+            STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=600)
+
+        self._release = release
+
+    @coroutine
+    def _sw_deploy_precheck_callback(self):
+        """
+        Software deploy precheck callback
+        """
+        response = (yield)
+        DLOG.debug("sw-deploy precheck callback response=%s." % response)
+
+        if response['completed']:
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            # TODO(jkraitbe): Add error message
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, "")
+
+    def apply(self):
+        """
+        Software deploy precheck
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_sw_deploy_precheck(self._release, self._sw_deploy_precheck_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """
+        Returns the sw-deploy precheck step object initialized using the given
+        dictionary
+        """
+        super(SwDeployPrecheckStep, self).from_dict(data)
+        self._release = data["release"]
+        return self
+
+    def as_dict(self):
+        """
+        Represent the sw-deploy precheck step as a dictionary
+        """
+        data = super(SwDeployPrecheckStep, self).as_dict()
+        data['release'] = self._release
+        data['entity_type'] = ''
+        data['entity_names'] = list()
+        data['entity_uuids'] = list()
+        return data
+
+
 class UpgradeStartStep(strategy.StrategyStep):
     """
     Upgrade Start - Strategy Step
     """
-    def __init__(self):
+    def __init__(self, release):
         super(UpgradeStartStep, self).__init__(
             STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=600)
 
-        self._wait_time = 0
-        self._query_inprogress = False
+        self._release = release
 
     @coroutine
     def _start_upgrade_callback(self):
@@ -1051,37 +1109,11 @@ class UpgradeStartStep(strategy.StrategyStep):
         DLOG.debug("Start-Upgrade callback response=%s." % response)
 
         if response['completed']:
-            if self.strategy is not None:
-                self.strategy.nfvi_upgrade = response['result-data']
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            # TODO(jkraitbe): Consider updating self.strategy.nfvi_upgrade.hosts_info
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, "")
-
-    @coroutine
-    def _get_upgrade_callback(self):
-        """
-        Get Upgrade Callback
-        """
-        from nfv_vim import nfvi
-
-        response = (yield)
-        DLOG.debug("Get-Upgrade callback response=%s." % response)
-
-        self._query_inprogress = False
-
-        if response['completed']:
-            if self.strategy is not None:
-                self.strategy.nfvi_upgrade = response['result-data']
-
-            if self.strategy.nfvi_upgrade.state != \
-                    nfvi.objects.v1.UPGRADE_STATE.STARTED:
-                # Keep waiting for upgrade to start
-                pass
-            else:
-                # Upgrade has started
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, "")
         else:
+            # TODO(jkraitbe): Add error message
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, "")
 
@@ -1092,30 +1124,8 @@ class UpgradeStartStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_upgrade_start(self._start_upgrade_callback())
+        nfvi.nfvi_upgrade_start(self._release, self._start_upgrade_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
-        from nfv_vim import nfvi
-
-        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
-
-        if event == STRATEGY_EVENT.HOST_AUDIT:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 60 seconds before checking upgrade for first time
-            if 60 <= secs_expired and not self._query_inprogress:
-                self._query_inprogress = True
-                nfvi.nfvi_get_upgrade(self._get_upgrade_callback())
-            return True
-
-        return False
 
     def from_dict(self, data):
         """
@@ -1123,8 +1133,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         dictionary
         """
         super(UpgradeStartStep, self).from_dict(data)
-        self._wait_time = 0
-        self._query_inprogress = False
+        self._release = data["release"]
         return self
 
     def as_dict(self):
@@ -1135,6 +1144,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
+        data['release'] = self._release
         return data
 
 
@@ -1143,12 +1153,11 @@ class UpgradeActivateStep(strategy.StrategyStep):
     Upgrade Activate - Strategy Step
     """
 
-    def __init__(self):
+    def __init__(self, release):
         super(UpgradeActivateStep, self).__init__(
             STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=900)
 
-        self._wait_time = 0
-        self._query_inprogress = False
+        self._release = release
 
     @coroutine
     def _activate_upgrade_callback(self):
@@ -1159,37 +1168,10 @@ class UpgradeActivateStep(strategy.StrategyStep):
         DLOG.debug("Activate-Upgrade callback response=%s." % response)
 
         if response['completed']:
-            if self.strategy is not None:
-                self.strategy.nfvi_upgrade = response['result-data']
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, "")
-
-    @coroutine
-    def _get_upgrade_callback(self):
-        """
-        Get Upgrade Callback
-        """
-        from nfv_vim import nfvi
-
-        response = (yield)
-        DLOG.debug("Get-Upgrade callback response=%s." % response)
-
-        self._query_inprogress = False
-
-        if response['completed']:
-            if self.strategy is not None:
-                self.strategy.nfvi_upgrade = response['result-data']
-
-            if self.strategy.nfvi_upgrade.state != \
-                    nfvi.objects.v1.UPGRADE_STATE.ACTIVATION_COMPLETE:
-                # Keep waiting for upgrade to activate
-                pass
-            else:
-                # Upgrade has activated
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, "")
         else:
+            # TODO(jkraitbe): Add error message
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, "")
 
@@ -1200,30 +1182,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_upgrade_activate(self._activate_upgrade_callback())
+        nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
-        from nfv_vim import nfvi
-
-        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
-
-        if event == STRATEGY_EVENT.HOST_AUDIT:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 60 seconds before checking upgrade for first time
-            if 60 <= secs_expired and not self._query_inprogress:
-                self._query_inprogress = True
-                nfvi.nfvi_get_upgrade(self._get_upgrade_callback())
-            return True
-
-        return False
 
     def from_dict(self, data):
         """
@@ -1231,8 +1191,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
         dictionary
         """
         super(UpgradeActivateStep, self).from_dict(data)
-        self._wait_time = 0
-        self._query_inprogress = False
+        self._release = data["release"]
         return self
 
     def as_dict(self):
@@ -1243,6 +1202,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
+        data['release'] = self._release
         return data
 
 
@@ -1251,12 +1211,11 @@ class UpgradeCompleteStep(strategy.StrategyStep):
     Upgrade Complete - Strategy Step
     """
 
-    def __init__(self):
+    def __init__(self, release):
         super(UpgradeCompleteStep, self).__init__(
             STRATEGY_STEP_NAME.COMPLETE_UPGRADE, timeout_in_secs=300)
 
-        self._wait_time = 0
-        self._query_inprogress = False
+        self._release = release
 
     @coroutine
     def _complete_upgrade_callback(self):
@@ -1267,34 +1226,10 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         DLOG.debug("Complete-Upgrade callback response=%s." % response)
 
         if response['completed']:
-            if self.strategy is not None:
-                self.strategy.nfvi_upgrade = response['result-data']
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, "")
-
-    @coroutine
-    def _get_upgrade_callback(self):
-        """
-        Get Upgrade Callback
-        """
-        response = (yield)
-        DLOG.debug("Get-Upgrade callback response=%s." % response)
-
-        self._query_inprogress = False
-
-        if response['completed']:
-            if self.strategy is not None:
-                self.strategy.nfvi_upgrade = response['result-data']
-
-            if self.strategy.nfvi_upgrade is not None:
-                # Keep waiting for upgrade to complete
-                pass
-            else:
-                # Upgrade has been completed (upgrade record deleted)
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, "")
         else:
+            # TODO(jkraitbe): Add error message
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, "")
 
@@ -1305,30 +1240,8 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_upgrade_complete(self._complete_upgrade_callback())
+        nfvi.nfvi_upgrade_complete(self._release, self._complete_upgrade_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
-        from nfv_vim import nfvi
-
-        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
-
-        if event == STRATEGY_EVENT.HOST_AUDIT:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 60 seconds before checking upgrade for first time
-            if 60 <= secs_expired and not self._query_inprogress:
-                self._query_inprogress = True
-                nfvi.nfvi_get_upgrade(self._get_upgrade_callback())
-            return True
-
-        return False
 
     def from_dict(self, data):
         """
@@ -1336,8 +1249,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         dictionary
         """
         super(UpgradeCompleteStep, self).from_dict(data)
-        self._wait_time = 0
-        self._query_inprogress = False
+        self._release = data["release"]
         return self
 
     def as_dict(self):
@@ -1348,6 +1260,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
+        data['release'] = self._release
         return data
 
 
@@ -2800,15 +2713,18 @@ class QueryUpgradeStep(strategy.StrategyStep):
     """
     Query Upgrade - Strategy Step
     """
-    def __init__(self):
+    def __init__(self, release):
         super(QueryUpgradeStep, self).__init__(
             STRATEGY_STEP_NAME.QUERY_UPGRADE, timeout_in_secs=60)
+
+        self._release = release
 
     @coroutine
     def _get_upgrade_callback(self):
         """
         Get Upgrade Callback
         """
+
         response = (yield)
         DLOG.debug("Query-Upgrade callback response=%s." % response)
 
@@ -2829,7 +2745,7 @@ class QueryUpgradeStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_get_upgrade(self._get_upgrade_callback())
+        nfvi.nfvi_get_upgrade(self._release, self._get_upgrade_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def as_dict(self):
@@ -2840,6 +2756,7 @@ class QueryUpgradeStep(strategy.StrategyStep):
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
+        data['release'] = None
         return data
 
 
@@ -5009,6 +4926,9 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.UPGRADE_HOSTS == data['name']:
         step_obj = object.__new__(UpgradeHostsStep)
+
+    elif STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK == data['name']:
+        step_obj = object.__new__(SwDeployPrecheckStep)
 
     elif STRATEGY_STEP_NAME.START_UPGRADE == data['name']:
         step_obj = object.__new__(UpgradeStartStep)

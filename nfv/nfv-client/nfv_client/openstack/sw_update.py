@@ -299,18 +299,11 @@ def create_strategy(token_id,
     elif sw_update.STRATEGY_NAME_SYSTEM_CONFIG_UPDATE == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
-    # TODO(jkraitbe): Backend for sw-deploy will continue as old sw-upgrade for now
     elif sw_update.STRATEGY_NAME_SW_UPGRADE == strategy_name:
         # controller-apply-type and default-instance-action passed to strategy
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
-        # required: 'release' passed to strategy as 'release'
         api_cmd_payload['release'] = kwargs['release']
-        if 'start_upgrade' in kwargs and kwargs['start_upgrade']:
-            api_cmd_payload['start-upgrade'] = True
-        if 'complete_upgrade' in kwargs and kwargs['complete_upgrade']:
-            api_cmd_payload['complete-upgrade'] = True
-
     api_cmd_payload['storage-apply-type'] = storage_apply_type
     api_cmd_payload['worker-apply-type'] = worker_apply_type
     if max_parallel_worker_hosts is not None:

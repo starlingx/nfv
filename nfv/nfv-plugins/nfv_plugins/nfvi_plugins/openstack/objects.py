@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -40,6 +40,7 @@ class PlatformServices(Constants):
     SYSINV = Constant('sysinv')
     PATCHING = Constant('patching')
     FM = Constant('fm')
+    USM = Constant('usm')
 
 
 # Platform Services Constant

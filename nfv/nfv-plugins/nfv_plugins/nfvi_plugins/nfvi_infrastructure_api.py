@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,6 +23,7 @@ from nfv_plugins.nfvi_plugins.openstack import mtc
 from nfv_plugins.nfvi_plugins.openstack import openstack
 from nfv_plugins.nfvi_plugins.openstack import rest_api
 from nfv_plugins.nfvi_plugins.openstack import sysinv
+from nfv_plugins.nfvi_plugins.openstack import usm
 
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 
@@ -2202,9 +2203,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def get_upgrade(self, future, callback):
+    def get_upgrade(self, future, release, callback):
         """
-        Get information about the upgrade from the plugin
+        Get information about the software deploy from the plugin
         """
         response = dict()
         response['completed'] = False
@@ -2225,26 +2226,30 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(sysinv.get_upgrade, self._platform_token)
+            future.work(usm.sw_deploy_get_release, self._platform_token, release)
             future.result = (yield)
 
             if not future.result.is_complete():
-                DLOG.error("SysInv get-upgrade did not complete.")
+                DLOG.error("USM software deploy get release did not complete.")
                 return
 
-            upgrade_data_list = future.result.data
-            if 1 < len(upgrade_data_list):
-                DLOG.critical("Too many upgrades retrieved, num_upgrades=%i"
-                              % len(upgrade_data_list))
+            release_data = future.result.data
+            release_info = release_data["metadata"].get(release, None)
 
-            upgrade_obj = None
+            future.work(usm.sw_deploy_host_list, self._platform_token)
+            future.result = (yield)
 
-            for upgrade_data in upgrade_data_list['upgrades']:
-                upgrade_obj = nfvi.objects.v1.Upgrade(
-                    upgrade_data['state'],
-                    upgrade_data['from_release'],
-                    upgrade_data['to_release'])
-                break
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy host list did not complete.")
+                return
+
+            hosts_info_data = future.result.data
+
+            upgrade_obj = nfvi.objects.v1.Upgrade(
+                release,
+                release_info,
+                hosts_info_data["data"],
+            )
 
             response['result-data'] = upgrade_obj
             response['completed'] = True
@@ -2267,9 +2272,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def upgrade_start(self, future, callback):
+    def sw_deploy_precheck(self, future, release, callback):
         """
-        Start an upgrade
+        Precheck a USM software deploy
         """
         response = dict()
         response['completed'] = False
@@ -2290,18 +2295,74 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(sysinv.upgrade_start, self._platform_token)
+            future.work(usm.sw_deploy_precheck, self._platform_token, release)
             future.result = (yield)
 
             if not future.result.is_complete():
-                DLOG.error("SysInv upgrade-start did not complete.")
+                DLOG.error("USM software deploy precheck did not complete.")
                 return
 
-            upgrade_data = future.result.data
             upgrade_obj = nfvi.objects.v1.Upgrade(
-                upgrade_data['state'],
-                upgrade_data['from_release'],
-                upgrade_data['to_release'])
+                release,
+                None,
+                None)
+
+            response['result-data'] = upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught exception while trying to precheck "
+                               "USM software deploy, error=%s." % e)
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying to precheck USM software deploy, "
+                           "error=%s." % e)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def upgrade_start(self, future, release, callback):
+        """
+        Start a USM software deploy
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+
+        try:
+            upgrade_data = future.result.data
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(usm.sw_deploy_start, self._platform_token, release)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy start did not complete.")
+                return
+
+            upgrade_obj = nfvi.objects.v1.Upgrade(
+                release,
+                upgrade_data,
+                None)
 
             response['result-data'] = upgrade_obj
             response['completed'] = True
@@ -2314,19 +2375,19 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             else:
                 DLOG.exception("Caught exception while trying to start "
-                               "upgrade, error=%s." % e)
+                               "USM software deploy, error=%s." % e)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to start upgrade, "
+            DLOG.exception("Caught exception while trying to start USM software deploy, "
                            "error=%s." % e)
 
         finally:
             callback.send(response)
             callback.close()
 
-    def upgrade_activate(self, future, callback):
+    def upgrade_activate(self, future, release, callback):
         """
-        Activate an upgrade
+        Activate a USM software deployement
         """
         response = dict()
         response['completed'] = False
@@ -2347,18 +2408,18 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(sysinv.upgrade_activate, self._platform_token)
+            future.work(usm.sw_deploy_activate, self._platform_token, release)
             future.result = (yield)
 
             if not future.result.is_complete():
-                DLOG.error("SysInv upgrade-activate did not complete.")
+                DLOG.error("USM software deploy activate did not complete.")
                 return
 
             upgrade_data = future.result.data
             upgrade_obj = nfvi.objects.v1.Upgrade(
-                upgrade_data['state'],
-                upgrade_data['from_release'],
-                upgrade_data['to_release'])
+                release,
+                upgrade_data,
+                None)
 
             response['result-data'] = upgrade_obj
             response['completed'] = True
@@ -2371,19 +2432,19 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             else:
                 DLOG.exception("Caught exception while trying to activate "
-                               "upgrade, error=%s." % e)
+                               "USM software deploy, error=%s." % e)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to activate upgrade, "
+            DLOG.exception("Caught exception while trying to activate USM software deploy, "
                            "error=%s." % e)
 
         finally:
             callback.send(response)
             callback.close()
 
-    def upgrade_complete(self, future, callback):
+    def upgrade_complete(self, future, release, callback):
         """
-        Complete an upgrade
+        Complete a USM software deployement
         """
         response = dict()
         response['completed'] = False
@@ -2404,18 +2465,18 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(sysinv.upgrade_complete, self._platform_token)
+            future.work(usm.sw_deploy_complete, self._platform_token, release)
             future.result = (yield)
 
             if not future.result.is_complete():
-                DLOG.error("SysInv upgrade-complete did not complete.")
+                DLOG.error("USM software deploy complete did not complete.")
                 return
 
             upgrade_data = future.result.data
             upgrade_obj = nfvi.objects.v1.Upgrade(
-                upgrade_data['state'],
-                upgrade_data['from_release'],
-                upgrade_data['to_release'])
+                release,
+                upgrade_data,
+                None)
 
             response['result-data'] = upgrade_obj
             response['completed'] = True
@@ -2428,10 +2489,10 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             else:
                 DLOG.exception("Caught exception while trying to complete "
-                               "upgrade, error=%s." % e)
+                               "USM software deploy, error=%s." % e)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to complete upgrade, "
+            DLOG.exception("Caught exception while trying to complete USM software deploy, "
                            "error=%s." % e)
 
         finally:
@@ -3594,7 +3655,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(sysinv.upgrade_host, self._platform_token, host_uuid)
+            future.work(usm.sw_deploy_execute, self._platform_token, host_name)
             future.result = (yield)
 
             if not future.result.is_complete():

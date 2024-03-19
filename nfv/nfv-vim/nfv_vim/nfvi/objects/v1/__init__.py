@@ -69,7 +69,6 @@ from nfv_vim.nfvi.objects.v1._sw_patch import SwPatch  # noqa: F401
 from nfv_vim.nfvi.objects.v1._system import System  # noqa: F401
 from nfv_vim.nfvi.objects.v1._tenant import Tenant  # noqa: F401
 from nfv_vim.nfvi.objects.v1._upgrade import Upgrade  # noqa: F401
-from nfv_vim.nfvi.objects.v1._upgrade import UPGRADE_STATE  # noqa: F401
 from nfv_vim.nfvi.objects.v1._volume import Volume  # noqa: F401
 from nfv_vim.nfvi.objects.v1._volume import VOLUME_ACTION  # noqa: F401
 from nfv_vim.nfvi.objects.v1._volume import VOLUME_AVAIL_STATUS  # noqa: F401

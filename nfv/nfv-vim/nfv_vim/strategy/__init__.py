@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -56,6 +56,7 @@ from nfv_vim.strategy._strategy_steps import StartInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import StopInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import STRATEGY_STEP_NAME  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwactHostsStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import SwDeployPrecheckStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwPatchHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SystemConfigUpdateHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SystemStabilizeStep  # noqa: F401

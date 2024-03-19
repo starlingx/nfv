@@ -14,7 +14,6 @@ from nfv_common.helpers import get_local_host_name
 from nfv_common.helpers import Singleton
 from nfv_common import strategy
 from nfv_vim.nfvi.objects.v1 import KUBE_ROOTCA_UPDATE_STATE
-from nfv_vim.nfvi.objects.v1 import UPGRADE_STATE
 from nfv_vim.objects import HOST_GROUP_POLICY
 from nfv_vim.objects import HOST_NAME
 from nfv_vim.objects import HOST_PERSONALITY
@@ -1059,6 +1058,16 @@ class PatchControllerHostsMixin(UpdateControllerHostsMixin):
             strategy.SwPatchHostsStep)
 
 
+class SwDeployControllerHostsMixin(UpdateControllerHostsMixin):
+    def _add_controller_strategy_stages(self, controllers, reboot):
+        from nfv_vim import strategy
+        return self._add_update_controller_strategy_stages(
+            controllers,
+            reboot,
+            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
+            strategy.UpgradeHostsStep)
+
+
 class UpdateSystemConfigControllerHostsMixin(UpdateControllerHostsMixin):
     def _add_system_config_controller_strategy_stages(self, controllers):
         """
@@ -1145,6 +1154,19 @@ class PatchStorageHostsMixin(UpdateStorageHostsMixin):
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_PATCH_STORAGE_HOSTS,
             strategy.SwPatchHostsStep)
+
+
+class SwDeployStorageHostsMixin(UpdateStorageHostsMixin):
+    def _add_storage_strategy_stages(self, storage_hosts, reboot):
+        """
+        Add storage software patch stages to a strategy
+        """
+        from nfv_vim import strategy
+        return self._add_update_storage_strategy_stages(
+            storage_hosts,
+            reboot,
+            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_STORAGE_HOSTS,
+            strategy.UpgradeHostsStep)
 
 
 class UpdateSystemConfigStorageHostsMixin(UpdateStorageHostsMixin):
@@ -1245,6 +1267,8 @@ class UpdateWorkerHostsMixin(object):
 
                 # Migrate or stop instances as necessary
                 if SW_UPDATE_INSTANCE_ACTION.MIGRATE == self._default_instance_action:
+                    # TODO(jkraitbe): Should probably be:
+                    #   if len(openstack_hosts) and len(instance_list)
                     if len(openstack_hosts):
                         if SW_UPDATE_APPLY_TYPE.PARALLEL == self._worker_apply_type:
                             # Disable host services before migrating to ensure
@@ -1333,6 +1357,16 @@ class PatchWorkerHostsMixin(UpdateWorkerHostsMixin):
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_PATCH_WORKER_HOSTS,
             strategy.SwPatchHostsStep)
+
+
+class SwDeployWorkerHostsMixin(UpdateWorkerHostsMixin):
+    def _add_worker_strategy_stages(self, worker_hosts, reboot):
+        from nfv_vim import strategy
+        return self._add_update_worker_strategy_stages(
+            worker_hosts,
+            reboot,
+            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS,
+            strategy.UpgradeHostsStep)
 
 
 class UpgradeKubeletWorkerHostsMixin(UpdateWorkerHostsMixin):
@@ -1716,41 +1750,34 @@ class SwPatchStrategy(SwUpdateStrategy,
 # The Software Upgrade Strategy
 #
 ###################################################################
-class SwUpgradeStrategy(SwUpdateStrategy):
+class SwUpgradeStrategy(
+    SwUpdateStrategy,
+    SwDeployControllerHostsMixin,
+    SwDeployStorageHostsMixin,
+    SwDeployWorkerHostsMixin,
+):
     """
     Software Upgrade - Strategy
     """
-    def __init__(self, uuid, storage_apply_type, worker_apply_type,
-                 max_parallel_worker_hosts,
-                 alarm_restrictions, release, start_upgrade, complete_upgrade,
+    def __init__(self, uuid,
+                 controller_apply_type, storage_apply_type, worker_apply_type,
+                 max_parallel_worker_hosts, default_instance_action,
+                 alarm_restrictions, release,
                  ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.SW_UPGRADE,
-            SW_UPDATE_APPLY_TYPE.SERIAL,
+            controller_apply_type,
             storage_apply_type,
             SW_UPDATE_APPLY_TYPE.IGNORE,
             worker_apply_type,
             max_parallel_worker_hosts,
-            SW_UPDATE_INSTANCE_ACTION.STOP_START,
+            default_instance_action,
             alarm_restrictions,
             ignore_alarms)
 
-        # Note: The support for start_upgrade was implemented and (mostly)
-        # tested, but there is a problem. When the sw-upgrade-start stage
-        # runs, it will start the upgrade, upgrade controller-1 and swact to
-        # it. However, when controller-1 becomes active, it will be using the
-        # snapshot of the VIM database that was created when the upgrade was
-        # started, so the strategy object created from the database will be
-        # long out of date (it thinks the upgrade start step is still in
-        # progress) and the strategy apply will fail. Fixing this would be
-        # complex, so we will not support the start_upgrade option for now,
-        # which would only have been for lab use.
-        if start_upgrade:
-            raise Exception("No support for start_upgrade")
         self._release = release
-        self._start_upgrade = start_upgrade
-        self._complete_upgrade = complete_upgrade
+
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['900.005',  # Upgrade in progress
                          '900.201',  # Software upgrade auto apply in progress
@@ -1761,6 +1788,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
         self._nfvi_upgrade = None
+        self._ignore_alarms_conditional = None
 
     @property
     def nfvi_upgrade(self):
@@ -1782,37 +1810,53 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         """
         from nfv_vim import strategy
 
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
-        stage.add_step(strategy.QueryAlarmsStep(
-            ignore_alarms=self._ignore_alarms))
-        stage.add_step(strategy.QueryUpgradeStep())
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.QueryUpgradeStep(release=self._release))
         self.build_phase.add_stage(stage)
+
         super(SwUpgradeStrategy, self).build()
+
+    def _swact_fix(self, stage, controller_name):
+        """Add a SWACT to a stage on DX systems
+
+        Currently, certain steps during sw-deploy must be done on a specific controller.
+        Here we insert arbitrary SWACTs to meet those requirements.
+
+        If controller_name does not match the current active host we return because
+        we are already on ideal host.
+        """
+
+        if self._single_controller or controller_name != get_local_host_name():
+            return
+
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        host_table = tables.tables_get_host_table()
+        for host in host_table.get_by_personality(HOST_PERSONALITY.CONTROLLER):
+            if controller_name == host.name:
+                stage.add_step(strategy.SwactHostsStep([host]))
+                break
 
     def _add_upgrade_start_stage(self):
         """
         Add upgrade start strategy stage
         """
         from nfv_vim import strategy
-        from nfv_vim import tables
 
-        host_table = tables.tables_get_host_table()
-        controller_1_host = None
-        for host in host_table.get_by_personality(HOST_PERSONALITY.CONTROLLER):
-            if HOST_NAME.CONTROLLER_1 == host.name:
-                controller_1_host = host
-                break
-        host_list = [controller_1_host]
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_START)
 
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_START)
         # Do not ignore any alarms when starting an upgrade
-        stage.add_step(strategy.QueryAlarmsStep(True))
-        # Upgrade start can only be done from controller-0
-        stage.add_step(strategy.SwactHostsStep(host_list))
-        stage.add_step(strategy.UpgradeStartStep())
-        stage.add_step(strategy.SystemStabilizeStep())
+        stage.add_step(strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms))
+        if self.nfvi_upgrade.is_available:
+            # sw-deploy start must be done on controller-0
+            self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
+            stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
+            stage.add_step(strategy.UpgradeStartStep(release=self._release))
+            stage.add_step(strategy.SystemStabilizeStep())
+        # sw-deploy host must first be on controller-1
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_0)
         self.apply_phase.add_stage(stage)
 
     def _add_upgrade_complete_stage(self):
@@ -1820,279 +1864,16 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         Add upgrade complete strategy stage
         """
         from nfv_vim import strategy
-        from nfv_vim import tables
 
-        host_table = tables.tables_get_host_table()
-        controller_1_host = None
-        for host in host_table.get_by_personality(HOST_PERSONALITY.CONTROLLER):
-            if HOST_NAME.CONTROLLER_1 == host.name:
-                controller_1_host = host
-                break
-        host_list = [controller_1_host]
-
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_COMPLETE)
-        stage.add_step(strategy.QueryAlarmsStep(
-            True, ignore_alarms=self._ignore_alarms))
-        # Upgrade complete can only be done from controller-0
-        stage.add_step(strategy.SwactHostsStep(host_list))
-        stage.add_step(strategy.UpgradeActivateStep())
-        stage.add_step(strategy.UpgradeCompleteStep())
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_COMPLETE)
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        # sw-deploy complete should be on controller-0
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
+        if not self.nfvi_upgrade.is_activated:
+            stage.add_step(strategy.UpgradeActivateStep(release=self._release))
+        stage.add_step(strategy.UpgradeCompleteStep(release=self._release))
         stage.add_step(strategy.SystemStabilizeStep())
         self.apply_phase.add_stage(stage)
-
-    def _add_controller_strategy_stages(self, controllers, reboot):
-        """
-        Add controller software upgrade strategy stages
-        """
-        from nfv_vim import strategy
-        from nfv_vim import tables
-
-        host_table = tables.tables_get_host_table()
-
-        if 2 > host_table.total_by_personality(HOST_PERSONALITY.CONTROLLER):
-            DLOG.warn("Not enough controllers to apply software upgrades.")
-            reason = 'not enough controllers to apply software upgrades'
-            return False, reason
-
-        controller_0_host = None
-        controller_1_host = None
-
-        for host in controllers:
-            if HOST_PERSONALITY.WORKER in host.personality:
-                # Do nothing for AIO hosts. We let the worker code handle everything.
-                # This is done to handle the case where stx-openstack is
-                # installed and there could be instances running on the
-                # AIO-DX controllers which need to be migrated.
-                if self._single_controller:
-                    DLOG.warn("Cannot apply software upgrades to AIO-SX deployment.")
-                    reason = 'cannot apply software upgrades to AIO-SX deployment'
-                    return False, reason
-                else:
-                    return True, ''
-            elif HOST_NAME.CONTROLLER_1 == host.name:
-                controller_1_host = host
-            elif HOST_NAME.CONTROLLER_0 == host.name:
-                controller_0_host = host
-
-        if controller_1_host is not None:
-            host_list = [controller_1_host]
-            stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS)
-            stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms))
-            stage.add_step(strategy.LockHostsStep(host_list))
-            stage.add_step(strategy.UpgradeHostsStep(host_list))
-            # During an upgrade, unlock may need to retry. Bug details:
-            # https://bugs.launchpad.net/starlingx/+bug/1946255
-            stage.add_step(strategy.UnlockHostsStep(
-                host_list,
-                retry_count=strategy.UnlockHostsStep.MAX_RETRIES))
-            # Allow up to four hours for controller disks to synchronize
-            stage.add_step(strategy.WaitDataSyncStep(
-                timeout_in_secs=4 * 60 * 60,
-                ignore_alarms=self._ignore_alarms))
-            self.apply_phase.add_stage(stage)
-
-        if controller_0_host is not None:
-            host_list = [controller_0_host]
-            stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS)
-            stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms))
-            if controller_1_host is not None:
-                # Only swact to controller-1 if it was upgraded. If we are only
-                # upgrading controller-0, then controller-1 needs to be
-                # active already.
-                stage.add_step(strategy.SwactHostsStep(host_list))
-            stage.add_step(strategy.LockHostsStep(host_list))
-            stage.add_step(strategy.UpgradeHostsStep(host_list))
-            # During an upgrade, unlock may need to retry. Bug details:
-            # https://bugs.launchpad.net/starlingx/+bug/1946255
-            stage.add_step(strategy.UnlockHostsStep(
-                host_list,
-                retry_count=strategy.UnlockHostsStep.MAX_RETRIES))
-            # Allow up to four hours for controller disks to synchronize
-            stage.add_step(strategy.WaitDataSyncStep(
-                timeout_in_secs=4 * 60 * 60,
-                ignore_alarms=self._ignore_alarms))
-            self.apply_phase.add_stage(stage)
-
-        return True, ''
-
-    def _add_storage_strategy_stages(self, storage_hosts, reboot):
-        """
-        Add storage software upgrade strategy stages
-        """
-        from nfv_vim import strategy
-
-        storage_0_host_list = list()
-        storage_0_host_lists = list()
-        other_storage_host_list = list()
-
-        for host in storage_hosts:
-            if HOST_NAME.STORAGE_0 == host.name:
-                storage_0_host_list.append(host)
-            else:
-                other_storage_host_list.append(host)
-
-        if len(storage_0_host_list) == 1:
-            storage_0_host_lists, reason = self._create_storage_host_lists(
-                storage_0_host_list)
-            if storage_0_host_lists is None:
-                return False, reason
-
-        other_storage_host_lists, reason = self._create_storage_host_lists(
-            other_storage_host_list)
-        if other_storage_host_lists is None:
-            return False, reason
-
-        # Upgrade storage-0 first and on its own since it has a ceph monitor
-        if len(storage_0_host_lists) == 1:
-            combined_host_lists = storage_0_host_lists + other_storage_host_lists
-        else:
-            combined_host_lists = other_storage_host_lists
-
-        for host_list in combined_host_lists:
-            stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_STORAGE_HOSTS)
-            stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms))
-            stage.add_step(strategy.LockHostsStep(host_list))
-            stage.add_step(strategy.UpgradeHostsStep(host_list))
-            # During an upgrade, unlock may need to retry. Bug details:
-            # https://bugs.launchpad.net/starlingx/+bug/1946255
-            stage.add_step(strategy.UnlockHostsStep(
-                host_list,
-                retry_count=strategy.UnlockHostsStep.MAX_RETRIES))
-
-            # After storage node(s) are unlocked, we need extra time to
-            # allow the OSDs to go back in sync and the storage related
-            # alarms to clear. We no longer wipe the OSD disks when upgrading
-            # a storage node, so they should only be syncing data that changed
-            # while they were being upgraded.
-            stage.add_step(strategy.WaitDataSyncStep(
-                timeout_in_secs=2 * 60 * 60,
-                ignore_alarms=self._ignore_alarms))
-            self.apply_phase.add_stage(stage)
-
-        return True, ''
-
-    def _add_worker_strategy_stages(self, worker_hosts, reboot):
-        """
-        Add worker software upgrade strategy stages
-        """
-        from nfv_vim import strategy
-        from nfv_vim import tables
-
-        host_lists, reason = self._create_worker_host_lists(worker_hosts, reboot)
-        if host_lists is None:
-            return False, reason
-
-        instance_table = tables.tables_get_instance_table()
-
-        for host_list in host_lists:
-            instance_list = list()
-
-            for host in host_list:
-                for instance in instance_table.on_host(host.name):
-                    if not instance.is_locked():
-                        instance_list.append(instance)
-                    else:
-                        DLOG.warn("Instance %s must not be shut down" %
-                                  instance.name)
-                        reason = ('instance %s must not be shut down' %
-                                  instance.name)
-                        return False, reason
-
-            # Computes with no instances
-            if 0 == len(instance_list):
-                stage = strategy.StrategyStage(
-                    strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS)
-                stage.add_step(strategy.QueryAlarmsStep(
-                    True, ignore_alarms=self._ignore_alarms))
-                if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
-                    stage.add_step(strategy.SwactHostsStep(host_list))
-                stage.add_step(strategy.LockHostsStep(host_list))
-                stage.add_step(strategy.UpgradeHostsStep(host_list))
-                # During an upgrade, unlock may need to retry. Bug details:
-                # https://bugs.launchpad.net/starlingx/+bug/1914836
-                stage.add_step(strategy.UnlockHostsStep(
-                    host_list,
-                    retry_count=strategy.UnlockHostsStep.MAX_RETRIES))
-                if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
-                    # AIO Controller hosts will undergo WaitDataSyncStep step
-                    # Allow up to four hours for controller disks to synchronize
-                    stage.add_step(strategy.WaitDataSyncStep(
-                        timeout_in_secs=4 * 60 * 60,
-                        ignore_alarms=self._ignore_alarms))
-                else:
-                    # Worker hosts will undergo:
-                    # 1) WaitAlarmsClear step if openstack is installed.
-                    # 2) SystemStabilizeStep step if openstack is not installed.
-                    if any([host.openstack_control or host.openstack_compute
-                            for host in host_list]):
-                        # Hosts with openstack that just need to wait for services to start up:
-                        stage.add_step(strategy.WaitAlarmsClearStep(
-                                timeout_in_secs=10 * 60,
-                                ignore_alarms=self._ignore_alarms))
-                    else:
-                        stage.add_step(strategy.SystemStabilizeStep())
-                self.apply_phase.add_stage(stage)
-                continue
-
-            # Computes with instances
-            stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS)
-
-            stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms))
-
-            if SW_UPDATE_APPLY_TYPE.PARALLEL == self._worker_apply_type:
-                # Disable host services before migrating to ensure
-                # instances do not migrate to worker hosts in the
-                # same set of hosts.
-                if host_list[0].host_service_configured(
-                        HOST_SERVICES.COMPUTE):
-                    stage.add_step(strategy.DisableHostServicesStep(
-                        host_list, HOST_SERVICES.COMPUTE))
-                # TODO(ksmith)
-                # When support is added for orchestration on
-                # non-OpenStack worker nodes, support for disabling
-                # kubernetes services will have to be added.
-
-            stage.add_step(strategy.MigrateInstancesStep(instance_list))
-            if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
-                stage.add_step(strategy.SwactHostsStep(host_list))
-            stage.add_step(strategy.LockHostsStep(host_list))
-            stage.add_step(strategy.UpgradeHostsStep(host_list))
-            # During an upgrade, unlock may need to retry. Bug details:
-            # https://bugs.launchpad.net/starlingx/+bug/1914836
-            stage.add_step(strategy.UnlockHostsStep(
-                host_list,
-                retry_count=strategy.UnlockHostsStep.MAX_RETRIES))
-            if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
-                # AIO Controller hosts will undergo WaitDataSyncStep step
-                # Allow up to four hours for controller disks to synchronize
-                stage.add_step(strategy.WaitDataSyncStep(
-                    timeout_in_secs=4 * 60 * 60,
-                    ignore_alarms=self._ignore_alarms))
-            else:
-                # Worker hosts will undergo:
-                # 1) WaitAlarmsClear step if openstack is installed.
-                # 2) SystemStabilizeStep step if openstack is not installed.
-                if any([host.openstack_control or host.openstack_compute
-                        for host in host_list]):
-                    # Hosts with openstack that just need to wait for
-                    # services to start up:
-                    stage.add_step(strategy.WaitAlarmsClearStep(
-                            timeout_in_secs=10 * 60,
-                            ignore_alarms=self._ignore_alarms))
-                else:
-                    stage.add_step(strategy.SystemStabilizeStep())
-            self.apply_phase.add_stage(stage)
-
-        return True, ''
 
     def build_complete(self, result, result_reason):
         """
@@ -2100,7 +1881,6 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         """
         from nfv_vim import strategy
         from nfv_vim import tables
-        import re
 
         result, result_reason = \
             super(SwUpgradeStrategy, self).build_complete(result, result_reason)
@@ -2108,102 +1888,50 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         DLOG.info("Build Complete Callback, result=%s, reason=%s."
                   % (result, result_reason))
 
-        # todo (vselvara): release validation needs to be replaced with validation
-        # based on results from 'software release' query api in the upcoming story.
-        release_type = re.compile(r"^[a-z]+[\-]+[\d*]+[\.]+[\d*]+[\.]+[\d*]+$")
-        if not release_type.match(self._release):
-            DLOG.warn("Invalid Software Release.")
-            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-            self.build_phase.result_reason = 'invalid software release'
-            self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
-            self.save()
-            return
-
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:
 
-            # Check whether the upgrade is in a valid state for orchestration
-            if self.nfvi_upgrade is None:
-                if not self._start_upgrade:
-                    DLOG.warn("No upgrade in progress.")
-                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                    self.build_phase.result_reason = 'no upgrade in progress'
-                    self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
-                    self.save()
-                    return
-            else:
-                if self._start_upgrade:
-                    valid_states = [UPGRADE_STATE.STARTED,
-                                    UPGRADE_STATE.DATA_MIGRATION_COMPLETE,
-                                    UPGRADE_STATE.UPGRADING_CONTROLLERS,
-                                    UPGRADE_STATE.UPGRADING_HOSTS]
-                else:
-                    valid_states = [UPGRADE_STATE.UPGRADING_CONTROLLERS,
-                                    UPGRADE_STATE.UPGRADING_HOSTS]
-
-                if self.nfvi_upgrade.state not in valid_states:
-                    DLOG.warn("Invalid upgrade state for orchestration: %s." %
-                              self.nfvi_upgrade.state)
-                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                    self.build_phase.result_reason = (
-                        'invalid upgrade state for orchestration: %s' %
-                        self.nfvi_upgrade.state)
-                    self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
-                    self.save()
-                    return
-
-                # If controller-1 has been upgraded and we have yet to upgrade
-                # controller-0, then controller-1 must be active.
-                if UPGRADE_STATE.UPGRADING_CONTROLLERS == self.nfvi_upgrade.state:
-                    if HOST_NAME.CONTROLLER_1 != get_local_host_name():
-                        DLOG.warn(
-                            "Controller-1 must be active for orchestration to "
-                            "upgrade controller-0.")
-                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = \
-                            strategy.STRATEGY_PHASE_RESULT.FAILED
-                        self.build_phase.result_reason = (
-                            'controller-1 must be active for orchestration to '
-                            'upgrade controller-0')
-                        self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason)
-                        self.save()
-                        return
-
-            if self._nfvi_alarms:
-                DLOG.warn(
-                    "Active alarms found, can't apply software upgrade.")
-                alarm_id_list = ""
-                for alarm_data in self._nfvi_alarms:
-                    if alarm_id_list:
-                        alarm_id_list += ', '
-                    alarm_id_list += alarm_data['alarm_id']
-                DLOG.warn("... active alarms: %s" % alarm_id_list)
+            if self.nfvi_upgrade.release_info is None:
+                reason = "Software release does not exist."
+                DLOG.warn(reason)
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = 'active alarms present ; '
-                self.build_phase.result_reason += alarm_id_list
+                self.build_phase.result_reason = reason
+                self.sw_update_obj.strategy_build_complete(
+                    False, self.build_phase.result_reason)
+                self.save()
+                return
+
+            if self.nfvi_upgrade.is_deployed or self.nfvi_upgrade.is_commited:
+                reason = "Software release is already deployed or committed."
+                DLOG.warn(reason)
+                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                self.build_phase.result = \
+                    strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.build_phase.result_reason = reason
+                self.sw_update_obj.strategy_build_complete(
+                    False, self.build_phase.result_reason)
+                self.save()
+                return
+
+            if self._nfvi_alarms:
+                DLOG.warn("Active alarms found, can't apply sw-deployment.")
+                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.build_phase.result_reason = 'active alarms present'
                 self.sw_update_obj.strategy_build_complete(
                     False, self.build_phase.result_reason)
                 self.save()
                 return
 
             host_table = tables.tables_get_host_table()
+
             for host in list(host_table.values()):
-                # Only allow upgrade orchestration when all hosts are
-                # available. It is not safe to automate upgrade application
-                # when we do not have full redundancy.
-                if not (host.is_unlocked() and host.is_enabled() and
-                        host.is_available()):
+                # All hosts must be unlock/enabled/available
+                if not (host.is_unlocked() and host.is_enabled() and host.is_available()):
                     DLOG.warn(
-                        "All %s hosts must be unlocked-enabled-available, "
-                        "can't apply software upgrades." % host.personality)
+                        "All hosts must be unlocked-enabled-available, "
+                        "can't apply sw-deployment: %s" % host.name)
                     self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                     self.build_phase.result = \
                         strategy.STRATEGY_PHASE_RESULT.FAILED
@@ -2215,73 +1943,76 @@ class SwUpgradeStrategy(SwUpdateStrategy):
                     self.save()
                     return
 
-            controller_hosts = list()
+            reboot_required = self.nfvi_upgrade.reboot_required
+            controller_strategy = self._add_controller_strategy_stages
+            controllers_hosts = list()
             storage_hosts = list()
             worker_hosts = list()
 
-            if self.nfvi_upgrade is None:
-                # Start upgrade
-                self._add_upgrade_start_stage()
+            self._add_upgrade_start_stage()
 
-                # All hosts will be upgraded
-                for host in list(host_table.values()):
+            if not self.nfvi_upgrade.is_activated:
+                # TODO(jkraitbe): Exclude hosts that are already deployed.
+                # The hosts states are found in self.nfvi_upgrade.hosts_info.
+                # None means deployment hasn't started.
+
+                # TODO(jkraitbe): SWACT to controller-1 should be
+                # here instead of in _add_upgrade_start_stage.
+
+                for host in host_table.values():
                     if HOST_PERSONALITY.CONTROLLER in host.personality:
-                        controller_hosts.append(host)
+                        controllers_hosts.append(host)
+                        if HOST_PERSONALITY.WORKER in host.personality:
+                            # We need to use this strategy on AIO type
+                            controller_strategy = self._add_worker_strategy_stages
 
                     elif HOST_PERSONALITY.STORAGE in host.personality:
                         storage_hosts.append(host)
 
-                    if HOST_PERSONALITY.WORKER in host.personality:
-                        worker_hosts.append(host)
-            else:
-                # Only hosts not yet upgraded will be upgraded
-                to_load = self.nfvi_upgrade.to_release
-                for host in list(host_table.values()):
-                    if host.software_load == to_load:
-                        # No need to upgrade this host
-                        continue
-
-                    if HOST_PERSONALITY.CONTROLLER in host.personality:
-                        controller_hosts.append(host)
-
-                    elif HOST_PERSONALITY.STORAGE in host.personality:
-                        storage_hosts.append(host)
-
-                    if HOST_PERSONALITY.WORKER in host.personality:
+                    elif HOST_PERSONALITY.WORKER in host.personality:
                         worker_hosts.append(host)
 
-            STRATEGY_CREATION_COMMANDS = [
-                (self._add_controller_strategy_stages,
-                 controller_hosts, True),
-                (self._add_storage_strategy_stages,
-                 storage_hosts, True),
-                (self._add_worker_strategy_stages,
-                 worker_hosts, True)
-            ]
-
-            for add_strategy_stages_function, host_list, reboot in \
-                    STRATEGY_CREATION_COMMANDS:
-                if host_list:
-                    success, reason = add_strategy_stages_function(
-                        host_list, reboot)
-                    if not success:
+                    else:
+                        DLOG.error(f"Unsupported personality for host {host.name}.")
                         self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                         self.build_phase.result = \
                             strategy.STRATEGY_PHASE_RESULT.FAILED
-                        self.build_phase.result_reason = reason
+                        self.build_phase.result_reason = \
+                            'Unsupported personality for host'
                         self.sw_update_obj.strategy_build_complete(
                             False, self.build_phase.result_reason)
                         self.save()
                         return
 
-            if self._complete_upgrade:
-                self._add_upgrade_complete_stage()
+                # Reverse controller hosts so controller-1 is first
+                controllers_hosts = controllers_hosts[::-1]
+
+                strategy_pairs = [
+                    (controller_strategy, controllers_hosts),
+                    (self._add_storage_strategy_stages, storage_hosts),
+                    (self._add_worker_strategy_stages, worker_hosts)
+                ]
+
+                for stage_func, host_list in strategy_pairs:
+                    if host_list:
+                        success, reason = stage_func(host_list, reboot_required)
+                        if not success:
+                            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                            self.build_phase.result = \
+                                strategy.STRATEGY_PHASE_RESULT.FAILED
+                            self.build_phase.result_reason = reason
+                            self.sw_update_obj.strategy_build_complete(
+                                False, self.build_phase.result_reason)
+                            self.save()
+                            return
+
+            self._add_upgrade_complete_stage()
 
             if 0 == len(self.apply_phase.stages):
-                DLOG.warn("No software upgrades need to be applied.")
+                DLOG.warn("No sw-deployments need to be applied.")
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = ('no software upgrades need to be '
+                self.build_phase.result_reason = ('no sw-deployments patches need to be '
                                                   'applied')
                 self.sw_update_obj.strategy_build_complete(
                     False, self.build_phase.result_reason)
@@ -2303,15 +2034,13 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         super(SwUpgradeStrategy, self).from_dict(data, build_phase, apply_phase,
                                                  abort_phase)
         self._single_controller = data['single_controller']
-        self._start_upgrade = data['start_upgrade']
-        self._complete_upgrade = data['complete_upgrade']
         self._release = data['release']
         nfvi_upgrade_data = data['nfvi_upgrade_data']
         if nfvi_upgrade_data:
             self._nfvi_upgrade = nfvi.objects.v1.Upgrade(
-                nfvi_upgrade_data['state'],
-                nfvi_upgrade_data['from_release'],
-                nfvi_upgrade_data['to_release'])
+                nfvi_upgrade_data['release'],
+                nfvi_upgrade_data['release_info'],
+                nfvi_upgrade_data['hosts_info'])
         else:
             self._nfvi_upgrade = None
 
@@ -2323,8 +2052,6 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         """
         data = super(SwUpgradeStrategy, self).as_dict()
         data['single_controller'] = self._single_controller
-        data['start_upgrade'] = self._start_upgrade
-        data['complete_upgrade'] = self._complete_upgrade
         data['release'] = self._release
         if self._nfvi_upgrade:
             nfvi_upgrade_data = self._nfvi_upgrade.as_dict()

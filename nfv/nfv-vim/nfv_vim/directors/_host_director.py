@@ -693,15 +693,8 @@ class HostDirector(object):
                 host_operation.set_failed(reason)
                 return host_operation
 
-            if host.is_locked():
-                host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
-                self._nfvi_upgrade_host(host.uuid, host.name)
-
-            else:
-                reason = "Cannot upgrade unlocked host %s." % host_name
-                DLOG.info(reason)
-                host_operation.set_failed(reason)
-                return host_operation
+            host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
+            self._nfvi_upgrade_host(host.uuid, host.name)
 
         if host_operation.is_inprogress():
             self._host_operation = host_operation

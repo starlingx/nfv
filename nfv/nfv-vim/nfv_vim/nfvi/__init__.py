@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -149,6 +149,7 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_host_state_ch
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_host_update_callback  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_host_upgrade_callback  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_sw_update_get_callback  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_sw_deploy_precheck  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_swact_from_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_unlock_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_upgrade_activate  # noqa: F401

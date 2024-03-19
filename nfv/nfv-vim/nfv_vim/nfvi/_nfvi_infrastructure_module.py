@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -367,38 +367,52 @@ def nfvi_get_kube_version_list(callback):
     return cmd_id
 
 
-def nfvi_get_upgrade(callback):
+def nfvi_get_upgrade(release, callback):
     """
-    Get upgrade
+    Get Software deploy
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('get_upgrade',
+                                                  release,
                                                   callback=callback)
     return cmd_id
 
 
-def nfvi_upgrade_start(callback):
+def nfvi_sw_deploy_precheck(release, callback):
     """
-    Upgrade start
+    Software deploy precheck
     """
-    cmd_id = _infrastructure_plugin.invoke_plugin('upgrade_start',
+    cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_precheck',
+                                                  release,
                                                   callback=callback)
     return cmd_id
 
 
-def nfvi_upgrade_activate(callback):
+def nfvi_upgrade_start(release, callback):
     """
-    Upgrade activate
+    Software deploy start
     """
-    cmd_id = _infrastructure_plugin.invoke_plugin('upgrade_activate',
+    cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_start',
+                                                  release,
                                                   callback=callback)
     return cmd_id
 
 
-def nfvi_upgrade_complete(callback):
+def nfvi_upgrade_activate(release, callback):
     """
-    Upgrade complete
+    Software deploy activate
     """
-    cmd_id = _infrastructure_plugin.invoke_plugin('upgrade_complete',
+    cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_activate',
+                                                  release,
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_upgrade_complete(release, callback):
+    """
+    Software deploy complete
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_complete',
+                                                  release,
                                                   callback=callback)
     return cmd_id
 

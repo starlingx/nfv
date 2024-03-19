@@ -1,11 +1,12 @@
 #
-# Copyright (c) 2020-2023 Wind River Systems, Inc.
+# Copyright (c) 2020-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 
 import fixtures
 
+import json
 import pprint
 import uuid
 
@@ -29,6 +30,7 @@ from nfv_unit_tests.tests import utils
 # unit test comparison between json structures
 DEBUG_PRINTING = False
 DEBUG_DEPTH = 3
+DEBUG_WITH_JSON = False
 
 
 def validate_strategy_persists(strategy):
@@ -44,9 +46,15 @@ def validate_strategy_persists(strategy):
     if DEBUG_PRINTING:
         if strategy.as_dict() != new_strategy.as_dict():
             print("==================== Strategy ====================")
-            pprint.pprint(strategy.as_dict(), depth=DEBUG_DEPTH)
+            if DEBUG_WITH_JSON:
+                print(json.dumps(strategy.as_dict(), indent=2))
+            else:
+                pprint.pprint(strategy.as_dict(), depth=DEBUG_DEPTH)
             print("============== Converted Strategy ================")
-            pprint.pprint(new_strategy.as_dict(), depth=DEBUG_DEPTH)
+            if DEBUG_WITH_JSON:
+                print(json.dumps(new_strategy.as_dict(), indent=2))
+            else:
+                pprint.pprint(new_strategy.as_dict(), depth=DEBUG_DEPTH)
     assert strategy.as_dict() == new_strategy.as_dict(), \
         "Strategy changed when converting to/from dict"
 
@@ -59,9 +67,15 @@ def validate_phase(phase, expected_results):
     """
     if DEBUG_PRINTING:
         print("====================== Phase Results ========================")
-        pprint.pprint(phase, depth=DEBUG_DEPTH)
+        if DEBUG_WITH_JSON:
+            print(json.dumps(phase, indent=2))
+        else:
+            pprint.pprint(phase, depth=DEBUG_DEPTH)
         print("===================== Expected Results ======================")
-        pprint.pprint(expected_results, depth=DEBUG_DEPTH)
+        if DEBUG_WITH_JSON:
+            print(json.dumps(expected_results, indent=2))
+        else:
+            pprint.pprint(expected_results, depth=DEBUG_DEPTH)
 
     for key in expected_results:
         if key == 'stages':
@@ -75,10 +89,14 @@ def validate_phase(phase, expected_results):
                             apply_step = apply_stage[stages_key][step_number]
                             for step_key in step:
                                 assert apply_step[step_key] == step[step_key], \
-                                    "for [%s][%d][%s][%d][%s] found: %s but expected: %s" % \
+                                    "for [%s][%d][%s][%d][%s] found: %s but expected: %s\n" \
+                                    "\n===== Found Step =====\n%s\n" \
+                                    "\n===== Expected Step =====\n%s" % \
                                     (key, stage_number, stages_key,
                                      step_number, step_key,
-                                     apply_step[step_key], step[step_key])
+                                     apply_step[step_key], step[step_key],
+                                     json.dumps(apply_step, indent=2),
+                                     json.dumps(step, indent=2))
                             step_number += 1
                     else:
                         assert apply_stage[stages_key] == stage[stages_key], \
@@ -110,6 +128,20 @@ def fake_host_name_controller_1():
 
 def fake_host_name_controller_0():
     return 'controller-0'
+
+
+def fake_host_name_flipper(before, after, n):
+    """Flip host after n-calls"""
+
+    hosts = [before, after]
+    index = 0
+
+    def _inner():
+        nonlocal index
+        index += 1
+        return hosts[index // n % 2]
+
+    return _inner
 
 
 def fake_callback():

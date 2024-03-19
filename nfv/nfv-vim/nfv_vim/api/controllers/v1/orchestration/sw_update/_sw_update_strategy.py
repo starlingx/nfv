@@ -186,11 +186,6 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     default_instance_action = wsme_types.wsattr(SwUpdateInstanceActionTypes,
                                                 mandatory=True,
                                                 name='default-instance-action')
-    # Disable support for start-upgrade as it was not completed
-    # start_upgrade = wsme_types.wsattr(
-    #     bool, mandatory=False, default=False, name='start-upgrade')
-    complete_upgrade = wsme_types.wsattr(
-        bool, mandatory=False, default=False, name='complete-upgrade')
     alarm_restrictions = wsme_types.wsattr(
         SwUpdateAlarmRestrictionTypes, mandatory=False,
         default=SW_UPDATE_ALARM_RESTRICTION_TYPES.STRICT,
@@ -695,9 +690,6 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
                 request_data.max_parallel_worker_hosts
         rpc_request.default_instance_action = request_data.default_instance_action
         rpc_request.alarm_restrictions = request_data.alarm_restrictions
-        # rpc_request.start_upgrade = request_data.start_upgrade
-        rpc_request.start_upgrade = False
-        rpc_request.complete_upgrade = request_data.complete_upgrade
         vim_connection = pecan.request.vim.open_connection()
         vim_connection.send(rpc_request.serialize())
         msg = vim_connection.receive(timeout_in_secs=30)
