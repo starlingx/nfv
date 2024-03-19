@@ -7,6 +7,7 @@ import json
 import os
 
 from nfv_client.openstack import rest_api
+from nfv_client import sw_update
 
 
 class StrategyStep(object):
@@ -272,14 +273,14 @@ def create_strategy(token_id,
     api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
-    if 'sw-patch' == strategy_name:
+    if sw_update.STRATEGY_NAME_SW_PATCH == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['swift-apply-type'] = swift_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
-    elif 'fw-update' == strategy_name:
+    elif sw_update.STRATEGY_NAME_FW_UPDATE == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
-    elif 'kube-rootca-update' == strategy_name:
+    elif sw_update.STRATEGY_NAME_KUBE_ROOTCA_UPDATE == strategy_name:
         # Note that the payload contains '-' and not '_'
         if 'expiry_date' in kwargs and kwargs['expiry_date']:
             api_cmd_payload['expiry-date'] = kwargs['expiry_date']
@@ -291,14 +292,15 @@ def create_strategy(token_id,
             # may not succeed if a SWACT occurs.
             api_cmd_payload['cert-file'] = os.path.abspath(kwargs['cert_file'])
         api_cmd_payload['default-instance-action'] = default_instance_action
-    elif 'kube-upgrade' == strategy_name:
+    elif sw_update.STRATEGY_NAME_KUBE_UPGRADE == strategy_name:
         # required: 'to_version' passed to strategy as 'to-version'
         api_cmd_payload['to-version'] = kwargs['to_version']
         api_cmd_payload['default-instance-action'] = default_instance_action
-    elif 'system-config-update' == strategy_name:
+    elif sw_update.STRATEGY_NAME_SYSTEM_CONFIG_UPDATE == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
-    elif 'sw-upgrade' == strategy_name:
+    # TODO(jkraitbe): Backend for sw-deploy will continue as old sw-upgrade for now
+    elif sw_update.STRATEGY_NAME_SW_UPGRADE == strategy_name:
         # for upgrade: default-instance-action is hardcoded to MIGRATE
         if 'start_upgrade' in kwargs and kwargs['start_upgrade']:
             api_cmd_payload['start-upgrade'] = True

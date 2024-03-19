@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -47,26 +47,27 @@ def get_extra_create_args(cmd_area, args):
     :returns: a dictionary of additional kwargs for the create_strategy command
     :raises: ValueError if a strategy has been registered but not update here
     """
-    if 'patch-strategy' == cmd_area:
+    if sw_update.CMD_NAME_SW_PATCH == cmd_area:
         # no additional kwargs for patch
         return {}
-    elif 'upgrade-strategy' == cmd_area:
+    elif sw_update.CMD_NAME_SW_DEPLOY == cmd_area:
+        # TODO(jkraitbe): Args will be updated to use new release parameter
         # upgrade supports: complete_upgrade
         return {'complete_upgrade': args.complete_upgrade}
-    elif 'fw-update-strategy' == cmd_area:
+    elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
         return {}
-    elif 'system-config-update-strategy' == cmd_area:
+    elif sw_update.CMD_NAME_SYSTEM_CONFIG_UPDATE == cmd_area:
         # no additional kwargs for system config update
         return {}
-    elif 'kube-rootca-update-strategy' == cmd_area:
+    elif sw_update.CMD_NAME_KUBE_ROOTCA_UPDATE == cmd_area:
         # kube rootca update supports expiry_date, subject and cert_file
         return {
             'expiry_date': args.expiry_date,
             'subject': args.subject,
             'cert_file': args.cert_file
         }
-    elif 'kube-upgrade-strategy' == cmd_area:
+    elif sw_update.CMD_NAME_KUBE_UPGRADE == cmd_area:
         # kube upgrade supports: to_version
         return {'to_version': args.to_version}
     else:
@@ -201,7 +202,7 @@ def setup_show_cmd(parser):
 def setup_fw_update_parser(commands):
     """Firmware Update Strategy Commands"""
 
-    cmd_area = 'fw-update-strategy'
+    cmd_area = sw_update.CMD_NAME_FW_UPDATE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_FW_UPDATE)
     cmd_parser = commands.add_parser(cmd_area,
                                      help='Firmware Update Strategy')
@@ -242,7 +243,7 @@ def setup_fw_update_parser(commands):
 def setup_kube_rootca_update_parser(commands):
     """Kubernetes RootCA Update Strategy Commands"""
 
-    cmd_area = 'kube-rootca-update-strategy'
+    cmd_area = sw_update.CMD_NAME_KUBE_ROOTCA_UPDATE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_KUBE_ROOTCA_UPDATE)
     cmd_parser = commands.add_parser(cmd_area,
                                      help='Kubernetes RootCA Update Strategy')
@@ -298,7 +299,7 @@ def setup_kube_rootca_update_parser(commands):
 def setup_kube_upgrade_parser(commands):
     """Kubernetes Upgrade Strategy Commands"""
 
-    cmd_area = 'kube-upgrade-strategy'
+    cmd_area = sw_update.CMD_NAME_KUBE_UPGRADE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_KUBE_UPGRADE)
     cmd_parser = commands.add_parser(cmd_area,
                                      help='Kubernetes Upgrade Strategy')
@@ -347,7 +348,7 @@ def setup_kube_upgrade_parser(commands):
 def setup_patch_parser(commands):
     """Patch Strategy Commands"""
 
-    cmd_area = 'patch-strategy'
+    cmd_area = sw_update.CMD_NAME_SW_PATCH
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_SW_PATCH)
     cmd_parser = commands.add_parser(cmd_area,
                                      help='Patch Strategy')
@@ -390,7 +391,7 @@ def setup_patch_parser(commands):
 def setup_system_config_update_parser(commands):
     """System config update Strategy Commands"""
 
-    cmd_area = 'system-config-update-strategy'
+    cmd_area = sw_update.CMD_NAME_SYSTEM_CONFIG_UPDATE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_SYSTEM_CONFIG_UPDATE)
     cmd_parser = commands.add_parser(cmd_area,
                                      help='system config update Strategy')
@@ -429,16 +430,17 @@ def setup_system_config_update_parser(commands):
     _ = setup_show_cmd(sub_cmds)
 
 
-def setup_upgrade_parser(commands):
-    """Upgrade Strategy Commands"""
+def setup_sw_deploy_parser(commands):
+    """Software Deploy Strategy Commands"""
 
-    cmd_area = 'upgrade-strategy'
+    cmd_area = sw_update.CMD_NAME_SW_DEPLOY
+    # TODO(jkraitbe): Backend for sw-deploy will continue as old sw-upgrade for now
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_SW_UPGRADE)
     cmd_parser = commands.add_parser(cmd_area,
-                                     help='Upgrade Strategy')
+                                     help='Software Deploy Strategy')
     cmd_parser.set_defaults(cmd_area=cmd_area)
 
-    sub_cmds = cmd_parser.add_subparsers(title='Software Upgrade Commands',
+    sub_cmds = cmd_parser.add_subparsers(title='Software Deploy Commands',
                                          metavar='')
     sub_cmds.required = True
 
@@ -457,10 +459,10 @@ def setup_upgrade_parser(commands):
         [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
          sw_update.ALARM_RESTRICTIONS_RELAXED],
         min_parallel=2,
-        max_parallel=10  # upgrade supports 2..10 workers in parallel
+        max_parallel=10  # SW Deploy supports 2..10 workers in parallel
     )
 
-    # add upgrade specific arguments to the create command
+    # add sw-deploy specific arguments to the create command
     # The get_extra_create_args method is updated to align with these
 
     # Disable support for --start-upgrade as it was not completed
@@ -468,6 +470,7 @@ def setup_upgrade_parser(commands):
     #                                  action='store_true',
     #                                  help=argparse.SUPPRESS)
 
+    # TODO(jkraitbe): Args will be updated to use new release parameter
     create_strategy_cmd.add_argument('--complete-upgrade',
                                      action='store_true',
                                      help=argparse.SUPPRESS)
@@ -516,8 +519,8 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
         # Add system config update strategy commands
         setup_system_config_update_parser(commands)
 
-        # Add software upgrade strategy commands
-        setup_upgrade_parser(commands)
+        # Add software sw-deploy strategy commands
+        setup_sw_deploy_parser(commands)
 
         args = parser.parse_args(argv)
 

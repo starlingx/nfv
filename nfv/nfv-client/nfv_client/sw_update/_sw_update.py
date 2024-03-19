@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -12,6 +12,13 @@ STRATEGY_NAME_FW_UPDATE = 'fw-update'
 STRATEGY_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update'
 STRATEGY_NAME_KUBE_UPGRADE = 'kube-upgrade'
 STRATEGY_NAME_SYSTEM_CONFIG_UPDATE = 'system-config-update'
+
+CMD_NAME_SW_PATCH = 'patch-strategy'
+CMD_NAME_SW_DEPLOY = 'sw-deploy-strategy'
+CMD_NAME_FW_UPDATE = 'fw-update-strategy'
+CMD_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update-strategy'
+CMD_NAME_KUBE_UPGRADE = 'kube-upgrade-strategy'
+CMD_NAME_SYSTEM_CONFIG_UPDATE = 'system-config-update-strategy'
 
 APPLY_TYPE_SERIAL = 'serial'
 APPLY_TYPE_PARALLEL = 'parallel'
@@ -123,8 +130,9 @@ def _display_strategy(strategy, details=False, active=False):
     """
     if strategy.name == STRATEGY_NAME_SW_PATCH:
         print("Strategy Patch Strategy:")
+    # TODO(jkraitbe): Backend for sw-deploy will continue as old sw-upgrade for now
     elif strategy.name == STRATEGY_NAME_SW_UPGRADE:
-        print("Strategy Upgrade Strategy:")
+        print("Strategy Software Deploy Strategy:")
     elif strategy.name == STRATEGY_NAME_FW_UPDATE:
         print("Strategy Firmware Update Strategy:")
     elif strategy.name == STRATEGY_NAME_KUBE_ROOTCA_UPDATE:
