@@ -99,11 +99,13 @@ def vim_sw_update_api_create_strategy(connection, msg):
             default_instance_action,
             alarm_restrictions, _vim_sw_update_api_create_strategy_callback)
     elif 'sw-upgrade' == msg.sw_update_type:
+        release = msg.release
         start_upgrade = msg.start_upgrade
         complete_upgrade = msg.complete_upgrade
         uuid, reason = sw_mgmt_director.create_sw_upgrade_strategy(
             storage_apply_type, worker_apply_type, max_parallel_worker_hosts,
             alarm_restrictions,
+            release,
             start_upgrade, complete_upgrade,
             _vim_sw_update_api_create_strategy_callback)
     elif 'fw-update' == msg.sw_update_type:

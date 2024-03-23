@@ -53,7 +53,10 @@ def get_extra_create_args(cmd_area, args):
     elif sw_update.CMD_NAME_SW_DEPLOY == cmd_area:
         # TODO(jkraitbe): Args will be updated to use new release parameter
         # upgrade supports: complete_upgrade
-        return {'complete_upgrade': args.complete_upgrade}
+        return {
+            'release': args.release,
+            'complete_upgrade': args.complete_upgrade
+        }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
         return {}
@@ -448,14 +451,16 @@ def setup_sw_deploy_parser(commands):
     # alarm restrictions, defaults to strict
     create_strategy_cmd = setup_create_cmd(
         sub_cmds,
-        [sw_update.APPLY_TYPE_SERIAL],  # hard coded to serial
+        [sw_update.APPLY_TYPE_SERIAL,  # hard coded to serial
+         sw_update.APPLY_TYPE_IGNORE],
         [sw_update.APPLY_TYPE_SERIAL,  # storage supports serial and parallel
          sw_update.APPLY_TYPE_PARALLEL,
          sw_update.APPLY_TYPE_IGNORE],
         [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
          sw_update.APPLY_TYPE_PARALLEL,
          sw_update.APPLY_TYPE_IGNORE],
-        [sw_update.INSTANCE_ACTION_MIGRATE],   # hardcoded to migrate
+        [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
+         sw_update.INSTANCE_ACTION_MIGRATE],
         [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
          sw_update.ALARM_RESTRICTIONS_RELAXED],
         min_parallel=2,
@@ -469,8 +474,10 @@ def setup_sw_deploy_parser(commands):
     # create_strategy_cmd.add_argument('--start-upgrade',
     #                                  action='store_true',
     #                                  help=argparse.SUPPRESS)
+    # sw-deploy create requires 'release' parameter
+    create_strategy_cmd.add_argument('release',
+                                     help='software release for deployment')
 
-    # TODO(jkraitbe): Args will be updated to use new release parameter
     create_strategy_cmd.add_argument('--complete-upgrade',
                                      action='store_true',
                                      help=argparse.SUPPRESS)

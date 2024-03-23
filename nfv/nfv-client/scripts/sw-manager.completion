@@ -125,13 +125,19 @@ function _swmanager()
                     case "$action" in
                         create)
                             local createopts="
+                                --controller-apply-type
                                 --storage-apply-type
                                 --worker-apply-type
                                 --max-parallel-worker-hosts
+                                --instance-action
                                 --alarm-restrictions
                             "
                             local createopt=${prev}
                             case "$createopt" in
+                                --controller-apply-type)
+                                    COMPREPLY=($(compgen -W "serial ignore" -- ${cur}))
+                                    return 0
+                                    ;;
                                 --storage-apply-type)
                                     COMPREPLY=($(compgen -W "serial parallel ignore" -- ${cur}))
                                     return 0
@@ -142,6 +148,10 @@ function _swmanager()
                                     ;;
                                 --max-parallel-worker-hosts)
                                     COMPREPLY=( $(compgen -- ${cur}))
+                                    return 0
+                                    ;;
+                                --instance-action)
+                                    COMPREPLY=($(compgen -W "migrate stop-start" -- ${cur}))
                                     return 0
                                     ;;
                                 --alarm-restrictions)

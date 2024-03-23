@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -63,6 +63,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
     """
     start_upgrade = None
     complete_upgrade = None
+    release = None
 
     def __init__(self, msg_version=RPC_MSG_VERSION.VERSION_1_0,
                  msg_type=RPC_MSG_TYPE.CREATE_SW_UPGRADE_STRATEGY_REQUEST,
@@ -74,11 +75,13 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         super(APIRequestCreateSwUpgradeStrategy, self).serialize_payload(msg)
         msg['start_upgrade'] = self.start_upgrade
         msg['complete_upgrade'] = self.complete_upgrade
+        msg['release'] = self.release
 
     def deserialize_payload(self, msg):
         super(APIRequestCreateSwUpgradeStrategy, self).deserialize_payload(msg)
         self.start_upgrade = msg.get('start_upgrade', None)
         self.complete_upgrade = msg.get('complete_upgrade', None)
+        self.release = msg.get('release', None)
 
     def __str__(self):
         return "create-sw-upgrade-strategy request: %s" % self.deserialize_payload

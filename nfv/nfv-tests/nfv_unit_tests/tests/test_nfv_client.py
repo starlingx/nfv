@@ -251,6 +251,10 @@ class TestCLISwDeployStrategy(TestNFVClientShell,
         super(TestCLISwDeployStrategy, self).setUp()
         self.set_strategy('sw-deploy-strategy')
 
+    def required_create_fields(self):
+        """sw-deploy strategy requires 'release' parameter for create"""
+        return ['starlingx-24.03.1']
+
 
 class TestCLIPatchStrategy(TestNFVClientShell,
                            StrategyMixin):

@@ -27,7 +27,6 @@ from nfv_vim import rpc
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import SW_UPDATE_ACTION
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import SW_UPDATE_ALARM_RESTRICTION_TYPES
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import SW_UPDATE_APPLY_TYPE
-from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import SW_UPDATE_NAME
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import SwUpdateActions
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import SwUpdateAlarmRestrictionTypes
@@ -174,12 +173,19 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     """
     Software Upgrade Strategy - Create Data
     """
+    controller_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
+                                              name='controller-apply-type')
+    release = wsme_types.wsattr(six.text_type, mandatory=True,
+                                name='release')
     storage_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
                                            name='storage-apply-type')
     worker_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
                                           name='worker-apply-type')
     max_parallel_worker_hosts = wsme_types.wsattr(
         int, mandatory=False, name='max-parallel-worker-hosts')
+    default_instance_action = wsme_types.wsattr(SwUpdateInstanceActionTypes,
+                                                mandatory=True,
+                                                name='default-instance-action')
     # Disable support for start-upgrade as it was not completed
     # start_upgrade = wsme_types.wsattr(
     #     bool, mandatory=False, default=False, name='start-upgrade')
@@ -673,7 +679,8 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
         rpc_request = rpc.APIRequestCreateSwUpgradeStrategy()
         rpc_request.sw_update_type = _get_sw_update_type_from_path(
             pecan.request.path)
-        rpc_request.controller_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
+        rpc_request.release = request_data.release
+        rpc_request.controller_apply_type = request_data.controller_apply_type
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.swift_apply_type = SW_UPDATE_APPLY_TYPE.IGNORE
         rpc_request.worker_apply_type = request_data.worker_apply_type
@@ -686,7 +693,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
                     "Invalid value for max-parallel-worker-hosts")
             rpc_request.max_parallel_worker_hosts = \
                 request_data.max_parallel_worker_hosts
-        rpc_request.default_instance_action = SW_UPDATE_INSTANCE_ACTION.MIGRATE
+        rpc_request.default_instance_action = request_data.default_instance_action
         rpc_request.alarm_restrictions = request_data.alarm_restrictions
         # rpc_request.start_upgrade = request_data.start_upgrade
         rpc_request.start_upgrade = False

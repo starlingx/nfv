@@ -1709,7 +1709,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
     """
     def __init__(self, uuid, storage_apply_type, worker_apply_type,
                  max_parallel_worker_hosts,
-                 alarm_restrictions, start_upgrade, complete_upgrade,
+                 alarm_restrictions, release, start_upgrade, complete_upgrade,
                  ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
@@ -1719,7 +1719,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
             SW_UPDATE_APPLY_TYPE.IGNORE,
             worker_apply_type,
             max_parallel_worker_hosts,
-            SW_UPDATE_INSTANCE_ACTION.MIGRATE,
+            SW_UPDATE_INSTANCE_ACTION.STOP_START,
             alarm_restrictions,
             ignore_alarms)
 
@@ -1735,6 +1735,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         # which would only have been for lab use.
         if start_upgrade:
             raise Exception("No support for start_upgrade")
+        self._release = release
         self._start_upgrade = start_upgrade
         self._complete_upgrade = complete_upgrade
         # The following alarms will not prevent a software upgrade operation
@@ -2086,12 +2087,26 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         """
         from nfv_vim import strategy
         from nfv_vim import tables
+        import re
 
         result, result_reason = \
             super(SwUpgradeStrategy, self).build_complete(result, result_reason)
 
         DLOG.info("Build Complete Callback, result=%s, reason=%s."
                   % (result, result_reason))
+
+        # todo (vselvara): release validation needs to be replaced with validation
+        # based on results from 'software release' query api in the upcoming story.
+        release_type = re.compile(r"^[a-z]+[\-]+[\d*]+[\.]+[\d*]+[\.]+[\d*]+$")
+        if not release_type.match(self._release):
+            DLOG.warn("Invalid Software Release.")
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = 'invalid software release'
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            return
 
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:
@@ -2277,6 +2292,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         self._single_controller = data['single_controller']
         self._start_upgrade = data['start_upgrade']
         self._complete_upgrade = data['complete_upgrade']
+        self._release = data['release']
         nfvi_upgrade_data = data['nfvi_upgrade_data']
         if nfvi_upgrade_data:
             self._nfvi_upgrade = nfvi.objects.v1.Upgrade(
@@ -2296,6 +2312,7 @@ class SwUpgradeStrategy(SwUpdateStrategy):
         data['single_controller'] = self._single_controller
         data['start_upgrade'] = self._start_upgrade
         data['complete_upgrade'] = self._complete_upgrade
+        data['release'] = self._release
         if self._nfvi_upgrade:
             nfvi_upgrade_data = self._nfvi_upgrade.as_dict()
         else:

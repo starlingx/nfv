@@ -76,7 +76,7 @@ class SwMgmtDirector(object):
 
     def create_sw_upgrade_strategy(self, storage_apply_type, worker_apply_type,
                                    max_parallel_worker_hosts,
-                                   alarm_restrictions, start_upgrade,
+                                   alarm_restrictions, release, start_upgrade,
                                    complete_upgrade, callback):
         """
         Create Software Upgrade Strategy
@@ -94,7 +94,7 @@ class SwMgmtDirector(object):
         success, reason = self._sw_update.strategy_build(
             strategy_uuid, storage_apply_type,
             worker_apply_type, max_parallel_worker_hosts,
-            alarm_restrictions, start_upgrade,
+            alarm_restrictions, release, start_upgrade,
             complete_upgrade, self._ignore_alarms,
             self._single_controller)
 

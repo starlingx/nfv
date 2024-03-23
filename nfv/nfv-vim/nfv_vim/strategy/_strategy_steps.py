@@ -54,6 +54,7 @@ class StrategyStepNames(Constants):
     QUERY_SW_PATCH_HOSTS = Constant('query-sw-patch-hosts')
     QUERY_FW_UPDATE_HOST = Constant('query-fw-update-host')
     QUERY_UPGRADE = Constant('query-upgrade')
+    QUERY_SOFTWARE_RELEASE = Constant('query-software-release')
     DISABLE_HOST_SERVICES = Constant('disable-host-services')
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
     # kube rootca update steps
