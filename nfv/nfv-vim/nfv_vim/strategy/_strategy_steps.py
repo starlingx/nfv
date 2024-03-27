@@ -88,6 +88,8 @@ class StrategyStepNames(Constants):
     KUBE_HOST_UPGRADE_CONTROL_PLANE = \
         Constant('kube-host-upgrade-control-plane')
     KUBE_HOST_UPGRADE_KUBELET = Constant('kube-host-upgrade-kubelet')
+    KUBE_PRE_APPLICATION_UPDATE = Constant('kube-pre-application-update')
+    KUBE_POST_APPLICATION_UPDATE = Constant('kube-post-application-update')
     # system config update specific steps
     QUERY_SYSTEM_CONFIG_UPDATE_HOSTS = Constant('query-system-config-update-hosts')
     SYSTEM_CONFIG_UPDATE_HOSTS = Constant('system-config-update-hosts')
@@ -4134,8 +4136,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         super(KubeUpgradeStartStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_START,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTING_FAILED,
-            timeout_in_secs=1800)
+            None)  # there is no failure state if upgrade-start fails
         # next 2 attributes must be persisted through from_dict/as_dict
         self._to_version = to_version
         self._force = force
@@ -4171,9 +4172,13 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
+        # kube-upgrade-start will return a result when it completes,
+        # so we do not want to use handle_event
         if response['completed']:
             if self.strategy is not None:
                 self.strategy.nfvi_kube_upgrade = response['result-data']
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response['reason'])
@@ -4360,6 +4365,88 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
         DLOG.info("Step (%s) apply." % self._name)
 
         nfvi.nfvi_kube_upgrade_download_images(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
+    """Kube Pre Application Update - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubePreApplicationUpdateStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_PRE_APPLICATION_UPDATE,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATED_APPS,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATING_APPS_FAILED,
+            timeout_in_secs=1800)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()]
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Pre Application Update - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Pre Application Update """
+
+        from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
+
+        nfvi.nfvi_kube_pre_application_update(self._response_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+
+class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
+    """Kube Post Application Update - Strategy Step"""
+
+    def __init__(self):
+        from nfv_vim import nfvi
+        super(KubePostApplicationUpdateStep, self).__init__(
+            STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED,
+            timeout_in_secs=1800)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()]
+
+    @coroutine
+    def _response_callback(self):
+        """Kube Post Application Update - Callback"""
+
+        response = (yield)
+        DLOG.debug("%s callback response=%s." % (self._name, response))
+
+        if response['completed']:
+            if self.strategy is not None:
+                self.strategy.nfvi_kube_upgrade = response['result-data']
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """Kube Post Application Update """
+
+        from nfv_vim import nfvi
+        DLOG.info("Step (%s) apply." % self._name)
+
+        nfvi.nfvi_kube_post_application_update(self._response_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
 
@@ -4894,6 +4981,8 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.KUBE_UPGRADE_NETWORKING: KubeUpgradeNetworkingStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_STORAGE: KubeUpgradeStorageStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_START: KubeUpgradeStartStep,
+        STRATEGY_STEP_NAME.KUBE_PRE_APPLICATION_UPDATE: KubePreApplicationUpdateStep,
+        STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE: KubePostApplicationUpdateStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE: QueryKubeHostUpgradeStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE: QueryKubeUpgradeStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS: QueryKubeVersionsStep,

@@ -269,8 +269,7 @@ class ApplyStageMixin(object):
             'total_steps': 1,
             'steps': [
                 {'name': 'kube-upgrade-start',
-                 'success_state': 'upgrade-started',
-                 'fail_state': 'upgrade-starting-failed'},
+                 'success_state': 'upgrade-started'},
             ],
         }
 
@@ -282,6 +281,17 @@ class ApplyStageMixin(object):
                 {'name': 'kube-upgrade-download-images',
                  'success_state': 'downloaded-images',
                  'fail_state': 'downloading-images-failed'},
+            ],
+        }
+
+    def _kube_pre_application_update_stage(self):
+        return {
+            'name': 'kube-pre-application-update',
+            'total_steps': 1,
+            'steps': [
+                {'name': 'kube-pre-application-update',
+                 'success_state': 'pre-updated-apps',
+                 'fail_state': 'pre-updating-apps-failed'},
             ],
         }
 
@@ -359,6 +369,17 @@ class ApplyStageMixin(object):
             'steps': [
                 {'name': 'kube-upgrade-complete',
                  'success_state': 'upgrade-complete'},
+            ],
+        }
+
+    def _kube_post_application_update_stage(self):
+        return {
+            'name': 'kube-post-application-update',
+            'total_steps': 1,
+            'steps': [
+                {'name': 'kube-post-application-update',
+                 'success_state': 'post-updated-apps',
+                 'fail_state': 'post-updating-apps-failed'},
             ],
         }
 
@@ -496,6 +517,7 @@ class ApplyStageMixin(object):
                          storage_list=None,
                          add_start=True,
                          add_download=True,
+                         add_pre_app_update=True,
                          add_networking=True,
                          add_storage=True,
                          add_cordon=True,
@@ -503,6 +525,7 @@ class ApplyStageMixin(object):
                          add_second_control_plane=True,
                          add_kubelets=True,
                          add_uncordon=True,
+                         add_post_app_update=True,
                          add_complete=True,
                          add_cleanup=True):
         """The order of the host_list determines the kubelets"""
@@ -518,6 +541,8 @@ class ApplyStageMixin(object):
             stages.append(self._kube_upgrade_start_stage())
         if add_download:
             stages.append(self._kube_upgrade_download_images_stage())
+        if add_pre_app_update:
+            stages.append(self._kube_pre_application_update_stage())
         if add_networking:
             stages.append(self._kube_upgrade_networking_stage())
         if add_storage:
@@ -539,6 +564,8 @@ class ApplyStageMixin(object):
             stages.append(self._kube_host_uncordon_stage())
         if add_complete:
             stages.append(self._kube_upgrade_complete_stage())
+        if add_post_app_update:
+            stages.append(self._kube_post_application_update_stage())
         if add_cleanup:
             stages.append(self._kube_upgrade_cleanup_stage())
         return stages
@@ -582,7 +609,7 @@ class ApplyStageMixin(object):
         """
         Test the kube_upgrade strategy creation when the upgrade had previously
         stopped after upgrade-completed.
-        It is expected to resume at the cleanup stage
+        It is expected to resume at the post application update stage
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
@@ -590,6 +617,7 @@ class ApplyStageMixin(object):
             self.default_to_version)
         # not using build_stage_list utility since the list of stages is small
         stages = [
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ]
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -624,39 +652,6 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         self.worker_list = []
         self.storage_list = []
 
-    def test_resume_after_starting_failed(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
-        stopped with 'upgrade-starting-failed'
-        It is expected to resume at the 'upgrade-starting' stage
-        """
-        kube_upgrade = self._create_kube_upgrade_obj(
-            KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTING_FAILED,
-            self.default_from_version,
-            self.default_to_version)
-        stages = [
-            self._kube_upgrade_start_stage(),
-            self._kube_upgrade_download_images_stage(),
-            self._kube_upgrade_networking_stage(),
-            self._kube_upgrade_storage_stage(),
-        ]
-        if self.is_simplex():
-            stages.append(self._kube_host_cordon_stage())
-        for ver in self.kube_versions:
-            stages.append(self._kube_upgrade_first_control_plane_stage(ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
-        if self.is_simplex():
-            stages.append(self._kube_host_uncordon_stage())
-        stages.extend([
-            self._kube_upgrade_complete_stage(),
-            self._kube_upgrade_cleanup_stage(),
-        ])
-        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
-
     def test_resume_after_download_images_failed(self):
         """
         Test the kube_upgrade strategy creation when the upgrade had previously
@@ -669,6 +664,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_to_version)
         stages = [
             self._kube_upgrade_download_images_stage(),
+            self._kube_pre_application_update_stage(),
             self._kube_upgrade_networking_stage(),
             self._kube_upgrade_storage_stage(),
         ]
@@ -685,6 +681,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -693,10 +690,77 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         """
         Test the kube_upgrade strategy creation when the upgrade had previously
         stopped with 'downloaded-images'
-        It is expected to resume at the 'first control plane' stage.
+        It is expected to resume at the 'pre application update' stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES,
+            self.default_from_version,
+            self.default_to_version)
+        stages = [
+            self._kube_pre_application_update_stage(),
+            self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_storage_stage(),
+        ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(
+                ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
+        stages.extend([
+            self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
+            self._kube_upgrade_cleanup_stage(),
+        ])
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+    def test_resume_after_pre_app_update_failed(self):
+        """
+        Test the kube_upgrade strategy creation when the upgrade had previously
+        stopped with 'pre-updating-apps-failed'.
+        It is expected to resume at the pre application update stage.
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_PRE_UPDATING_APPS_FAILED,
+            self.default_from_version,
+            self.default_to_version)
+        stages = [
+            self._kube_pre_application_update_stage(),
+            self._kube_upgrade_networking_stage(),
+            self._kube_upgrade_storage_stage(),
+        ]
+        if self.is_simplex():
+            stages.append(self._kube_host_cordon_stage())
+        for ver in self.kube_versions:
+            stages.append(self._kube_upgrade_first_control_plane_stage(ver))
+            stages.extend(self._kube_upgrade_kubelet_stages(
+                ver,
+                self.std_controller_list,
+                self.aio_controller_list,
+                self.worker_list))
+        if self.is_simplex():
+            stages.append(self._kube_host_uncordon_stage())
+        stages.extend([
+            self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
+            self._kube_upgrade_cleanup_stage(),
+        ])
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+    def test_resume_after_pre_app_update_succeeded(self):
+        """
+        Test the kube_upgrade strategy creation when the upgrade had previously
+        stopped with 'pre-updated-apps'.
+        It is expected to resume at the upgrade networking stage.
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_PRE_UPDATED_APPS,
             self.default_from_version,
             self.default_to_version)
         stages = [
@@ -717,6 +781,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -744,6 +809,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -769,6 +835,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -801,6 +868,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -832,6 +900,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -863,6 +932,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -892,6 +962,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -919,6 +990,7 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
@@ -946,8 +1018,40 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
             self._kube_upgrade_complete_stage(),
+            self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+    def test_resume_after_post_app_update_failed(self):
+        """
+        Test the kube_upgrade strategy creation when the upgrade had previously
+        stopped with 'post-updating-apps-failed'
+        It is expected to resume at the post application update stage.
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED,
+            self.default_from_version,
+            self.default_to_version)
+        stages = [
+            self._kube_post_application_update_stage(),
+            self._kube_upgrade_cleanup_stage(),
+        ]
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+    def test_resume_after_post_app_update_succeeded(self):
+        """
+        Test the kube_upgrade strategy creation when the upgrade had previously
+        stopped with 'post-updated-apps'.
+        It is expected to resume at the cleanup stage.
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS,
+            self.default_from_version,
+            self.default_to_version)
+        stages = [
+            self._kube_upgrade_cleanup_stage(),
+        ]
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
 

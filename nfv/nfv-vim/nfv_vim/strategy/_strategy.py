@@ -3211,7 +3211,23 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES)
         stage.add_step(strategy.KubeUpgradeDownloadImagesStep())
         self.apply_phase.add_stage(stage)
-        # Next stage after download images is upgrade networking
+        # Next stage after download images is pre application update
+        self._add_kube_pre_application_update_stage()
+
+    def _add_kube_pre_application_update_stage(self):
+        """
+        Add kube pre application update stage.
+        This stage only occurs after download images
+        It then proceeds to the next stage
+        """
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_PRE_APPLICATION_UPDATE)
+        stage.add_step(strategy.KubePreApplicationUpdateStep())
+        self.apply_phase.add_stage(stage)
+
+        # Next stage after pre application update is upgrade networking
         self._add_kube_upgrade_networking_stage()
 
     def _add_kube_upgrade_networking_stage(self):
@@ -3496,13 +3512,29 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_COMPLETE)
         stage.add_step(strategy.KubeUpgradeCompleteStep())
         self.apply_phase.add_stage(stage)
-        # stage after kube upgrade complete stage, cleans up the kube upgrade
+        # Next stage after upgrade complete is post application update
+        self._add_kube_post_application_update_stage()
+
+    def _add_kube_post_application_update_stage(self):
+        """
+        Add kube post application update stage.
+        This stage occurs after the upgrade is completed
+        It then proceeds to the next stage
+        """
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_POST_APPLICATION_UPDATE)
+        stage.add_step(strategy.KubePostApplicationUpdateStep())
+        self.apply_phase.add_stage(stage)
+
+        # Next stage after post application update is upgrade cleanup
         self._add_kube_upgrade_cleanup_stage()
 
     def _add_kube_upgrade_cleanup_stage(self):
         """
         kube upgrade cleanup stage deletes the kube upgrade.
-        This stage occurs after all kube upgrade is completed
+        This stage occurs after the post application update stage
         """
         from nfv_vim import strategy
         stage = strategy.StrategyStage(
@@ -3563,10 +3595,6 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # Note: there are no resume states for actions that are still running
         # ie:  KUBE_UPGRADE_DOWNLOADING_IMAGES
         RESUME_STATE = {
-            # If upgrade start failed, allow to restart
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTING_FAILED:
-                self._add_kube_upgrade_start_stage,
-
             # after upgrade-started -> download images
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED:
                 self._add_kube_upgrade_download_images_stage,
@@ -3575,8 +3603,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED:
                 self._add_kube_upgrade_download_images_stage,
 
-            # After downloading images -> upgrade networking
+            # After downloading images -> pre update applications
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES:
+                self._add_kube_pre_application_update_stage,
+
+            # if pre updating apps failed, resume at pre updating apps
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATING_APPS_FAILED:
+                self._add_kube_pre_application_update_stage,
+
+            # After pre updating apps -> upgrade networking
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATED_APPS:
                 self._add_kube_upgrade_networking_stage,
 
             # if networking state failed, resync at networking state
@@ -3631,8 +3667,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE:
                 self._add_kube_upgrade_complete_stage,
 
-            # upgrade is completed, delete the upgrade
+            # upgrade is completed, post update apps
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE:
+                self._add_kube_post_application_update_stage,
+
+            # If post updating apps failed, resume at post application update stage
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED:
+                self._add_kube_post_application_update_stage,
+
+            # After post updating apps, delete the upgrade
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS:
                 self._add_kube_upgrade_cleanup_stage,
         }
 
