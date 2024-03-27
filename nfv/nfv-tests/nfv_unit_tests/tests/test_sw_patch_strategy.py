@@ -2990,7 +2990,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                 },
                 {'name': 'sw-patch-controllers',
@@ -3008,7 +3008,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                  },
             ]
@@ -3100,7 +3100,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                 },
                 {'name': 'sw-patch-controllers',
@@ -3118,7 +3118,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                  },
             ]
@@ -3224,7 +3224,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -3246,7 +3246,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                   ]
                  },
             ]
@@ -3349,7 +3349,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -3371,7 +3371,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                   ]
                  },
             ]
@@ -3426,7 +3426,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -3444,7 +3444,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                   ]
                  },
             ]
@@ -3499,7 +3499,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-patch-worker-hosts',
@@ -3517,7 +3517,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                   ]
                  },
             ]
@@ -3594,7 +3594,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3616,7 +3616,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3758,7 +3758,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3780,7 +3780,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3878,7 +3878,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -3896,7 +3896,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                  },
                 {'name': 'sw-patch-worker-hosts',
@@ -4014,7 +4014,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                 },
             ]
@@ -4072,7 +4072,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-instances',
                       'entity_names': ['test_instance_0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800},
+                      'timeout': 2400},
                  ]
                 },
             ]
@@ -4123,7 +4123,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                       'entity_names': ['controller-0']},
                      {'name': 'wait-alarms-clear',
-                      'timeout': 1800}
+                      'timeout': 2400}
                  ]
                 },
             ]

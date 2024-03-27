@@ -136,7 +136,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-0']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
             ]
@@ -188,7 +188,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-0']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
                 {
@@ -207,7 +207,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-1']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
             ]
@@ -276,7 +276,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-0']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
                 {
@@ -295,7 +295,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-1']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
                 {
@@ -433,7 +433,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-0']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
                 {
@@ -452,7 +452,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-1']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
                 {
@@ -573,7 +573,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-0']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
                 {
@@ -763,7 +763,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
                         {'name': 'unlock-hosts',
                          'entity_names': ['controller-0']},
                         {'name': 'wait-alarms-clear',
-                         'timeout': 1800},
+                         'timeout': 2400},
                     ]
                 },
                 {

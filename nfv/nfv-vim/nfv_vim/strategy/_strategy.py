@@ -52,6 +52,7 @@ NO_REBOOT_DELAY = 30
 # constants used by the patching API for state and repo state
 PATCH_REPO_STATE_APPLIED = 'Applied'
 PATCH_STATE_APPLIED = 'Applied'
+WAIT_ALARM_TIMEOUT = 2400
 
 
 ###################################################################
@@ -971,7 +972,8 @@ class UpdateControllerHostsMixin(object):
                         host_list = [host]
                         stage = strategy.StrategyStage(strategy_stage_name)
                         stage.add_step(strategy.QueryAlarmsStep(
-                            True, ignore_alarms=self._ignore_alarms))
+                            True, ignore_alarms=self._ignore_alarms,
+                            ignore_alarms_conditional=self._ignore_alarms_conditional))
                         if reboot:
                             stage.add_step(strategy.SwactHostsStep(host_list))
                             stage.add_step(strategy.LockHostsStep(host_list))
@@ -992,8 +994,9 @@ class UpdateControllerHostsMixin(object):
                             # OSDs configured, but the alarms should clear quickly in
                             # that case so this will not delay the update strategy.
                             stage.add_step(strategy.WaitAlarmsClearStep(
-                                           timeout_in_secs=30 * 60,
-                                           ignore_alarms=self._ignore_alarms))
+                                           timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                                           ignore_alarms=self._ignore_alarms,
+                                           ignore_alarms_conditional=self._ignore_alarms_conditional))
                         else:
                             # Less time required if host is not rebooting
                             stage.add_step(strategy.SystemStabilizeStep(
@@ -1004,7 +1007,8 @@ class UpdateControllerHostsMixin(object):
                 host_list = [local_host]
                 stage = strategy.StrategyStage(strategy_stage_name)
                 stage.add_step(strategy.QueryAlarmsStep(
-                    True, ignore_alarms=self._ignore_alarms))
+                    True, ignore_alarms=self._ignore_alarms,
+                    ignore_alarms_conditional=self._ignore_alarms_conditional))
                 if reboot:
                     stage.add_step(strategy.SwactHostsStep(host_list))
                     stage.add_step(strategy.LockHostsStep(host_list))
@@ -1025,8 +1029,9 @@ class UpdateControllerHostsMixin(object):
                     # OSDs configured, but the alarms should clear quickly in
                     # that case so this will not delay the update strategy.
                     stage.add_step(strategy.WaitAlarmsClearStep(
-                                   timeout_in_secs=30 * 60,
-                                   ignore_alarms=self._ignore_alarms))
+                                   timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                                   ignore_alarms=self._ignore_alarms,
+                                   ignore_alarms_conditional=self._ignore_alarms_conditional))
                 else:
                     # Less time required if host is not rebooting
                     stage.add_step(strategy.SystemStabilizeStep(
@@ -1105,7 +1110,8 @@ class UpdateStorageHostsMixin(object):
         for host_list in host_lists:
             stage = strategy.StrategyStage(strategy_stage_name)
             stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms))
+                True, ignore_alarms=self._ignore_alarms,
+                ignore_alarms_conditional=self._ignore_alarms_conditional))
             if reboot:
                 stage.add_step(strategy.LockHostsStep(host_list))
             # Add the action step for these hosts (patch, etc..)
@@ -1227,7 +1233,8 @@ class UpdateWorkerHostsMixin(object):
             stage = strategy.StrategyStage(strategy_stage_name)
 
             stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms))
+                True, ignore_alarms=self._ignore_alarms,
+                ignore_alarms_conditional=self._ignore_alarms_conditional))
 
             if reboot:
                 if 1 == len(host_list):
@@ -1297,8 +1304,9 @@ class UpdateWorkerHostsMixin(object):
                         for host in hosts_to_lock + hosts_to_reboot]):
                     # Multiple personality nodes that need to wait for OSDs to sync:
                     stage.add_step(strategy.WaitAlarmsClearStep(
-                                   timeout_in_secs=30 * 60,
-                                   ignore_alarms=self._ignore_alarms))
+                                   timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                                   ignore_alarms=self._ignore_alarms,
+                                   ignore_alarms_conditional=self._ignore_alarms_conditional))
                 else:
                     if any([host.openstack_control or host.openstack_compute
                             for host in hosts_to_lock + hosts_to_reboot]):
@@ -1393,8 +1401,12 @@ class SwPatchStrategy(SwUpdateStrategy,
                          '100.119',  # PTP alarm for SyncE
                          '900.701',  # Node tainted
                          ]
+        IGNORE_ALARMS_CONDITIONAL = {'750.006': 1800}
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
+
+        # This is to ignore the stale alarm(currently 750.006 is ignored).
+        self._ignore_alarms_conditional = IGNORE_ALARMS_CONDITIONAL
 
         # initialize the variables required by the mixins
         # ie: self._nfvi_sw_patches, self._nfvi_sw_patch_hosts
@@ -1409,7 +1421,8 @@ class SwPatchStrategy(SwUpdateStrategy,
         stage = strategy.StrategyStage(
             strategy.STRATEGY_STAGE_NAME.SW_PATCH_QUERY)
         stage.add_step(
-            strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+            strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms,
+            ignore_alarms_conditional=self._ignore_alarms_conditional))
         stage.add_step(strategy.QuerySwPatchesStep())
         stage.add_step(strategy.QuerySwPatchHostsStep())
         self.build_phase.add_stage(stage)
@@ -2370,7 +2383,7 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
-
+        self._ignore_alarms_conditional = None
         # initialize the variables required by the mixins
         self.initialize_mixin()
 
@@ -3325,7 +3338,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         ]
         # self._ignore_alarms is declared in parent class
         self._ignore_alarms += IGNORE_ALARMS
-
+        self._ignore_alarms_conditional = None
         # to_version and single_controller MUST be serialized
         self._to_version = to_version
         self._single_controller = single_controller

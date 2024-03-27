@@ -1912,13 +1912,18 @@ class QueryAlarmsStep(strategy.StrategyStep):
     """
     Query Alarms - Strategy Step
     """
-    def __init__(self, fail_on_alarms=False, ignore_alarms=None):
+    def __init__(self, fail_on_alarms=False, ignore_alarms=None, ignore_alarms_conditional=None):
         super(QueryAlarmsStep, self).__init__(
             STRATEGY_STEP_NAME.QUERY_ALARMS, timeout_in_secs=60)
         if ignore_alarms is None:
             ignore_alarms = []
         self._fail_on_alarms = fail_on_alarms
         self._ignore_alarms = ignore_alarms
+        # For ignoring stale alarm for the specified amount of time.
+        # Currently we are ignoring 750.006 alarm for patch strategy.
+        if ignore_alarms_conditional is None:
+            ignore_alarms_conditional = {}
+        self._ignore_alarms_conditional = ignore_alarms_conditional
 
     @coroutine
     def _query_alarms_callback(self, fm_service):
@@ -1940,7 +1945,8 @@ class QueryAlarmsStep(strategy.StrategyStep):
                                   "%s - uuid %s due to relaxed alarm "
                                   "strictness" % (nfvi_alarm.alarm_id,
                                                   nfvi_alarm.alarm_uuid))
-                    elif nfvi_alarm.alarm_id not in self._ignore_alarms:
+                    elif (nfvi_alarm.alarm_id not in self._ignore_alarms and
+                            nfvi_alarm.alarm_id not in self._ignore_alarms_conditional):
                         DLOG.warn("Alarm: %s" % nfvi_alarm.alarm_id)
                         nfvi_alarms.append(nfvi_alarm)
                     else:
@@ -1982,6 +1988,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
         super(QueryAlarmsStep, self).from_dict(data)
         self._fail_on_alarms = data['fail_on_alarms']
         self._ignore_alarms = data['ignore_alarms']
+        self._ignore_alarms_conditional = data['ignore_alarms_conditional']
         return self
 
     def as_dict(self):
@@ -1994,6 +2001,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
         data['entity_uuids'] = list()
         data['fail_on_alarms'] = self._fail_on_alarms
         data['ignore_alarms'] = self._ignore_alarms
+        data['ignore_alarms_conditional'] = self._ignore_alarms_conditional
         return data
 
 
@@ -2106,7 +2114,8 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
     """
     Alarm Wait - Strategy Step
     """
-    def __init__(self, timeout_in_secs=300, first_query_delay_in_secs=60, ignore_alarms=None):
+    def __init__(self, timeout_in_secs=300, first_query_delay_in_secs=60, ignore_alarms=None,
+                 ignore_alarms_conditional=None):
         super(WaitAlarmsClearStep, self).__init__(
             STRATEGY_STEP_NAME.WAIT_ALARMS_CLEAR, timeout_in_secs=timeout_in_secs)
         self._first_query_delay_in_secs = first_query_delay_in_secs
@@ -2115,12 +2124,17 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         self._ignore_alarms = ignore_alarms
         self._wait_time = 0
         self._query_inprogress = False
+        if ignore_alarms_conditional is None:
+            ignore_alarms_conditional = {}
+        self._ignore_alarms_conditional = ignore_alarms_conditional
 
     @coroutine
     def _query_alarms_callback(self):
         """
         Query Alarms Callback
         """
+        from datetime import datetime
+
         response = (yield)
         DLOG.debug("Query-Alarms callback response=%s." % response)
 
@@ -2138,6 +2152,27 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
                                   "strictness" % (nfvi_alarm.alarm_id,
                                                   nfvi_alarm.alarm_uuid))
                     elif nfvi_alarm.alarm_id not in self._ignore_alarms:
+                        # For ignoring stale alarm(currently 750.006)
+                        if nfvi_alarm.alarm_id in self._ignore_alarms_conditional:
+                            format_string = "%Y-%m-%dT%H:%M:%S.%f"
+                            alarm_timestamp = nfvi_alarm.timestamp
+                            alarm_timestamp_obj = datetime.strptime(
+                                alarm_timestamp, format_string)
+                            current_time = datetime.now()
+                            time_in_sec = (
+                                current_time - alarm_timestamp_obj).total_seconds()
+                            # Ignoring stale alarm if present after specified amount of time
+                            if self._ignore_alarms_conditional[nfvi_alarm.alarm_id] < int(time_in_sec):
+                                # Appends stale alarm to list _ignore_alarms
+                                # if specified timeout is reached.
+                                self._ignore_alarms.append(nfvi_alarm.alarm_id)
+                            else:
+                                # Appends alarm to nfvi_alarms if, the specified
+                                # timeout is not reached.
+                                nfvi_alarms.append(nfvi_alarm)
+                        else:
+                            nfvi_alarms.append(nfvi_alarm)
+
                         nfvi_alarms.append(nfvi_alarm)
                     else:
                         DLOG.debug("Ignoring alarm %s - uuid %s" %
@@ -2145,6 +2180,13 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
                 self.strategy.nfvi_alarms = nfvi_alarms
 
             if self.strategy.nfvi_alarms:
+                ignore_alarm_list = list(self._ignore_alarms_conditional.keys())
+                for alarm in self.strategy.nfvi_alarms:
+                    for remove_alarm in ignore_alarm_list:
+                        if alarm['alarm_id'] == remove_alarm:
+                            # Removes only the alarm which has
+                            # not yet reached specified timeout.
+                            self.strategy.nfvi_alarms.remove(alarm)
                 # Keep waiting for alarms to clear
                 pass
             else:
@@ -2193,6 +2235,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         super(WaitAlarmsClearStep, self).from_dict(data)
         self._first_query_delay_in_secs = data['first_query_delay_in_secs']
         self._ignore_alarms = data['ignore_alarms']
+        self._ignore_alarms_conditional = data['ignore_alarms_conditional']
         self._wait_time = 0
         self._query_inprogress = False
         return self
@@ -2207,6 +2250,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         data['entity_uuids'] = list()
         data['first_query_delay_in_secs'] = self._first_query_delay_in_secs
         data['ignore_alarms'] = self._ignore_alarms
+        data['ignore_alarms_conditional'] = self._ignore_alarms_conditional
         return data
 
 
