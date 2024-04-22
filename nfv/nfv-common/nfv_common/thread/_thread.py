@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016,2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -94,7 +94,7 @@ class Thread(object):
                         self._stall_timestamp_ms = \
                             timers.get_monotonic_timestamp_in_ms()
 
-                    DLOG.error("Thread %s stalled, progress_marker=%s, "
+                    DLOG.warn("Thread %s stalled, progress_marker=%s, "
                                "elapsed_secs=%s." % (self._name,
                                                      self._progress_marker.value,
                                                      self.stall_elapsed_secs))

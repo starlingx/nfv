@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016,2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,6 +8,10 @@ from nfv_common import debug
 from nfv_common.tasks._task_work import TaskWork
 
 DLOG = debug.debug_get_logger('nfv_common.tasks.task_future')
+
+# TODO(vselvara)The timeout to be changed back to 20sec when the start
+# software-api is async for patch-release
+TASK_TIMEOUT = 600
 
 
 class TaskFuture(object):
@@ -57,7 +61,7 @@ class TaskFuture(object):
         if timeout_in_secs is None:
             # WARNING: Any change to the default timeout must be reflected in
             # the timeouts used for any work being done.
-            timeout_in_secs = 20
+            timeout_in_secs = TASK_TIMEOUT
 
         elif 0 >= timeout_in_secs:
             timeout_in_secs = None  # No timeout wanted, wait forever

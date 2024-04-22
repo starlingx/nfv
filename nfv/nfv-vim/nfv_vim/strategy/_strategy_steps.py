@@ -24,6 +24,11 @@ KUBE_CERT_UPDATE_TRUSTBOTHCAS = "trust-both-cas"
 KUBE_CERT_UPDATE_TRUSTNEWCA = "trust-new-ca"
 KUBE_CERT_UPDATE_UPDATECERTS = "update-certs"
 
+# sw-deploy strategy constants
+SW_DEPLOY_START = 'start-done'
+SW_HOST_DEPLOYED = 'deployed'
+SW_DEPLOY_ACTIVATE_DONE = 'activate-done'
+
 
 @six.add_metaclass(Singleton)
 class StrategyStepNames(Constants):
@@ -918,131 +923,13 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
         return data
 
 
-class UpgradeHostsStep(strategy.StrategyStep):
-    """
-    Upgrade Hosts - Strategy Step
-    """
-    def __init__(self, hosts):
-        super(UpgradeHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.UPGRADE_HOSTS, timeout_in_secs=3600)
-        self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
-        for host in hosts:
-            self._host_names.append(host.name)
-            self._host_uuids.append(host.uuid)
-        self._wait_time = 0
-
-    def _total_hosts_upgraded(self):
-        """
-        Returns the number of hosts that are upgraded
-        """
-
-        # TODO(jkraitbe): Use deploy/host_list instead
-        total_hosts_upgraded = 0
-        host_table = tables.tables_get_host_table()
-        for host_name in self._host_names:
-            host = host_table.get(host_name, None)
-            if host is None:
-                return -1
-
-            if (host.is_online() and
-                    host.target_load == self.strategy.nfvi_upgrade.release and
-                    host.software_load == self.strategy.nfvi_upgrade.release):
-                total_hosts_upgraded += 1
-
-        return total_hosts_upgraded
-
-    def apply(self):
-        """
-        Upgrade all hosts
-        """
-        from nfv_vim import directors
-
-        DLOG.info("Step (%s) apply for hosts %s." % (self._name,
-                                                     self._host_names))
-        host_director = directors.get_host_director()
-        operation = host_director.upgrade_hosts(self._host_names)
-        if operation.is_inprogress():
-            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-        elif operation.is_failed():
-            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
-
-        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
-
-    def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
-        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
-
-        if event == STRATEGY_EVENT.HOST_UPGRADE_FAILED:
-            host = event_data
-            if host is not None and host.name in self._host_names:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, "host upgrade failed")
-                return True
-
-        elif event in [STRATEGY_EVENT.HOST_AUDIT]:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 2 minutes for the host to go offline before
-            # checking whether the upgrade is complete.
-            if 120 <= secs_expired:
-                total_hosts_upgraded = self._total_hosts_upgraded()
-
-                if -1 == total_hosts_upgraded:
-                    result = strategy.STRATEGY_STEP_RESULT.FAILED
-                    self.stage.step_complete(result, "host no longer exists")
-                    return True
-
-                if total_hosts_upgraded == len(self._host_names):
-                    result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                    self.stage.step_complete(result, '')
-                    return True
-
-        return False
-
-    def from_dict(self, data):
-        """
-        Returns the upgrade hosts step object initialized using the given
-        dictionary
-        """
-        super(UpgradeHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
-        self._host_names = data['entity_names']
-        host_table = tables.tables_get_host_table()
-        for host_name in self._host_names:
-            host = host_table.get(host_name, None)
-            if host is not None:
-                self._hosts.append(host)
-                self._host_uuids.append(host.uuid)
-        self._wait_time = 0
-        return self
-
-    def as_dict(self):
-        """
-        Represent the upgrade hosts step as a dictionary
-        """
-        data = super(UpgradeHostsStep, self).as_dict()
-        data['entity_type'] = 'hosts'
-        data['entity_names'] = self._host_names
-        data['entity_uuids'] = self._host_uuids
-        return data
-
-
 class SwDeployPrecheckStep(strategy.StrategyStep):
     """
     Software Deploy Precheck - Strategy Step
     """
     def __init__(self, release):
         super(SwDeployPrecheckStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=600)
-
+            STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
 
     @coroutine
@@ -1054,12 +941,14 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         DLOG.debug("sw-deploy precheck callback response=%s." % response)
 
         if response['completed']:
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
-        else:
-            # TODO(jkraitbe): Add error message
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
+            if not response['result-data']:
+                DLOG.debug("sw-deploy precheck completed %s" % response['result-data'])
+            else:
+                reason = "sw-deploy precheck failed"
+                # TODO(vselvara) to display the entire error response
+                # reason = response['result-data']
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, reason)
 
     def apply(self):
         """
@@ -1092,6 +981,120 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         return data
 
 
+class UpgradeHostsStep(strategy.StrategyStep):
+    """
+    Upgrade Hosts - Strategy Step
+    """
+    def __init__(self, hosts):
+        super(UpgradeHostsStep, self).__init__(
+            STRATEGY_STEP_NAME.UPGRADE_HOSTS, timeout_in_secs=3600)
+        self._host_names = list()
+        self._host_uuids = list()
+        for host in hosts:
+            self._host_names.append(host.name)
+        self._wait_time = 0
+        self._query_inprogress = False
+
+    @coroutine
+    def _get_upgrade_callback(self):
+        """
+        Get Upgrade Callback
+        """
+        response = (yield)
+        DLOG.debug("Query-Upgrade callback response=%s." % response)
+        self._query_inprogress = False
+        if response['completed']:
+            self.strategy.nfvi_upgrade = response['result-data']
+            host_count = 0
+            match_count = 0
+            host_info_list = self.strategy.nfvi_upgrade['hosts_info']
+            for host_name in self._host_names:
+                for host in host_info_list:
+                    if (host_name == host['hostname']) and (host['host_state'] == SW_HOST_DEPLOYED):
+                        match_count += 1
+                    host_count += 1
+            if match_count == len(self._host_names):
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                DLOG.info("Upgrade Hosts completed")
+                self.stage.step_complete(result, "")
+            else:
+                # keep waiting for Upgrade host state to change
+                pass
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            DLOG.info("Host Upgrade failed")
+            self.stage.step_complete(result, response['reason'])
+
+    def apply(self):
+        """
+        Upgrade all hosts
+        """
+        from nfv_vim import directors
+
+        DLOG.info("Step (%s) apply for hosts %s." % (self._name,
+                                                     self._host_names))
+        host_director = directors.get_host_director()
+        operation = host_director.upgrade_hosts(self._host_names)
+        if operation.is_inprogress():
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        elif operation.is_failed():
+            return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_UPGRADE_FAILED:
+            host = event_data
+            if host is not None and host.name in self._host_names:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, "host upgrade failed")
+                return True
+
+        elif event in [STRATEGY_EVENT.HOST_AUDIT]:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) // 1000
+            # Wait at least 2 minutes for the host to go offline before
+            # checking whether the upgrade is complete.
+            if 120 <= secs_expired and not self._query_inprogress:
+                self._query_inprogress = True
+                release = self.strategy.nfvi_upgrade['release']
+                nfvi.nfvi_get_upgrade(release, self._get_upgrade_callback())
+            return True
+        return False
+
+    def from_dict(self, data):
+        """
+        Returns the upgrade hosts step object initialized using the given
+        dictionary
+        """
+        super(UpgradeHostsStep, self).from_dict(data)
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        self._wait_time = 0
+        self._query_inprogress = False
+        return self
+
+    def as_dict(self):
+        """
+        Represent the upgrade hosts step as a dictionary
+        """
+        data = super(UpgradeHostsStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
+        return data
+
+
 class UpgradeStartStep(strategy.StrategyStep):
     """
     Upgrade Start - Strategy Step
@@ -1109,15 +1112,19 @@ class UpgradeStartStep(strategy.StrategyStep):
         """
         response = (yield)
         DLOG.debug("Start-Upgrade callback response=%s." % response)
-
         if response['completed']:
-            # TODO(jkraitbe): Consider updating self.strategy.nfvi_upgrade.hosts_info
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
+            state_info = response['result-data']['release_info']['state']
+            if state_info == SW_DEPLOY_START:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+            else:
+                reason = "Software deploy not started. Current state:%s" % state_info
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, reason)
         else:
-            # TODO(jkraitbe): Add error message
+            reason = "Software deploy start not completed"
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
+            self.stage.step_complete(result, reason)
 
     def apply(self):
         """
@@ -1167,15 +1174,20 @@ class UpgradeActivateStep(strategy.StrategyStep):
         Activate Upgrade Callback
         """
         response = (yield)
-        DLOG.debug("Activate-Upgrade callback response=%s." % response)
-
+        self.strategy.nfvi_upgrade = response['result-data']
         if response['completed']:
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
+            state_info = self.strategy.nfvi_upgrade['release_info']['state']
+            if state_info == SW_DEPLOY_ACTIVATE_DONE:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+            else:
+                reason = "SW Deploy Activate not successful. Current state:%s" % state_info
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, reason)
         else:
-            # TODO(jkraitbe): Add error message
+            reason = "SW Deploy Activate not complete. Current response:%s" % response['result-data']
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
+            self.stage.step_complete(result, reason)
 
     def apply(self):
         """
@@ -1226,14 +1238,20 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         """
         response = (yield)
         DLOG.debug("Complete-Upgrade callback response=%s." % response)
-
+        self.strategy.nfvi_upgrade = response['result-data']
         if response['completed']:
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
+            state_info = self.strategy.nfvi_upgrade['release_info']['state']
+            if state_info == SW_HOST_DEPLOYED:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+            else:
+                reason = "SW Deploy completed failed. Current state:%s" % state_info
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, reason)
         else:
-            # TODO(jkraitbe): Add error message
+            reason = "SW Deploy did not complete. Current response:%s" % response['result-data']
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
+            self.stage.step_complete(result, reason)
 
     def apply(self):
         """

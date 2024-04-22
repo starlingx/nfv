@@ -172,6 +172,40 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         return controller_hosts, storage_hosts, worker_hosts, strategy
 
+    @mock.patch('nfv_common.strategy._strategy.Strategy._build')
+    def test_sw_deploy_strategy_build_steps(self, fake_build):
+        """
+        Verify build phase steps and stages for sw deploy strategy creation.
+        """
+        # setup a minimal host environment
+        self.create_host('controller-0', aio=True)
+
+        update_obj = SwUpgrade()
+        strategy = self.create_sw_deploy_strategy(
+            single_controller=True)
+        update_obj = SwUpgrade()
+        strategy.sw_update_obj = update_obj
+
+        strategy.build()
+
+        # verify the build phase and steps
+        build_phase = strategy.build_phase.as_dict()
+        query_steps = [
+            {'name': 'query-alarms'},
+            {'name': 'sw-deploy-precheck'},
+            {'name': 'query-upgrade'},
+        ]
+        expected_results = {
+            'total_stages': 1,
+            'stages': [
+                {'name': 'sw-upgrade-query',
+                 'total_steps': len(query_steps),
+                 'steps': query_steps,
+                },
+            ],
+        }
+        sw_update_testcase.validate_phase(build_phase, expected_results)
+
     #  ~~~ SW-DEPLOY Start ~~~
 
     @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
@@ -205,11 +239,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 4,
+                 'total_steps': 3,
                  'steps': [
                      {'name': 'query-alarms'},
-                     {'name': 'sw-deploy-precheck',
-                      'release': release},
                      {'name': 'start-upgrade',
                       'release': release},
                      {'name': 'system-stabilize',
@@ -253,11 +285,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 4,
+                 'total_steps': 3,
                  'steps': [
                      {'name': 'query-alarms'},
-                     {'name': 'sw-deploy-precheck',
-                      'release': release},
                      {'name': 'start-upgrade',
                       'release': release},
                      {'name': 'system-stabilize',
@@ -302,13 +332,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 6,
+                 'total_steps': 5,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'sw-deploy-precheck',
-                      'release': release},
                      {'name': 'start-upgrade',
                       'release': release},
                      {'name': 'system-stabilize',
@@ -994,10 +1022,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 4,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'sw-deploy-precheck', 'release': release},
                         {'name': 'start-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
                     ],
@@ -1060,10 +1087,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 4,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'sw-deploy-precheck', 'release': release},
                         {'name': 'start-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
                     ],
@@ -1130,10 +1156,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 4,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'sw-deploy-precheck', 'release': release},
                         {'name': 'start-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
                     ],
@@ -1205,10 +1230,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 4,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'sw-deploy-precheck', 'release': release},
                         {'name': 'start-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
                     ],
@@ -1292,10 +1316,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 4,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'sw-deploy-precheck', 'release': release},
                         {'name': 'start-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
                     ],
@@ -1389,10 +1412,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 4,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'sw-deploy-precheck', 'release': release},
                         {'name': 'start-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
                     ],

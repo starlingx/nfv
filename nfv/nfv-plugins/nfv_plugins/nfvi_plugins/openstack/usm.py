@@ -13,6 +13,7 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
 
 REST_API_REQUEST_TIMEOUT = 60
+REST_API_START_REQUEST_TIMEOUT = 600
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.usm')
 
@@ -22,7 +23,7 @@ def _usm_api_cmd(token, endpoint):
     if base_url is None:
         raise ValueError("PlatformService USM URL is invalid")
 
-    url = os.path.join(base_url, "v1/software", endpoint)
+    url = os.path.join(base_url, "v1/", endpoint)
     return url
 
 
@@ -44,7 +45,7 @@ def _api_get(token, url):
     return response
 
 
-def _api_post(token, url, payload, headers=None):
+def _api_post(token, url, payload, headers=None, timeout_in_secs=REST_API_REQUEST_TIMEOUT):
     """
     Generic POST to an endpoint with a payload
     """
@@ -56,7 +57,7 @@ def _api_post(token, url, payload, headers=None):
                                 url,
                                 headers,
                                 json.dumps(payload),
-                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+                                timeout_in_secs)
     return response
 
 
@@ -65,7 +66,18 @@ def sw_deploy_get_release(token, release):
     Query USM for information about a specific upgrade
     """
 
-    uri = f"show/{release}"
+    uri = f"release"  # noqa:F541 pylint: disable=W1309
+    url = _usm_api_cmd(token, uri)
+    response = _api_get(token, url)
+    return response
+
+
+def sw_deploy_show(token):
+    """
+    Query USM for information about a specific upgrade
+    """
+
+    uri = f"deploy"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
     response = _api_get(token, url)
     return response
@@ -76,8 +88,7 @@ def sw_deploy_host_list(token):
     Query USM for information about a hosts during a deployment
     """
 
-    # TODO(jkraitbe): This API will change in the future
-    uri = "host_list"
+    uri = "deploy_host"
     url = _usm_api_cmd(token, uri)
     response = _api_get(token, url)
     return response
@@ -88,7 +99,8 @@ def sw_deploy_precheck(token, release, force=False):
     Ask USM to precheck before a deployment
     """
 
-    uri = f"deploy_precheck/{release}/force" if force else f"deploy_precheck/{release}"
+    uri = (f"deploy/{release}/precheck/force" if
+            force else f"deploy/{release}/precheck")
     url = _usm_api_cmd(token, uri)
     response = _api_post(token, url, {})
     return response
@@ -99,9 +111,9 @@ def sw_deploy_start(token, release, force=False):
     Ask USM to start a deployment
     """
 
-    uri = f"deploy_start/{release}/force" if force else f"deploy_start/{release}"
+    uri = f"deploy/{release}/start/force" if force else f"deploy/{release}/start"
     url = _usm_api_cmd(token, uri)
-    response = _api_post(token, url, {})
+    response = _api_post(token, url, {}, None, REST_API_START_REQUEST_TIMEOUT)
     return response
 
 
@@ -116,23 +128,23 @@ def sw_deploy_execute(token, host_name):
     return response
 
 
-def sw_deploy_activate(token, release):
+def sw_deploy_activate(token):
     """
     Ask USM activate a deployment
     """
 
-    uri = f"deploy_activate/{release}"
+    uri = f"deploy/activate"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
     response = _api_post(token, url, {})
     return response
 
 
-def sw_deploy_complete(token, release):
+def sw_deploy_complete(token):
     """
     Ask USM complete a deployment
     """
 
-    uri = f"deploy_complete/{release}"
+    uri = f"deploy/complete"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
     response = _api_post(token, url, {})
     return response

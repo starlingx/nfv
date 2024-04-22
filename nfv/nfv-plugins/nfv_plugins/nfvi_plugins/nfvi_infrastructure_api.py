@@ -2351,8 +2351,16 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 DLOG.error("USM software deploy get release did not complete.")
                 return
 
+            release_info = None
             release_data = future.result.data
-            release_info = release_data["metadata"].get(release, None)
+            for rel in release_data:
+                if rel['release_id'] == release:
+                    release_info = rel
+                    break
+
+            if not release_info:
+                DLOG.error("Software release not found.")
+                return
 
             future.work(usm.sw_deploy_host_list, self._platform_token)
             future.result = (yield)
@@ -2362,11 +2370,13 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 return
 
             hosts_info_data = future.result.data
+            if hosts_info_data == []:
+                hosts_info_data = None
 
             upgrade_obj = nfvi.objects.v1.Upgrade(
                 release,
                 release_info,
-                hosts_info_data["data"],
+                hosts_info_data,
             )
 
             response['result-data'] = upgrade_obj
@@ -2415,17 +2425,13 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             future.work(usm.sw_deploy_precheck, self._platform_token, release)
             future.result = (yield)
-
             if not future.result.is_complete():
                 DLOG.error("USM software deploy precheck did not complete.")
                 return
 
-            upgrade_obj = nfvi.objects.v1.Upgrade(
-                release,
-                None,
-                None)
+            precheck_data = future.result.data['error']
 
-            response['result-data'] = upgrade_obj
+            response['result-data'] = precheck_data
             response['completed'] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2446,7 +2452,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def upgrade_start(self, future, release, callback):
+    def sw_deploy_start(self, future, release, callback):
         """
         Start a USM software deploy
         """
@@ -2455,9 +2461,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         response['reason'] = ''
 
         try:
-            upgrade_data = future.result.data
             future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
-
             if self._platform_token is None or \
                     self._platform_token.is_expired():
                 future.work(openstack.get_token, self._platform_directory)
@@ -2472,15 +2476,37 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             future.work(usm.sw_deploy_start, self._platform_token, release)
             future.result = (yield)
-
             if not future.result.is_complete():
                 DLOG.error("USM software deploy start did not complete.")
                 return
 
+            # TODO(vselvara): remove the state check here once the api is changed
+            # to async. state check to be done in _strategy_steps.py
+            future.work(usm.sw_deploy_host_list, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy host list did not complete.")
+                return
+
+            hosts_info_data = future.result.data
+
+            future.work(usm.sw_deploy_show, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy show did not complete.")
+                return
+            state_info = future.result.data
+            if state_info:
+                state_info = state_info[0]
+            else:
+                state_info = None
+
             upgrade_obj = nfvi.objects.v1.Upgrade(
                 release,
-                upgrade_data,
-                None)
+                state_info,
+                hosts_info_data,
+            )
 
             response['result-data'] = upgrade_obj
             response['completed'] = True
@@ -2503,7 +2529,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def upgrade_activate(self, future, release, callback):
+    def sw_deploy_activate(self, future, release, callback):
         """
         Activate a USM software deployement
         """
@@ -2526,17 +2552,29 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_activate, self._platform_token, release)
+            future.work(usm.sw_deploy_activate, self._platform_token)
             future.result = (yield)
 
             if not future.result.is_complete():
                 DLOG.error("USM software deploy activate did not complete.")
                 return
 
-            upgrade_data = future.result.data
+            future.work(usm.sw_deploy_show, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy show did not complete.")
+                return
+
+            state_info = future.result.data
+            if state_info:
+                state_info = state_info[0]
+            else:
+                state_info = None
+
             upgrade_obj = nfvi.objects.v1.Upgrade(
                 release,
-                upgrade_data,
+                state_info,
                 None)
 
             response['result-data'] = upgrade_obj
@@ -2560,7 +2598,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def upgrade_complete(self, future, release, callback):
+    def sw_deploy_complete(self, future, release, callback):
         """
         Complete a USM software deployement
         """
@@ -2583,17 +2621,34 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_complete, self._platform_token, release)
+            future.work(usm.sw_deploy_complete, self._platform_token)
             future.result = (yield)
 
             if not future.result.is_complete():
                 DLOG.error("USM software deploy complete did not complete.")
                 return
 
-            upgrade_data = future.result.data
+            future.work(usm.sw_deploy_get_release, self._platform_token, release)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy get release did not complete.")
+                return
+
+            release_info = None
+            release_data = future.result.data
+            for rel in release_data:
+                if rel['release_id'] == release:
+                    release_info = rel
+                    break
+
+            if not release_info:
+                DLOG.error("Software release not found.")
+                return
+
             upgrade_obj = nfvi.objects.v1.Upgrade(
                 release,
-                upgrade_data,
+                release_info,
                 None)
 
             response['result-data'] = upgrade_obj
@@ -3777,6 +3832,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             future.result = (yield)
 
             if not future.result.is_complete():
+                DLOG.error("USM software deploy host %s did not complete." % host_name)
                 return
 
             response['completed'] = True

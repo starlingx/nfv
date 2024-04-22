@@ -1812,6 +1812,7 @@ class SwUpgradeStrategy(
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
         self.build_phase.add_stage(stage)
 
@@ -1852,7 +1853,6 @@ class SwUpgradeStrategy(
         if self.nfvi_upgrade.is_available:
             # sw-deploy start must be done on controller-0
             self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-            stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
             stage.add_step(strategy.UpgradeStartStep(release=self._release))
             stage.add_step(strategy.SystemStabilizeStep())
         # sw-deploy host must first be on controller-1
@@ -1890,8 +1890,7 @@ class SwUpgradeStrategy(
 
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:
-
-            if self.nfvi_upgrade.release_info is None:
+            if not self.nfvi_upgrade.release_info:
                 reason = "Software release does not exist."
                 DLOG.warn(reason)
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED

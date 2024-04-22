@@ -1400,11 +1400,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 8,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 4,
+                 'total_steps': 3,
                  'steps': [
                      {'name': 'query-alarms'},
-                     {'name': 'sw-deploy-precheck',
-                      'release': strategy.nfvi_upgrade.release},
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',
@@ -1570,13 +1568,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 6,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 6,
+                 'total_steps': 5,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
-                     {'name': 'sw-deploy-precheck',
-                      'release': strategy.nfvi_upgrade.release},
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',

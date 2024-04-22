@@ -33,14 +33,14 @@ class Upgrade(ObjectData):
 
     @property
     def state(self):
-        if self.release_info is None:
+        if not self.release_info:
             return None
 
         return self.release_info["state"]
 
     @property
     def reboot_required(self):
-        if self.release_info is None:
+        if not self.release_info:
             return None
 
         return self.release_info["reboot_required"] == USM_REBOOT_REQUIRED
