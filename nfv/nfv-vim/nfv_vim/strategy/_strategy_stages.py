@@ -63,6 +63,7 @@ class StrategyStageNames(Constants):
     KUBE_UPGRADE_QUERY = Constant('kube-upgrade-query')
     KUBE_UPGRADE_START = Constant('kube-upgrade-start')
     KUBE_UPGRADE_DOWNLOAD_IMAGES = Constant('kube-upgrade-download-images')
+    KUBE_PRE_APPLICATION_UPDATE = Constant('kube-pre-application-update')
     KUBE_UPGRADE_FIRST_CONTROL_PLANE = \
         Constant('kube-upgrade-first-control-plane')
     KUBE_UPGRADE_NETWORKING = Constant('kube-upgrade-networking')
@@ -73,6 +74,7 @@ class StrategyStageNames(Constants):
     KUBE_UPGRADE_KUBELETS_CONTROLLERS = \
        Constant('kube-upgrade-kubelets-controllers')
     KUBE_UPGRADE_KUBELETS_WORKERS = Constant('kube-upgrade-kubelets-workers')
+    KUBE_POST_APPLICATION_UPDATE = Constant('kube-post-application-update')
     KUBE_UPGRADE_COMPLETE = Constant('kube-upgrade-complete')
     KUBE_UPGRADE_CLEANUP = Constant('kube-upgrade-cleanup')
 

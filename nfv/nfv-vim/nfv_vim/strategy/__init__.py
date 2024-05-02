@@ -21,6 +21,8 @@ from nfv_vim.strategy._strategy_steps import KubeHostCordonStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeHostUncordonStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeHostUpgradeControlPlaneStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeHostUpgradeKubeletStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubePostApplicationUpdateStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import KubePreApplicationUpdateStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateCompleteStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateGenerateCertStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateHostTrustBothcasStep  # noqa: F401

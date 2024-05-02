@@ -436,6 +436,13 @@ def kube_upgrade_download_images(token):
     return _patch_kube_upgrade_state(token, "downloading-images")
 
 
+def kube_pre_application_update(token):
+    """
+    Ask System Inventory to kube pre application update
+    """
+    return _patch_kube_upgrade_state(token, "pre-updating-apps")
+
+
 def kube_upgrade_networking(token):
     """
     Ask System Inventory to kube upgrade networking
@@ -581,6 +588,13 @@ def upgrade_activate(token):
                                 json.dumps(api_cmd_payload),
                                 timeout_in_secs=REST_API_REQUEST_TIMEOUT)
     return response
+
+
+def kube_post_application_update(token):
+    """
+    Ask System Inventory to kube post application update
+    """
+    return _patch_kube_upgrade_state(token, "post-updating-apps")
 
 
 def upgrade_complete(token):

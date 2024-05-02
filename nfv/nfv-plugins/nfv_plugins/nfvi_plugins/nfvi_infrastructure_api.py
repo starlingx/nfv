@@ -2017,6 +2017,124 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def kube_pre_application_update(self, future, callback):
+        """
+        Start kube pre application update
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-pre-application-update'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.kube_pre_application_update,
+                        self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+
+            kube_upgrade_data = future.result.data
+            kube_upgrade_obj = nfvi.objects.v1.KubeUpgrade(
+                kube_upgrade_data['state'],
+                kube_upgrade_data['from_version'],
+                kube_upgrade_data['to_version'])
+
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def kube_post_application_update(self, future, callback):
+        """
+        Start kube post application update
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        action_type = 'kube-post-application-update'
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(sysinv.kube_post_application_update,
+                        self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("%s did not complete." % action_type)
+                return
+
+            kube_upgrade_data = future.result.data
+            kube_upgrade_obj = nfvi.objects.v1.KubeUpgrade(
+                kube_upgrade_data['state'],
+                kube_upgrade_data['from_version'],
+                kube_upgrade_data['to_version'])
+
+            response['result-data'] = kube_upgrade_obj
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception("Caught API exception while trying %s. error=%s"
+                               % (action_type, e))
+
+        except Exception as e:
+            DLOG.exception("Caught exception while trying %s. error=%s"
+                           % (action_type, e))
+
+        finally:
+            callback.send(response)
+            callback.close()
+
     def kube_upgrade_networking(self, future, callback):
         """
         Start kube upgrade networking

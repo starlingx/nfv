@@ -321,6 +321,26 @@ def nfvi_kube_upgrade_start(to_version, force, alarm_ignore_list, callback):
     return cmd_id
 
 
+def nfvi_kube_pre_application_update(callback):
+    """
+    Kube Upgrade Pre Application Update
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_pre_application_update',
+        callback=callback)
+    return cmd_id
+
+
+def nfvi_kube_post_application_update(callback):
+    """
+    Kube Upgrade Post Application Update
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        'kube_post_application_update',
+        callback=callback)
+    return cmd_id
+
+
 def nfvi_get_kube_host_upgrade_list(callback):
     """
     Get kube host upgrade list
