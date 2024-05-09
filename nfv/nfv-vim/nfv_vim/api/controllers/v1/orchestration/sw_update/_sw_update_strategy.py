@@ -175,8 +175,10 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     """
     controller_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
                                               name='controller-apply-type')
-    release = wsme_types.wsattr(six.text_type, mandatory=True,
+    release = wsme_types.wsattr(six.text_type, mandatory=False,
                                 name='release')
+    rollback = wsme_types.wsattr(bool, mandatory=False,
+                                 name='rollback')
     storage_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
                                            name='storage-apply-type')
     worker_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
@@ -675,6 +677,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
         rpc_request.sw_update_type = _get_sw_update_type_from_path(
             pecan.request.path)
         rpc_request.release = request_data.release
+        rpc_request.rollback = request_data.rollback
         rpc_request.controller_apply_type = request_data.controller_apply_type
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.swift_apply_type = SW_UPDATE_APPLY_TYPE.IGNORE

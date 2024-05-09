@@ -14,6 +14,11 @@ from nfv_client import sw_update
 REGISTERED_STRATEGIES = {}
 
 
+def _process_exit(error):
+    print(error)
+    sys.exit(1)
+
+
 def register_strategy(cmd_area, strategy_name):
     """
     Registers a parser command with an update strategy name
@@ -51,7 +56,16 @@ def get_extra_create_args(cmd_area, args):
         # no additional kwargs for patch
         return {}
     elif sw_update.CMD_NAME_SW_DEPLOY == cmd_area:
-        return {'release': args.release}
+        # We can't use mutual exclusion for release and rollback because
+        # release is a positional arg.
+        if args.release is None and not args.rollback:
+            raise ValueError("Must set release or rollback")
+        elif args.release is not None and args.rollback:
+            raise ValueError("Cannot set both release and rollback")
+        return {
+            'release': args.release,
+            'rollback': args.rollback
+        }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
         return {}
@@ -465,9 +479,22 @@ def setup_sw_deploy_parser(commands):
     # add sw-deploy specific arguments to the create command
     # The get_extra_create_args method is updated to align with these
 
-    # sw-deploy create requires 'release' parameter
+    # VIM software deploy supports two modes: Upgrade and rollback.
+    # The upgrade mode is enabled by passing the release parameter,
+    # the rollback mode is enabled by passing the --rollback flag.
+    # These modes are mutually exclusive.
+
+    # sw-deploy create (upgrade)
     create_strategy_cmd.add_argument('release',
-                                     help='software release for deployment')
+                                     help='software release for deployment',
+                                     default=None,
+                                     nargs="?")
+
+    # sw-deploy create (rollback)
+    create_strategy_cmd.add_argument('--rollback',
+                                     help='Perform a rollback instead of upgrade',
+                                     action="store_true",
+                                     required=False)
 
     # define the delete command
     _ = setup_delete_cmd(sub_cmds)
@@ -654,8 +681,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
         print("Keyboard Interrupt received.")
 
     except Exception as e:  # pylint: disable=broad-except
-        print(e)
-        sys.exit(1)
+        _process_exit(e)
 
 
 if __name__ == "__main__":

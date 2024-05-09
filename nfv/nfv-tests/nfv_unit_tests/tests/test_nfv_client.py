@@ -230,6 +230,15 @@ class StrategyMixin(object):
             shell.process_main(shell_args)
         mock_create.assert_called_once()
 
+    # Test the create command can be invoked. Requires the env to be set
+    @mock.patch('nfv_client.sw_update.create_strategy')
+    def _test_shell_create_with_error(self, mock_create=None, shell_args=None):
+        with mock.patch.dict(os.environ, self.MOCK_ENV):
+            with mock.patch.object(shell, '_process_exit') as thing:
+                shell.process_main(shell_args)
+                # Returns the exception passed to _process_exit
+                return thing.call_args_list[0][0][0]
+
     # -- Create command --
     def test_shell_strategy_create(self):
         shell_args = [self.strategy, 'create']
@@ -252,8 +261,22 @@ class TestCLISwDeployStrategy(TestNFVClientShell,
         self.set_strategy('sw-deploy-strategy')
 
     def required_create_fields(self):
-        """Kube Upgrade requires a to-version for create"""
+        """Software deploy requires a release for create"""
         return ['starlingx-24.03.1']
+
+    def test_create_missing_both(self):
+        shell_args = [self.strategy, 'create']
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == 'Must set release or rollback', e
+
+    def test_create_rollback(self):
+        shell_args = [self.strategy, 'create', '--rollback']
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_with_both(self):
+        shell_args = [self.strategy, 'create', 'v123.1', '--rollback']
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == 'Cannot set both release and rollback', e
 
 
 class TestCLIPatchStrategy(TestNFVClientShell,

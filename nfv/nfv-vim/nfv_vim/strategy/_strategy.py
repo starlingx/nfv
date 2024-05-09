@@ -1762,7 +1762,7 @@ class SwUpgradeStrategy(
     def __init__(self, uuid,
                  controller_apply_type, storage_apply_type, worker_apply_type,
                  max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions, release,
+                 alarm_restrictions, release, rollback,
                  ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
@@ -1777,6 +1777,7 @@ class SwUpgradeStrategy(
             ignore_alarms)
 
         self._release = release
+        self._rollback = rollback
 
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['900.005',  # Upgrade in progress
@@ -1804,10 +1805,7 @@ class SwUpgradeStrategy(
         """
         self._nfvi_upgrade = nfvi_upgrade
 
-    def build(self):
-        """
-        Build the strategy
-        """
+    def _build_normal(self):
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
@@ -1815,8 +1813,51 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
         self.build_phase.add_stage(stage)
-
         super(SwUpgradeStrategy, self).build()
+
+    def _build_rollback(self):
+        reason = "Rollback not supported yet."
+        DLOG.warn(reason)
+        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+        self.build_phase.result_reason = reason
+        self.sw_update_obj.strategy_build_complete(
+            False, self.build_phase.result_reason)
+        self.save()
+        super(SwUpgradeStrategy, self).build()
+
+    def build(self):
+        """
+        Build the strategy
+        """
+
+        if self._release is None and not self._rollback:
+            reason = "Release or rollback must be set"
+            DLOG.error(reason)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = reason
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            super(SwUpgradeStrategy, self).build()
+
+        elif self._release is not None and self._rollback:
+            reason = "Cannot set both release and rollback"
+            DLOG.error(reason)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = reason
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            super(SwUpgradeStrategy, self).build()
+
+        elif self._rollback:
+            return self._build_rollback()
+
+        else:
+            return self._build_normal()
 
     def _swact_fix(self, stage, controller_name):
         """Add a SWACT to a stage on DX systems
@@ -1875,10 +1916,7 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.SystemStabilizeStep())
         self.apply_phase.add_stage(stage)
 
-    def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+    def _build_complete_normal(self, result, result_reason):
         from nfv_vim import strategy
         from nfv_vim import tables
 
@@ -2024,6 +2062,25 @@ class SwUpgradeStrategy(
         self.sw_update_obj.strategy_build_complete(True, '')
         self.save()
 
+    def _build_complete_rollback(self, result, result_reason):
+        reason = "Rollback not supported yet."
+        DLOG.warn(reason)
+        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+        self.build_phase.result_reason = reason
+        self.sw_update_obj.strategy_build_complete(
+            False, self.build_phase.result_reason)
+        self.save()
+
+    def build_complete(self, result, result_reason):
+        """
+        Strategy Build Complete
+        """
+        if self._rollback:
+            return self._build_complete_rollback(result, result_reason)
+
+        return self._build_complete_normal(result, result_reason)
+
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """
         Initializes a software upgrade strategy object using the given dictionary
@@ -2034,6 +2091,7 @@ class SwUpgradeStrategy(
                                                  abort_phase)
         self._single_controller = data['single_controller']
         self._release = data['release']
+        self._rollback = data['rollback']
         nfvi_upgrade_data = data['nfvi_upgrade_data']
         if nfvi_upgrade_data:
             self._nfvi_upgrade = nfvi.objects.v1.Upgrade(
@@ -2052,6 +2110,7 @@ class SwUpgradeStrategy(
         data = super(SwUpgradeStrategy, self).as_dict()
         data['single_controller'] = self._single_controller
         data['release'] = self._release
+        data['rollback'] = self._rollback
         if self._nfvi_upgrade:
             nfvi_upgrade_data = self._nfvi_upgrade.as_dict()
         else:

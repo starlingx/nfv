@@ -304,6 +304,7 @@ def create_strategy(token_id,
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
         api_cmd_payload['release'] = kwargs['release']
+        api_cmd_payload['rollback'] = kwargs['rollback']
     api_cmd_payload['storage-apply-type'] = storage_apply_type
     api_cmd_payload['worker-apply-type'] = worker_apply_type
     if max_parallel_worker_hosts is not None:

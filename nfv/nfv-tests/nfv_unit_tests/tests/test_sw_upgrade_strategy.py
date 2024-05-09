@@ -54,6 +54,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
             release='starlingx-24.03.1',
+            rollback=False,
             nfvi_upgrade=None,
             single_controller=False
     ):
@@ -69,6 +70,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=default_instance_action,
             alarm_restrictions=alarm_restrictions,
             release=release,
+            rollback=rollback,
             ignore_alarms=[],
             single_controller=single_controller,
         )
@@ -91,6 +93,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             openstack=True,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            rollback=False,
             **kwargs,
     ):
         self.create_host('controller-0', aio=True, openstack_installed=openstack)
@@ -104,6 +107,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=True,
             default_instance_action=default_instance_action,
             worker_apply_type=worker_apply_type,
+            rollback=rollback,
             **kwargs,
         )
 
@@ -114,6 +118,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             openstack=True,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            rollback=False,
             **kwargs,
     ):
         self.create_host('controller-0', aio=True, openstack_installed=openstack)
@@ -127,6 +132,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy = self.create_sw_upgrade_strategy(
             default_instance_action=default_instance_action,
             worker_apply_type=worker_apply_type,
+            rollback=rollback,
             **kwargs,
         )
 

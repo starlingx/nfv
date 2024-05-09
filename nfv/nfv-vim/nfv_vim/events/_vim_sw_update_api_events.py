@@ -100,10 +100,11 @@ def vim_sw_update_api_create_strategy(connection, msg):
             alarm_restrictions, _vim_sw_update_api_create_strategy_callback)
     elif 'sw-upgrade' == msg.sw_update_type:
         release = msg.release
+        rollback = msg.rollback
         uuid, reason = sw_mgmt_director.create_sw_upgrade_strategy(
             controller_apply_type, storage_apply_type,
             worker_apply_type, max_parallel_worker_hosts,
-            default_instance_action, alarm_restrictions, release,
+            default_instance_action, alarm_restrictions, release, rollback,
             _vim_sw_update_api_create_strategy_callback)
     elif 'fw-update' == msg.sw_update_type:
         uuid, reason = sw_mgmt_director.create_fw_update_strategy(
