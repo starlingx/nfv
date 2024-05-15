@@ -225,7 +225,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -271,7 +271,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -318,7 +318,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -370,7 +370,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -418,7 +418,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -467,7 +467,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -1005,7 +1005,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -1070,7 +1070,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'Y',
+                    'reboot_required': True,
                 },
                 None,
             )
@@ -1139,7 +1139,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -1213,7 +1213,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'Y',
+                    'reboot_required': True,
                 },
                 None,
             )
@@ -1299,7 +1299,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'N',
+                    'reboot_required': False,
                 },
                 None,
             )
@@ -1395,7 +1395,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 release,
                 {
                     'state': 'available',
-                    'reboot_required': 'Y',
+                    'reboot_required': True,
                 },
                 None,
             )
