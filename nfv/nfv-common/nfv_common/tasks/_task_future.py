@@ -9,9 +9,7 @@ from nfv_common.tasks._task_work import TaskWork
 
 DLOG = debug.debug_get_logger('nfv_common.tasks.task_future')
 
-# TODO(vselvara)The timeout to be changed back to 20sec when the start
-# software-api is async for patch-release
-TASK_TIMEOUT = 600
+TASK_TIMEOUT = 20
 
 
 class TaskFuture(object):

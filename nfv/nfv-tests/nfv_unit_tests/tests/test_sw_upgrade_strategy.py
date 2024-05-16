@@ -83,6 +83,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'reboot_required': True,
                 },
                 None,
+                None,
             )
 
         strategy.nfvi_upgrade = nfvi_upgrade

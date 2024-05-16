@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+
 from unittest import mock
 import uuid
 
@@ -234,6 +235,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'reboot_required': False,
                 },
                 None,
+                None,
             )
         )
 
@@ -279,6 +281,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': False,
                 },
+                None,
                 None,
             )
         )
@@ -326,6 +329,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': False,
                 },
+                None,
                 None,
             )
         )
@@ -379,6 +383,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'reboot_required': False,
                 },
                 None,
+                None,
             )
         )
 
@@ -426,6 +431,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': False,
                 },
+                None,
                 None,
             )
         )
@@ -475,6 +481,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': False,
                 },
+                None,
                 None,
             )
         )
@@ -925,6 +932,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 '13.01',
                 {'state': 'deployed'},
                 None,
+                None,
             )
         )
 
@@ -952,6 +960,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 '13.01',
                 {'state': 'committed'},
                 None,
+                None,
             )
         )
 
@@ -977,6 +986,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 '13.01',
+                None,
                 None,
                 None,
             )
@@ -1013,6 +1023,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': False,
                 },
+                None,
                 None,
             )
         )
@@ -1078,6 +1089,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': True,
                 },
+                None,
                 None,
             )
         )
@@ -1147,6 +1159,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': False,
                 },
+                None,
                 None,
             )
         )
@@ -1221,6 +1234,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': True,
                 },
+                None,
                 None,
             )
         )
@@ -1307,6 +1321,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': False,
                 },
+                None,
                 None,
             )
         )
@@ -1403,6 +1418,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'state': 'available',
                     'reboot_required': True,
                 },
+                None,
                 None,
             )
         )
