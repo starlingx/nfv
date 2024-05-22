@@ -18,7 +18,6 @@ USM_DEPLOYING_START = 'deploying-start'
 USM_REMOVING = 'removing'
 USM_UNAVAILABLE = 'unavailable'
 USM_UNKNOWN = 'n/a'
-USM_REBOOT_REQUIRED = "Y"
 
 
 class Upgrade(ObjectData):
@@ -43,7 +42,7 @@ class Upgrade(ObjectData):
         if not self.release_info:
             return None
 
-        return self.release_info["reboot_required"] == USM_REBOOT_REQUIRED
+        return self.release_info["reboot_required"]
 
     @property
     def is_available(self):
