@@ -21,6 +21,21 @@ from nfv_vim.strategy._strategy import SwUpgradeStrategy
 
 from nfv_unit_tests.tests import sw_update_testcase
 
+INITIAL_RELEASE = "3.2.1"
+PATCH_RELEASE_UPGRADE = "3.2.2"
+# Minor and Major are both major release upgrades
+MINOR_RELEASE_UPGRADE = "4.0.1"
+MAJOR_RELEASE_UPGRADE = "4.0.1"
+
+IGNORE_ALARMS_LIST = [
+    "900.005",
+    "900.201",
+    "750.006",
+    "100.119",
+    "900.701",
+    "900.231",
+]
+
 
 # TODO(jkraitbe): Update this when retry count is decicded.
 # utility method for the formatting of unlock-hosts stage as dict
@@ -44,6 +59,7 @@ def _unlock_hosts_stage_as_dict(host_names, retry_count=5, retry_delay=120):
             sw_update_testcase.fake_timer)
 @mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
+@mock.patch.object(nfvi.objects.v1.upgrade, 'SW_VERSION', INITIAL_RELEASE)
 class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     def create_sw_upgrade_strategy(self,
@@ -81,6 +97,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -1162,7 +1179,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'system-stabilize', 'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400}
                  ]
                 }
@@ -1212,7 +1229,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'system-stabilize', 'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400},
                  ]
                 },
@@ -1229,7 +1246,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'system-stabilize', 'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-1']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400},
                  ]
                 }
@@ -1301,7 +1318,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'system-stabilize', 'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400}
                  ]
                 },
@@ -1318,7 +1335,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'system-stabilize', 'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-1']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400}
                  ]
                 },
@@ -1407,9 +1424,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 8,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 3,
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-1']},
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',
@@ -1430,7 +1449,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-1']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400}
                  ]
                  },
@@ -1448,7 +1467,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400}
                  ]
                  },
@@ -1465,7 +1484,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                        'entity_names': ['storage-0']},
                      {'name': 'wait-data-sync',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 1800}
                  ]
                  },
@@ -1482,7 +1501,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'unlock-hosts',
                        'entity_names': ['storage-1']},
                      {'name': 'wait-data-sync',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 1800}
                  ]
                  },
@@ -1522,9 +1541,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  ]
                  },
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 4,
+                 'total_steps': 5,
                  'steps': [
                      {'name': 'query-alarms'},
+                     {'name': 'swact-hosts',
+                      'entity_names': ['controller-1']},
                      {'name': 'activate-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'complete-upgrade',
@@ -1540,8 +1561,6 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     # pylint: disable=no-member
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_flipper('controller-1', 'controller-0', n=2))
     def test_sw_upgrade_strategy_build_complete_serial_migrate(self):
         """
         Test the sw_upgrade strategy build_complete:
@@ -1575,7 +1594,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 6,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 5,
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
@@ -1584,8 +1603,6 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',
                       'timeout': 60},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
                  ]
                 },
                 {'name': 'sw-upgrade-controllers',
@@ -1602,7 +1619,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-1']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400}
                  ]
                  },
@@ -1620,7 +1637,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['controller-0']),
                      {'name': 'wait-alarms-clear',
-                      'ignore_alarms': ['900.005', '900.201', '750.006', '100.119', '900.701'],
+                      'ignore_alarms': IGNORE_ALARMS_LIST,
                       'timeout': 2400}
                  ]
                  },

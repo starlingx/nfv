@@ -4,43 +4,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from enum import Enum
-
 from nfv_vim.nfvi.objects.v1._object import ObjectData
+import software.states as usm_states
+from tsconfig.tsconfig import SW_VERSION
 
 
-# Enums from https://opendev.org/starlingx/update/src/branch/master/software/software/states.py
-class RELEASE_STATES(Enum):
-    AVAILABLE = 'available'
-    UNAVAILABLE = 'unavailable'
-    DEPLOYING = 'deploying'
-    DEPLOYED = 'deployed'
-    REMOVING = 'removing'
-    COMMITTED = 'committed'
+def is_major_release(to_release, from_release):
+    """Determine if this is a major release software deployment
 
+    Major release if major or minor version changed:
+    eg. 10.11.12 -> (11.1.1 or 10.12.1)
+    """
 
-class DEPLOY_STATES(Enum):
-    START = 'start'
-    START_DONE = 'start-done'
-    START_FAILED = 'start-failed'
-
-    HOST = 'host'
-    HOST_DONE = 'host-done'
-    HOST_FAILED = 'host-failed'
-
-    ACTIVATE = 'activate'
-    ACTIVATE_DONE = 'activate-done'
-    ACTIVATE_FAILED = 'activate-failed'
-
-    ABORT = 'abort'
-    ABORT_DONE = 'abort-done'
-
-
-class DEPLOY_HOST_STATES(Enum):
-    DEPLOYED = 'deployed'
-    DEPLOYING = 'deploying'
-    FAILED = 'failed'
-    PENDING = 'pending'
+    return to_release.split(".")[:2] != from_release.split(".")[:2]
 
 
 class Upgrade(ObjectData):
@@ -76,49 +52,73 @@ class Upgrade(ObjectData):
         return self.release_info["reboot_required"]
 
     @property
+    def sw_version(self):
+        if not self.release_info:
+            return None
+
+        return self.release_info["sw_version"]
+
+    @property
+    def major_release(self):
+        if not self.release_info:
+            return None
+
+        return is_major_release(SW_VERSION, self.sw_version)
+
+    @property
     def is_available(self):
-        return self.release_state == RELEASE_STATES.AVAILABLE.value
+        return self.release_state == usm_states.AVAILABLE
 
     @property
     def is_deployed(self):
-        return self.release_state == RELEASE_STATES.DEPLOYED.value
+        return self.release_state == usm_states.DEPLOYED
 
     @property
     def is_committed(self):
-        return self.release_state == RELEASE_STATES.COMMITTED.value
+        return self.release_state == usm_states.COMMITTED
 
     @property
     def is_starting(self):
-        return self.deploy_state == DEPLOY_STATES.START.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.START.value
 
     @property
     def is_start_done(self):
-        return self.deploy_state == DEPLOY_STATES.START_DONE.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.START_DONE.value
 
     @property
     def is_start_failed(self):
-        return self.deploy_state == DEPLOY_STATES.START_FAILED.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.START_FAILED.value
 
     @property
     def is_deploying_hosts(self):
-        return self.deploy_state == DEPLOY_STATES.HOST.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.HOST.value
 
     @property
     def is_deploy_hosts_done(self):
-        return self.deploy_state == DEPLOY_STATES.HOST_DONE.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.HOST_DONE.value
 
     @property
     def is_deploy_hosts_failed(self):
-        return self.deploy_state == DEPLOY_STATES.HOST_FAILED.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.HOST_FAILED.value
 
     @property
     def is_activating(self):
-        return self.deploy_state == DEPLOY_STATES.ACTIVATE.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE.value
 
     @property
     def is_activate_done(self):
-        return self.deploy_state == DEPLOY_STATES.ACTIVATE_DONE.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_DONE.value
 
     @property
     def is_activate_failed(self):
-        return self.deploy_state == DEPLOY_STATES.ACTIVATE_FAILED.value
+        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_FAILED.value
+
+    @property
+    def all_hosts_deployed(self):
+        if not self.hosts_info:
+            return None
+
+        for v in self.hosts_info:
+            if v["host_state"] != usm_states.DEPLOY_HOST_STATES.DEPLOYED.value:
+                return False
+        return True

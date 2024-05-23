@@ -7,6 +7,7 @@ import six
 
 from nfv_common import debug
 from nfv_common.helpers import coroutine
+from nfv_common.helpers import get_local_host_name
 from nfv_common.helpers import Singleton
 
 from nfv_vim import nfvi
@@ -715,6 +716,11 @@ class HostDirector(object):
                        % (self._host_operation.operation_type,
                           host_operation.operation_type))
             self._host_operation = None
+
+        # We don't need to SWACT if we are already on the correct controller.
+        # This assumes that there will only ever two be controllers.
+        if len(host_names) == 1 and host_names[0] != get_local_host_name():
+            return None
 
         host_table = tables.tables_get_host_table()
         for host_name in host_names:

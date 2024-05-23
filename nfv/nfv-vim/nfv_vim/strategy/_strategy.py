@@ -1785,6 +1785,7 @@ class SwUpgradeStrategy(
                          '750.006',  # Configuration change requires reapply of cert-manager
                          '100.119',  # PTP alarm for SyncE
                          '900.701',  # Node tainted
+                         '900.231',  # Software deployment data is out of sync
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -1864,12 +1865,9 @@ class SwUpgradeStrategy(
 
         Currently, certain steps during sw-deploy must be done on a specific controller.
         Here we insert arbitrary SWACTs to meet those requirements.
-
-        If controller_name does not match the current active host we return because
-        we are already on ideal host.
         """
 
-        if self._single_controller or controller_name != get_local_host_name():
+        if self._single_controller or not self.nfvi_upgrade.major_release:
             return
 
         from nfv_vim import strategy
@@ -1885,19 +1883,21 @@ class SwUpgradeStrategy(
         """
         Add upgrade start strategy stage
         """
+
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_START)
 
-        stage.add_step(strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms))
         # If the release is not available the deployment is already started
-        # sw-deploy start must be done on controller-0
-        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(strategy.UpgradeStartStep(release=self._release, force=self._ignore_alarms))
-        stage.add_step(strategy.SystemStabilizeStep())
-        # TODO(jkraitbe): This SWACT should be part of deploy hosts logic
-        # sw-deploy host must first be on controller-1
-        self._swact_fix(stage, HOST_NAME.CONTROLLER_0)
+        if self.nfvi_upgrade.is_available:
+            stage.add_step(strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms))
+            # sw-deploy start for major releases must be done on controller-0
+            self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
+            stage.add_step(strategy.UpgradeStartStep(release=self._release, force=self._ignore_alarms))
+            stage.add_step(strategy.SystemStabilizeStep())
+        else:
+            DLOG.info("Software deployment already inprogress, skipping start")
+
         self.apply_phase.add_stage(stage)
 
     def _add_upgrade_complete_stage(self):
@@ -1908,8 +1908,6 @@ class SwUpgradeStrategy(
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_COMPLETE)
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
-        # TODO(jkraitbe): This SWACT should be part of deploy hosts logic
-        # sw-deploy complete should be on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.UpgradeActivateStep(release=self._release))
         stage.add_step(strategy.UpgradeCompleteStep(release=self._release))
@@ -1988,13 +1986,6 @@ class SwUpgradeStrategy(
 
             self._add_upgrade_start_stage()
 
-            # TODO(jkraitbe): Exclude hosts that are already deployed.
-            # The hosts states are found in self.nfvi_upgrade.hosts_info.
-            # None means deployment hasn't started.
-
-            # TODO(jkraitbe): SWACT to controller-1 should be
-            # here instead of in _add_upgrade_start_stage.
-
             for host in host_table.values():
                 if HOST_PERSONALITY.CONTROLLER in host.personality:
                     controllers_hosts.append(host)
@@ -2020,8 +2011,12 @@ class SwUpgradeStrategy(
                     self.save()
                     return
 
-            # Reverse controller hosts so controller-1 is first
-            controllers_hosts = controllers_hosts[::-1]
+            if not self._single_controller and self.nfvi_upgrade.major_release:
+                # Reverse controller hosts so controller-1 is first
+                controllers_hosts = sorted(
+                    controllers_hosts,
+                    key=lambda x: x.name == HOST_NAME.CONTROLLER_0,
+                )
 
             strategy_pairs = [
                 (controller_strategy, controllers_hosts),

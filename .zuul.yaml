@@ -30,8 +30,10 @@
     description: Run py39 for nfv
     nodeset: debian-bullseye
     required-projects:
+      - starlingx/config
       - starlingx/fault
       - starlingx/root
+      - starlingx/update
     vars:
       tox_extra_args: -c nfv/tox.ini
       tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
@@ -61,8 +63,10 @@
     description: Run pylint for nfv
     nodeset: debian-bullseye
     required-projects:
+      - starlingx/config
       - starlingx/fault
       - starlingx/root
+      - starlingx/update
     vars:
       tox_envlist: pylint
       tox_extra_args: -c nfv/tox.ini

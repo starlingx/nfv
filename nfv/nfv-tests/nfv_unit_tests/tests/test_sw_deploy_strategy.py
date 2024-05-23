@@ -20,6 +20,13 @@ from nfv_vim.strategy._strategy import SwUpgradeStrategy
 from nfv_unit_tests.tests import sw_update_testcase
 
 
+INITIAL_RELEASE = "3.2.1"
+PATCH_RELEASE_UPGRADE = "3.2.2"
+# Minor and Major are both major release upgrades
+MINOR_RELEASE_UPGRADE = "4.0.1"
+MAJOR_RELEASE_UPGRADE = "4.0.1"
+
+
 # utility method for the formatting of unlock-hosts stage as dict
 # workers default to 5 retries with 120 second delay between attempts
 # std controllers and storage have 0 retries
@@ -41,6 +48,7 @@ def _unlock_hosts_stage_as_dict(host_names, retry_count=5, retry_delay=120):
             sw_update_testcase.fake_timer)
 @mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
             sw_update_testcase.fake_nfvi_compute_plugin_disabled)
+@mock.patch.object(nfvi.objects.v1.upgrade, 'SW_VERSION', INITIAL_RELEASE)
 class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     def create_sw_deploy_strategy(self,
@@ -50,7 +58,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=10,
             alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
-            release="123.1",
+            release=MAJOR_RELEASE_UPGRADE,
             rollback=False,
             nfvi_upgrade=None,
             single_controller=False
@@ -179,6 +187,22 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         return controller_hosts, storage_hosts, worker_hosts, strategy
 
+    def test_is_major_release(self):
+        is_major_release = nfvi.objects.v1.is_major_release
+        assert is_major_release(INITIAL_RELEASE, MAJOR_RELEASE_UPGRADE)
+        assert is_major_release(INITIAL_RELEASE, MINOR_RELEASE_UPGRADE)
+        assert not is_major_release(INITIAL_RELEASE, PATCH_RELEASE_UPGRADE)
+        assert is_major_release("22.12", "24.09.1")
+        assert is_major_release("22.12", "24.09.1")
+        assert is_major_release("22.12", "24.09.1")
+        assert is_major_release("22.12", "24.09")
+        assert is_major_release("22.12.1", "24.09")
+        assert is_major_release("24.03", "24.09.1")
+        assert is_major_release("24.03", "24.09.1")
+        assert not is_major_release("22.12", "22.12")
+        assert not is_major_release("22.12", "22.12.1")
+        assert not is_major_release("22.12.2", "22.12.1")
+
     @mock.patch('nfv_common.strategy._strategy.Strategy._build')
     def test_sw_deploy_strategy_build_steps(self, fake_build):
         """
@@ -233,6 +257,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -280,6 +305,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -310,8 +336,6 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     # pylint: disable=no-member
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_flipper('controller-1', 'controller-0', n=2))
     def test_sw_deploy_strategy_start_on_controller_1_aiodx(self):
         """
         Test the sw_upgrade strategy start stages on controller-1:
@@ -328,6 +352,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -342,7 +367,55 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 5,
+                 'total_steps': 3,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'start-upgrade',
+                      'release': release},
+                     {'name': 'system-stabilize',
+                      'timeout': 60},
+                 ]
+                }
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    # pylint: disable=no-member
+    def test_sw_deploy_strategy_start_on_controller_1_aiodx_major(self):
+        """
+        Test the sw_upgrade strategy start stages on controller-1:
+        - dx
+        - major release
+        Verify:
+        - pass
+        """
+
+        release = "888.8"
+        _, strategy = self._gen_aiodx_hosts_and_strategy(
+            release=release,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'available',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            )
+        )
+
+        strategy._add_upgrade_start_stage()
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 1,
+            'stages': [
+                {'name': 'sw-upgrade-start',
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
@@ -351,8 +424,6 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'release': release},
                      {'name': 'system-stabilize',
                       'timeout': 60},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
                  ]
                 }
             ]
@@ -381,6 +452,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -430,6 +502,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -462,8 +535,6 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     # pylint: disable=no-member
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_flipper('controller-1', 'controller-0', n=2))
     def test_sw_deploy_strategy_complete_on_controller_1_aiodx(self):
         """
         Test the sw_upgrade strategy complete stages on controller-1:
@@ -480,6 +551,57 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            )
+        )
+
+        strategy._add_upgrade_complete_stage()
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 1,
+            'stages': [
+                {'name': 'sw-upgrade-complete',
+                 'total_steps': 4,
+                 'steps': [
+                     {'name': 'query-alarms'},
+                     {'name': 'activate-upgrade',
+                      'release': release},
+                     {'name': 'complete-upgrade',
+                      'release': release},
+                     {'name': 'system-stabilize',
+                      'timeout': 60},
+                 ]
+                }
+            ]
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    # pylint: disable=no-member
+    def test_sw_deploy_strategy_complete_on_controller_1_aiodx_major(self):
+        """
+        Test the sw_upgrade strategy complete stages on controller-1:
+        - dx
+        - major releasee
+        Verify:
+        - pass
+        """
+
+        release = "888.8"
+        _, strategy = self._gen_aiodx_hosts_and_strategy(
+            release=release,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'available',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -943,9 +1065,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         expected_reason = "Software release is already deployed or committed."
         bpr = strategy.build_phase
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
-        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
-        assert bpr.result_reason == expected_reason, strategy.build_phase.result_reason
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
+        assert bpr.result_reason == expected_reason, bpr.result_reason
 
     def test_sw_deploy_strategy_aiosx_already_committed(self):
         """
@@ -1158,6 +1280,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -1187,7 +1310,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
                         {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
@@ -1196,7 +1319,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
                         {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
@@ -1233,6 +1356,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': True,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -1262,12 +1386,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'total_steps': 7,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'swact-hosts', 'entity_names': ['controller-1']},
-                        {'name': 'lock-hosts', 'entity_names': ['controller-1']},
-                        {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'swact-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
                         {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'unlock-hosts',
-                         'entity_names': ['controller-1'], 'retry_count': 0, 'retry_delay': 120},
+                         'entity_names': ['controller-0'], 'retry_count': 0, 'retry_delay': 120},
                         {'name': 'wait-alarms-clear', 'timeout': 2400},
                     ]
                 },
@@ -1276,12 +1400,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'total_steps': 7,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'swact-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'swact-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
                         {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'unlock-hosts',
-                         'entity_names': ['controller-0'], 'retry_count': 0, 'retry_delay': 120},
+                         'entity_names': ['controller-1'], 'retry_count': 0, 'retry_delay': 120},
                         {'name': 'wait-alarms-clear', 'timeout': 2400},
                     ]
                 },
@@ -1320,6 +1444,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -1349,7 +1474,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
                         {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
@@ -1358,7 +1483,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
-                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
                         {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
@@ -1417,6 +1542,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': True,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -1437,6 +1563,128 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
+                        {'name': 'start-upgrade', 'release': release},
+                        {'name': 'system-stabilize', 'timeout': 60},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-controllers',
+                    'total_steps': 7,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'swact-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts',
+                         'entity_names': ['controller-0'], 'retry_count': 0, 'retry_delay': 120},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-controllers',
+                    'total_steps': 7,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'swact-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts',
+                         'entity_names': ['controller-1'], 'retry_count': 0, 'retry_delay': 120},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-storage-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts',
+                         'entity_names': ['storage-0', 'storage-1', 'storage-2']},
+                        {'name': 'upgrade-hosts',
+                         'entity_names': ['storage-0', 'storage-1', 'storage-2']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts',
+                         'entity_names': ['storage-0', 'storage-1', 'storage-2']},
+                        {'name': 'wait-data-sync', 'timeout': 1800},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts',
+                         'entity_names': ['compute-0', 'compute-1', 'compute-2']},
+                        {'name': 'upgrade-hosts',
+                         'entity_names': ['compute-0', 'compute-1', 'compute-2']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts',
+                         'entity_names': ['compute-0', 'compute-1', 'compute-2']},
+                        {'name': 'wait-alarms-clear', 'timeout': 600},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-complete',
+                    'total_steps': 4,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'activate-upgrade', 'release': release},
+                        {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'system-stabilize', 'timeout': 60},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_standard_apply_phase_rr_major(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - standard
+        - rr
+        - parallel storage
+        - parallel workers
+        - major release
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, _, _, strategy = self._gen_standard_hosts_and_strategy(
+            release=release,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'available',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+
+                },
+                None,
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 6,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-start',
+                    'total_steps': 4,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'swact-hosts',
+                         'entity_names': ['controller-1']},
                         {'name': 'start-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
                     ],
@@ -1501,9 +1749,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 4,
+                    'total_steps': 5,
                     'steps': [
                         {'name': 'query-alarms'},
+                        {'name': 'swact-hosts',
+                         'entity_names': ['controller-1']},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},

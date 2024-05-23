@@ -623,9 +623,12 @@ class SwactHostsStep(strategy.StrategyStep):
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name,
                                                      self._host_names))
+
         host_director = directors.get_host_director()
         operation = host_director.swact_hosts(self._host_names)
-        if operation.is_inprogress():
+        if operation is None:
+            return strategy.STRATEGY_STEP_RESULT.SUCCESS, "Already on correct host"
+        elif operation.is_inprogress():
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
         elif operation.is_failed():
             return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason

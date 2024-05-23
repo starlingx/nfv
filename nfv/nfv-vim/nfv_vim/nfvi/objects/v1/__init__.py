@@ -1,8 +1,9 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+
 from nfv_vim.nfvi.objects.v1._alarm import Alarm  # noqa: F401
 from nfv_vim.nfvi.objects.v1._alarm import ALARM_SEVERITY  # noqa: F401
 from nfv_vim.nfvi.objects.v1._guest_service import GUEST_SERVICE_ADMIN_STATE  # noqa: F401
@@ -68,6 +69,8 @@ from nfv_vim.nfvi.objects.v1._subnet import Subnet  # noqa: F401
 from nfv_vim.nfvi.objects.v1._sw_patch import SwPatch  # noqa: F401
 from nfv_vim.nfvi.objects.v1._system import System  # noqa: F401
 from nfv_vim.nfvi.objects.v1._tenant import Tenant  # noqa: F401
+from nfv_vim.nfvi.objects.v1._upgrade import is_major_release  # noqa: F401
+import nfv_vim.nfvi.objects.v1._upgrade as upgrade  # noqa: F401,H306
 from nfv_vim.nfvi.objects.v1._upgrade import Upgrade  # noqa: F401
 from nfv_vim.nfvi.objects.v1._volume import Volume  # noqa: F401
 from nfv_vim.nfvi.objects.v1._volume import VOLUME_ACTION  # noqa: F401
