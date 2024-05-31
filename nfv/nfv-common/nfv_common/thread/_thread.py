@@ -94,7 +94,7 @@ class Thread(object):
                         self._stall_timestamp_ms = \
                             timers.get_monotonic_timestamp_in_ms()
 
-                    DLOG.warn("Thread %s stalled, progress_marker=%s, "
+                    DLOG.error("Thread %s stalled, progress_marker=%s, "
                                "elapsed_secs=%s." % (self._name,
                                                      self._progress_marker.value,
                                                      self.stall_elapsed_secs))

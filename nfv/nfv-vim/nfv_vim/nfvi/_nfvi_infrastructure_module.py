@@ -397,22 +397,24 @@ def nfvi_get_upgrade(release, callback):
     return cmd_id
 
 
-def nfvi_sw_deploy_precheck(release, callback):
+def nfvi_sw_deploy_precheck(release, force, callback):
     """
     Software deploy precheck
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_precheck',
                                                   release,
+                                                  force,
                                                   callback=callback)
     return cmd_id
 
 
-def nfvi_upgrade_start(release, callback):
+def nfvi_upgrade_start(release, force, callback):
     """
     Software deploy start
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_start',
                                                   release,
+                                                  force,
                                                   callback=callback)
     return cmd_id
 

@@ -13,7 +13,6 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
 
 REST_API_REQUEST_TIMEOUT = 60
-REST_API_START_REQUEST_TIMEOUT = 600
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.usm')
 
@@ -38,6 +37,7 @@ def _api_get(token, url):
     """
     Perform a generic GET for a particular API endpoint
     """
+
     response = rest_api_request(token,
                                 "GET",
                                 url,
@@ -99,10 +99,10 @@ def sw_deploy_precheck(token, release, force=False):
     Ask USM to precheck before a deployment
     """
 
-    uri = (f"deploy/{release}/precheck/force" if
-            force else f"deploy/{release}/precheck")
+    uri = f"deploy/{release}/precheck"
+    data = {"force": force} if force else {}
     url = _usm_api_cmd(token, uri)
-    response = _api_post(token, url, {})
+    response = _api_post(token, url, data)
     return response
 
 
@@ -111,9 +111,10 @@ def sw_deploy_start(token, release, force=False):
     Ask USM to start a deployment
     """
 
-    uri = f"deploy/{release}/start/force" if force else f"deploy/{release}/start"
+    uri = f"deploy/{release}/start"
     url = _usm_api_cmd(token, uri)
-    response = _api_post(token, url, {}, None, REST_API_START_REQUEST_TIMEOUT)
+    data = {"force": force} if force else {}
+    response = _api_post(token, url, data)
     return response
 
 

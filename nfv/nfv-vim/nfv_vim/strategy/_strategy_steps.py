@@ -927,10 +927,11 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
     """
     Software Deploy Precheck - Strategy Step
     """
-    def __init__(self, release):
+    def __init__(self, release, force):
         super(SwDeployPrecheckStep, self).__init__(
             STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
+        self._force = force
 
     @coroutine
     def _sw_deploy_precheck_callback(self):
@@ -942,7 +943,9 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
 
         if response['completed']:
             if not response['result-data']:
-                DLOG.debug("sw-deploy precheck completed %s" % response['result-data'])
+                DLOG.debug("sw-deploy precheck completed")
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, '')
             else:
                 reason = "sw-deploy precheck failed"
                 # TODO(vselvara) to display the entire error response
@@ -957,7 +960,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_sw_deploy_precheck(self._release, self._sw_deploy_precheck_callback())
+        nfvi.nfvi_sw_deploy_precheck(self._release, self._force, self._sw_deploy_precheck_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
@@ -967,6 +970,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         """
         super(SwDeployPrecheckStep, self).from_dict(data)
         self._release = data["release"]
+        self._force = data["force"]
         return self
 
     def as_dict(self):
@@ -975,6 +979,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         """
         data = super(SwDeployPrecheckStep, self).as_dict()
         data['release'] = self._release
+        data['force'] = self._force
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
@@ -1099,11 +1104,13 @@ class UpgradeStartStep(strategy.StrategyStep):
     """
     Upgrade Start - Strategy Step
     """
-    def __init__(self, release):
+    def __init__(self, release, force):
         super(UpgradeStartStep, self).__init__(
-            STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=600)
+            STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=1200)
 
         self._release = release
+        self._force = force
+        self._query_inprogress = False
 
     @coroutine
     def _start_upgrade_callback(self):
@@ -1112,19 +1119,62 @@ class UpgradeStartStep(strategy.StrategyStep):
         """
         response = (yield)
         DLOG.debug("Start-Upgrade callback response=%s." % response)
-        if response['completed']:
-            state_info = response['result-data']['release_info']['state']
-            if state_info == SW_DEPLOY_START:
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, "")
-            else:
-                reason = "Software deploy not started. Current state:%s" % state_info
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, reason)
-        else:
-            reason = "Software deploy start not completed"
+
+        if not response['completed']:
+            reason = (
+                "Unknown error while trying to start the software deployment, "
+                "check /var/log/nfv-vim.log for more information."
+            )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, reason)
+
+        elif not (info := response["result-data"]["info"].strip()).endswith("started"):
+            # TODO(jkraitbe): This will likely change in future
+            # Failed/Rejected starts return HTTP 200 so we need to parse result
+            reason = f"Failed deploy start: {info}"
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, reason)
+
+    @coroutine
+    def _handle_start_upgrade_callback(self):
+        """
+        Handle Start Upgrade Callback
+        """
+        response = (yield)
+        DLOG.debug("Handle Start-Upgrade callback response=%s." % response)
+
+        self._query_inprogress = False
+
+        if not response['completed']:
+            # Something went wrong while collecting state info
+            return
+
+        self.strategy.nfvi_upgrade = response['result-data']
+
+        if self.strategy.nfvi_upgrade.is_start_done:
+            DLOG.debug("Handle Start-Upgrade callback, deploy start is done")
+            reason = ""
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, reason)
+
+        elif self.strategy.nfvi_upgrade.is_start_failed:
+            reason = (
+                "Software deployment start failed, "
+                "check /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, reason)
+
+        elif not self.strategy.nfvi_upgrade.is_starting:
+            reason = (
+                "Unknown error while starting the software deployment, "
+                "check /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, reason)
+
+        else:
+            DLOG.debug("Handle Start-Upgrade callback, deploy start in progress...")
 
     def apply(self):
         """
@@ -1133,8 +1183,24 @@ class UpgradeStartStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_upgrade_start(self._release, self._start_upgrade_callback())
+        nfvi.nfvi_upgrade_start(self._release, self._force, self._start_upgrade_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_upgrade(self._release, self._handle_start_upgrade_callback())
+            return True
+
+        return False
 
     def from_dict(self, data):
         """
@@ -1143,6 +1209,8 @@ class UpgradeStartStep(strategy.StrategyStep):
         """
         super(UpgradeStartStep, self).from_dict(data)
         self._release = data["release"]
+        self._force = data["force"]
+        self._query_inprogress = False
         return self
 
     def as_dict(self):
@@ -1154,6 +1222,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         data['entity_names'] = list()
         data['entity_uuids'] = list()
         data['release'] = self._release
+        data['force'] = self._force
         return data
 
 
@@ -1161,33 +1230,73 @@ class UpgradeActivateStep(strategy.StrategyStep):
     """
     Upgrade Activate - Strategy Step
     """
-
     def __init__(self, release):
         super(UpgradeActivateStep, self).__init__(
-            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=900)
+            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=1500)
 
         self._release = release
+        self._query_inprogress = False
 
     @coroutine
     def _activate_upgrade_callback(self):
         """
         Activate Upgrade Callback
         """
+
         response = (yield)
-        self.strategy.nfvi_upgrade = response['result-data']
-        if response['completed']:
-            state_info = self.strategy.nfvi_upgrade['release_info']['state']
-            if state_info == SW_DEPLOY_ACTIVATE_DONE:
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, "")
-            else:
-                reason = "SW Deploy Activate not successful. Current state:%s" % state_info
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, reason)
-        else:
-            reason = "SW Deploy Activate not complete. Current response:%s" % response['result-data']
+        DLOG.debug("Activate-Upgrade callback response=%s." % response)
+
+        if not response['completed']:
+            reason = (
+                "Unknown error while trying to activate the software deployment, "
+                "check /var/log/nfv-vim.log for more information."
+            )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, reason)
+
+        # TODO(jkraitbe): This will change in future
+
+    @coroutine
+    def _handle_activate_upgrade_callback(self):
+        """
+        Handle Activate Upgrade Callback
+        """
+
+        response = (yield)
+        DLOG.debug("Handle Activate-Upgrade callback response=%s." % response)
+
+        self._query_inprogress = False
+
+        if not response['completed']:
+            # Something went wrong while collecting state info
+            return
+
+        self.strategy.nfvi_upgrade = response['result-data']
+
+        if self.strategy.nfvi_upgrade.is_activate_done:
+            DLOG.debug("Handle Activate-Upgrade callback, deploy activate is done")
+            reason = ""
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, reason)
+
+        elif self.strategy.nfvi_upgrade.is_activate_failed:
+            reason = (
+                "Software deployment activate failed, "
+                "check /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, reason)
+
+        elif not self.strategy.nfvi_upgrade.is_activating:
+            reason = (
+                "Unknown error while activating the software deployment, "
+                "check /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, reason)
+
+        else:
+            DLOG.debug("Handle Activate-Upgrade callback, deploy activate in progress...")
 
     def apply(self):
         """
@@ -1199,6 +1308,22 @@ class UpgradeActivateStep(strategy.StrategyStep):
         nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_upgrade(self._release, self._handle_activate_upgrade_callback())
+            return True
+
+        return False
+
     def from_dict(self, data):
         """
         Returns the upgrade activate step object initialized using the given
@@ -1206,6 +1331,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
         """
         super(UpgradeActivateStep, self).from_dict(data)
         self._release = data["release"]
+        self._query_inprogress = False
         return self
 
     def as_dict(self):
@@ -1238,6 +1364,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         """
         response = (yield)
         DLOG.debug("Complete-Upgrade callback response=%s." % response)
+
         self.strategy.nfvi_upgrade = response['result-data']
         if response['completed']:
             state_info = self.strategy.nfvi_upgrade['release_info']['state']
