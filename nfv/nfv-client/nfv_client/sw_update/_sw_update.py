@@ -5,6 +5,7 @@
 #
 from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
+import textwrap
 
 STRATEGY_NAME_SW_PATCH = 'sw-patch'
 STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
@@ -32,9 +33,21 @@ ALARM_RESTRICTIONS_RELAXED = 'relaxed'
 
 
 def _print(indent_by, field, value, remains=''):
-    print("%s%s%s%s %s" % (' ' * indent_by, field + ':',
-                           ' ' * (42 - indent_by - len('%s' % field) - 1), value,
-                           remains))
+    full_field = f"{field}:"
+    if "\n" in value:
+        full_field = f"{full_field} |\n"
+
+    full_value = value
+    if remains:
+        full_field = f"{value} {remains}"
+
+    if "\n" not in value:
+        print("%s%s%s%s" % (' ' * indent_by, full_field,
+                            ' ' * (42 - indent_by - len('%s' % field) - 1), full_value))
+
+    else:
+        full_value = textwrap.indent(full_value, " " * (indent_by + 2))
+        print("%s%s%s" % (' ' * indent_by, full_field, full_value))
 
 
 def _display_strategy_step(strategy_step, active=False):

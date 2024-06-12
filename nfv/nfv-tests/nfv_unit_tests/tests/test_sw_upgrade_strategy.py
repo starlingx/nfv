@@ -1432,7 +1432,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',
-                      'timeout': 60},
+                      'timeout': 15},
                  ]
                 },
                 {'name': 'sw-upgrade-controllers',
@@ -1602,7 +1602,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',
-                      'timeout': 60},
+                      'timeout': 15},
                  ]
                 },
                 {'name': 'sw-upgrade-controllers',

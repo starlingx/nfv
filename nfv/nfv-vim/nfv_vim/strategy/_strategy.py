@@ -1811,8 +1811,8 @@ class SwUpgradeStrategy(
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
-        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release, force=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
+        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
         self.build_phase.add_stage(stage)
         super(SwUpgradeStrategy, self).build()
 
@@ -1893,11 +1893,11 @@ class SwUpgradeStrategy(
             stage.add_step(strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms))
             # sw-deploy start for major releases must be done on controller-0
             self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-            stage.add_step(strategy.UpgradeStartStep(release=self._release, force=self._ignore_alarms))
-            stage.add_step(strategy.SystemStabilizeStep())
+            stage.add_step(strategy.UpgradeStartStep(release=self._release))
         else:
             DLOG.info("Software deployment already inprogress, skipping start")
 
+        stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
         self.apply_phase.add_stage(stage)
 
     def _add_upgrade_complete_stage(self):

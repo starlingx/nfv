@@ -930,11 +930,10 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
     """
     Software Deploy Precheck - Strategy Step
     """
-    def __init__(self, release, force):
+    def __init__(self, release):
         super(SwDeployPrecheckStep, self).__init__(
             STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
-        self._force = force
 
     @coroutine
     def _sw_deploy_precheck_callback(self):
@@ -944,17 +943,16 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         response = (yield)
         DLOG.debug("sw-deploy precheck callback response=%s." % response)
 
-        if response['completed']:
-            if not response['result-data']:
-                DLOG.debug("sw-deploy precheck completed")
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, '')
-            else:
-                reason = "sw-deploy precheck failed"
-                # TODO(vselvara) to display the entire error response
-                # reason = response['result-data']
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, reason)
+        if response['completed'] and not response['result-data']:
+            DLOG.debug("sw-deploy precheck completed")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, '')
+        else:
+            reason = "sw-deploy precheck failed"
+            # TODO(vselvara) to display the entire error response
+            # reason = response['result-data']
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(result, reason)
 
     def apply(self):
         """
@@ -963,7 +961,10 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_sw_deploy_precheck(self._release, self._force, self._sw_deploy_precheck_callback())
+        force = (
+            self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
+        )
+        nfvi.nfvi_sw_deploy_precheck(self._release, force, self._sw_deploy_precheck_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
@@ -973,7 +974,6 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         """
         super(SwDeployPrecheckStep, self).from_dict(data)
         self._release = data["release"]
-        self._force = data["force"]
         return self
 
     def as_dict(self):
@@ -982,7 +982,6 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         """
         data = super(SwDeployPrecheckStep, self).as_dict()
         data['release'] = self._release
-        data['force'] = self._force
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
@@ -1107,12 +1106,11 @@ class UpgradeStartStep(strategy.StrategyStep):
     """
     Upgrade Start - Strategy Step
     """
-    def __init__(self, release, force):
+    def __init__(self, release):
         super(UpgradeStartStep, self).__init__(
             STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=1200)
 
         self._release = release
-        self._force = force
         self._query_inprogress = False
 
     @coroutine
@@ -1186,7 +1184,10 @@ class UpgradeStartStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_upgrade_start(self._release, self._force, self._start_upgrade_callback())
+        force = (
+            self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
+        )
+        nfvi.nfvi_upgrade_start(self._release, force, self._start_upgrade_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
@@ -1212,7 +1213,6 @@ class UpgradeStartStep(strategy.StrategyStep):
         """
         super(UpgradeStartStep, self).from_dict(data)
         self._release = data["release"]
-        self._force = data["force"]
         self._query_inprogress = False
         return self
 
@@ -1225,7 +1225,6 @@ class UpgradeStartStep(strategy.StrategyStep):
         data['entity_names'] = list()
         data['entity_uuids'] = list()
         data['release'] = self._release
-        data['force'] = self._force
         return data
 
 

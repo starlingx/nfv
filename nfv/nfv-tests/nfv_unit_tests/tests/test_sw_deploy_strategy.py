@@ -223,8 +223,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         build_phase = strategy.build_phase.as_dict()
         query_steps = [
             {'name': 'query-alarms'},
-            {'name': 'sw-deploy-precheck'},
             {'name': 'query-upgrade'},
+            {'name': 'sw-deploy-precheck'},
         ]
         expected_results = {
             'total_stages': 1,
@@ -278,7 +278,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': release},
                      {'name': 'system-stabilize',
-                      'timeout': 60},
+                      'timeout': 15},
                  ]
                 }
             ]
@@ -326,7 +326,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': release},
                      {'name': 'system-stabilize',
-                      'timeout': 60},
+                      'timeout': 15},
                  ]
                 }
             ]
@@ -373,7 +373,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': release},
                      {'name': 'system-stabilize',
-                      'timeout': 60},
+                      'timeout': 15},
                  ]
                 }
             ]
@@ -423,7 +423,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': release},
                      {'name': 'system-stabilize',
-                      'timeout': 60},
+                      'timeout': 15},
                  ]
                 }
             ]
@@ -1165,7 +1165,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'system-stabilize', 'timeout': 15},
                     ],
                 },
                 {
@@ -1231,7 +1231,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'system-stabilize', 'timeout': 15},
                     ],
                 },
                 {
@@ -1302,7 +1302,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'system-stabilize', 'timeout': 15},
                     ],
                 },
                 {
@@ -1378,7 +1378,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'system-stabilize', 'timeout': 15},
                     ],
                 },
                 {
@@ -1466,7 +1466,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'system-stabilize', 'timeout': 15},
                     ],
                 },
                 {
@@ -1564,7 +1564,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'system-stabilize', 'timeout': 15},
                     ],
                 },
                 {
@@ -1686,7 +1686,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                         {'name': 'swact-hosts',
                          'entity_names': ['controller-1']},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'system-stabilize', 'timeout': 15},
                     ],
                 },
                 {
