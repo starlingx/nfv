@@ -999,7 +999,6 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._host_uuids = list()
         for host in hosts:
             self._host_names.append(host.name)
-        self._wait_time = 0
         self._query_inprogress = False
 
     @coroutine
@@ -1065,18 +1064,11 @@ class UpgradeHostsStep(strategy.StrategyStep):
                 return True
 
         elif event in [STRATEGY_EVENT.HOST_AUDIT]:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            # Wait at least 2 minutes for the host to go offline before
-            # checking whether the upgrade is complete.
-            if 120 <= secs_expired and not self._query_inprogress:
-                self._query_inprogress = True
-                release = self.strategy.nfvi_upgrade['release']
-                nfvi.nfvi_get_upgrade(release, self._get_upgrade_callback())
+            self._query_inprogress = True
+            release = self.strategy.nfvi_upgrade['release']
+            nfvi.nfvi_get_upgrade(release, self._get_upgrade_callback())
             return True
+
         return False
 
     def from_dict(self, data):
@@ -1087,7 +1079,6 @@ class UpgradeHostsStep(strategy.StrategyStep):
         super(UpgradeHostsStep, self).from_dict(data)
         self._host_uuids = list()
         self._host_names = data['entity_names']
-        self._wait_time = 0
         self._query_inprogress = False
         return self
 

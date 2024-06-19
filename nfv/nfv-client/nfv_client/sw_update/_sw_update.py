@@ -34,14 +34,14 @@ ALARM_RESTRICTIONS_RELAXED = 'relaxed'
 
 def _print(indent_by, field, value, remains=''):
     full_field = f"{field}:"
-    if "\n" in value:
+    if isinstance(value, str) and "\n" in value:
         full_field = f"{full_field} |\n"
 
     full_value = value
     if remains:
-        full_field = f"{value} {remains}"
+        full_value = f"{value} {remains}"
 
-    if "\n" not in value:
+    if not (isinstance(value, str) and "\n" in value):
         print("%s%s%s%s" % (' ' * indent_by, full_field,
                             ' ' * (42 - indent_by - len('%s' % field) - 1), full_value))
 
