@@ -70,6 +70,10 @@ class Upgrade(ObjectData):
         return self.release_state == usm_states.AVAILABLE
 
     @property
+    def is_unavailable(self):
+        return self.release_state == usm_states.UNAVAILABLE
+
+    @property
     def is_deployed(self):
         return self.release_state == usm_states.DEPLOYED
 
@@ -112,6 +116,10 @@ class Upgrade(ObjectData):
     @property
     def is_activate_failed(self):
         return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_FAILED.value
+
+    @property
+    def is_deploy_completed(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.COMPLETED.value
 
     @property
     def all_hosts_deployed(self):

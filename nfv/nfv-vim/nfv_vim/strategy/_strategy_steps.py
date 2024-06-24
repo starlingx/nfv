@@ -948,9 +948,10 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, '')
         else:
-            reason = "sw-deploy precheck failed"
-            # TODO(vselvara) to display the entire error response
-            # reason = response['result-data']
+            reason = response.get("error-message",
+                "Unknown error while trying to precheck the software deployment, "
+                "check /var/log/nfv-vim.log for more information."
+            )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, reason)
 
@@ -1113,17 +1114,10 @@ class UpgradeStartStep(strategy.StrategyStep):
         DLOG.debug("Start-Upgrade callback response=%s." % response)
 
         if not response['completed']:
-            reason = (
+            reason = response.get('error-message',
                 "Unknown error while trying to start the software deployment, "
                 "check /var/log/nfv-vim.log for more information."
             )
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, reason)
-
-        elif not (info := response["result-data"]["info"].strip()).endswith("started"):
-            # TODO(jkraitbe): This will likely change in future
-            # Failed/Rejected starts return HTTP 200 so we need to parse result
-            reason = f"Failed deploy start: {info}"
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, reason)
 
@@ -1240,7 +1234,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
         DLOG.debug("Activate-Upgrade callback response=%s." % response)
 
         if not response['completed']:
-            reason = (
+            reason = response.get("error-message",
                 "Unknown error while trying to activate the software deployment, "
                 "check /var/log/nfv-vim.log for more information."
             )
@@ -1359,17 +1353,14 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         DLOG.debug("Complete-Upgrade callback response=%s." % response)
 
         self.strategy.nfvi_upgrade = response['result-data']
-        if response['completed']:
-            state_info = self.strategy.nfvi_upgrade['release_info']['state']
-            if state_info == SW_HOST_DEPLOYED:
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, "")
-            else:
-                reason = "SW Deploy completed failed. Current state:%s" % state_info
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, reason)
+        if response['completed'] and self.strategy.nfvi_upgrade.is_deploy_completed:
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
         else:
-            reason = "SW Deploy did not complete. Current response:%s" % response['result-data']
+            reason = response.get("error-message",
+                "Unknown error while trying to complete the software deployment, "
+                "check /var/log/nfv-vim.log for more information."
+            )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, reason)
 
@@ -2876,7 +2867,9 @@ class QueryUpgradeStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
+            self.stage.step_complete(result,
+                                     f"Failed to query software release: {self._release}. " +
+                                     "Check /var/log/nfv-vim.log for more information.")
 
     def apply(self):
         """

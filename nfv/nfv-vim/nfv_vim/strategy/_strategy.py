@@ -1812,6 +1812,7 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
+        # Precheck is part of create phase because DC requested it
         stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
         self.build_phase.add_stage(stage)
         super(SwUpgradeStrategy, self).build()
@@ -1918,6 +1919,7 @@ class SwUpgradeStrategy(
         from nfv_vim import strategy
         from nfv_vim import tables
 
+        reason = ""
         result, result_reason = \
             super(SwUpgradeStrategy, self).build_complete(result, result_reason)
 
@@ -1926,34 +1928,23 @@ class SwUpgradeStrategy(
 
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:
-            if not self.nfvi_upgrade.release_info:
-                reason = "Software release does not exist."
-                DLOG.warn(reason)
-                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = reason
-                self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
-                self.save()
-                return
+            if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
+                reason = "Software release does not exist or is unavailable."
 
-            if self.nfvi_upgrade.is_deployed or self.nfvi_upgrade.is_committed:
+            elif self.nfvi_upgrade.is_deployed or self.nfvi_upgrade.is_committed:
                 reason = "Software release is already deployed or committed."
+
+            elif self.nfvi_upgrade.is_deploy_completed:
+                reason = "Software deployment is already complete."
+
+            elif self._nfvi_alarms:
+                reason = "Active alarms found, can't apply software deployment."
+
+            if reason:
                 DLOG.warn(reason)
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                self.build_phase.result = \
-                    strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = reason
-                self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
-                self.save()
-                return
-
-            if self._nfvi_alarms:
-                DLOG.warn("Active alarms found, can't apply sw-deployment.")
-                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = 'active alarms present'
+                self.build_phase.result_reason = reason
                 self.sw_update_obj.strategy_build_complete(
                     False, self.build_phase.result_reason)
                 self.save()

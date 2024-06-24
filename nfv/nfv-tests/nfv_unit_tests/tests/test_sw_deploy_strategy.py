@@ -1044,7 +1044,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_deploy_strategy_aiosx_already_deployed(self):
         """
         Test the sw_deploy strategy when patch already deployed:
-        - patch already committed
+        - patch already deployed
         Verify:
         - Fail
         """
@@ -1063,6 +1063,34 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
         expected_reason = "Software release is already deployed or committed."
+        bpr = strategy.build_phase
+
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
+        assert bpr.result_reason == expected_reason, bpr.result_reason
+
+    def test_sw_deploy_strategy_aiosx_already_deploy_completed(self):
+        """
+        Test the sw_deploy strategy when patch already deploy completed:
+        - patch deploy completed
+        Verify:
+        - Fail
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                '13.01',
+                {'state': 'deploying'},
+                {'state': 'completed'},
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        expected_reason = "Software deployment is already complete."
         bpr = strategy.build_phase
 
         assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
@@ -1118,7 +1146,35 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy.sw_update_obj = fake_upgrade_obj
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        expected_reason = "Software release does not exist."
+        expected_reason = "Software release does not exist or is unavailable."
+        bpr = strategy.build_phase
+
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
+        assert bpr.result_reason == expected_reason, strategy.build_phase.result_reason
+
+    def test_sw_deploy_strategy_aiosx_release_is_unavailable(self):
+        """
+        Test the sw_deploy strategy when patch is unavailable:
+        - patch does not exist
+        Verify:
+        - Fail
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                '13.01',
+                {'state': 'unavailable'},
+                None,
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        expected_reason = "Software release does not exist or is unavailable."
         bpr = strategy.build_phase
 
         assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
