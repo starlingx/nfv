@@ -1,14 +1,14 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
 import os
-from six.moves import http_client as httplib
-from six.moves import urllib
+import requests
 
 CAFILE = os.environ.get('REQUESTS_CA_BUNDLE')
+STRATEGY_EXISTS = 'strategy already exists.'
 
 
 def request(token_id, method, api_cmd, api_cmd_headers=None,
@@ -18,92 +18,40 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
     Note: Using a default timeout of 40 seconds. The VIM's internal handling
     of these requests times out after 30 seconds - we want that to happen
     first (if possible).
+    Library usage: 'urllib' library is replaced by 'requests' library - 'urllib'
+    has limitation to support huge multiple connection requests in parallel.
     """
-    headers_per_hop = ['connection', 'keep-alive', 'proxy-authenticate',
-                       'proxy-authorization', 'te', 'trailers',
-                       'transfer-encoding', 'upgrade']
+    headers = {"Accept": "application/json"}
+    if token_id:
+        headers["X-Auth-Token"] = token_id
 
+    if api_cmd_headers:
+        headers.update(api_cmd_headers)
+    if api_cmd_payload:
+        api_cmd_payload = json.loads(api_cmd_payload)
     try:
-        request_info = urllib.request.Request(api_cmd)
-        request_info.get_method = lambda: method
-        if token_id is not None:
-            request_info.add_header("X-Auth-Token", token_id)
-        request_info.add_header("Accept", "application/json")
+        response = requests.request(
+            method, api_cmd, headers=headers, json=api_cmd_payload,
+            timeout=timeout_in_secs, verify=CAFILE
+        )
+        response.raise_for_status()
 
-        if api_cmd_headers is not None:
-            for header_type, header_value in list(api_cmd_headers.items()):
-                request_info.add_header(header_type, header_value)
-
-        if api_cmd_payload is not None:
-            request_info.data = api_cmd_payload.encode()
-
-        url_request = urllib.request.urlopen(request_info,
-                                             timeout=timeout_in_secs,
-                                             cafile=CAFILE)
-
-        headers = list()  # list of tuples
-        for key, value in url_request.info().items():
-            if key not in headers_per_hop:
-                cap_key = '-'.join((ck.capitalize() for ck in key.split('-')))
-                headers.append((cap_key, value))
-
-        response_raw = url_request.read()
-
-        # python2 the reponse may be an empty string
-        # python3 the response may be an empty byte string
-        if response_raw == "" or response_raw == b"":
-            response = dict()
+        # Check if the content type starts with 'application/json'
+        content_type = response.headers.get('content-type', '')
+        if content_type.startswith('application/json'):
+            return response.json()
         else:
-            response = json.loads(response_raw)
+            return response.text
 
-        url_request.close()
-
-        return response
-
-    except urllib.error.HTTPError as e:
-        headers = list()
-        response_raw = dict()
-        json_response = False
-
-        if e.fp is not None:
-            headers = list()  # list of tuples
-            for key, value in e.fp.info().items():
-                if key not in headers_per_hop:
-                    header = '-'.join((ck.capitalize()
-                                       for ck in key.split('-')))
-                    headers.append((header, value))
-                    # set a flag if the response is json
-                    # to assist with extracting faultString
-                    if 'Content-Type' == header:
-                        if 'application/json' == value.split(';')[0]:
-                            json_response = True
-
-            response_raw = e.fp.read()
-
-        reason = e.reason
-        if json_response:
-            try:
-                response = json.loads(response_raw)
-                message = response.get('faultstring', None)
-                if message is not None:
-                    reason = str(message.rstrip('.'))
-            except ValueError:
-                pass
-
-        if httplib.FOUND == e.code:
-            return response_raw
-
-        elif httplib.NOT_FOUND == e.code:
+    except requests.HTTPError as e:
+        status_code = e.response.status_code
+        if status_code == requests.codes.not_found:  # pylint: disable=no-member
             return None
-
-        elif httplib.CONFLICT == e.code:
-            raise Exception("Operation failed: conflict detected. %s" % reason)
-
-        elif httplib.FORBIDDEN == e.code:
+        elif status_code == requests.codes.conflict:  # pylint: disable=no-member
+            error_response = json.loads(response.text)
+            raise Exception(
+               f"Operation failed: conflict detected. {error_response.get('faultstring', STRATEGY_EXISTS)}")
+        elif status_code == requests.codes.forbidden:  # pylint: disable=no-member
             raise Exception("Authorization failed")
-
-        raise Exception(reason)
-
-    except urllib.error.URLError as e:
-        reason = e.reason
-        raise Exception(reason)
+        else:
+            raise Exception(f"HTTP error: {e}")
