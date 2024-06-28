@@ -56,6 +56,7 @@ class StrategyPhase(object):
     completion_percentage = None
     result = None
     reason = None
+    response = None
 
     def __repr__(self):
         return "%s" % str(self.__dict__)
@@ -139,6 +140,7 @@ def _get_strategy_phase_object_from_response(response):
     phase.completion_percentage = response['completion-percentage']
     phase.result = response['result']
     phase.reason = response['reason']
+    phase.response = response['response']
 
     phase.stages = []
     for stage in response['stages']:
