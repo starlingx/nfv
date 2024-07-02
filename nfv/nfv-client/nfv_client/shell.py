@@ -208,6 +208,9 @@ def setup_show_cmd(parser):
     show_cmd.add_argument('--active',
                           action='store_true',
                           help='show currently active strategy step')
+    show_cmd.add_argument('--error-details',
+                          action='store_true',
+                          help='show error details of failed strategy step')
     return show_cmd
 
 
@@ -672,7 +675,8 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
                                     args.os_interface,
                                     strategy_name,
                                     details=args.details,
-                                    active=args.active)
+                                    active=args.active,
+                                    error_details=args.error_details)
         else:
             raise ValueError("Unknown command, %s, given for %s"
                              % (args.cmd, args.cmd_area))

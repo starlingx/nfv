@@ -943,7 +943,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         response = (yield)
         DLOG.debug("sw-deploy precheck callback response=%s." % response)
 
-        if response['completed'] and not response['result-data']:
+        if response['completed'] and response['result-data']:
             DLOG.debug("sw-deploy precheck completed")
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, '')
@@ -953,6 +953,8 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
     def apply(self):
@@ -1030,6 +1032,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             DLOG.info("Host Upgrade failed")
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, response['reason'])
 
     def apply(self):
@@ -1119,6 +1123,8 @@ class UpgradeStartStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
     @coroutine
@@ -1149,6 +1155,8 @@ class UpgradeStartStep(strategy.StrategyStep):
                 "check /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
         elif not self.strategy.nfvi_upgrade.is_starting:
@@ -1157,6 +1165,8 @@ class UpgradeStartStep(strategy.StrategyStep):
                 "check /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
         else:
@@ -1239,6 +1249,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
         # TODO(jkraitbe): This will change in future
@@ -1272,6 +1284,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
                 "check /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
         elif not self.strategy.nfvi_upgrade.is_activating:
@@ -1280,6 +1294,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
                 "check /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
         else:
@@ -1362,6 +1378,8 @@ class UpgradeCompleteStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
     def apply(self):

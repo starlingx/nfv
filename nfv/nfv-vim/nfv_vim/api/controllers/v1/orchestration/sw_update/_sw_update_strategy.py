@@ -1,4 +1,4 @@
-#
+
 # Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -113,6 +113,7 @@ class SwUpdateStrategyPhaseData(wsme_types.Base):
     completion_percentage = wsme_types.wsattr(int, name='completion-percentage')
     result = wsme_types.wsattr(six.text_type, name='result')
     reason = wsme_types.wsattr(six.text_type, name='reason')
+    response = wsme_types.wsattr(six.text_type, name='response')
     start_date_time = wsme_types.wsattr(six.text_type, name='start-date-time')
     end_date_time = wsme_types.wsattr(six.text_type, name='end-date-time')
 
@@ -359,6 +360,7 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
         phase.completion_percentage = phase_data['completion_percentage']
         phase.result = phase_data['result']
         phase.reason = phase_data['result_reason']
+        phase.response = phase_data['result_response']
         phase.start_date_time = phase_data['start_date_time']
         phase.end_date_time = phase_data['end_date_time']
         return phase

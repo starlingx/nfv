@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016,2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -33,6 +33,7 @@ class StrategyPhase(object):
         self._stages = list()
         self._result = STRATEGY_PHASE_RESULT.INITIAL
         self._result_reason = ''
+        self._result_response = ''
         self._timer_id = None
         self._timeout_in_secs = 0
         self._inprogress = False
@@ -128,6 +129,20 @@ class StrategyPhase(object):
         Updates the reason for the result of the strategy phase
         """
         self._result_reason = reason
+
+    @property
+    def result_response(self):
+        """
+        Returns the response for the result of the strategy phase
+        """
+        return self._result_response
+
+    @result_response.setter
+    def result_response(self, response):
+        """
+        Updates the response for the result of the strategy phase
+        """
+        self._result_response = response
 
     @property
     def start_date_time(self):
@@ -296,6 +311,12 @@ class StrategyPhase(object):
         self._result = STRATEGY_PHASE_RESULT.TIMED_OUT
         self._result_reason = 'timeout'
         self._complete(self._result, self._result_reason)
+
+    def result_complete_response(self, response):
+        """
+        Sets complete result response
+        """
+        self._result_response = response
 
     def _complete(self, result, reason):
         """
@@ -611,6 +632,7 @@ class StrategyPhase(object):
             data['stages'].append(stage.as_dict())
         data['result'] = self._result
         data['result_reason'] = self._result_reason
+        data['result_response'] = self._result_response
         data['start_date_time'] = self._start_date_time
         data['end_date_time'] = self._end_date_time
         return data

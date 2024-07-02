@@ -172,7 +172,7 @@ function _swmanager()
                             ;;
                         show)
                             if [ "${prev}" = "${action}" ]; then
-                              COMPREPLY=($(compgen -W "--details --active" -- ${cur}))
+                              COMPREPLY=($(compgen -W "--details --active --error-details" -- ${cur}))
                             fi
                             return 0
                             ;;

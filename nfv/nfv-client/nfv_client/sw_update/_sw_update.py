@@ -137,7 +137,7 @@ def _display_strategy_phase(strategy_phase, details=False, active=False):
                 print("")
 
 
-def _display_strategy(strategy, details=False, active=False):
+def _display_strategy(strategy, details=False, active=False, error_details=False):
     """
     Software Update - Display Strategy Information
     """
@@ -180,6 +180,7 @@ def _display_strategy(strategy, details=False, active=False):
 
         if 0 < strategy.abort_phase.total_stages:
             _display_strategy_phase(strategy.abort_phase, details, active)
+
     else:
         if strategy.current_phase == strategy.build_phase.phase_name:
             if strategy.build_phase.inprogress:
@@ -187,12 +188,16 @@ def _display_strategy(strategy, details=False, active=False):
             else:
                 _print(2, "build-result", strategy.build_phase.result)
                 _print(2, "build-reason", strategy.build_phase.reason)
+                if error_details:
+                    _print(2, "build-error-response", strategy.build_phase.response)
         elif strategy.current_phase == strategy.apply_phase.phase_name:
             if strategy.apply_phase.inprogress:
                 _print(2, "inprogress", "true")
             else:
                 _print(2, "apply-result", strategy.apply_phase.result)
                 _print(2, "apply-reason", strategy.apply_phase.reason)
+                if error_details:
+                    _print(2, "apply-error-response", strategy.apply_phase.response)
         elif strategy.current_phase == strategy.abort_phase.phase_name:
             if strategy.abort_phase.inprogress:
                 _print(2, "inprogress", "true")
@@ -205,6 +210,9 @@ def _display_strategy(strategy, details=False, active=False):
                 _print(2, "apply-reason", strategy.apply_phase.reason)
                 _print(2, "abort-result", strategy.abort_phase.result)
                 _print(2, "abort-reason", strategy.abort_phase.reason)
+            if error_details:
+                _print(2, "apply-error-response", strategy.apply_phase.response)
+                _print(2, "abort-error-response", strategy.abort_phase.response)
 
 
 def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
@@ -339,7 +347,7 @@ def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
 def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                   os_username, os_password, os_user_domain_name, os_region_name,
-                  os_interface, strategy_name, details=False, active=False):
+                  os_interface, strategy_name, details=False, active=False, error_details=False):
     """
     Software Update - Show Strategy
     """
@@ -362,4 +370,4 @@ def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
         print("No strategy available")
         return
 
-    _display_strategy(strategy, details, active)
+    _display_strategy(strategy, details, active, error_details)
