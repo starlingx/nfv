@@ -2009,6 +2009,18 @@ class SwUpgradeStrategy(
                     key=lambda x: x.name == HOST_NAME.CONTROLLER_0,
                 )
 
+            elif not self.nfvi_upgrade.major_release:
+                local_host_name = get_local_host_name()
+                # Sort the controller such that host other than
+                # current local_host_name is the first element in the list.
+                # This sorting is to reduce the number of swact required since
+                # sw-deploy patch release orchestration can start on host that
+                # is currently active.
+                controllers_hosts = sorted(
+                    controllers_hosts,
+                    key=lambda x: x.name == local_host_name,
+                )
+
             strategy_pairs = [
                 (controller_strategy, controllers_hosts),
                 (self._add_storage_strategy_stages, storage_hosts),

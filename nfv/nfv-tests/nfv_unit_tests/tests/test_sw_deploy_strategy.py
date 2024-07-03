@@ -1200,6 +1200,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -1266,6 +1267,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 {
                     'state': 'available',
                     'reboot_required': True,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
                 },
                 None,
                 None,
