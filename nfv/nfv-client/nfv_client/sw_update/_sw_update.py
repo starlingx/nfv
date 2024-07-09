@@ -7,14 +7,12 @@ from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
 import textwrap
 
-STRATEGY_NAME_SW_PATCH = 'sw-patch'
 STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
 STRATEGY_NAME_FW_UPDATE = 'fw-update'
 STRATEGY_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update'
 STRATEGY_NAME_KUBE_UPGRADE = 'kube-upgrade'
 STRATEGY_NAME_SYSTEM_CONFIG_UPDATE = 'system-config-update'
 
-CMD_NAME_SW_PATCH = 'patch-strategy'
 CMD_NAME_SW_DEPLOY = 'sw-deploy-strategy'
 CMD_NAME_FW_UPDATE = 'fw-update-strategy'
 CMD_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update-strategy'
@@ -141,10 +139,8 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
     """
     Software Update - Display Strategy Information
     """
-    if strategy.name == STRATEGY_NAME_SW_PATCH:
-        print("Strategy Patch Strategy:")
     # TODO(jkraitbe): Backend for sw-deploy will continue as old sw-upgrade for now
-    elif strategy.name == STRATEGY_NAME_SW_UPGRADE:
+    if strategy.name == STRATEGY_NAME_SW_UPGRADE:
         print("Strategy Software Deploy Strategy:")
     elif strategy.name == STRATEGY_NAME_FW_UPDATE:
         print("Strategy Firmware Update Strategy:")

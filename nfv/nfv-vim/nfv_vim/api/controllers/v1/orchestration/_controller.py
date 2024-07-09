@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,6 @@ from nfv_vim.api.controllers.v1.orchestration.sw_update import FwUpdateAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import KubeRootcaUpdateAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import KubeUpgradeAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import StrategyAPI
-from nfv_vim.api.controllers.v1.orchestration.sw_update import SwPatchAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SwUpgradeAPI
 from nfv_vim.api.controllers.v1.orchestration.sw_update import SystemConfigUpdateAPI
 
@@ -34,7 +33,6 @@ class OrchestrationDescription(wsme_types.Base):
         description.id = "orchestration"
         description.links = [
             Link.make_link('self', url, 'orchestration'),
-            Link.make_link('sw-patch', url, 'orchestration/sw-patch', ''),
             Link.make_link('sw-upgrade', url, 'orchestration/sw-upgrade', ''),
             Link.make_link('system-config-update',
                            url, 'orchestration/system-config-update', ''),
@@ -53,9 +51,7 @@ class OrchestrationAPI(rest.RestController):
     """
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'sw-patch' == key:
-            return SwPatchAPI(), remainder
-        elif 'sw-upgrade' == key:
+        if 'sw-upgrade' == key:
             return SwUpgradeAPI(), remainder
         elif 'system-config-update' == key:
             return SystemConfigUpdateAPI(), remainder

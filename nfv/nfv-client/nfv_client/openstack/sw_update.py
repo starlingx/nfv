@@ -275,11 +275,7 @@ def create_strategy(token_id,
     api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
-    if sw_update.STRATEGY_NAME_SW_PATCH == strategy_name:
-        api_cmd_payload['controller-apply-type'] = controller_apply_type
-        api_cmd_payload['swift-apply-type'] = swift_apply_type
-        api_cmd_payload['default-instance-action'] = default_instance_action
-    elif sw_update.STRATEGY_NAME_FW_UPDATE == strategy_name:
+    if sw_update.STRATEGY_NAME_FW_UPDATE == strategy_name:
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
     elif sw_update.STRATEGY_NAME_KUBE_ROOTCA_UPDATE == strategy_name:

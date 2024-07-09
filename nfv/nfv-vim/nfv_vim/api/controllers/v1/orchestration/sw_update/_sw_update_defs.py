@@ -19,7 +19,6 @@ class SwUpdateNames(Constants):
     FW_UPDATE = Constant('fw-update')
     KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
     KUBE_UPGRADE = Constant('kube-upgrade')
-    SW_PATCH = Constant('sw-patch')
     SW_UPGRADE = Constant('sw-upgrade')
     SYSTEM_CONFIG_UPDATE = Constant('system-config-update')
     CURRENT_STRATEGY = Constant('current-strategy')
@@ -77,7 +76,6 @@ SwUpdateNames = wsme_types.Enum(str,
                                 SW_UPDATE_NAME.FW_UPDATE,
                                 SW_UPDATE_NAME.KUBE_ROOTCA_UPDATE,
                                 SW_UPDATE_NAME.KUBE_UPGRADE,
-                                SW_UPDATE_NAME.SW_PATCH,
                                 SW_UPDATE_NAME.SW_UPGRADE,
                                 SW_UPDATE_NAME.SYSTEM_CONFIG_UPDATE,
                                 SW_UPDATE_NAME.CURRENT_STRATEGY)
