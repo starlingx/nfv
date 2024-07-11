@@ -2262,6 +2262,16 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
                         host_list.remove(host)
                         break
 
+            local_host_name = get_local_host_name()
+            # Sort the controller such that host other than
+            # current local_host_name is the first element in the list.
+            # This sorting is to reduce the number of swact required.
+            controller_hosts = sorted(controller_hosts,
+                    key=lambda x: x.name == local_host_name,)
+
+            worker_hosts = sorted(worker_hosts,
+                    key=lambda x: x.name == local_host_name,)
+
             STRATEGY_CREATION_COMMANDS = [
                 (self._add_system_config_controller_strategy_stages,
                  controller_hosts),
