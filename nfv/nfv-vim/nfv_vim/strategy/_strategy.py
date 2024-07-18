@@ -2192,6 +2192,7 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
                          '280.001',  # Subcloud resource off-line
                          '280.002',  # Subcloud resource out-of-sync
                          '280.003',  # Subcloud backup failed
+                         '400.005',  # Communication failure detected during oam reconfiguration
                          '500.200',  # Certificate expiring soon
                          '700.004',  # VM stopped
                          '750.006',  # Configuration change requires reapply of an application
