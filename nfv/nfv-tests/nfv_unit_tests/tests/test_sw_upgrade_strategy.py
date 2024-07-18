@@ -1816,7 +1816,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 0,
             'result': 'failed',
             'result_reason':
-                'all controller hosts must be unlocked-enabled-available'
+                "All hosts must be unlocked-enabled-available to start a new sw-deployment: ['controller-0']"
         }
 
         sw_update_testcase.validate_phase(build_phase, expected_results)
@@ -1860,7 +1860,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 0,
             'result': 'failed',
             'result_reason':
-                'all worker hosts must be unlocked-enabled-available'
+                "All hosts must be unlocked-enabled-available to start a new sw-deployment: ['compute-3']"
         }
 
         sw_update_testcase.validate_phase(build_phase, expected_results)

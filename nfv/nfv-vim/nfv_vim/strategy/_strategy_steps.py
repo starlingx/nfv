@@ -943,7 +943,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         response = (yield)
         DLOG.debug("sw-deploy precheck callback response=%s." % response)
 
-        if response['completed'] and response['result-data']:
+        if response['completed'] and response['complete-data'].get('system_healthy', False):
             DLOG.debug("sw-deploy precheck completed")
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, '')
@@ -964,11 +964,16 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        force = (
-            self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
-        )
-        nfvi.nfvi_sw_deploy_precheck(self._release, force, self._sw_deploy_precheck_callback())
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        if self.strategy.nfvi_upgrade.is_deploying:
+            reason = "Deployment already in progress, skipping precheck"
+            DLOG.info(reason)
+            return strategy.STRATEGY_STEP_RESULT.SUCCESS, reason
+        else:
+            force = (
+                self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
+            )
+            nfvi.nfvi_sw_deploy_precheck(self._release, force, self._sw_deploy_precheck_callback())
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
         """
@@ -1179,11 +1184,22 @@ class UpgradeStartStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        force = (
-            self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
-        )
-        nfvi.nfvi_upgrade_start(self._release, force, self._start_upgrade_callback())
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+        result = strategy.STRATEGY_STEP_RESULT.WAIT
+        reason = ""
+
+        if self.strategy.nfvi_upgrade.is_starting:
+            DLOG.info("Deployment already starting, skipping start call")
+        elif self.strategy.nfvi_upgrade.is_start_done:
+            DLOG.info("Deployment already started, skipping start call")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+        else:
+            force = (
+                self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
+            )
+            nfvi.nfvi_upgrade_start(self._release, force, self._start_upgrade_callback())
+
+        return result, reason
 
     def handle_event(self, event, event_data=None):
         """
@@ -1253,8 +1269,6 @@ class UpgradeActivateStep(strategy.StrategyStep):
             self.phase.result_complete_response(detailed_reason)
             self.stage.step_complete(result, reason)
 
-        # TODO(jkraitbe): This will change in future
-
     @coroutine
     def _handle_activate_upgrade_callback(self):
         """
@@ -1308,8 +1322,19 @@ class UpgradeActivateStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+        result = strategy.STRATEGY_STEP_RESULT.WAIT
+        reason = ""
+
+        if self.strategy.nfvi_upgrade.is_activating:
+            DLOG.info("Deployment already activating, skipping activate call")
+        elif self.strategy.nfvi_upgrade.is_activate_done:
+            DLOG.info("Deployment already activated, skipping activate call")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+        else:
+            nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
+
+        return result, reason
 
     def handle_event(self, event, event_data=None):
         """

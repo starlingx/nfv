@@ -59,11 +59,27 @@ class Upgrade(ObjectData):
         return self.release_info["sw_version"]
 
     @property
-    def major_release(self):
-        if not self.release_info:
+    def from_release(self):
+        if not self.deploy_info:
             return None
 
-        return is_major_release(SW_VERSION, self.sw_version)
+        return self.deploy_info["from_release"]
+
+    @property
+    def to_release(self):
+        if not self.deploy_info:
+            return None
+
+        return self.deploy_info["to_release"]
+
+    @property
+    def major_release(self):
+        if self.deploy_info:
+            return is_major_release(self.from_release, self.to_release)
+        elif self.release_info:
+            # On DX systems, SW_VERSION will not be accurate if only one host has be deployed.
+            # Therefore, it should only be used when a deployment is not in progress.
+            return is_major_release(SW_VERSION, self.sw_version)
 
     @property
     def is_available(self):
@@ -72,6 +88,10 @@ class Upgrade(ObjectData):
     @property
     def is_unavailable(self):
         return self.release_state == usm_states.UNAVAILABLE
+
+    @property
+    def is_deploying(self):
+        return self.release_state == usm_states.DEPLOYING
 
     @property
     def is_deployed(self):
@@ -98,11 +118,11 @@ class Upgrade(ObjectData):
         return self.deploy_state == usm_states.DEPLOY_STATES.HOST.value
 
     @property
-    def is_deploy_hosts_done(self):
+    def is_deploying_hosts_done(self):
         return self.deploy_state == usm_states.DEPLOY_STATES.HOST_DONE.value
 
     @property
-    def is_deploy_hosts_failed(self):
+    def is_deploying_hosts_failed(self):
         return self.deploy_state == usm_states.DEPLOY_STATES.HOST_FAILED.value
 
     @property
@@ -121,12 +141,10 @@ class Upgrade(ObjectData):
     def is_deploy_completed(self):
         return self.deploy_state == usm_states.DEPLOY_STATES.COMPLETED.value
 
-    @property
-    def all_hosts_deployed(self):
+    def is_host_deployed(self, hostname):
         if not self.hosts_info:
             return None
 
         for v in self.hosts_info:
-            if v["host_state"] != usm_states.DEPLOY_HOST_STATES.DEPLOYED.value:
-                return False
-        return True
+            if v["hostname"] == hostname:
+                return v["host_state"] == usm_states.DEPLOY_HOST_STATES.DEPLOYED.value

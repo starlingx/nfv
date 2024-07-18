@@ -1046,13 +1046,17 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Test the sw_deploy strategy when patch already deployed:
         - patch already deployed
         Verify:
-        - Fail
+        - Success
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 '13.01',
-                {'state': 'deployed'},
+                {
+                    'state': 'deployed',
+                    'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
+                },
                 None,
                 None,
             )
@@ -1062,12 +1066,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy.sw_update_obj = fake_upgrade_obj
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        expected_reason = "Software release is already deployed or committed."
         bpr = strategy.build_phase
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
-        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
-        assert bpr.result_reason == expected_reason, bpr.result_reason
+        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     def test_sw_deploy_strategy_aiosx_already_deploy_completed(self):
         """
@@ -1118,7 +1120,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy.sw_update_obj = fake_upgrade_obj
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        expected_reason = "Software release is already deployed or committed."
+        expected_reason = "Software release is committed."
         bpr = strategy.build_phase
 
         assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED

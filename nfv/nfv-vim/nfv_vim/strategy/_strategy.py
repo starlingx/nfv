@@ -1890,16 +1890,90 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_START)
 
         # If the release is not available the deployment is already started
-        if self.nfvi_upgrade.is_available:
-            stage.add_step(strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms))
-            # sw-deploy start for major releases must be done on controller-0
-            self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-            stage.add_step(strategy.UpgradeStartStep(release=self._release))
-        else:
-            DLOG.info("Software deployment already inprogress, skipping start")
-
+        stage.add_step(strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms))
+        # sw-deploy start for major releases must be done on controller-0
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
+        stage.add_step(strategy.UpgradeStartStep(release=self._release))
         stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
         self.apply_phase.add_stage(stage)
+
+    def _add_upgrade_hosts_stages(self):
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        host_table = tables.tables_get_host_table()
+        reboot_required = self.nfvi_upgrade.reboot_required
+        controller_strategy = self._add_controller_strategy_stages
+        controllers_hosts = list()
+        storage_hosts = list()
+        worker_hosts = list()
+
+        for host in host_table.values():
+            if self.nfvi_upgrade.is_host_deployed(host.name):
+                DLOG.info("Skipping deploy-host for already deployed host: {host.name}")
+                continue
+
+            if HOST_PERSONALITY.CONTROLLER in host.personality:
+                controllers_hosts.append(host)
+                if HOST_PERSONALITY.WORKER in host.personality:
+                    # We need to use this strategy on AIO type
+                    controller_strategy = self._add_worker_strategy_stages
+
+            elif HOST_PERSONALITY.STORAGE in host.personality:
+                storage_hosts.append(host)
+
+            elif HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+
+            else:
+                DLOG.error(f"Unsupported personality for host {host.name}.")
+                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                self.build_phase.result = \
+                    strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.build_phase.result_reason = \
+                    'Unsupported personality for host'
+                self.sw_update_obj.strategy_build_complete(
+                    False, self.build_phase.result_reason)
+                self.save()
+                return
+
+        if not self._single_controller and self.nfvi_upgrade.major_release:
+            # Reverse controller hosts so controller-1 is first
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == HOST_NAME.CONTROLLER_0,
+            )
+
+        elif not self.nfvi_upgrade.major_release:
+            local_host_name = get_local_host_name()
+            # Sort the controller such that host other than
+            # current local_host_name is the first element in the list.
+            # This sorting is to reduce the number of swact required since
+            # sw-deploy patch release orchestration can start on host that
+            # is currently active.
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == local_host_name,
+            )
+
+        strategy_pairs = [
+            (controller_strategy, controllers_hosts),
+            (self._add_storage_strategy_stages, storage_hosts),
+            (self._add_worker_strategy_stages, worker_hosts)
+        ]
+
+        for stage_func, host_list in strategy_pairs:
+            if host_list:
+                success, reason = stage_func(host_list, reboot_required)
+                if not success:
+                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                    self.build_phase.result = \
+                        strategy.STRATEGY_PHASE_RESULT.FAILED
+                    self.build_phase.result_reason = reason
+                    self.sw_update_obj.strategy_build_complete(
+                        False, self.build_phase.result_reason)
+                    self.save()
+                    return
 
     def _add_upgrade_complete_stage(self):
         """
@@ -1917,7 +1991,6 @@ class SwUpgradeStrategy(
 
     def _build_complete_normal(self, result, result_reason):
         from nfv_vim import strategy
-        from nfv_vim import tables
 
         reason = ""
         result, result_reason = \
@@ -1931,14 +2004,27 @@ class SwUpgradeStrategy(
             if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
                 reason = "Software release does not exist or is unavailable."
 
-            elif self.nfvi_upgrade.is_deployed or self.nfvi_upgrade.is_committed:
-                reason = "Software release is already deployed or committed."
+            elif self.nfvi_upgrade.is_committed:
+                reason = "Software release is committed."
 
             elif self.nfvi_upgrade.is_deploy_completed:
                 reason = "Software deployment is already complete."
 
             elif self._nfvi_alarms:
                 reason = "Active alarms found, can't apply software deployment."
+
+            elif self.nfvi_upgrade.is_deployed or self.nfvi_upgrade.is_available:
+                from nfv_vim import tables
+                bad_hosts = []
+                host_table = tables.tables_get_host_table()
+                for host in list(host_table.values()):
+                    if not (host.is_unlocked() and host.is_enabled() and host.is_available()):
+                        bad_hosts.append(host.name)
+                if bad_hosts:
+                    reason = (
+                        "All hosts must be unlocked-enabled-available " +
+                        f"to start a new sw-deployment: {bad_hosts}"
+                    )
 
             if reason:
                 DLOG.warn(reason)
@@ -1950,97 +2036,46 @@ class SwUpgradeStrategy(
                 self.save()
                 return
 
-            host_table = tables.tables_get_host_table()
+            do_start = True
+            do_upgrade_hosts = True
+            do_complete = True
 
-            for host in list(host_table.values()):
-                # All hosts must be unlock/enabled/available
-                if not (host.is_unlocked() and host.is_enabled() and host.is_available()):
-                    DLOG.warn(
-                        "All hosts must be unlocked-enabled-available, "
-                        "can't apply sw-deployment: %s" % host.name)
-                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = \
-                        strategy.STRATEGY_PHASE_RESULT.FAILED
-                    self.build_phase.result_reason = (
-                        'all %s hosts must be unlocked-enabled-available' %
-                        host.personality)
-                    self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
-                    self.save()
-                    return
+            # Skip start if started
+            if (
+                    self.nfvi_upgrade.is_start_done or
+                    self.nfvi_upgrade.is_deploying_hosts or
+                    self.nfvi_upgrade.is_deploying_hosts_failed
+            ):
+                DLOG.info("Skipping sw-deploy-start: Already started")
+                do_start = False
 
-            reboot_required = self.nfvi_upgrade.reboot_required
-            controller_strategy = self._add_controller_strategy_stages
-            controllers_hosts = list()
-            storage_hosts = list()
-            worker_hosts = list()
+            # Skip straight to end if activate is complete or failed
+            elif (
+                   self.nfvi_upgrade.is_deploying_hosts_done or
+                   self.nfvi_upgrade.is_activating or
+                   self.nfvi_upgrade.is_activate_done or
+                   self.nfvi_upgrade.is_activate_failed
+            ):
+                DLOG.info("Skipping sw-deploy-start: Already started")
+                DLOG.info("Skipping sw-deploy-hosts: Already deployed hosts")
+                do_start = False
+                do_upgrade_hosts = False
 
-            self._add_upgrade_start_stage()
+            # Already done, strategy probably would have failed already but just in case
+            elif self.nfvi_upgrade.is_deploy_completed:
+                DLOG.info("Doing nothing sw-deploy already completed")
+                do_start = False
+                do_upgrade_hosts = False
+                do_complete = False
 
-            for host in host_table.values():
-                if HOST_PERSONALITY.CONTROLLER in host.personality:
-                    controllers_hosts.append(host)
-                    if HOST_PERSONALITY.WORKER in host.personality:
-                        # We need to use this strategy on AIO type
-                        controller_strategy = self._add_worker_strategy_stages
+            if do_start:
+                self._add_upgrade_start_stage()
 
-                elif HOST_PERSONALITY.STORAGE in host.personality:
-                    storage_hosts.append(host)
+            if do_upgrade_hosts:
+                self._add_upgrade_hosts_stages()
 
-                elif HOST_PERSONALITY.WORKER in host.personality:
-                    worker_hosts.append(host)
-
-                else:
-                    DLOG.error(f"Unsupported personality for host {host.name}.")
-                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = \
-                        strategy.STRATEGY_PHASE_RESULT.FAILED
-                    self.build_phase.result_reason = \
-                        'Unsupported personality for host'
-                    self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
-                    self.save()
-                    return
-
-            if not self._single_controller and self.nfvi_upgrade.major_release:
-                # Reverse controller hosts so controller-1 is first
-                controllers_hosts = sorted(
-                    controllers_hosts,
-                    key=lambda x: x.name == HOST_NAME.CONTROLLER_0,
-                )
-
-            elif not self.nfvi_upgrade.major_release:
-                local_host_name = get_local_host_name()
-                # Sort the controller such that host other than
-                # current local_host_name is the first element in the list.
-                # This sorting is to reduce the number of swact required since
-                # sw-deploy patch release orchestration can start on host that
-                # is currently active.
-                controllers_hosts = sorted(
-                    controllers_hosts,
-                    key=lambda x: x.name == local_host_name,
-                )
-
-            strategy_pairs = [
-                (controller_strategy, controllers_hosts),
-                (self._add_storage_strategy_stages, storage_hosts),
-                (self._add_worker_strategy_stages, worker_hosts)
-            ]
-
-            for stage_func, host_list in strategy_pairs:
-                if host_list:
-                    success, reason = stage_func(host_list, reboot_required)
-                    if not success:
-                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = \
-                            strategy.STRATEGY_PHASE_RESULT.FAILED
-                        self.build_phase.result_reason = reason
-                        self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason)
-                        self.save()
-                        return
-
-            self._add_upgrade_complete_stage()
+            if do_complete:
+                self._add_upgrade_complete_stage()
 
             if 0 == len(self.apply_phase.stages):
                 DLOG.warn("No sw-deployments need to be applied.")
