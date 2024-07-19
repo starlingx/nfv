@@ -1259,8 +1259,16 @@ class UpdateWorkerHostsMixin(object):
             hosts_to_lock = list()
             hosts_to_reboot = list()
             if reboot:
-                hosts_to_lock = [x for x in host_list if not x.is_locked()]
-                hosts_to_reboot = [x for x in host_list if x.is_locked()]
+                if (
+                    isinstance(self, SwUpgradeStrategy) and
+                    any(HOST_PERSONALITY.CONTROLLER in v.personality for v in host_list)
+                ):
+                    # Always lock/unlock controllers during rollback/upgrade
+                    hosts_to_lock = host_list
+                    hosts_to_reboot = []
+                else:
+                    hosts_to_lock = [x for x in host_list if not x.is_locked()]
+                    hosts_to_reboot = [x for x in host_list if x.is_locked()]
 
             stage = strategy.StrategyStage(strategy_stage_name)
 
@@ -1828,14 +1836,12 @@ class SwUpgradeStrategy(
         super(SwUpgradeStrategy, self).build()
 
     def _build_rollback(self):
-        reason = "Rollback not supported yet."
-        DLOG.warn(reason)
-        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-        self.build_phase.result_reason = reason
-        self.sw_update_obj.strategy_build_complete(
-            False, self.build_phase.result_reason)
-        self.save()
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.QueryUpgradeStep(release=None))
+        self.build_phase.add_stage(stage)
         super(SwUpgradeStrategy, self).build()
 
     def build(self):
@@ -2109,15 +2115,152 @@ class SwUpgradeStrategy(
         self.sw_update_obj.strategy_build_complete(True, '')
         self.save()
 
+    def _add_rollback_start_stage(self):
+        """
+        Add rollback start strategy stage
+        """
+
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_START)
+
+        stage.add_step(strategy.QueryAlarmsStep(fail_on_alarms=False, ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.SwDeployAbortStep())
+        stage.add_step(strategy.SwDeployActivateRollbackStep())
+        self.apply_phase.add_stage(stage)
+
+    def _add_rollback_hosts_stages(self):
+        """
+        Add rollback hosts strategy stage
+        """
+
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        host_table = tables.tables_get_host_table()
+        reboot_required = self.nfvi_upgrade.reboot_required
+        controller_strategy = self._add_controller_strategy_stages
+        controllers_hosts = list()
+        storage_hosts = list()
+        worker_hosts = list()
+
+        for host in host_table.values():
+            if self.nfvi_upgrade.is_host_pending(host.name):
+                DLOG.info("Skipping host-rollback for pending host: {host.name}")
+                continue
+
+            if HOST_PERSONALITY.CONTROLLER in host.personality:
+                controllers_hosts.append(host)
+                if HOST_PERSONALITY.WORKER in host.personality:
+                    # We need to use this strategy on AIO type
+                    controller_strategy = self._add_worker_strategy_stages
+
+            elif HOST_PERSONALITY.STORAGE in host.personality:
+                storage_hosts.append(host)
+
+            elif HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+
+            else:
+                DLOG.error(f"Unsupported personality for host {host.name}.")
+                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                self.build_phase.result = \
+                    strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.build_phase.result_reason = \
+                    'Unsupported personality for host'
+                self.sw_update_obj.strategy_build_complete(
+                    False, self.build_phase.result_reason)
+                self.save()
+                return
+
+        # Sort the controller such that host other than
+        # current local_host_name is the first element in the list.
+        # This sorting is to reduce the number of swact required since
+        # sw-deploy patch release orchestration can start on host that
+        # is currently active.
+        local_host_name = get_local_host_name()
+        controllers_hosts = sorted(
+            controllers_hosts,
+            key=lambda x: x.name == local_host_name,
+        )
+
+        strategy_pairs = [
+            (self._add_worker_strategy_stages, worker_hosts),
+            (self._add_storage_strategy_stages, storage_hosts),
+            (controller_strategy, controllers_hosts),
+        ]
+
+        for stage_func, host_list in strategy_pairs:
+            if host_list:
+                success, reason = stage_func(host_list, reboot_required)
+                if not success:
+                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                    self.build_phase.result = \
+                        strategy.STRATEGY_PHASE_RESULT.FAILED
+                    self.build_phase.result_reason = reason
+                    self.sw_update_obj.strategy_build_complete(
+                        False, self.build_phase.result_reason)
+                    self.save()
+                    return
+
+    def _add_rollback_complete_stage(self):
+        """
+        Add rollback complete strategy stage
+        """
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_COMPLETE)
+
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        self.apply_phase.add_stage(stage)
+
     def _build_complete_rollback(self, result, result_reason):
-        reason = "Rollback not supported yet."
-        DLOG.warn(reason)
-        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-        self.build_phase.result_reason = reason
-        self.sw_update_obj.strategy_build_complete(
-            False, self.build_phase.result_reason)
-        self.save()
+        from nfv_vim import strategy
+
+        reason = ""
+        result, result_reason = \
+            super(SwUpgradeStrategy, self).build_complete(result, result_reason)
+
+        DLOG.info("Build Complete Callback, result=%s, reason=%s."
+                  % (result, result_reason))
+
+        if result not in [strategy.STRATEGY_RESULT.SUCCESS, strategy.STRATEGY_RESULT.DEGRADED]:
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+
+            self.sw_update_obj.strategy_build_complete(True, '')
+            self.save()
+            return
+
+        if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
+            reason = "Software release does not exist or is unavailable."
+
+        elif not self.nfvi_upgrade.is_deploying:
+            reason = (
+                "Software release must be deploying for a rollback, " +
+                f"found={self.nfvi_upgrade.release_info}."
+            )
+
+        elif not self._single_controller:
+            reason = "Rollback only supported for AIO-SX currently"
+
+        elif not self.nfvi_upgrade.major_release:
+            reason = "Rollback only supported for major releases currently"
+
+        if reason:
+            DLOG.warn(reason)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = reason
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            return
+
+        # Unlike with normal deployments we will defer skip logic to the steps
+        self._add_rollback_start_stage()
+        self._add_rollback_hosts_stages()
+        self._add_rollback_complete_stage()
 
     def build_complete(self, result, result_reason):
         """

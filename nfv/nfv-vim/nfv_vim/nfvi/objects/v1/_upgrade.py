@@ -138,6 +138,38 @@ class Upgrade(ObjectData):
         return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_FAILED.value
 
     @property
+    def is_rollback(self):
+        return self.deploy_state and "rollback" in self.deploy_state
+
+    @property
+    def is_activate_rollback(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK.value
+
+    @property
+    def is_activate_rollback_pending(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_PENDING.value
+
+    @property
+    def is_activate_rollback_done(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_DONE.value
+
+    @property
+    def is_activate_rollback_failed(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_FAILED.value
+
+    @property
+    def is_rollback_hosts(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.HOST_ROLLBACK.value
+
+    @property
+    def is_rollback_hosts_done(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.HOST_ROLLBACK_DONE.value
+
+    @property
+    def is_rollback_hosts_failed(self):
+        return self.deploy_state == usm_states.DEPLOY_STATES.HOST_ROLLBACK_FAILED.value
+
+    @property
     def is_deploy_completed(self):
         return self.deploy_state == usm_states.DEPLOY_STATES.COMPLETED.value
 
@@ -155,3 +187,11 @@ class Upgrade(ObjectData):
         for v in self.hosts_info:
             if v["hostname"] == hostname:
                 return v["host_state"] == usm_states.DEPLOY_HOST_STATES.DEPLOYED.value
+
+    def is_host_pending(self, hostname):
+        if not self.hosts_info:
+            return None
+
+        for v in self.hosts_info:
+            if v["hostname"] == hostname:
+                return v["host_state"] == usm_states.DEPLOY_HOST_STATES.PENDING.value

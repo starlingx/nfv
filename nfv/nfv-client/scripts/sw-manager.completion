@@ -53,6 +53,7 @@ function _swmanager()
                                 --max-parallel-worker-hosts
                                 --instance-action
                                 --alarm-restrictions
+                                --rollback
                             "
                             local createopt=${prev}
                             case "$createopt" in
@@ -78,6 +79,10 @@ function _swmanager()
                                     ;;
                                 --alarm-restrictions)
                                     COMPREPLY=($(compgen -W "strict relaxed permissive" -- ${cur}))
+                                    return 0
+                                    ;;
+                                --rollback)
+                                    COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
                                     return 0
                                     ;;
                                 *)

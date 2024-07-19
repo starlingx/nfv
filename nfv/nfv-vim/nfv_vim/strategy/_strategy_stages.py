@@ -28,10 +28,12 @@ class StrategyStageNames(Constants):
     # upgrade stages
     SW_UPGRADE_QUERY = Constant('sw-upgrade-query')
     SW_UPGRADE_START = Constant('sw-upgrade-start')
+    SW_UPGRADE_ROLLBACK_START = Constant('sw-upgrade-rollback-start')
     SW_UPGRADE_CONTROLLERS = Constant('sw-upgrade-controllers')
     SW_UPGRADE_STORAGE_HOSTS = Constant('sw-upgrade-storage-hosts')
     SW_UPGRADE_WORKER_HOSTS = Constant('sw-upgrade-worker-hosts')
     SW_UPGRADE_COMPLETE = Constant('sw-upgrade-complete')
+    SW_UPGRADE_ROLLBACK_COMPLETE = Constant('sw-upgrade-rollback-complete')
     # firmware update stages
     FW_UPDATE_QUERY = Constant('fw-update-query')
     FW_UPDATE_HOSTS_QUERY = Constant('fw-update-hosts-query')

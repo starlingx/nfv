@@ -1826,3 +1826,441 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_complete(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - aio-sx
+        - major
+        - complete
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'deploying',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    'state': 'completed',
+                    'from_release': INITIAL_RELEASE,
+                    'to_release': MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 1,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_active_done(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - aio-sx
+        - major
+        - activate-deon
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'deploying',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    'state': 'activate-done',
+                    'from_release': INITIAL_RELEASE,
+                    'to_release': MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 1,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_activate_failed(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - aio-sx
+        - major
+        - activate-failed
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'deploying',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    'state': 'activate-failed',
+                    'from_release': INITIAL_RELEASE,
+                    'to_release': MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 1,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_host_done(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - aio-sx
+        - major
+        - host-done
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'deploying',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    'state': 'host-done',
+                    'from_release': INITIAL_RELEASE,
+                    'to_release': MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 1,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_host_failed(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - aio-sx
+        - major
+        - host-failed
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'deploying',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    'state': 'host-failed',
+                    'from_release': INITIAL_RELEASE,
+                    'to_release': MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 1,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_host(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - aio-sx
+        - major
+        - host
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'deploying',
+                    'reboot_required': True,
+                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    'state': 'host',
+                    'from_release': INITIAL_RELEASE,
+                    'to_release': MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 1,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)

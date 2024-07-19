@@ -151,6 +151,8 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_host_state_ch
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_host_update_callback  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_host_upgrade_callback  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_register_sw_update_get_callback  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_sw_deploy_abort  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_sw_deploy_activate_rollback  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_sw_deploy_precheck  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_swact_from_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_unlock_host  # noqa: F401

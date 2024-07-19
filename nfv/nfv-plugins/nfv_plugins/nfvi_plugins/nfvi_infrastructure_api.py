@@ -2686,6 +2686,166 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def sw_deploy_abort(self, future, callback):
+        """
+        Abort a USM software deployement
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        response['complete-data'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(usm.sw_deploy_abort, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy abort did not complete.")
+                return
+
+            response['complete-data'] = future.result.data
+
+            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, None)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                )
+                response['error-message'] = error_msg
+                return
+
+            response['result-data'] = future.result.data
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            x = json.loads(e.http_response_body)
+            error_msg = x.get("error", x.get("info"))
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            elif httplib.NOT_ACCEPTABLE == e.http_status_code:
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software deploy abort, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    )
+                else:
+                    error_msg = f"Software deploy abort was rejected: {error_msg}"
+
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy abort, error={e}"
+
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
+
+        except Exception as e:
+            error_msg = f"Caught exception while trying software deploy abort, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def sw_deploy_activate_rollback(self, future, callback):
+        """
+        Activate rollback a USM software deployement
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        response['complete-data'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(usm.sw_deploy_activate_rollback, self._platform_token)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy activate did not complete.")
+                return
+
+            response['complete-data'] = future.result.data
+
+            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, None)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                )
+                response['error-message'] = error_msg
+                return
+
+            response['result-data'] = future.result.data
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            x = json.loads(e.http_response_body)
+            error_msg = x.get("error", x.get("info"))
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            elif httplib.NOT_ACCEPTABLE == e.http_status_code:
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software deploy activate-rollback, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    )
+                else:
+                    error_msg = f"Software deploy activate was rejected: {error_msg}"
+
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy activate-rollback, error={e}"
+
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
+
+        except Exception as e:
+            error_msg = f"Caught exception while trying software deploy activate-rollback, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
     def delete_host_services(self, future, host_uuid, host_name,
                              host_personality, callback):
         """
@@ -3816,7 +3976,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def upgrade_host(self, future, host_uuid, host_name, callback):
+    def upgrade_host(self, future, host_uuid, host_name, rollback, callback):
         """
         Upgrade a host
         """
@@ -3826,6 +3986,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         response['host_name'] = host_name
         response['reason'] = ''
         response['complete-data'] = ''
+        kind = "deploy" if not rollback else "rollback"
+        method = usm.sw_deploy_execute if not rollback else usm.sw_deploy_rollback
 
         try:
             future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
@@ -3843,10 +4005,10 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_execute, self._platform_token, host_name)
+            future.work(method, self._platform_token, host_name)
             future.result = (yield)
             if not future.result.is_complete():
-                DLOG.error("USM software deploy host %s did not complete." % host_name)
+                DLOG.error(f"USM software {kind} host %s did not complete." % host_name)
                 return
 
             response['completed'] = True

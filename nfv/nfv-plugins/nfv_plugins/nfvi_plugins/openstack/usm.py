@@ -67,7 +67,7 @@ def sw_deploy_get_releases(token):
     Query USM for information about all releases
     """
 
-    uri = f"release"  # noqa:F541 pylint: disable=W1309
+    uri = "release"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
     response = _api_get(token, url)
     return response
@@ -130,6 +130,17 @@ def sw_deploy_execute(token, host_name):
     return response
 
 
+def sw_deploy_rollback(token, host_name):
+    """
+    Ask USM to rollback a deployment on a host
+    """
+
+    uri = f"deploy_host/{host_name}/rollback"
+    url = _usm_api_cmd(token, uri)
+    response = _api_post(token, url, {})
+    return response
+
+
 def sw_deploy_activate(token):
     """
     Ask USM activate a deployment
@@ -147,6 +158,28 @@ def sw_deploy_complete(token):
     """
 
     uri = f"deploy/complete"  # noqa:F541 pylint: disable=W1309
+    url = _usm_api_cmd(token, uri)
+    response = _api_post(token, url, {})
+    return response
+
+
+def sw_deploy_abort(token):
+    """
+    Ask USM abort a deployment
+    """
+
+    uri = f"deploy/abort"  # noqa:F541 pylint: disable=W1309
+    url = _usm_api_cmd(token, uri)
+    response = _api_post(token, url, {})
+    return response
+
+
+def sw_deploy_activate_rollback(token):
+    """
+    Ask USM activate rollback a deployment
+    """
+
+    uri = f"deploy/activate-rollback"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
     response = _api_post(token, url, {})
     return response

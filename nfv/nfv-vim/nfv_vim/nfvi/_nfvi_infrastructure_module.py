@@ -439,6 +439,24 @@ def nfvi_upgrade_complete(release, callback):
     return cmd_id
 
 
+def nfvi_sw_deploy_abort(callback):
+    """
+    Software deploy abort
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_abort',
+                                                  callback=callback)
+    return cmd_id
+
+
+def nfvi_sw_deploy_activate_rollback(callback):
+    """
+    Software deploy activate rollback
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_activate_rollback',
+                                                  callback=callback)
+    return cmd_id
+
+
 def nfvi_disable_container_host_services(host_uuid, host_name,
                                          host_personality, host_offline,
                                          callback):
@@ -578,12 +596,12 @@ def nfvi_reboot_host(host_uuid, host_name, callback):
     return cmd_id
 
 
-def nfvi_upgrade_host(host_uuid, host_name, callback):
+def nfvi_upgrade_host(host_uuid, host_name, rollback, callback):
     """
     Upgrade a host
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('upgrade_host', host_uuid,
-                                                  host_name, callback=callback)
+                                                  host_name, rollback, callback=callback)
     return cmd_id
 
 

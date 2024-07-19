@@ -41,6 +41,8 @@ class StrategyStepNames(Constants):
     SW_DEPLOY_PRECHECK = Constant('sw-deploy-precheck')
     START_UPGRADE = Constant('start-upgrade')
     ACTIVATE_UPGRADE = Constant('activate-upgrade')
+    SW_DEPLOY_ABORT = Constant('sw-deploy-abort')
+    SW_DEPLOY_ACTIVATE_ROLLBACK = Constant('sw-deploy-activate-rollback')
     COMPLETE_UPGRADE = Constant('complete-upgrade')
     SWACT_HOSTS = Constant('swact-hosts')
     SW_PATCH_HOSTS = Constant('sw-patch-hosts')
@@ -1096,7 +1098,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
         DLOG.info("Step (%s) apply for hosts %s." % (self._name,
                                                      self._host_names))
         host_director = directors.get_host_director()
-        operation = host_director.upgrade_hosts(self._host_names)
+        operation = host_director.upgrade_hosts(self._host_names, self.strategy._rollback)
         if operation.is_inprogress():
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
         elif operation.is_failed():
@@ -1513,6 +1515,212 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         data['entity_names'] = list()
         data['entity_uuids'] = list()
         data['release'] = self._release
+        return data
+
+
+class SwDeployAbortStep(strategy.StrategyStep):
+    """
+    Software Deploy Abort - Strategy Step
+    """
+    def __init__(self):
+        super(SwDeployAbortStep, self).__init__(
+            STRATEGY_STEP_NAME.SW_DEPLOY_ABORT, timeout_in_secs=60)
+
+    @coroutine
+    def _sw_deploy_abort_callback(self):
+        """
+        Handle Activate Upgrade Callback
+        """
+
+        response = (yield)
+        DLOG.debug("Handle SW-Deploy-Abort callback: response=%s." % response)
+
+        if response['completed']:
+            DLOG.debug("sw-deploy abort completed")
+            self.strategy.nfvi_upgrade = response['result-data']
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, '')
+        else:
+            reason = response.get("error-message",
+                "Unknown error while trying software deploy abort, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
+            self.stage.step_complete(result, reason)
+
+    def apply(self):
+        """
+        Upgrade Activate
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+
+        if self.strategy.nfvi_upgrade.is_rollback:
+            reason = "Rollback already in progress, skipping abort call"
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            DLOG.info(reason)
+            return result, reason
+
+        nfvi.nfvi_sw_deploy_abort(self._sw_deploy_abort_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """
+        Returns the upgrade activate step object initialized using the given
+        dictionary
+        """
+        super(SwDeployAbortStep, self).from_dict(data)
+        return self
+
+    def as_dict(self):
+        """
+        Represent the upgrade activate step as a dictionary
+        """
+        data = super(SwDeployAbortStep, self).as_dict()
+        data['entity_type'] = ''
+        data['entity_names'] = list()
+        data['entity_uuids'] = list()
+        return data
+
+
+class SwDeployActivateRollbackStep(strategy.StrategyStep):
+    """
+    Software Deploy Activate-Rollback - Strategy Step
+    """
+    def __init__(self):
+        super(SwDeployActivateRollbackStep, self).__init__(
+            STRATEGY_STEP_NAME.SW_DEPLOY_ACTIVATE_ROLLBACK, timeout_in_secs=1830)
+
+        self._query_inprogress = False
+
+    @coroutine
+    def _activate_rollback_callback(self):
+        """
+        Activate-Rollback Callback
+        """
+
+        response = (yield)
+        DLOG.debug("Activate-Rollback callback response=%s." % response)
+
+        if not response['completed']:
+            reason = response.get("error-message",
+                "Unknown error while trying software deploy activate-rollback, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
+            self.stage.step_complete(result, reason)
+
+    @coroutine
+    def _handle_activate_rollback_callback(self):
+        """
+        Handle Activate Upgrade Callback
+        """
+
+        response = (yield)
+        DLOG.debug("Handle Activate-Rollback callback response=%s." % response)
+
+        self._query_inprogress = False
+
+        if not response['completed']:
+            # Something went wrong while collecting state info
+            return
+
+        self.strategy.nfvi_upgrade = response['result-data']
+
+        if self.strategy.nfvi_upgrade.is_activate_rollback_done:
+            DLOG.debug("Handle Activate-Rollback callback, deploy activate is done")
+            reason = ""
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, reason)
+
+        elif self.strategy.nfvi_upgrade.is_activate_rollback_failed:
+            reason = (
+                "Failed software deploy activate-rollback, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
+            self.stage.step_complete(result, reason)
+
+        elif not self.strategy.nfvi_upgrade.is_activate_rollback:
+            reason = (
+                "Unknown error while doing software deploy activate-rollback, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
+            self.stage.step_complete(result, reason)
+
+        else:
+            DLOG.debug("Handle Activate-Rollback callback, deploy activate in progress...")
+
+    def apply(self):
+        """
+        Upgrade Activate
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+
+        result = strategy.STRATEGY_STEP_RESULT.WAIT
+        reason = ""
+
+        if self.strategy.nfvi_upgrade.is_activate_rollback:
+            DLOG.info("Deployment already activating, skipping activate call")
+        elif self.strategy.nfvi_upgrade.is_activate_rollback_done:
+            DLOG.info("Deployment already activated, skipping activate call")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+        elif (
+                self.strategy.nfvi_upgrade.is_activate_rollback_pending or
+                self.strategy.nfvi_upgrade.is_activate_rollback_failed
+        ):
+            nfvi.nfvi_sw_deploy_activate_rollback(self._activate_rollback_callback())
+        else:
+            DLOG.info("software deploy activate-rollback not required, skipping call")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+
+        return result, reason
+
+    def handle_event(self, event, event_data=None):
+        """
+        Handle Host events
+        """
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if not self._query_inprogress:
+                self._query_inprogress = True
+                nfvi.nfvi_get_upgrade(None, self._handle_activate_rollback_callback())
+            return True
+
+        return False
+
+    def from_dict(self, data):
+        """
+        Returns the activate-rollback step object initialized using the given
+        dictionary
+        """
+        super(SwDeployActivateRollbackStep, self).from_dict(data)
+        self._query_inprogress = False
+        return self
+
+    def as_dict(self):
+        """
+        Represent the activate-rollback step as a dictionary
+        """
+        data = super(SwDeployActivateRollbackStep, self).as_dict()
+        data['entity_type'] = ''
+        data['entity_names'] = list()
+        data['entity_uuids'] = list()
         return data
 
 
@@ -5301,6 +5509,12 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.COMPLETE_UPGRADE == data['name']:
         step_obj = object.__new__(UpgradeCompleteStep)
+
+    elif STRATEGY_STEP_NAME.SW_DEPLOY_ABORT == data['name']:
+        step_obj = object.__new__(SwDeployAbortStep)
+
+    elif STRATEGY_STEP_NAME.SW_DEPLOY_ACTIVATE_ROLLBACK == data['name']:
+        step_obj = object.__new__(SwDeployActivateRollbackStep)
 
     elif STRATEGY_STEP_NAME.SW_PATCH_HOSTS == data['name']:
         step_obj = object.__new__(SwPatchHostsStep)

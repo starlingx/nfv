@@ -305,11 +305,11 @@ class HostDirector(object):
             sw_mgmt_director = directors.get_sw_mgmt_director()
             sw_mgmt_director.host_upgrade_changed(result)
 
-    def _nfvi_upgrade_host(self, host_uuid, host_name):
+    def _nfvi_upgrade_host(self, host_uuid, host_name, rollback):
         """
         NFVI Upgrade Host
         """
-        nfvi.nfvi_upgrade_host(host_uuid, host_name,
+        nfvi.nfvi_upgrade_host(host_uuid, host_name, rollback,
                                self._nfvi_upgrade_host_callback())
 
     @coroutine
@@ -680,7 +680,7 @@ class HostDirector(object):
 
         return host_operation
 
-    def upgrade_hosts(self, host_names):
+    def upgrade_hosts(self, host_names, rollback):
         """
         Upgrade a list of hosts
         """
@@ -705,7 +705,7 @@ class HostDirector(object):
                 return host_operation
 
             host_operation.add_host(host.name, OPERATION_STATE.INPROGRESS)
-            self._nfvi_upgrade_host(host.uuid, host.name)
+            self._nfvi_upgrade_host(host.uuid, host.name, rollback=rollback)
 
         if host_operation.is_inprogress():
             self._host_operation = host_operation
