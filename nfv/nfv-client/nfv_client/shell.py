@@ -52,10 +52,7 @@ def get_extra_create_args(cmd_area, args):
     :returns: a dictionary of additional kwargs for the create_strategy command
     :raises: ValueError if a strategy has been registered but not update here
     """
-    if sw_update.CMD_NAME_SW_PATCH == cmd_area:
-        # no additional kwargs for patch
-        return {}
-    elif sw_update.CMD_NAME_SW_DEPLOY == cmd_area:
+    if sw_update.CMD_NAME_SW_DEPLOY == cmd_area:
         # We can't use mutual exclusion for release and rollback because
         # release is a positional arg.
         if args.release is None and not args.rollback:
@@ -107,7 +104,7 @@ def setup_abort_cmd(parser):
     """
     Sets up an 'abort' command for a strategy command parser.
 
-    ex: sw-manager patch-strategy abort <some args>
+    ex: sw-manager sw-deploy-strategy abort <some args>
 
     :param parser: the strategy parser to add the create command to.
     """
@@ -123,7 +120,7 @@ def setup_apply_cmd(parser):
     """
     Sets up an 'apply' command for a strategy command parser.
 
-    ex: sw-manager patch-strategy apply <some args>
+    ex: sw-manager sw-deploy-strategy apply <some args>
 
     :param parser: the strategy parser to register the command under
     """
@@ -147,7 +144,7 @@ def setup_create_cmd(parser,
     """
     Sets up a 'create' command for a strategy command parser.
 
-    ex: sw-manager patch-strategy create <some args>
+    ex: sw-manager sw-deploy-strategy create <some args>
 
     :param parser: the strategy parser to register the command under
     :param controller_types: list of the valid apply types for controller
@@ -180,7 +177,7 @@ def setup_delete_cmd(parser):
     """
     Sets up a 'delete' command for a strategy command parser.
 
-    ex: sw-manager patch-strategy delete <some args>
+    ex: sw-manager sw-deploy-strategy delete <some args>
 
     :param parser: the strategy parser to register the command under
     """
@@ -196,7 +193,7 @@ def setup_show_cmd(parser):
     """
     Sets up a 'show' command for a strategy command parser.
 
-    ex: sw-manager patch-strategy show <some args>
+    ex: sw-manager sw-deploy-strategy show <some args>
 
     :param parser: the strategy parser to register the command under
     """
@@ -360,49 +357,6 @@ def setup_kube_upgrade_parser(commands):
     _ = setup_show_cmd(sub_cmds)
 
 
-def setup_patch_parser(commands):
-    """Patch Strategy Commands"""
-
-    cmd_area = sw_update.CMD_NAME_SW_PATCH
-    register_strategy(cmd_area, sw_update.STRATEGY_NAME_SW_PATCH)
-    cmd_parser = commands.add_parser(cmd_area,
-                                     help='Patch Strategy')
-    cmd_parser.set_defaults(cmd_area=cmd_area)
-
-    sub_cmds = cmd_parser.add_subparsers(title='Software Patch Commands',
-                                         metavar='')
-    sub_cmds.required = True
-
-    # define the create command
-    # alarm restrictions, defaults to strict
-    _ = setup_create_cmd(
-        sub_cmds,
-        [sw_update.APPLY_TYPE_SERIAL,  # controller supports serial
-         sw_update.APPLY_TYPE_IGNORE],
-        [sw_update.APPLY_TYPE_SERIAL,  # storage supports serial and parallel
-         sw_update.APPLY_TYPE_PARALLEL,
-         sw_update.APPLY_TYPE_IGNORE],
-        [sw_update.APPLY_TYPE_SERIAL,  # worker supports serial and parallel
-         sw_update.APPLY_TYPE_PARALLEL,
-         sw_update.APPLY_TYPE_IGNORE],
-        [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
-         sw_update.INSTANCE_ACTION_MIGRATE],
-        [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
-         sw_update.ALARM_RESTRICTIONS_RELAXED],
-        min_parallel=2,
-        max_parallel=100  # patch supports 2..100 workers in parallel
-    )
-
-    # define the delete command
-    _ = setup_delete_cmd(sub_cmds)
-    # define the apply command
-    _ = setup_apply_cmd(sub_cmds)
-    # define the abort command
-    _ = setup_abort_cmd(sub_cmds)
-    # define the show command
-    _ = setup_show_cmd(sub_cmds)
-
-
 def setup_system_config_update_parser(commands):
     """System config update Strategy Commands"""
 
@@ -536,9 +490,6 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
 
         # Add kubernetes upgrade strategy commands
         setup_kube_upgrade_parser(commands)
-
-        # Add software patch strategy commands
-        setup_patch_parser(commands)
 
         # Add system config update strategy commands
         setup_system_config_update_parser(commands)

@@ -279,13 +279,6 @@ class TestCLISwDeployStrategy(TestNFVClientShell,
         assert str(e) == 'Cannot set both release and rollback', e
 
 
-class TestCLIPatchStrategy(TestNFVClientShell,
-                           StrategyMixin):
-    def setUp(self):
-        super(TestCLIPatchStrategy, self).setUp()
-        self.set_strategy('patch-strategy')
-
-
 class TestCLIFwUpdateStrategy(TestNFVClientShell,
                               StrategyMixin):
     def setUp(self):

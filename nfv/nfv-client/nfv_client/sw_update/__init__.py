@@ -13,7 +13,6 @@ from nfv_client.sw_update._sw_update import CMD_NAME_FW_UPDATE  # noqa: F401
 from nfv_client.sw_update._sw_update import CMD_NAME_KUBE_ROOTCA_UPDATE  # noqa: F401
 from nfv_client.sw_update._sw_update import CMD_NAME_KUBE_UPGRADE  # noqa: F401
 from nfv_client.sw_update._sw_update import CMD_NAME_SW_DEPLOY  # noqa: F401
-from nfv_client.sw_update._sw_update import CMD_NAME_SW_PATCH  # noqa: F401
 from nfv_client.sw_update._sw_update import CMD_NAME_SYSTEM_CONFIG_UPDATE  # noqa: F401
 from nfv_client.sw_update._sw_update import create_strategy  # noqa: F401
 from nfv_client.sw_update._sw_update import delete_strategy  # noqa: F401
@@ -23,6 +22,5 @@ from nfv_client.sw_update._sw_update import show_strategy  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_FW_UPDATE  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_KUBE_ROOTCA_UPDATE  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_KUBE_UPGRADE  # noqa: F401
-from nfv_client.sw_update._sw_update import STRATEGY_NAME_SW_PATCH  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_SW_UPGRADE  # noqa: F401
 from nfv_client.sw_update._sw_update import STRATEGY_NAME_SYSTEM_CONFIG_UPDATE  # noqa: F401
