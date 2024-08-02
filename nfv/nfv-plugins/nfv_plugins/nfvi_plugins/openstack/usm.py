@@ -10,7 +10,8 @@ import os
 from nfv_common import debug
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
-
+from nfv_vim import nfvi
+import software.states as usm_states
 
 REST_API_REQUEST_TIMEOUT = 60
 
@@ -61,9 +62,9 @@ def _api_post(token, url, payload, headers=None, timeout_in_secs=REST_API_REQUES
     return response
 
 
-def sw_deploy_get_release(token, release):
+def sw_deploy_get_releases(token):
     """
-    Query USM for information about a specific upgrade
+    Query USM for information about all releases
     """
 
     uri = f"release"  # noqa:F541 pylint: disable=W1309
@@ -149,3 +150,47 @@ def sw_deploy_complete(token):
     url = _usm_api_cmd(token, uri)
     response = _api_post(token, url, {})
     return response
+
+
+def sw_deploy_get_upgrade_obj(token, release):
+    """Quickly gather all information about a software deployment"""
+
+    # Query USM API
+    release_info = None
+    deploy_info = None
+    hosts_info = None
+    release_data = sw_deploy_get_releases(token).result_data
+    deploy_data = sw_deploy_show(token).result_data
+    hosts_info_data = sw_deploy_host_list(token).result_data
+
+    # Parse responses
+    for rel in release_data:
+        if release and rel['release_id'] == release:
+            release_info = rel
+            break
+        elif not release and rel['state'] == usm_states.DEPLOYING:
+            release = rel['release_id']
+            release_info = rel
+            break
+
+    if not release_info:
+        if release:
+            error_msg = f"Software release not found: {release}"
+        else:
+            error_msg = "Software release not found"
+        raise EnvironmentError(error_msg)
+
+    if deploy_data:
+        deploy_info = deploy_data[0]
+
+    if hosts_info_data:
+        hosts_info = hosts_info_data
+
+    upgrade_obj = nfvi.objects.v1.Upgrade(
+        release,
+        release_info,
+        deploy_info,
+        hosts_info,
+    )
+
+    return upgrade_obj

@@ -2344,56 +2344,18 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_get_release, self._platform_token, release)
+            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
             future.result = (yield)
 
             if not future.result.is_complete():
-                DLOG.error("USM software deploy get release did not complete.")
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                )
+                response['error-message'] = error_msg
                 return
 
-            release_info = None
-            release_data = future.result.data
-            for rel in release_data:
-                if rel['release_id'] == release:
-                    release_info = rel
-                    break
-
-            if not release_info:
-                DLOG.error("Software release not found.")
-                return
-
-            future.work(usm.sw_deploy_show, self._platform_token)
-            future.result = (yield)
-
-            if not future.result.is_complete():
-                DLOG.error("USM software deploy get did not complete.")
-                return
-
-            deploy_info = future.result.data
-            if deploy_info:
-                deploy_info = deploy_info[0]
-            else:
-                deploy_info = None
-
-            future.work(usm.sw_deploy_host_list, self._platform_token)
-            future.result = (yield)
-
-            if not future.result.is_complete():
-                DLOG.error("USM software deploy host list did not complete.")
-                return
-
-            hosts_info_data = future.result.data
-            if hosts_info_data == []:
-                hosts_info_data = None
-
-            upgrade_obj = nfvi.objects.v1.Upgrade(
-                release,
-                release_info,
-                deploy_info,
-                hosts_info_data,
-            )
-
-            response['result-data'] = upgrade_obj
+            response['result-data'] = future.result.data
             response['completed'] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2402,13 +2364,16 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if self._platform_token is not None:
                     self._platform_token.set_expired()
 
-            else:
-                DLOG.exception("Caught exception while trying to get upgrade "
-                               "info, error=%s." % e)
+            elif not error_msg:
+                error_msg = f"Caught exception while trying to query deployment info, error={e}"
+
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to get upgrade info, "
-                           "error=%s." % e)
+            error_msg = f"Caught exception while trying to query deployment info, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
 
         finally:
             callback.send(response)
@@ -2446,33 +2411,35 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             precheck_data = future.result.data['system_healthy']
 
+            response['complete-data'] = future.result.data
             response['result-data'] = precheck_data
             response['completed'] = True
-            response['complete-data'] = future.result.data
 
         except exceptions.OpenStackRestAPIException as e:
             x = json.loads(e.http_response_body)
-            msg = x.get("error", x.get("info"))
+            error_msg = x.get("error", x.get("info"))
             if httplib.UNAUTHORIZED == e.http_status_code:
                 response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._platform_token is not None:
                     self._platform_token.set_expired()
 
             elif httplib.NOT_ACCEPTABLE == e.http_status_code:
-                if not msg:
-                    msg = (
-                        "Unknown error while trying to precheck the software deployment, " +
-                        "check /var/log/nfv-vim.log for more information."
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software deploy precheck, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
 
-            else:
-                DLOG.exception("Caught exception while trying to precheck "
-                               "USM software deploy, error=%s." % e)
-            response["error-message"] = msg.strip()
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy precheck, error={e}"
+
+            response["error-message"] = error_msg.strip()
+            DLOG.exception(error_msg)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to precheck USM software deploy, "
-                           "error=%s." % e)
+            error_msg = f"Caught exception while trying software deploy precheck, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
 
         finally:
             callback.send(response)
@@ -2507,32 +2474,47 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 DLOG.error("USM software deploy start did not complete.")
                 return
 
+            response['complete-data'] = future.result.data
+
+            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                )
+                response['error-message'] = error_msg
+                return
+
             response['result-data'] = future.result.data
             response['completed'] = True
 
         except exceptions.OpenStackRestAPIException as e:
             x = json.loads(e.http_response_body)
-            msg = x.get("error", x.get("info"))
+            error_msg = x.get("error", x.get("info"))
             if httplib.UNAUTHORIZED == e.http_status_code:
                 response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._platform_token is not None:
                     self._platform_token.set_expired()
 
             elif httplib.NOT_ACCEPTABLE == e.http_status_code:
-                if not msg:
-                    msg = (
-                        "Unknown error while trying to start the software deployment, " +
-                        "check /var/log/nfv-vim.log for more information."
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software deploy start, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
 
-            else:
-                DLOG.exception("Caught exception while trying to start "
-                               "USM software deploy, error=%s." % e)
-            response["error-message"] = msg.strip()
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy start, error={e}"
+
+            response["error-message"] = error_msg.strip()
+            DLOG.exception(error_msg)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to start USM software deploy, "
-                           "error=%s." % e)
+            error_msg = f"Caught exception while trying software deploy start, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
 
         finally:
             callback.send(response)
@@ -2569,52 +2551,47 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 DLOG.error("USM software deploy activate did not complete.")
                 return
 
-            future.work(usm.sw_deploy_show, self._platform_token)
+            response['complete-data'] = future.result.data
+
+            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
             future.result = (yield)
 
             if not future.result.is_complete():
-                DLOG.error("USM software deploy show did not complete.")
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                )
+                response['error-message'] = error_msg
                 return
 
-            state_info = future.result.data
-            if state_info:
-                state_info = state_info[0]
-            else:
-                state_info = None
-
-            upgrade_obj = nfvi.objects.v1.Upgrade(
-                release,
-                state_info,
-                None,
-                None)
-
-            response['result-data'] = upgrade_obj
+            response['result-data'] = future.result.data
             response['completed'] = True
-            response['complete-data'] = future.result.data
 
         except exceptions.OpenStackRestAPIException as e:
             x = json.loads(e.http_response_body)
-            msg = x.get("error", x.get("info"))
+            error_msg = x.get("error", x.get("info"))
             if httplib.UNAUTHORIZED == e.http_status_code:
                 response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._platform_token is not None:
                     self._platform_token.set_expired()
 
             elif httplib.NOT_ACCEPTABLE == e.http_status_code:
-                if not msg:
-                    msg = (
-                        "Unknown error while trying to activate the software deployment, " +
-                        "check /var/log/nfv-vim.log for more information."
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software deploy activate, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
 
-            else:
-                DLOG.exception("Caught exception while trying to activate "
-                               "USM software deploy, error=%s." % e)
-            response["error-message"] = msg.strip()
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy activate, error={e}"
+
+            response["error-message"] = error_msg.strip()
+            DLOG.exception(error_msg)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to activate USM software deploy, "
-                           "error=%s." % e)
+            error_msg = f"Caught exception while trying software deploy activate, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
 
         finally:
             callback.send(response)
@@ -2650,72 +2627,47 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 DLOG.error("USM software deploy complete did not complete.")
                 return
 
-            future.work(usm.sw_deploy_get_release, self._platform_token, release)
-            future.result = (yield)
-
-            if not future.result.is_complete():
-                DLOG.error("USM software deploy get release did not complete.")
-                return
-
-            release_info = None
-            release_data = future.result.data
-            for rel in release_data:
-                if rel['release_id'] == release:
-                    release_info = rel
-                    break
-
-            if not release_info:
-                DLOG.error("Software release not found.")
-                return
-
-            future.work(usm.sw_deploy_show, self._platform_token)
-            future.result = (yield)
-
-            if not future.result.is_complete():
-                DLOG.error("USM software deploy get did not complete.")
-                return
-
-            deploy_info = future.result.data
-            if deploy_info:
-                deploy_info = deploy_info[0]
-            else:
-                deploy_info = None
-
-            upgrade_obj = nfvi.objects.v1.Upgrade(
-                release,
-                release_info,
-                deploy_info,
-                None)
-
-            response['result-data'] = upgrade_obj
-            response['completed'] = True
             response['complete-data'] = future.result.data
+
+            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                )
+                response['error-message'] = error_msg
+                return
+
+            response['result-data'] = future.result.data
+            response['completed'] = True
 
         except exceptions.OpenStackRestAPIException as e:
             x = json.loads(e.http_response_body)
-            msg = x.get("error", x.get("info"))
+            error_msg = x.get("error", x.get("info"))
             if httplib.UNAUTHORIZED == e.http_status_code:
                 response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._platform_token is not None:
                     self._platform_token.set_expired()
 
             elif httplib.NOT_ACCEPTABLE == e.http_status_code:
-                x = json.loads(e.http_response_body)
-                msg = x.get("error", x.get("info"))
-                if not msg:
-                    msg = (
-                        "Unknown error while trying to complete the software deployment, " +
-                        "check /var/log/nfv-vim.log for more information."
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software deploy complete, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
 
-            else:
-                DLOG.exception("Caught exception while trying to complete "
-                               "USM software deploy, error=%s." % e)
-            response["error-message"] = msg.strip()
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy complete, error={e}"
+
+            response["error-message"] = error_msg.strip()
+            DLOG.exception(error_msg)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to complete USM software deploy, "
-                           "error=%s." % e)
+            error_msg = f"Caught exception while trying software deploy complete, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
 
         finally:
             callback.send(response)

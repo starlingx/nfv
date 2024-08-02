@@ -949,8 +949,8 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
             self.stage.step_complete(result, '')
         else:
             reason = response.get("error-message",
-                "Unknown error while trying to precheck the software deployment, "
-                "check /var/log/nfv-vim.log for more information."
+                "Unknown error while trying software deploy precheck, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -1124,8 +1124,8 @@ class UpgradeStartStep(strategy.StrategyStep):
 
         if not response['completed']:
             reason = response.get('error-message',
-                "Unknown error while trying to start the software deployment, "
-                "check /var/log/nfv-vim.log for more information."
+                "Unknown error while trying software deploy start, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -1156,8 +1156,8 @@ class UpgradeStartStep(strategy.StrategyStep):
 
         elif self.strategy.nfvi_upgrade.is_start_failed:
             reason = (
-                "Software deployment start failed, "
-                "check /var/log/software.log for more information."
+                "Failed during software deploy start, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -1166,8 +1166,8 @@ class UpgradeStartStep(strategy.StrategyStep):
 
         elif not self.strategy.nfvi_upgrade.is_starting:
             reason = (
-                "Unknown error while starting the software deployment, "
-                "check /var/log/software.log for more information."
+                "Unknown error while doing software deploy start, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -1261,8 +1261,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
         if not response['completed']:
             reason = response.get("error-message",
-                "Unknown error while trying to activate the software deployment, "
-                "check /var/log/nfv-vim.log for more information."
+                "Unknown error while trying software deploy activate, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -1294,8 +1294,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
         elif self.strategy.nfvi_upgrade.is_activate_failed:
             reason = (
-                "Software deployment activate failed, "
-                "check /var/log/software.log for more information."
+                "Failed software deploy activate, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -1304,8 +1304,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
         elif not self.strategy.nfvi_upgrade.is_activating:
             reason = (
-                "Unknown error while activating the software deployment, "
-                "check /var/log/software.log for more information."
+                "Unknown error while doing software deploy activate, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -1399,8 +1399,8 @@ class UpgradeCompleteStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
         else:
             reason = response.get("error-message",
-                "Unknown error while trying to complete the software deployment, "
-                "check /var/log/nfv-vim.log for more information."
+                "Unknown error while trying software deploy complete, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             detailed_reason = str(response)
@@ -2910,9 +2910,13 @@ class QueryUpgradeStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result,
-                                     f"Failed to query software release: {self._release}. " +
-                                     "Check /var/log/nfv-vim.log for more information.")
+            reason = response.get("error-message",
+                "Unknown error while trying to query the software deployment, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+            )
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
+            self.stage.step_complete(result, reason)
 
     def apply(self):
         """

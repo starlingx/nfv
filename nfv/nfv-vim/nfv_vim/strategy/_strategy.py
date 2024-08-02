@@ -400,8 +400,12 @@ class SwUpdateStrategy(strategy.Strategy):
         result, result_reason = \
             super(SwUpdateStrategy, self).apply_complete(result, result_reason)
 
-        DLOG.info("Apply Complete Callback, result=%s, reason=%s."
-                  % (result, result_reason))
+        if result == strategy.STRATEGY_RESULT.SUCCESS:
+            DLOG.info("Apply Complete Callback, result=%s, reason=%s."
+                      % (result, result_reason))
+        else:
+            DLOG.error("Apply Complete Callback, result=%s, reason=%s."
+                       % (result, result_reason))
 
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:
@@ -424,8 +428,12 @@ class SwUpdateStrategy(strategy.Strategy):
         result, result_reason = \
             super(SwUpdateStrategy, self).abort_complete(result, result_reason)
 
-        DLOG.info("Abort Complete Callback, result=%s, reason=%s."
-                  % (result, result_reason))
+        if result == strategy.STRATEGY_RESULT.SUCCESS:
+            DLOG.info("Abort Complete Callback, result=%s, reason=%s."
+                      % (result, result_reason))
+        else:
+            DLOG.error("Abort Complete Callback, result=%s, reason=%s."
+                       % (result, result_reason))
 
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:
@@ -1996,8 +2004,12 @@ class SwUpgradeStrategy(
         result, result_reason = \
             super(SwUpgradeStrategy, self).build_complete(result, result_reason)
 
-        DLOG.info("Build Complete Callback, result=%s, reason=%s."
-                  % (result, result_reason))
+        if result == strategy.STRATEGY_RESULT.SUCCESS:
+            DLOG.info("Build Complete Callback, result=%s, reason=%s."
+                      % (result, result_reason))
+        else:
+            DLOG.error("Build Complete Callback, result=%s, reason=%s."
+                       % (result, result_reason))
 
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:

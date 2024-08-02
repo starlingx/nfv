@@ -566,6 +566,8 @@ class StrategyPhase(object):
         Phase Complete (can be overridden by child class)
         """
         DLOG.debug("Strategy Phase (%s) complete." % self._name)
+        if not self.is_success() and self.result_response:
+            DLOG.error(f"Strategy Phase ({self.name}) did not succeed: {self.result_response}")
         if self.strategy is not None:
             self.strategy.phase_complete(self, result, reason)  # pylint: disable=no-member
         else:
