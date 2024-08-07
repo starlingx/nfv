@@ -65,6 +65,7 @@ class StrategyPhase(object):
 class Strategy(object):
     uuid = None
     name = None
+    release = None
     controller_apply_type = None
     storage_apply_type = None
     swift_apply_type = None
@@ -159,6 +160,8 @@ def _get_strategy_object_from_response(response):
     strategy = Strategy()
     strategy.uuid = strategy_data['uuid']
     strategy.name = strategy_data['name']
+    if strategy.name == sw_update.STRATEGY_NAME_SW_UPGRADE:
+        strategy.release = strategy_data['release']
     strategy.controller_apply_type = strategy_data['controller-apply-type']
     strategy.storage_apply_type = strategy_data['storage-apply-type']
     strategy.swift_apply_type = strategy_data['swift-apply-type']
@@ -309,7 +312,6 @@ def create_strategy(token_id,
         api_cmd_payload['max-parallel-worker-hosts'] = \
             max_parallel_worker_hosts
     api_cmd_payload['alarm-restrictions'] = alarm_restrictions
-
     response = rest_api.request(token_id, "POST", api_cmd, api_cmd_headers,
                                 json.dumps(api_cmd_payload))
     if not response:

@@ -154,6 +154,8 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
         print("Strategy Unknown Strategy:")
 
     _print(2, "strategy-uuid", strategy.uuid)
+    if strategy.name == STRATEGY_NAME_SW_UPGRADE:
+        _print(2, "release-id", strategy.release)
     _print(2, "controller-apply-type", strategy.controller_apply_type)
     _print(2, "storage-apply-type", strategy.storage_apply_type)
     _print(2, "worker-apply-type", strategy.worker_apply_type)
