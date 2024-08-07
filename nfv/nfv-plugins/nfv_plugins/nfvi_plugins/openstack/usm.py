@@ -162,29 +162,45 @@ def sw_deploy_get_upgrade_obj(token, release):
     release_data = sw_deploy_get_releases(token).result_data
     deploy_data = sw_deploy_show(token).result_data
     hosts_info_data = sw_deploy_host_list(token).result_data
+    error_template = "{}, check /var/log/nfv-vim.log or /var/log/software.log for more information."
 
     # Parse responses
-    for rel in release_data:
-        if release and rel['release_id'] == release:
-            release_info = rel
-            break
-        elif not release and rel['state'] == usm_states.DEPLOYING:
-            release = rel['release_id']
-            release_info = rel
-            break
+    try:
+        for rel in release_data:
+            if release and rel['release_id'] == release:
+                release_info = rel
+                break
+            elif not release and rel['state'] == usm_states.DEPLOYING:
+                release = rel['release_id']
+                release_info = rel
+                break
+    except Exception as e:
+        error = "Failed to parse 'software list'"
+        DLOG.exception(f"{error}: {release_data}")
+        raise ValueError(error_template.format(error)) from e
 
     if not release_info:
         if release:
-            error_msg = f"Software release not found: {release}"
+            error = f"Software release not found: {release}"
         else:
-            error_msg = "Software release not found"
-        raise EnvironmentError(error_msg)
+            error = "Software release not found"
+        raise EnvironmentError(error)
 
-    if deploy_data:
-        deploy_info = deploy_data[0]
+    try:
+        if deploy_data:
+            deploy_info = deploy_data[0]
+    except Exception as e:
+        error = "Failed to parse 'software deploy show'"
+        DLOG.exception(f"{error}: {deploy_data}")
+        raise ValueError(error_template.format(error)) from e
 
-    if hosts_info_data:
-        hosts_info = hosts_info_data
+    try:
+        if hosts_info_data:
+            hosts_info = hosts_info_data
+    except Exception as e:
+        error = "Failed to parse 'software deploy host-list'"
+        DLOG.exception(f"{error}: {hosts_info_data}")
+        raise ValueError(error_template.format(error)) from e
 
     upgrade_obj = nfvi.objects.v1.Upgrade(
         release,

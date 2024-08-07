@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
 import six
 
 from nfv_common import debug
@@ -16,6 +17,7 @@ from nfv_vim import objects
 from nfv_vim.strategy._strategy_defs import FW_UPDATE_LABEL
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 from nfv_vim import tables
+import software.states as usm_states
 
 DLOG = debug.debug_get_logger('nfv_vim.strategy.step')
 
@@ -23,11 +25,6 @@ DLOG = debug.debug_get_logger('nfv_vim.strategy.step')
 KUBE_CERT_UPDATE_TRUSTBOTHCAS = "trust-both-cas"
 KUBE_CERT_UPDATE_TRUSTNEWCA = "trust-new-ca"
 KUBE_CERT_UPDATE_UPDATECERTS = "update-certs"
-
-# sw-deploy strategy constants
-SW_DEPLOY_START = 'start-done'
-SW_HOST_DEPLOYED = 'deployed'
-SW_DEPLOY_ACTIVATE_DONE = 'activate-done'
 
 
 @six.add_metaclass(Singleton)
@@ -1008,38 +1005,84 @@ class UpgradeHostsStep(strategy.StrategyStep):
         for host in hosts:
             self._host_names.append(host.name)
         self._query_inprogress = False
+        self._step_complete = False
+        self._deployed_hosts = {}
+        self._failed_hosts = {}
+        self._unknown_hosts = 0
+
+    def _get_upgrade_callback_inner(self, response):
+        """
+        Get Upgrade Callback
+        """
+
+        if not response['completed']:
+            return False
+
+        self.strategy.nfvi_upgrade = response['result-data']
+        hosts_states = self.strategy.nfvi_upgrade.host_states
+        # This information is already in the response, but this adds an easy view.
+        response['hosts-states'] = hosts_states
+
+        completed_hosts = self._deployed_hosts.keys() | self._failed_hosts.keys()
+        missing_hosts = set(self._host_names) - completed_hosts
+
+        if len(missing_hosts) - self._unknown_hosts > 0:
+            # TODO(jkraitbe): Allow reason to be updated during STRATEGY_STEP_RESULT.WAIT
+            reason = f"Deploy hosts still in progress, waiting for: {missing_hosts}"
+            DLOG.error(reason)
+            return False
+
+        # Determine if any hosts failed and why
+        failed_hosts = {}
+        for v in self._host_names:
+            if v in self._deployed_hosts:
+                continue
+
+            fail_reason = None
+            if v not in hosts_states:
+                fail_reason = self._failed_hosts.get(v, "Missing host from software deploy host-list")
+            elif usm_states.DEPLOY_HOST_STATES.PENDING.value in hosts_states[v]:
+                fail_reason = self._failed_hosts.get(v, "Host was detected in pending state")
+            elif usm_states.DEPLOY_HOST_STATES.FAILED.value in hosts_states[v]:
+                fail_reason = self._failed_hosts.get(v, "Host was detected in failed state")
+            elif usm_states.DEPLOY_HOST_STATES.DEPLOYING.value in hosts_states[v]:
+                fail_reason = self._failed_hosts.get(v, "Host was still deploying when it was expected to be done")
+            elif usm_states.DEPLOY_HOST_STATES.DEPLOYED.value not in hosts_states[v]:
+                fail_reason = self._failed_hosts.get(v, f"Host was detected in invalid state: {hosts_states[v]}")
+
+            if fail_reason:
+                failed_hosts[v] = fail_reason
+                DLOG.error(f"{v}: {fail_reason}")
+
+        # # Wait for all hosts to be done transitioning before declaring pass/fail
+        if failed_hosts:
+            response['failed-hosts'] = failed_hosts
+            reason = f"Deploy hosts failed for some hosts: {json.dumps(failed_hosts, indent=2)}"
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
+            self.stage.step_complete(result, reason)
+            return True
+
+        reason = "Deploy hosts succeeded for all hosts"
+        result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+        DLOG.info(reason)
+        self.stage.step_complete(result, reason)
+        return True
 
     @coroutine
     def _get_upgrade_callback(self):
         """
         Get Upgrade Callback
         """
+
         response = (yield)
         DLOG.debug("Query-Upgrade callback response=%s." % response)
-        self._query_inprogress = False
-        if response['completed']:
-            self.strategy.nfvi_upgrade = response['result-data']
-            host_count = 0
-            match_count = 0
-            host_info_list = self.strategy.nfvi_upgrade['hosts_info']
-            for host_name in self._host_names:
-                for host in host_info_list:
-                    if (host_name == host['hostname']) and (host['host_state'] == SW_HOST_DEPLOYED):
-                        match_count += 1
-                    host_count += 1
-            if match_count == len(self._host_names):
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                DLOG.info("Upgrade Hosts completed")
-                self.stage.step_complete(result, "")
-            else:
-                # keep waiting for Upgrade host state to change
-                pass
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            DLOG.info("Host Upgrade failed")
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
-            self.stage.step_complete(result, response['reason'])
+
+        try:
+            self._step_complete = self._get_upgrade_callback_inner(response)
+        finally:
+            self._query_inprogress = False
 
     def apply(self):
         """
@@ -1066,14 +1109,36 @@ class UpgradeHostsStep(strategy.StrategyStep):
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
+        update = False
+
         if event == STRATEGY_EVENT.HOST_UPGRADE_FAILED:
-            host = event_data
-            if host is not None and host.name in self._host_names:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, "host upgrade failed")
-                return True
+            host = event_data["host"]
+            if host and host.name in self._host_names:
+                error = f"Failed software deploy host {host.name}: {event_data['error-message']}"
+                self._failed_hosts[host.name] = error
+                DLOG.error(error)
+            else:
+                DLOG.error(f"Unknown software deploy host failed: {event_data}")
+                self._unknown_hosts += 1
+            update = True
+
+        elif event == STRATEGY_EVENT.HOST_UPGRADE_CHANGED:
+            host = event_data["host"]
+            if host and host.name in self._host_names:
+                self._deployed_hosts[host.name] = None
+                DLOG.info(f"Completed software deploy host {host.name}")
+            else:
+                DLOG.error(f"Unknown software deploy host completed: {event_data}")
+                self._unknown_hosts += 1
+            update = True
 
         elif event in [STRATEGY_EVENT.HOST_AUDIT]:
+            update = True
+
+        if self._query_inprogress or self._step_complete:
+            return True
+
+        if update:
             self._query_inprogress = True
             release = self.strategy.nfvi_upgrade['release']
             nfvi.nfvi_get_upgrade(release, self._get_upgrade_callback())
@@ -1090,6 +1155,10 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._host_uuids = list()
         self._host_names = data['entity_names']
         self._query_inprogress = False
+        self._step_complete = False
+        self._failed_hosts = data["failed_hosts"]
+        self._deployed_hosts = data["deployed_hosts"]
+        self._unknown_hosts = data["unknown_hosts"]
         return self
 
     def as_dict(self):
@@ -1100,6 +1169,9 @@ class UpgradeHostsStep(strategy.StrategyStep):
         data['entity_type'] = 'hosts'
         data['entity_names'] = self._host_names
         data['entity_uuids'] = self._host_uuids
+        data['failed_hosts'] = self._failed_hosts
+        data['deployed_hosts'] = self._deployed_hosts
+        data['unknown_hosts'] = self._unknown_hosts
         return data
 
 

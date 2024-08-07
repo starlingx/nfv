@@ -273,27 +273,37 @@ class HostDirector(object):
 
         response = (yield)
         DLOG.verbose("NFVI Upgrade Host callback response=%s." % response)
+
+        host_table = tables.tables_get_host_table()
+        host = host_table.get(response['host_name'], None)
+        if host is None:
+            DLOG.verbose("Host %s does not exist." % response['host_name'])
+            return
+
+        if self._host_operation is None:
+            DLOG.verbose("No host %s operation in progress." % host.name)
+            return
+
+        if OPERATION_TYPE.UPGRADE_HOSTS != self._host_operation.operation_type:
+            DLOG.verbose("Unexpected host %s operation %s, ignoring."
+                            % (host.name, self._host_operation.operation_type))
+            return
+
         if not response['completed']:
             DLOG.info("Upgrade of host %s failed, reason=%s."
+                      % (response['host_name'], response.get('error-message', response['reason'])))
+
+            result = {"host": host, "error-message": response["error-message"]}
+            sw_mgmt_director = directors.get_sw_mgmt_director()
+            sw_mgmt_director.host_upgrade_failed(result)
+
+        else:
+            DLOG.info("Upgrade of host %s succeeded, reason=%s."
                       % (response['host_name'], response['reason']))
 
-            host_table = tables.tables_get_host_table()
-            host = host_table.get(response['host_name'], None)
-            if host is None:
-                DLOG.verbose("Host %s does not exist." % response['host_name'])
-                return
-
-            if self._host_operation is None:
-                DLOG.verbose("No host %s operation in progress." % host.name)
-                return
-
-            if OPERATION_TYPE.UPGRADE_HOSTS != self._host_operation.operation_type:
-                DLOG.verbose("Unexpected host %s operation %s, ignoring."
-                             % (host.name, self._host_operation.operation_type))
-                return
-
+            result = {"host": host}
             sw_mgmt_director = directors.get_sw_mgmt_director()
-            sw_mgmt_director.host_upgrade_failed(host)
+            sw_mgmt_director.host_upgrade_changed(result)
 
     def _nfvi_upgrade_host(self, host_uuid, host_name):
         """

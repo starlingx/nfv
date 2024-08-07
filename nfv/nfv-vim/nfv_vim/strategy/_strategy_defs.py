@@ -18,6 +18,7 @@ class EventNames(object):
     HOST_UNLOCK_FAILED = Constant('host-unlock-failed')
     HOST_REBOOT_FAILED = Constant('host-reboot-failed')
     HOST_UPGRADE_FAILED = Constant('host-upgrade-failed')
+    HOST_UPGRADE_CHANGED = Constant('host-upgrade-changed')
     HOST_FW_UPDATE_FAILED = Constant('host-fw-update-failed')
     HOST_FW_UPDATE_ABORT_FAILED = Constant('host-fw-update-abort-failed')
     HOST_SWACT_FAILED = Constant('host-swact-failed')
