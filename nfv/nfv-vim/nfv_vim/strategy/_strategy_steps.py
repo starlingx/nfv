@@ -1245,7 +1245,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
     """
     def __init__(self, release):
         super(UpgradeActivateStep, self).__init__(
-            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=1500)
+            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=1860)
 
         self._release = release
         self._query_inprogress = False
