@@ -121,6 +121,8 @@ class SwUpdateStrategyData(wsme_types.Base):
     """
     uuid = wsme_types.wsattr(six.text_type, name='uuid')
     name = wsme_types.wsattr(SwUpdateNames, name='name')
+    release = wsme_types.wsattr(six.text_type, mandatory=False,
+                                name='release')
     controller_apply_type = wsme_types.wsattr(SwUpdateApplyTypes,
                                               name='controller-apply-type')
     storage_apply_type = wsme_types.wsattr(SwUpdateApplyTypes,
@@ -343,6 +345,8 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
         strategy = SwUpdateStrategyData()
         strategy.uuid = strategy_data['uuid']
         strategy.name = strategy_data['name']
+        if strategy.name == SW_UPDATE_NAME.SW_UPGRADE:
+            strategy.release = strategy_data['release']
         strategy.controller_apply_type = strategy_data['controller_apply_type']
         strategy.storage_apply_type = strategy_data['storage_apply_type']
         strategy.swift_apply_type = strategy_data['swift_apply_type']
