@@ -141,6 +141,13 @@ class Upgrade(ObjectData):
     def is_deploy_completed(self):
         return self.deploy_state == usm_states.DEPLOY_STATES.COMPLETED.value
 
+    @property
+    def host_states(self):
+        return {
+            v["hostname"]: v["host_state"]
+            for v in self.hosts_info
+        }
+
     def is_host_deployed(self, hostname):
         if not self.hosts_info:
             return None

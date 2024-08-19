@@ -47,6 +47,8 @@ STRATEGY_NAME = StrategyNames()
 MTCE_DELAY = 15
 # a no-reboot patch can stabilize in 30 seconds
 NO_REBOOT_DELAY = 30
+# How long to wait after deploy-start-done
+DEPLOY_START_DONE_DELAY = 120
 
 # constants used by the patching API for state and repo state
 PATCH_REPO_STATE_APPLIED = 'Applied'
@@ -1902,7 +1904,8 @@ class SwUpgradeStrategy(
         # sw-deploy start for major releases must be done on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.UpgradeStartStep(release=self._release))
-        stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
+        # There can be alarms related to CPU/memory/disk usage after start
+        stage.add_step(strategy.SystemStabilizeStep(DEPLOY_START_DONE_DELAY))
         self.apply_phase.add_stage(stage)
 
     def _add_upgrade_hosts_stages(self):
@@ -1918,7 +1921,7 @@ class SwUpgradeStrategy(
 
         for host in host_table.values():
             if self.nfvi_upgrade.is_host_deployed(host.name):
-                DLOG.info("Skipping deploy-host for already deployed host: {host.name}")
+                DLOG.info(f"Skipping deploy-host for already deployed host: {host.name}")
                 continue
 
             if HOST_PERSONALITY.CONTROLLER in host.personality:

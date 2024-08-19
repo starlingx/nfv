@@ -2367,8 +2367,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             elif not error_msg:
                 error_msg = f"Caught exception while trying to query deployment info, error={e}"
 
-            response["error-message"] = error_msg
-            DLOG.exception(error_msg)
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
 
         except Exception as e:
             error_msg = f"Caught exception while trying to query deployment info, error={e}"
@@ -2429,12 +2430,15 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                         "Unknown error while trying software deploy precheck, "
                         "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
+                else:
+                    error_msg = f"Software deploy precheck was rejected: {error_msg}"
 
             elif not error_msg:
                 error_msg = f"Caught exception while trying software deploy precheck, error={e}"
 
-            response["error-message"] = error_msg.strip()
-            DLOG.exception(error_msg)
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
 
         except Exception as e:
             error_msg = f"Caught exception while trying software deploy precheck, error={e}"
@@ -2504,12 +2508,15 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                         "Unknown error while trying software deploy start, "
                         "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
+                else:
+                    error_msg = f"Software deploy start was rejected: {error_msg}"
 
             elif not error_msg:
                 error_msg = f"Caught exception while trying software deploy start, error={e}"
 
-            response["error-message"] = error_msg.strip()
-            DLOG.exception(error_msg)
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
 
         except Exception as e:
             error_msg = f"Caught exception while trying software deploy start, error={e}"
@@ -2581,12 +2588,15 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                         "Unknown error while trying software deploy activate, "
                         "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
+                else:
+                    error_msg = f"Software deploy activate was rejected: {error_msg}"
 
             elif not error_msg:
                 error_msg = f"Caught exception while trying software deploy activate, error={e}"
 
-            response["error-message"] = error_msg.strip()
-            DLOG.exception(error_msg)
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
 
         except Exception as e:
             error_msg = f"Caught exception while trying software deploy activate, error={e}"
@@ -2657,12 +2667,15 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                         "Unknown error while trying software deploy complete, "
                         "check /var/log/nfv-vim.log or /var/log/software.log for more information."
                     )
+                else:
+                    error_msg = f"Software deploy complete was rejected: {error_msg}"
 
             elif not error_msg:
                 error_msg = f"Caught exception while trying software deploy complete, error={e}"
 
-            response["error-message"] = error_msg.strip()
-            DLOG.exception(error_msg)
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
 
         except Exception as e:
             error_msg = f"Caught exception while trying software deploy complete, error={e}"
@@ -3841,22 +3854,23 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
         except exceptions.OpenStackRestAPIException as e:
             x = json.loads(e.http_response_body)
-            msg = x.get("error", x.get("info"))
-            response["error-message"] = msg.strip()
+            error_msg = x.get("error", x.get("info"))
             if httplib.UNAUTHORIZED == e.http_status_code:
                 response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._platform_token is not None:
                     self._platform_token.set_expired()
 
-            else:
-                DLOG.exception("Caught exception while trying to upgrade "
-                               "a host %s, error=%s." % (host_name, e))
-                response['reason'] = e.http_response_reason
-            response["error-message"] = msg.strip()
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy host {host_name}, error={e}"
+
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to upgrade a "
-                           "host %s, error=%s." % (host_name, e))
+            error_msg = f"Caught exception while trying software deploy host {host_name}, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
 
         finally:
             callback.send(response)

@@ -36,6 +36,8 @@ IGNORE_ALARMS_LIST = [
     "900.231",
 ]
 
+DEPLOY_START_DELAY = 120
+
 
 # TODO(jkraitbe): Update this when retry count is decicded.
 # utility method for the formatting of unlock-hosts stage as dict
@@ -1432,7 +1434,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',
-                      'timeout': 15},
+                      'timeout': DEPLOY_START_DELAY},
                  ]
                 },
                 {'name': 'sw-upgrade-controllers',
@@ -1602,7 +1604,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'system-stabilize',
-                      'timeout': 15},
+                      'timeout': DEPLOY_START_DELAY},
                  ]
                 },
                 {'name': 'sw-upgrade-controllers',

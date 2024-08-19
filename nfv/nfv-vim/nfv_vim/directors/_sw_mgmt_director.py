@@ -351,13 +351,21 @@ class SwMgmtDirector(object):
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_SWACT_FAILED, host)
 
-    def host_upgrade_failed(self, host):
+    def host_upgrade_failed(self, result):
         """
         Called when an upgrade of a host failed
         """
         if self._sw_update is not None:
             self._sw_update.handle_event(
-                strategy.STRATEGY_EVENT.HOST_UPGRADE_FAILED, host)
+                strategy.STRATEGY_EVENT.HOST_UPGRADE_FAILED, result)
+
+    def host_upgrade_changed(self, result):
+        """
+        Called when an upgrade of a host succeeded
+        """
+        if self._sw_update is not None:
+            self._sw_update.handle_event(
+                strategy.STRATEGY_EVENT.HOST_UPGRADE_CHANGED, result)
 
     def host_fw_update_abort_failed(self, host):
         """
