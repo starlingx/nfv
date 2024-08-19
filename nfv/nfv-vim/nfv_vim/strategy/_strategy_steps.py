@@ -967,7 +967,10 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
             return strategy.STRATEGY_STEP_RESULT.SUCCESS, reason
         else:
             force = (
-                self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
+                self.strategy._alarm_restrictions in [
+                    strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED,
+                    strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
+                ]
             )
             nfvi.nfvi_sw_deploy_precheck(self._release, force, self._sw_deploy_precheck_callback())
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -1267,7 +1270,10 @@ class UpgradeStartStep(strategy.StrategyStep):
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
         else:
             force = (
-                self.strategy._alarm_restrictions == strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED
+                self.strategy._alarm_restrictions in [
+                    strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED,
+                    strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
+                ]
             )
             nfvi.nfvi_upgrade_start(self._release, force, self._start_upgrade_callback())
 
@@ -2104,6 +2110,12 @@ class QueryAlarmsStep(strategy.StrategyStep):
                                   "%s - uuid %s due to relaxed alarm "
                                   "strictness" % (nfvi_alarm.alarm_id,
                                                   nfvi_alarm.alarm_uuid))
+                    elif (self.strategy._alarm_restrictions ==
+                            strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE):
+                        DLOG.warn("Ignoring alarm "
+                                  "%s - uuid %s due to permissive alarm "
+                                  "strictness" % (nfvi_alarm.alarm_id,
+                                                  nfvi_alarm.alarm_uuid))
                     elif (nfvi_alarm.alarm_id not in self._ignore_alarms and
                             nfvi_alarm.alarm_id not in self._ignore_alarms_conditional):
                         DLOG.warn("Alarm: %s" % nfvi_alarm.alarm_id)
@@ -2196,6 +2208,12 @@ class WaitDataSyncStep(strategy.StrategyStep):
                             nfvi_alarm.mgmt_affecting == 'False'):
                         DLOG.warn("Ignoring non-management affecting alarm "
                                   "%s - uuid %s due to relaxed alarm "
+                                  "strictness" % (nfvi_alarm.alarm_id,
+                                                  nfvi_alarm.alarm_uuid))
+                    elif (self.strategy._alarm_restrictions ==
+                            strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE):
+                        DLOG.warn("Ignoring alarm "
+                                  "%s - uuid %s due to permissive alarm "
                                   "strictness" % (nfvi_alarm.alarm_id,
                                                   nfvi_alarm.alarm_uuid))
                     elif nfvi_alarm.alarm_id not in self._ignore_alarms:
@@ -2308,6 +2326,12 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
                             nfvi_alarm.mgmt_affecting == 'False'):
                         DLOG.warn("Ignoring non-management affecting alarm "
                                   "%s - uuid %s due to relaxed alarm "
+                                  "strictness" % (nfvi_alarm.alarm_id,
+                                                  nfvi_alarm.alarm_uuid))
+                    elif (self.strategy._alarm_restrictions ==
+                            strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE):
+                        DLOG.warn("Ignoring alarm "
+                                  "%s - uuid %s due to permissive alarm "
                                   "strictness" % (nfvi_alarm.alarm_id,
                                                   nfvi_alarm.alarm_uuid))
                     elif nfvi_alarm.alarm_id not in self._ignore_alarms:

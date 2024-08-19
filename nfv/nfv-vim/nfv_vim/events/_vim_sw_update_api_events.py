@@ -88,6 +88,8 @@ def vim_sw_update_api_create_strategy(connection, msg):
 
     if 'strict' == msg.alarm_restrictions:
         alarm_restrictions = objects.SW_UPDATE_ALARM_RESTRICTION.STRICT
+    elif 'permissive' == msg.alarm_restrictions:
+        alarm_restrictions = objects.SW_UPDATE_ALARM_RESTRICTION.PERMISSIVE
     else:
         alarm_restrictions = objects.SW_UPDATE_ALARM_RESTRICTION.RELAXED
 

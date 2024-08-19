@@ -27,6 +27,7 @@ class StrategyAlarmRestrictionTypes(Constants):
     """
     STRICT = Constant('strict')
     RELAXED = Constant('relaxed')
+    PERMISSIVE = Constant('permissive')
 
 
 @six.add_metaclass(Singleton)

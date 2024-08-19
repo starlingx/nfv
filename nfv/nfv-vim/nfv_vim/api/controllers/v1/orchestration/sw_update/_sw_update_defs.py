@@ -61,6 +61,7 @@ class SwUpdateAlarmRestrictionTypes(Constants):
     """
     STRICT = Constant('strict')
     RELAXED = Constant('relaxed')
+    PERMISSIVE = Constant('permissive')
 
 
 # Constant Instantiation
@@ -93,4 +94,5 @@ SwUpdateInstanceActionTypes = wsme_types.Enum(str,
                                               SW_UPDATE_INSTANCE_ACTION.STOP_START)
 SwUpdateAlarmRestrictionTypes = wsme_types.Enum(
     str, SW_UPDATE_ALARM_RESTRICTION_TYPES.STRICT,
-    SW_UPDATE_ALARM_RESTRICTION_TYPES.RELAXED)
+    SW_UPDATE_ALARM_RESTRICTION_TYPES.RELAXED,
+    SW_UPDATE_ALARM_RESTRICTION_TYPES.PERMISSIVE)

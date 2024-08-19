@@ -77,7 +77,7 @@ function _swmanager()
                                     return 0
                                     ;;
                                 --alarm-restrictions)
-                                    COMPREPLY=($(compgen -W "strict relaxed" -- ${cur}))
+                                    COMPREPLY=($(compgen -W "strict relaxed permissive" -- ${cur}))
                                     return 0
                                     ;;
                                 *)

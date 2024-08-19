@@ -428,7 +428,8 @@ def setup_sw_deploy_parser(commands):
         [sw_update.INSTANCE_ACTION_STOP_START,  # instance actions
          sw_update.INSTANCE_ACTION_MIGRATE],
         [sw_update.ALARM_RESTRICTIONS_STRICT,  # alarm restrictions
-         sw_update.ALARM_RESTRICTIONS_RELAXED],
+         sw_update.ALARM_RESTRICTIONS_RELAXED,
+         sw_update.ALARM_RESTRICTIONS_PERMISSIVE],
         min_parallel=2,
         max_parallel=10  # SW Deploy supports 2..10 workers in parallel
     )

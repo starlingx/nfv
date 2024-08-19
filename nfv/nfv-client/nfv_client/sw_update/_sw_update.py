@@ -3,6 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import sys
+
 from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
 import textwrap
@@ -28,6 +30,7 @@ INSTANCE_ACTION_STOP_START = 'stop-start'
 
 ALARM_RESTRICTIONS_STRICT = 'strict'
 ALARM_RESTRICTIONS_RELAXED = 'relaxed'
+ALARM_RESTRICTIONS_PERMISSIVE = 'permissive'
 
 
 def _print(indent_by, field, value, remains=''):
@@ -223,6 +226,16 @@ def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
     """
     Software Update - Create Strategy
     """
+
+    if alarm_restrictions == ALARM_RESTRICTIONS_PERMISSIVE:
+        response = input(
+            "Using --alarm-restrictions permissive is unsafe.\n"
+            "Ensure you have contacted support and understand the possible complications.\n"
+            "Enter 'yes' to continue or anything else to abort: "
+        )
+        if response != "yes":
+            sys.exit(1)
+
     token = openstack.get_token(os_auth_uri, os_project_name,
                                 os_project_domain_name, os_username, os_password,
                                 os_user_domain_name)

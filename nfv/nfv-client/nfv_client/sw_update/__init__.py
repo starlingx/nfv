@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_client.sw_update._sw_update import abort_strategy  # noqa: F401
+from nfv_client.sw_update._sw_update import ALARM_RESTRICTIONS_PERMISSIVE  # noqa: F401
 from nfv_client.sw_update._sw_update import ALARM_RESTRICTIONS_RELAXED  # noqa: F401
 from nfv_client.sw_update._sw_update import ALARM_RESTRICTIONS_STRICT  # noqa: F401
 from nfv_client.sw_update._sw_update import apply_strategy  # noqa: F401
