@@ -1804,6 +1804,9 @@ class SwUpgradeStrategy(
                          '100.119',  # PTP alarm for SyncE
                          '900.701',  # Node tainted
                          '900.231',  # Software deployment data is out of sync
+                         '250.001',  # System Config out of date
+                         '200.001',  # Node locked
+                         '900.021',  # Deploy host failed
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller

@@ -2367,7 +2367,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
         super(QueryAlarmsStep, self).from_dict(data)
         self._fail_on_alarms = data['fail_on_alarms']
         self._ignore_alarms = data['ignore_alarms']
-        self._ignore_alarms_conditional = data['ignore_alarms_conditional']
+        self._ignore_alarms_conditional = data.get('ignore_alarms_conditional', [])
         return self
 
     def as_dict(self):
@@ -2626,7 +2626,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         super(WaitAlarmsClearStep, self).from_dict(data)
         self._first_query_delay_in_secs = data['first_query_delay_in_secs']
         self._ignore_alarms = data['ignore_alarms']
-        self._ignore_alarms_conditional = data['ignore_alarms_conditional']
+        self._ignore_alarms_conditional = data.get('ignore_alarms_conditional', [])
         self._wait_time = 0
         self._query_inprogress = False
         return self
