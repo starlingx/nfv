@@ -76,6 +76,7 @@
     name: nova-api-proxy-tox-pep8
     parent: tox
     description: Run pep8 for nova-api-proxy
+    nodeset: debian-bullseye
     vars:
       tox_envlist: pep8
       tox_extra_args: -c nova-api-proxy/tox.ini
