@@ -1929,7 +1929,7 @@ class SwUpgradeStrategy(
         worker_hosts = list()
 
         for host in host_table.values():
-            if self.nfvi_upgrade.is_host_deployed(host.name):
+            if host.is_unlocked() and self.nfvi_upgrade.is_host_deployed(host.name):
                 DLOG.info(f"Skipping deploy-host for already deployed host: {host.name}")
                 continue
 
@@ -2068,38 +2068,40 @@ class SwUpgradeStrategy(
             if (
                     self.nfvi_upgrade.is_start_done or
                     self.nfvi_upgrade.is_deploying_hosts or
-                    self.nfvi_upgrade.is_deploying_hosts_failed
+                    self.nfvi_upgrade.is_deploying_hosts_failed or
+                    self.nfvi_upgrade.is_deploying_hosts_done
             ):
-                DLOG.info("Skipping sw-deploy-start: Already started")
                 do_start = False
 
             # Skip straight to end if activate is complete or failed
             elif (
-                   self.nfvi_upgrade.is_deploying_hosts_done or
-                   self.nfvi_upgrade.is_activating or
-                   self.nfvi_upgrade.is_activate_done or
-                   self.nfvi_upgrade.is_activate_failed
+                    self.nfvi_upgrade.is_activating or
+                    self.nfvi_upgrade.is_activate_done or
+                    self.nfvi_upgrade.is_activate_failed
             ):
-                DLOG.info("Skipping sw-deploy-start: Already started")
-                DLOG.info("Skipping sw-deploy-hosts: Already deployed hosts")
                 do_start = False
                 do_upgrade_hosts = False
 
             # Already done, strategy probably would have failed already but just in case
             elif self.nfvi_upgrade.is_deploy_completed:
-                DLOG.info("Doing nothing sw-deploy already completed")
                 do_start = False
                 do_upgrade_hosts = False
                 do_complete = False
 
             if do_start:
                 self._add_upgrade_start_stage()
+            else:
+                DLOG.info("Skipping sw-deploy-start: Already started")
 
             if do_upgrade_hosts:
                 self._add_upgrade_hosts_stages()
+            else:
+                DLOG.info("Skipping sw-deploy-hosts: Already deployed hosts")
 
             if do_complete:
                 self._add_upgrade_complete_stage()
+            else:
+                DLOG.info("Doing nothing sw-deploy already completed")
 
             if 0 == len(self.apply_phase.stages):
                 DLOG.warn("No sw-deployments need to be applied.")
