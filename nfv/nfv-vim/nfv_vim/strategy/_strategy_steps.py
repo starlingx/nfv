@@ -5,6 +5,7 @@
 #
 import json
 import six
+import time
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -1323,12 +1324,23 @@ class UpgradeActivateStep(strategy.StrategyStep):
     """
     Upgrade Activate - Strategy Step
     """
-    def __init__(self, release):
+
+    ACTIVATION_TIMEOUT = 1860
+    RETRY_LIMIT = 2
+    RETRY_DELAY = 120
+
+    def __init__(self, release, retry_limit=RETRY_LIMIT, retry_delay=RETRY_DELAY):
         super(UpgradeActivateStep, self).__init__(
-            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=1860)
+            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=self.ACTIVATION_TIMEOUT)
 
         self._release = release
         self._query_inprogress = False
+        # Things for retrying activation
+        self._retry_count = 0  # Current attempt
+        self._retry_sleep = 0  # Earliest time next attempt can begin, current time + delay
+        self._retry_requested = False  # Is a retry queued
+        self._retry_limit = retry_limit  # Maximum number of retries
+        self._retry_delay = retry_delay  # Minium delay between retries
 
     @coroutine
     def _activate_upgrade_callback(self):
@@ -1365,35 +1377,50 @@ class UpgradeActivateStep(strategy.StrategyStep):
             return
 
         self.strategy.nfvi_upgrade = response['result-data']
+        reason = ""
+        result = None
 
+        # Determine activation progress by parsing USM state
         if self.strategy.nfvi_upgrade.is_activate_done:
-            DLOG.debug("Handle Activate-Upgrade callback, deploy activate is done")
-            reason = ""
+            reason = f"Completed software deploy activate, retries={self._retry_count}"
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, reason)
-
+            DLOG.debug("Handle Activate-Upgrade callback, deploy activate is done")
         elif self.strategy.nfvi_upgrade.is_activate_failed:
             reason = (
                 "Failed software deploy activate, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
-            self.stage.step_complete(result, reason)
-
         elif not self.strategy.nfvi_upgrade.is_activating:
             reason = (
                 "Unknown error while doing software deploy activate, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
-            self.stage.step_complete(result, reason)
-
         else:
             DLOG.debug("Handle Activate-Upgrade callback, deploy activate in progress...")
+
+        # If no result, activation is still in progress
+        if not result:
+            return
+
+        # If failed, retry if we haven't hit retry limit
+        if result == strategy.STRATEGY_STEP_RESULT.FAILED and self._retry_count < self._retry_limit:
+            self._retry_requested = True
+            self._retry_sleep = time.perf_counter() + self._retry_delay
+            DLOG.notice(
+                "Handle Activate-Upgrade failure, "
+                f"retry={self._retry_count + 1} queued, "
+                f"delay>={self._retry_delay} seconds"
+            )
+            self.strategy.save()
+            return
+
+        # If failed, add detailed error-response
+        if result == strategy.STRATEGY_STEP_RESULT.FAILED:
+            self.phase.result_complete_response(str(response))
+
+        self.stage.step_complete(result, reason)
 
     def apply(self):
         """
@@ -1407,12 +1434,15 @@ class UpgradeActivateStep(strategy.StrategyStep):
         reason = ""
 
         if self.strategy.nfvi_upgrade.is_activating:
-            DLOG.info("Deployment already activating, skipping activate call")
+            DLOG.info("Deployment already activating")
         elif self.strategy.nfvi_upgrade.is_activate_done:
-            DLOG.info("Deployment already activated, skipping activate call")
+            DLOG.info("Deployment already activated")
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-        else:
+        elif self.strategy.nfvi_upgrade.is_deploying_hosts_done or self.strategy.nfvi_upgrade.is_activate_failed:
             nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
+        else:
+            DLOG.info("Invalid initial state for software deploy activate")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
 
         return result, reason
 
@@ -1424,13 +1454,22 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
-        if event == STRATEGY_EVENT.HOST_AUDIT:
-            if not self._query_inprogress:
-                self._query_inprogress = True
-                nfvi.nfvi_get_upgrade(self._release, self._handle_activate_upgrade_callback())
-            return True
+        if event != STRATEGY_EVENT.HOST_AUDIT:
+            return False
 
-        return False
+        elif self._retry_requested and time.perf_counter() > self._retry_sleep:
+            self._retry_requested = False
+            self._retry_count += 1
+            self.extend_timeout(self.ACTIVATION_TIMEOUT)
+            DLOG.notice(f"Step ({self._name}): Executing retry={self._retry_count}")
+            self.strategy.save()
+            nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
+
+        elif not self._retry_requested and not self._query_inprogress:
+            self._query_inprogress = True
+            nfvi.nfvi_get_upgrade(self._release, self._handle_activate_upgrade_callback())
+
+        return True
 
     def from_dict(self, data):
         """
@@ -1440,6 +1479,11 @@ class UpgradeActivateStep(strategy.StrategyStep):
         super(UpgradeActivateStep, self).from_dict(data)
         self._release = data["release"]
         self._query_inprogress = False
+        self._retry_count = data["retry_count"]
+        self._retry_sleep = data["retry_sleep"]
+        self._retry_requested = data["retry_requested"]
+        self._retry_limit = data["retry_limit"]
+        self._retry_delay = data["retry_delay"]
         return self
 
     def as_dict(self):
@@ -1451,6 +1495,11 @@ class UpgradeActivateStep(strategy.StrategyStep):
         data['entity_names'] = list()
         data['entity_uuids'] = list()
         data['release'] = self._release
+        data['retry_count'] = self._retry_count
+        data['retry_sleep'] = self._retry_sleep
+        data['retry_requested'] = self._retry_requested
+        data['retry_limit'] = self._retry_limit
+        data['retry_delay'] = self._retry_delay
         return data
 
 
@@ -1473,8 +1522,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         response = (yield)
         DLOG.debug("Complete-Upgrade callback response=%s." % response)
 
-        self.strategy.nfvi_upgrade = response['result-data']
-        if response['completed'] and self.strategy.nfvi_upgrade.is_deploy_completed:
+        if response['completed'] and response['result-data'].is_deploy_completed:
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             self.stage.step_complete(result, "")
         else:
