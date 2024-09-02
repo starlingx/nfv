@@ -82,3 +82,15 @@ def database_sw_update_get_list():
                                                                   strategy_data)
             sw_update_objs.append(system_config_update_obj)
     return sw_update_objs
+
+
+def database_sw_update_exists():
+    """
+    Check if any software update strategy exists in the database
+    """
+    db = database_get()
+    session = db.session()
+    query = session.query(model.SoftwareUpdate)
+
+    # Return True if any record exists, False otherwise
+    return session.query(query.exists()).scalar()

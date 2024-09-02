@@ -5,6 +5,8 @@
 #
 import collections
 
+from nfv_vim.database._database_sw_update import database_sw_update_exists
+
 from nfv_common import debug
 from nfv_common import histogram
 from nfv_common import timers
@@ -52,6 +54,9 @@ _nfvi_networks_paging = nfvi.objects.v1.Paging(page_limit=32)
 
 _audit_debug_dump_back_off_ms = 0
 _last_audit_debug_dump_ms = 0
+_last_audit_time_ms = 0
+AUDIT_DELAY_MS = 60000  # 60000 ms = 60 seconds
+AUDIT_DELAY_SECONDS = 60  # 60 seconds
 
 
 def _audit_dump_debug_info(do_dump=True):
@@ -814,10 +819,35 @@ def _audit_nfvi():
     """
     Audit NFVI
     """
-    global _main_audit_inprogress
+    global _main_audit_inprogress, _last_audit_time_ms
+
+    # Initialize the last audit time to the current time
+    _last_audit_time_ms = timers.get_monotonic_timestamp_in_ms()
 
     while True:
         timer_id = (yield)
+
+        if database_sw_update_exists():
+            DLOG.verbose(
+                "Active strategy detected, continuing with the audit."
+            )
+        else:
+            current_time_ms = timers.get_monotonic_timestamp_in_ms()
+            elapsed_ms = current_time_ms - _last_audit_time_ms
+            if elapsed_ms < AUDIT_DELAY_MS:
+                DLOG.verbose(
+                    f"No active strategy found, waiting "
+                    f"{AUDIT_DELAY_SECONDS - elapsed_ms / 1000:.2f} "
+                    f"seconds before next audit."
+                )
+
+                yield  # Yield control to ensure other coroutines can run
+                continue  # Skip the current iteration to delay the audit
+            else:
+                DLOG.verbose(
+                    f"No active strategy found, performing "
+                    f"audit after {AUDIT_DELAY_SECONDS} seconds."
+                )
 
         DLOG.verbose("Audit system information called, timer_id=%s."
                      % timer_id)
@@ -930,6 +960,9 @@ def _audit_nfvi():
             _main_audit_inprogress = True
             while _main_audit_inprogress:
                 timer_id = (yield)
+
+        # Reset the last audit time
+        _last_audit_time_ms = timers.get_monotonic_timestamp_in_ms()
 
 
 @coroutine
