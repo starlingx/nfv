@@ -219,6 +219,9 @@ def sw_deploy_get_upgrade_obj(token, release):
             error = "Software release not found"
         raise EnvironmentError(error)
 
+    # During a major release the packages list will be too big and will break RPC calls.
+    release_info.pop("packages")
+
     try:
         if deploy_data:
             deploy_info = deploy_data[0]
