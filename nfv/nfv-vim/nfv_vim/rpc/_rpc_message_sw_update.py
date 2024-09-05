@@ -63,6 +63,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
     """
     release = None
     rollback = None
+    delete = None
 
     def __init__(self, msg_version=RPC_MSG_VERSION.VERSION_1_0,
                  msg_type=RPC_MSG_TYPE.CREATE_SW_UPGRADE_STRATEGY_REQUEST,
@@ -74,11 +75,13 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         super(APIRequestCreateSwUpgradeStrategy, self).serialize_payload(msg)
         msg['release'] = self.release
         msg['rollback'] = self.rollback
+        msg['delete'] = self.delete
 
     def deserialize_payload(self, msg):
         super(APIRequestCreateSwUpgradeStrategy, self).deserialize_payload(msg)
         self.release = msg.get('release', None)
         self.rollback = msg.get('rollback', None)
+        self.delete = msg.get('delete', None)
 
     def __str__(self):
         return "create-sw-deploy-strategy request: %s" % self.deserialize_payload

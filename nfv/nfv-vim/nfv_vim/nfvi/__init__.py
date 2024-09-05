@@ -91,6 +91,7 @@ from nfv_vim.nfvi._nfvi_image_module import nfvi_image_plugin_disabled  # noqa: 
 from nfv_vim.nfvi._nfvi_image_module import nfvi_update_image  # noqa: F401
 
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_delete_container_host_services  # noqa: F401
+from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_deploy_delete  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_disable_container_host_services  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_enable_container_host_services  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_alarm_history  # noqa: F401

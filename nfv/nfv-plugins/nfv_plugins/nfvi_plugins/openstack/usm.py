@@ -62,6 +62,18 @@ def _api_post(token, url, payload, headers=None, timeout_in_secs=REST_API_REQUES
     return response
 
 
+def _api_delete(token, url):
+    """
+    Perform DELETE on a particular endpoint
+    """
+
+    response = rest_api_request(token,
+                                "DELETE",
+                                url,
+                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    return response
+
+
 def sw_deploy_get_releases(token):
     """
     Query USM for information about all releases
@@ -160,6 +172,17 @@ def sw_deploy_complete(token):
     uri = f"deploy/complete"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
     response = _api_post(token, url, {})
+    return response
+
+
+def sw_deploy_delete(token):
+    """
+    Ask USM delete a deployment
+    """
+
+    uri = f"deploy"  # noqa:F541 pylint: disable=W1309
+    url = _usm_api_cmd(token, uri)
+    response = _api_delete(token, url)
     return response
 
 

@@ -439,6 +439,16 @@ def nfvi_upgrade_complete(release, callback):
     return cmd_id
 
 
+def nfvi_deploy_delete(release, callback):
+    """
+    Software deploy delete
+    """
+    cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_delete',
+                                                  release,
+                                                  callback=callback)
+    return cmd_id
+
+
 def nfvi_sw_deploy_abort(callback):
     """
     Software deploy abort

@@ -62,6 +62,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             release=MAJOR_RELEASE_UPGRADE,
             rollback=False,
+            delete=False,
             nfvi_upgrade=None,
             single_controller=False
     ):
@@ -78,6 +79,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             alarm_restrictions=alarm_restrictions,
             release=release,
             rollback=rollback,
+            delete=delete,
             ignore_alarms=[],
             single_controller=single_controller,
         )
@@ -92,6 +94,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
             instances=None,
             rollback=False,
+            delete=False,
             **kwargs,
     ):
         self.create_host('controller-0', aio=True, openstack_installed=openstack)
@@ -109,6 +112,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=default_instance_action,
             worker_apply_type=worker_apply_type,
             rollback=rollback,
+            delete=delete,
             **kwargs,
         )
 
@@ -121,6 +125,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
             instances=None,
             rollback=False,
+            delete=False,
             **kwargs,
     ):
         self.create_host('controller-0', aio=True, openstack_installed=openstack)
@@ -138,6 +143,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=default_instance_action,
             worker_apply_type=worker_apply_type,
             rollback=rollback,
+            delete=delete,
             **kwargs,
         )
 
@@ -1055,7 +1061,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 '13.01',
                 {
-                    'state': 'deployed',
+                    'state': 'deploying',
                     'reboot_required': False,
                     'sw_version': PATCH_RELEASE_UPGRADE,
                 },
@@ -1337,6 +1343,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         release = '888.8'
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
+            delete=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
@@ -1356,7 +1363,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 4,
+            'total_stages': 5,
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
@@ -1393,6 +1400,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
+                    ]
+                },
+                {
+                    'name': 'sw-deploy-delete',
+                    'total_steps': 2,
+                    'steps': [
+                        {'name': 'swact-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'deploy-delete', 'release': release},
                     ],
                 },
             ],
@@ -1413,6 +1428,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         release = '888.8'
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
+            delete=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
@@ -1432,7 +1448,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 4,
+            'total_stages': 5,
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
@@ -1479,7 +1495,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
                         {'name': 'system-stabilize', 'timeout': 60},
-                    ],
+                    ]
+                },
+                {
+                    'name': 'sw-deploy-delete',
+                    'total_steps': 2,
+                    'steps': [
+                        {'name': 'swact-hosts', 'entity_names': ['controller-1']},
+                        {'name': 'deploy-delete', 'release': release},
+                    ]
                 },
             ],
         }
@@ -1841,6 +1865,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
+            delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
@@ -1914,6 +1939,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
+            delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
@@ -1987,6 +2013,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
+            delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
@@ -2060,6 +2087,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
+            delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
@@ -2133,6 +2161,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
+            delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
@@ -2206,6 +2235,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
+            delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
                 {
