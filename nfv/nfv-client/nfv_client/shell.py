@@ -59,9 +59,12 @@ def get_extra_create_args(cmd_area, args):
             raise ValueError("Must set release or rollback")
         elif args.release is not None and args.rollback:
             raise ValueError("Cannot set both release and rollback")
+        elif args.rollback and args.delete:
+            raise ValueError("Cannot set both rollback and delete")
         return {
             'release': args.release,
-            'rollback': args.rollback
+            'rollback': args.rollback,
+            'delete': args.delete
         }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
@@ -451,6 +454,12 @@ def setup_sw_deploy_parser(commands):
     # sw-deploy create (rollback)
     create_strategy_cmd.add_argument('--rollback',
                                      help='Perform a rollback instead of upgrade',
+                                     action="store_true",
+                                     required=False)
+
+    # sw-deploy create (delete)
+    create_strategy_cmd.add_argument('--delete',
+                                     help='add delete option',
                                      action="store_true",
                                      required=False)
 

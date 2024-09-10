@@ -2686,6 +2686,85 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def sw_deploy_delete(self, future, release, callback):
+        """
+        Delete USM software deployement
+        """
+        response = dict()
+        response['completed'] = False
+        response['reason'] = ''
+        response['complete-data'] = ''
+
+        try:
+            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._platform_token is None or \
+                    self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = (yield)
+
+                if not future.result.is_complete() or \
+                        future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(usm.sw_deploy_delete, self._platform_token)
+            future.result = (yield)
+            if not future.result.is_complete():
+                DLOG.error("USM software deploy delete did not complete.")
+                return
+
+            response['complete-data'] = future.result.data
+
+            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
+            future.result = (yield)
+
+            if not future.result.is_complete():
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                )
+                response['error-message'] = error_msg
+                return
+
+            response['result-data'] = future.result.data
+            response['completed'] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            x = json.loads(e.http_response_body)
+            error_msg = x.get("error", x.get("info"))
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            elif httplib.NOT_ACCEPTABLE == e.http_status_code:
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software deploy delete, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    )
+                else:
+                    error_msg = f"Software deploy delete was rejected: {error_msg}"
+
+            elif not error_msg:
+                error_msg = f"Caught exception while trying software deploy delete, error={e}"
+
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
+
+        except Exception as e:
+            error_msg = f"Caught exception while trying software deploy delete, error={e}"
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
     def sw_deploy_abort(self, future, callback):
         """
         Abort a USM software deployement

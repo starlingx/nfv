@@ -1780,7 +1780,7 @@ class SwUpgradeStrategy(
     def __init__(self, uuid,
                  controller_apply_type, storage_apply_type, worker_apply_type,
                  max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions, release, rollback,
+                 alarm_restrictions, release, rollback, delete,
                  ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
@@ -1796,6 +1796,7 @@ class SwUpgradeStrategy(
 
         self._release = release
         self._rollback = rollback
+        self._delete = delete
 
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['900.005',  # Upgrade in progress
@@ -1874,20 +1875,34 @@ class SwUpgradeStrategy(
             self.save()
             super(SwUpgradeStrategy, self).build()
 
+        elif self._rollback and self._delete is not None:
+            reason = "Cannot set both delete and rollback, delete is set by default"
+            DLOG.error(reason)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = reason
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            super(SwUpgradeStrategy, self).build()
+
         elif self._rollback:
             return self._build_rollback()
 
         else:
             return self._build_normal()
 
-    def _swact_fix(self, stage, controller_name):
+    def _swact_fix(self, stage, controller_name, force=False):
         """Add a SWACT to a stage on DX systems
 
         Currently, certain steps during sw-deploy must be done on a specific controller.
         Here we insert arbitrary SWACTs to meet those requirements.
         """
 
-        if self._single_controller or not self.nfvi_upgrade.major_release:
+        if force and not self._single_controller:
+            # Deployment delete requires a swact
+            pass
+        elif self._single_controller or not self.nfvi_upgrade.major_release:
             return
 
         from nfv_vim import strategy
@@ -2009,6 +2024,18 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.SystemStabilizeStep())
         self.apply_phase.add_stage(stage)
 
+    def _add_deploy_delete_stage(self):
+        """
+        Add deploy delete strategy stage
+        """
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_DEPLOY_DELETE)
+        # sw-deploy delete must be done on controller-0
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1, True)
+        stage.add_step(strategy.SwDeployDeleteStep(release=self._release))
+        self.apply_phase.add_stage(stage)
+
     def _build_complete_normal(self, result, result_reason):
         from nfv_vim import strategy
 
@@ -2063,6 +2090,7 @@ class SwUpgradeStrategy(
             do_start = True
             do_upgrade_hosts = True
             do_complete = True
+            do_delete = self._delete
 
             # Skip start if started
             if (
@@ -2088,6 +2116,12 @@ class SwUpgradeStrategy(
                 do_upgrade_hosts = False
                 do_complete = False
 
+            elif self.nfvi_upgrade.is_deployed:
+                do_start = False
+                do_upgrade_hosts = False
+                do_complete = False
+                do_delete = False
+
             if do_start:
                 self._add_upgrade_start_stage()
             else:
@@ -2102,6 +2136,11 @@ class SwUpgradeStrategy(
                 self._add_upgrade_complete_stage()
             else:
                 DLOG.info("Doing nothing sw-deploy already completed")
+
+            if do_delete:
+                self._add_deploy_delete_stage()
+            else:
+                DLOG.info("Doing nothing sw-deploy already deleted")
 
             if 0 == len(self.apply_phase.stages):
                 DLOG.warn("No sw-deployments need to be applied.")

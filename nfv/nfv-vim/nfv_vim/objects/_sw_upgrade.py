@@ -31,7 +31,7 @@ class SwUpgrade(SwUpdate):
 
     def strategy_build(self, strategy_uuid, controller_apply_type, storage_apply_type,
                        worker_apply_type, default_instance_action, max_parallel_worker_hosts,
-                       alarm_restrictions, release, rollback,
+                       alarm_restrictions, release, rollback, delete,
                        ignore_alarms, single_controller):
         """
         Create a software upgrade strategy
@@ -52,6 +52,7 @@ class SwUpgrade(SwUpdate):
             alarm_restrictions,
             release,
             rollback,
+            delete,
             ignore_alarms,
             single_controller,
         )

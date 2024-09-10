@@ -45,6 +45,7 @@ class StrategyStepNames(Constants):
     SW_DEPLOY_ABORT = Constant('sw-deploy-abort')
     SW_DEPLOY_ACTIVATE_ROLLBACK = Constant('sw-deploy-activate-rollback')
     COMPLETE_UPGRADE = Constant('complete-upgrade')
+    SW_DEPLOY_DELETE = Constant('deploy-delete')
     SWACT_HOSTS = Constant('swact-hosts')
     SW_PATCH_HOSTS = Constant('sw-patch-hosts')
     FW_UPDATE_HOSTS = Constant('fw-update-hosts')
@@ -1559,6 +1560,69 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         Represent the upgrade complete step as a dictionary
         """
         data = super(UpgradeCompleteStep, self).as_dict()
+        data['entity_type'] = ''
+        data['entity_names'] = list()
+        data['entity_uuids'] = list()
+        data['release'] = self._release
+        return data
+
+
+class SwDeployDeleteStep(strategy.StrategyStep):
+    """
+    Upgrade Complete - Strategy Step
+    """
+
+    def __init__(self, release):
+        super(SwDeployDeleteStep, self).__init__(
+            STRATEGY_STEP_NAME.SW_DEPLOY_DELETE, timeout_in_secs=60)
+
+        self._release = release
+
+    @coroutine
+    def _deploy_delete_callback(self):
+        """
+        Deploy Delete Callback
+        """
+        response = (yield)
+        DLOG.debug("Deploy-delete callback response=%s." % response)
+
+        if response['completed'] and response['result-data'].is_deployed:
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            reason = response.get("error-message",
+                "Unknown error while trying software deploy delete, "
+                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            detailed_reason = str(response)
+            self.phase.result_complete_response(detailed_reason)
+            self.stage.step_complete(result, reason)
+
+    def apply(self):
+        """
+        Deploy Delete
+        """
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        nfvi.nfvi_deploy_delete(self._release, self._deploy_delete_callback())
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """
+        Returns the deploy delete step object initialized using the given
+        dictionary
+        """
+        super(SwDeployDeleteStep, self).from_dict(data)
+        self._release = data["release"]
+        return self
+
+    def as_dict(self):
+        """
+        Represent the deploy delete step as a dictionary
+        """
+        data = super(SwDeployDeleteStep, self).as_dict()
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
@@ -5557,6 +5621,9 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.COMPLETE_UPGRADE == data['name']:
         step_obj = object.__new__(UpgradeCompleteStep)
+
+    elif STRATEGY_STEP_NAME.SW_DEPLOY_DELETE == data['name']:
+        step_obj = object.__new__(SwDeployDeleteStep)
 
     elif STRATEGY_STEP_NAME.SW_DEPLOY_ABORT == data['name']:
         step_obj = object.__new__(SwDeployAbortStep)

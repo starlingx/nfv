@@ -76,6 +76,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
             release='starlingx-24.03.1',
             rollback=False,
+            delete=False,
             nfvi_upgrade=None,
             single_controller=False
     ):
@@ -92,6 +93,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             alarm_restrictions=alarm_restrictions,
             release=release,
             rollback=rollback,
+            delete=delete,
             ignore_alarms=[],
             single_controller=single_controller,
         )

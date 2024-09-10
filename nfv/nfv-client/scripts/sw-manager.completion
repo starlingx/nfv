@@ -54,6 +54,7 @@ function _swmanager()
                                 --instance-action
                                 --alarm-restrictions
                                 --rollback
+                                --delete
                             "
                             local createopt=${prev}
                             case "$createopt" in
@@ -82,6 +83,10 @@ function _swmanager()
                                     return 0
                                     ;;
                                 --rollback)
+                                    COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
+                                    return 0
+                                    ;;
+                                --delete)
                                     COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
                                     return 0
                                     ;;
