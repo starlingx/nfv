@@ -1799,15 +1799,18 @@ class SwUpgradeStrategy(
         self._delete = delete
 
         # The following alarms will not prevent a software upgrade operation
-        IGNORE_ALARMS = ['900.005',  # Upgrade in progress
-                         '900.201',  # Software upgrade auto apply in progress
-                         '750.006',  # Configuration change requires reapply of cert-manager
-                         '100.119',  # PTP alarm for SyncE
-                         '900.701',  # Node tainted
-                         '900.231',  # Software deployment data is out of sync
-                         '250.001',  # System Config out of date
+        IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
                          '200.001',  # Node locked
+                         '250.001',  # System Config out of date
+                         '750.006',  # Configuration change requires reapply of cert-manager
+                         '900.004',  # Incorrect software load
+                         '900.005',  # Upgrade in progress
+                         '900.020',  # Deploy host completed
                          '900.021',  # Deploy host failed
+                         '900.022',  # Deploy in host-rollback-done state
+                         '900.201',  # Software upgrade auto apply in progress
+                         '900.231',  # Software deployment data is out of sync
+                         '900.701',  # Node tainted
                          ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -2053,16 +2056,16 @@ class SwUpgradeStrategy(
         if result in [strategy.STRATEGY_RESULT.SUCCESS,
                       strategy.STRATEGY_RESULT.DEGRADED]:
             if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
-                reason = "Software release does not exist or is unavailable."
+                reason = "Software release does not exist or is unavailable"
 
             elif self.nfvi_upgrade.is_committed:
-                reason = "Software release is committed."
+                reason = "Software release is committed"
 
-            elif self.nfvi_upgrade.is_deploy_completed:
-                reason = "Software deployment is already complete."
+            elif self.nfvi_upgrade.is_deploy_completed and not self._delete:
+                reason = "Software deployment is already complete, pending delete"
 
             elif self._nfvi_alarms:
-                reason = "Active alarms found, can't apply software deployment."
+                reason = "Active alarms found, can't apply software deployment"
 
             elif self.nfvi_upgrade.is_deployed or self.nfvi_upgrade.is_available:
                 from nfv_vim import tables
@@ -2168,9 +2171,10 @@ class SwUpgradeStrategy(
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_START)
 
-        stage.add_step(strategy.QueryAlarmsStep(fail_on_alarms=False, ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.SwDeployAbortStep())
-        stage.add_step(strategy.SwDeployActivateRollbackStep())
+        # TODO(jkraitbe): Activate-rollback not supported yet
+        # stage.add_step(strategy.SwDeployActivateRollbackStep())
         self.apply_phase.add_stage(stage)
 
     def _add_rollback_hosts_stages(self):
@@ -2189,8 +2193,14 @@ class SwUpgradeStrategy(
         worker_hosts = list()
 
         for host in host_table.values():
-            if self.nfvi_upgrade.is_host_pending(host.name):
-                DLOG.info("Skipping host-rollback for pending host: {host.name}")
+            if (
+                    (host.is_unlocked() and self.nfvi_upgrade.is_host_rollback_deployed(host.name)) or
+                    # TODO(jkraitbe): Skip pending hosts, USM does not allow unlocking pending hosts.
+                    # Any hosts that are locked/pending will need to be manually unlocked by user after
+                    # the sw-deploy-strategy is complete.
+                    self.nfvi_upgrade.is_host_pending(host.name)
+            ):
+                DLOG.info(f"Skipping rollback-host for already rolled back host: {host.name}")
                 continue
 
             if HOST_PERSONALITY.CONTROLLER in host.personality:
@@ -2256,6 +2266,7 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_COMPLETE)
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.SwDeployDeleteStep(release=self.nfvi_upgrade.release_id))
         self.apply_phase.add_stage(stage)
 
     def _build_complete_rollback(self, result, result_reason):
@@ -2277,19 +2288,30 @@ class SwUpgradeStrategy(
             return
 
         if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
-            reason = "Software release does not exist or is unavailable."
+            reason = "Software release does not exist or is unavailable"
 
         elif not self.nfvi_upgrade.is_deploying:
             reason = (
                 "Software release must be deploying for a rollback, " +
-                f"found={self.nfvi_upgrade.release_info}."
+                f"found={self.nfvi_upgrade.release_info}"
             )
 
         elif not self._single_controller:
-            reason = "Rollback only supported for AIO-SX currently"
+            reason = "Software rollback is only supported on AIO-SX by VIM currently"
+
+        elif self.nfvi_upgrade.is_starting:
+            reason = "Software rollback cannot be initiated while sw-deploy-start is in progress"
+
+        elif (
+                self.nfvi_upgrade.is_activating or
+                self.nfvi_upgrade.is_activate_done or
+                self.nfvi_upgrade.is_activate_failed or
+                self.nfvi_upgrade.is_deploy_completed
+        ):
+            reason = "Software rollback cannot be initiated by VIM after activation"
 
         elif not self.nfvi_upgrade.major_release:
-            reason = "Rollback only supported for major releases currently"
+            reason = "Rollback only supported for major releases by VIM currently"
 
         if reason:
             DLOG.warn(reason)

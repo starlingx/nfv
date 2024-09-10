@@ -454,13 +454,13 @@ def setup_sw_deploy_parser(commands):
     # sw-deploy create (rollback)
     create_strategy_cmd.add_argument('--rollback',
                                      help='Perform a rollback instead of upgrade',
-                                     action="store_true",
+                                     action=argparse.BooleanOptionalAction,
                                      required=False)
 
     # sw-deploy create (delete)
     create_strategy_cmd.add_argument('--delete',
                                      help='add delete option',
-                                     action="store_true",
+                                     action=argparse.BooleanOptionalAction,
                                      required=False)
 
     # define the delete command

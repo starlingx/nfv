@@ -31,6 +31,13 @@ class Upgrade(ObjectData):
                          hosts_info=hosts_info))
 
     @property
+    def release_id(self):
+        if not self.release_info:
+            return None
+
+        return self.release_info["release_id"]
+
+    @property
     def release_state(self):
         if not self.release_info:
             return None
@@ -195,3 +202,11 @@ class Upgrade(ObjectData):
         for v in self.hosts_info:
             if v["hostname"] == hostname:
                 return v["host_state"] == usm_states.DEPLOY_HOST_STATES.PENDING.value
+
+    def is_host_rollback_deployed(self, hostname):
+        if not self.hosts_info:
+            return None
+
+        for v in self.hosts_info:
+            if v["hostname"] == hostname:
+                return v["host_state"] == usm_states.DEPLOY_HOST_STATES.ROLLBACK_DEPLOYED.value

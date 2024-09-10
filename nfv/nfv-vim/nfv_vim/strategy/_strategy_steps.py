@@ -947,7 +947,8 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         if response['completed'] and response['complete-data'].get('system_healthy', False):
             DLOG.debug("sw-deploy precheck completed")
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, '')
+            reason = response['complete-data'].get('info', '').strip()
+            self.stage.step_complete(result, reason)
         else:
             reason = response.get("error-message",
                 "Unknown error while trying software deploy precheck, "
@@ -1439,11 +1440,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
         elif self.strategy.nfvi_upgrade.is_activate_done:
             DLOG.info("Deployment already activated")
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-        elif self.strategy.nfvi_upgrade.is_deploying_hosts_done or self.strategy.nfvi_upgrade.is_activate_failed:
-            nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
         else:
-            DLOG.info("Invalid initial state for software deploy activate")
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
 
         return result, reason
 
@@ -1523,18 +1521,24 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         response = (yield)
         DLOG.debug("Complete-Upgrade callback response=%s." % response)
 
-        if response['completed'] and response['result-data'].is_deploy_completed:
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
-        else:
+        result = None
+        reason = ''
+
+        if response['completed']:
+            self.strategy.nfvi_upgrade = response['result-data']
+            if self.strategy.nfvi_upgrade.is_deploy_completed:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                reason = response['complete-data'].get('info', '').strip()
+
+        if result is None:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
             reason = response.get("error-message",
                 "Unknown error while trying software deploy complete, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
-            self.stage.step_complete(result, reason)
+            self.phase.result_complete_response(str(response))
+
+        self.stage.step_complete(result, reason)
 
     def apply(self):
         """
@@ -1586,18 +1590,27 @@ class SwDeployDeleteStep(strategy.StrategyStep):
         response = (yield)
         DLOG.debug("Deploy-delete callback response=%s." % response)
 
-        if response['completed'] and response['result-data'].is_deployed:
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
-        else:
+        result = None
+        reason = ''
+
+        if response['completed']:
+            self.strategy.nfvi_upgrade = response['result-data']
+            if (
+                    not self.strategy._rollback and self.strategy.nfvi_upgrade.is_deployed or
+                    self.strategy._rollback and self.strategy.nfvi_upgrade.is_available
+            ):
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                reason = response['complete-data'].get('info', '').strip()
+
+        if result is None:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
             reason = response.get("error-message",
                 "Unknown error while trying software deploy delete, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
-            self.stage.step_complete(result, reason)
+            self.phase.result_complete_response(str(response))
+
+        self.stage.step_complete(result, reason)
 
     def apply(self):
         """
@@ -1606,6 +1619,7 @@ class SwDeployDeleteStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
+
         nfvi.nfvi_deploy_delete(self._release, self._deploy_delete_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
@@ -1651,7 +1665,8 @@ class SwDeployAbortStep(strategy.StrategyStep):
             DLOG.debug("sw-deploy abort completed")
             self.strategy.nfvi_upgrade = response['result-data']
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, '')
+            reason = response['complete-data'].get('info', '').strip()
+            self.stage.step_complete(result, reason)
         else:
             reason = response.get("error-message",
                 "Unknown error while trying software deploy abort, "
@@ -1672,6 +1687,15 @@ class SwDeployAbortStep(strategy.StrategyStep):
 
         if self.strategy.nfvi_upgrade.is_rollback:
             reason = "Rollback already in progress, skipping abort call"
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            DLOG.info(reason)
+            return result, reason
+
+        elif (
+                self.strategy.nfvi_upgrade.is_start_done or
+                self.strategy.nfvi_upgrade.is_start_failed
+        ):
+            reason = f"Software deploy abort not required from {self.strategy.nfvi_upgrade.deploy_state}"
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             DLOG.info(reason)
             return result, reason
