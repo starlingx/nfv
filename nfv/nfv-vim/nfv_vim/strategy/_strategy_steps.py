@@ -7,6 +7,7 @@ import json
 import six
 import time
 
+from nfv_common import config
 from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -1007,7 +1008,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
     """
     def __init__(self, hosts):
         super(UpgradeHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.UPGRADE_HOSTS, timeout_in_secs=3600)
+            STRATEGY_STEP_NAME.UPGRADE_HOSTS, timeout_in_secs=self.TIMEOUT)
         self._host_names = list()
         self._host_uuids = list()
         for host in hosts:
@@ -1017,6 +1018,12 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._deployed_hosts = {}
         self._failed_hosts = {}
         self._unknown_hosts = 0
+
+    @property
+    def TIMEOUT(self):
+        section = config.CONF.get("software-deploy", {})
+        timeout = int(section.get("deploy_host_execute_timeout", 3600))
+        return timeout
 
     def _get_upgrade_callback_inner(self, response):
         """
@@ -1187,12 +1194,19 @@ class UpgradeStartStep(strategy.StrategyStep):
     """
     Upgrade Start - Strategy Step
     """
-    def __init__(self, release):
+
+    def __init__(self, release, timeout=None):
         super(UpgradeStartStep, self).__init__(
-            STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=1200)
+            STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
         self._query_inprogress = False
+
+    @property
+    def TIMEOUT(self):
+        section = config.CONF.get("software-deploy", {})
+        timeout = int(section.get("deploy_start_timeout", 3600))
+        return timeout
 
     @coroutine
     def _start_upgrade_callback(self):
@@ -1327,13 +1341,9 @@ class UpgradeActivateStep(strategy.StrategyStep):
     Upgrade Activate - Strategy Step
     """
 
-    ACTIVATION_TIMEOUT = 1860
-    RETRY_LIMIT = 2
-    RETRY_DELAY = 120
-
-    def __init__(self, release, retry_limit=RETRY_LIMIT, retry_delay=RETRY_DELAY):
+    def __init__(self, release):
         super(UpgradeActivateStep, self).__init__(
-            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=self.ACTIVATION_TIMEOUT)
+            STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
         self._query_inprogress = False
@@ -1341,8 +1351,26 @@ class UpgradeActivateStep(strategy.StrategyStep):
         self._retry_count = 0  # Current attempt
         self._retry_sleep = 0  # Earliest time next attempt can begin, current time + delay
         self._retry_requested = False  # Is a retry queued
-        self._retry_limit = retry_limit  # Maximum number of retries
-        self._retry_delay = retry_delay  # Minium delay between retries
+        self._retry_limit = self.RETRY_LIMIT  # Maximum number of retries
+        self._retry_delay = self.RETRY_DELAY  # Minimum delay between retries
+
+    @property
+    def TIMEOUT(self):
+        section = config.CONF.get("software-deploy", {})
+        timeout = int(section.get("deploy_activate_timeout", 3600))
+        return timeout
+
+    @property
+    def RETRY_LIMIT(self):
+        section = config.CONF.get("software-deploy", {})
+        timeout = int(section.get("deploy_activate_retries", 2))
+        return timeout
+
+    @property
+    def RETRY_DELAY(self):
+        section = config.CONF.get("software-deploy", {})
+        timeout = int(section.get("deploy_activate_retry_delay", 120))
+        return timeout
 
     @coroutine
     def _activate_upgrade_callback(self):
@@ -1459,7 +1487,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
         elif self._retry_requested and time.perf_counter() > self._retry_sleep:
             self._retry_requested = False
             self._retry_count += 1
-            self.extend_timeout(self.ACTIVATION_TIMEOUT)
+            self.extend_timeout(self.TIMEOUT)
             DLOG.notice(f"Step ({self._name}): Executing retry={self._retry_count}")
             self.strategy.save()
             nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())

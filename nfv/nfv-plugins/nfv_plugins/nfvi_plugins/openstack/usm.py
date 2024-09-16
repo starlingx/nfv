@@ -243,7 +243,7 @@ def sw_deploy_get_upgrade_obj(token, release):
         raise EnvironmentError(error)
 
     # During a major release the packages list will be too big and will break RPC calls.
-    release_info.pop("packages")
+    release_info["packages_count"] = len(release_info.pop("packages", []))
 
     try:
         if deploy_data:
