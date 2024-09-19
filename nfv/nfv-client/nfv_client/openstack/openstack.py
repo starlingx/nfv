@@ -49,7 +49,7 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
         request_info = urllib.request.Request(url)
         request_info.add_header("Content-Type", "application/json")
         request_info.add_header("Accept", "application/json")
-
+        request_info.add_header("User-Agent", "vim/1.0")
         payload = json.dumps(
             {"auth": {
                 "identity": {

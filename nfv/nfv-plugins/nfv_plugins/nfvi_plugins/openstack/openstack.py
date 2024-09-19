@@ -31,6 +31,7 @@ def get_token(directory):
         request_info = urllib.request.Request(url)
         request_info.add_header("Content-Type", "application/json")
         request_info.add_header("Accept", "application/json")
+        request_info.add_header("User-Agent", "vim/1.0")
 
         if directory.auth_password is None:
             import keyring
