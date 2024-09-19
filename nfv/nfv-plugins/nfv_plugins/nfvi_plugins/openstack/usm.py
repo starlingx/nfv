@@ -208,6 +208,54 @@ def sw_deploy_activate_rollback(token):
     return response
 
 
+def is_target_release_downgrade(index, release_data):
+    """Check if target release is a downgrade and if it is RR.
+
+    A release is a upgrade if it is available or deploying.
+    RR is set when there is at least one RR release as part of the upgrade.
+    RR values are taken from upgraded releases including the target release.
+
+    A release is a downgrade if it is deployed or removing.
+    RR is set when there is at least one RR release as part of the downgrade.
+    RR values are taken from downgraded releases and not the target release.
+    """
+
+    upgrade = False
+    downgrade = False
+    vim_rr = False
+    upgrade_states = [usm_states.AVAILABLE, usm_states.DEPLOYING]
+    downgrade_states = [usm_states.DEPLOYED, usm_states.REMOVING]
+    current_state = release_data[index]["state"]
+
+    # Need to figure out if upgrade or downgrade
+    if release_data[index]["state"] in upgrade_states:
+        upgrade = True
+
+    elif release_data[index]["state"] in downgrade_states:
+        downgrade = True
+
+    else:
+        # Pretend it's an upgrade and let strategy reject request
+        upgrade = True
+        return upgrade, downgrade, vim_rr
+
+    if downgrade:
+        # Check if downgrade is RR
+        for release in release_data[index + 1:]:
+            if release["state"] != current_state:
+                break
+            vim_rr |= release["reboot_required"]
+
+    elif upgrade:
+        # Check if upgrade is RR
+        for release in release_data[index::-1]:
+            if release["state"] != current_state:
+                break
+            vim_rr |= release["reboot_required"]
+
+    return upgrade, downgrade, vim_rr
+
+
 def sw_deploy_get_upgrade_obj(token, release):
     """Quickly gather all information about a software deployment"""
 
@@ -215,6 +263,9 @@ def sw_deploy_get_upgrade_obj(token, release):
     release_info = None
     deploy_info = None
     hosts_info = None
+    downgrade = False
+    upgrade = False
+    vim_rr = None
     release_data = sw_deploy_get_releases(token).result_data
     deploy_data = sw_deploy_show(token).result_data
     hosts_info_data = sw_deploy_host_list(token).result_data
@@ -222,17 +273,21 @@ def sw_deploy_get_upgrade_obj(token, release):
 
     # Parse responses
     try:
-        for rel in release_data:
+        for i, rel in enumerate(release_data):
             if release and rel['release_id'] == release:
                 release_info = rel
+                upgrade, downgrade, vim_rr = is_target_release_downgrade(i, release_data)
+                DLOG.debug(f"Detected, {upgrade=}, {downgrade=}, "
+                           f"target={release}, "
+                           f"reboot_required={vim_rr}")
                 break
             elif not release and rel['state'] == usm_states.DEPLOYING:
                 release = rel['release_id']
                 release_info = rel
                 break
     except Exception as e:
-        error = "Failed to parse 'software list'"
-        DLOG.exception(f"{error}: {release_data}")
+        error = f"Failed to parse 'software list': {e}"
+        DLOG.exception(f"{error}: \n{release_data=}")
         raise ValueError(error_template.format(error)) from e
 
     if not release_info:
@@ -244,21 +299,24 @@ def sw_deploy_get_upgrade_obj(token, release):
 
     # During a major release the packages list will be too big and will break RPC calls.
     release_info["packages_count"] = len(release_info.pop("packages", []))
+    release_info["upgrade"] = upgrade
+    release_info["downgrade"] = downgrade
+    release_info["vim_rr"] = vim_rr
 
     try:
         if deploy_data:
             deploy_info = deploy_data[0]
     except Exception as e:
-        error = "Failed to parse 'software deploy show'"
-        DLOG.exception(f"{error}: {deploy_data}")
+        error = f"Failed to parse 'software deploy show': {e}"
+        DLOG.exception(f"{error}: \n{deploy_data=}")
         raise ValueError(error_template.format(error)) from e
 
     try:
         if hosts_info_data:
             hosts_info = hosts_info_data
     except Exception as e:
-        error = "Failed to parse 'software deploy host-list'"
-        DLOG.exception(f"{error}: {hosts_info_data}")
+        error = f"Failed to parse 'software deploy host-list': {e}"
+        DLOG.exception(f"{error}: \n{hosts_info_data=}")
         raise ValueError(error_template.format(error)) from e
 
     upgrade_obj = nfvi.objects.v1.Upgrade(

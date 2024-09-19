@@ -967,7 +967,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        if self.strategy.nfvi_upgrade.is_deploying:
+        if self.strategy.nfvi_upgrade.is_deploying or self.strategy.nfvi_upgrade.is_removing:
             reason = "Deployment already in progress, skipping precheck"
             DLOG.info(reason)
             return strategy.STRATEGY_STEP_RESULT.SUCCESS, reason

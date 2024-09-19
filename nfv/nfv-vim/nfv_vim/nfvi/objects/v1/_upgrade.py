@@ -56,7 +56,7 @@ class Upgrade(ObjectData):
         if not self.release_info:
             return None
 
-        return self.release_info["reboot_required"]
+        return self.release_info.get("vim_rr", self.release_info["reboot_required"])
 
     @property
     def sw_version(self):
@@ -89,6 +89,13 @@ class Upgrade(ObjectData):
             return is_major_release(SW_VERSION, self.sw_version)
 
     @property
+    def is_downgrade(self):
+        if not self.release_info:
+            return None
+
+        return self.release_info.get("downgrade", False)
+
+    @property
     def is_available(self):
         return self.release_state == usm_states.AVAILABLE
 
@@ -99,6 +106,10 @@ class Upgrade(ObjectData):
     @property
     def is_deploying(self):
         return self.release_state == usm_states.DEPLOYING
+
+    @property
+    def is_removing(self):
+        return self.release_state == usm_states.REMOVING
 
     @property
     def is_deployed(self):

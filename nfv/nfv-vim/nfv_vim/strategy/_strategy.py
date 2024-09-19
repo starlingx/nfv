@@ -2113,13 +2113,13 @@ class SwUpgradeStrategy(
                 do_start = False
                 do_upgrade_hosts = False
 
-            # Already done, strategy probably would have failed already but just in case
+            # Only optional delete is remaining if already deployed
             elif self.nfvi_upgrade.is_deploy_completed:
                 do_start = False
                 do_upgrade_hosts = False
                 do_complete = False
 
-            elif self.nfvi_upgrade.is_deployed:
+            elif self.nfvi_upgrade.is_deployed and not self.nfvi_upgrade.is_downgrade:
                 do_start = False
                 do_upgrade_hosts = False
                 do_complete = False

@@ -8,8 +8,8 @@ from unittest import mock
 import uuid
 
 from nfv_common import strategy as common_strategy
+from nfv_plugins.nfvi_plugins.openstack.usm import is_target_release_downgrade
 from nfv_vim import nfvi
-
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
@@ -1049,10 +1049,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_deploy_strategy_aiosx_already_deployed(self):
+    def test_sw_deploy_strategy_aiosx_already_deploying(self):
         """
-        Test the sw_deploy strategy when patch already deployed:
-        - patch already deployed
+        Test the sw_deploy strategy when patch already deploying:
+        - patch already deploying
         Verify:
         - Success
         """
@@ -1062,6 +1062,36 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 '13.01',
                 {
                     'state': 'deploying',
+                    'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        bpr = strategy.build_phase
+
+        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
+
+    def test_sw_deploy_strategy_aiosx_already_removing(self):
+        """
+        Test the sw_deploy strategy when patch already removing:
+        - patch already removing
+        Verify:
+        - Success
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                '13.01',
+                {
+                    'state': 'removing',
                     'reboot_required': False,
                     'sw_version': PATCH_RELEASE_UPGRADE,
                 },
@@ -1106,6 +1136,65 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
         assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
         assert bpr.result_reason == expected_reason, bpr.result_reason
+
+    def test_sw_deploy_strategy_aiosx_already_deployed(self):
+        """
+        Test the sw_deploy strategy when patch already deploy completed:
+        - patch deployed
+        Verify:
+        - Fail
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                '13.01',
+                {'state': 'deployed'},
+                None,
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        expected_reason = "no sw-deployments patches need to be applied"
+        bpr = strategy.build_phase
+
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
+        assert bpr.result_reason == expected_reason, bpr.result_reason
+
+    def test_sw_deploy_strategy_aiosx_already_deployed_downgrade_create(self):
+        """
+        Test the sw_deploy strategy when patch already deploy completed:
+        - patch deployed
+        Verify:
+        - Fail
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                '13.01',
+                {
+                    'state': 'deployed',
+                    'downgrade': True,
+                    'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        bpr = strategy.build_phase
+
+        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     def test_sw_deploy_strategy_aiosx_already_committed(self):
         """
@@ -2207,3 +2296,574 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_downgrade(self):
+        """
+        Test the sw_deploy strategy apply phase:
+        - aio-sx
+        - major
+        - host
+        Verify:
+        - Pass
+        """
+
+        release = '888.8'
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=release,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    'state': 'available',
+                    'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            )
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'start-upgrade', 'release': release},
+                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 30},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-complete',
+                    'total_steps': 4,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'activate-upgrade', 'release': release},
+                        {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'system-stabilize', 'timeout': 60},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - We should be able to upgrade to a deployed release
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "available",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "available",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert upgrade
+        assert not downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade_rr(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - We should be able to upgrade to a deployed release
+        - RR
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "available",  # Target
+                "reboot_required": True,
+            },
+            {
+                "state": "available",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert upgrade
+        assert not downgrade
+        assert vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade_multiple(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - We should be able to upgrade to a deployed release
+        - Upgrade multiple releases at once
+        Verify:
+        - Pass
+        """
+
+        index = 2
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "available",
+                "reboot_required": False,
+            },
+            {
+                "state": "available",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "available",
+                "reboot_required": True,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert upgrade
+        assert not downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade_multiple_rr_first(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - We should be able to upgrade to a deployed release
+        - Upgrade multiple releases at once
+        - RR on the oldest release
+        Verify:
+        - Pass
+        """
+
+        index = 2
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "available",
+                "reboot_required": True,
+            },
+            {
+                "state": "available",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "available",
+                "reboot_required": True,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert upgrade
+        assert not downgrade
+        assert vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade_multiple_rr_second(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - We should be able to upgrade to a deployed release
+        - Upgrade multiple releases at once
+        - RR on the most recent release
+        Verify:
+        - Pass
+        """
+
+        index = 2
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "available",
+                "reboot_required": False,
+            },
+            {
+                "state": "available",  # Target
+                "reboot_required": True,
+            },
+            {
+                "state": "available",
+                "reboot_required": True,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert upgrade
+        assert not downgrade
+        assert vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade_deploying_complex(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - We should be able to upgrade to a deployed release
+        - Upgrade multiple releases at once
+        - RR on the most recent release
+        Verify:
+        - Pass
+        """
+
+        index = 4
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+            {
+                "state": "deploying",
+                "reboot_required": False,
+            },
+            {
+                "state": "deploying",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "available",
+                "reboot_required": True,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert upgrade
+        assert not downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade_not_required(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - Nothing to upgrade
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "available",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_upgrade_reenter(self):
+        """
+        Test the sw_deploy strategy upgrade logic:
+        - Nothing to upgrade
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deploying",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "available",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert upgrade
+        assert not downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_rr(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - RR
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_multiple(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - Downgrade multiple releases at once
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_multiple_rr_first(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - Downgrade multiple releases at once
+        - RR on the oldest release
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_multiple_rr_second(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - Downgrade multiple releases at once
+        - RR on the most recent release
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_removing_complex(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - Downgrade multiple releases at once
+        - RR on the most recent release
+        Verify:
+        - Pass
+        """
+
+        index = 3
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",
+            },
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+            {
+                "state": "removing",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "removing",
+                "reboot_required": False,
+            },
+            {
+                "state": "available",
+                "reboot_required": True,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_not_required(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - Nothing to downgrade
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "available",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_reenter(self):
+        """
+        Test the sw_deploy strategy downgrade logic:
+        - Nothing to downgrade
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "unavailable",
+            },
+            {
+                "state": "deployed",  # Target
+            },
+            {
+                "state": "removing",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
