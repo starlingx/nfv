@@ -1018,6 +1018,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._deployed_hosts = {}
         self._failed_hosts = {}
         self._unknown_hosts = 0
+        self._restart = False
+        self._skip_loop = True
 
     @property
     def TIMEOUT(self):
@@ -1108,6 +1110,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
         DLOG.info("Step (%s) apply for hosts %s." % (self._name,
                                                      self._host_names))
         host_director = directors.get_host_director()
+        self._restart = False
         operation = host_director.upgrade_hosts(self._host_names, self.strategy._rollback)
         if operation.is_inprogress():
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -1116,15 +1119,37 @@ class UpgradeHostsStep(strategy.StrategyStep):
 
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
+    def _set_skiploop_val(self):
+        """
+        Skip loop value to avoid infinite loop
+        """
+        DLOG.warn("VIM restart detected. Set value to disable infinite loop")
+        # Value to be set to False to avoid infinite loop
+        self._skip_loop = False
+        return
+
     def handle_event(self, event, event_data=None):
         """
         Handle Host events
         """
+        from nfv_vim import directors
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         update = False
+        DLOG.debug("Check if VIM was restarted during host deploy %s" % (self._restart))
+        if self._restart:
+            DLOG.error("VIM restart detected during software deploy host")
+            # VIM restart done. Set the value back to False
+            self._restart = False
+            # This check is to avoid getting into infinite loop
+            if not self._skip_loop:
+                return True
+            host_director = directors.get_host_director()
+            host_director.upgrade_hosts(self._host_names, self.strategy._rollback)
+            self._set_skiploop_val()
+            self.strategy.save()
 
         if event == STRATEGY_EVENT.HOST_UPGRADE_FAILED:
             host = event_data["host"]
@@ -1174,6 +1199,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._failed_hosts = data["failed_hosts"]
         self._deployed_hosts = data["deployed_hosts"]
         self._unknown_hosts = data["unknown_hosts"]
+        self._restart = True
+        self._skip_loop = True
         return self
 
     def as_dict(self):
