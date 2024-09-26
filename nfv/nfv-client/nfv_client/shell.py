@@ -413,7 +413,7 @@ def setup_sw_deploy_parser(commands):
     cmd_parser.set_defaults(cmd_area=cmd_area)
 
     sub_cmds = cmd_parser.add_subparsers(title='Software Deploy Commands',
-                                         metavar='')
+                                         metavar='[create, delete, apply, abort, show]')
     sub_cmds.required = True
 
     # define the create command
