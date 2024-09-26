@@ -876,7 +876,11 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
         rpc_request = rpc.APIRequestCreateKubeUpgradeStrategy()
         rpc_request.sw_update_type = _get_sw_update_type_from_path(
             pecan.request.path)
-        rpc_request.to_version = request_data.to_version
+        request_data.to_version = request_data.to_version.lower()
+        if request_data.to_version.startswith('v'):
+            rpc_request.to_version = request_data.to_version
+        else:
+            rpc_request.to_version = "v{}".format(request_data.to_version)
         rpc_request.controller_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.worker_apply_type = request_data.worker_apply_type
