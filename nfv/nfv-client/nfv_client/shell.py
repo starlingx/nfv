@@ -6,6 +6,7 @@
 import argparse
 import http.client as http_client
 import os
+import signal
 from six.moves import urllib
 import sys
 
@@ -117,6 +118,9 @@ def setup_abort_cmd(parser):
     abort_cmd.set_defaults(cmd='abort')
     abort_cmd.add_argument('--stage-id',
                            help='stage identifier to abort')
+    abort_cmd.add_argument('--yes',
+                           action='store_true',
+                           help='automatically confirm the action')
     return abort_cmd
 
 
@@ -134,6 +138,9 @@ def setup_apply_cmd(parser):
     apply_cmd.add_argument('--stage-id',
                            default=None,
                            help='stage identifier to apply')
+    apply_cmd.add_argument('--yes',
+                           action='store_true',
+                           help='automatically confirm the action')
     return apply_cmd
 
 
@@ -474,6 +481,69 @@ def setup_sw_deploy_parser(commands):
     _ = setup_show_cmd(sub_cmds)
 
 
+def input_with_timeout(prompt, timeout):
+    def timeout_handler(signum, frame):
+        raise TimeoutError
+
+    # Set the timeout handler
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(timeout)  # Set the alarm for the timeout
+
+    try:
+        # Try to get input from the user
+        result = input(prompt)
+        signal.alarm(0)  # Cancel the alarm if input is received in time
+        return result
+    except TimeoutError:
+        print("\nNo response received within the time limit.")
+        sys.exit(1)
+
+
+def prompt_cli_confirmation(timeout=10):
+    RESET = "\033[0m"
+    YELLOW = '\033[93m'
+    BOLD = '\033[1m'
+    confirmation = input_with_timeout(
+            f"{BOLD}{YELLOW}WARNING: This is a high-risk operation that may "
+            f"cause a service interruption or remove critical resources{RESET}\n"
+            f"{BOLD}{YELLOW}Do you want to continue? (yes/No): {RESET}", timeout
+        )
+
+    if confirmation.lower() != 'yes':
+        print("Operation cancelled by the user")
+        sys.exit(1)
+
+
+def _is_service_impacting_command(command):
+    base_commands = [
+        "sw-deploy-strategy",
+        "fw-update-strategy",
+        "kube-upgrade-strategy",
+        "kube-rootca-update-strategy",
+        "system-config-update-strategy"
+    ]
+
+    actions = ["apply", "abort"]
+
+    service_impacting_commands = {
+            f"{cmd} {action}"
+            for cmd in base_commands
+            for action in actions
+    }
+
+    return command in service_impacting_commands
+
+
+def _is_cli_confirmation_param_enabled():
+    return os.environ.get("CLI_CONFIRMATIONS", "disabled") == "enabled"
+
+
+def confirm_if_required(args, command, cli_conf_enabled):
+    if cli_conf_enabled and not getattr(args, "yes", False):
+        if _is_service_impacting_command(command):
+            prompt_cli_confirmation()
+
+
 def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
     """
     Client - Main
@@ -577,6 +647,10 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
             return
 
         strategy_name = get_strategy_name(args.cmd_area)
+        command = args.cmd_area + " " + args.cmd
+        cli_conf_param_enabled = _is_cli_confirmation_param_enabled()
+        confirm_if_required(args, command, cli_conf_param_enabled)
+
         if 'create' == args.cmd:
             extra_create_args = get_extra_create_args(args.cmd_area, args)
             sw_update.create_strategy(args.os_auth_url,

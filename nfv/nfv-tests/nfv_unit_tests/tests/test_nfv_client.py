@@ -195,7 +195,7 @@ class StrategyMixin(object):
         mock_abort.assert_called_once()
 
     def test_shell_strategy_abort(self):
-        shell_args = [self.strategy, 'abort']
+        shell_args = [self.strategy, 'abort', '--yes']
         self._test_shell_abort(shell_args=shell_args)
 
     # -- Apply command --
@@ -207,7 +207,7 @@ class StrategyMixin(object):
         mock_apply.assert_called_once()
 
     def test_shell_strategy_apply(self):
-        shell_args = [self.strategy, 'apply']
+        shell_args = [self.strategy, 'apply', '--yes']
         self._test_shell_apply(shell_args=shell_args)
 
     # -- Delete command --
