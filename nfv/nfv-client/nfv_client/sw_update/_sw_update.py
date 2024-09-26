@@ -32,6 +32,9 @@ ALARM_RESTRICTIONS_STRICT = 'strict'
 ALARM_RESTRICTIONS_RELAXED = 'relaxed'
 ALARM_RESTRICTIONS_PERMISSIVE = 'permissive'
 
+STRATEGY_APPLYING = 'applying'
+STRATEGY_READY_TO_APPLY = 'ready-to-apply'
+
 
 def _print(indent_by, field, value, remains=''):
     full_field = f"{field}:"
@@ -311,6 +314,21 @@ def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                                 openstack.SERVICE_TYPE.NFV, os_interface)
     if url is None:
         raise ValueError("NFV-VIM URL is invalid")
+
+    strategy = sw_update.get_strategies(token.get_id(), url, strategy_name,
+                                        os_username, os_user_domain_name,
+                                        os_username)
+
+    if not strategy:
+        raise Exception("No strategy available. Nothing to apply.")
+    else:
+        if strategy.state == STRATEGY_APPLYING:
+            raise Exception(
+                    "Strategy already applied.")
+
+        elif strategy.state != STRATEGY_READY_TO_APPLY:
+            raise Exception(
+                    "Strategy cannot be applied. %s is not a valid state." % strategy.state)
 
     strategy = sw_update.apply_strategy(token.get_id(), url,
                                         strategy_name, stage_id,
