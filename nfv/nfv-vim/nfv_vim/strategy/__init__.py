@@ -61,6 +61,7 @@ from nfv_vim.strategy._strategy_steps import SwactHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwDeployAbortStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwDeployActivateRollbackStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwDeployDeleteStep  # noqa: F401
+from nfv_vim.strategy._strategy_steps import SwDeployDoNothingStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwDeployPrecheckStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwPatchHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SystemConfigUpdateHostsStep  # noqa: F401

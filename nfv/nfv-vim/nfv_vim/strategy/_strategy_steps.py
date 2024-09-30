@@ -39,6 +39,7 @@ class StrategyStepNames(Constants):
     LOCK_HOSTS = Constant('lock-hosts')
     UNLOCK_HOSTS = Constant('unlock-hosts')
     REBOOT_HOSTS = Constant('reboot-hosts')
+    SW_DEPLOY_DO_NOTHING = Constant('sw-deploy-do-nothing')
     UPGRADE_HOSTS = Constant('upgrade-hosts')
     SW_DEPLOY_PRECHECK = Constant('sw-deploy-precheck')
     START_UPGRADE = Constant('start-upgrade')
@@ -999,6 +1000,46 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         data['entity_type'] = ''
         data['entity_names'] = list()
         data['entity_uuids'] = list()
+        return data
+
+
+class SwDeployDoNothingStep(strategy.StrategyStep):
+    """Do nothing, be happy"""
+
+    def __init__(self, hosts):
+        super(SwDeployDoNothingStep, self).__init__(
+            STRATEGY_STEP_NAME.SW_DEPLOY_DO_NOTHING, timeout_in_secs=10)
+        self._host_names = list()
+        self._host_uuids = list()
+        for host in hosts:
+            self._host_names.append(host.name)
+
+    def apply(self):
+        """
+        Do nothing
+        """
+        DLOG.info("Step (%s) apply for hosts %s." % (self._name,
+                                                     self._host_names))
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+    def from_dict(self, data):
+        """
+        Returns the upgrade hosts step object initialized using the given
+        dictionary
+        """
+        super(SwDeployDoNothingStep, self).from_dict(data)
+        self._host_uuids = list()
+        self._host_names = data['entity_names']
+        return self
+
+    def as_dict(self):
+        """
+        Represent the upgrade hosts step as a dictionary
+        """
+        data = super(SwDeployDoNothingStep, self).as_dict()
+        data['entity_type'] = 'hosts'
+        data['entity_names'] = self._host_names
+        data['entity_uuids'] = self._host_uuids
         return data
 
 
@@ -5685,6 +5726,9 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.SWACT_HOSTS == data['name']:
         step_obj = object.__new__(SwactHostsStep)
+
+    elif STRATEGY_STEP_NAME.SW_DEPLOY_DO_NOTHING == data['name']:
+        step_obj = object.__new__(SwDeployDoNothingStep)
 
     elif STRATEGY_STEP_NAME.UPGRADE_HOSTS == data['name']:
         step_obj = object.__new__(UpgradeHostsStep)

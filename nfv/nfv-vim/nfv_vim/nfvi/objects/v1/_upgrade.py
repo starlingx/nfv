@@ -53,6 +53,13 @@ class Upgrade(ObjectData):
 
     @property
     def reboot_required(self):
+        # Ideally we use the reboot_required value from the deployment in progress.
+        # However, if we haven't started the deployment yet we need to use our own derived
+        # reboot_required value stored in vim_rr.  Using the reboot_required from release_info
+        # will not be correct during multi-patch situations.
+        if self.deploy_info:
+            return self.deploy_info["reboot_required"]
+
         if not self.release_info:
             return None
 

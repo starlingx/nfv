@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
+import functools
 import six
 import weakref
 
@@ -1378,13 +1379,13 @@ class PatchWorkerHostsMixin(UpdateWorkerHostsMixin):
 
 
 class SwDeployWorkerHostsMixin(UpdateWorkerHostsMixin):
-    def _add_worker_strategy_stages(self, worker_hosts, reboot):
+    def _add_worker_strategy_stages(self, worker_hosts, reboot, do_nothing=False):
         from nfv_vim import strategy
         return self._add_update_worker_strategy_stages(
             worker_hosts,
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS,
-            strategy.UpgradeHostsStep)
+            strategy.UpgradeHostsStep if not do_nothing else strategy.SwDeployDoNothingStep)
 
 
 class UpgradeKubeletWorkerHostsMixin(UpdateWorkerHostsMixin):
@@ -2177,7 +2178,7 @@ class SwUpgradeStrategy(
         # stage.add_step(strategy.SwDeployActivateRollbackStep())
         self.apply_phase.add_stage(stage)
 
-    def _add_rollback_hosts_stages(self):
+    def _add_rollback_hosts_stages(self, do_nothing):
         """
         Add rollback hosts strategy stage
         """
@@ -2192,13 +2193,13 @@ class SwUpgradeStrategy(
         storage_hosts = list()
         worker_hosts = list()
 
+        # TODO(jkraitbe): do_nothing is only used on AIO-SX currently.
+        # Problems will be encountered for parallel apply without additional work.
+
         for host in host_table.values():
             if (
                     (host.is_unlocked() and self.nfvi_upgrade.is_host_rollback_deployed(host.name)) or
-                    # TODO(jkraitbe): Skip pending hosts, USM does not allow unlocking pending hosts.
-                    # Any hosts that are locked/pending will need to be manually unlocked by user after
-                    # the sw-deploy-strategy is complete.
-                    self.nfvi_upgrade.is_host_pending(host.name)
+                    (host.is_unlocked() and self.nfvi_upgrade.is_host_pending(host.name))
             ):
                 DLOG.info(f"Skipping rollback-host for already rolled back host: {host.name}")
                 continue
@@ -2207,7 +2208,9 @@ class SwUpgradeStrategy(
                 controllers_hosts.append(host)
                 if HOST_PERSONALITY.WORKER in host.personality:
                     # We need to use this strategy on AIO type
-                    controller_strategy = self._add_worker_strategy_stages
+                    controller_strategy = functools.partial(
+                        self._add_worker_strategy_stages,
+                        do_nothing=do_nothing)
 
             elif HOST_PERSONALITY.STORAGE in host.personality:
                 storage_hosts.append(host)
@@ -2310,9 +2313,6 @@ class SwUpgradeStrategy(
         ):
             reason = "Software rollback cannot be initiated by VIM after activation"
 
-        elif not self.nfvi_upgrade.major_release:
-            reason = "Rollback only supported for major releases by VIM currently"
-
         if reason:
             DLOG.warn(reason)
             self._state = strategy.STRATEGY_STATE.BUILD_FAILED
@@ -2323,10 +2323,22 @@ class SwUpgradeStrategy(
             self.save()
             return
 
+        do_nothing = False
+
+        if (
+            self.nfvi_upgrade.is_start_done or
+            self.nfvi_upgrade.is_start_failed
+        ):
+            do_nothing = True
+
         # Unlike with normal deployments we will defer skip logic to the steps
         self._add_rollback_start_stage()
-        self._add_rollback_hosts_stages()
-        self._add_rollback_complete_stage()
+        if not do_nothing:
+            self._add_rollback_hosts_stages(do_nothing)
+            self._add_rollback_complete_stage()
+        else:
+            self._add_rollback_complete_stage()
+            self._add_rollback_hosts_stages(do_nothing)
 
     def build_complete(self, result, result_reason):
         """
