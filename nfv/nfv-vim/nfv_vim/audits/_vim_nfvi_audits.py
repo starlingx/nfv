@@ -882,12 +882,26 @@ def _audit_nfvi():
             while _main_audit_inprogress:
                 timer_id = (yield)
 
-        DLOG.verbose("Audit tenants called, timer_id=%s." % timer_id)
-        nfvi.nfvi_get_tenants(_audit_nfvi_tenants_callback(timer_id))
+        # This is to avoid making frequent /project requests against the platform's
+        # keystone. This audit is relevant when stx-openstack is installed because it
+        # uses projects to isolate virtualized resources.
+        # The solution implemented here is a very simple one. It uses information
+        # already stored in tables_get_host_table() to determine if openstack is installed
+        # or not. It does not follow this repository's standard of defining flags in
+        # configuration files via puppet.
+        # A better alternative is to make use of a config file flag, generated with puppet,
+        # as per conventions here. [1] defines a list of flags to indicate which plugin is disabled
+        # Add a new item like nfvi_identity_plugin_disabled to mark that the keystone identity
+        # plugin should be disabled and use here in vim like [2].
+        # [1] https://opendev.org/starlingx/config/src/commit/7f3ae1c40df99274c61e4691803662ad04198620/sysinv/sysinv/sysinv/sysinv/puppet/nfv.py#L295
+        # [2] https://opendev.org/starlingx/nfv/src/commit/d3ed569df7989e405df17ee67f62574575f196ca/nfv/nfv-vim/nfv_vim/audits/_vim_nfvi_audits.py#L867
+        if any(host.openstack_control for host in tables.tables_get_host_table().values()):
+            DLOG.verbose("Audit tenants called, timer_id=%s." % timer_id)
+            nfvi.nfvi_get_tenants(_audit_nfvi_tenants_callback(timer_id))
 
-        _main_audit_inprogress = True
-        while _main_audit_inprogress:
-            timer_id = (yield)
+            _main_audit_inprogress = True
+            while _main_audit_inprogress:
+                timer_id = (yield)
 
         if not nfvi.nfvi_compute_plugin_disabled():
             DLOG.verbose("Audit instance types called, timer_id=%s."
