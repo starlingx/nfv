@@ -1809,6 +1809,7 @@ class SwUpgradeStrategy(
                          '900.020',  # Deploy host completed
                          '900.021',  # Deploy host failed
                          '900.022',  # Deploy in host-rollback-done state
+                         '900.023',  # Software release deploy operation in progress
                          '900.201',  # Software upgrade auto apply in progress
                          '900.231',  # Software deployment data is out of sync
                          '900.701',  # Node tainted
