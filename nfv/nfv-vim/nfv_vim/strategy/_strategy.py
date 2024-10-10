@@ -1896,17 +1896,14 @@ class SwUpgradeStrategy(
         else:
             return self._build_normal()
 
-    def _swact_fix(self, stage, controller_name, force=False):
+    def _swact_fix(self, stage, controller_name):
         """Add a SWACT to a stage on DX systems
 
         Currently, certain steps during sw-deploy must be done on a specific controller.
         Here we insert arbitrary SWACTs to meet those requirements.
         """
 
-        if force and not self._single_controller:
-            # Deployment delete requires a swact
-            pass
-        elif self._single_controller or not self.nfvi_upgrade.major_release:
+        if self._single_controller or not self.nfvi_upgrade.major_release:
             return
 
         from nfv_vim import strategy
@@ -2035,8 +2032,8 @@ class SwUpgradeStrategy(
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_DEPLOY_DELETE)
-        # sw-deploy delete must be done on controller-0
-        self._swact_fix(stage, HOST_NAME.CONTROLLER_1, True)
+        # sw-deploy delete must be done on controller-0 for major release
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.SwDeployDeleteStep(release=self._release))
         self.apply_phase.add_stage(stage)
 

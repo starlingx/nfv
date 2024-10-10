@@ -1493,9 +1493,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 },
                 {
                     'name': 'sw-deploy-delete',
-                    'total_steps': 2,
+                    'total_steps': 1,
                     'steps': [
-                        {'name': 'swact-hosts', 'entity_names': ['controller-1']},
                         {'name': 'deploy-delete', 'release': release},
                     ],
                 },
@@ -1588,9 +1587,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 },
                 {
                     'name': 'sw-deploy-delete',
-                    'total_steps': 2,
+                    'total_steps': 1,
                     'steps': [
-                        {'name': 'swact-hosts', 'entity_names': ['controller-1']},
                         {'name': 'deploy-delete', 'release': release},
                     ]
                 },
