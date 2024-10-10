@@ -82,6 +82,34 @@ def _display_strategy_step(strategy_step, active=False):
     return True
 
 
+def _get_current_stage_and_step(strategy):
+    """
+    Get the current stage and step
+    """
+
+    current_phase = None
+    current_stage, current_step = None, None
+
+    for v in [strategy.build_phase, strategy.apply_phase, strategy.abort_phase]:
+        if strategy.current_phase == v.phase_name:
+            current_phase = v
+            break
+
+    if not current_phase:
+        return current_stage, current_step
+
+    for stage in current_phase.stages:
+        current_stage = stage
+        if stage.inprogress or stage == current_phase.stages[-1]:
+            for step in current_stage.steps:
+                current_step = step
+                if step.result not in ['initial', 'success'] or step == current_stage.steps[-1]:
+                    break
+            break
+
+    return current_stage, current_step
+
+
 def _display_strategy_stage(strategy_stage, details=False, active=False):
     """
     Software Update - Display Strategy Stage Information
@@ -171,6 +199,11 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
     _print(2, "default-instance-action", strategy.default_instance_action)
     _print(2, "alarm-restrictions", strategy.alarm_restrictions)
     _print(2, "current-phase", strategy.current_phase)
+    current_stage, current_step = _get_current_stage_and_step(strategy)
+    if current_stage:
+        _print(2, "current-stage", current_stage.stage_name)
+    if current_step:
+        _print(2, "current-step", current_step.step_name)
     _print(2, "current-phase-completion",
            ("%s%%" % strategy.current_phase_completion_percentage))
     _print(2, "state", strategy.state)
