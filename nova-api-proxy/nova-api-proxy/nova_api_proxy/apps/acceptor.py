@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -76,13 +76,13 @@ class APIController(Middleware):
         remote_addr = environ.get('HTTP_X_FORWARDED_FOR',
                                   environ['REMOTE_ADDR'])
         LOG.info("%s request issued by user (%s) tenant (%s) remote address "
-                 "(%s)"
-                 " \"%s %s\"" % (environ['REQUEST_METHOD'],
-                                 environ['HTTP_X_USER'],
-                                 environ['HTTP_X_TENANT'],
-                                 remote_addr,
-                                 environ['REQUEST_METHOD'],
-                                 construct_url(environ)))
+                 "(%s) \"%s %s\"" %
+                 (environ.get('REQUEST_METHOD', 'UNDEFINED'),
+                  environ.get('HTTP_X_USER', 'Keystone middleware disabled'),
+                  environ.get('HTTP_X_TENANT', 'Keystone middleware disabled'),
+                  remote_addr,
+                  environ.get('REQUEST_METHOD', 'UNDEFINED'),
+                  construct_url(environ)))
 
     def _generate_log(self, req):
         environ = req.environ
