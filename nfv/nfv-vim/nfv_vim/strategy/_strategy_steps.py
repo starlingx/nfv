@@ -1206,7 +1206,6 @@ class UpgradeHostsStep(strategy.StrategyStep):
         elif event == STRATEGY_EVENT.HOST_UPGRADE_CHANGED:
             host = event_data["host"]
             if host and host.name in self._host_names:
-                self._deployed_hosts[host.name] = None
                 DLOG.info(f"Completed software deploy host {host.name}")
             else:
                 DLOG.error(f"Unknown software deploy host completed: {event_data}")

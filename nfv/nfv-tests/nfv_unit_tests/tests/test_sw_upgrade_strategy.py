@@ -31,6 +31,8 @@ IGNORE_ALARMS_LIST = [
     "100.119",
     "200.001",
     "250.001",
+    "280.002",
+    "700.004",
     "750.006",
     "900.004",
     "900.005",
@@ -1551,7 +1553,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  ]
                  },
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 5,
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
@@ -1560,8 +1562,6 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'complete-upgrade',
                       'release': strategy.nfvi_upgrade.release},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
                   ]
                 }
             ]
@@ -1686,7 +1686,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  ]
                  },
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 5,
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
@@ -1695,8 +1695,6 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'complete-upgrade',
                       'release': strategy.nfvi_upgrade.release},
-                     {'name': 'system-stabilize',
-                      'timeout': 60},
                   ]
                 }
             ]

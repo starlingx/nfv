@@ -1803,6 +1803,8 @@ class SwUpgradeStrategy(
         IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
                          '200.001',  # Node locked
                          '250.001',  # System Config out of date
+                         '280.002',  # Subcloud resource out-of-sync
+                         '700.004',  # VM stopped
                          '750.006',  # Configuration change requires reapply of cert-manager
                          '900.004',  # Incorrect software load
                          '900.005',  # Upgrade in progress
@@ -2022,7 +2024,6 @@ class SwUpgradeStrategy(
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.UpgradeActivateStep(release=self._release))
         stage.add_step(strategy.UpgradeCompleteStep(release=self._release))
-        stage.add_step(strategy.SystemStabilizeStep())
         self.apply_phase.add_stage(stage)
 
     def _add_deploy_delete_stage(self):

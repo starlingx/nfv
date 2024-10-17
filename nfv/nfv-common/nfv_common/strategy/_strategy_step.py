@@ -198,7 +198,8 @@ class StrategyStep(object):
         """
         DLOG.verbose("Default strategy step timeout for %s, timeout=%s secs."
                      % (self._name, self._timeout_in_secs))
-        return STRATEGY_STEP_RESULT.TIMED_OUT, ''
+        timedout_step = f"{self._name} timed out"
+        return STRATEGY_STEP_RESULT.TIMED_OUT, timedout_step
 
     def handle_event(self, event, event_data=None):
         """

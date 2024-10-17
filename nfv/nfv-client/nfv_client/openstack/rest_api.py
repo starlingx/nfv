@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+from nfv_client import sw_update
 import os
 import requests
 
@@ -49,8 +50,12 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
             return None
         elif status_code == requests.codes.conflict:  # pylint: disable=no-member
             error_response = json.loads(response.text)
-            raise Exception(
-               f"Operation failed: conflict detected. {error_response.get('faultstring', STRATEGY_EXISTS)}")
+            if 'faultstring' in error_response and sw_update.STRATEGY_NAME_SW_UPGRADE in error_response.get('faultstring'):
+                raise Exception(
+                        "Operation failed: conflict detected.strategy already exists of type:sw-deploy")
+            else:
+                raise Exception(
+                        f"Operation failed: conflict detected. {error_response.get('faultstring', STRATEGY_EXISTS)}")
         elif status_code == requests.codes.forbidden:  # pylint: disable=no-member
             raise Exception("Authorization failed")
         else:

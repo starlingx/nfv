@@ -327,7 +327,7 @@ def delete_strategy(os_auth_uri, os_project_name, os_project_domain_name,
         print("Strategy deleted")
         return
     else:
-        raise Exception("Strategy delete failed")
+        raise Exception("Nothing to delete")
 
 
 def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
