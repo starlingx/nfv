@@ -97,6 +97,14 @@ class SwMgmtDirector(object):
             alarm_restrictions, release, rollback, delete,
             self._ignore_alarms, self._single_controller)
 
+        # TODO(jkraitbe): All create_* functions should have this check.
+        #   In fact, create functions should be reworked into single function.
+        # If the strategy failed to create scheduling will cause timeouts.
+        if not success:
+            del self._sw_update
+            self._sw_update = None
+            return None, reason
+
         schedule.schedule_function_call(callback, success, reason,
                                         self._sw_update.strategy)
         return strategy_uuid, ''
