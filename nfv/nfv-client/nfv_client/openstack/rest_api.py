@@ -10,6 +10,14 @@ import requests
 
 CAFILE = os.environ.get('REQUESTS_CA_BUNDLE')
 STRATEGY_EXISTS = 'strategy already exists.'
+UNKNOWN_FAILURE = "Check /var/log/nfv-vim-api.log for details."
+UNKNOWN_BAD_REQUEST = f"Unknown cause of bad request.  {UNKNOWN_FAILURE}"
+
+
+class SwRestApiException(Exception):
+    def __init__(self, msg, *args: object) -> None:
+        msg = msg.replace(sw_update.STRATEGY_NAME_SW_UPGRADE, sw_update.STRATEGY_NAME_SW_DEPLOY)
+        super().__init__(msg, *args)
 
 
 def request(token_id, method, api_cmd, api_cmd_headers=None,
@@ -48,15 +56,17 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
         status_code = e.response.status_code
         if status_code == requests.codes.not_found:  # pylint: disable=no-member
             return None
+        elif status_code == requests.codes.bad_request:  # pylint: disable=no-member
+            error_response = response.json()
+            raise SwRestApiException(
+                    "Operation failed: Bad request.\n"
+                    f"{error_response.get('faultstring', UNKNOWN_BAD_REQUEST)}")
         elif status_code == requests.codes.conflict:  # pylint: disable=no-member
             error_response = json.loads(response.text)
-            if 'faultstring' in error_response and sw_update.STRATEGY_NAME_SW_UPGRADE in error_response.get('faultstring'):
-                raise Exception(
-                        "Operation failed: conflict detected.strategy already exists of type:sw-deploy")
-            else:
-                raise Exception(
-                        f"Operation failed: conflict detected. {error_response.get('faultstring', STRATEGY_EXISTS)}")
+            raise SwRestApiException(
+                    "Operation failed: Conflict detected.\n"
+                    f"{error_response.get('faultstring', STRATEGY_EXISTS)}")
         elif status_code == requests.codes.forbidden:  # pylint: disable=no-member
             raise Exception("Authorization failed")
         else:
-            raise Exception(f"HTTP error: {e}")
+            raise Exception(f"HTTP error: {e}\n{UNKNOWN_FAILURE} ")

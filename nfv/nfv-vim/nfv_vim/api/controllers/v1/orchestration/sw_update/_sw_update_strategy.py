@@ -626,6 +626,8 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
             query_data = SwUpdateStrategyQueryData()
             query_data.convert_strategy(strategy)
             return query_data
+        elif rpc.RPC_MSG_RESULT.FAILED == response.result and response.error_string:
+            return pecan.abort(httplib.BAD_REQUEST, response.error_string)
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
             return pecan.abort(httplib.CONFLICT, response.error_string)
 
@@ -690,6 +692,8 @@ class SystemConfigUpdateStrategyAPI(SwUpdateStrategyAPI):
             query_data = SwUpdateStrategyQueryData()
             query_data.convert_strategy(strategy)
             return query_data
+        elif rpc.RPC_MSG_RESULT.FAILED == response.result and response.error_string:
+            return pecan.abort(httplib.BAD_REQUEST, response.error_string)
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
             return pecan.abort(httplib.CONFLICT, response.error_string)
 
@@ -754,6 +758,8 @@ class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
             query_data = SwUpdateStrategyQueryData()
             query_data.convert_strategy(strategy)
             return query_data
+        elif rpc.RPC_MSG_RESULT.FAILED == response.result and response.error_string:
+            return pecan.abort(httplib.BAD_REQUEST, response.error_string)
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
             return pecan.abort(httplib.CONFLICT, response.error_string)
 
@@ -844,6 +850,8 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
             query_data = SwUpdateStrategyQueryData()
             query_data.convert_strategy(strategy)
             return query_data
+        elif rpc.RPC_MSG_RESULT.FAILED == response.result and response.error_string:
+            return pecan.abort(httplib.BAD_REQUEST, response.error_string)
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
             return pecan.abort(httplib.CONFLICT, response.error_string)
 
@@ -921,6 +929,8 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
             query_data = SwUpdateStrategyQueryData()
             query_data.convert_strategy(strategy)
             return query_data
+        elif rpc.RPC_MSG_RESULT.FAILED == response.result and response.error_string:
+            return pecan.abort(httplib.BAD_REQUEST, response.error_string)
         elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
             return pecan.abort(httplib.CONFLICT, response.error_string)
 

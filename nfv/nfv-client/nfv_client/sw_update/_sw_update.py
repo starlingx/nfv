@@ -9,6 +9,7 @@ from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
 import textwrap
 
+STRATEGY_NAME_SW_DEPLOY = 'sw-deploy'
 STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
 STRATEGY_NAME_FW_UPDATE = 'fw-update'
 STRATEGY_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update'

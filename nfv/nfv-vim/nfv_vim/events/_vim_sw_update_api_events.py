@@ -165,9 +165,11 @@ def vim_sw_update_api_create_strategy(connection, msg):
         if reason is not None and reason.startswith("strategy already exists"):
             response.result = rpc.RPC_MSG_RESULT.CONFLICT
             response.error_string = reason
+        elif reason is not None and reason:
+            response.result = rpc.RPC_MSG_RESULT.FAILED
+            response.error_string = reason
         else:
             response.result = rpc.RPC_MSG_RESULT.FAILED
-            # todo(abailey): consider adding error_string to other error types
         connection.send(response.serialize())
         DLOG.verbose("Sent response=%s." % response)
         connection.close()

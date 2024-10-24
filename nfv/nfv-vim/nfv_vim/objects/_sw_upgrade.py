@@ -13,6 +13,7 @@ from nfv_vim import event_log
 from nfv_vim import nfvi
 
 from nfv_vim.objects._sw_update import SW_UPDATE_ALARM_TYPES
+from nfv_vim.objects._sw_update import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects._sw_update import SW_UPDATE_EVENT_IDS
 from nfv_vim.objects._sw_update import SW_UPDATE_TYPE
 from nfv_vim.objects._sw_update import SwUpdate
@@ -41,6 +42,10 @@ class SwUpgrade(SwUpdate):
         if self._strategy:
             reason = "strategy already exists of type:%s" % self._sw_update_type
             return False, reason
+
+        # The USM feature does not currently allow parallel host-deploys for storage nodes.
+        if storage_apply_type == SW_UPDATE_APPLY_TYPE.PARALLEL:
+            return False, f"{self.sw_update_type} does not support storage-apply-type == parallel"
 
         self._strategy = strategy.SwUpgradeStrategy(
             strategy_uuid,
