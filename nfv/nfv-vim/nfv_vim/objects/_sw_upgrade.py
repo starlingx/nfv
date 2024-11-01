@@ -43,9 +43,17 @@ class SwUpgrade(SwUpdate):
             reason = "strategy already exists of type:%s" % self._sw_update_type
             return False, reason
 
-        # The USM feature does not currently allow parallel host-deploys for storage nodes.
+        # If the storage apply type is not ignore, it can be either parallel or serial,
+        # but the USM feature does not currently allow parallel host-deploys for
+        # storage nodes. So, set it to serial by default.
+        # TODO(rlima): remove this condition once parallel apply is supported
         if storage_apply_type == SW_UPDATE_APPLY_TYPE.PARALLEL:
-            return False, f"{self.sw_update_type} does not support storage-apply-type == parallel"
+            msg = (
+                "Received a parallel apply for storage, but it is not supported. "
+                "Replacing with serial apply"
+            )
+            DLOG.info(msg)
+            storage_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
 
         self._strategy = strategy.SwUpgradeStrategy(
             strategy_uuid,
