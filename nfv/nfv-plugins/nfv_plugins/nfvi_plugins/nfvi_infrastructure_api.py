@@ -2972,9 +2972,30 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         response = dict()
         response['completed'] = False
         response['reason'] = ''
+        uncordoned = False
 
         try:
             future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            if self._host_supports_kubernetes(host_personality):
+
+                # To enable kubernetes we uncordon the node, allowing
+                # new pods to be scheduled on the node.
+                future.work(kubernetes_client.uncordon_node, host_name)
+                future.result = (yield)
+
+                if future.result.is_complete():
+                    DLOG.info("Successfully uncordoned host, host_uuid=%s, host_name=%s."
+                               % (host_uuid, host_name))
+                    uncordoned = True
+                else:
+                    DLOG.error("Kubernetes uncordon_node failed, operation "
+                               "did not complete, host_uuid=%s, host_name=%s."
+                               % (host_uuid, host_name))
+
+        except Exception as e:
+            DLOG.exception(f"Caught exception while trying to uncordon {host_name}, error: {str(e)}")
+
+        try:
 
             if self._host_supports_kubernetes(host_personality):
                 response['reason'] = 'failed to enable kubernetes services'
@@ -2995,8 +3016,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                % (host_uuid, host_name))
                     return
 
-            response['completed'] = True
-            response['reason'] = ''
+            if uncordoned:
+                response['completed'] = True
+                response['reason'] = ''
+            else:
+                response['completed'] = False
+                response['reason'] = 'uncordon failed'
 
         except Exception as e:
             DLOG.exception("Caught exception while trying to enable %s "
@@ -3017,9 +3042,31 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         response = dict()
         response['completed'] = False
         response['reason'] = ''
+        drain_success = False
 
+        # Drain all virt-launcher pods on the node
         try:
             future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+
+            if self._host_supports_kubernetes(host_personality):
+                drain_success = kubernetes_client.drain_node(
+                    host_name=host_name,
+                    delete_emptydir_data=True,
+                    ignore_daemonsets=True,
+                    force=True,
+                    skip_wait_for_delete_timeout=60,
+                    pod_selector="kubevirt.io=virt-launcher"
+                )
+
+                if drain_success:
+                    DLOG.info(f"Successfully drained virt-launcher pods on host, host_uuid={host_uuid}, host_name={host_name}.")
+                else:
+                    DLOG.error(f"Kubernetes drain_node failed to drain virt-launcher pods on host, host_uuid={host_uuid}, host_name={host_name}.")
+        except Exception as e:
+            # Handle any exceptions that occurred while draining the node
+            DLOG.error(f"Exception calling drain_node for host_uuid={host_uuid}, host_name={host_name}, pod_selector='kubevirt.io=virt-launcher': {e}")
+
+        try:
 
             if self._host_supports_kubernetes(host_personality):
                 response['reason'] = 'failed to disable kubernetes services'
@@ -3060,8 +3107,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                    % (host_uuid, host_name))
                         return
 
-            response['completed'] = True
-            response['reason'] = ''
+            if drain_success:
+                response['completed'] = True
+                response['reason'] = ''
+            else:
+                response['completed'] = False
+                response['reason'] = 'drain failed'
 
         except Exception as e:
             DLOG.exception("Caught exception while trying to disable %s "

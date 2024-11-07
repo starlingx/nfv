@@ -9,12 +9,16 @@ from fm_api import fm_api
 import kubernetes
 
 from kubernetes import __version__ as K8S_MODULE_VERSION
+from kubernetes import client
 from kubernetes.client.models.v1_container_image import V1ContainerImage
 from kubernetes.client.rest import ApiException
-from six.moves import http_client as httplib
+from kubernetes import config
 
 from nfv_common import debug
 from nfv_common.helpers import Result
+
+from six.moves import http_client as httplib
+import subprocess
 
 K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split('.', maxsplit=1)[0])
 
@@ -439,3 +443,121 @@ def get_namespaced_running_pods(namespace, name):
                 found.append(pod.metadata.name)
 
     return Result(','.join(found))
+
+
+class DrainNodeException(Exception):
+    """Custom exception for drain node failures."""
+    pass
+
+
+def drain_node(kubeconfig_path="/etc/kubernetes/admin.conf", host_name=None, delete_emptydir_data=True, ignore_daemonsets=True, force=False,
+               pod_selector="", skip_wait_for_delete_timeout=None, grace_period=None, timeout=None):
+    """
+    Drain a Kubernetes node by marking it unschedulable and evicting all the pods running on it using kubectl drain.
+
+    :param kubeconfig_path: Path to the kubeconfig file to use.
+    :param host_name: The name of the node to drain (default: None).
+    :param delete_emptydir_data: Delete pods with emptyDir data on the node if set to True.
+                                 Removes pods with emptyDir volumes.
+    :param ignore_daemonsets: Ignore DaemonSets when draining the node if set to True.
+                              DaemonSet-managed pods won't be evicted.
+    :param force: Force the eviction of pods if set to True.
+                  Continues even if there are pods not managed by a controller.
+    :param pod_selector: Only drain pods matching the specified label selector (e.g., "kubevirt.io=virt-launcher").
+                         Only evict pods that match the specified label selector.
+    :param skip_wait_for_delete_timeout: Skips waiting for pods to be deleted after the specified number of seconds.
+                                         Allows skipping the wait for deletion timeout (takes an integer value in seconds).
+    :param grace_period: Grace period in seconds for pod termination (default is set by the Kubernetes API).
+                         Seconds to wait for pod termination before forcefully killing them.
+    :param timeout: Timeout for the drain operation.
+                    Maximum time to wait for the drain operation to complete.
+    :return: A boolean indicating if the drain operation was successful.
+    """
+
+    # Ensure host_name is provided
+    if not host_name:
+        DLOG.exception("Host name is required to drain a node.")
+        raise DrainNodeException("Host name is required to drain a node.")
+
+    try:
+        # Construct the kubectl drain command
+        drain_cmd = [
+            "kubectl", "drain", host_name,
+            f"--ignore-daemonsets={ignore_daemonsets}",
+            f"--delete-emptydir-data={delete_emptydir_data}",
+            f"--pod-selector={pod_selector}",
+            f"--kubeconfig={kubeconfig_path}"
+        ]
+
+        # Add optional parameters if set
+        if force:
+            drain_cmd.append("--force")
+        if skip_wait_for_delete_timeout is not None:
+            drain_cmd.append(f"--skip-wait-for-delete-timeout={skip_wait_for_delete_timeout}")
+        if grace_period is not None:
+            drain_cmd.append(f"--grace-period={grace_period}")
+        if timeout is not None:
+            drain_cmd.append(f"--timeout={timeout}")
+
+        # Remove any empty arguments
+        drain_cmd = [arg for arg in drain_cmd if arg]
+
+        # Log the complete command being run
+        DLOG.debug(f"Running drain command: {' '.join(drain_cmd)}")
+
+        # Execute the kubectl drain command
+        process = subprocess.run(drain_cmd, capture_output=True, text=True, check=False)
+
+        if process.returncode == 0:
+            DLOG.debug(f"Successfully drained node {host_name}.")
+            return True
+        else:
+            DLOG.error(f"Failed to drain node {host_name}. Command output: {process.stdout}")
+            DLOG.error(f"Error: {process.stderr}")
+            return False
+
+    except Exception as e:
+        DLOG.exception(f"Exception occurred while draining node {host_name}, error: {str(e)}")
+        return False
+
+
+def uncordon_node(host_name):
+    """
+    Uncordon a Kubernetes node by marking it as schedulable.
+
+    :param host_name: The name of the node to uncordon.
+    :return: A boolean indicating if the uncordon operation was successful.
+    """
+    try:
+        # Get Kubernetes configuration and create API client
+        kubecfg = next((line.split('=')[-1].strip() for line in open('/etc/profile.d/kubeconfig.sh') if 'export KUBECONFIG=' in line), None)
+        config.load_kube_config(kubecfg)
+        v1 = client.CoreV1Api()
+
+        # Fetch the current state of the node
+        node = v1.read_node(name=host_name)
+
+        # Check if the node is currently unschedulable
+        if node.spec.unschedulable:
+            # Mark the node as schedulable (uncordon)
+            body = {
+                "spec": {
+                    "unschedulable": False
+                }
+            }
+
+            # Apply the change
+            v1.patch_node(name=host_name, body=body)
+            DLOG.info(f"Node {host_name} successfully uncordoned.")
+            return True
+        else:
+            DLOG.info(f"Node {host_name} is already schedulable (uncordoned).")
+            return True
+
+    except ApiException as e:
+        DLOG.error(f"Failed to uncordon node {host_name}, reason: {e.reason}")
+        return False
+
+    except Exception as e:
+        DLOG.exception(f"Exception occurred while uncordoning node {host_name}, error: {str(e)}")
+        return False
