@@ -1803,7 +1803,11 @@ class SwUpgradeStrategy(
         IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
                          '200.001',  # Node locked
                          '250.001',  # System Config out of date
+                         '280.001',  # Subcloud is offline
                          '280.002',  # Subcloud resource out-of-sync
+                         '280.003',  # Subcloud backup failure
+                         '280.004',  # Subcloud peer group in disconnected state
+                         '280.005',  # Subcloud peer group managed with lower priority
                          '700.004',  # VM stopped
                          '750.006',  # Configuration change requires reapply of cert-manager
                          '900.004',  # Incorrect software load
