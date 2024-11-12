@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import pprint
 import weakref
 
 from datetime import datetime
@@ -316,7 +317,12 @@ class StrategyPhase(object):
         """
         Sets complete result response
         """
-        self._result_response = response
+        # response message is converted to readable display format
+        response_format = response.copy()
+        if 'error-message' in response_format:
+            response_format['error-message'] = response_format['error-message'].splitlines()
+        response_result = pprint.pformat(response_format)
+        self._result_response = response_result
 
     def _complete(self, result, reason):
         """

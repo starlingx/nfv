@@ -957,8 +957,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     def apply(self):
@@ -1117,8 +1116,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
             response['failed-hosts'] = failed_hosts
             reason = f"Deploy hosts failed for some hosts: {json.dumps(failed_hosts, indent=2)}"
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
             return True
 
@@ -1290,8 +1288,7 @@ class UpgradeStartStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     @coroutine
@@ -1322,8 +1319,7 @@ class UpgradeStartStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
         elif not self.strategy.nfvi_upgrade.is_starting:
@@ -1332,8 +1328,7 @@ class UpgradeStartStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
         else:
@@ -1455,8 +1450,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     @coroutine
@@ -1516,7 +1510,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
         # If failed, add detailed error-response
         if result == strategy.STRATEGY_STEP_RESULT.FAILED:
-            self.phase.result_complete_response(str(response))
+            self.phase.result_complete_response(response)
 
         self.stage.step_complete(result, reason)
 
@@ -1632,7 +1626,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
                 "Unknown error while trying software deploy complete, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
-            self.phase.result_complete_response(str(response))
+            self.phase.result_complete_response(response)
 
         self.stage.step_complete(result, reason)
 
@@ -1704,7 +1698,7 @@ class SwDeployDeleteStep(strategy.StrategyStep):
                 "Unknown error while trying software deploy delete, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
-            self.phase.result_complete_response(str(response))
+            self.phase.result_complete_response(response)
 
         self.stage.step_complete(result, reason)
 
@@ -1769,8 +1763,7 @@ class SwDeployAbortStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     def apply(self):
@@ -1843,8 +1836,7 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     @coroutine
@@ -1876,8 +1868,7 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
         elif not self.strategy.nfvi_upgrade.is_activate_rollback:
@@ -1886,8 +1877,7 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
         else:
@@ -3450,8 +3440,7 @@ class QueryUpgradeStep(strategy.StrategyStep):
                 "Unknown error while trying to query the software deployment, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
-            detailed_reason = str(response)
-            self.phase.result_complete_response(detailed_reason)
+            self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     def apply(self):
