@@ -14,6 +14,20 @@ from nfv_common.state_machine._state_task_work_result import STATE_TASK_WORK_RES
 DLOG = debug.debug_get_logger('nfv_common.state_machine.state_task')
 
 
+RESULT_LOG_LEVELS = {
+   STATE_TASK_RESULT.SUCCESS: DLOG.debug,
+   STATE_TASK_RESULT.FAILED: DLOG.error,
+   STATE_TASK_RESULT.TIMED_OUT: DLOG.error,
+   STATE_TASK_RESULT.ABORTED: DLOG.notice,
+   STATE_TASK_RESULT.DEGRADED: DLOG.warn,
+}
+
+
+def result_log(result, message):
+    logger = RESULT_LOG_LEVELS.get(result, DLOG.debug)
+    logger(message)
+
+
 class StateTask(object):
     """
     State Task
@@ -226,7 +240,8 @@ class StateTask(object):
         State Task Work Complete
         """
         task_work = self._task_work_list[self._current_task_work]
-        DLOG.debug("Task (%s) work (%s) complete, result=%s, reason=%s."
+        result_log(task_work_result,
+                   "Task (%s) work (%s) complete, result=%s, reason=%s."
                    % (self._name, task_work.name, task_work_result,
                       task_work_result_reason))
 
@@ -234,7 +249,8 @@ class StateTask(object):
             task_work.complete(task_work_result, task_work_result_reason)
 
         if task_work_result != updated_task_work_result:
-            DLOG.debug("Task (%s) work (%s) complete, result updated, "
+            result_log(updated_task_work_result,
+                       "Task (%s) work (%s) complete, result updated, "
                        "was_result=%s, now_result=%s."
                        % (self._name, task_work.name, task_work_result,
                           updated_task_work_result))
