@@ -2997,7 +2997,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
         try:
 
-            if self._host_supports_kubernetes(host_personality):
+            kubernetes_supported = self._host_supports_kubernetes(host_personality)
+
+            if kubernetes_supported:
                 response['reason'] = 'failed to enable kubernetes services'
 
                 # To enable kubernetes we remove the NoExecute taint from the
@@ -3016,7 +3018,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                % (host_uuid, host_name))
                     return
 
-            if uncordoned:
+            if not kubernetes_supported or uncordoned:
                 response['completed'] = True
                 response['reason'] = ''
             else:
@@ -3068,7 +3070,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
         try:
 
-            if self._host_supports_kubernetes(host_personality):
+            kubernetes_supported = self._host_supports_kubernetes(host_personality)
+
+            if kubernetes_supported:
                 response['reason'] = 'failed to disable kubernetes services'
 
                 # To disable kubernetes we add the NoExecute taint to the
@@ -3107,7 +3111,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                    % (host_uuid, host_name))
                         return
 
-            if drain_success:
+            if not kubernetes_supported or drain_success:
                 response['completed'] = True
                 response['reason'] = ''
             else:
