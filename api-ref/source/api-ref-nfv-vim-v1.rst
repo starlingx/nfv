@@ -260,18 +260,18 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 This operation does not accept a request body.
 
------------------
-Upgrade Strategy
------------------
+-------------------------
+Software Deploy Strategy
+-------------------------
 
-Upgrade orchestration is done with an upgrade orchestration strategy, or
-plan, for the automated upgrade procedure which contains a number of
-parameters for customizing the particular behavior of the upgrade
+Software deploy orchestration is done with sw-deploy orchestration strategy, or
+plan, automated software deployment procedure contains a number of
+parameters for customizing the particular behavior of the software deploy
 orchestration.
 
-******************************************************************
-Shows detailed information about the current sw-upgrade strategy
-******************************************************************
+**************************************************************************
+Shows detailed information about the current sw-deploy strategy (AIO-DX)
+**************************************************************************
 
 .. rest_method:: GET /api/orchestration/sw-upgrade/strategy
 
@@ -291,8 +291,9 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
        "controller-apply-type": "serial",
        "current-phase-completion-percentage": 100,
        "uuid": "ac9b953a-caf1-4abe-8d53-498b598e6731",
-       "name": "sw-upgrade",
+       "release-id": "starlingx-24.09.1",
        "worker-apply-type": "serial",
+       "storage-apply-type": "serial",
        "max-parallel-worker-hosts": 2,
        "current-phase": "build",
        "apply-phase": {
@@ -311,6 +312,7 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
              "start-date-time": "",
              "end-date-time": "",
              "stage-id": 0,
+             "stage-name": sw-upgrade-start,
              "reason": "",
              "current-step": 0,
              "steps": [
@@ -318,98 +320,46 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
                  "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
                  "step-id": 0,
-                 "entity-uuids": [],
                  "step-name": "query-alarms",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
                },
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 900,
-                 "entity-type": "hosts",
-                 "step-id": 1,
-                 "entity-uuids": [
-                   "77f00eea-a346-46f1-bf81-837088616b13"
-                 ],
-                 "step-name": "lock-hosts",
-                 "result": "initial",
-                 "entity-names": [
-                   "controller-0"
-                 ],
-                 "reason": ""
-               },
-               {
-                 "start-date-time": "",
-                 "end-date-time": "",
-                 "timeout": 1800,
-                 "entity-type": "hosts",
-                 "step-id": 2,
-                 "entity-uuids": [
-                   "77f00eea-a346-46f1-bf81-837088616b13"
-                 ],
-                 "step-name": "upgrade-hosts",
-                 "result": "initial",
-                 "entity-names": [
-                   "controller-0"
-                 ],
-                 "reason": ""
-               },
-               {
-                 "start-date-time": "",
-                 "end-date-time": "",
-                 "timeout": 900,
-                 "entity-type": "hosts",
-                 "step-id": 3,
-                 "entity-uuids": [
-                   "77f00eea-a346-46f1-bf81-837088616b13"
-                 ],
-                 "step-name": "unlock-hosts",
-                 "result": "initial",
-                 "entity-names": [
-                   "controller-0"
-                 ],
-                 "reason": ""
-               },
-               {
-                 "start-date-time": "",
-                 "end-date-time": "",
-                 "timeout": 7200,
-                 "entity-type": "",
-                 "step-id": 4,
+                 "timeout": 3600,
+                 "step-id": 0,
                  "entity-uuids": [],
-                 "step-name": "wait-data-sync",
+                 "step-name": "start-upgrade",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
-               }
-             ],
-             "result": "initial",
-             "timeout": 10861,
-             "total-steps": 5,
-             "inprogress": false,
-             "stage-name": "sw-upgrade-controllers"
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 120,
+                 "step-id": 0,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               }]
            },
            {
              "start-date-time": "",
              "end-date-time": "",
              "stage-id": 1,
+             "stage-name": sw-upgrade-worker-hosts,
              "reason": "",
-             "current-step": 0,
+             "current-step": 6,
              "steps": [
                {
                  "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 0,
-                 "entity-uuids": [],
+                 "step-id": 1,
                  "step-name": "query-alarms",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
                },
                {
@@ -417,15 +367,37 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
                  "end-date-time": "",
                  "timeout": 900,
                  "entity-type": "hosts",
-                 "step-id": 1,
+                 "step-id": 2,
                  "entity-uuids": [
-                   "2acdfcdc-c29c-46f1-846d-23838ff608cb"
+                   "77f00eea-a346-46f1-bf81-837088616b13"
                  ],
                  "step-name": "lock-hosts",
                  "result": "initial",
                  "entity-names": [
-                   "compute-1"
+                   "controller-0"
                  ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 3600,
+                 "entity-type": "hosts",
+                 "step-id": 3,
+                 "step-name": "upgrade-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "controller-0"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 15,
+                 "step-id": 4,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
                  "reason": ""
                },
                {
@@ -433,69 +405,42 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
                  "end-date-time": "",
                  "timeout": 1800,
                  "entity-type": "hosts",
-                 "step-id": 2,
+                 "step-id": 5,
                  "entity-uuids": [
-                   "2acdfcdc-c29c-46f1-846d-23838ff608cb"
-                 ],
-                 "step-name": "upgrade-hosts",
-                 "result": "initial",
-                 "entity-names": [
-                   "compute-1"
-                 ],
-                 "reason": ""
-               },
-               {
-                 "start-date-time": "",
-                 "end-date-time": "",
-                 "timeout": 900,
-                 "entity-type": "hosts",
-                 "step-id": 3,
-                 "entity-uuids": [
-                   "2acdfcdc-c29c-46f1-846d-23838ff608cb"
+                   "77f00eea-a346-46f1-bf81-837088616b13"
                  ],
                  "step-name": "unlock-hosts",
                  "result": "initial",
                  "entity-names": [
-                   "compute-1"
+                   "controller-0"
                  ],
                  "reason": ""
                },
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 4,
-                 "entity-uuids": [],
-                 "step-name": "system-stabilize",
+                 "timeout": 2400,
+                 "step-id": 6,
+                 "step-name": "wait-alarms-clear",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
-               }
-             ],
-             "result": "initial",
-             "timeout": 3721,
-             "total-steps": 5,
-             "inprogress": false,
-             "stage-name": "sw-upgrade-worker-hosts"
+               }]
            },
            {
              "start-date-time": "",
              "end-date-time": "",
              "stage-id": 2,
+             "stage-name": sw-upgrade-worker-hosts,
              "reason": "",
-             "current-step": 0,
+             "current-step": 6,
              "steps": [
                {
                  "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 0,
-                 "entity-uuids": [],
+                 "step-id": 1,
                  "step-name": "query-alarms",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
                },
                {
@@ -503,9 +448,252 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
                  "end-date-time": "",
                  "timeout": 900,
                  "entity-type": "hosts",
-                 "step-id": 1,
+                 "step-id": 2,
                  "entity-uuids": [
-                   "fe3ba4e3-e84d-467f-b633-e23df2f86e90"
+                   "77f00eea-a346-46f1-bf81-837088616b13"
+                 ],
+                 "step-name": "lock-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "controller-1"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 3600,
+                 "entity-type": "hosts",
+                 "step-id": 3,
+                 "step-name": "upgrade-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "controller-1"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 15,
+                 "step-id": 4,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "entity-type": "hosts",
+                 "step-id": 5,
+                 "entity-uuids": [
+                   "77f00eea-a346-46f1-bf81-837088616b13"
+                 ],
+                 "step-name": "unlock-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "controller-1"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 2400,
+                 "step-id": 6,
+                 "step-name": "wait-alarms-clear",
+                 "result": "initial",
+                 "reason": ""
+               }]
+           },
+           {
+             "start-date-time": "",
+             "end-date-time": "",
+             "stage-id": 3,
+             "stage-name": sw-upgrade-worker-hosts,
+             "reason": "",
+             "current-step": 6,
+             "steps": [
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "step-id": 1,
+                 "step-name": "query-alarms",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 900,
+                 "entity-type": "hosts",
+                 "step-id": 2,
+                 "entity-uuids": [
+                   "77f00eea-a346-46f1-bf81-837088616b13"
+                 ],
+                 "step-name": "lock-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "storage-0"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 3600,
+                 "entity-type": "hosts",
+                 "step-id": 3,
+                 "step-name": "upgrade-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "storage-0"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 15,
+                 "step-id": 4,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "entity-type": "hosts",
+                 "step-id": 5,
+                 "entity-uuids": [
+                   "77f00eea-a346-46f1-bf81-837088616b13"
+                 ],
+                 "step-name": "unlock-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "storage-0"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "step-id": 6,
+                 "step-name": "wait-data-sync",
+                 "result": "initial",
+                 "reason": ""
+               }]
+           },
+           {
+             "start-date-time": "",
+             "end-date-time": "",
+             "stage-id": 4,
+             "stage-name": sw-upgrade-worker-hosts,
+             "reason": "",
+             "current-step": 6,
+             "steps": [
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "step-id": 1,
+                 "step-name": "query-alarms",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 900,
+                 "entity-type": "hosts",
+                 "step-id": 2,
+                 "entity-uuids": [
+                   "77f00eea-a346-46f1-bf81-837088616b13"
+                 ],
+                 "step-name": "lock-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "storage-1"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 3600,
+                 "entity-type": "hosts",
+                 "step-id": 3,
+                 "step-name": "upgrade-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "storage-1"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 15,
+                 "step-id": 4,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "entity-type": "hosts",
+                 "step-id": 5,
+                 "entity-uuids": [
+                   "77f00eea-a346-46f1-bf81-837088616b13"
+                 ],
+                 "step-name": "unlock-hosts",
+                 "result": "initial",
+                 "entity-names": [
+                   "storage-1"
+                 ],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "step-id": 6,
+                 "step-name": "wait-data-sync",
+                 "result": "initial",
+                 "reason": ""
+               }]
+           },
+           {
+             "start-date-time": "",
+             "end-date-time": "",
+             "stage-id": 5,
+             "stage-name": sw-upgrade-worker-hosts,
+             "reason": "",
+             "current-step": 6,
+             "steps": [
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "step-id": 1,
+                 "step-name": "query-alarms",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 900,
+                 "entity-type": "hosts",
+                 "step-id": 2,
+                 "entity-uuids": [
+                   "77f00eea-a346-46f1-bf81-837088616b13"
                  ],
                  "step-name": "lock-hosts",
                  "result": "initial",
@@ -517,12 +705,9 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 1800,
+                 "timeout": 3600,
                  "entity-type": "hosts",
-                 "step-id": 2,
-                 "entity-uuids": [
-                   "fe3ba4e3-e84d-467f-b633-e23df2f86e90"
-                 ],
+                 "step-id": 3,
                  "step-name": "upgrade-hosts",
                  "result": "initial",
                  "entity-names": [
@@ -533,11 +718,20 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 900,
+                 "timeout": 15,
+                 "step-id": 4,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
                  "entity-type": "hosts",
-                 "step-id": 3,
+                 "step-id": 5,
                  "entity-uuids": [
-                   "fe3ba4e3-e84d-467f-b633-e23df2f86e90"
+                   "77f00eea-a346-46f1-bf81-837088616b13"
                  ],
                  "step-name": "unlock-hosts",
                  "result": "initial",
@@ -549,104 +743,21 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 60,
-                 "entity-type": "",
+                 "timeout": 15,
                  "step-id": 4,
-                 "entity-uuids": [],
                  "step-name": "system-stabilize",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
-               }
-             ],
-             "result": "initial",
-             "timeout": 3721,
-             "total-steps": 5,
-             "inprogress": false,
-             "stage-name": "sw-upgrade-worker-hosts"
+               }]
            }
-         ],
-         "current-stage": 0
-       },
-       "storage-apply-type": "serial",
-       "state": "ready-to-apply",
-       "default-instance-action": "migrate",
-     "alarm-restrictions": "relaxed",
-       "abort-phase": {
-         "start-date-time": "",
-         "end-date-time": "",
-         "phase-name": "abort",
-         "completion-percentage": 100,
-         "total-stages": 0,
-         "stop-at-stage": 0,
-         "result": "initial",
-         "timeout": 0,
-         "reason": "",
-         "inprogress": false,
-         "stages": [],
-         "current-stage": 0
-       },
-       "build-phase": {
-         "start-date-time": "2017-01-10 15:23:12",
-         "end-date-time": "2017-01-10 15:23:12",
-         "phase-name": "build",
-         "completion-percentage": 100,
-         "total-stages": 1,
-         "stop-at-stage": 1,
-         "result": "success",
-         "timeout": 122,
-         "reason": "",
-         "inprogress": false,
-         "stages": [
-           {
-             "start-date-time": "2017-01-10 15:23:12",
-             "end-date-time": "2017-01-10 15:23:12",
-             "stage-id": 0,
-             "reason": "",
-             "current-step": 2,
-             "steps": [
-               {
-                 "start-date-time": "2017-01-10 15:23:12",
-                 "end-date-time": "2017-01-10 15:23:12",
-                 "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 0,
-                 "entity-uuids": [],
-                 "step-name": "query-alarms",
-                 "result": "success",
-                 "entity-names": [],
-                 "reason": ""
-               },
-               {
-                 "start-date-time": "2017-01-10 15:23:12",
-                 "end-date-time": "2017-01-10 15:23:12",
-                 "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 1,
-                 "entity-uuids": [],
-                 "step-name": "query-upgrade",
-                 "result": "success",
-                 "entity-names": [],
-                 "reason": ""
-               }
-             ],
-             "result": "success",
-             "timeout": 121,
-             "total-steps": 2,
-             "inprogress": false,
-             "stage-name": "sw-upgrade-query"
-           }
-         ],
-         "current-stage": 1
-       },
-       "swift-apply-type": "ignore"
-     }
+        ]
+      }
    }
-
+ 
 This operation does not accept a request body.
 
 *******************************
-Creates a sw-upgrade strategy
+Creates a sw-deploy strategy
 *******************************
 
 .. rest_method:: POST /api/orchestration/sw-upgrade/strategy
@@ -666,7 +777,7 @@ forbidden (403), badMethod (405), overLimit (413)
    :header: "Parameter", "Style", "Type", "Description"
    :widths: 20, 20, 20, 60
 
-   "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts: ``serial``, ``parallel`` or ``ignore``."
+   "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts: ``serial`` or ``ignore``, Note: ``storage-apply-type = parallel`` will be enabled in future."
    "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``, ``parallel`` or ``ignore``."
    "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of worker hosts to upgrade in parallel; only applicable if ``worker-apply-type = parallel``. Default value is ``2``."
    "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks: ``strict`` or ``relaxed``."
@@ -686,8 +797,9 @@ forbidden (403), badMethod (405), overLimit (413)
        "controller-apply-type": "serial",
        "current-phase-completion-percentage": 0,
        "uuid": "ac9b953a-caf1-4abe-8d53-498b598e6731",
-       "name": "sw-upgrade",
+       "release-id": "starlingx-24.09.1",
        "worker-apply-type": "serial",
+       "storage-apply-type": "serial",
        "max-parallel-worker-hosts": 2,
        "current-phase": "build",
        "apply-phase": {
@@ -723,64 +835,67 @@ forbidden (403), badMethod (405), overLimit (413)
          "current-stage": 0
        },
        "build-phase": {
-         "start-date-time": "2017-01-10 15:23:12",
+         "start-date-time": "",
          "end-date-time": "",
          "phase-name": "build",
          "completion-percentage": 0,
          "total-stages": 1,
          "stop-at-stage": 1,
          "result": "inprogress",
-         "timeout": 122,
+         "timeout": 182 seconds,
          "reason": "",
          "inprogress": true,
          "stages": [
            {
-             "start-date-time": "2017-01-10 15:23:12",
+             "start-date-time": "",
              "end-date-time": "",
              "stage-id": 0,
+             "stage-name": "sw-upgrade-query",
              "reason": "",
-             "current-step": 0,
+             "current-step": 3,
              "steps": [
                {
-                 "start-date-time": "2017-01-10 15:23:12",
+                 "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 0,
-                 "entity-uuids": [],
+                 "step-id": 1,
                  "step-name": "query-alarms",
                  "result": "wait",
-                 "entity-names": [],
                  "reason": ""
                },
                {
                  "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 1,
-                 "entity-uuids": [],
+                 "step-id": 2,
                  "step-name": "query-upgrade",
                  "result": "initial",
-                 "entity-names": [],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "step-id": 3,
+                 "step-name": "sw-deploy-precheck",
+                 "result": "initial",
                  "reason": ""
                }
              ],
              "result": "inprogress",
              "timeout": 121,
-             "total-steps": 2,
+             "total-steps": 3,
              "inprogress": true,
              "stage-name": "sw-upgrade-query"
            }
          ],
-         "current-stage": 0
        },
        "swift-apply-type": "ignore"
      }
    }
 
 *****************************************
-Deletes the current sw-upgrade strategy
+Deletes the current sw-deploy strategy
 *****************************************
 
 .. rest_method:: DELETE /api/orchestration/sw-upgrade/strategy
@@ -795,7 +910,7 @@ Deletes the current sw-upgrade strategy
    }
 
 *****************************************
-Applies or aborts a sw-upgrade strategy
+Applies or aborts a sw-deploy strategy
 *****************************************
 
 .. rest_method:: POST /api/orchestration/sw-upgrade/strategy/actions
@@ -831,12 +946,12 @@ forbidden (403), badMethod (405), overLimit (413)
        "controller-apply-type": "serial",
        "current-phase-completion-percentage": 0,
        "uuid": "ac9b953a-caf1-4abe-8d53-498b598e6731",
-       "name": "sw-upgrade",
+       "release-id": "starlingx-24.09.1",
        "worker-apply-type": "serial",
        "max-parallel-worker-hosts": 2,
        "current-phase": "apply",
        "apply-phase": {
-         "start-date-time": "2017-01-10 16:19:12",
+         "start-date-time": "",
          "end-date-time": "",
          "phase-name": "apply",
          "completion-percentage": 0,
@@ -848,22 +963,19 @@ forbidden (403), badMethod (405), overLimit (413)
          "inprogress": true,
          "stages": [
            {
-             "start-date-time": "2017-01-10 16:19:12",
+             "start-date-time": "",
              "end-date-time": "",
              "stage-id": 0,
              "reason": "",
              "current-step": 0,
              "steps": [
                {
-                 "start-date-time": "2017-01-10 16:19:12",
+                 "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
                  "step-id": 0,
-                 "entity-uuids": [],
                  "step-name": "query-alarms",
                  "result": "wait",
-                 "entity-names": [],
                  "reason": ""
                },
                {
@@ -885,7 +997,7 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 1800,
+                 "timeout": 3600,
                  "entity-type": "hosts",
                  "step-id": 2,
                  "entity-uuids": [
@@ -901,9 +1013,18 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 900,
-                 "entity-type": "hosts",
+                 "timeout": 15,
                  "step-id": 3,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               }
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "entity-type": "hosts",
+                 "step-id": 4,
                  "entity-uuids": [
                    "77f00eea-a346-46f1-bf81-837088616b13"
                  ],
@@ -917,11 +1038,11 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 7200,
+                 "timeout": 2400,
                  "entity-type": "",
                  "step-id": 4,
                  "entity-uuids": [],
-                 "step-name": "wait-data-sync",
+                 "step-name": "wait-alarms-clear",
                  "result": "initial",
                  "entity-names": [],
                  "reason": ""
@@ -944,12 +1065,9 @@ forbidden (403), badMethod (405), overLimit (413)
                  "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
                  "step-id": 0,
-                 "entity-uuids": [],
                  "step-name": "query-alarms",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
                },
                {
@@ -971,7 +1089,7 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 1800,
+                 "timeout": 3600,
                  "entity-type": "hosts",
                  "step-id": 2,
                  "entity-uuids": [
@@ -987,9 +1105,18 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 900,
-                 "entity-type": "hosts",
+                 "timeout": 15,
                  "step-id": 3,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "entity-type": "hosts",
+                 "step-id": 4,
                  "entity-uuids": [
                    "2acdfcdc-c29c-46f1-846d-23838ff608cb"
                  ],
@@ -1003,13 +1130,10 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 4,
-                 "entity-uuids": [],
+                 "timeout": 15,
+                 "step-id": 5,
                  "step-name": "system-stabilize",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
                }
              ],
@@ -1030,12 +1154,9 @@ forbidden (403), badMethod (405), overLimit (413)
                  "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
                  "step-id": 0,
-                 "entity-uuids": [],
                  "step-name": "query-alarms",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
                },
                {
@@ -1057,7 +1178,7 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 1800,
+                 "timeout": 3600,
                  "entity-type": "hosts",
                  "step-id": 2,
                  "entity-uuids": [
@@ -1073,9 +1194,18 @@ forbidden (403), badMethod (405), overLimit (413)
                {
                  "start-date-time": "",
                  "end-date-time": "",
-                 "timeout": 900,
-                 "entity-type": "hosts",
+                 "timeout": 15,
                  "step-id": 3,
+                 "step-name": "system-stabilize",
+                 "result": "initial",
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 1800,
+                 "entity-type": "hosts",
+                 "step-id": 4,
                  "entity-uuids": [
                    "fe3ba4e3-e84d-467f-b633-e23df2f86e90"
                  ],
@@ -1090,12 +1220,9 @@ forbidden (403), badMethod (405), overLimit (413)
                  "start-date-time": "",
                  "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 4,
-                 "entity-uuids": [],
+                 "step-id": 5,
                  "step-name": "system-stabilize",
                  "result": "initial",
-                 "entity-names": [],
                  "reason": ""
                }
              ],
@@ -1127,8 +1254,8 @@ forbidden (403), badMethod (405), overLimit (413)
          "current-stage": 0
        },
        "build-phase": {
-         "start-date-time": "2017-01-10 15:23:12",
-         "end-date-time": "2017-01-10 15:23:12",
+         "start-date-time": "",
+         "end-date-time": "",
          "phase-name": "build",
          "completion-percentage": 100,
          "total-stages": 1,
@@ -1139,34 +1266,37 @@ forbidden (403), badMethod (405), overLimit (413)
          "inprogress": false,
          "stages": [
            {
-             "start-date-time": "2017-01-10 15:23:12",
-             "end-date-time": "2017-01-10 15:23:12",
+             "start-date-time": "",
+             "end-date-time": "",
              "stage-id": 0,
              "reason": "",
-             "current-step": 2,
+             "current-step": 3,
              "steps": [
                {
-                 "start-date-time": "2017-01-10 15:23:12",
-                 "end-date-time": "2017-01-10 15:23:12",
+                 "start-date-time": "",
+                 "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 0,
-                 "entity-uuids": [],
+                 "step-id": 1,
                  "step-name": "query-alarms",
                  "result": "success",
-                 "entity-names": [],
                  "reason": ""
                },
                {
-                 "start-date-time": "2017-01-10 15:23:12",
-                 "end-date-time": "2017-01-10 15:23:12",
+                 "start-date-time": "",
+                 "end-date-time": "",
                  "timeout": 60,
-                 "entity-type": "",
-                 "step-id": 1,
-                 "entity-uuids": [],
+                 "step-id": 2,
                  "step-name": "query-upgrade",
                  "result": "success",
-                 "entity-names": [],
+                 "reason": ""
+               },
+               {
+                 "start-date-time": "",
+                 "end-date-time": "",
+                 "timeout": 60,
+                 "step-id": 3,
+                 "step-name": "sw-deploy-precheck",
+                 "result": "success",
                  "reason": ""
                }
              ],
