@@ -2071,7 +2071,10 @@ class SwUpgradeStrategy(
             elif self._nfvi_alarms:
                 reason = "Active alarms found, can't apply software deployment"
 
-            elif self.nfvi_upgrade.is_deployed or self.nfvi_upgrade.is_available:
+            elif not self.nfvi_upgrade.deploy_info and (
+                    self.nfvi_upgrade.is_deployed or
+                    self.nfvi_upgrade.is_available
+            ):
                 from nfv_vim import tables
                 bad_hosts = []
                 host_table = tables.tables_get_host_table()
