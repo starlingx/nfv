@@ -14,6 +14,7 @@ from nfv_vim import nfvi
 import software.states as usm_states
 
 REST_API_REQUEST_TIMEOUT = 60
+REST_API_DEPLOY_HOST_TIMEOUT = 180
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.usm')
 
@@ -58,7 +59,7 @@ def _api_post(token, url, payload, headers=None, timeout_in_secs=REST_API_REQUES
                                 url,
                                 headers,
                                 json.dumps(payload),
-                                timeout_in_secs)
+                                timeout_in_secs=timeout_in_secs)
     return response
 
 
@@ -138,7 +139,7 @@ def sw_deploy_execute(token, host_name):
 
     uri = f"deploy_host/{host_name}"
     url = _usm_api_cmd(token, uri)
-    response = _api_post(token, url, {})
+    response = _api_post(token, url, {}, timeout_in_secs=REST_API_DEPLOY_HOST_TIMEOUT)
     return response
 
 
