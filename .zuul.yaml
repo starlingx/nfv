@@ -42,6 +42,7 @@
     name: nfv-tox-pep8
     parent: openstack-tox-pep8
     description: Run pep8 for nfv
+    nodeset: debian-bullseye
     vars:
       tox_extra_args: -c nfv/tox.ini
 
