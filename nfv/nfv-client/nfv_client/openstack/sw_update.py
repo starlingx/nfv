@@ -141,7 +141,7 @@ def _get_strategy_phase_object_from_response(response):
     phase.completion_percentage = response['completion-percentage']
     phase.result = response['result']
     phase.reason = response['reason']
-    phase.response = response['response']
+    phase.response = response.get('response')
 
     phase.stages = []
     for stage in response['stages']:
