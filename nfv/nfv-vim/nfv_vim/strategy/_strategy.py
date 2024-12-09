@@ -1454,7 +1454,7 @@ class SwPatchStrategy(SwUpdateStrategy,
                          '100.119',  # PTP alarm for SyncE
                          '900.701',  # Node tainted
                          ]
-        IGNORE_ALARMS_CONDITIONAL = {'750.006': 1800}
+        IGNORE_ALARMS_CONDITIONAL = {'750.006': 120}
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
 
