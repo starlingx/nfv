@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,7 +13,6 @@ from six.moves import socketserver as SocketServer
 from six.moves import urllib
 
 import socket
-import ssl
 import struct
 
 from nfv_common import debug
@@ -21,7 +20,6 @@ from nfv_common import selobj
 from nfv_common import timers
 
 from nfv_common.helpers import coroutine
-from nfv_common.helpers import get_system_ca_file
 from nfv_common.helpers import Object
 from nfv_common.helpers import Result
 
@@ -340,28 +338,23 @@ def _rest_api_request(token_id,
         if file_to_post is not None:
             headers = {"X-Auth-Token": token_id}
             files = {'file': ("for_upload", file_to_post)}
-            request = requests.post(api_cmd, headers=headers, files=files,
-                                    timeout=timeout_in_secs)
-            status_code = request.status_code
-            response_raw = request.text
-            request.close()
+            with requests.post(api_cmd, headers=headers, files=files,
+                               timeout=timeout_in_secs) as request:
+                status_code = request.status_code
+                response_raw = request.text
+
         else:
-            ca_file = get_system_ca_file()
-            ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH,
-                                                     cafile=ca_file)
+            with urllib.request.urlopen(request_info,
+                                        timeout=timeout_in_secs) as request:
+                headers = list()  # list of tuples
+                for key, value in request.info().items():
+                    if key not in headers_per_hop:
+                        cap_key = '-'.join((ck.capitalize()
+                                            for ck in key.split('-')))
+                        headers.append((cap_key, value))
 
-            request = urllib.request.urlopen(request_info,
-                                             timeout=timeout_in_secs,
-                                             context=ssl_context)
-            headers = list()  # list of tuples
-            for key, value in request.info().items():
-                if key not in headers_per_hop:
-                    cap_key = '-'.join((ck.capitalize() for ck in key.split('-')))
-                    headers.append((cap_key, value))
-
-            response_raw = request.read()
-            status_code = request.code
-            request.close()
+                response_raw = request.read()
+                status_code = request.code
 
         if response_raw == "" or response_raw == b"":
             response = dict()

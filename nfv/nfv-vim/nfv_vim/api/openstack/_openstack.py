@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -56,12 +56,12 @@ def validate_token(directory, admin_token, token_id):
 
         request_info.data = payload.encode()
 
-        request = urllib.request.urlopen(request_info)
-        # Identity API v3 returns token id in X-Subject-Token
-        # response header.
-        token_id = request.headers.get('X-Subject-Token')
-        response = json.loads(request.read())
-        request.close()
+        with urllib.request.urlopen(request_info) as request:
+            # Identity API v3 returns token id in X-Subject-Token
+            # response header.
+            token_id = request.headers.get('X-Subject-Token')
+            response = json.loads(request.read())
+
         return Token(response, directory, token_id)
 
     except urllib.error.HTTPError as e:
@@ -118,12 +118,12 @@ def get_token(directory):
                     }}}})
         request_info.data = payload.encode()
 
-        request = urllib.request.urlopen(request_info)
-        # Identity API v3 returns token id in X-Subject-Token
-        # response header.
-        token_id = request.headers.get('X-Subject-Token')
-        response = json.loads(request.read())
-        request.close()
+        with urllib.request.urlopen(request_info) as request:
+            # Identity API v3 returns token id in X-Subject-Token
+            # response header.
+            token_id = request.headers.get('X-Subject-Token')
+            response = json.loads(request.read())
+
         return Token(response, directory, token_id)
 
     except urllib.error.HTTPError as e:

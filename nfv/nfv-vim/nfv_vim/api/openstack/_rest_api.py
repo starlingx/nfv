@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2024 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -42,16 +42,16 @@ def rest_api_request(token, method, url, headers=None, body=None):
         # opener = urllib.request.build_opener(handler)
         # urllib.request.install_opener(opener)
 
-        request = urllib.request.urlopen(request_info)
+        with urllib.request.urlopen(request_info) as request:
+            headers = list()  # list of tuples
+            for key, value in request.info().items():
+                if key not in headers_per_hop:
+                    cap_key = '-'.join((ck.capitalize()
+                                        for ck in key.split('-')))
+                    headers.append((cap_key, value))
 
-        headers = list()  # list of tuples
-        for key, value in request.info().items():
-            if key not in headers_per_hop:
-                cap_key = '-'.join((ck.capitalize() for ck in key.split('-')))
-                headers.append((cap_key, value))
+            response = request.read()
 
-        response = request.read()
-        request.close()
         return httplib.OK, headers, response
 
     except urllib.error.HTTPError as e:
