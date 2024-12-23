@@ -1802,6 +1802,7 @@ class SwUpgradeStrategy(
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
                          '200.001',  # Node locked
+                         '200.003',  # Pxeboot network communication failure
                          '250.001',  # System Config out of date
                          '280.001',  # Subcloud is offline
                          '280.002',  # Subcloud resource out-of-sync
