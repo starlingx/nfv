@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016,2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,6 +8,7 @@ import functools
 import inspect
 import logging
 import os
+from pathlib import Path
 import six
 import sys
 
@@ -40,10 +41,17 @@ class DebugLogHandler(logging.Handler):
         self.process_name = None
         self.thread_name = None
 
+        pid_size = 7
+        try:
+            max_pid = Path("/proc/sys/kernel/pid_max").read_text()
+            pid_size = len(str(int(max_pid)))
+        except Exception:
+            pass
+
         # To keep syslog-ng happy, we need to add the who field twice.  Newer
         # syslog-ng removes the header formatting
-        fmt = ("%(asctime)s %(who)36s[%(process)d]: %(who)36s[%(process)d] "
-               "%(levelname)8s %(message)s")
+        fmt = (f"%(asctime)s %(who)36s[%(process)d]: %(who)36s[%(process){pid_size}d] "
+                "%(levelname)8s %(message)s")
         formatter = DebugLogFormatter(fmt)
         self.setFormatter(formatter)
 

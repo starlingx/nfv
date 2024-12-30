@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -2355,6 +2355,20 @@ class SwUpgradeStrategy(
             return self._build_complete_rollback(result, result_reason)
 
         return self._build_complete_normal(result, result_reason)
+
+    def apply_complete(self, result, result_reason):
+        """
+        Strategy Apply Complete
+        """
+
+        # On success we change the reason
+        if result == strategy.STRATEGY_RESULT.SUCCESS:
+            if self._rollback:
+                result_reason = f"Rollback to release={self._release} was successful"
+            else:
+                result_reason = f"Upgrade to release={self._release} was successful"
+
+        super(SwUpgradeStrategy, self).apply_complete(result, result_reason)
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """
