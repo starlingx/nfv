@@ -1092,8 +1092,6 @@ class UpgradeHostsStep(strategy.StrategyStep):
         # Determine if any hosts failed and why
         failed_hosts = {}
         for v in self._host_names:
-            if v in self._deployed_hosts:
-                continue
 
             fail_reason = None
             if v not in hosts_states:
