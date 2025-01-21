@@ -48,8 +48,6 @@ STRATEGY_NAME = StrategyNames()
 MTCE_DELAY = 15
 # a no-reboot patch can stabilize in 30 seconds
 NO_REBOOT_DELAY = 30
-# How long to wait after deploy-start-done
-DEPLOY_START_DONE_DELAY = 120
 
 # constants used by the patching API for state and repo state
 PATCH_REPO_STATE_APPLIED = 'Applied'
@@ -982,7 +980,8 @@ class UpdateControllerHostsMixin(object):
                         host_list = [host]
                         stage = strategy.StrategyStage(strategy_stage_name)
                         stage.add_step(strategy.QueryAlarmsStep(
-                            True, ignore_alarms=self._ignore_alarms,
+                            not isinstance(self, SwUpgradeStrategy),
+                            ignore_alarms=self._ignore_alarms,
                             ignore_alarms_conditional=self._ignore_alarms_conditional))
                         if reboot:
                             stage.add_step(strategy.SwactHostsStep(host_list))
@@ -1007,7 +1006,7 @@ class UpdateControllerHostsMixin(object):
                                            timeout_in_secs=WAIT_ALARM_TIMEOUT,
                                            ignore_alarms=self._ignore_alarms,
                                            ignore_alarms_conditional=self._ignore_alarms_conditional))
-                        else:
+                        elif not isinstance(self, SwUpgradeStrategy):
                             # Less time required if host is not rebooting
                             stage.add_step(strategy.SystemStabilizeStep(
                                            timeout_in_secs=NO_REBOOT_DELAY))
@@ -1017,7 +1016,8 @@ class UpdateControllerHostsMixin(object):
                 host_list = [local_host]
                 stage = strategy.StrategyStage(strategy_stage_name)
                 stage.add_step(strategy.QueryAlarmsStep(
-                    True, ignore_alarms=self._ignore_alarms,
+                    not isinstance(self, SwUpgradeStrategy),
+                    ignore_alarms=self._ignore_alarms,
                     ignore_alarms_conditional=self._ignore_alarms_conditional))
                 if reboot:
                     stage.add_step(strategy.SwactHostsStep(host_list))
@@ -1042,7 +1042,7 @@ class UpdateControllerHostsMixin(object):
                                    timeout_in_secs=WAIT_ALARM_TIMEOUT,
                                    ignore_alarms=self._ignore_alarms,
                                    ignore_alarms_conditional=self._ignore_alarms_conditional))
-                else:
+                elif not isinstance(self, SwUpgradeStrategy):
                     # Less time required if host is not rebooting
                     stage.add_step(strategy.SystemStabilizeStep(
                                    timeout_in_secs=NO_REBOOT_DELAY))
@@ -1130,7 +1130,8 @@ class UpdateStorageHostsMixin(object):
         for host_list in host_lists:
             stage = strategy.StrategyStage(strategy_stage_name)
             stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms,
+                not isinstance(self, SwUpgradeStrategy),
+                ignore_alarms=self._ignore_alarms,
                 ignore_alarms_conditional=self._ignore_alarms_conditional))
             if reboot:
                 stage.add_step(strategy.LockHostsStep(host_list))
@@ -1147,7 +1148,7 @@ class UpdateStorageHostsMixin(object):
                 stage.add_step(strategy.WaitDataSyncStep(
                     timeout_in_secs=30 * 60,
                     ignore_alarms=self._ignore_alarms))
-            else:
+            elif not isinstance(self, SwUpgradeStrategy):
                 stage.add_step(strategy.SystemStabilizeStep(
                                timeout_in_secs=NO_REBOOT_DELAY))
             self.apply_phase.add_stage(stage)
@@ -1274,7 +1275,8 @@ class UpdateWorkerHostsMixin(object):
             stage = strategy.StrategyStage(strategy_stage_name)
 
             stage.add_step(strategy.QueryAlarmsStep(
-                True, ignore_alarms=self._ignore_alarms,
+                not isinstance(self, SwUpgradeStrategy),
+                ignore_alarms=self._ignore_alarms,
                 ignore_alarms_conditional=self._ignore_alarms_conditional))
 
             if reboot:
@@ -1360,7 +1362,7 @@ class UpdateWorkerHostsMixin(object):
                     else:
                         # Worker host wihout multiple personalities or openstack:
                         stage.add_step(strategy.SystemStabilizeStep())
-            else:
+            elif not isinstance(self, SwUpgradeStrategy):
                 # Less time required if host is not rebooting:
                 stage.add_step(strategy.SystemStabilizeStep(
                                timeout_in_secs=NO_REBOOT_DELAY))
@@ -1932,13 +1934,10 @@ class SwUpgradeStrategy(
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_START)
 
-        # If the release is not available the deployment is already started
-        stage.add_step(strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms))
         # sw-deploy start for major releases must be done on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.UpgradeStartStep(release=self._release))
-        # There can be alarms related to CPU/memory/disk usage after start
-        stage.add_step(strategy.SystemStabilizeStep(DEPLOY_START_DONE_DELAY))
+        stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
         self.apply_phase.add_stage(stage)
 
     def _add_upgrade_hosts_stages(self):
@@ -2026,10 +2025,25 @@ class SwUpgradeStrategy(
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_COMPLETE)
-        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+
+        # Add a stabilization on NRR to allow software agent to catch up.
+        # But only if we did some deploy-host steps.
+        if (
+                not self.nfvi_upgrade.reboot_required and
+                self.apply_phase.stages and
+                self.apply_phase.stages[-1].name in [
+                    strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
+                    strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_STORAGE_HOSTS,
+                    strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS,
+                ]
+        ):
+            stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
+
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
+        stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.UpgradeActivateStep(release=self._release))
         stage.add_step(strategy.UpgradeCompleteStep(release=self._release))
+        stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
         self.apply_phase.add_stage(stage)
 
     def _add_deploy_delete_stage(self):
@@ -2063,30 +2077,8 @@ class SwUpgradeStrategy(
             if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
                 reason = "Software release does not exist or is unavailable"
 
-            elif self.nfvi_upgrade.is_committed:
-                reason = "Software release is committed"
-
             elif self.nfvi_upgrade.is_deploy_completed and not self._delete:
                 reason = "Software deployment is already complete, pending delete"
-
-            elif self._nfvi_alarms:
-                reason = "Active alarms found, can't apply software deployment"
-
-            elif not self.nfvi_upgrade.deploy_info and (
-                    self.nfvi_upgrade.is_deployed or
-                    self.nfvi_upgrade.is_available
-            ):
-                from nfv_vim import tables
-                bad_hosts = []
-                host_table = tables.tables_get_host_table()
-                for host in list(host_table.values()):
-                    if not (host.is_unlocked() and host.is_enabled() and host.is_available()):
-                        bad_hosts.append(host.name)
-                if bad_hosts:
-                    reason = (
-                        "All hosts must be unlocked-enabled-available " +
-                        f"to start a new sw-deployment: {bad_hosts}"
-                    )
 
             if reason:
                 DLOG.warn(reason)

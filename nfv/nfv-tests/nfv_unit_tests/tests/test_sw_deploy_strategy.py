@@ -26,8 +26,6 @@ PATCH_RELEASE_UPGRADE = "3.2.2"
 MINOR_RELEASE_UPGRADE = "4.0.1"
 MAJOR_RELEASE_UPGRADE = "4.0.1"
 
-DEPLOY_START_DELAY = 120
-
 
 # utility method for the formatting of unlock-hosts stage as dict
 # workers default to 5 retries with 120 second delay between attempts
@@ -280,13 +278,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 3,
+                 'total_steps': 2,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'start-upgrade',
                       'release': release},
-                     {'name': 'system-stabilize',
-                      'timeout': DEPLOY_START_DELAY},
+                     {'name': 'query-alarms'},
                  ]
                 }
             ]
@@ -328,13 +324,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 3,
+                 'total_steps': 2,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'start-upgrade',
                       'release': release},
-                     {'name': 'system-stabilize',
-                      'timeout': DEPLOY_START_DELAY},
+                     {'name': 'query-alarms'},
                  ]
                 }
             ]
@@ -375,13 +369,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 3,
+                 'total_steps': 2,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'start-upgrade',
                       'release': release},
-                     {'name': 'system-stabilize',
-                      'timeout': DEPLOY_START_DELAY},
+                     {'name': 'query-alarms'},
                  ]
                 }
             ]
@@ -423,15 +415,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 4,
+                 'total_steps': 3,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'start-upgrade',
                       'release': release},
-                     {'name': 'system-stabilize',
-                      'timeout': DEPLOY_START_DELAY},
+                     {'name': 'query-alarms'},
                  ]
                 }
             ]
@@ -475,13 +465,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 3,
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'activate-upgrade',
                       'release': release},
                      {'name': 'complete-upgrade',
                       'release': release},
+                     {'name': 'query-alarms'},
                   ]
                 }
             ]
@@ -523,13 +514,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 3,
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'activate-upgrade',
                       'release': release},
                      {'name': 'complete-upgrade',
                       'release': release},
+                     {'name': 'query-alarms'},
                   ]
                 }
             ]
@@ -570,13 +562,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 3,
+                 'total_steps': 4,
                  'steps': [
                      {'name': 'query-alarms'},
                      {'name': 'activate-upgrade',
                       'release': release},
                      {'name': 'complete-upgrade',
                       'release': release},
+                     {'name': 'query-alarms'},
                  ]
                 }
             ]
@@ -618,15 +611,16 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 1,
             'stages': [
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 4,
+                 'total_steps': 5,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
+                     {'name': 'query-alarms'},
                      {'name': 'activate-upgrade',
                       'release': release},
                      {'name': 'complete-upgrade',
                       'release': release},
+                     {'name': 'query-alarms'},
                  ]
                 }
             ]
@@ -663,11 +657,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
             ],
@@ -704,11 +697,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
             ],
@@ -747,11 +739,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
             ],
@@ -816,11 +807,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
             ],
@@ -1199,7 +1189,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 '13.01',
-                {'state': 'committed'},
+                {
+                    'state': 'commited',
+                    'downgrade': True,
+                    'reboot_required': False,
+                    'sw_version': PATCH_RELEASE_UPGRADE,
+                },
                 None,
                 None,
             )
@@ -1209,12 +1204,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy.sw_update_obj = fake_upgrade_obj
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        expected_reason = "Software release is committed"
         bpr = strategy.build_phase
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
-        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
-        assert bpr.result_reason == expected_reason, strategy.build_phase.result_reason
+        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     def test_sw_deploy_strategy_aiosx_release_does_not_exist(self):
         """
@@ -1309,29 +1302,29 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 3,
+                    'total_steps': 5,
                     'steps': [
+                        {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ],
                 },
             ],
@@ -1375,11 +1368,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
@@ -1397,11 +1389,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 3,
+                    'total_steps': 4,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ],
                 },
             ],
@@ -1446,38 +1439,37 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 3,
+                    'total_steps': 5,
                     'steps': [
+                        {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ]
                 },
                 {
@@ -1529,11 +1521,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
@@ -1566,11 +1557,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 3,
+                    'total_steps': 4,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ]
                 },
                 {
@@ -1623,58 +1615,55 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
                     'name': 'sw-upgrade-controllers',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-controllers',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-1']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-storage-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts',
                          'entity_names': ['storage-0', 'storage-1', 'storage-2']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts',
                          'entity_names': ['compute-0', 'compute-1', 'compute-2']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 3,
+                    'total_steps': 5,
                     'steps': [
+                        {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ],
                 },
             ],
@@ -1720,11 +1709,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
@@ -1787,11 +1775,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 3,
+                    'total_steps': 4,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ],
                 },
             ],
@@ -1839,13 +1828,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 4,
+                    'total_steps': 3,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'swact-hosts',
                          'entity_names': ['controller-1']},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
@@ -1908,13 +1896,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 4,
+                    'total_steps': 5,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'swact-hosts',
                          'entity_names': ['controller-1']},
+                        {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ],
                 },
             ],
@@ -2633,29 +2622,29 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-start',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
-                        {'name': 'query-alarms'},
                         {'name': 'start-upgrade', 'release': release},
-                        {'name': 'system-stabilize', 'timeout': DEPLOY_START_DELAY},
+                        {'name': 'query-alarms'},
                     ],
                 },
                 {
                     'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 3,
+                    'total_steps': 2,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 30},
                     ]
                 },
                 {
                     'name': 'sw-upgrade-complete',
-                    'total_steps': 3,
+                    'total_steps': 5,
                     'steps': [
+                        {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'query-alarms'},
                         {'name': 'activate-upgrade', 'release': release},
                         {'name': 'complete-upgrade', 'release': release},
+                        {'name': 'query-alarms'},
                     ],
                 },
             ],
