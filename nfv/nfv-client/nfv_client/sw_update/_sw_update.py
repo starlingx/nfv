@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -104,7 +104,10 @@ def _get_current_stage_and_step(strategy):
         if stage.inprogress or stage == current_phase.stages[-1]:
             for step in current_stage.steps:
                 current_step = step
-                if step.result not in ['initial', 'success'] or step == current_stage.steps[-1]:
+                if (
+                        step.result not in ['initial', 'timed-out', 'success'] or
+                        step == current_stage.steps[-1]
+                ):
                     break
             break
 
@@ -205,6 +208,8 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
         _print(2, "current-stage", current_stage.stage_name)
     if current_step:
         _print(2, "current-step", current_step.step_name)
+        if current_step.entity_type == "hosts" and current_step.entity_names:
+            _print(2, "entity-names", current_step.entity_names)
     _print(2, "current-phase-completion",
            ("%s%%" % strategy.current_phase_completion_percentage))
     _print(2, "state", strategy.state)

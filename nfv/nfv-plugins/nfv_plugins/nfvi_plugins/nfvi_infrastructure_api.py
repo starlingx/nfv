@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -4263,6 +4263,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     alarm_data['reason_text'], alarm_data['timestamp'],
                     alarm_data['mgmt_affecting'])
                 alarms.append(alarm)
+            alarms.sort(key=lambda x: x.alarm_id)
 
             response['result-data'] = alarms
             response['completed'] = True

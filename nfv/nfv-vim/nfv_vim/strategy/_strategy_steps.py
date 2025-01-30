@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -2531,35 +2531,39 @@ class QueryAlarmsStep(strategy.StrategyStep):
             if self.strategy is not None:
                 nfvi_alarms = self.strategy.nfvi_alarms
                 for nfvi_alarm in response['result-data']:
-                    if (self.strategy._alarm_restrictions ==
+                    if (nfvi_alarm.alarm_id in self._ignore_alarms or
+                            nfvi_alarm.alarm_id in self._ignore_alarms_conditional):
+                        DLOG.info("Strategy ignores alarm: id=%s, uuid=%s" %
+                                   (nfvi_alarm.alarm_id, nfvi_alarm.alarm_uuid))
+                    elif (self.strategy._alarm_restrictions ==
                             strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED and
                             nfvi_alarm.mgmt_affecting == 'False'):
-                        DLOG.warn("Ignoring non-management affecting alarm "
-                                  "%s - uuid %s due to relaxed alarm "
-                                  "strictness" % (nfvi_alarm.alarm_id,
-                                                  nfvi_alarm.alarm_uuid))
+                        DLOG.warn("Relaxed mode ignores alarm: "
+                                  "id=%s, uuid=%s" % (nfvi_alarm.alarm_id,
+                                                      nfvi_alarm.alarm_uuid))
                     elif (self.strategy._alarm_restrictions ==
                             strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE):
-                        DLOG.warn("Ignoring alarm "
-                                  "%s - uuid %s due to permissive alarm "
-                                  "strictness" % (nfvi_alarm.alarm_id,
-                                                  nfvi_alarm.alarm_uuid))
-                    elif (nfvi_alarm.alarm_id not in self._ignore_alarms and
-                            nfvi_alarm.alarm_id not in self._ignore_alarms_conditional):
-                        DLOG.warn("Alarm: %s" % nfvi_alarm.alarm_id)
-                        nfvi_alarms.append(nfvi_alarm)
+                        DLOG.warn("Permissive mode ignores alarm: "
+                                  "id=%s, uuid=%s" % (nfvi_alarm.alarm_id,
+                                                      nfvi_alarm.alarm_uuid))
                     else:
-                        DLOG.warn("Ignoring alarm %s - uuid %s" %
-                                  (nfvi_alarm.alarm_id, nfvi_alarm.alarm_uuid))
+                        DLOG.warn("Detected alarm: %s" % nfvi_alarm.alarm_id)
+                        nfvi_alarms.append(nfvi_alarm)
                 self.strategy.nfvi_alarms = nfvi_alarms
 
-            if self._fail_on_alarms and self.strategy.nfvi_alarms:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                alarm_ids = [str(alarm.get('alarm_id')) for alarm in self.strategy.nfvi_alarms]
-                reason = "alarms %s from %s are present" % (alarm_ids, fm_service)
+            if self.strategy.nfvi_alarms:
+                result = (
+                    strategy.STRATEGY_STEP_RESULT.FAILED
+                    if self._fail_on_alarms
+                    else strategy.STRATEGY_STEP_RESULT.SUCCESS
+                )
+                reason = (
+                    f"Unignored {fm_service} alarms are present: "
+                    f"{json.dumps([v.as_dict() for v in self.strategy.nfvi_alarms], indent=2)}"
+                )
             else:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                reason = ""
+                reason = "No unignored alarms present"
 
             self.stage.step_complete(result, reason)
         else:
@@ -2631,24 +2635,22 @@ class WaitDataSyncStep(strategy.StrategyStep):
             if self.strategy is not None:
                 nfvi_alarms = list()
                 for nfvi_alarm in response['result-data']:
-                    if (self.strategy._alarm_restrictions ==
+                    if nfvi_alarm.alarm_id in self._ignore_alarms:
+                        DLOG.info("Strategy ignores alarm: id=%s, uuid=%s" %
+                                   (nfvi_alarm.alarm_id, nfvi_alarm.alarm_uuid))
+                    elif (self.strategy._alarm_restrictions ==
                             strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED and
                             nfvi_alarm.mgmt_affecting == 'False'):
-                        DLOG.warn("Ignoring non-management affecting alarm "
-                                  "%s - uuid %s due to relaxed alarm "
-                                  "strictness" % (nfvi_alarm.alarm_id,
-                                                  nfvi_alarm.alarm_uuid))
+                        DLOG.warn("Relaxed mode ignores alarm: "
+                                  "id=%s, uuid=%s" % (nfvi_alarm.alarm_id,
+                                                      nfvi_alarm.alarm_uuid))
                     elif (self.strategy._alarm_restrictions ==
                             strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE):
-                        DLOG.warn("Ignoring alarm "
-                                  "%s - uuid %s due to permissive alarm "
-                                  "strictness" % (nfvi_alarm.alarm_id,
-                                                  nfvi_alarm.alarm_uuid))
-                    elif nfvi_alarm.alarm_id not in self._ignore_alarms:
-                        nfvi_alarms.append(nfvi_alarm)
+                        DLOG.warn("Permissive mode ignores alarm: "
+                                  "id=%s, uuid=%s" % (nfvi_alarm.alarm_id,
+                                                      nfvi_alarm.alarm_uuid))
                     else:
-                        DLOG.debug("Ignoring alarm %s - uuid %s" %
-                                   (nfvi_alarm.alarm_id, nfvi_alarm.alarm_uuid))
+                        nfvi_alarms.append(nfvi_alarm)
                 self.strategy.nfvi_alarms = nfvi_alarms
 
             if self.strategy.nfvi_alarms:
@@ -2749,20 +2751,21 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
             if self.strategy is not None:
                 nfvi_alarms = list()
                 for nfvi_alarm in response['result-data']:
-                    if (self.strategy._alarm_restrictions ==
+                    if nfvi_alarm.alarm_id in self._ignore_alarms:
+                        DLOG.info("Strategy ignores alarm: id=%s, uuid=%s" %
+                                   (nfvi_alarm.alarm_id, nfvi_alarm.alarm_uuid))
+                    elif (self.strategy._alarm_restrictions ==
                             strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED and
                             nfvi_alarm.mgmt_affecting == 'False'):
-                        DLOG.warn("Ignoring non-management affecting alarm "
-                                  "%s - uuid %s due to relaxed alarm "
-                                  "strictness" % (nfvi_alarm.alarm_id,
-                                                  nfvi_alarm.alarm_uuid))
+                        DLOG.warn("Relaxed mode ignores alarm: "
+                                  "id=%s, uuid=%s" % (nfvi_alarm.alarm_id,
+                                                      nfvi_alarm.alarm_uuid))
                     elif (self.strategy._alarm_restrictions ==
                             strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE):
-                        DLOG.warn("Ignoring alarm "
-                                  "%s - uuid %s due to permissive alarm "
-                                  "strictness" % (nfvi_alarm.alarm_id,
-                                                  nfvi_alarm.alarm_uuid))
-                    elif nfvi_alarm.alarm_id not in self._ignore_alarms:
+                        DLOG.warn("Permissive mode ignores alarm: "
+                                  "id=%s, uuid=%s" % (nfvi_alarm.alarm_id,
+                                                      nfvi_alarm.alarm_uuid))
+                    else:
                         # For ignoring stale alarm(currently 750.006)
                         if nfvi_alarm.alarm_id in self._ignore_alarms_conditional:
                             format_string = "%Y-%m-%dT%H:%M:%S.%f"
@@ -2784,10 +2787,6 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
                         else:
                             nfvi_alarms.append(nfvi_alarm)
 
-                        nfvi_alarms.append(nfvi_alarm)
-                    else:
-                        DLOG.debug("Ignoring alarm %s - uuid %s" %
-                                   (nfvi_alarm.alarm_id, nfvi_alarm.alarm_uuid))
                 self.strategy.nfvi_alarms = nfvi_alarms
 
             if self.strategy.nfvi_alarms:
@@ -2798,9 +2797,15 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
                             # Removes only the alarm which has
                             # not yet reached specified timeout.
                             self.strategy.nfvi_alarms.remove(alarm)
-                # Keep waiting for alarms to clear
-                pass
-            else:
+
+            for v in self.strategy.nfvi_alarms:
+                DLOG.info(
+                    "Waiting for unignored alarm to clear "
+                    f"id={v.alarm_id}, uuid={v.alarm_uuid}"
+                )
+
+            # Do not use elif, nfvi_alarms can be modified during previous block
+            if not self.strategy.nfvi_alarms:
                 # Alarms have all cleared
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 self.stage.step_complete(result, "")
@@ -2863,6 +2868,18 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         data['ignore_alarms'] = self._ignore_alarms
         data['ignore_alarms_conditional'] = self._ignore_alarms_conditional
         return data
+
+    def timeout(self):
+        """
+        Strategy Step Timeout Override
+        """
+
+        result, _ = super(WaitAlarmsClearStep, self).timeout()
+        reason = (
+            "Unignored alarms did not clear before timeout: "
+            f"{json.dumps([v.as_dict() for v in self.strategy.nfvi_alarms], indent=2)}"
+        )
+        return result, reason
 
 
 class QuerySwPatchesStep(strategy.StrategyStep):
