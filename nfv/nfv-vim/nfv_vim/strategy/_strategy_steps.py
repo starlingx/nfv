@@ -1424,13 +1424,13 @@ class UpgradeActivateStep(strategy.StrategyStep):
     @property
     def RETRY_LIMIT(self):
         section = config.CONF.get("software-deploy", {})
-        timeout = int(section.get("deploy_activate_retries", 2))
+        timeout = int(section.get("deploy_activate_retries", 3))
         return timeout
 
     @property
     def RETRY_DELAY(self):
         section = config.CONF.get("software-deploy", {})
-        timeout = int(section.get("deploy_activate_retry_delay", 120))
+        timeout = int(section.get("deploy_activate_retry_delay", 30))
         return timeout
 
     @coroutine
@@ -1497,11 +1497,16 @@ class UpgradeActivateStep(strategy.StrategyStep):
         # If failed, retry if we haven't hit retry limit
         if result == strategy.STRATEGY_STEP_RESULT.FAILED and self._retry_count < self._retry_limit:
             self._retry_requested = True
-            self._retry_sleep = time.perf_counter() + self._retry_delay
+            # Increases the delay with each retry,
+            # retry1 - 30secs + audit event(30~35secs)
+            # retry2 - 60secs + audit event(30~35secs)
+            # retry3 - 90secs + audit event(30~35secs)
+            _sleep_duration = self._retry_delay * (self._retry_count + 1)
+            self._retry_sleep = time.perf_counter() + _sleep_duration
             DLOG.notice(
                 "Handle Activate-Upgrade failure, "
-                f"retry={self._retry_count + 1} queued, "
-                f"delay>={self._retry_delay} seconds"
+                f"retry={self._retry_count+1} queued, "
+                f"delay>={_sleep_duration} seconds"
             )
             self.strategy.save()
             return
@@ -1547,7 +1552,6 @@ class UpgradeActivateStep(strategy.StrategyStep):
         elif self._retry_requested and time.perf_counter() > self._retry_sleep:
             self._retry_requested = False
             self._retry_count += 1
-            self.extend_timeout(self.TIMEOUT)
             DLOG.notice(f"Step ({self._name}): Executing retry={self._retry_count}")
             self.strategy.save()
             nfvi.nfvi_upgrade_activate(self._release, self._activate_upgrade_callback())
