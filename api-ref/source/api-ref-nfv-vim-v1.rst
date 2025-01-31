@@ -41,21 +41,21 @@ Create a User & Project scoped token in Keystone
 
 **Request**
 
-        **Request body parameters**
+**Request body parameters**
 
-        .. csv-table::
-           :header: "Parameter", "Style", "Type", "Description"
-           :widths: 20, 10, 10, 20
+.. csv-table::
+  :header: "Parameter", "Style", "Type", "Description"
+  :widths: 20, 10, 10, 20
 
-           "See example below for full structure", "", "", "Use values in example for all
-           attributes except user name and password."
-           "identity:password:user:name", "plain", "xsd:string", "Your user name; note that
-           user must have ‘admin’ role."
-           "identity:password:user:password", "plain", "xsd:string", "Your user’s password."
+  "See example below for full structure", "", "", "Use values in example for all
+  attributes except user name and password."
+  "identity:password:user:name", "plain", "xsd:string", "Your user name; note that
+  user must have ‘admin’ role."
+  "identity:password:user:password", "plain", "xsd:string", "Your user’s password."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
           {
             "auth": {
@@ -80,18 +80,18 @@ Create a User & Project scoped token in Keystone
 
 **Response**
 
-        **Normal header response codes**
+**Normal header response codes**
 
-        200
+200
 
-        **Error header response codes**
+**Error header response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401), forbidden (403),
-        badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401), forbidden (403),
+badMethod (405), overLimit (413)
 
-        **Response header example**
+**Response header example**
 
-        ::
+::
 
           HTTP/1.1 201 CREATED
           Server: gunicorn
@@ -103,9 +103,9 @@ Create a User & Project scoped token in Keystone
           U8U0IC563o5j0xYMaBW_ZY15_V9yPqb7zI2gkpZgXJoNO-x6WiLoy5VRU5WKBfYvZaUEzdA-SeJtYHXmG5ci7n0CjgMzLX4IqybS0lp4ahiE0
           Vary: X-Auth-Token
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
               "token" : {
@@ -282,16 +282,16 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        ::
+::
 
             {
                "name": "nfv-vim",
@@ -400,16 +400,16 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        ::
+::
 
            {
               "id": "sw-upgrade",
@@ -542,22 +542,22 @@ Shows detailed information about the current sw-deploy strategy (AIO-DX)
 
 **Request**
 
-        This operation does not accept a request body.
+This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
                "strategy": {
@@ -1012,9 +1012,9 @@ Creates a sw-deploy strategy
 
 **Request**
 
-        **Request parameters**
+**Request parameters**
 
-        .. csv-table::
+.. csv-table::
             :header: "Parameter", "Style", "Type", "Description"
             :widths: 20, 20, 20, 60
 
@@ -1031,9 +1031,9 @@ Creates a sw-deploy strategy
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be marked complete."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
           {
              "controller-apply-type": "serial/ignore",
@@ -1048,18 +1048,18 @@ Creates a sw-deploy strategy
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
         
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
                 "strategy": {
@@ -1176,13 +1176,13 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        204
+204
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
            {
            }
@@ -1196,9 +1196,9 @@ Applies or aborts a sw-deploy strategy
 
 **Request**
 
-        **Request body parameters**
+**Request body parameters**
 
-        .. csv-table::
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
@@ -1207,9 +1207,9 @@ Applies or aborts a sw-deploy strategy
            "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
            Only used with ``apply-stage`` or ``abort-stage`` actions."
 
-        **Request body example**
+**Request body example**
         
-        ::
+::
 
            {
              "action": "apply-all"
@@ -1217,18 +1217,18 @@ Applies or aborts a sw-deploy strategy
            
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        202
+202
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
               "strategy": {
@@ -2879,20 +2879,20 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        The result shows current active strategy name and type.
+The result shows current active strategy name and type.
 
-        ::
+::
 
             {
                 "strategy": {
@@ -2901,9 +2901,9 @@ This operation does not accept a request body.
                 }
             }
 
-        The result shows there is no current strategy.
+The result shows there is no current strategy.
 
-        ::
+::
 
             {
                 "strategy": null
@@ -2948,20 +2948,20 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        The result shows there is no current strategy.
+The result shows there is no current strategy.
 
-        ::
+::
 
             {
                 "strategy": null
@@ -2978,7 +2978,7 @@ Check System Health
 
 The typical port used for SYSINV API is 6385.
 
-.. rest_method:: GET <sysinv_url>:<sysinv_port>/v1/ihosts/
+.. rest_method:: GET sysinv_url:sysinv_port/v1/ihosts/
 
 **Request**
 
@@ -2986,19 +2986,19 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
-        unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
-        itemNotFound (404)
+computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
+unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
+itemNotFound (404)
 
-        **Response body example**
+**Response body example**
         
-        ::
+::
 
             {
                "ihosts": [
@@ -3032,57 +3032,60 @@ Check for alarms
 -----------------
 The typical port used for the FM REST API is 18002.
 
-.. rest_method:: GET <fm_url>:<fm_port>/v1/alarms
+.. rest_method:: GET fm_url:fm_port/v1/alarms
 
 The supported query options are alarm_id, entity_type_id,
 entity_instance_id, severity and alarm_type.
 
 **Request**
 
-    **Request parameters**
+**Request parameters**
 
-    .. csv-table::
+.. csv-table::
        :header: "Parameter", "Style", "Type", "Description"
        :widths: 20, 20, 20, 60
 
-       "include_suppress (Optional)", "query", "xsd:boolean", "This optional parameter when set to true (include_suppress=true)
+       "include_suppress (Optional)", "query", "xsd:boolean", "This optional parameter when 
+       set to true (include_suppress=true)
        specifies to include suppressed alarms in output."
        "expand (Optional)", "query", "xsd:boolean", "This optional parameter when set to true (expand=true) specifies
        that the response should contains the same response parameters as when querying for a specific alarm."
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
-        unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
-        itemNotFound (404)
+computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
+unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
+itemNotFound (404)
 
-        **Response body parameters**
+**Response body parameters**
 
-        .. csv-table::
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
-           "ialarms (Optional)", "plain", "xsd:list", "The list of active alarms based on the specified query."
+           "alarms (Optional)", "plain", "xsd:list", "The list of active alarms based on the specified query."
            "alarm_id (Optional)", "plain", "xsd:string", "The alarm ID; each type of alarm has a unique ID.
            Note the alarm_id and the entity_instance_id uniquely identify an alarm instance."
            "entity_instance_id (Optional)", "plain", "xsd:string", "The instance of the object raising alarm. A .
            separated list of sub-entity-type=instance-value pairs, representing the containment structure of the
-           overall entity instance. Note the alarm_id and the entity_instance_id uniquely identify an alarm instance."
+           overall entity instance. Note the alarm_id and the entity_instance_id uniquely identify 
+           an alarm instance."
            "reason_text (Optional)", "plain", "xsd:string", "The text description of the alarm."
            "severity (Optional)", "plain", "xsd:string", "The severity of the alarm; ``critical``, ``major``,
            ``minor``, or ``warning``."
-           "timestamp (Optional)", "plain", "xsd:dateTime", "The time in UTC at which the alarm has last been updated."
+           "timestamp (Optional)", "plain", "xsd:dateTime", "The time in UTC at which the alarm 
+           has last been updated."
            "uuid (Optional)", "plain", "csapi:UUID", "The unique identifier of the alarm."
 
-        **Responde body example**
+**Responde body example**
 
-        ::
+::
 
            {
              "alarms": []
@@ -3098,17 +3101,17 @@ Upload of software release on system controller
 
 The typical port used for Software REST API is 5497.
 
-.. rest_method:: POST <software_url>:<software_port>/v1/release
+.. rest_method:: POST software_url:software_port/v1/release
 
 **Request**
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
            data:
               [
-                "/home/sysadmin/10.0.1-software-insvc.patch"
+                "/home/sysadmin/10.0.1-software.patch"
 
                 (or)
 
@@ -3118,18 +3121,17 @@ The typical port used for Software REST API is 5497.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        internalServerError (500)
+internalServerError (500)
 
-        **Response body parameters**
+**Response body parameters**
 
-        .. csv-table::
-
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
@@ -3138,9 +3140,9 @@ The typical port used for Software REST API is 5497.
            "error", "plain", "xsd:string", "Any errors generated during the request processing."
            "upload_info", "plain", "xsd:list", "Information regarding uploaded files."
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
 
            {
@@ -3190,24 +3192,24 @@ Create prestage-strategy is used in case of Distributed Cloud environment(DC),
 to make the software release available on the subcloud.
 The typical port used for DCMANAGER REST API is 8119.
 
-.. rest_method:: POST <dcmanager_url>:<dcmanager_port>/v1.0/sw-update-strategy/
+.. rest_method:: POST dcmanager_url:dcmanager_port/v1.0/sw-update-strategy/
 
 **Request**
 
-    **Request body parameters**
+**Request body parameters**
     
-        subcloud-apply-type: subcloud_name,
-        max-parallel-subclouds: max_parallel_subclouds,
-        stop-on-failure: stop_on_failure,
-        cloud-name: name_of_cloud,
-        type: sw_update_strategy_type,
-        sysadmin_password: password,
-        for_sw_deploy: true,
-        prestage-software-version: YY.MM/YY.MM.nn
+* subcloud-apply-type: subcloud_name
+* max-parallel-subclouds: max_parallel_subclouds
+* stop-on-failure: stop_on_failure
+* cloud-name: name_of_cloud
+* type: sw_update_strategy_type
+* sysadmin_password: password
+* for_sw_deploy: true
+* prestage-software-version: YY.MM/YY.MM.nn
         
-    **Request body example**
+**Request body example**
 
-     ::
+::
 
        {
          "type": "prestage",
@@ -3219,19 +3221,19 @@ The typical port used for DCMANAGER REST API is 8119.
 
 **Response**
 
-    **Normal response codes**
+**Normal response codes**
 
-    200
+200
 
-   **Error response codes**
+**Error response codes**
 
-   badRequest (400), unauthorized (401), forbidden (403), badMethod (405),
-   HTTPUnprocessableEntity (422), internalServerError (500),
-   serviceUnavailable (503)
+badRequest (400), unauthorized (401), forbidden (403), badMethod (405),
+HTTPUnprocessableEntity (422), internalServerError (500),
+serviceUnavailable (503)
 
-   **Response body example**
+**Response body example**
 
-   ::
+::
      
      {
        strategy type: prestage
@@ -3249,24 +3251,24 @@ DC - Apply prestage-strategy
 Apply prestage strategy is used in case of Distributed Cloud environment(DC),
 to make the software release available on the subcloud.
 
-.. rest_method:: POST <dcmanager_url>:<dcmanager_port>/v1.0/sw-update-strategy/actions?type=prestage
+.. rest_method:: POST dcmanager_url:dcmanager_port/v1.0/sw-update-strategy/actions?type=prestage
 
 **Request**
 
-     **Request body parameters**
+**Request body parameters**
 
-        subcloud-apply-type: subcloud_name,
-        stop-on-failure: stop_on_failure,
-        cloud-name: name_of_cloud,
-        type: sw_update_strategy_type,
-        sysadmin_password: password,
-        for_sw_deploy: true,
-        prestage-software-version: YY.MM/YY.MM.nn,
-        action: action_to_perform
+* subcloud-apply-type: subcloud_name
+* stop-on-failure: stop_on_failure
+* cloud-name: name_of_cloud
+* type: sw_update_strategy_type
+* sysadmin_password: password
+* for_sw_deploy: true
+* prestage-software-version: YY.MM/YY.MM.nn
+* action: action_to_perform
 
-     **Request body example**
+**Request body example**
 
-     ::
+::
 
        {
          "type": "prestage",
@@ -3279,19 +3281,19 @@ to make the software release available on the subcloud.
 
 **Response**
 
-    **Normal response codes**
+**Normal response codes**
 
-    200
+200
 
-   **Error response codes**
+**Error response codes**
 
-   badRequest (400), unauthorized (401), forbidden (403), badMethod (405),
-   HTTPUnprocessableEntity (422), internalServerError (500),
-   serviceUnavailable (503)
+badRequest (400), unauthorized (401), forbidden (403), badMethod (405),
+HTTPUnprocessableEntity (422), internalServerError (500),
+serviceUnavailable (503)
 
-   **Response body example**
+**Response body example**
 
-   ::
+::
 
      {
        strategy type: prestage
@@ -3316,24 +3318,28 @@ Creates software deploy strategy
 
 **Request**
 
-        **Request parameters**
+**Request parameters**
 
-        .. csv-table::
+.. csv-table::
             :header: "Parameter", "Style", "Type", "Description"
             :widths: 20, 20, 20, 60
 
             "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts:
             ``serial``, ``parallel`` or ``ignore``."
-            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``            , ``parallel`` or ``ignore``."
-            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of w            orker hosts to upgrade in parallel; only applicable if ``worker-apply-type = parallel``.            Default value is ``2``."
-            "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:            ``strict`` or ``relaxed``."
+            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``, 
+            ``parallel`` or ``ignore``."
+            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of 
+            worker hosts to upgrade in parallel; only applicable if ``worker-apply-type = parallel``.
+            Default value is ``2``."
+            "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
+            ``strict`` or ``relaxed``."
             "release", "plain", "xsd:string", "The release identification name."
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be marked complete."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
           {
              "controller-apply-type": "serial/ignore",
@@ -3348,18 +3354,18 @@ Creates software deploy strategy
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
                 "strategy": {
@@ -3420,22 +3426,22 @@ Shows the active strategy details.
 
 **Request**
 
-        This operation does not accept a request body.
+This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
           {
                "current-phase-completion": 100%
@@ -3453,9 +3459,9 @@ in response message.
 
 **Request**
 
-        **Request body parameters**
+**Request body parameters**
 
-        .. csv-table::
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
@@ -3464,9 +3470,9 @@ in response message.
            "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
            Only used with ``apply-stage`` or ``abort-stage`` actions."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
            {
              "action": "apply-all"
@@ -3474,18 +3480,18 @@ in response message.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        202
+202
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
               "strategy": {
@@ -3528,7 +3534,7 @@ in response message.
               "reason": ""
               }
             }
-          }
+          
 
 **Note**
 The API takes long time to complete the operation. Approximately it takes an hour
@@ -3546,9 +3552,9 @@ for stage-id data in the strategy output.
 
 **Request**
 
-        **Request body parameters**
+**Request body parameters**
 
-        .. csv-table::
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
@@ -3557,9 +3563,9 @@ for stage-id data in the strategy output.
            "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
            Only used with ``apply-stage`` or ``abort-stage`` actions."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
            {
              "action": "apply-stage",
@@ -3568,18 +3574,18 @@ for stage-id data in the strategy output.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        202
+202
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
               "strategy": {
@@ -3635,22 +3641,22 @@ The apply phase is considered to be completed if below values are set.
 
 **Request**
 
-        This operation does not accept a request body.
+This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
           {
                "current-phase-completion": 100%
@@ -3665,7 +3671,7 @@ If the user has not selected ‘delete: true’ in step 1, then complete the dep
 using below API to delete.
 The typical port used for software REST API is 5497.
 
-.. rest_method:: DELETE <software_url>:<software_port>/v1/deploy
+.. rest_method:: DELETE software_url:software_port/v1/deploy
 
 **Request**
 
@@ -3673,17 +3679,17 @@ This operation does not accept a request body.
 
 **Response**
 
-    **Normal response codes**
+**Normal response codes**
 
-    200
+200
 
-    **Error response codes**
+**Error response codes**
 
-    internalServerError (500)
+internalServerError (500)
 
-    **Response parameters**
+**Response parameters**
 
-    .. csv-table::
+.. csv-table::
        :header: "Parameter", "Style", "Type", "Description"
        :widths: 20, 20, 20, 60
 
@@ -3691,9 +3697,9 @@ This operation does not accept a request body.
        "warning", "plain", "xsd:string", "Any warnings generated during the request processing."
        "error", "plain", "xsd:string", "Any errors generated during the request processing."
 
-    **Response body example**
+**Response body example**
 
-    ::
+::
 
       {
           "info": "Deploy deleted with success",
@@ -3734,20 +3740,20 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        The result shows there is no current strategy.
+The result shows there is no current strategy.
 
-        ::
+::
 
             {
                 "strategy": null
@@ -3760,7 +3766,7 @@ Shows software list
 The typical port used for the Software REST API is 5497.
 Software list shows the release is in ‘deployed’ state.
 
-.. rest_method:: GET <software_url>:<software_port>/v1/release/{release-id}
+.. rest_method:: GET software_url:software_port/v1/release/{release-id}
 
 **Request**
 
@@ -3768,17 +3774,17 @@ This operation does not accept a request body.
 
 **Response**
 
-    **Normal response codes**
+**Normal response codes**
 
-    200
+200
 
-    **Error response codes**
+**Error response codes**
 
-    internalServerError (500)
+internalServerError (500)
 
-    **Response body parameter**
+**Response body parameter**
 
-    .. csv-table::
+.. csv-table::
        :header: "Parameter", "Style", "Type", "Description"
        :widths: 20, 20, 20, 60
 
@@ -3797,9 +3803,9 @@ This operation does not accept a request body.
        "requires", "plain", "xsd:list", "A list of patch ids required for this patch release to be installed."
        "packages", "plain", "xsd:list", "A list of packages present in the release."
 
-    **Response body example**
+**Response body example**
 
-    ::
+::
 
         {
            "release_id":"stx-0.0.0",
@@ -3833,9 +3839,9 @@ Create software deploy strategy.
 
 **Request**
 
-        **Request parameters**
+**Request parameters**
 
-        .. csv-table::
+.. csv-table::
             :header: "Parameter", "Style", "Type", "Description"
             :widths: 20, 20, 20, 60
 
@@ -3848,9 +3854,9 @@ Create software deploy strategy.
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be marked complete."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
           {
              "controller-apply-type": "serial/ignore",
@@ -3865,18 +3871,18 @@ Create software deploy strategy.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
                 "strategy": {
@@ -3937,22 +3943,22 @@ Shows the active strategy details.
 
 **Request**
 
-        This operation does not accept a request body.
+This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
           {
                "current-phase-completion": 100%
@@ -3970,9 +3976,9 @@ in response message.
 
 **Request**
 
-        **Request body parameters**
+**Request body parameters**
 
-        .. csv-table::
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
@@ -3981,9 +3987,9 @@ in response message.
            "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
            Only used with ``apply-stage`` or ``abort-stage`` actions."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
            {
              "action": "apply-all"
@@ -3991,18 +3997,18 @@ in response message.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        202
+202
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
               "strategy": {
@@ -4064,9 +4070,9 @@ for stage-id data in the strategy output.
 
 **Request**
 
-        **Request body parameters**
+**Request body parameters**
 
-        .. csv-table::
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
@@ -4075,9 +4081,9 @@ for stage-id data in the strategy output.
            "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
            Only used with ``apply-stage`` or ``abort-stage`` actions."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
            {
              "action": "apply-stage",
@@ -4086,17 +4092,18 @@ for stage-id data in the strategy output.
 
 **Response**
 
-        **Normal response codes**
-        202
+**Normal response codes**
 
-        **Error response codes**
+202
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+**Error response codes**
 
-        **Response body example**
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        ::
+**Response body example**
+
+::
 
             {
               "strategy": {
@@ -4149,22 +4156,22 @@ for stage-id data in the strategy output.
 
 **Request**
 
-        This operation does not accept a request body.
+This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
                "strategy": {
@@ -4183,7 +4190,7 @@ If the user has not selected ‘delete: true’ in step 1, then complete the dep
 using below API to delete.
 The typical port used for software REST API is 5497.
 
-.. rest_method:: DELETE <software_url>:<software_port>v1/deploy
+.. rest_method:: DELETE software_url:software_port/v1/deploy
 
 **Request**
 
@@ -4191,17 +4198,17 @@ This operation does not accept a request body.
 
 **Response**
 
-    **Normal response codes**
+**Normal response codes**
 
-    200
+200
 
-    **Error response codes**
+**Error response codes**
 
-    internalServerError (500)
+internalServerError (500)
 
-    **Response parameters**
+**Response parameters**
 
-    .. csv-table::
+.. csv-table::
        :header: "Parameter", "Style", "Type", "Description"
        :widths: 20, 20, 20, 60
 
@@ -4209,9 +4216,9 @@ This operation does not accept a request body.
        "warning", "plain", "xsd:string", "Any warnings generated during the request processing."
        "error", "plain", "xsd:string", "Any errors generated during the request processing."
 
-    **Response body example**
+**Response body example**
 
-    ::
+::
 
       {
           "info": "Deploy deleted with success",
@@ -4250,20 +4257,20 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        The result shows current active strategy name and state as 'failed'.
+The result shows current active strategy name and state as 'failed'.
 
-        ::
+::
 
             {
                 "strategy": {
@@ -4278,7 +4285,7 @@ Check System Health
 
 The typical port used for SYSINV API is 6385.
 
-.. rest_method:: GET <system_url>:<system_port>/v1/ihosts/
+.. rest_method:: GET system_url:system_port/v1/ihosts/
 
 **Request**
 
@@ -4286,19 +4293,19 @@ This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
-        unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
-        itemNotFound (404)
+computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
+unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
+itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
                "ihosts": [
@@ -4333,16 +4340,16 @@ Check for alarms
 
 The typical port used for the FM REST API is 18002.
 
-.. rest_method:: GET <fm_url>:<fm_port>/v1/alarms
+.. rest_method:: GET fm_url:fm_port/v1/alarms
 
 The supported query options are alarm_id, entity_type_id,
 entity_instance_id, severity and alarm_type.
 
 **Request**
 
-    **Request parameters**
+**Request parameters**
 
-    .. csv-table::
+.. csv-table::
        :header: "Parameter", "Style", "Type", "Description"
        :widths: 20, 20, 20, 60
 
@@ -4353,22 +4360,23 @@ entity_instance_id, severity and alarm_type.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
-        **Error response codes**
+200
 
-        computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
-        unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
-        itemNotFound (404)
+**Error response codes**
 
-        **Response body parameters**
+computeFault (400, 500, ...), serviceUnavailable (503), badRequest (400),
+unauthorized (401), forbidden (403), badMethod (405), overLimit (413),
+itemNotFound (404)
 
-        .. csv-table::
+**Response body parameters**
+
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
-           "ialarms (Optional)", "plain", "xsd:list", "The list of active alarms based on the specified query."
+           "alarms (Optional)", "plain", "xsd:list", "The list of active alarms based on the specified query."
            "alarm_id (Optional)", "plain", "xsd:string", "The alarm ID; each type of alarm has a unique ID.
            Note the alarm_id and the entity_instance_id uniquely identify an alarm instance."
            "entity_instance_id (Optional)", "plain", "xsd:string", "The instance of the object raising alarm. A .
@@ -4380,8 +4388,9 @@ entity_instance_id, severity and alarm_type.
            "timestamp (Optional)", "plain", "xsd:dateTime", "The time in UTC at which the alarm has last been updated."
            "uuid (Optional)", "plain", "csapi:UUID", "The unique identifier of the alarm."
 
-        **Responde body example**
-        ::
+**Responde body example**
+        
+::
 
            {
              "alarms":[
@@ -4414,9 +4423,9 @@ Steps
 
 **Request**
 
-        **Request body parameter**
+**Request body parameter**
        
-        ::
+::
 
           {
              "force": false
@@ -4424,13 +4433,13 @@ Steps
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        204
+204
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
            {
            }
@@ -4443,9 +4452,9 @@ Steps
 
 **Request**
 
-        **Request parameters**
+**Request parameters**
 
-        .. csv-table::
+.. csv-table::
             :header: "Parameter", "Style", "Type", "Description"
             :widths: 20, 20, 20, 60
 
@@ -4459,9 +4468,9 @@ Steps
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be marked complete."
 
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
           {
              "controller-apply-type": "serial/ignore",
@@ -4485,22 +4494,22 @@ Shows the active strategy details.
 
 **Request**
 
-        This operation does not accept a request body.
+This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
           {
                "current-phase-completion": 100%
@@ -4518,9 +4527,9 @@ in response message.
 
 **Request**
 
-        **Request body parameters**
+**Request body parameters**
 
-        .. csv-table::
+.. csv-table::
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
@@ -4529,9 +4538,9 @@ in response message.
            "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
            Only used with ``apply-stage`` or ``abort-stage`` actions."
 
-        **Request body example**
+**Request body example**
 
-        ::
+::
 
            {
              "action": "apply-all"
@@ -4539,18 +4548,18 @@ in response message.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        202
+202
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
               "strategy": {
@@ -4603,22 +4612,22 @@ in response message.
 
 **Request**
 
-        This operation does not accept a request body.
+This operation does not accept a request body.
 
 **Response**
 
-        **Normal response codes**
+**Normal response codes**
 
-        200
+200
 
-        **Error response codes**
+**Error response codes**
 
-        serviceUnavailable (503), badRequest (400), unauthorized (401),
-        forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
+serviceUnavailable (503), badRequest (400), unauthorized (401),
+forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
-        **Response body example**
+**Response body example**
 
-        ::
+::
 
             {
                "strategy": {
@@ -4640,13 +4649,13 @@ The typical port used for Software REST API is 5497.
 The release should be rolled back and the earlier release would be marked
 as the active one.
 
-.. rest_method:: GET <software_url>:<software_port>/v1/release
+.. rest_method:: GET software_url:software_port/v1/release
 
 **Request**
 
-    **Request body parameter**
+**Request body parameter**
 
-    .. csv-table::
+.. csv-table::
        :header: "Parameter", "Style", "Type", "Description"
        :widths: 20, 20, 20, 60
 
@@ -4655,17 +4664,17 @@ as the active one.
 
 **Response**
 
-    **Normal response codes**
+**Normal response codes**
 
-    200
+200
 
-    **Error response codes**
+**Error response codes**
 
-    internalServerError (500)
+internalServerError (500)
 
-    **Response body example**
+**Response body example**
 
-    ::
+::
 
        [
          {
