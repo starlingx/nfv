@@ -50,8 +50,6 @@ IGNORE_ALARMS_LIST = [
     "900.701",
 ]
 
-DEPLOY_START_DELAY = 120
-
 
 # TODO(jkraitbe): Update this when retry count is decicded.
 # utility method for the formatting of unlock-hosts stage as dict
@@ -1442,15 +1440,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 8,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 4,
+                 'total_steps': 3,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
-                     {'name': 'system-stabilize',
-                      'timeout': DEPLOY_START_DELAY},
+                     {'name': 'query-alarms'},
                  ]
                 },
                 {'name': 'sw-upgrade-controllers',
@@ -1559,15 +1555,16 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  ]
                  },
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 4,
+                 'total_steps': 5,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
+                     {'name': 'query-alarms'},
                      {'name': 'activate-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'complete-upgrade',
                       'release': strategy.nfvi_upgrade.release},
+                     {'name': 'query-alarms'},
                   ]
                 }
             ]
@@ -1610,15 +1607,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'total_stages': 6,
             'stages': [
                 {'name': 'sw-upgrade-start',
-                 'total_steps': 4,
+                 'total_steps': 3,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
                      {'name': 'start-upgrade',
                       'release': strategy.nfvi_upgrade.release},
-                     {'name': 'system-stabilize',
-                      'timeout': DEPLOY_START_DELAY},
+                     {'name': 'query-alarms'},
                  ]
                 },
                 {'name': 'sw-upgrade-controllers',
@@ -1692,15 +1687,16 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                  ]
                  },
                 {'name': 'sw-upgrade-complete',
-                 'total_steps': 4,
+                 'total_steps': 5,
                  'steps': [
-                     {'name': 'query-alarms'},
                      {'name': 'swact-hosts',
                       'entity_names': ['controller-1']},
+                     {'name': 'query-alarms'},
                      {'name': 'activate-upgrade',
                       'release': strategy.nfvi_upgrade.release},
                      {'name': 'complete-upgrade',
                       'release': strategy.nfvi_upgrade.release},
+                     {'name': 'query-alarms'},
                   ]
                 }
             ]
@@ -1822,18 +1818,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         fake_upgrade_obj = SwUpgrade()
         strategy.sw_update_obj = fake_upgrade_obj
+
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        bpr = strategy.build_phase
 
-        build_phase = strategy.build_phase.as_dict()
-
-        expected_results = {
-            'total_stages': 0,
-            'result': 'failed',
-            'result_reason':
-                "All hosts must be unlocked-enabled-available to start a new sw-deployment: ['controller-0']"
-        }
-
-        sw_update_testcase.validate_phase(build_phase, expected_results)
+        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
                 sw_update_testcase.fake_host_name_controller_1)
@@ -1866,18 +1856,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         fake_upgrade_obj = SwUpgrade()
         strategy.sw_update_obj = fake_upgrade_obj
+
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        bpr = strategy.build_phase
 
-        build_phase = strategy.build_phase.as_dict()
-
-        expected_results = {
-            'total_stages': 0,
-            'result': 'failed',
-            'result_reason':
-                "All hosts must be unlocked-enabled-available to start a new sw-deployment: ['compute-3']"
-        }
-
-        sw_update_testcase.validate_phase(build_phase, expected_results)
+        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     @testtools.skip('Retries not implemented')
     @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
