@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023,2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -15,6 +15,7 @@ DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.sysinv')
 # WARNING: Any change to this timeout must be reflected in the config.ini
 # file for the nfvi plugins.
 REST_API_REQUEST_TIMEOUT = 60
+REST_API_UNLOCK_REQUEST_TIMEOUT = 120
 
 KUBE_ROOTCA_UPDATE_ENDPOINT = "/kube_rootca_update"
 KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT = \
@@ -854,7 +855,7 @@ def unlock_host(token, host_uuid):
 
     response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
                                 json.dumps(api_cmd_payload),
-                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+                                timeout_in_secs=REST_API_UNLOCK_REQUEST_TIMEOUT)
     return response
 
 
