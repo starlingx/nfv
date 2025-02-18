@@ -32,7 +32,7 @@ fw_update_strategy_rules = [
     ),
     base.RuleDefault(
         name=POLICY_ROOT % 'get',
-        check_str='rule:' + base.READER_IN_SYSTEM_PROJECTS,
+        check_str='rule:' + base.READER_OR_OPERATOR_IN_SYSTEM_PROJECTS,
         description="Get a fw_update_strategy",
     )
 ]
