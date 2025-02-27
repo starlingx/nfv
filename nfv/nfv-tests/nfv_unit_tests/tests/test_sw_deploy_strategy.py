@@ -2910,6 +2910,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     def test_sw_deploy_strategy_aiosx_is_downgrade(self):
         """
+
         Test the sw_deploy strategy downgrade logic:
         - We should be able to downgrade to a deployed release
         Verify:
@@ -2979,6 +2980,134 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             },
             {
                 "state": "deployed",  # Target
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_RR_invalid_release(self):
+        """
+
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - Downgrade multiple releases at once
+        - Invalid release uploaded and is in 'available' statei with RR.
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+            {
+                "state": "deployed",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "available",  # Invalid Release
+                "reboot_required": True,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_NRR_invalid_release(self):
+        """
+
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - Downgrade multiple releases at once
+        - Invalid release uploaded and is in 'available' state with NRR.
+        Verify:
+        - Pass
+        """
+
+        index = 1
+        release_data = [
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+            {
+                "state": "deployed",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "available",  # Invalid Release
+                "reboot_required": True,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+        ]
+
+        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
+        assert not upgrade
+        assert downgrade
+        assert not vim_rr
+
+    def test_sw_deploy_strategy_aiosx_is_downgrade_NRR_invalid_release_with_index2(self):
+        """
+
+        Test the sw_deploy strategy downgrade logic:
+        - We should be able to downgrade to a deployed release
+        - Downgrade multiple releases at once
+        - Invalid release uploaded and is in 'available' state with NRR.
+        Verify:
+        - Pass
+        """
+
+        index = 2
+        release_data = [
+            {
+                "state": "deployed",
+                "reboot_required": True,
+            },
+            {
+                "state": "deployed",
+                "reboot_required": False,
+            },
+            {
+                "state": "deployed",  # Target
+                "reboot_required": False,
+            },
+            {
+                "state": "available",  # Invalid Release
+                "reboot_required": True,
             },
             {
                 "state": "deployed",

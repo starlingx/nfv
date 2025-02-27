@@ -218,6 +218,7 @@ def is_target_release_downgrade(index, release_data):
 
     A release is a downgrade if it is deployed or removing.
     RR is set when there is at least one RR release as part of the downgrade.
+    RR value of an Invalid release in 'available' state is ignored.
     RR values are taken from downgraded releases and not the target release.
     """
 
@@ -243,7 +244,8 @@ def is_target_release_downgrade(index, release_data):
     if downgrade:
         # Check if downgrade is RR
         for release in release_data[index + 1:]:
-            if release["state"] != current_state:
+            if ((release["state"] != current_state) and
+                    (release["state"] == usm_states.AVAILABLE)):
                 break
             vim_rr |= release["reboot_required"]
 
