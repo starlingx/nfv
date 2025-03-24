@@ -47,13 +47,13 @@ def unit_test(title):
 def _task_non_coroutine(arg1):
     global _test_complete
     _test_complete = True
-    assert(arg1 == 'arg1')
+    assert (arg1 == 'arg1')
     return True
 
 
 def _task_work_func(arg1, arg2):
-    assert(arg1 == 'arg1')
-    assert(arg2 == 'arg2')
+    assert (arg1 == 'arg1')
+    assert (arg2 == 'arg2')
     return "FUNCTION PASSED"
 
 
@@ -61,13 +61,13 @@ def _task_work_func(arg1, arg2):
 def _task_coroutine_callback():
     global _test_complete, _test_result
     result = (yield)
-    assert(result == "FUNCTION PASSED")
+    assert (result == "FUNCTION PASSED")
     _test_complete = True
     _test_result = True
 
 
 def _task_coroutine(future, arg1, callback):
-    assert(arg1 == 'arg1')
+    assert (arg1 == 'arg1')
     future.work(_task_work_func, 'arg1', 'arg2')
     future.result = (yield)
     if future.result.is_complete():
@@ -77,7 +77,7 @@ def _task_coroutine(future, arg1, callback):
 
 
 def _task_coroutine_with_timer(future, arg1, callback):
-    assert(arg1 == 'arg1')
+    assert (arg1 == 'arg1')
     timer_id = future.timer('timer-test', 2)
     start_ms = timers.get_monotonic_timestamp_in_ms()
     future.result = (yield)

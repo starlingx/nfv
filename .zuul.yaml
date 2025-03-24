@@ -6,7 +6,7 @@
       - stx-release-notes-jobs
     check:
       jobs:
-        - openstack-tox-linters
+        - nfv-tox-linters
         - nfv-tox-pep8
         - nfv-tox-py39
         - nfv-tox-pylint
@@ -14,7 +14,7 @@
         - nova-api-proxy-tox-pylint
     gate:
       jobs:
-        - openstack-tox-linters
+        - nfv-tox-linters
         - nfv-tox-pep8
         - nfv-tox-py39
         - nfv-tox-pylint
@@ -25,25 +25,33 @@
         - stx-nfv-upload-git-mirror
 
 - job:
+    name: nfv-tox-linters
+    parent: tox
+    nodeset: debian-bullseye
+    description: Run linters
+    vars:
+      tox_envlist: linters
+
+- job:
     name: nfv-tox-py39
-    parent: openstack-tox-py39
+    parent: tox
     description: Run py39 for nfv
     nodeset: debian-bullseye
     required-projects:
       - starlingx/config
       - starlingx/fault
-      - starlingx/root
       - starlingx/update
     vars:
+      tox_envlist: py39
       tox_extra_args: -c nfv/tox.ini
-      tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
     name: nfv-tox-pep8
-    parent: openstack-tox-pep8
+    parent: tox
     description: Run pep8 for nfv
     nodeset: debian-bullseye
     vars:
+      tox_envlist: pep8
       tox_extra_args: -c nfv/tox.ini
 
 - job:
@@ -51,12 +59,9 @@
     parent: tox
     description: Run bandit for nfv
     nodeset: debian-bullseye
-    required-projects:
-      - starlingx/root
     vars:
       tox_envlist: bandit
       tox_extra_args: -c nfv/tox.ini
-      tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
     name: nfv-tox-pylint
@@ -66,12 +71,10 @@
     required-projects:
       - starlingx/config
       - starlingx/fault
-      - starlingx/root
       - starlingx/update
     vars:
       tox_envlist: pylint
       tox_extra_args: -c nfv/tox.ini
-      tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
     name: nova-api-proxy-tox-pep8
@@ -87,12 +90,9 @@
     parent: tox
     description: Run pylint for nova-api-proxy
     nodeset: debian-bullseye
-    required-projects:
-      - starlingx/root
     vars:
       tox_envlist: pylint
       tox_extra_args: -c nova-api-proxy/tox.ini
-      tox_constraints_file: '{{ ansible_user_dir }}/src/opendev.org/starlingx/root/build-tools/requirements/debian/upper-constraints.txt'
 
 - job:
     name: stx-nfv-upload-git-mirror

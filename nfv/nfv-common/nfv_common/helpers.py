@@ -56,8 +56,8 @@ class Result(object):
         self.ancillary_data = ancillary_data
 
     def __str__(self):
-        return("Result: result-data: %s  ancillary-data: %s"
-               % (self.result_data, self.ancillary_data))
+        return ("Result: result-data: %s  ancillary-data: %s"
+                % (self.result_data, self.ancillary_data))
 
 
 class Constants(object):

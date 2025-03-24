@@ -1985,7 +1985,7 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         """
         from nfv_vim import directors
 
-        if(self._instance_names):
+        if (self._instance_names):
             DLOG.info("Step (%s) apply for instances %s running on hosts %s." % (
                 self._name,
                 self._instance_names,
