@@ -188,8 +188,7 @@ class TestInstance(testcase.NFVTestCase):
     def create_host(self, host_name,
                     cpe=False,
                     admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED,
-                    software_load='12.01',
-                    target_load='12.01'):
+                    sw_version='12.01'):
         """
         Create a host
         """
@@ -213,8 +212,7 @@ class TestInstance(testcase.NFVTestCase):
             oper_state=nfvi.objects.v1.HOST_OPER_STATE.ENABLED,
             avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.AVAILABLE,
             action=nfvi.objects.v1.HOST_ACTION.NONE,
-            software_load=software_load,
-            target_load=target_load,
+            sw_version=sw_version,
             openstack_compute=False,
             openstack_control=False,
             remote_storage=False,

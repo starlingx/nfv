@@ -106,7 +106,7 @@ class Host(ObjectData):
     NFVI Host Object
     """
     def __init__(self, uuid, name, personality, admin_state, oper_state,
-                 avail_status, action, uptime, software_load, target_load,
+                 avail_status, action, uptime, sw_version,
                  device_image_update=None,
                  openstack_compute=False,
                  openstack_control=False,
@@ -119,8 +119,7 @@ class Host(ObjectData):
                          avail_status=avail_status,
                          action=action,
                          uptime=uptime,
-                         software_load=software_load,
-                         target_load=target_load,
+                         sw_version=sw_version,
                          device_image_update=device_image_update,
                          openstack_compute=openstack_compute,
                          openstack_control=openstack_control,
