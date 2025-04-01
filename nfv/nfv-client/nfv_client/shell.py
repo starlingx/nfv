@@ -1,9 +1,10 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
+import http.client as http_client
 import os
 from six.moves import urllib
 import sys
@@ -510,10 +511,13 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
         args = parser.parse_args(argv)
 
         if args.debug:
-            # Enable Debug
+            # Enable debug for legacy HTTP requests
             handler = urllib.request.HTTPHandler(debuglevel=1)
             opener = urllib.request.build_opener(handler)
             urllib.request.install_opener(opener)
+
+            # Enable debug for requests library
+            http_client.HTTPConnection.debuglevel = 1
 
         if args.os_auth_url is None:
             args.os_auth_url = os.environ.get('OS_AUTH_URL', None)
