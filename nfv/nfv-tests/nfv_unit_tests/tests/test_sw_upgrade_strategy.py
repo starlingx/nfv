@@ -288,7 +288,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-2', 'compute-3']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -306,7 +306,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -324,7 +324,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 }
             ]
@@ -401,7 +401,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-1', 'compute-5']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -422,7 +422,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      _unlock_hosts_stage_as_dict(
                          ['compute-0', 'compute-2', 'compute-3']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -443,7 +443,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      _unlock_hosts_stage_as_dict(
                          ['compute-4', 'compute-6', 'compute-7']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -463,7 +463,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      _unlock_hosts_stage_as_dict(
                          ['compute-8', 'compute-9']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                  }
             ]
@@ -581,7 +581,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 2400},
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -603,7 +603,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                      _unlock_hosts_stage_as_dict(
                          ['compute-0', 'compute-2', 'compute-3']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -622,7 +622,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-4']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 }
             ]
@@ -717,7 +717,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(stage_hosts[0]),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                 },
             ]
@@ -741,7 +741,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(stage_hosts[x]),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                  }
             )
@@ -808,7 +808,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-2']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 2400},
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -825,7 +825,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-3']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 2400},
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -843,7 +843,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 2400},
                  ]
                 },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -861,7 +861,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 2400},
                  ]
                 },
             ]
@@ -917,7 +917,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                         {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'unlock-hosts',
                          'entity_names': [f'compute-{i}']},
-                        {'name': 'system-stabilize', 'timeout': 60},
+                        {'name': 'wait-alarms-clear',
+                         'ignore_alarms': IGNORE_ALARMS_LIST,
+                         'timeout': 2400}
                     ]
                 }
                 for i in range(4)
@@ -1533,7 +1535,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 2400},
                  ]
                  },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -1551,7 +1553,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                        'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600},
+                      'timeout': 2400},
                  ]
                  },
                 {'name': 'sw-upgrade-complete',
@@ -1666,7 +1668,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-1']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                  },
                 {'name': 'sw-upgrade-worker-hosts',
@@ -1683,7 +1685,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                       'timeout': 15},
                      _unlock_hosts_stage_as_dict(['compute-0']),
                      {'name': 'wait-alarms-clear',
-                      'timeout': 600}
+                      'timeout': 2400}
                  ]
                  },
                 {'name': 'sw-upgrade-complete',

@@ -1345,7 +1345,13 @@ class UpdateWorkerHostsMixin(object):
                 # alarms to clear. Note: not all controller nodes will have
                 # OSDs configured, but the alarms should clear quickly in
                 # that case so this will not delay the update strategy.
-                if any([HOST_PERSONALITY.CONTROLLER in host.personality
+                if isinstance(self, SwUpgradeStrategy):
+                    # TODO(jkraitbe): Workers can now support OSDs but VIM lacks a way to check.
+                    stage.add_step(strategy.WaitAlarmsClearStep(
+                                timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                                ignore_alarms=self._ignore_alarms,
+                                ignore_alarms_conditional=self._ignore_alarms_conditional))
+                elif any([HOST_PERSONALITY.CONTROLLER in host.personality
                         for host in hosts_to_lock + hosts_to_reboot]):
                     # Multiple personality nodes that need to wait for OSDs to sync:
                     stage.add_step(strategy.WaitAlarmsClearStep(

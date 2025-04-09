@@ -1770,7 +1770,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                         {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'unlock-hosts',
                          'entity_names': ['compute-0', 'compute-1', 'compute-2']},
-                        {'name': 'wait-alarms-clear', 'timeout': 600},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
                     ]
                 },
                 {
@@ -1891,7 +1891,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                         {'name': 'system-stabilize', 'timeout': 15},
                         {'name': 'unlock-hosts',
                          'entity_names': ['compute-0', 'compute-1', 'compute-2']},
-                        {'name': 'wait-alarms-clear', 'timeout': 600},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
                     ]
                 },
                 {

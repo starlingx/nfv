@@ -95,8 +95,8 @@ def validate_phase(phase, expected_results):
                                     (key, stage_number, stages_key,
                                      step_number, step_key,
                                      apply_step[step_key], step[step_key],
-                                     json.dumps(apply_step, indent=2),
-                                     json.dumps(step, indent=2))
+                                     json.dumps(step, indent=2),
+                                     json.dumps(apply_step, indent=2))
                             step_number += 1
                     else:
                         assert apply_stage[stages_key] == stage[stages_key], \
