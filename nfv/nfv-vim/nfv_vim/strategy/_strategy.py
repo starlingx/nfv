@@ -2246,6 +2246,9 @@ class SwUpgradeStrategy(
             key=lambda x: x.name == local_host_name,
         )
 
+        # TODO(sshathee): Uncomment when implementing for storage configuration
+        # storage_hosts = storage_hosts.reverse()
+
         strategy_pairs = [
             (self._add_worker_strategy_stages, worker_hosts),
             (self._add_storage_strategy_stages, storage_hosts),
@@ -2274,6 +2277,8 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_COMPLETE)
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        # sw-deploy delete must be done on controller-0 for major release
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.SwDeployDeleteStep(release=self.nfvi_upgrade.release_id))
         self.apply_phase.add_stage(stage)
 
@@ -2303,9 +2308,6 @@ class SwUpgradeStrategy(
                 "Software release must be deploying for a rollback, " +
                 f"found={self.nfvi_upgrade.release_info}"
             )
-
-        elif not self._single_controller:
-            reason = "Software rollback is only supported on AIO-SX by VIM currently"
 
         elif self.nfvi_upgrade.is_starting:
             reason = "Software rollback cannot be initiated while sw-deploy-start is in progress"
