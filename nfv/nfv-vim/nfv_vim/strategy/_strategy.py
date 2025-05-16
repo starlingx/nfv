@@ -1789,7 +1789,7 @@ class SwUpgradeStrategy(
     def __init__(self, uuid,
                  controller_apply_type, storage_apply_type, worker_apply_type,
                  max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions, release, rollback, delete,
+                 alarm_restrictions, release, rollback, delete, snapshot,
                  ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
@@ -1806,6 +1806,7 @@ class SwUpgradeStrategy(
         self._release = release
         self._rollback = rollback
         self._delete = delete
+        self._snapshot = snapshot
 
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
@@ -1855,7 +1856,8 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
         # Precheck is part of create phase because DC requested it
-        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
+        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release,
+                                                     snapshot=self._snapshot))
         self.build_phase.add_stage(stage)
         super(SwUpgradeStrategy, self).build()
 
@@ -1906,6 +1908,20 @@ class SwUpgradeStrategy(
             self.save()
             super(SwUpgradeStrategy, self).build()
 
+        # TODO(sshathee): Remove this conditon when implementing snapshot
+        # with rollback command
+        elif self._rollback and self._snapshot is not None:
+            reason = "Cannot set both snapshot and rollback, if snapshot" \
+                      "is available it will be forcibly used."
+            DLOG.error(reason)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = reason
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            super(SwUpgradeStrategy, self).build()
+
         elif self._rollback:
             return self._build_rollback()
 
@@ -1942,7 +1958,7 @@ class SwUpgradeStrategy(
 
         # sw-deploy start for major releases must be done on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(strategy.UpgradeStartStep(release=self._release))
+        stage.add_step(strategy.UpgradeStartStep(release=self._release, snapshot=self._snapshot))
         stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
         self.apply_phase.add_stage(stage)
 

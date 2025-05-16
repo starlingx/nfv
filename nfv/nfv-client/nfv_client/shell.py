@@ -63,10 +63,15 @@ def get_extra_create_args(cmd_area, args):
             raise ValueError("Cannot set both release and rollback")
         elif args.rollback and args.delete:
             raise ValueError("Cannot set both rollback and delete")
+        # TODO(sshathee): Remove this conditon when implementing snapshot
+        # with rollback command
+        elif args.rollback and args.snapshot:
+            raise ValueError("Snapshot is not an optional parameter for rollback")
         return {
             'release': args.release,
             'rollback': args.rollback,
-            'delete': args.delete
+            'delete': args.delete,
+            'snapshot': args.snapshot
         }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
@@ -468,6 +473,12 @@ def setup_sw_deploy_parser(commands):
     # sw-deploy create (delete)
     create_strategy_cmd.add_argument('--delete',
                                      help='add delete option',
+                                     action=argparse.BooleanOptionalAction,
+                                     required=False)
+
+    # sw-deploy create (snapshot)
+    create_strategy_cmd.add_argument('--snapshot',
+                                     help='add snapshot option',
                                      action=argparse.BooleanOptionalAction,
                                      required=False)
 
