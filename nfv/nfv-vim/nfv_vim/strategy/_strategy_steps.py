@@ -1433,6 +1433,11 @@ class UpgradeActivateStep(strategy.StrategyStep):
         timeout = int(section.get("deploy_activate_retry_delay", 30))
         return timeout
 
+    def timeout(self):
+        result, msg = super().timeout()
+        msg = f"{msg}, retries={self._retry_count}"
+        return result, msg
+
     @coroutine
     def _activate_upgrade_callback(self):
         """
@@ -1477,13 +1482,13 @@ class UpgradeActivateStep(strategy.StrategyStep):
             DLOG.debug("Handle Activate-Upgrade callback, deploy activate is done")
         elif self.strategy.nfvi_upgrade.is_activate_failed:
             reason = (
-                "Failed software deploy activate, "
+                f"Failed software deploy activate, retries={self._retry_count}, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
         elif not self.strategy.nfvi_upgrade.is_activating:
             reason = (
-                "Unknown error while doing software deploy activate, "
+                f"Unknown error while doing software deploy activate, retries={self._retry_count}, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
