@@ -78,6 +78,9 @@ def _nfvi_host_action_callback(nfvi_host_uuid, nfvi_host_name, do_action):
         elif nfvi.objects.v1.HOST_ACTION.DELETE == do_action:
             host.nfvi_host_delete()
 
+        elif nfvi.objects.v1.HOST_ACTION.HOST_AUDIT == do_action:
+            host.nfvi_host_audit()
+
         else:
             DLOG.info("Unknown action %s received for %s."
                       % (do_action, nfvi_host_name))
