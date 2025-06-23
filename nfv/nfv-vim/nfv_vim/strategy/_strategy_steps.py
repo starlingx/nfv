@@ -933,10 +933,11 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
     """
     Software Deploy Precheck - Strategy Step
     """
-    def __init__(self, release):
+    def __init__(self, release, snapshot=False):
         super(SwDeployPrecheckStep, self).__init__(
             STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
+        self._snapshot = snapshot
 
     @coroutine
     def _sw_deploy_precheck_callback(self):
@@ -978,7 +979,9 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
                     strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
                 ]
             )
-            nfvi.nfvi_sw_deploy_precheck(self._release, force, self._sw_deploy_precheck_callback())
+
+            nfvi.nfvi_sw_deploy_precheck(self._release, force, self._snapshot,
+                                         self._sw_deploy_precheck_callback())
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
@@ -1259,11 +1262,12 @@ class UpgradeStartStep(strategy.StrategyStep):
     Upgrade Start - Strategy Step
     """
 
-    def __init__(self, release, timeout=None):
+    def __init__(self, release, snapshot=False, timeout=None):
         super(UpgradeStartStep, self).__init__(
             STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
+        self._snapshot = snapshot
         self._query_inprogress = False
 
     @property
@@ -1355,7 +1359,9 @@ class UpgradeStartStep(strategy.StrategyStep):
                     strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
                 ]
             )
-            nfvi.nfvi_upgrade_start(self._release, force, self._start_upgrade_callback())
+
+            nfvi.nfvi_upgrade_start(self._release, force, self._snapshot,
+                                    self._start_upgrade_callback())
 
         return result, reason
 

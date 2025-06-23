@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023-2024 Wind River Systems, Inc.
+# Copyright (c) 2023-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -277,6 +277,10 @@ class TestCLISwDeployStrategy(TestNFVClientShell,
         shell_args = [self.strategy, 'create', 'v123.1', '--rollback']
         e = self._test_shell_create_with_error(shell_args=shell_args)
         assert str(e) == 'Cannot set both release and rollback', e
+
+    def test_create_snapshot(self):
+        shell_args = [self.strategy, 'create', 'v123.1', '--snapshot']
+        self._test_shell_create(shell_args=shell_args)
 
 
 class TestCLIFwUpdateStrategy(TestNFVClientShell,

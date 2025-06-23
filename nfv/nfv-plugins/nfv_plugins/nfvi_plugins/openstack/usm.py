@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2024 Wind River Systems, Inc.
+# Copyright (c) 2024-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -108,26 +108,35 @@ def sw_deploy_host_list(token):
     return response
 
 
-def sw_deploy_precheck(token, release, force=False):
+def sw_deploy_precheck(token, release, force=False, snapshot=False):
     """
     Ask USM to precheck before a deployment
     """
 
     uri = f"deploy/{release}/precheck"
-    data = {"force": force} if force else {}
     url = _usm_api_cmd(token, uri)
+    data = {}
+    if force:
+        data["force"] = force
+    if snapshot:
+        data["options"] = ["snapshot=true"]
     response = _api_post(token, url, data)
     return response
 
 
-def sw_deploy_start(token, release, force=False):
+def sw_deploy_start(token, release, force=False, snapshot=False):
     """
     Ask USM to start a deployment
     """
 
     uri = f"deploy/{release}/start"
     url = _usm_api_cmd(token, uri)
-    data = {"force": force} if force else {}
+    data = {}
+    if force:
+        data["force"] = force
+    if snapshot:
+        data["options"] = ["snapshot=true"]
+
     response = _api_post(token, url, data)
     return response
 

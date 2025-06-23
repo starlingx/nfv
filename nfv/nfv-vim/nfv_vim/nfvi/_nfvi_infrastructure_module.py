@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -397,24 +397,26 @@ def nfvi_get_upgrade(release, callback):
     return cmd_id
 
 
-def nfvi_sw_deploy_precheck(release, force, callback):
+def nfvi_sw_deploy_precheck(release, force, snapshot, callback):
     """
     Software deploy precheck
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_precheck',
                                                   release,
                                                   force,
+                                                  snapshot,
                                                   callback=callback)
     return cmd_id
 
 
-def nfvi_upgrade_start(release, force, callback):
+def nfvi_upgrade_start(release, force, snapshot, callback):
     """
     Software deploy start
     """
     cmd_id = _infrastructure_plugin.invoke_plugin('sw_deploy_start',
                                                   release,
                                                   force,
+                                                  snapshot,
                                                   callback=callback)
     return cmd_id
 

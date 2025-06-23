@@ -2376,7 +2376,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def sw_deploy_precheck(self, future, release, force, callback):
+    def sw_deploy_precheck(self, future, release, force, snapshot, callback):
         """
         Precheck a USM software deploy
         """
@@ -2400,7 +2400,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_precheck, self._platform_token, release, force)
+            future.work(usm.sw_deploy_precheck, self._platform_token, release, force, snapshot)
             future.result = (yield)
             if not future.result.is_complete():
                 DLOG.error("USM software deploy precheck did not complete.")
@@ -2445,7 +2445,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def sw_deploy_start(self, future, release, force, callback):
+    def sw_deploy_start(self, future, release, force, snapshot, callback):
         """
         Start a USM software deploy
         """
@@ -2467,7 +2467,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_start, self._platform_token, release, force)
+            future.work(usm.sw_deploy_start, self._platform_token, release, force, snapshot)
             future.result = (yield)
 
             if not future.result.is_complete():

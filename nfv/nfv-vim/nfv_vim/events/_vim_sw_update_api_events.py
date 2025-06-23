@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -104,11 +104,12 @@ def vim_sw_update_api_create_strategy(connection, msg):
         release = msg.release
         rollback = msg.rollback
         delete = msg.delete
+        snapshot = msg.snapshot
         uuid, reason = sw_mgmt_director.create_sw_upgrade_strategy(
             controller_apply_type, storage_apply_type,
             worker_apply_type, max_parallel_worker_hosts,
             default_instance_action, alarm_restrictions, release, rollback,
-            delete, _vim_sw_update_api_create_strategy_callback)
+            delete, snapshot, _vim_sw_update_api_create_strategy_callback)
     elif 'fw-update' == msg.sw_update_type:
         uuid, reason = sw_mgmt_director.create_fw_update_strategy(
             controller_apply_type, storage_apply_type,

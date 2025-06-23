@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -86,6 +86,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             release='starlingx-24.03.1',
             rollback=False,
             delete=False,
+            snapshot=False,
             nfvi_upgrade=None,
             single_controller=False
     ):
@@ -103,6 +104,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             release=release,
             rollback=rollback,
             delete=delete,
+            snapshot=snapshot,
             ignore_alarms=[],
             single_controller=single_controller,
         )
