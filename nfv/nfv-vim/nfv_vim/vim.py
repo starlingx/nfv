@@ -116,7 +116,7 @@ def process_finalize():
     events.events_finalize()
     directors.directors_finalize()
     tables.tables_finalize()
-    database.database_finalize()
+    database.database_finalize(config.CONF['database'])
     nfvi.nfvi_finalize()
     alarm.alarm_finalize()
     event_log.event_log_finalize()
@@ -132,6 +132,8 @@ def process_main():
     Virtual Infrastructure Manager - Main
     """
     def _force_exit():
+        # Always finalize DB or it can become corrupted
+        database.database_finalize(config.CONF['database'])
         os._exit(-1)
 
     global do_reload, dump_data_captured, reset_data_captured
