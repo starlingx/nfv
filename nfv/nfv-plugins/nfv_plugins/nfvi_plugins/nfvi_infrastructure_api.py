@@ -4607,6 +4607,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     do_action = nfvi.objects.v1.HOST_ACTION.LOCK
                 elif action == "force-lock":
                     do_action = nfvi.objects.v1.HOST_ACTION.LOCK_FORCE
+                elif action == "host-audit":
+                    do_action = nfvi.objects.v1.HOST_ACTION.HOST_AUDIT
 
                 if host_uuid is not None and host_name is not None \
                         and do_action is not None:
