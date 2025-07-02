@@ -972,6 +972,24 @@ class UpdateControllerHostsMixin(object):
             local_host = None
             local_host_name = get_local_host_name()
 
+            # This part of code is used by other orchestrations too, so making these modifications
+            # so that they are not affected. We don't need to check for AIO configuration
+            # because they have worker personality also, so they go to worker strategy
+            # stages.
+            # For software major upgrade, strict controller order needs to be followed
+            # Deploy order: [controller-1, controller-0]
+            # Rollback order: [controller-0, controller-1]
+            try:
+                if isinstance(self, SwUpgradeStrategy) and self.nfvi_upgrade.major_release:
+                    if self._rollback and not self._single_controller:
+                        # Rollback case
+                        local_host_name = HOST_NAME.CONTROLLER_1
+                    else:
+                        # Upgrade case
+                        local_host_name = HOST_NAME.CONTROLLER_0
+            except Exception as e:
+                DLOG.warn("While checking for software major upgrade got exception: ", exc_info=e)
+
             for host in controllers:
                 if HOST_PERSONALITY.WORKER not in host.personality:
                     if local_host_name == host.name:
@@ -2021,6 +2039,11 @@ class SwUpgradeStrategy(
                 key=lambda x: x.name == local_host_name,
             )
 
+        storage_hosts = sorted(
+            storage_hosts,
+            key=lambda x: int(x.name.split("-")[1])
+        )
+
         strategy_pairs = [
             (controller_strategy, controllers_hosts),
             (self._add_storage_strategy_stages, storage_hosts),
@@ -2251,25 +2274,52 @@ class SwUpgradeStrategy(
                 self.save()
                 return
 
-        # Sort the controller such that host other than
-        # current local_host_name is the first element in the list.
-        # This sorting is to reduce the number of swact required since
-        # sw-deploy patch release orchestration can start on host that
-        # is currently active.
-        local_host_name = get_local_host_name()
-        controllers_hosts = sorted(
-            controllers_hosts,
-            key=lambda x: x.name == local_host_name,
-        )
+        if self.nfvi_upgrade.major_release:
+            # Major release rollback
+            # Dependency in USM to rollback controller
+            # hosts in order [controller-0, controller-1]
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == HOST_NAME.CONTROLLER_1,
+            )
 
-        # TODO(sshathee): Uncomment when implementing for storage configuration
-        # storage_hosts = storage_hosts.reverse()
+            # Dependency in USM to rollback storage hosts in
+            # reverse order of deployment for major release
+            storage_hosts = sorted(
+                storage_hosts,
+                key=lambda x: int(x.name.split("-")[1]),
+                reverse=True
+            )
+
+        else:
+            # Patch rollback
+            local_host_name = get_local_host_name()
+
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == local_host_name,
+            )
+
+            # For patch rollback, storage hosts order is not reversed in USM,
+            # in validate_host_deploy_order function
+            # TODO(sshathee) Reverse the storage host order once its done in
+            # USM to maintain same order for major and patch rollback
+            storage_hosts = sorted(
+                storage_hosts,
+                key=lambda x: int(x.name.split("-")[1])
+            )
 
         strategy_pairs = [
             (self._add_worker_strategy_stages, worker_hosts),
             (self._add_storage_strategy_stages, storage_hosts),
             (controller_strategy, controllers_hosts),
         ]
+
+        if not self.nfvi_upgrade.major_release:
+            # Patch rollback order is controller, storage then worker nodes
+            # in USM
+            # TODO(sshathee) Revisit the patch order once its unified in USM
+            strategy_pairs.reverse()
 
         for stage_func, host_list in strategy_pairs:
             if host_list:
