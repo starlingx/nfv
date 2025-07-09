@@ -212,7 +212,7 @@ def sw_deploy_activate_rollback(token):
     Ask USM activate rollback a deployment
     """
 
-    uri = f"deploy/activate-rollback"  # noqa:F541 pylint: disable=W1309
+    uri = f"deploy/activate_rollback"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
     response = _api_post(token, url, {})
     return response

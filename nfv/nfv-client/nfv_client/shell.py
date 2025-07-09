@@ -58,15 +58,13 @@ def get_extra_create_args(cmd_area, args):
         # We can't use mutual exclusion for release and rollback because
         # release is a positional arg.
         if args.release is None and not args.rollback:
-            raise ValueError("Must set release or rollback")
+            raise ValueError("Must set rollback or release")
         elif args.release is not None and args.rollback:
-            raise ValueError("Cannot set both release and rollback")
+            raise ValueError("Cannot set both rollback and release")
         elif args.rollback and args.delete:
             raise ValueError("Cannot set both rollback and delete")
-        # TODO(sshathee): Remove this conditon when implementing snapshot
-        # with rollback command
         elif args.rollback and args.snapshot:
-            raise ValueError("Snapshot is not an optional parameter for rollback")
+            raise ValueError("Cannot set both rollback and snapshot")
         return {
             'release': args.release,
             'rollback': args.rollback,

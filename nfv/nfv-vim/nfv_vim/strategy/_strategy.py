@@ -2218,8 +2218,7 @@ class SwUpgradeStrategy(
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.SwDeployAbortStep())
-        # TODO(jkraitbe): Activate-rollback not supported yet
-        # stage.add_step(strategy.SwDeployActivateRollbackStep())
+        stage.add_step(strategy.SwDeployActivateRollbackStep())
         self.apply_phase.add_stage(stage)
 
     def _add_rollback_hosts_stages(self, do_nothing):
@@ -2377,14 +2376,6 @@ class SwUpgradeStrategy(
 
         elif self.nfvi_upgrade.is_starting:
             reason = "Software rollback cannot be initiated while sw-deploy-start is in progress"
-
-        elif (
-                self.nfvi_upgrade.is_activating or
-                self.nfvi_upgrade.is_activate_done or
-                self.nfvi_upgrade.is_activate_failed or
-                self.nfvi_upgrade.is_deploy_completed
-        ):
-            reason = "Software rollback cannot be initiated by VIM after activation"
 
         if reason:
             DLOG.warn(reason)

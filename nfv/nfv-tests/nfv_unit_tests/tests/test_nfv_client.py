@@ -267,7 +267,7 @@ class TestCLISwDeployStrategy(TestNFVClientShell,
     def test_create_missing_both(self):
         shell_args = [self.strategy, 'create']
         e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == 'Must set release or rollback', e
+        assert str(e) == 'Must set rollback or release', e
 
     def test_create_rollback(self):
         shell_args = [self.strategy, 'create', '--rollback']
@@ -276,11 +276,16 @@ class TestCLISwDeployStrategy(TestNFVClientShell,
     def test_create_with_both(self):
         shell_args = [self.strategy, 'create', 'v123.1', '--rollback']
         e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == 'Cannot set both release and rollback', e
+        assert str(e) == 'Cannot set both rollback and release', e
 
     def test_create_snapshot(self):
         shell_args = [self.strategy, 'create', 'v123.1', '--snapshot']
         self._test_shell_create(shell_args=shell_args)
+
+    def test_create_rollback_with_snapshot(self):
+        shell_args = [self.strategy, 'create', '--rollback', '--snapshot']
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == 'Cannot set both rollback and snapshot', e
 
 
 class TestCLIFwUpdateStrategy(TestNFVClientShell,

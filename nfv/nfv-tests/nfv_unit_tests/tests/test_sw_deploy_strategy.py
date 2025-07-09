@@ -1937,25 +1937,72 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'sw_version': MAJOR_RELEASE_UPGRADE,
                 },
                 {
-                    'state': 'completed',
+                    'state': 'complete',
                     'reboot_required': True,
                     'from_release': INITIAL_RELEASE,
                     'to_release': MAJOR_RELEASE_UPGRADE,
                 },
-                None,
+                [
+                    {
+                        'hostname': 'controller-0',
+                        'host_state': 'deployed',
+                    },
+                ],
             )
         )
+
+        # Replace controller-0 with locked one
+        self.create_host(
+            'controller-0',
+            aio=True,
+            openstack_installed=False,
+            admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED,
+            oper_state=nfvi.objects.v1.HOST_OPER_STATE.DISABLED,
+            avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.ONLINE)
 
         fake_upgrade_obj = SwUpgrade()
         strategy.sw_update_obj = fake_upgrade_obj
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        expected_reason = "Software rollback cannot be initiated by VIM after activation"
-        bpr = strategy.build_phase
+        apply_phase = strategy.apply_phase.as_dict()
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
-        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
-        assert bpr.result_reason == expected_reason, bpr.result_reason
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 2,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'deploy-delete'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_active_done(self):
         """
@@ -1980,25 +2027,72 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'sw_version': MAJOR_RELEASE_UPGRADE,
                 },
                 {
-                    'state': 'activate-done',
+                    'state': 'activate-rollback-done',
                     'reboot_required': True,
                     'from_release': INITIAL_RELEASE,
                     'to_release': MAJOR_RELEASE_UPGRADE,
                 },
-                None,
+                [
+                    {
+                        'hostname': 'controller-0',
+                        'host_state': 'deployed',
+                    },
+                ],
             )
         )
+
+        # Replace controller-0 with locked one
+        self.create_host(
+            'controller-0',
+            aio=True,
+            openstack_installed=False,
+            admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED,
+            oper_state=nfvi.objects.v1.HOST_OPER_STATE.DISABLED,
+            avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.ONLINE)
 
         fake_upgrade_obj = SwUpgrade()
         strategy.sw_update_obj = fake_upgrade_obj
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        expected_reason = "Software rollback cannot be initiated by VIM after activation"
-        bpr = strategy.build_phase
+        apply_phase = strategy.apply_phase.as_dict()
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
-        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
-        assert bpr.result_reason == expected_reason, bpr.result_reason
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 2,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'deploy-delete'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_activate_failed(self):
         """
@@ -2023,25 +2117,72 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                     'sw_version': MAJOR_RELEASE_UPGRADE,
                 },
                 {
-                    'state': 'activate-failed',
+                    'state': 'activate-rollback-failed',
                     'reboot_required': True,
                     'from_release': INITIAL_RELEASE,
                     'to_release': MAJOR_RELEASE_UPGRADE,
                 },
-                None,
+                [
+                    {
+                        'hostname': 'controller-0',
+                        'host_state': 'deployed',
+                    },
+                ],
             )
         )
+
+        # Replace controller-0 with locked one
+        self.create_host(
+            'controller-0',
+            aio=True,
+            openstack_installed=False,
+            admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED,
+            oper_state=nfvi.objects.v1.HOST_OPER_STATE.DISABLED,
+            avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.ONLINE)
 
         fake_upgrade_obj = SwUpgrade()
         strategy.sw_update_obj = fake_upgrade_obj
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        expected_reason = "Software rollback cannot be initiated by VIM after activation"
-        bpr = strategy.build_phase
+        apply_phase = strategy.apply_phase.as_dict()
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state
-        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED, bpr.result
-        assert bpr.result_reason == expected_reason, bpr.result_reason
+        expected_results = {
+            'total_stages': 3,
+            'stages': [
+                {
+                    'name': 'sw-upgrade-rollback-start',
+                    'total_steps': 3,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
+                    ],
+                },
+                {
+                    'name': 'sw-upgrade-worker-hosts',
+                    'total_steps': 6,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
+                        {'name': 'system-stabilize', 'timeout': 15},
+                        {'name': 'unlock-hosts'},
+                        {'name': 'wait-alarms-clear', 'timeout': 2400},
+                    ]
+                },
+                {
+                    'name': 'sw-upgrade-rollback-complete',
+                    'total_steps': 2,
+                    'steps': [
+                        {'name': 'query-alarms'},
+                        {'name': 'deploy-delete'},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_start_done(self):
         """
@@ -2091,10 +2232,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2169,10 +2311,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2250,10 +2393,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2328,10 +2472,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2403,11 +2548,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
-                        # {'name': 'sw-deploy-activate-rollback'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2479,11 +2624,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
-                        # {'name': 'sw-deploy-activate-rollback'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2555,11 +2700,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
-                        # {'name': 'sw-deploy-activate-rollback'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2641,10 +2786,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2741,10 +2887,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2819,10 +2966,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2909,10 +3057,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -2999,10 +3148,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
@@ -3089,10 +3239,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             'stages': [
                 {
                     'name': 'sw-upgrade-rollback-start',
-                    'total_steps': 2,
+                    'total_steps': 3,
                     'steps': [
                         {'name': 'query-alarms'},
                         {'name': 'sw-deploy-abort'},
+                        {'name': 'sw-deploy-activate-rollback'},
                     ],
                 },
                 {
