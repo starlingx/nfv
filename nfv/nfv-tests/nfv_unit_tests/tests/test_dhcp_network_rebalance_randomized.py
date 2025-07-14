@@ -285,10 +285,10 @@ class TestNeutronDHCPRebalance(testcase.NFVTestCase):
                     if (old_state != DHCP_REBALANCE_STATE.DONE) and \
                             (old_state != DHCP_REBALANCE_STATE.HOLD_OFF):
                         if _DHCPRebalance.num_dhcp_agents < 2:
-                            assert(new_state == DHCP_REBALANCE_STATE.DONE)
+                            assert (new_state == DHCP_REBALANCE_STATE.DONE)
                         else:
-                            assert(new_state ==
-                                   DHCP_REBALANCE_STATE.GET_NETWORKS_HOSTED_ON_AGENT)
+                            assert (new_state ==
+                                    DHCP_REBALANCE_STATE.GET_NETWORKS_HOSTED_ON_AGENT)
 
                 if ((old_state ==
                         DHCP_REBALANCE_STATE.GET_NETWORKS_HOSTED_ON_AGENT) and
@@ -376,8 +376,8 @@ class TestNeutronDHCPRebalance(testcase.NFVTestCase):
                     doing_abort = False
                     if (old_state != DHCP_REBALANCE_STATE.DONE) and \
                             (old_state != DHCP_REBALANCE_STATE.HOLD_OFF):
-                        assert(new_state ==
-                               DHCP_REBALANCE_STATE.HOLD_OFF)
+                        assert (new_state ==
+                                DHCP_REBALANCE_STATE.HOLD_OFF)
 
                 if ((old_state ==
                         DHCP_REBALANCE_STATE.GET_NETWORKS_HOSTED_ON_AGENT) and

@@ -116,8 +116,8 @@ class Database(object):
 @event.listens_for(Engine, "connect")
 def database_set_sqlite_pragma(db_connection, connection_record):
     cursor = db_connection.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA synchronous=FULL")
+    cursor.execute("PRAGMA journal_mode=TRUNCATE")
+    cursor.execute("PRAGMA synchronous=EXTRA")
     cursor.execute("PRAGMA user_version=%s" % _db_version)
 
 

@@ -433,8 +433,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 data_port_avail_status = state.get('data_ports_avail', None)
                 host_action = (host_data.get('ihost_action') or "")
                 host_action = host_action.rstrip('-')
-                software_load = host_data['software_load']
-                target_load = host_data['target_load']
+                sw_version = host_data.get("sw_version")
                 device_image_update = host_data['device_image_update']
 
                 future.work(sysinv.get_host_labels, self._platform_token,
@@ -467,8 +466,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                                 avail_status,
                                                 host_action,
                                                 host_data['uptime'],
-                                                software_load,
-                                                target_load,
+                                                sw_version,
                                                 device_image_update,
                                                 openstack_compute,
                                                 openstack_control,
@@ -570,8 +568,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             data_port_oper_state = state.get('data_ports_oper', None)
             data_port_avail_status = state.get('data_ports_avail', None)
             host_action = (host_data.get('ihost_action') or "").rstrip('-')
-            software_load = host_data['software_load']
-            target_load = host_data['target_load']
+            sw_version = host_data.get("sw_version")
             device_image_update = host_data['device_image_update']
 
             admin_state, oper_state, avail_status, nfvi_data \
@@ -603,8 +600,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                             avail_status,
                                             host_action,
                                             host_data['uptime'],
-                                            software_load,
-                                            target_load,
+                                            sw_version,
                                             device_image_update,
                                             openstack_compute,
                                             openstack_control,
@@ -2380,7 +2376,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def sw_deploy_precheck(self, future, release, force, callback):
+    def sw_deploy_precheck(self, future, release, force, snapshot, callback):
         """
         Precheck a USM software deploy
         """
@@ -2404,7 +2400,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_precheck, self._platform_token, release, force)
+            future.work(usm.sw_deploy_precheck, self._platform_token, release, force, snapshot)
             future.result = (yield)
             if not future.result.is_complete():
                 DLOG.error("USM software deploy precheck did not complete.")
@@ -2449,7 +2445,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def sw_deploy_start(self, future, release, force, callback):
+    def sw_deploy_start(self, future, release, force, snapshot, callback):
         """
         Start a USM software deploy
         """
@@ -2471,7 +2467,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_start, self._platform_token, release, force)
+            future.work(usm.sw_deploy_start, self._platform_token, release, force, snapshot)
             future.result = (yield)
 
             if not future.result.is_complete():
@@ -3185,8 +3181,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             data_port_oper_state = state.get('data_ports_oper', None)
             data_port_avail_status = state.get('data_ports_avail', None)
             host_action = (host_data.get('ihost_action') or "").rstrip('-')
-            software_load = host_data['software_load']
-            target_load = host_data['target_load']
+            sw_version = host_data.get("sw_version")
             device_image_update = host_data['device_image_update']
 
             admin_state, oper_state, avail_status, nfvi_data \
@@ -3218,8 +3213,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                             avail_status,
                                             host_action,
                                             host_data['uptime'],
-                                            software_load,
-                                            target_load,
+                                            sw_version,
                                             device_image_update,
                                             openstack_compute,
                                             openstack_control,
@@ -3305,8 +3299,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             data_port_oper_state = state.get('data_ports_oper', None)
             data_port_avail_status = state.get('data_ports_avail', None)
             host_action = (host_data.get('ihost_action') or "").rstrip('-')
-            software_load = host_data['software_load']
-            target_load = host_data['target_load']
+            sw_version = host_data.get("sw_version")
             device_image_update = host_data['device_image_update']
 
             admin_state, oper_state, avail_status, nfvi_data \
@@ -3338,8 +3331,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                             avail_status,
                                             host_action,
                                             host_data['uptime'],
-                                            software_load,
-                                            target_load,
+                                            sw_version,
                                             device_image_update,
                                             openstack_compute,
                                             openstack_control,
@@ -3424,8 +3416,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             sub_function_avail_status = state.get('subfunction_avail', None)
             data_port_oper_state = state.get('data_ports_oper', None)
             data_port_avail_status = state.get('data_ports_avail', None)
-            software_load = host_data['software_load']
-            target_load = host_data['target_load']
+            sw_version = host_data.get("sw_version")
             device_image_update = host_data['device_image_update']
 
             admin_state, oper_state, avail_status, nfvi_data \
@@ -3457,8 +3448,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                             avail_status,
                                             host_data['ihost_action'],
                                             host_data['uptime'],
-                                            software_load,
-                                            target_load,
+                                            sw_version,
                                             device_image_update,
                                             openstack_compute,
                                             openstack_control,
@@ -3542,8 +3532,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             sub_function_avail_status = state.get('subfunction_avail', None)
             data_port_oper_state = state.get('data_ports_oper', None)
             data_port_avail_status = state.get('data_ports_avail', None)
-            software_load = host_data['software_load']
-            target_load = host_data['target_load']
+            sw_version = host_data.get("sw_version")
             device_image_update = host_data['device_image_update']
 
             admin_state, oper_state, avail_status, nfvi_data \
@@ -3575,8 +3564,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                             avail_status,
                                             host_data['ihost_action'],
                                             host_data['uptime'],
-                                            software_load,
-                                            target_load,
+                                            sw_version,
                                             device_image_update,
                                             openstack_compute,
                                             openstack_control,
@@ -3713,8 +3701,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             sub_function_avail_status = state.get('subfunction_avail', None)
             data_port_oper_state = state.get('data_ports_oper', None)
             data_port_avail_status = state.get('data_ports_avail', None)
-            software_load = host_data['software_load']
-            target_load = host_data['target_load']
+            sw_version = host_data.get("sw_version")
             device_image_update = host_data['device_image_update']
 
             admin_state, oper_state, avail_status, nfvi_data \
@@ -3746,8 +3733,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                                             avail_status,
                                             host_data['ihost_action'],
                                             host_data['uptime'],
-                                            software_load,
-                                            target_load,
+                                            sw_version,
                                             device_image_update,
                                             openstack_compute,
                                             openstack_control,
@@ -4621,6 +4607,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     do_action = nfvi.objects.v1.HOST_ACTION.LOCK
                 elif action == "force-lock":
                     do_action = nfvi.objects.v1.HOST_ACTION.LOCK_FORCE
+                elif action == "host-audit":
+                    do_action = nfvi.objects.v1.HOST_ACTION.HOST_AUDIT
 
                 if host_uuid is not None and host_name is not None \
                         and do_action is not None:

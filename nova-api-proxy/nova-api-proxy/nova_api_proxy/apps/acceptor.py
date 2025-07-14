@@ -93,14 +93,14 @@ class APIController(Middleware):
         self._log_message(environ)
 
     def _print_data(self, obj):
-        if type(obj) == dict:
+        if isinstance(obj, dict):
             for k, v in obj.items():
                 if hasattr(v, '__iter__'):
                     LOG.info("%s" % k)
                     self._print_data(v)
                 else:
                     LOG.info('%s : %s' % (k, v))
-        elif type(obj) == list:
+        elif isinstance(obj, list):
             for v in obj:
                 if hasattr(v, '__iter__'):
                     self._print_data(v)

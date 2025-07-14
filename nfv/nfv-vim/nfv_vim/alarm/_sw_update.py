@@ -46,36 +46,36 @@ _alarm_templates = {
     },
     alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_INPROGRESS: {
         'entity_type': "orchestration",
-        'entity': "orchestration=sw-upgrade",
+        'entity': "orchestration=sw-deploy",
         'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
         'severity': alarm.ALARM_SEVERITY.MAJOR,
         'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
-        'reason_text': "Software upgrade auto-apply inprogress",
-        'repair_action': ("Wait for software upgrade auto-apply to complete; "
+        'reason_text': "Software deploy auto-apply inprogress",
+        'repair_action': ("Wait for software deploy auto-apply to complete; "
                           "if problem persists contact next level of support"),
         'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
     },
     alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_ABORTING: {
         'entity_type': "orchestration",
-        'entity': "orchestration=sw-upgrade",
+        'entity': "orchestration=sw-deploy",
         'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
         'severity': alarm.ALARM_SEVERITY.MAJOR,
         'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
-        'reason_text': "Software upgrade auto-apply aborting",
+        'reason_text': "Software deploy auto-apply aborting",
         'repair_action': (
-        "Wait for software upgrade auto-apply abort to complete; "
+        "Wait for software deploy auto-apply abort to complete; "
         "if problem persists contact next level of support"),
         'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
     },
 
     alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_FAILED: {
         'entity_type': "orchestration",
-        'entity': "orchestration=sw-upgrade",
+        'entity': "orchestration=sw-deploy",
         'event_type': alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
         'severity': alarm.ALARM_SEVERITY.CRITICAL,
         'probable_cause': alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
-        'reason_text': "Software upgrade auto-apply failed",
-        'repair_action': ("Attempt to perform software upgrade manually; if "
+        'reason_text': "Software deploy auto-apply failed",
+        'repair_action': ("Attempt to perform software deploy manually; if "
                           "problem persists contact next level of support"),
         'exclude_alarm_context': [alarm.ALARM_CONTEXT.TENANT],
     },

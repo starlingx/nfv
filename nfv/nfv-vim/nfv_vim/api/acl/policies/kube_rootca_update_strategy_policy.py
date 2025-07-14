@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Wind River Systems, Inc.
+# Copyright (c) 2022,2025 Wind River Systems, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -22,17 +22,17 @@ POLICY_ROOT = 'nfv_api:kube_rootca_update_strategy:%s'
 kube_rootca_update_strategy_rules = [
     base.RuleDefault(
         name=POLICY_ROOT % 'add',
-        check_str='rule:' + base.ADMIN_IN_SYSTEM_PROJECTS,
+        check_str='rule:' + base.ADMIN_OR_CONFIGURATOR,
         description="Add a kube_rootca_update_strategy",
     ),
     base.RuleDefault(
         name=POLICY_ROOT % 'delete',
-        check_str='rule:' + base.ADMIN_IN_SYSTEM_PROJECTS,
+        check_str='rule:' + base.ADMIN_OR_CONFIGURATOR,
         description="Delete a kube_rootca_update_strategy",
     ),
     base.RuleDefault(
         name=POLICY_ROOT % 'get',
-        check_str='rule:' + base.READER_IN_SYSTEM_PROJECTS,
+        check_str='rule:' + base.READER_OR_OPERATOR_OR_CONFIGURATOR,
         description="Get a kube_rootca_update_strategy",
     )
 ]

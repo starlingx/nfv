@@ -34,22 +34,22 @@ class TestNFVDatabaseUpgrade(testcase.NFVTestCase):
         config = dict()
         config['database_dir'] = self.db_dir
         database.database_initialize(config)
-        data_input = "%s/nfv_vim_db_stx_19.12" % root_dir
-        data_output = "%s/nfv_vim_db_stx_19.12.dump" % root_dir
+        data_input = "%s/nfv_vim_db_stx_25.09" % root_dir
+        data_output = "%s/nfv_vim_db_stx_25.09.dump" % root_dir
         database.database_load_data(data_input)
         database.database_dump_data(data_output)
         database.database_finalize()
 
-    def test_nfv_vim_database_upgrade_from_19_12(self):
+    def test_nfv_vim_database_upgrade_from_25_09(self):
         """
-        Test VIM database upgrades from stx 19_12
+        Test VIM database upgrades from stx 25_09
         """
         root_dir = os.environ['VIRTUAL_ENV']
         # stage some old data
         devnull = open(os.devnull, 'w')
         try:
             vim_cmd = ("nfv-vim-manage db-load-data -d %s "
-                       "-f %s/nfv_vim_db_stx_19.12" % (self.db_dir, root_dir))
+                       "-f %s/nfv_vim_db_stx_25.09" % (self.db_dir, root_dir))
 
             subprocess.check_call([vim_cmd], shell=True, stderr=devnull)
         except subprocess.CalledProcessError:

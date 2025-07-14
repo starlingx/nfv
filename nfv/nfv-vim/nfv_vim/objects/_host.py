@@ -274,18 +274,11 @@ class Host(ObjectData):
         return self._upgrade_inprogress
 
     @property
-    def software_load(self):
+    def sw_version(self):
         """
-        Returns software_load running on this host
+        Returns sw_version running on this host
         """
-        return self._nfvi_host.software_load
-
-    @property
-    def target_load(self):
-        """
-        Returns target_load for this host
-        """
-        return self._nfvi_host.target_load
+        return self._nfvi_host.sw_version
 
     @property
     def openstack_compute(self):
@@ -729,6 +722,12 @@ class Host(ObjectData):
         NFVI Host Delete
         """
         self._fsm.handle_event(host_fsm.HOST_EVENT.DELETE)
+
+    def nfvi_host_audit(self):
+        """
+        NFVI Host Audit
+        """
+        self._fsm.handle_event(host_fsm.HOST_EVENT.AUDIT)
 
     def periodic_timer(self):
         """

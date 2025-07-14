@@ -933,10 +933,11 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
     """
     Software Deploy Precheck - Strategy Step
     """
-    def __init__(self, release):
+    def __init__(self, release, snapshot=False):
         super(SwDeployPrecheckStep, self).__init__(
             STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
+        self._snapshot = snapshot
 
     @coroutine
     def _sw_deploy_precheck_callback(self):
@@ -978,7 +979,9 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
                     strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
                 ]
             )
-            nfvi.nfvi_sw_deploy_precheck(self._release, force, self._sw_deploy_precheck_callback())
+
+            nfvi.nfvi_sw_deploy_precheck(self._release, force, self._snapshot,
+                                         self._sw_deploy_precheck_callback())
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
@@ -1259,11 +1262,12 @@ class UpgradeStartStep(strategy.StrategyStep):
     Upgrade Start - Strategy Step
     """
 
-    def __init__(self, release, timeout=None):
+    def __init__(self, release, snapshot=False, timeout=None):
         super(UpgradeStartStep, self).__init__(
             STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
+        self._snapshot = snapshot
         self._query_inprogress = False
 
     @property
@@ -1355,7 +1359,9 @@ class UpgradeStartStep(strategy.StrategyStep):
                     strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
                 ]
             )
-            nfvi.nfvi_upgrade_start(self._release, force, self._start_upgrade_callback())
+
+            nfvi.nfvi_upgrade_start(self._release, force, self._snapshot,
+                                    self._start_upgrade_callback())
 
         return result, reason
 
@@ -1433,6 +1439,11 @@ class UpgradeActivateStep(strategy.StrategyStep):
         timeout = int(section.get("deploy_activate_retry_delay", 30))
         return timeout
 
+    def timeout(self):
+        result, msg = super().timeout()
+        msg = f"{msg}, retries={self._retry_count}"
+        return result, msg
+
     @coroutine
     def _activate_upgrade_callback(self):
         """
@@ -1477,13 +1488,13 @@ class UpgradeActivateStep(strategy.StrategyStep):
             DLOG.debug("Handle Activate-Upgrade callback, deploy activate is done")
         elif self.strategy.nfvi_upgrade.is_activate_failed:
             reason = (
-                "Failed software deploy activate, "
+                f"Failed software deploy activate, retries={self._retry_count}, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
         elif not self.strategy.nfvi_upgrade.is_activating:
             reason = (
-                "Unknown error while doing software deploy activate, "
+                f"Unknown error while doing software deploy activate, retries={self._retry_count}, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
@@ -1985,7 +1996,7 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         """
         from nfv_vim import directors
 
-        if(self._instance_names):
+        if (self._instance_names):
             DLOG.info("Step (%s) apply for instances %s running on hosts %s." % (
                 self._name,
                 self._instance_names,

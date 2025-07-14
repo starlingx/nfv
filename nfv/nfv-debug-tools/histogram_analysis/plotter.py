@@ -227,7 +227,7 @@ def pCommand(pList):
             isFile = True
             procList.append(pList[i])
         else:
-            while(not isFile):
+            while (not isFile):
                 print("\nFiles containing keyword: %s" % (str(procName)))
                 csvFile = str(procName) + ".csv"
                 for root, directories, filenames in os.walk(pth):
@@ -351,7 +351,7 @@ def setFilename(graphName):
         graphName = time.strftime("%m-%d-%Y")
     if os.path.exists(str(graphName + ".html")):
         n = 1
-        while(not validName):
+        while (not validName):
             if os.path.exists(str(graphName + "(" + str(n) + ").html")):
                 n += 1
             else:
@@ -468,7 +468,7 @@ if config:
 # If only one of execution time and delta hits was specified, generate one graph.
 if procs:
     if (execTime and hits):
-        if(not oneAxis):
+        if (not oneAxis):
             fig = tools.make_subplots(rows=2, cols=1)
             storeGraphData(procs, dateRange, execTime, False, 1)
             storeGraphData(procs, dateRange, False, hits, 2)

@@ -95,8 +95,8 @@ def validate_phase(phase, expected_results):
                                     (key, stage_number, stages_key,
                                      step_number, step_key,
                                      apply_step[step_key], step[step_key],
-                                     json.dumps(apply_step, indent=2),
-                                     json.dumps(step, indent=2))
+                                     json.dumps(step, indent=2),
+                                     json.dumps(apply_step, indent=2))
                             step_number += 1
                     else:
                         assert apply_stage[stages_key] == stage[stages_key], \
@@ -285,8 +285,7 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
                     admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED,
                     oper_state=nfvi.objects.v1.HOST_OPER_STATE.ENABLED,
                     avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.AVAILABLE,
-                    software_load='12.01',
-                    target_load='12.01',
+                    sw_version='12.01',
                     openstack_installed=True):
         """
         Create a host
@@ -321,8 +320,7 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
             oper_state=oper_state,
             avail_status=avail_status,
             action=nfvi.objects.v1.HOST_ACTION.NONE,
-            software_load=software_load,
-            target_load=target_load,
+            sw_version=sw_version,
             openstack_compute=openstack_compute,
             openstack_control=openstack_control,
             remote_storage=False,

@@ -327,10 +327,10 @@ class TestNeutronRebalance2(testcase.NFVTestCase):
                     if (old_state != L3_REBALANCE_STATE.DONE) and \
                             (old_state != L3_REBALANCE_STATE.HOLD_OFF):
                         if _L3Rebalance.num_l3agents < 2:
-                            assert(new_state == L3_REBALANCE_STATE.DONE)
+                            assert (new_state == L3_REBALANCE_STATE.DONE)
                         else:
-                            assert(new_state ==
-                                   L3_REBALANCE_STATE.GET_ROUTERS_HOSTED_ON_AGENT)
+                            assert (new_state ==
+                                    L3_REBALANCE_STATE.GET_ROUTERS_HOSTED_ON_AGENT)
 
                 if ((old_state ==
                         L3_REBALANCE_STATE.GET_ROUTERS_HOSTED_ON_AGENT) and
@@ -476,8 +476,8 @@ class TestNeutronRebalance2(testcase.NFVTestCase):
                     doing_abort = False
                     if (old_state != L3_REBALANCE_STATE.DONE) and \
                             (old_state != L3_REBALANCE_STATE.HOLD_OFF):
-                        assert(new_state ==
-                               L3_REBALANCE_STATE.HOLD_OFF)
+                        assert (new_state ==
+                                L3_REBALANCE_STATE.HOLD_OFF)
 
                 if ((old_state ==
                         L3_REBALANCE_STATE.GET_ROUTERS_HOSTED_ON_AGENT) and

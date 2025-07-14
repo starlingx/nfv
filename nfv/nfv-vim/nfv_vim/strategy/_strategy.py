@@ -972,6 +972,24 @@ class UpdateControllerHostsMixin(object):
             local_host = None
             local_host_name = get_local_host_name()
 
+            # This part of code is used by other orchestrations too, so making these modifications
+            # so that they are not affected. We don't need to check for AIO configuration
+            # because they have worker personality also, so they go to worker strategy
+            # stages.
+            # For software major upgrade, strict controller order needs to be followed
+            # Deploy order: [controller-1, controller-0]
+            # Rollback order: [controller-0, controller-1]
+            try:
+                if isinstance(self, SwUpgradeStrategy) and self.nfvi_upgrade.major_release:
+                    if self._rollback and not self._single_controller:
+                        # Rollback case
+                        local_host_name = HOST_NAME.CONTROLLER_1
+                    else:
+                        # Upgrade case
+                        local_host_name = HOST_NAME.CONTROLLER_0
+            except Exception as e:
+                DLOG.warn("While checking for software major upgrade got exception: ", exc_info=e)
+
             for host in controllers:
                 if HOST_PERSONALITY.WORKER not in host.personality:
                     if local_host_name == host.name:
@@ -1345,7 +1363,13 @@ class UpdateWorkerHostsMixin(object):
                 # alarms to clear. Note: not all controller nodes will have
                 # OSDs configured, but the alarms should clear quickly in
                 # that case so this will not delay the update strategy.
-                if any([HOST_PERSONALITY.CONTROLLER in host.personality
+                if isinstance(self, SwUpgradeStrategy):
+                    # TODO(jkraitbe): Workers can now support OSDs but VIM lacks a way to check.
+                    stage.add_step(strategy.WaitAlarmsClearStep(
+                                timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                                ignore_alarms=self._ignore_alarms,
+                                ignore_alarms_conditional=self._ignore_alarms_conditional))
+                elif any([HOST_PERSONALITY.CONTROLLER in host.personality
                         for host in hosts_to_lock + hosts_to_reboot]):
                     # Multiple personality nodes that need to wait for OSDs to sync:
                     stage.add_step(strategy.WaitAlarmsClearStep(
@@ -1783,7 +1807,7 @@ class SwUpgradeStrategy(
     def __init__(self, uuid,
                  controller_apply_type, storage_apply_type, worker_apply_type,
                  max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions, release, rollback, delete,
+                 alarm_restrictions, release, rollback, delete, snapshot,
                  ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
@@ -1800,6 +1824,7 @@ class SwUpgradeStrategy(
         self._release = release
         self._rollback = rollback
         self._delete = delete
+        self._snapshot = snapshot
 
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
@@ -1849,7 +1874,8 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
         # Precheck is part of create phase because DC requested it
-        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
+        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release,
+                                                     snapshot=self._snapshot))
         self.build_phase.add_stage(stage)
         super(SwUpgradeStrategy, self).build()
 
@@ -1900,6 +1926,20 @@ class SwUpgradeStrategy(
             self.save()
             super(SwUpgradeStrategy, self).build()
 
+        # TODO(sshathee): Remove this conditon when implementing snapshot
+        # with rollback command
+        elif self._rollback and self._snapshot is not None:
+            reason = "Cannot set both snapshot and rollback, if snapshot" \
+                      "is available it will be forcibly used."
+            DLOG.error(reason)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = reason
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            super(SwUpgradeStrategy, self).build()
+
         elif self._rollback:
             return self._build_rollback()
 
@@ -1936,7 +1976,7 @@ class SwUpgradeStrategy(
 
         # sw-deploy start for major releases must be done on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(strategy.UpgradeStartStep(release=self._release))
+        stage.add_step(strategy.UpgradeStartStep(release=self._release, snapshot=self._snapshot))
         stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
         self.apply_phase.add_stage(stage)
 
@@ -1998,6 +2038,11 @@ class SwUpgradeStrategy(
                 controllers_hosts,
                 key=lambda x: x.name == local_host_name,
             )
+
+        storage_hosts = sorted(
+            storage_hosts,
+            key=lambda x: int(x.name.split("-")[1])
+        )
 
         strategy_pairs = [
             (controller_strategy, controllers_hosts),
@@ -2229,22 +2274,52 @@ class SwUpgradeStrategy(
                 self.save()
                 return
 
-        # Sort the controller such that host other than
-        # current local_host_name is the first element in the list.
-        # This sorting is to reduce the number of swact required since
-        # sw-deploy patch release orchestration can start on host that
-        # is currently active.
-        local_host_name = get_local_host_name()
-        controllers_hosts = sorted(
-            controllers_hosts,
-            key=lambda x: x.name == local_host_name,
-        )
+        if self.nfvi_upgrade.major_release:
+            # Major release rollback
+            # Dependency in USM to rollback controller
+            # hosts in order [controller-0, controller-1]
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == HOST_NAME.CONTROLLER_1,
+            )
+
+            # Dependency in USM to rollback storage hosts in
+            # reverse order of deployment for major release
+            storage_hosts = sorted(
+                storage_hosts,
+                key=lambda x: int(x.name.split("-")[1]),
+                reverse=True
+            )
+
+        else:
+            # Patch rollback
+            local_host_name = get_local_host_name()
+
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == local_host_name,
+            )
+
+            # For patch rollback, storage hosts order is not reversed in USM,
+            # in validate_host_deploy_order function
+            # TODO(sshathee) Reverse the storage host order once its done in
+            # USM to maintain same order for major and patch rollback
+            storage_hosts = sorted(
+                storage_hosts,
+                key=lambda x: int(x.name.split("-")[1])
+            )
 
         strategy_pairs = [
             (self._add_worker_strategy_stages, worker_hosts),
             (self._add_storage_strategy_stages, storage_hosts),
             (controller_strategy, controllers_hosts),
         ]
+
+        if not self.nfvi_upgrade.major_release:
+            # Patch rollback order is controller, storage then worker nodes
+            # in USM
+            # TODO(sshathee) Revisit the patch order once its unified in USM
+            strategy_pairs.reverse()
 
         for stage_func, host_list in strategy_pairs:
             if host_list:
@@ -2268,6 +2343,8 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_COMPLETE)
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        # sw-deploy delete must be done on controller-0 for major release
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.SwDeployDeleteStep(release=self.nfvi_upgrade.release_id))
         self.apply_phase.add_stage(stage)
 
@@ -2297,9 +2374,6 @@ class SwUpgradeStrategy(
                 "Software release must be deploying for a rollback, " +
                 f"found={self.nfvi_upgrade.release_info}"
             )
-
-        elif not self._single_controller:
-            reason = "Software rollback is only supported on AIO-SX by VIM currently"
 
         elif self.nfvi_upgrade.is_starting:
             reason = "Software rollback cannot be initiated while sw-deploy-start is in progress"

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -55,6 +55,7 @@ function _swmanager()
                                 --alarm-restrictions
                                 --rollback
                                 --delete
+                                --snapshot
                             "
                             local createopt=${prev}
                             case "$createopt" in
@@ -87,6 +88,10 @@ function _swmanager()
                                     return 0
                                     ;;
                                 --delete)
+                                    COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
+                                    return 0
+                                    ;;
+                                --snapshot)
                                     COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
                                     return 0
                                     ;;

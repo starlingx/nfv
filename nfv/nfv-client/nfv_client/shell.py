@@ -1,10 +1,12 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
+import http.client as http_client
 import os
+import signal
 from six.moves import urllib
 import sys
 
@@ -61,10 +63,15 @@ def get_extra_create_args(cmd_area, args):
             raise ValueError("Cannot set both release and rollback")
         elif args.rollback and args.delete:
             raise ValueError("Cannot set both rollback and delete")
+        # TODO(sshathee): Remove this conditon when implementing snapshot
+        # with rollback command
+        elif args.rollback and args.snapshot:
+            raise ValueError("Snapshot is not an optional parameter for rollback")
         return {
             'release': args.release,
             'rollback': args.rollback,
-            'delete': args.delete
+            'delete': args.delete,
+            'snapshot': args.snapshot
         }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
@@ -116,6 +123,9 @@ def setup_abort_cmd(parser):
     abort_cmd.set_defaults(cmd='abort')
     abort_cmd.add_argument('--stage-id',
                            help='stage identifier to abort')
+    abort_cmd.add_argument('--yes',
+                           action='store_true',
+                           help='automatically confirm the action')
     return abort_cmd
 
 
@@ -133,6 +143,9 @@ def setup_apply_cmd(parser):
     apply_cmd.add_argument('--stage-id',
                            default=None,
                            help='stage identifier to apply')
+    apply_cmd.add_argument('--yes',
+                           action='store_true',
+                           help='automatically confirm the action')
     return apply_cmd
 
 
@@ -463,6 +476,12 @@ def setup_sw_deploy_parser(commands):
                                      action=argparse.BooleanOptionalAction,
                                      required=False)
 
+    # sw-deploy create (snapshot)
+    create_strategy_cmd.add_argument('--snapshot',
+                                     help='add snapshot option',
+                                     action=argparse.BooleanOptionalAction,
+                                     required=False)
+
     # define the delete command
     _ = setup_delete_cmd(sub_cmds)
     # define the apply command
@@ -471,6 +490,69 @@ def setup_sw_deploy_parser(commands):
     _ = setup_abort_cmd(sub_cmds)
     # define the show command
     _ = setup_show_cmd(sub_cmds)
+
+
+def input_with_timeout(prompt, timeout):
+    def timeout_handler(signum, frame):
+        raise TimeoutError
+
+    # Set the timeout handler
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(timeout)  # Set the alarm for the timeout
+
+    try:
+        # Try to get input from the user
+        result = input(prompt)
+        signal.alarm(0)  # Cancel the alarm if input is received in time
+        return result
+    except TimeoutError:
+        print("\nNo response received within the time limit.")
+        sys.exit(1)
+
+
+def prompt_cli_confirmation(timeout=10):
+    RESET = "\033[0m"
+    YELLOW = '\033[93m'
+    BOLD = '\033[1m'
+    confirmation = input_with_timeout(
+            f"{BOLD}{YELLOW}WARNING: This is a high-risk operation that may "
+            f"cause a service interruption or remove critical resources{RESET}\n"
+            f"{BOLD}{YELLOW}Do you want to continue? (yes/No): {RESET}", timeout
+        )
+
+    if confirmation.lower() != 'yes':
+        print("Operation cancelled by the user")
+        sys.exit(1)
+
+
+def _is_service_impacting_command(command):
+    base_commands = [
+        "sw-deploy-strategy",
+        "fw-update-strategy",
+        "kube-upgrade-strategy",
+        "kube-rootca-update-strategy",
+        "system-config-update-strategy"
+    ]
+
+    actions = ["apply", "abort"]
+
+    service_impacting_commands = {
+            f"{cmd} {action}"
+            for cmd in base_commands
+            for action in actions
+    }
+
+    return command in service_impacting_commands
+
+
+def _is_cli_confirmation_param_enabled():
+    return os.environ.get("CLI_CONFIRMATIONS", "disabled") == "enabled"
+
+
+def confirm_if_required(args, command, cli_conf_enabled):
+    if cli_conf_enabled and not getattr(args, "yes", False):
+        if _is_service_impacting_command(command):
+            prompt_cli_confirmation()
 
 
 def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
@@ -510,10 +592,13 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
         args = parser.parse_args(argv)
 
         if args.debug:
-            # Enable Debug
+            # Enable debug for legacy HTTP requests
             handler = urllib.request.HTTPHandler(debuglevel=1)
             opener = urllib.request.build_opener(handler)
             urllib.request.install_opener(opener)
+
+            # Enable debug for requests library
+            http_client.HTTPConnection.debuglevel = 1
 
         if args.os_auth_url is None:
             args.os_auth_url = os.environ.get('OS_AUTH_URL', None)
@@ -573,6 +658,10 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
             return
 
         strategy_name = get_strategy_name(args.cmd_area)
+        command = args.cmd_area + " " + args.cmd
+        cli_conf_param_enabled = _is_cli_confirmation_param_enabled()
+        confirm_if_required(args, command, cli_conf_param_enabled)
+
         if 'create' == args.cmd:
             extra_create_args = get_extra_create_args(args.cmd_area, args)
             sw_update.create_strategy(args.os_auth_url,
