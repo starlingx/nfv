@@ -305,9 +305,9 @@ def create_strategy(token_id,
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
         api_cmd_payload['release'] = kwargs['release']
-        api_cmd_payload['rollback'] = kwargs['rollback']
-        api_cmd_payload['delete'] = kwargs['delete']
-        api_cmd_payload['snapshot'] = kwargs['snapshot']
+        api_cmd_payload['rollback'] = kwargs.get('rollback')
+        api_cmd_payload['delete'] = kwargs.get('delete')
+        api_cmd_payload['snapshot'] = kwargs.get('snapshot')
 
     api_cmd_payload['storage-apply-type'] = storage_apply_type
     api_cmd_payload['worker-apply-type'] = worker_apply_type
