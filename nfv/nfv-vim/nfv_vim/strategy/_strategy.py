@@ -54,6 +54,9 @@ PATCH_REPO_STATE_APPLIED = 'Applied'
 PATCH_STATE_APPLIED = 'Applied'
 WAIT_ALARM_TIMEOUT = 2400
 
+# constants used by kube upgrade
+KUBELET_MINOR_SKEW_TOLERANCE = 3
+
 
 ###################################################################
 #
@@ -3702,6 +3705,52 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             self.apply_phase.add_stage(stage)
         self._add_kube_update_stages()
 
+    def _kubelet_version_skew(self, kubeadm_version, kubelet_version):
+        """Calculate integer skew between kubeadm (control-plane) minor
+        version and kubelet minor version.
+
+        Reference: https://kubernetes.io/releases/version-skew-policy/
+        kubelet may be up to three minor versions older than kube-apiserver.
+
+        This routine transforms major.minor.patch version string 'X.Y.Z'
+        to scaled representation 100*int(X) + int(Y). The major version is
+        scaled by 100. This ensures that major version changes go beyond
+        the skew limit. The patch version is ignored.
+
+        :param kubeadm_version: control-plane K8S version
+        :param kubelet_version: kubelet K8S version
+
+        :return: integer: skew between kubeadm minor version
+                 and kubelet minor version
+        """
+        def safe_strip(input_string):
+            if not input_string:
+                return ''
+            return ''.join(c for c in input_string if c in '1234567890.')
+
+        if any(value is None for value in (kubeadm_version, kubelet_version)):
+            raise ValueError("Invalid kubelet version skew input")
+
+        # Split major.minor.patch into integer components
+        try:
+            kubeadm_map = list(map(int, safe_strip(kubeadm_version).split(".")[:2]))
+            kubelet_map = list(map(int, safe_strip(kubelet_version).split(".")[:2]))
+        except Exception as e:
+            DLOG.error("_kubelet_version_skew: Unexpected error: %s, "
+                      "kubeadm_version=%s, kubelet_version=%s"
+                      % (e, kubeadm_version, kubelet_version))
+            raise ValueError("Invalid kubelet version skew input")
+
+        if len(kubeadm_map) != 2 or len(kubelet_map) != 2:
+            raise ValueError("Invalid kubelet version skew input")
+
+        # Calculate integer skew between kubeadm and kubelet minor version
+        skew = (
+                100 * (kubeadm_map[0] - kubelet_map[0]) +
+                (kubeadm_map[1] - kubelet_map[1])
+        )
+        return skew
+
     def _add_kube_update_stages(self):
         """Stages for control plane, kubelet and cordon"""
         # Algorithm
@@ -3709,13 +3758,13 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # Simplex:
         # - loop over kube versions
         #   - control plane
-        #   - kubelet
+        #   - kubelet: if exceeded skew, or last version
         # -------------------------
         # Duplex:
         # - loop over kube versions
         #   - first control plane
         #   - second control plane
-        #   - kubelets
+        #   - kubelets: if exceeded skew, or last version
         # -------------------------
         from nfv_vim import nfvi
         from nfv_vim import strategy
@@ -3724,6 +3773,11 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         second_host = self.get_second_host()
         ver_list = self._get_kube_version_steps(self._to_version,
                                                 self._nfvi_kube_versions_list)
+
+        # convert the kube_list into a dictionary indexed by version
+        kube_dict = {}
+        for kube in self._nfvi_kube_versions_list:
+            kube_dict[kube['kube_version']] = kube
 
         prev_state = None
         if self.nfvi_kube_upgrade is not None:
@@ -3742,6 +3796,14 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             skip_first = True
             skip_second = True
 
+        # initial list of kubelet_stage versions considered for upgrade
+        if ver_list:
+            first = ver_list[0]
+            upgrade_from = kube_dict[first]['upgrade_from'][0]
+            kubelet_stage = [upgrade_from]
+        else:
+            kubelet_stage = []
+
         for kube_ver in ver_list:
             DLOG.info("Examining %s " % kube_ver)
 
@@ -3758,12 +3820,39 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             else:
                 self._add_kube_upgrade_second_control_plane_stage(second_host, kube_ver)
 
-            # kubelets
-            self._add_kube_upgrade_kubelets_stage(kube_ver)
+            # Evaluate Kubernetes Skew Policy; this will evaluate kubelet version skew
+            # for each K8S node. This prevents unsupported advancement of control-plane
+            # if any nodes are not current enough.
+            # Example:  If current kubelet is at 1.29, current kubeadm is at 1.32,
+            # then the minor version skew is 3 (i.e., 32 - 29). We prevent the kubeadm
+            # upgrade to 1.33 since the resulting upgrade would have skew of 4.
+
+            # keep kubelet versions we have yet to upgrade
+            kubeadm_version = kube_ver
+            kubelet_stage.append(kubeadm_version)
+            kubelet_version = kubelet_stage[0]
+            kubelet_skew = self._kubelet_version_skew(kubeadm_version, kubelet_version)
+
+            # upgrade kubelet if we exceed skew tolerance
+            if kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE:
+                self._add_kube_upgrade_kubelets_stage(kube_ver)
+
+                # initialize next iteration
+                kubelet_stage = [kubeadm_version]
+
             # kubelets can 'fail' the build. Return abruptly if it does
             # todo(abailey): change this once all lock/unlock are removed from kubelet
             if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
                 return
+
+        # Update kubelet to the final version if it isn't already
+        if kubelet_stage:
+            kubelet_version = kubelet_stage[0]
+            kube_ver = kubelet_stage[-1]
+            if kubelet_version != self._to_version:
+                self._add_kube_upgrade_kubelets_stage(kube_ver)
+                if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
+                    return
 
         self._add_kube_host_uncordon_stage()
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2023 Wind River Systems, Inc.
+# Copyright (c) 2020-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,11 +19,15 @@ from nfv_vim.strategy._strategy import KubeUpgradeStrategy
 
 from nfv_unit_tests.tests import sw_update_testcase
 
-
-FROM_KUBE_VERSION = '1.2.3'
-MID_KUBE_VERSION = '1.2.4'
-HIGH_KUBE_VERSION = '1.2.5'
-DEFAULT_TO_VERSION = MID_KUBE_VERSION
+# Kubernetes versions: v<major.minor.patch>
+FROM_KUBE_VERSION = 'v1.29.2'
+MID1_KUBE_VERSION = 'v1.30.6'
+MID2_KUBE_VERSION = 'v1.31.5'
+MID3_KUBE_VERSION = 'v1.32.2'
+HIGH_KUBE_VERSION = 'v1.33.0'
+MAJOR1_KUBE_VERSION = 'v2.0.0'
+MAJOR2_KUBE_VERSION = 'v2.1.1'
+DEFAULT_TO_VERSION = MID1_KUBE_VERSION
 FAKE_LOAD = '12.01'
 
 
@@ -45,7 +49,7 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             max_parallel_worker_hosts=10,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
-            to_version=MID_KUBE_VERSION,
+            to_version=MID1_KUBE_VERSION,
             single_controller=False,
             nfvi_kube_upgrade=None):
         """
@@ -122,7 +126,7 @@ class SimplexKubeUpgradeMixin(object):
             []   # available_patches
         ),
         KubeVersion(
-            MID_KUBE_VERSION,  # kube_version
+            MID1_KUBE_VERSION,  # kube_version
             'available',  # state
             False,  # target
             [FROM_KUBE_VERSION],  # upgrade_from
@@ -131,10 +135,28 @@ class SimplexKubeUpgradeMixin(object):
             []  # available_patches
         ),
         KubeVersion(
+            MID2_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [MID1_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
+            MID3_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [MID2_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
             HIGH_KUBE_VERSION,  # kube_version
             'available',  # state
             False,  # target
-            [MID_KUBE_VERSION],  # upgrade_from
+            [MID3_KUBE_VERSION],  # upgrade_from
             [],  # downgrade_to
             [],  # applied_patches
             []  # available_patches
@@ -143,6 +165,59 @@ class SimplexKubeUpgradeMixin(object):
 
     def setUp(self):
         super(SimplexKubeUpgradeMixin, self).setUp()
+
+    def is_simplex(self):
+        return True
+
+    def is_duplex(self):
+        return False
+
+
+class SimplexMajorKubeUpgradeMixin(object):
+    FAKE_KUBE_HOST_UPGRADES_LIST = []
+
+    # simplex sets the versions as available
+    FAKE_KUBE_VERSIONS_LIST = [
+        KubeVersion(
+            MID3_KUBE_VERSION,  # kube_version
+            'active',  # state
+            True,  # target
+            [],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
+            HIGH_KUBE_VERSION,  # kube_version
+            'available',  # state
+            True,  # target
+            [MID3_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
+            MAJOR1_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [HIGH_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
+            MAJOR2_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [MAJOR1_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+    ]
+
+    def setUp(self):
+        super(SimplexMajorKubeUpgradeMixin, self).setUp()
 
     def is_simplex(self):
         return True
@@ -166,7 +241,7 @@ class DuplexKubeUpgradeMixin(object):
             []   # available_patches
         ),
         KubeVersion(
-            MID_KUBE_VERSION,  # kube_version
+            MID1_KUBE_VERSION,  # kube_version
             'available',  # state
             False,  # target
             [FROM_KUBE_VERSION],  # upgrade_from
@@ -175,10 +250,28 @@ class DuplexKubeUpgradeMixin(object):
             []  # available_patches
         ),
         KubeVersion(
+            MID2_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [MID1_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
+            MID3_KUBE_VERSION,  # kube_version
+            'available',  # state
+            False,  # target
+            [MID2_KUBE_VERSION],  # upgrade_from
+            [],  # downgrade_to
+            [],  # applied_patches
+            []  # available_patches
+        ),
+        KubeVersion(
             HIGH_KUBE_VERSION,  # kube_version
             'unavailable',  # state
             False,  # target
-            [MID_KUBE_VERSION],  # upgrade_from
+            [MID3_KUBE_VERSION],  # upgrade_from
             [],  # downgrade_to
             [],  # applied_patches
             []  # available_patches
@@ -210,9 +303,11 @@ class ApplyStageMixin(object):
 
     # for multi-kube upgrade: 'to' and 'kube_versions' should be updated
     default_from_version = FROM_KUBE_VERSION
-    default_to_version = MID_KUBE_VERSION
+    default_to_version = MID1_KUBE_VERSION
     # steps when performing control plane and kubelet upversion
-    kube_versions = [MID_KUBE_VERSION, ]
+    kube_versions = [MID1_KUBE_VERSION, ]
+    # kubelet stages based on enforcing K8S minor version policy skew
+    kubelet_versions = [MID1_KUBE_VERSION, ]
 
     def setUp(self):
         super(ApplyStageMixin, self).setUp()
@@ -554,7 +649,7 @@ class ApplyStageMixin(object):
                 stages.append(self._kube_upgrade_first_control_plane_stage(ver))
             if add_second_control_plane:
                 stages.append(self._kube_upgrade_second_control_plane_stage(ver))
-            if add_kubelets:
+            if add_kubelets and ver in self.kubelet_versions:
                 # there are no kubelets on storage
                 stages.extend(self._kube_upgrade_kubelet_stages(ver,
                                                                 std_controller_list,
@@ -625,10 +720,29 @@ class ApplyStageMixin(object):
 
 class MultiApplyStageMixin(ApplyStageMixin):
     default_to_version = HIGH_KUBE_VERSION
-    kube_versions = [MID_KUBE_VERSION, HIGH_KUBE_VERSION, ]
+    kube_versions = [MID1_KUBE_VERSION,
+                     MID2_KUBE_VERSION,
+                     MID3_KUBE_VERSION,
+                     HIGH_KUBE_VERSION, ]
+    # kubelet stages based on enforcing K8S minor version policy skew
+    kubelet_versions = [MID3_KUBE_VERSION,
+                        HIGH_KUBE_VERSION, ]
 
     def setUp(self):
         super(MultiApplyStageMixin, self).setUp()
+
+
+class MultiMajorApplyStageMixin(ApplyStageMixin):
+    default_to_version = MAJOR2_KUBE_VERSION
+    kube_versions = [HIGH_KUBE_VERSION,
+                     MAJOR1_KUBE_VERSION,
+                     MAJOR2_KUBE_VERSION, ]
+    # kubelet stages based on enforcing K8S minor version policy skew
+    kubelet_versions = [MAJOR1_KUBE_VERSION,
+                        MAJOR2_KUBE_VERSION, ]
+
+    def setUp(self):
+        super(MultiMajorApplyStageMixin, self).setUp()
 
 
 @mock.patch('nfv_vim.event_log._instance._event_issue',
@@ -672,11 +786,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -706,11 +821,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -739,11 +855,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             stages.append(self._kube_host_cordon_stage())
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -772,11 +889,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -800,11 +918,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -826,11 +945,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_to_version)
         stages = []
         for ver in self.kube_versions:
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -859,11 +979,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -891,11 +1012,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -923,11 +1045,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -953,11 +1076,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
         for ver in self.kube_versions:
             stages.append(self._kube_upgrade_first_control_plane_stage(
                 ver))
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -981,11 +1105,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_to_version)
         stages = []
         for ver in self.kube_versions:
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -1009,11 +1134,12 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_to_version)
         stages = []
         for ver in self.kube_versions:
-            stages.extend(self._kube_upgrade_kubelet_stages(
-                ver,
-                self.std_controller_list,
-                self.aio_controller_list,
-                self.worker_list))
+            if ver in self.kubelet_versions:
+                stages.extend(self._kube_upgrade_kubelet_stages(
+                    ver,
+                    self.std_controller_list,
+                    self.aio_controller_list,
+                    self.worker_list))
         if self.is_simplex():
             stages.append(self._kube_host_uncordon_stage())
         stages.extend([
@@ -1070,6 +1196,29 @@ class TestSimplexMultiApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
 
     def setUp(self):
         super(TestSimplexMultiApplyStrategy, self).setUp()
+        self.create_host('controller-0', aio=True)
+        # AIO kubelet phase does not process controller with the workers
+        self.std_controller_list = []
+        self.aio_controller_list = ['controller-0', ]
+        self.worker_list = []
+        self.storage_list = []
+
+
+@mock.patch('nfv_vim.event_log._instance._event_issue',
+            sw_update_testcase.fake_event_issue)
+@mock.patch('nfv_vim.objects._sw_update.SwUpdate.save',
+            sw_update_testcase.fake_save)
+@mock.patch('nfv_vim.objects._sw_update.timers.timers_create_timer',
+            sw_update_testcase.fake_timer)
+@mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
+            sw_update_testcase.fake_nfvi_compute_plugin_disabled)
+class TestSimplexMultiMajorApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
+                                         MultiMajorApplyStageMixin,
+                                         SimplexMajorKubeUpgradeMixin):
+    """This test class can be updated to resume from partial control plane"""
+
+    def setUp(self):
+        super(TestSimplexMultiMajorApplyStrategy, self).setUp()
         self.create_host('controller-0', aio=True)
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
