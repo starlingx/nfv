@@ -5235,6 +5235,12 @@ class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED,
             timeout_in_secs=900)
 
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()]
+
     @coroutine
     def _response_callback(self):
         """Kube Upgrade Storage - Callback"""
