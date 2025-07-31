@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -204,6 +204,12 @@ class RestAPIServer(SocketServer.TCPServer):
         self._port = port
         self._http_handler = RestAPIRequestDispatcher
         self._http_handler.protocol = "HTTP/1.1"
+        try:
+            socket.inet_pton(socket.AF_INET6, ip)
+            self.address_family = socket.AF_INET6
+            DLOG.info("IP address %s is IPv6, updating address family." % ip)
+        except socket.error as e:
+            DLOG.info("Cannot transform IP %s to IPv6. %s " % ip, e)
         SocketServer.TCPServer.__init__(self, (ip, int(port)),
                                         self._http_handler,
                                         bind_and_activate=False)
