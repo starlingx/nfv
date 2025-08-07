@@ -1681,7 +1681,7 @@ class SwDeployDeleteStep(strategy.StrategyStep):
 
     def __init__(self, release):
         super(SwDeployDeleteStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_DEPLOY_DELETE, timeout_in_secs=60)
+            STRATEGY_STEP_NAME.SW_DEPLOY_DELETE, timeout_in_secs=300)
 
         self._release = release
 

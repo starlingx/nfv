@@ -15,6 +15,7 @@ import software.states as usm_states
 
 REST_API_REQUEST_TIMEOUT = 60
 REST_API_DEPLOY_HOST_TIMEOUT = 180
+REST_API_DEPLOY_DELETE_TIMEOUT = 300
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.usm')
 
@@ -63,7 +64,7 @@ def _api_post(token, url, payload, headers=None, timeout_in_secs=REST_API_REQUES
     return response
 
 
-def _api_delete(token, url):
+def _api_delete(token, url, timeout_in_secs=REST_API_REQUEST_TIMEOUT):
     """
     Perform DELETE on a particular endpoint
     """
@@ -71,7 +72,7 @@ def _api_delete(token, url):
     response = rest_api_request(token,
                                 "DELETE",
                                 url,
-                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+                                timeout_in_secs=timeout_in_secs)
     return response
 
 
@@ -192,7 +193,7 @@ def sw_deploy_delete(token):
 
     uri = f"deploy"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
-    response = _api_delete(token, url)
+    response = _api_delete(token, url, timeout_in_secs=REST_API_DEPLOY_DELETE_TIMEOUT)
     return response
 
 
