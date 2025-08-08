@@ -3604,6 +3604,14 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                 kubelet_map[host.host_uuid] = host.kubelet_version
         return kubelet_map
 
+    def _kubeadm_map(self):
+        """Map the host kubeadm versions by the host uuid.
+        """
+        kubeadm_map = dict()
+        for host in self.nfvi_kube_host_upgrade_list:
+            kubeadm_map[host.host_uuid] = host.control_plane_version
+        return kubeadm_map
+
     def _add_kube_upgrade_start_stage(self):
         """
         Add upgrade start strategy stage
@@ -3766,41 +3774,81 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         #   - second control plane
         #   - kubelets: if exceeded skew, or last version
         # -------------------------
-        from nfv_vim import nfvi
+        from distutils.version import LooseVersion
         from nfv_vim import strategy
 
         first_host = self.get_first_host()
         second_host = self.get_second_host()
         ver_list = self._get_kube_version_steps(self._to_version,
                                                 self._nfvi_kube_versions_list)
+        kubeadm_map = self._kubeadm_map()
+        kubelet_map = self._kubelet_map()
+        kubelet_min_version = min(kubelet_map.values(), key=LooseVersion, default=None)
 
         # convert the kube_list into a dictionary indexed by version
         kube_dict = {}
         for kube in self._nfvi_kube_versions_list:
             kube_dict[kube['kube_version']] = kube
 
-        prev_state = None
-        if self.nfvi_kube_upgrade is not None:
-            prev_state = self.nfvi_kube_upgrade.state
-
+        # Determine whether we have to upgrade control-plane at the
+        # first kube version in the upgrade list, otherwise skip.
         skip_first = False
         skip_second = False
-        if prev_state in [nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
-                          nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER,
-                          nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED]:
-            # we have already proceeded past first control plane
+
+        # Kubernetes skew policy allows upgrade of control-plane(s)
+        # multiple times before updating kubelet. This logic is aligned
+        # with the semantic in sysinv/api/controllers/v1/host.py
+        # kube_upgrade_control_plane().
+
+        first_ver = None
+        if first_host is not None:
+            first_ver = kubeadm_map.get(first_host.uuid)
+        second_ver = None
+        if second_host is not None:
+            second_ver = kubeadm_map.get(second_host.uuid)
+
+        # determine if control-plane already upgraded at this step
+        ver_init = ver_list[0] if ver_list else None
+        if first_ver == ver_init:
             skip_first = True
-        elif prev_state in [nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
-                            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS]:
-            # we have already proceeded past first control plane and second control plane
-            skip_first = True
+        if second_ver == ver_init:
             skip_second = True
+
+        # detect duplex and order
+        if len(set(kubeadm_map.values())) != 1:
+            if ((first_ver is not None) and
+                    all(LooseVersion(first_ver) > LooseVersion(ver)
+                        for ver in kubeadm_map.values())):
+                # first_host control-plane newer than second
+                skip_first = True
+            if ((second_ver is not None) and
+                    all(LooseVersion(second_ver) > LooseVersion(ver)
+                        for ver in kubeadm_map.values())):
+                # second_host control-plane newer than first
+                skip_second = True
 
         # initial list of kubelet_stage versions considered for upgrade
         if ver_list:
-            first = ver_list[0]
-            upgrade_from = kube_dict[first]['upgrade_from'][0]
-            kubelet_stage = [upgrade_from]
+            upgrade_from = kube_dict[ver_init]['upgrade_from'][0]
+            if (kubelet_min_version is not None and
+                    LooseVersion(kubelet_min_version) < LooseVersion(upgrade_from)):
+                kubelet_stage = [kubelet_min_version]
+            else:
+                kubelet_stage = [upgrade_from]
+
+            # Upgrade kubelet first if nodes are partially upgraded and one node
+            # has exceeded kubelet version skew.
+            # Example:  If current kubelet is at 1.29, current kubeadm is at 1.32.
+            kubeadm_version = ver_init
+            kubelet_version = kubelet_stage[0]
+            kubelet_skew = self._kubelet_version_skew(kubeadm_version, kubelet_version)
+
+            # upgrade kubelet if we exceed skew tolerance.
+            if kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE:
+                self._add_kube_upgrade_kubelets_stage(ver_init)
+
+                # initialize next iteration
+                kubelet_stage = [kubeadm_version]
         else:
             kubelet_stage = []
 
