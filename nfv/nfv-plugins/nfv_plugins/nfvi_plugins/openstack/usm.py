@@ -14,7 +14,7 @@ from nfv_vim import nfvi
 import software.states as usm_states
 
 REST_API_REQUEST_TIMEOUT = 60
-REST_API_DEPLOY_HOST_TIMEOUT = 180
+REST_API_DEPLOY_HOST_TIMEOUT = 240
 REST_API_DEPLOY_DELETE_TIMEOUT = 300
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.usm')
