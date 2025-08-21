@@ -1063,12 +1063,35 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._unknown_hosts = 0
         self._restart = False
         self._skip_loop = True
+        # Retries
+        self._retry_count = 0  # Current attempt
+        self._retry_sleep = 0  # Earliest time next attempt can begin, current time + delay
+        self._retry_requested = False  # Is a retry queued
+        self._max_retries = self.MAX_RETRIES  # Maximum number of retries
+        self._retry_delay = self.RETRY_DELAY  # Minimum delay between retries
 
     @property
     def TIMEOUT(self):
         section = config.CONF.get("software-deploy", {})
         timeout = int(section.get("deploy_host_execute_timeout", 3600))
         return timeout
+
+    @property
+    def MAX_RETRIES(self):
+        section = config.CONF.get("software-deploy", {})
+        max_retries = int(section.get("deploy_host_retries", 3))
+        return max_retries
+
+    @property
+    def RETRY_DELAY(self):
+        section = config.CONF.get("software-deploy", {})
+        retry_delay = int(section.get("deploy_host_retry_delay", 120))
+        return retry_delay
+
+    def timeout(self):
+        result, msg = super().timeout()
+        msg = f"{msg}, retries={self._retry_count}"
+        return result, msg
 
     def _get_upgrade_callback_inner(self, response):
         """
@@ -1117,11 +1140,24 @@ class UpgradeHostsStep(strategy.StrategyStep):
             response['failed-hosts'] = failed_hosts
             reason = f"Deploy hosts failed for some hosts: {json.dumps(failed_hosts, indent=2)}"
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+
+            # Check if retry limit exceeded
+            if self._retry_count < self._max_retries:
+                self._retry_requested = True
+                self._retry_sleep = time.perf_counter() + self._retry_delay
+                DLOG.notice(
+                    "Handle Host-Upgrade failure, "
+                    f"retry={self._retry_count+1} queued, "
+                    f"delay>={self._retry_delay} seconds"
+                )
+                self.strategy.save()
+                return False
+
             self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
             return True
 
-        reason = "Deploy hosts succeeded for all hosts"
+        reason = f"Deploy hosts succeeded for all hosts, retries={self._retry_count}"
         result = strategy.STRATEGY_STEP_RESULT.SUCCESS
         DLOG.info(reason)
         self.stage.step_complete(result, reason)
@@ -1213,16 +1249,31 @@ class UpgradeHostsStep(strategy.StrategyStep):
             update = True
 
         elif event in [STRATEGY_EVENT.HOST_AUDIT]:
-            update = True
+            pass
+
+        if self._retry_requested and time.perf_counter() > self._retry_sleep:
+            self._retry_requested = False
+            self._retry_count += 1
+
+            if len(self._failed_hosts.keys()) == 0:
+                DLOG.info("No failed hosts, deploy host completed between the retry delay")
+                update = True
+            else:
+                DLOG.notice(f"Step ({self._name}): Executing retry={self._retry_count} "
+                            f"for hosts: {list(self._failed_hosts.keys())}")
+                self.strategy.save()
+                host_director = directors.get_host_director()
+                host_director.upgrade_hosts(self._failed_hosts.keys(),
+                                            self.strategy._rollback)
 
         if self._query_inprogress or self._step_complete:
             return True
 
         if update:
+            update = False
             self._query_inprogress = True
             release = self.strategy.nfvi_upgrade['release']
             nfvi.nfvi_get_upgrade(release, self._get_upgrade_callback())
-            return True
 
         return False
 
@@ -1241,6 +1292,11 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._unknown_hosts = data["unknown_hosts"]
         self._restart = True
         self._skip_loop = True
+        self._retry_count = data["retry_count"]
+        self._retry_sleep = data["retry_sleep"]
+        self._retry_requested = data["retry_requested"]
+        self._max_retries = data["max_retries"]
+        self._retry_delay = data["retry_delay"]
         return self
 
     def as_dict(self):
@@ -1254,6 +1310,11 @@ class UpgradeHostsStep(strategy.StrategyStep):
         data['failed_hosts'] = self._failed_hosts
         data['deployed_hosts'] = self._deployed_hosts
         data['unknown_hosts'] = self._unknown_hosts
+        data['retry_count'] = self._retry_count
+        data['retry_sleep'] = self._retry_sleep
+        data['retry_requested'] = self._retry_requested
+        data['max_retries'] = self._max_retries
+        data['retry_delay'] = self._retry_delay
         return data
 
 
@@ -1430,14 +1491,14 @@ class UpgradeActivateStep(strategy.StrategyStep):
     @property
     def RETRY_LIMIT(self):
         section = config.CONF.get("software-deploy", {})
-        timeout = int(section.get("deploy_activate_retries", 3))
-        return timeout
+        retry_limit = int(section.get("deploy_activate_retries", 3))
+        return retry_limit
 
     @property
     def RETRY_DELAY(self):
         section = config.CONF.get("software-deploy", {})
-        timeout = int(section.get("deploy_activate_retry_delay", 30))
-        return timeout
+        retry_delay = int(section.get("deploy_activate_retry_delay", 30))
+        return retry_delay
 
     def timeout(self):
         result, msg = super().timeout()
