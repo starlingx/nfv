@@ -16,6 +16,7 @@ from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.strategy._strategy import KubeUpgradeStrategy
+from nfv_vim import tables
 
 from nfv_unit_tests.tests import sw_update_testcase
 
@@ -581,16 +582,31 @@ class ApplyStageMixin(object):
                 self._kube_upgrade_kubelet_worker_stage(sub_list, ver, True, False))
         return kubelet_stages
 
-    def validate_apply_phase(self, single_controller, kube_upgrade, stages):
+    def validate_apply_phase(self, single_controller, kube_upgrade, stages,
+                             kube_hosts_list=None):
+        """
+        Build a strategy and compare against a predetermined set of stages.
+        Validate stage counts and contents per unique stage name.
+        Validate that strategy is persistable without loss of data.
+
+        :param self: ApplyStageMixin
+        :param single_controller: boolean: False is Simplex, True Duplex
+        :param kube_upgrade: kube upgrade db object
+        :param stages: list of stage dictionary containing steps
+        :param kube_hosts_list: list of KubeHostUpgrade db object, contains
+               control-plane and kubelet version per host
+        """
         # sw_update_obj is a weak ref. it must be defined here
         update_obj = KubeUpgrade()
 
-        # create a strategy for a system with no existing kube_upgrade
+        # Create a strategy for a system. If kube_hosts_list provided,
+        # then the strategy is resumed from partially upgraded system.
         strategy = self._create_built_kube_upgrade_strategy(
             update_obj,
             self.default_to_version,
             single_controller=single_controller,
-            kube_upgrade=kube_upgrade)
+            kube_upgrade=kube_upgrade,
+            kube_hosts_list=kube_hosts_list)
 
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
 
@@ -691,7 +707,7 @@ class ApplyStageMixin(object):
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
             self.default_from_version,
             self.default_to_version)
-        # explicity bypass the start stage
+        # explicitly bypass the start stage
         stages = self.build_stage_list(
             std_controller_list=self.std_controller_list,
             aio_controller_list=self.aio_controller_list,
@@ -716,6 +732,73 @@ class ApplyStageMixin(object):
             self._kube_upgrade_cleanup_stage(),
         ]
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+
+    def test_resume_after_first_control_plane_succeeded_partial(self):
+        """
+        Test the kube_upgrade strategy creation after the first control plane
+        has succeeded one kube version.
+        """
+        kube_upgrade = self._create_kube_upgrade_obj(
+            KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+            self.default_from_version,
+            self.default_to_version)
+        # explicitly bypass the initial stages
+        stages = self.build_stage_list(
+            std_controller_list=self.std_controller_list,
+            aio_controller_list=self.aio_controller_list,
+            worker_list=self.worker_list,
+            storage_list=self.storage_list,
+            add_start=False,
+            add_download=False,
+            add_pre_app_update=False,
+            add_networking=False,
+            add_storage=False,
+            add_cordon=False)
+
+        # Define the initial state of control-plane(s) and kubelet.
+        # The build strategy accounts for the multi-node and
+        # K8S skew version policy.
+        host_table = tables.tables_get_host_table()
+        data = []
+        if self.is_duplex():
+            first_controller = 'controller-1'
+            second_controller = 'controller-0'
+        else:
+            first_controller = 'controller-0'
+        host_upgrade = {
+            'host_id': 1,
+            'host_uuid': host_table.get(first_controller).get('_nfvi_host').get('uuid'),
+            'target_version': self.default_to_version,
+            'control_plane_version': self.kube_versions[0],  # this upgraded
+            'kubelet_version': self.default_from_version,
+            'status': KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER}
+        data.append(host_upgrade)
+        if self.is_duplex():
+            host_upgrade = {
+                'host_id': 2,
+                'host_uuid': host_table.get(second_controller).get('_nfvi_host').get('uuid'),
+                'target_version': self.default_to_version,
+                'control_plane_version': self.default_from_version,
+                'kubelet_version': self.default_from_version,
+                'status': None}
+            data.append(host_upgrade)
+        kube_hosts_list = []
+        for d in data:
+            kube_host_upgrade = nfvi.objects.v1.KubeHostUpgrade(
+                d['host_id'],
+                d['host_uuid'],
+                d['target_version'],
+                d['control_plane_version'],
+                d['kubelet_version'],
+                d['status'])
+            kube_hosts_list.append(kube_host_upgrade)
+
+        # We used the builder to generate all stages, we can simply drop
+        # the first step since that was completed.
+        # (i.e., kube-upgrade-first-control-plane)
+        del stages[0]
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages,
+                                  kube_hosts_list=kube_hosts_list)
 
 
 class MultiApplyStageMixin(ApplyStageMixin):
@@ -944,6 +1027,30 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self.default_from_version,
             self.default_to_version)
         stages = []
+
+        # Define the initial state of control-plane(s) and kubelet.
+        # The build strategy accounts for the multi-node and
+        # K8S skew version policy.
+        host_table = tables.tables_get_host_table()
+        data = [
+            {'host_id': 1,
+             'host_uuid': host_table.get('controller-0').get('_nfvi_host').get('uuid'),
+             'target_version': self.default_to_version,
+             'control_plane_version': self.default_to_version,  # upgraded to final
+             'kubelet_version': self.default_from_version,
+             'status': KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER},
+        ]
+        kube_hosts_list = []
+        for d in data:
+            kube_host_upgrade = nfvi.objects.v1.KubeHostUpgrade(
+                d['host_id'],
+                d['host_uuid'],
+                d['target_version'],
+                d['control_plane_version'],
+                d['kubelet_version'],
+                d['status'])
+            kube_hosts_list.append(kube_host_upgrade)
+
         for ver in self.kube_versions:
             if ver in self.kubelet_versions:
                 stages.extend(self._kube_upgrade_kubelet_stages(
@@ -958,7 +1065,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
-        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages,
+                                  kube_hosts_list=kube_hosts_list)
 
     def test_resume_after_networking_failed(self):
         """
@@ -1103,6 +1211,30 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
             self.default_from_version,
             self.default_to_version)
+
+        # Define the initial state of control-plane(s) and kubelet.
+        # The build strategy accounts for the multi-node and
+        # K8S skew version policy.
+        host_table = tables.tables_get_host_table()
+        data = [
+            {'host_id': 1,
+             'host_uuid': host_table.get('controller-0').get('_nfvi_host').get('uuid'),
+             'target_version': self.default_to_version,
+             'control_plane_version': self.default_to_version,  # upgraded to final
+             'kubelet_version': self.default_from_version,
+             'status': KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER},
+        ]
+        kube_hosts_list = []
+        for d in data:
+            kube_host_upgrade = nfvi.objects.v1.KubeHostUpgrade(
+                d['host_id'],
+                d['host_uuid'],
+                d['target_version'],
+                d['control_plane_version'],
+                d['kubelet_version'],
+                d['status'])
+            kube_hosts_list.append(kube_host_upgrade)
+
         stages = []
         for ver in self.kube_versions:
             if ver in self.kubelet_versions:
@@ -1118,7 +1250,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
-        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages,
+                                  kube_hosts_list=kube_hosts_list)
 
     def test_resume_after_invalid_second_master_fail_state(self):
         """
@@ -1132,6 +1265,30 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED,
             self.default_from_version,
             self.default_to_version)
+
+        # Define the initial state of control-plane(s) and kubelet.
+        # The build strategy accounts for the multi-node and
+        # K8S skew version policy.
+        host_table = tables.tables_get_host_table()
+        data = [
+            {'host_id': 1,
+             'host_uuid': host_table.get('controller-0').get('_nfvi_host').get('uuid'),
+             'target_version': self.default_to_version,
+             'control_plane_version': self.default_to_version,
+             'kubelet_version': self.default_from_version,
+             'status': KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER},
+        ]
+        kube_hosts_list = []
+        for d in data:
+            kube_host_upgrade = nfvi.objects.v1.KubeHostUpgrade(
+                d['host_id'],
+                d['host_uuid'],
+                d['target_version'],
+                d['control_plane_version'],
+                d['kubelet_version'],
+                d['status'])
+            kube_hosts_list.append(kube_host_upgrade)
+
         stages = []
         for ver in self.kube_versions:
             if ver in self.kubelet_versions:
@@ -1147,7 +1304,8 @@ class TestSimplexApplyStrategy(sw_update_testcase.SwUpdateStrategyTestCase,
             self._kube_post_application_update_stage(),
             self._kube_upgrade_cleanup_stage(),
         ])
-        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
+        self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages,
+                                  kube_hosts_list=kube_hosts_list)
 
     def test_resume_after_post_app_update_failed(self):
         """
