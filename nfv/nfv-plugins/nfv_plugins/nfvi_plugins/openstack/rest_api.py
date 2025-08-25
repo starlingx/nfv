@@ -207,9 +207,11 @@ class RestAPIServer(SocketServer.TCPServer):
         try:
             socket.inet_pton(socket.AF_INET6, ip)
             self.address_family = socket.AF_INET6
-            DLOG.info("IP address %s is IPv6, updating address family." % ip)
-        except socket.error as e:
-            DLOG.info("Cannot transform IP %s to IPv6. %s " % (ip, e))
+            DLOG.info(f"REST API setup to listen on IPv6 address {ip}")
+        except Exception as e:
+            DLOG.debug(f"Cannot transform {ip} to IPv6. {e}")
+            socket.inet_pton(socket.AF_INET, ip)  # If not IPv6, asserts IPv4
+            DLOG.info(f"REST API setup to listen on IPv4 address {ip}")
         SocketServer.TCPServer.__init__(self, (ip, int(port)),
                                         self._http_handler,
                                         bind_and_activate=False)
