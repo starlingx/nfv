@@ -1366,7 +1366,7 @@ class UpdateWorkerHostsMixin(object):
                 # alarms to clear. Note: not all controller nodes will have
                 # OSDs configured, but the alarms should clear quickly in
                 # that case so this will not delay the update strategy.
-                if isinstance(self, SwUpgradeStrategy):
+                if isinstance(self, (SwUpgradeStrategy, KubeUpgradeStrategy)):
                     # TODO(jkraitbe): Workers can now support OSDs but VIM lacks a way to check.
                     stage.add_step(strategy.WaitAlarmsClearStep(
                                 timeout_in_secs=WAIT_ALARM_TIMEOUT,
