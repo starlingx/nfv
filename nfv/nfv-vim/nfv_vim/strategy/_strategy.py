@@ -3479,6 +3479,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             '700.004',  # VM stopped
             '750.006',  # Configuration change requires reapply of cert-manager
             '900.007',  # Kube Upgrade in progress
+            '900.022',  # Clean up deployment data
+            '900.023',  # Software release deploy operation in progress.
             '900.401',  # kube-upgrade-auto-apply-inprogress
             '900.701',  # Node tainted
         ]
