@@ -6,6 +6,7 @@
 import json
 import re
 import requests
+import ssl
 
 from six.moves import BaseHTTPServer
 from six.moves import http_client as httplib
@@ -20,6 +21,7 @@ from nfv_common import selobj
 from nfv_common import timers
 
 from nfv_common.helpers import coroutine
+from nfv_common.helpers import get_system_ca_file
 from nfv_common.helpers import Object
 from nfv_common.helpers import Result
 
@@ -29,6 +31,8 @@ from nfv_plugins.nfvi_plugins.openstack.openstack_log import log_error
 from nfv_plugins.nfvi_plugins.openstack.openstack_log import log_info
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.rest_api')
+
+_ssl_context = None
 
 
 class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -352,8 +356,20 @@ def _rest_api_request(token_id,
                 response_raw = request.text
 
         else:
+            global _ssl_context
+            ssl_context = None
+            if api_cmd.startswith('https://'):
+                if _ssl_context is None:
+                    ca_file = get_system_ca_file()
+                    if ca_file:
+                        _ssl_context = ssl.create_default_context(
+                            ssl.Purpose.CLIENT_AUTH,
+                            cafile=ca_file
+                        )
+                ssl_context = _ssl_context
             with urllib.request.urlopen(request_info,
-                                        timeout=timeout_in_secs) as request:
+                                        timeout=timeout_in_secs,
+                                        context=ssl_context) as request:
                 headers = list()  # list of tuples
                 for key, value in request.info().items():
                     if key not in headers_per_hop:
