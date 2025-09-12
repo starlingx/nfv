@@ -3903,8 +3903,48 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                 self._add_kube_upgrade_kubelets_stage(kube_ver)
                 if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
                     return
+        else:
+            # Ensure worker hosts are unlocked if they are already at the
+            # target kubelet version. This handles the case where the
+            # upgrade strategy was aborted/recreated, leaving workers locked
+            # even though no kubelet upgrade stage is generated for them.
+            # Although AIO hosts also have the worker personality, this
+            # block should not be reachable with a locked controller
+            locked_workers = []
+            already_upgraded_hosts = self._query_already_upgraded_hosts(self._to_version)
+            for host in already_upgraded_hosts:
+                if (HOST_PERSONALITY.WORKER in host.personality and
+                    kubelet_map.get(host.uuid) == self._to_version and
+                    host.is_locked()):
+                    locked_workers.append(host)
+
+            if locked_workers:
+                stage = strategy.StrategyStage(
+                    strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_UNLOCK_LOCKED_WORKERS)
+                stage.add_step(strategy.UnlockHostsStep(locked_workers))
+                stage.add_step(strategy.SystemStabilizeStep())
+                self.apply_phase.add_stage(stage)
 
         self._add_kube_host_uncordon_stage()
+
+    def _query_already_upgraded_hosts(self, kube_ver):
+        from nfv_vim import tables
+
+        host_table = tables.tables_get_host_table()
+        kubelet_map = self._kubelet_map()
+
+        already_upgraded_hosts = list()
+        for host in list(host_table.values()):
+            if kubelet_map.get(host.uuid) == self._to_version:
+                DLOG.info("Host %s kubelet already up to date" % host.name)
+                already_upgraded_hosts.append(host)
+                continue
+            if kubelet_map.get(host.uuid) == kube_ver:
+                DLOG.info("Host %s kubelet already at interim version" % host.name)
+                already_upgraded_hosts.append(host)
+                continue
+
+        return already_upgraded_hosts
 
     def _add_kube_host_uncordon_stage(self):
         """Add host uncordon stage for a host"""
