@@ -159,7 +159,7 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     delete = wsme_types.wsattr(bool, mandatory=False,
                                  name='delete')
     snapshot = wsme_types.wsattr(bool, mandatory=False,
-                                 name='snapshot')
+                                 name='snapshot', default=None)
     storage_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
                                            name='storage-apply-type')
     worker_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
