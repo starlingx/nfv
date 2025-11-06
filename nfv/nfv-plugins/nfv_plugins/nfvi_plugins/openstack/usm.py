@@ -307,7 +307,7 @@ def sw_deploy_get_upgrade_obj(token, release):
         if release:
             error = f"Software release not found: {release}"
         else:
-            error = "Software release not found"
+            error = "Expected software deployment in progress, none found"
         raise EnvironmentError(error)
 
     # During a major release the packages list will be too big and will break RPC calls.
