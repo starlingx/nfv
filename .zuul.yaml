@@ -41,6 +41,7 @@
       - starlingx/config
       - starlingx/fault
       - starlingx/update
+      - starlingx/utilities
     vars:
       tox_envlist: py39
       tox_extra_args: -c nfv/tox.ini
@@ -72,6 +73,7 @@
       - starlingx/config
       - starlingx/fault
       - starlingx/update
+      - starlingx/utilities
     vars:
       tox_envlist: pylint
       tox_extra_args: -c nfv/tox.ini

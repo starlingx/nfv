@@ -4,10 +4,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import sys
+import textwrap
 
 from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
-import textwrap
+from nfv_common.strategy import AUTH_TYPES
+from platform_util.oidc import oidc_utils
+from urllib.parse import urlparse
 
 STRATEGY_NAME_SW_DEPLOY = 'sw-deploy'
 STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
@@ -258,13 +261,79 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
                 _print(2, "abort-error-response", strategy.abort_phase.response)
 
 
+def _get_auth_token_and_url(os_auth_uri, os_project_name,
+                            os_project_domain_name, os_username,
+                            os_password, os_user_domain_name,
+                            os_region_name, os_interface, stx_auth_type):
+    """Get authentication context for OIDC or Keystone"""
+
+    if stx_auth_type == AUTH_TYPES.OIDC:
+        # OIDC authentication path
+        controller_ip = urlparse(os_auth_uri).hostname
+
+        token_id = oidc_utils.get_oidc_token(os_username)
+        if not token_id:
+            raise ValueError("No OIDC token found.")
+
+        # Check if this is a DC system
+        is_dc_system = False
+        try:
+            with open('/etc/platform/platform.conf', 'r') as f:
+                for line in f:
+                    if line.startswith('distributed_cloud_role='):
+                        role = line.split('=')[1].strip()
+                        is_dc_system = role in ['subcloud', 'systemcontroller']
+                        break
+        except FileNotFoundError:
+            pass  # Non-DC systems may not have distributed_cloud_role
+
+        # TODO(rummadis): Generalize OIDC URL construction instead of hardcoding
+        # ports and protocols (similar to Keystone approach)
+        if os_interface == 'public':
+            protocol = 'https'
+            port = '4545'
+        elif os_interface == 'internal':
+            protocol = 'http'
+            port = '4545'
+        else:  # admin
+            if is_dc_system:
+                protocol = 'https'
+                port = '4546'
+            else:
+                protocol = 'http'
+                port = '4545'
+
+        # Handle IPv6
+        if controller_ip.count(':') >= 2 and not controller_ip.startswith("["):
+            controller_ip = f"[{controller_ip}]"
+
+        url = f"{protocol}://{controller_ip}:{port}"
+
+        return token_id, url
+    else:
+        # Keystone authentication path
+        token = openstack.get_token(os_auth_uri, os_project_name,
+                                    os_project_domain_name, os_username,
+                                    os_password, os_user_domain_name)
+        if token is None:
+            raise ValueError("Invalid keystone token")
+
+        url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
+                                    openstack.SERVICE_TYPE.NFV, os_interface)
+        if url is None:
+            raise ValueError("NFV-VIM URL is invalid")
+
+        return token.get_id(), url
+
+
 def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                     os_username, os_password, os_user_domain_name,
                     os_region_name, os_interface,
                     strategy_name, controller_apply_type,
                     storage_apply_type, swift_apply_type, worker_apply_type,
                     max_parallel_worker_hosts,
-                    default_instance_action, alarm_restrictions, **kwargs):
+                    default_instance_action, alarm_restrictions, stx_auth_type,
+                    **kwargs):
     """
     Software Update - Create Strategy
     """
@@ -278,19 +347,17 @@ def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
         if response != "yes":
             sys.exit(1)
 
-    token = openstack.get_token(os_auth_uri, os_project_name,
-                                os_project_domain_name, os_username, os_password,
-                                os_user_domain_name)
+    token_id, url = _get_auth_token_and_url(os_auth_uri,
+                                            os_project_name,
+                                            os_project_domain_name,
+                                            os_username,
+                                            os_password,
+                                            os_user_domain_name,
+                                            os_region_name,
+                                            os_interface,
+                                            stx_auth_type)
 
-    if token is None:
-        raise ValueError("Invalid keystone token")
-
-    url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
-                                openstack.SERVICE_TYPE.NFV, os_interface)
-    if url is None:
-        raise ValueError("NFV-VIM URL is invalid")
-
-    strategy = sw_update.create_strategy(token.get_id(), url,
+    strategy = sw_update.create_strategy(token_id, url,
                                          strategy_name,
                                          controller_apply_type,
                                          storage_apply_type, swift_apply_type,
@@ -300,6 +367,7 @@ def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                                          alarm_restrictions,
                                          os_username, os_user_domain_name,
                                          os_username,
+                                         auth_type=stx_auth_type,
                                          **kwargs)
     if not strategy:
         raise Exception("Strategy creation failed")
@@ -308,27 +376,26 @@ def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
 
 def delete_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                    os_username, os_password, os_user_domain_name, os_region_name,
-                    os_interface, strategy_name, force=False):
+                    os_username, os_password, os_user_domain_name,
+                    os_region_name, os_interface, strategy_name, stx_auth_type,
+                    force=False):
     """
     Software Update - Delete Strategy
     """
-    token = openstack.get_token(os_auth_uri, os_project_name,
-                                os_project_domain_name, os_username, os_password,
-                                os_user_domain_name)
+    token_id, url = _get_auth_token_and_url(os_auth_uri,
+                                            os_project_name,
+                                            os_project_domain_name,
+                                            os_username,
+                                            os_password,
+                                            os_user_domain_name,
+                                            os_region_name,
+                                            os_interface,
+                                            stx_auth_type)
 
-    if token is None:
-        raise ValueError("Invalid keystone token")
-
-    url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
-                                openstack.SERVICE_TYPE.NFV, os_interface)
-    if url is None:
-        raise ValueError("NFV-VIM URL is invalid")
-
-    success = sw_update.delete_strategy(token.get_id(), url,
+    success = sw_update.delete_strategy(token_id, url,
                                         strategy_name, force,
                                         os_username, os_user_domain_name,
-                                        os_username)
+                                        os_username, auth_type=stx_auth_type)
     if success:
         print("Strategy deleted")
         return
@@ -337,26 +404,25 @@ def delete_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
 
 def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                   os_username, os_password, os_user_domain_name, os_region_name,
-                   os_interface, strategy_name, stage_id=None):
+                   os_username, os_password, os_user_domain_name,
+                   os_region_name, os_interface, strategy_name, stx_auth_type,
+                   stage_id=None):
     """
     Software Update - Apply Strategy
     """
-    token = openstack.get_token(os_auth_uri, os_project_name,
-                                os_project_domain_name, os_username, os_password,
-                                os_user_domain_name)
+    token_id, url = _get_auth_token_and_url(os_auth_uri,
+                                            os_project_name,
+                                            os_project_domain_name,
+                                            os_username,
+                                            os_password,
+                                            os_user_domain_name,
+                                            os_region_name,
+                                            os_interface,
+                                            stx_auth_type)
 
-    if token is None:
-        raise ValueError("Invalid keystone token")
-
-    url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
-                                openstack.SERVICE_TYPE.NFV, os_interface)
-    if url is None:
-        raise ValueError("NFV-VIM URL is invalid")
-
-    strategy = sw_update.get_strategies(token.get_id(), url, strategy_name,
+    strategy = sw_update.get_strategies(token_id, url, strategy_name,
                                         os_username, os_user_domain_name,
-                                        os_username)
+                                        os_username, auth_type=stx_auth_type)
 
     if not strategy:
         raise Exception("No strategy available. Nothing to apply.")
@@ -369,10 +435,10 @@ def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
             raise Exception(
                     "Strategy cannot be applied. %s is not a valid state." % strategy.state)
 
-    strategy = sw_update.apply_strategy(token.get_id(), url,
+    strategy = sw_update.apply_strategy(token_id, url,
                                         strategy_name, stage_id,
                                         os_username, os_user_domain_name,
-                                        os_username)
+                                        os_username, auth_type=stx_auth_type)
     if not strategy:
         if stage_id is None:
             raise Exception("Strategy apply failed")
@@ -383,27 +449,26 @@ def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
 
 def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                   os_username, os_password, os_user_domain_name, os_region_name,
-                   os_interface, strategy_name, stage_id=None):
+                   os_username, os_password, os_user_domain_name,
+                   os_region_name, os_interface, strategy_name, stx_auth_type,
+                   stage_id=None):
     """
     Software Update - Abort Strategy
     """
-    token = openstack.get_token(os_auth_uri, os_project_name,
-                                os_project_domain_name, os_username, os_password,
-                                os_user_domain_name)
+    token_id, url = _get_auth_token_and_url(os_auth_uri,
+                                            os_project_name,
+                                            os_project_domain_name,
+                                            os_username,
+                                            os_password,
+                                            os_user_domain_name,
+                                            os_region_name,
+                                            os_interface,
+                                            stx_auth_type)
 
-    if token is None:
-        raise ValueError("Invalid keystone token")
-
-    url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
-                                openstack.SERVICE_TYPE.NFV, os_interface)
-    if url is None:
-        raise ValueError("NFV-VIM URL is invalid")
-
-    strategy = sw_update.abort_strategy(token.get_id(), url,
+    strategy = sw_update.abort_strategy(token_id, url,
                                         strategy_name, stage_id,
                                         os_username, os_user_domain_name,
-                                        os_username)
+                                        os_username, auth_type=stx_auth_type)
     if not strategy:
         if stage_id is None:
             raise Exception("Strategy abort failed")
@@ -415,25 +480,24 @@ def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
 
 def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
                   os_username, os_password, os_user_domain_name, os_region_name,
-                  os_interface, strategy_name, details=False, active=False, error_details=False):
+                  os_interface, strategy_name, stx_auth_type, details=False,
+                  active=False, error_details=False):
     """
     Software Update - Show Strategy
     """
-    token = openstack.get_token(os_auth_uri, os_project_name,
-                                os_project_domain_name, os_username, os_password,
-                                os_user_domain_name)
+    token_id, url = _get_auth_token_and_url(os_auth_uri,
+                                            os_project_name,
+                                            os_project_domain_name,
+                                            os_username,
+                                            os_password,
+                                            os_user_domain_name,
+                                            os_region_name,
+                                            os_interface,
+                                            stx_auth_type)
 
-    if token is None:
-        raise ValueError("Invalid keystone token")
-
-    url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
-                                openstack.SERVICE_TYPE.NFV, os_interface)
-    if url is None:
-        raise ValueError("NFV-VIM URL is invalid")
-
-    strategy = sw_update.get_strategies(token.get_id(), url, strategy_name,
+    strategy = sw_update.get_strategies(token_id, url, strategy_name,
                                         os_username, os_user_domain_name,
-                                        os_username)
+                                        os_username, auth_type=stx_auth_type)
     if not strategy:
         print("No strategy available")
         return

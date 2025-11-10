@@ -7,6 +7,7 @@ import json
 
 from nfv_client.openstack import rest_api
 from nfv_client import sw_update
+from nfv_common.strategy import AUTH_TYPES
 
 
 class StrategyStep(object):
@@ -201,7 +202,8 @@ def _get_current_strategy_from_response(response):
 
 
 def get_strategies(token_id, url, strategy_name, username=None,
-                   user_domain_name=None, tenant=None):
+                   user_domain_name=None, tenant=None,
+                   auth_type=AUTH_TYPES.KEYSTONE):
     """
     Software Update - Get Strategies
     """
@@ -214,9 +216,9 @@ def get_strategies(token_id, url, strategy_name, username=None,
         api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
-    api_cmd_headers['X-Auth-Token'] = token_id
 
-    response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers)
+    response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers,
+                                auth_type=auth_type)
     if not response:
         return None
 
@@ -224,7 +226,8 @@ def get_strategies(token_id, url, strategy_name, username=None,
 
 
 def get_strategy(token_id, url, strategy_name, strategy_uuid, username=None,
-                 user_domain_name=None, tenant=None):
+                 user_domain_name=None, tenant=None,
+                 auth_type=AUTH_TYPES.KEYSTONE):
     """
     Software Update - Get Strategy
     """
@@ -238,9 +241,9 @@ def get_strategy(token_id, url, strategy_name, strategy_uuid, username=None,
         api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
-    api_cmd_headers['X-Auth-Token'] = token_id
 
-    response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers)
+    response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers,
+                                auth_type=auth_type)
     if not response:
         return None
 
@@ -260,6 +263,7 @@ def create_strategy(token_id,
                     username=None,
                     user_domain_name=None,
                     tenant=None,
+                    auth_type=AUTH_TYPES.KEYSTONE,
                     **kwargs):
     """
     Software Update - Create Strategy
@@ -274,7 +278,6 @@ def create_strategy(token_id,
         api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
-    api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
     if sw_update.STRATEGY_NAME_FW_UPDATE == strategy_name:
@@ -315,7 +318,8 @@ def create_strategy(token_id,
             max_parallel_worker_hosts
     api_cmd_payload['alarm-restrictions'] = alarm_restrictions
     response = rest_api.request(token_id, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                auth_type=auth_type)
     if not response:
         return None
 
@@ -323,7 +327,8 @@ def create_strategy(token_id,
 
 
 def delete_strategy(token_id, url, strategy_name, force=False,
-                    username=None, user_domain_name=None, tenant=None):
+                    username=None, user_domain_name=None, tenant=None,
+                    auth_type=AUTH_TYPES.KEYSTONE):
     """
     Software Update - Delete Strategy
     """
@@ -337,13 +342,13 @@ def delete_strategy(token_id, url, strategy_name, force=False,
         api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
-    api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
     api_cmd_payload['force'] = force
 
     response = rest_api.request(token_id, "DELETE", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                auth_type=auth_type)
     # We expect an empty response body for this request (204 NO CONTENT). If
     # there is no response body it is a 404 NOT FOUND which means there was
     # no strategy to delete.
@@ -354,7 +359,8 @@ def delete_strategy(token_id, url, strategy_name, force=False,
 
 
 def apply_strategy(token_id, url, strategy_name, stage_id=None,
-                   username=None, user_domain_name=None, tenant=None):
+                   username=None, user_domain_name=None, tenant=None,
+                   auth_type=AUTH_TYPES.KEYSTONE):
     """
     Software Update - Apply Strategy
     """
@@ -368,7 +374,6 @@ def apply_strategy(token_id, url, strategy_name, stage_id=None,
         api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
-    api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
     if stage_id is None:
@@ -378,7 +383,8 @@ def apply_strategy(token_id, url, strategy_name, stage_id=None,
         api_cmd_payload['stage-id'] = stage_id
 
     response = rest_api.request(token_id, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                auth_type=auth_type)
     if not response:
         return None
 
@@ -386,7 +392,8 @@ def apply_strategy(token_id, url, strategy_name, stage_id=None,
 
 
 def abort_strategy(token_id, url, strategy_name, stage_id, username=None,
-                   user_domain_name=None, tenant=None):
+                   user_domain_name=None, tenant=None,
+                   auth_type=AUTH_TYPES.KEYSTONE):
     """
     Software Update - Abort Strategy
     """
@@ -400,14 +407,14 @@ def abort_strategy(token_id, url, strategy_name, stage_id, username=None,
         api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
-    api_cmd_headers['X-Auth-Token'] = token_id
 
     api_cmd_payload = dict()
     api_cmd_payload['action'] = 'abort-stage'
     api_cmd_payload['stage-id'] = stage_id
 
     response = rest_api.request(token_id, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+                                json.dumps(api_cmd_payload),
+                                auth_type=auth_type)
     if not response:
         return None
 
@@ -415,7 +422,8 @@ def abort_strategy(token_id, url, strategy_name, stage_id, username=None,
 
 
 def get_current_strategy(token_id, url, username=None,
-                   user_domain_name=None, tenant=None):
+                         user_domain_name=None, tenant=None,
+                         auth_type=AUTH_TYPES.KEYSTONE):
     """
     Get The Current Active Strategy Type And State
     """
@@ -428,9 +436,9 @@ def get_current_strategy(token_id, url, username=None,
         api_cmd_headers['X-Tenant'] = tenant
     if user_domain_name:
         api_cmd_headers['X-User-Domain-Name'] = user_domain_name
-    api_cmd_headers['X-Auth-Token'] = token_id
 
-    response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers)
+    response = rest_api.request(token_id, "GET", api_cmd, api_cmd_headers,
+                                auth_type=auth_type)
     if response['strategy'] is not None:
         return _get_current_strategy_from_response(response)
 

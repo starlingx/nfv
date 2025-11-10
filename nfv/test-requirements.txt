@@ -7,3 +7,5 @@ coverage>=3.6
 fixtures>=3.0.0 # Apache-2.0/BSD
 pylint
 testtools>=2.2.0 # MIT
+pyjwkest
+oic

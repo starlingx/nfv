@@ -563,6 +563,11 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
         parser.add_argument('--os-user-domain-name', default=None)
         parser.add_argument('--os-region-name', default=None)
         parser.add_argument('--os-interface', default=None)
+        parser.add_argument('--stx-auth-type',
+                            default=os.environ.get('STX_AUTH_TYPE', "keystone").lower(),
+                            choices=['keystone', 'oidc'],
+                            help="Authentication type: keystone or oidc (Env: STX_AUTH_TYPE)"
+                            )
 
         commands = parser.add_subparsers(title='Commands', metavar='')
         commands.required = True
@@ -673,6 +678,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
                                       args.max_parallel_worker_hosts,
                                       args.instance_action,
                                       args.alarm_restrictions,
+                                      args.stx_auth_type,
                                       **extra_create_args)
         elif 'delete' == args.cmd:
             sw_update.delete_strategy(args.os_auth_url,
@@ -684,6 +690,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
                                       args.os_region_name,
                                       args.os_interface,
                                       strategy_name,
+                                      args.stx_auth_type,
                                       force=args.force)
         elif 'apply' == args.cmd:
             sw_update.apply_strategy(args.os_auth_url,
@@ -695,6 +702,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
                                      args.os_region_name,
                                      args.os_interface,
                                      strategy_name,
+                                     args.stx_auth_type,
                                      stage_id=args.stage_id)
         elif 'abort' == args.cmd:
             sw_update.abort_strategy(args.os_auth_url,
@@ -706,6 +714,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
                                      args.os_region_name,
                                      args.os_interface,
                                      strategy_name,
+                                     args.stx_auth_type,
                                      stage_id=args.stage_id)
         elif 'show' == args.cmd:
             sw_update.show_strategy(args.os_auth_url,
@@ -717,6 +726,7 @@ def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
                                     args.os_region_name,
                                     args.os_interface,
                                     strategy_name,
+                                    args.stx_auth_type,
                                     details=args.details,
                                     active=args.active,
                                     error_details=args.error_details)

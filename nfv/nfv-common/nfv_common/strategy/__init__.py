@@ -1,9 +1,10 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common.strategy._strategy import Strategy  # noqa: F401
+from nfv_common.strategy._strategy_defs import AUTH_TYPES  # noqa: F401
 from nfv_common.strategy._strategy_defs import STRATEGY_ALARM_RESTRICTION_TYPES  # noqa: F401
 from nfv_common.strategy._strategy_defs import STRATEGY_APPLY_TYPE  # noqa: F401
 from nfv_common.strategy._strategy_defs import STRATEGY_PHASE  # noqa: F401

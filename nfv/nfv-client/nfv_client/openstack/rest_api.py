@@ -1,12 +1,15 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-from nfv_client import sw_update
 import os
 import requests
+
+from nfv_client import sw_update
+from nfv_common.strategy import AUTH_TYPES
+
 
 CAFILE = os.environ.get('REQUESTS_CA_BUNDLE')
 STRATEGY_EXISTS = 'strategy already exists.'
@@ -21,7 +24,7 @@ class SwRestApiException(Exception):
 
 
 def request(token_id, method, api_cmd, api_cmd_headers=None,
-            api_cmd_payload=None, timeout_in_secs=40):
+            api_cmd_payload=None, timeout_in_secs=40, auth_type='keystone'):
     """
     Make a rest-api request
     Note: Using a default timeout of 40 seconds. The VIM's internal handling
@@ -32,7 +35,10 @@ def request(token_id, method, api_cmd, api_cmd_headers=None,
     """
     headers = {"Accept": "application/json"}
     if token_id:
-        headers["X-Auth-Token"] = token_id
+        if auth_type == AUTH_TYPES.OIDC:
+            headers["OIDC-Token"] = token_id
+        else:
+            headers["X-Auth-Token"] = token_id
 
     if api_cmd_headers:
         headers.update(api_cmd_headers)
