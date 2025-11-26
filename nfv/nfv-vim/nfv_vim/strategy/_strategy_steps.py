@@ -4824,6 +4824,12 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response['reason'])
 
+    def _abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()] if self.strategy._single_controller else []
+
     def handle_event(self, event, event_data=None):
         """Handle Host events"""
 
@@ -4939,7 +4945,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def from_dict(self, data):
         """
@@ -5091,7 +5097,7 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5136,7 +5142,7 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5177,7 +5183,7 @@ class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5218,7 +5224,7 @@ class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5259,7 +5265,7 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5300,7 +5306,7 @@ class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5464,7 +5470,7 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include an uncordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def handle_event(self, event, event_data=None):
         """
@@ -5518,7 +5524,7 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include a cordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def handle_event(self, event, event_data=None):
         """
@@ -5575,7 +5581,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include an uncordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def handle_event(self, event, event_data=None):
         """
@@ -5632,7 +5638,7 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include an uncordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _get_kube_host_upgrade_list_callback(self):
