@@ -3049,8 +3049,7 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
                  ignore_alarms,
                  single_controller,
                  expiry_date,
-                 subject,
-                 cert_file):
+                 subject):
         super(KubeRootcaUpdateStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.KUBE_ROOTCA_UPDATE,
@@ -3087,7 +3086,6 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         self._single_controller = single_controller
         self._expiry_date = expiry_date
         self._subject = subject
-        self._cert_file = cert_file
 
         # initialize the variables required by the mixins
         self.initialize_mixin()
@@ -3123,23 +3121,16 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
     def _add_kube_rootca_update_cert_stage(self):
         """
         Add kube-rootca-update cert strategy stage
-        This stage either uploads an existing cert, or generates one.
-        The upload option requires the path for the file to upload.
-        The generate option supports a expiry_date and subject  option.
+        This stage generates a cert, supporting a expiry_date and subject option.
         This stage is skipped if a previous update has already performed this
         activity.
         """
         from nfv_vim import strategy
         stage = strategy.StrategyStage(
             strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_CERT)
-        # if there is an existing cert file, upload it
-        if self._cert_file:
-            stage.add_step(
-                strategy.KubeRootcaUpdateUploadCertStep(self._cert_file))
-        else:
-            stage.add_step(
-                strategy.KubeRootcaUpdateGenerateCertStep(self._expiry_date,
-                                                          self._subject))
+        stage.add_step(
+            strategy.KubeRootcaUpdateGenerateCertStep(self._expiry_date,
+                                                      self._subject))
         self.apply_phase.add_stage(stage)
         # Proceed to the next stage
         self._add_kube_rootca_hosts_trustbothcas_stage()
@@ -3286,14 +3277,12 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
             # update was aborted, this means it needs to be recreated
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_ABORTED:
                 self._add_kube_rootca_update_start_stage,
-            # after update-started -> generate or upload cert
+            # after update-started, generate cert stage
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED:
                 self._add_kube_rootca_update_cert_stage,
 
-            # after generated or uploaded, host trustbothcas stage
+            # after generated, host trustbothcas stage
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED:
-                self._add_kube_rootca_hosts_trustbothcas_stage,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_UPLOADED:
                 self._add_kube_rootca_hosts_trustbothcas_stage,
 
             # handle interruption updating hosts trustbothcas -> retry
@@ -3412,7 +3401,6 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         self._single_controller = data['single_controller']
         self._expiry_date = data.get('expiry_date')
         self._subject = data.get('subject')
-        self._cert_file = data.get('cert_file')
         self.mixin_from_dict(data)
         return self
 
@@ -3424,7 +3412,6 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         data['single_controller'] = self._single_controller
         data['expiry_date'] = self._expiry_date
         data['subject'] = self._subject
-        data['cert_file'] = self._cert_file
         self.mixin_as_dict(data)
         return data
 

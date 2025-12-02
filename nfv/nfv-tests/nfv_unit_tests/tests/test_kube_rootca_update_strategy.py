@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2023 Wind River Systems, Inc.
+# Copyright (c) 2020-2023,2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -40,7 +40,6 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=False,
             expiry_date=None,
             subject=None,
-            cert_file=None,
             nfvi_kube_rootca_update=None):
         """
         Create a kube rootca update strategy
@@ -56,8 +55,7 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             ignore_alarms=[],
             single_controller=single_controller,
             expiry_date=expiry_date,
-            subject=subject,
-            cert_file=cert_file
+            subject=subject
         )
         strategy.sw_update_obj = sw_update_obj  # this is a weakref
         strategy.nfvi_kube_rootca_update = nfvi_kube_rootca_update
@@ -176,8 +174,7 @@ class ApplyStageMixin(object):
                                             kube_rootca_update=None,
                                             alarms_list=None,
                                             expiry_date=None,
-                                            subject=None,
-                                            cert_file=None):
+                                            subject=None):
         """
         Create a kube rootca update strategy
         populate the API query results from the build steps
@@ -193,8 +190,7 @@ class ApplyStageMixin(object):
             ignore_alarms=[],
             single_controller=single_controller,
             expiry_date=expiry_date,
-            subject=subject,
-            cert_file=cert_file
+            subject=subject
         )
         strategy.sw_update_obj = sw_update_obj  # warning: this is a weakref
         strategy.nfvi_kube_rootca_update = kube_rootca_update
@@ -214,15 +210,10 @@ class ApplyStageMixin(object):
             ],
         }
 
-    def _kube_rootca_update_cert_stage(self, upload=None):
-        if upload is not None:
-            step = {
-                'name': 'kube-rootca-update-upload-cert',
-            }
-        else:
-            step = {
-                'name': 'kube-rootca-update-generate-cert',
-            }
+    def _kube_rootca_update_cert_stage(self):
+        step = {
+            'name': 'kube-rootca-update-generate-cert',
+        }
         return {
             'name': 'kube-rootca-update-cert',
             'total_steps': 1,
@@ -374,8 +365,7 @@ class ApplyStageMixin(object):
             stages.append(self._kube_rootca_update_start_stage())
 
         if add_cert:
-            # todo(abailey): add support for upload vs generate
-            stages.append(self._kube_rootca_update_cert_stage(upload=None))
+            stages.append(self._kube_rootca_update_cert_stage())
 
         if add_host_trustboth:
             stages.extend(

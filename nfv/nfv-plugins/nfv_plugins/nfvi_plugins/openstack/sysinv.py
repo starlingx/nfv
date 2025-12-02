@@ -22,8 +22,6 @@ KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT = \
     KUBE_ROOTCA_UPDATE_ENDPOINT + "/generate_cert"
 KUBE_ROOTCA_UPDATE_PODS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/pods"
 KUBE_ROOTCA_UPDATE_HOSTS_ENDPOINT = KUBE_ROOTCA_UPDATE_ENDPOINT + "/hosts"
-KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT = \
-    KUBE_ROOTCA_UPDATE_ENDPOINT + "/upload_cert"
 
 KUBE_UPGRADE_ENDPOINT = "/kube_upgrade"
 
@@ -284,28 +282,6 @@ def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
     api_cmd_payload['subject'] = subject
     return _api_post(token, KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT,
                      api_cmd_payload)
-
-
-def kube_rootca_update_upload_cert(token, cert_file):
-    """
-    Ask System Inventory to kube rootca update upload a cert file
-    This uses POST for a file, which urllib does not work well with.
-    """
-    api_cmd = _api_cmd(token, KUBE_ROOTCA_UPDATE_UPLOAD_CERT_ENDPOINT)
-    api_cmd_headers = _api_cmd_headers()
-    api_cmd_payload = dict()
-
-    # The API is expecting requests.post formatted data
-    with open(cert_file, "rb") as cert_file_handle:
-        # file handle automatically closed once this request is sent
-        response = rest_api_request(token,
-                                    "POST",
-                                    api_cmd,
-                                    api_cmd_headers,
-                                    json.dumps(api_cmd_payload),
-                                    timeout_in_secs=REST_API_REQUEST_TIMEOUT,
-                                    file_to_post=cert_file_handle)
-    return response
 
 
 def kube_rootca_update_abort(token):

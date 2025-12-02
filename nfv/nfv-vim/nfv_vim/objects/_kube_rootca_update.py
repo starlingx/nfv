@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2021 Wind River Systems, Inc.
+# Copyright (c) 2020-2021,2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -41,8 +41,7 @@ class KubeRootcaUpdate(SwUpdate):
                        ignore_alarms,
                        single_controller,
                        expiry_date,
-                       subject,
-                       cert_file):
+                       subject):
         """
         Create a kubernetes root ca update strategy
         """
@@ -63,8 +62,7 @@ class KubeRootcaUpdate(SwUpdate):
                                               ignore_alarms,
                                               single_controller,
                                               expiry_date,
-                                              subject,
-                                              cert_file)
+                                              subject)
         self._strategy.sw_update_obj = self
         self._strategy.build()
         self._persist()

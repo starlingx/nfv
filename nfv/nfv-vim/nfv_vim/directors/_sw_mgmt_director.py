@@ -180,7 +180,6 @@ class SwMgmtDirector(object):
                                            alarm_restrictions,
                                            expiry_date,
                                            subject,
-                                           cert_file,
                                            callback):
         """
         Create Kubernetes Root CA Update Strategy
@@ -206,8 +205,7 @@ class SwMgmtDirector(object):
             self._ignore_alarms,
             self._single_controller,
             expiry_date,
-            subject,
-            cert_file)
+            subject)
 
         schedule.schedule_function_call(callback,
                                         success,

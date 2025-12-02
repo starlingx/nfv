@@ -120,7 +120,6 @@ def vim_sw_update_api_create_strategy(connection, msg):
     elif 'kube-rootca-update' == msg.sw_update_type:
         expiry_date = msg.expiry_date
         subject = msg.subject
-        cert_file = msg.cert_file
         uuid, reason = sw_mgmt_director.create_kube_rootca_update_strategy(
             controller_apply_type,
             storage_apply_type,
@@ -130,7 +129,6 @@ def vim_sw_update_api_create_strategy(connection, msg):
             alarm_restrictions,
             expiry_date,
             subject,
-            cert_file,
             _vim_sw_update_api_create_strategy_callback)
     elif 'kube-upgrade' == msg.sw_update_type:
         to_version = msg.to_version
