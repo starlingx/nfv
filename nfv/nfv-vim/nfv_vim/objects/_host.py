@@ -723,6 +723,12 @@ class Host(ObjectData):
         """
         self._fsm.handle_event(host_fsm.HOST_EVENT.DELETE)
 
+    def nfvi_host_audit(self):
+        """
+        NFVI Host Audit
+        """
+        self._fsm.handle_event(host_fsm.HOST_EVENT.AUDIT)
+
     def periodic_timer(self):
         """
         Periodic Timer

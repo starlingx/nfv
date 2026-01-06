@@ -61,6 +61,7 @@ class HostAction(Constants):
     UNLOCK = Constant('unlock')
     LOCK_FORCE = Constant('lock-force')
     DELETE = Constant('delete')
+    HOST_AUDIT = Constant('host-audit')
 
 
 @six.add_metaclass(Singleton)

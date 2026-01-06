@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -77,7 +77,8 @@ class SwMgmtDirector(object):
     def create_sw_upgrade_strategy(self,
                                    controller_apply_type, storage_apply_type, worker_apply_type,
                                    max_parallel_worker_hosts, default_instance_action,
-                                   alarm_restrictions, release, rollback, delete, callback):
+                                   alarm_restrictions, release, rollback, delete,
+                                   snapshot, callback):
         """
         Create Software Upgrade Strategy
         """
@@ -94,7 +95,7 @@ class SwMgmtDirector(object):
         success, reason = self._sw_update.strategy_build(
             strategy_uuid, controller_apply_type, storage_apply_type,
             worker_apply_type, max_parallel_worker_hosts, default_instance_action,
-            alarm_restrictions, release, rollback, delete,
+            alarm_restrictions, release, rollback, delete, snapshot,
             self._ignore_alarms, self._single_controller)
 
         # TODO(jkraitbe): All create_* functions should have this check.

@@ -933,10 +933,11 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
     """
     Software Deploy Precheck - Strategy Step
     """
-    def __init__(self, release):
+    def __init__(self, release, snapshot=False):
         super(SwDeployPrecheckStep, self).__init__(
             STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
+        self._snapshot = snapshot
 
     @coroutine
     def _sw_deploy_precheck_callback(self):
@@ -978,7 +979,9 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
                     strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
                 ]
             )
-            nfvi.nfvi_sw_deploy_precheck(self._release, force, self._sw_deploy_precheck_callback())
+
+            nfvi.nfvi_sw_deploy_precheck(self._release, force, self._snapshot,
+                                         self._sw_deploy_precheck_callback())
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
@@ -1060,12 +1063,35 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._unknown_hosts = 0
         self._restart = False
         self._skip_loop = True
+        # Retries
+        self._retry_count = 0  # Current attempt
+        self._retry_sleep = 0  # Earliest time next attempt can begin, current time + delay
+        self._retry_requested = False  # Is a retry queued
+        self._max_retries = self.MAX_RETRIES  # Maximum number of retries
+        self._retry_delay = self.RETRY_DELAY  # Minimum delay between retries
 
     @property
     def TIMEOUT(self):
         section = config.CONF.get("software-deploy", {})
         timeout = int(section.get("deploy_host_execute_timeout", 3600))
         return timeout
+
+    @property
+    def MAX_RETRIES(self):
+        section = config.CONF.get("software-deploy", {})
+        max_retries = int(section.get("deploy_host_retries", 3))
+        return max_retries
+
+    @property
+    def RETRY_DELAY(self):
+        section = config.CONF.get("software-deploy", {})
+        retry_delay = int(section.get("deploy_host_retry_delay", 120))
+        return retry_delay
+
+    def timeout(self):
+        result, msg = super().timeout()
+        msg = f"{msg}, retries={self._retry_count}"
+        return result, msg
 
     def _get_upgrade_callback_inner(self, response):
         """
@@ -1114,11 +1140,24 @@ class UpgradeHostsStep(strategy.StrategyStep):
             response['failed-hosts'] = failed_hosts
             reason = f"Deploy hosts failed for some hosts: {json.dumps(failed_hosts, indent=2)}"
             result = strategy.STRATEGY_STEP_RESULT.FAILED
+
+            # Check if retry limit exceeded
+            if self._retry_count < self._max_retries:
+                self._retry_requested = True
+                self._retry_sleep = time.perf_counter() + self._retry_delay
+                DLOG.notice(
+                    "Handle Host-Upgrade failure, "
+                    f"retry={self._retry_count+1} queued, "
+                    f"delay>={self._retry_delay} seconds"
+                )
+                self.strategy.save()
+                return False
+
             self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
             return True
 
-        reason = "Deploy hosts succeeded for all hosts"
+        reason = f"Deploy hosts succeeded for all hosts, retries={self._retry_count}"
         result = strategy.STRATEGY_STEP_RESULT.SUCCESS
         DLOG.info(reason)
         self.stage.step_complete(result, reason)
@@ -1210,16 +1249,31 @@ class UpgradeHostsStep(strategy.StrategyStep):
             update = True
 
         elif event in [STRATEGY_EVENT.HOST_AUDIT]:
-            update = True
+            pass
+
+        if self._retry_requested and time.perf_counter() > self._retry_sleep:
+            self._retry_requested = False
+            self._retry_count += 1
+
+            if len(self._failed_hosts.keys()) == 0:
+                DLOG.info("No failed hosts, deploy host completed between the retry delay")
+                update = True
+            else:
+                DLOG.notice(f"Step ({self._name}): Executing retry={self._retry_count} "
+                            f"for hosts: {list(self._failed_hosts.keys())}")
+                self.strategy.save()
+                host_director = directors.get_host_director()
+                host_director.upgrade_hosts(self._failed_hosts.keys(),
+                                            self.strategy._rollback)
 
         if self._query_inprogress or self._step_complete:
             return True
 
         if update:
+            update = False
             self._query_inprogress = True
             release = self.strategy.nfvi_upgrade['release']
             nfvi.nfvi_get_upgrade(release, self._get_upgrade_callback())
-            return True
 
         return False
 
@@ -1238,6 +1292,11 @@ class UpgradeHostsStep(strategy.StrategyStep):
         self._unknown_hosts = data["unknown_hosts"]
         self._restart = True
         self._skip_loop = True
+        self._retry_count = data["retry_count"]
+        self._retry_sleep = data["retry_sleep"]
+        self._retry_requested = data["retry_requested"]
+        self._max_retries = data["max_retries"]
+        self._retry_delay = data["retry_delay"]
         return self
 
     def as_dict(self):
@@ -1251,6 +1310,11 @@ class UpgradeHostsStep(strategy.StrategyStep):
         data['failed_hosts'] = self._failed_hosts
         data['deployed_hosts'] = self._deployed_hosts
         data['unknown_hosts'] = self._unknown_hosts
+        data['retry_count'] = self._retry_count
+        data['retry_sleep'] = self._retry_sleep
+        data['retry_requested'] = self._retry_requested
+        data['max_retries'] = self._max_retries
+        data['retry_delay'] = self._retry_delay
         return data
 
 
@@ -1259,11 +1323,12 @@ class UpgradeStartStep(strategy.StrategyStep):
     Upgrade Start - Strategy Step
     """
 
-    def __init__(self, release, timeout=None):
+    def __init__(self, release, snapshot=False, timeout=None):
         super(UpgradeStartStep, self).__init__(
             STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
+        self._snapshot = snapshot
         self._query_inprogress = False
 
     @property
@@ -1355,7 +1420,9 @@ class UpgradeStartStep(strategy.StrategyStep):
                     strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
                 ]
             )
-            nfvi.nfvi_upgrade_start(self._release, force, self._start_upgrade_callback())
+
+            nfvi.nfvi_upgrade_start(self._release, force, self._snapshot,
+                                    self._start_upgrade_callback())
 
         return result, reason
 
@@ -1424,14 +1491,19 @@ class UpgradeActivateStep(strategy.StrategyStep):
     @property
     def RETRY_LIMIT(self):
         section = config.CONF.get("software-deploy", {})
-        timeout = int(section.get("deploy_activate_retries", 3))
-        return timeout
+        retry_limit = int(section.get("deploy_activate_retries", 3))
+        return retry_limit
 
     @property
     def RETRY_DELAY(self):
         section = config.CONF.get("software-deploy", {})
-        timeout = int(section.get("deploy_activate_retry_delay", 30))
-        return timeout
+        retry_delay = int(section.get("deploy_activate_retry_delay", 30))
+        return retry_delay
+
+    def timeout(self):
+        result, msg = super().timeout()
+        msg = f"{msg}, retries={self._retry_count}"
+        return result, msg
 
     @coroutine
     def _activate_upgrade_callback(self):
@@ -1477,13 +1549,13 @@ class UpgradeActivateStep(strategy.StrategyStep):
             DLOG.debug("Handle Activate-Upgrade callback, deploy activate is done")
         elif self.strategy.nfvi_upgrade.is_activate_failed:
             reason = (
-                "Failed software deploy activate, "
+                f"Failed software deploy activate, retries={self._retry_count}, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
         elif not self.strategy.nfvi_upgrade.is_activating:
             reason = (
-                "Unknown error while doing software deploy activate, "
+                f"Unknown error while doing software deploy activate, retries={self._retry_count}, "
                 "check /var/log/nfv-vim.log or /var/log/software.log for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
@@ -1670,7 +1742,7 @@ class SwDeployDeleteStep(strategy.StrategyStep):
 
     def __init__(self, release):
         super(SwDeployDeleteStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_DEPLOY_DELETE, timeout_in_secs=60)
+            STRATEGY_STEP_NAME.SW_DEPLOY_DELETE, timeout_in_secs=300)
 
         self._release = release
 
@@ -4752,6 +4824,12 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response['reason'])
 
+    def _abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return [KubeUpgradeAbortStep()] if self.strategy._single_controller else []
+
     def handle_event(self, event, event_data=None):
         """Handle Host events"""
 
@@ -4867,7 +4945,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def from_dict(self, data):
         """
@@ -5019,7 +5097,7 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5064,7 +5142,7 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5105,7 +5183,7 @@ class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5146,7 +5224,7 @@ class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5187,7 +5265,7 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
         """
         Returns the abort step related to this step
         """
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5223,6 +5301,12 @@ class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED,
             timeout_in_secs=900)
+
+    def abort(self):
+        """
+        Returns the abort step related to this step
+        """
+        return self._abort()
 
     @coroutine
     def _response_callback(self):
@@ -5386,7 +5470,7 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include an uncordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def handle_event(self, event, event_data=None):
         """
@@ -5440,7 +5524,7 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include a cordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def handle_event(self, event, event_data=None):
         """
@@ -5497,7 +5581,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include an uncordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     def handle_event(self, event, event_data=None):
         """
@@ -5554,7 +5638,7 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
         Returns the abort step related to this step
         """
         # todo(abailey): Unknown if this should include an uncordon if it fails
-        return [KubeUpgradeAbortStep()]
+        return self._abort()
 
     @coroutine
     def _get_kube_host_upgrade_list_callback(self):

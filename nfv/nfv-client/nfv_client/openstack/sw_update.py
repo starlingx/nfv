@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -305,8 +305,15 @@ def create_strategy(token_id,
         api_cmd_payload['controller-apply-type'] = controller_apply_type
         api_cmd_payload['default-instance-action'] = default_instance_action
         api_cmd_payload['release'] = kwargs['release']
-        api_cmd_payload['rollback'] = kwargs['rollback']
-        api_cmd_payload['delete'] = kwargs['delete']
+        api_cmd_payload['rollback'] = kwargs.get('rollback')
+        api_cmd_payload['delete'] = kwargs.get('delete')
+
+        # Append snapshot if it was provided. This is to
+        # support API call backwards compatibility, where
+        # the snapshot parameter is unknown.
+        if kwargs.get('snapshot'):
+            api_cmd_payload['snapshot'] = kwargs.get('snapshot')
+
     api_cmd_payload['storage-apply-type'] = storage_apply_type
     api_cmd_payload['worker-apply-type'] = worker_apply_type
     if max_parallel_worker_hosts is not None:

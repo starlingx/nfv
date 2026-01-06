@@ -1,5 +1,5 @@
 
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -158,6 +158,8 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
                                  name='rollback')
     delete = wsme_types.wsattr(bool, mandatory=False,
                                  name='delete')
+    snapshot = wsme_types.wsattr(bool, mandatory=False,
+                                 name='snapshot', default=None)
     storage_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
                                            name='storage-apply-type')
     worker_apply_type = wsme_types.wsattr(SwUpdateApplyTypes, mandatory=True,
@@ -593,6 +595,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
         rpc_request.release = request_data.release
         rpc_request.rollback = request_data.rollback
         rpc_request.delete = request_data.delete
+        rpc_request.snapshot = request_data.snapshot
         rpc_request.controller_apply_type = request_data.controller_apply_type
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.swift_apply_type = SW_UPDATE_APPLY_TYPE.IGNORE

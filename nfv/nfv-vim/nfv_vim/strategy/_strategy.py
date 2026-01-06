@@ -54,6 +54,9 @@ PATCH_REPO_STATE_APPLIED = 'Applied'
 PATCH_STATE_APPLIED = 'Applied'
 WAIT_ALARM_TIMEOUT = 2400
 
+# constants used by kube upgrade
+KUBELET_MINOR_SKEW_TOLERANCE = 3
+
 
 ###################################################################
 #
@@ -972,6 +975,24 @@ class UpdateControllerHostsMixin(object):
             local_host = None
             local_host_name = get_local_host_name()
 
+            # This part of code is used by other orchestrations too, so making these modifications
+            # so that they are not affected. We don't need to check for AIO configuration
+            # because they have worker personality also, so they go to worker strategy
+            # stages.
+            # For software major upgrade, strict controller order needs to be followed
+            # Deploy order: [controller-1, controller-0]
+            # Rollback order: [controller-0, controller-1]
+            try:
+                if isinstance(self, SwUpgradeStrategy) and self.nfvi_upgrade.major_release:
+                    if self._rollback and not self._single_controller:
+                        # Rollback case
+                        local_host_name = HOST_NAME.CONTROLLER_1
+                    else:
+                        # Upgrade case
+                        local_host_name = HOST_NAME.CONTROLLER_0
+            except Exception as e:
+                DLOG.warn("While checking for software major upgrade got exception: ", exc_info=e)
+
             for host in controllers:
                 if HOST_PERSONALITY.WORKER not in host.personality:
                     if local_host_name == host.name:
@@ -1345,7 +1366,13 @@ class UpdateWorkerHostsMixin(object):
                 # alarms to clear. Note: not all controller nodes will have
                 # OSDs configured, but the alarms should clear quickly in
                 # that case so this will not delay the update strategy.
-                if any([HOST_PERSONALITY.CONTROLLER in host.personality
+                if isinstance(self, (SwUpgradeStrategy, KubeUpgradeStrategy)):
+                    # TODO(jkraitbe): Workers can now support OSDs but VIM lacks a way to check.
+                    stage.add_step(strategy.WaitAlarmsClearStep(
+                                timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                                ignore_alarms=self._ignore_alarms,
+                                ignore_alarms_conditional=self._ignore_alarms_conditional))
+                elif any([HOST_PERSONALITY.CONTROLLER in host.personality
                         for host in hosts_to_lock + hosts_to_reboot]):
                     # Multiple personality nodes that need to wait for OSDs to sync:
                     stage.add_step(strategy.WaitAlarmsClearStep(
@@ -1783,7 +1810,7 @@ class SwUpgradeStrategy(
     def __init__(self, uuid,
                  controller_apply_type, storage_apply_type, worker_apply_type,
                  max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions, release, rollback, delete,
+                 alarm_restrictions, release, rollback, delete, snapshot,
                  ignore_alarms, single_controller):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
@@ -1800,6 +1827,7 @@ class SwUpgradeStrategy(
         self._release = release
         self._rollback = rollback
         self._delete = delete
+        self._snapshot = snapshot
 
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
@@ -1849,7 +1877,8 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
         # Precheck is part of create phase because DC requested it
-        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release))
+        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release,
+                                                     snapshot=self._snapshot))
         self.build_phase.add_stage(stage)
         super(SwUpgradeStrategy, self).build()
 
@@ -1900,6 +1929,20 @@ class SwUpgradeStrategy(
             self.save()
             super(SwUpgradeStrategy, self).build()
 
+        # TODO(sshathee): Remove this conditon when implementing snapshot
+        # with rollback command
+        elif self._rollback and self._snapshot is not None:
+            reason = "Cannot set both snapshot and rollback, if snapshot" \
+                      "is available it will be forcibly used."
+            DLOG.error(reason)
+            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+            self.build_phase.result_reason = reason
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason)
+            self.save()
+            super(SwUpgradeStrategy, self).build()
+
         elif self._rollback:
             return self._build_rollback()
 
@@ -1936,7 +1979,7 @@ class SwUpgradeStrategy(
 
         # sw-deploy start for major releases must be done on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(strategy.UpgradeStartStep(release=self._release))
+        stage.add_step(strategy.UpgradeStartStep(release=self._release, snapshot=self._snapshot))
         stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
         self.apply_phase.add_stage(stage)
 
@@ -1998,6 +2041,11 @@ class SwUpgradeStrategy(
                 controllers_hosts,
                 key=lambda x: x.name == local_host_name,
             )
+
+        storage_hosts = sorted(
+            storage_hosts,
+            key=lambda x: int(x.name.split("-")[1])
+        )
 
         strategy_pairs = [
             (controller_strategy, controllers_hosts),
@@ -2173,8 +2221,7 @@ class SwUpgradeStrategy(
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.SwDeployAbortStep())
-        # TODO(jkraitbe): Activate-rollback not supported yet
-        # stage.add_step(strategy.SwDeployActivateRollbackStep())
+        stage.add_step(strategy.SwDeployActivateRollbackStep())
         self.apply_phase.add_stage(stage)
 
     def _add_rollback_hosts_stages(self, do_nothing):
@@ -2229,22 +2276,52 @@ class SwUpgradeStrategy(
                 self.save()
                 return
 
-        # Sort the controller such that host other than
-        # current local_host_name is the first element in the list.
-        # This sorting is to reduce the number of swact required since
-        # sw-deploy patch release orchestration can start on host that
-        # is currently active.
-        local_host_name = get_local_host_name()
-        controllers_hosts = sorted(
-            controllers_hosts,
-            key=lambda x: x.name == local_host_name,
-        )
+        if self.nfvi_upgrade.major_release:
+            # Major release rollback
+            # Dependency in USM to rollback controller
+            # hosts in order [controller-0, controller-1]
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == HOST_NAME.CONTROLLER_1,
+            )
+
+            # Dependency in USM to rollback storage hosts in
+            # reverse order of deployment for major release
+            storage_hosts = sorted(
+                storage_hosts,
+                key=lambda x: int(x.name.split("-")[1]),
+                reverse=True
+            )
+
+        else:
+            # Patch rollback
+            local_host_name = get_local_host_name()
+
+            controllers_hosts = sorted(
+                controllers_hosts,
+                key=lambda x: x.name == local_host_name,
+            )
+
+            # For patch rollback, storage hosts order is not reversed in USM,
+            # in validate_host_deploy_order function
+            # TODO(sshathee) Reverse the storage host order once its done in
+            # USM to maintain same order for major and patch rollback
+            storage_hosts = sorted(
+                storage_hosts,
+                key=lambda x: int(x.name.split("-")[1])
+            )
 
         strategy_pairs = [
             (self._add_worker_strategy_stages, worker_hosts),
             (self._add_storage_strategy_stages, storage_hosts),
             (controller_strategy, controllers_hosts),
         ]
+
+        if not self.nfvi_upgrade.major_release:
+            # Patch rollback order is controller, storage then worker nodes
+            # in USM
+            # TODO(sshathee) Revisit the patch order once its unified in USM
+            strategy_pairs.reverse()
 
         for stage_func, host_list in strategy_pairs:
             if host_list:
@@ -2268,6 +2345,8 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_COMPLETE)
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        # sw-deploy delete must be done on controller-0 for major release
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(strategy.SwDeployDeleteStep(release=self.nfvi_upgrade.release_id))
         self.apply_phase.add_stage(stage)
 
@@ -2298,19 +2377,8 @@ class SwUpgradeStrategy(
                 f"found={self.nfvi_upgrade.release_info}"
             )
 
-        elif not self._single_controller:
-            reason = "Software rollback is only supported on AIO-SX by VIM currently"
-
         elif self.nfvi_upgrade.is_starting:
             reason = "Software rollback cannot be initiated while sw-deploy-start is in progress"
-
-        elif (
-                self.nfvi_upgrade.is_activating or
-                self.nfvi_upgrade.is_activate_done or
-                self.nfvi_upgrade.is_activate_failed or
-                self.nfvi_upgrade.is_deploy_completed
-        ):
-            reason = "Software rollback cannot be initiated by VIM after activation"
 
         if reason:
             DLOG.warn(reason)
@@ -3411,6 +3479,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             '700.004',  # VM stopped
             '750.006',  # Configuration change requires reapply of cert-manager
             '900.007',  # Kube Upgrade in progress
+            '900.022',  # Clean up deployment data
+            '900.023',  # Software release deploy operation in progress.
             '900.401',  # kube-upgrade-auto-apply-inprogress
             '900.701',  # Node tainted
         ]
@@ -3536,6 +3606,14 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                 kubelet_map[host.host_uuid] = host.kubelet_version
         return kubelet_map
 
+    def _kubeadm_map(self):
+        """Map the host kubeadm versions by the host uuid.
+        """
+        kubeadm_map = dict()
+        for host in self.nfvi_kube_host_upgrade_list:
+            kubeadm_map[host.host_uuid] = host.control_plane_version
+        return kubeadm_map
+
     def _add_kube_upgrade_start_stage(self):
         """
         Add upgrade start strategy stage
@@ -3637,6 +3715,52 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             self.apply_phase.add_stage(stage)
         self._add_kube_update_stages()
 
+    def _kubelet_version_skew(self, kubeadm_version, kubelet_version):
+        """Calculate integer skew between kubeadm (control-plane) minor
+        version and kubelet minor version.
+
+        Reference: https://kubernetes.io/releases/version-skew-policy/
+        kubelet may be up to three minor versions older than kube-apiserver.
+
+        This routine transforms major.minor.patch version string 'X.Y.Z'
+        to scaled representation 100*int(X) + int(Y). The major version is
+        scaled by 100. This ensures that major version changes go beyond
+        the skew limit. The patch version is ignored.
+
+        :param kubeadm_version: control-plane K8S version
+        :param kubelet_version: kubelet K8S version
+
+        :return: integer: skew between kubeadm minor version
+                 and kubelet minor version
+        """
+        def safe_strip(input_string):
+            if not input_string:
+                return ''
+            return ''.join(c for c in input_string if c in '1234567890.')
+
+        if any(value is None for value in (kubeadm_version, kubelet_version)):
+            raise ValueError("Invalid kubelet version skew input")
+
+        # Split major.minor.patch into integer components
+        try:
+            kubeadm_map = list(map(int, safe_strip(kubeadm_version).split(".")[:2]))
+            kubelet_map = list(map(int, safe_strip(kubelet_version).split(".")[:2]))
+        except Exception as e:
+            DLOG.error("_kubelet_version_skew: Unexpected error: %s, "
+                      "kubeadm_version=%s, kubelet_version=%s"
+                      % (e, kubeadm_version, kubelet_version))
+            raise ValueError("Invalid kubelet version skew input")
+
+        if len(kubeadm_map) != 2 or len(kubelet_map) != 2:
+            raise ValueError("Invalid kubelet version skew input")
+
+        # Calculate integer skew between kubeadm and kubelet minor version
+        skew = (
+                100 * (kubeadm_map[0] - kubelet_map[0]) +
+                (kubeadm_map[1] - kubelet_map[1])
+        )
+        return skew
+
     def _add_kube_update_stages(self):
         """Stages for control plane, kubelet and cordon"""
         # Algorithm
@@ -3644,38 +3768,91 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # Simplex:
         # - loop over kube versions
         #   - control plane
-        #   - kubelet
+        #   - kubelet: if exceeded skew, or last version
         # -------------------------
         # Duplex:
         # - loop over kube versions
         #   - first control plane
         #   - second control plane
-        #   - kubelets
+        #   - kubelets: if exceeded skew, or last version
         # -------------------------
-        from nfv_vim import nfvi
+        from distutils.version import LooseVersion
         from nfv_vim import strategy
 
         first_host = self.get_first_host()
         second_host = self.get_second_host()
         ver_list = self._get_kube_version_steps(self._to_version,
                                                 self._nfvi_kube_versions_list)
+        kubeadm_map = self._kubeadm_map()
+        kubelet_map = self._kubelet_map()
+        kubelet_min_version = min(kubelet_map.values(), key=LooseVersion, default=None)
 
-        prev_state = None
-        if self.nfvi_kube_upgrade is not None:
-            prev_state = self.nfvi_kube_upgrade.state
+        # convert the kube_list into a dictionary indexed by version
+        kube_dict = {}
+        for kube in self._nfvi_kube_versions_list:
+            kube_dict[kube['kube_version']] = kube
 
+        # Determine whether we have to upgrade control-plane at the
+        # first kube version in the upgrade list, otherwise skip.
         skip_first = False
         skip_second = False
-        if prev_state in [nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
-                          nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER,
-                          nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED]:
-            # we have already proceeded past first control plane
+
+        # Kubernetes skew policy allows upgrade of control-plane(s)
+        # multiple times before updating kubelet. This logic is aligned
+        # with the semantic in sysinv/api/controllers/v1/host.py
+        # kube_upgrade_control_plane().
+
+        first_ver = None
+        if first_host is not None:
+            first_ver = kubeadm_map.get(first_host.uuid)
+        second_ver = None
+        if second_host is not None:
+            second_ver = kubeadm_map.get(second_host.uuid)
+
+        # determine if control-plane already upgraded at this step
+        ver_init = ver_list[0] if ver_list else None
+        if first_ver == ver_init:
             skip_first = True
-        elif prev_state in [nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
-                            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS]:
-            # we have already proceeded past first control plane and second control plane
-            skip_first = True
+        if second_ver == ver_init:
             skip_second = True
+
+        # detect duplex and order
+        if len(set(kubeadm_map.values())) != 1:
+            if ((first_ver is not None) and
+                    all(LooseVersion(first_ver) > LooseVersion(ver)
+                        for ver in kubeadm_map.values())):
+                # first_host control-plane newer than second
+                skip_first = True
+            if ((second_ver is not None) and
+                    all(LooseVersion(second_ver) > LooseVersion(ver)
+                        for ver in kubeadm_map.values())):
+                # second_host control-plane newer than first
+                skip_second = True
+
+        # initial list of kubelet_stage versions considered for upgrade
+        if ver_list:
+            upgrade_from = kube_dict[ver_init]['upgrade_from'][0]
+            if (kubelet_min_version is not None and
+                    LooseVersion(kubelet_min_version) < LooseVersion(upgrade_from)):
+                kubelet_stage = [kubelet_min_version]
+            else:
+                kubelet_stage = [upgrade_from]
+
+            # Upgrade kubelet first if nodes are partially upgraded and one node
+            # has exceeded kubelet version skew.
+            # Example:  If current kubelet is at 1.29, current kubeadm is at 1.32.
+            kubeadm_version = ver_init
+            kubelet_version = kubelet_stage[0]
+            kubelet_skew = self._kubelet_version_skew(kubeadm_version, kubelet_version)
+
+            # upgrade kubelet if we exceed skew tolerance.
+            if kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE:
+                self._add_kube_upgrade_kubelets_stage(ver_init)
+
+                # initialize next iteration
+                kubelet_stage = [kubeadm_version]
+        else:
+            kubelet_stage = []
 
         for kube_ver in ver_list:
             DLOG.info("Examining %s " % kube_ver)
@@ -3693,14 +3870,81 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             else:
                 self._add_kube_upgrade_second_control_plane_stage(second_host, kube_ver)
 
-            # kubelets
-            self._add_kube_upgrade_kubelets_stage(kube_ver)
+            # Evaluate Kubernetes Skew Policy; this will evaluate kubelet version skew
+            # for each K8S node. This prevents unsupported advancement of control-plane
+            # if any nodes are not current enough.
+            # Example:  If current kubelet is at 1.29, current kubeadm is at 1.32,
+            # then the minor version skew is 3 (i.e., 32 - 29). We prevent the kubeadm
+            # upgrade to 1.33 since the resulting upgrade would have skew of 4.
+
+            # keep kubelet versions we have yet to upgrade
+            kubeadm_version = kube_ver
+            kubelet_stage.append(kubeadm_version)
+            kubelet_version = kubelet_stage[0]
+            kubelet_skew = self._kubelet_version_skew(kubeadm_version, kubelet_version)
+
+            # upgrade kubelet if we exceed skew tolerance
+            if kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE:
+                self._add_kube_upgrade_kubelets_stage(kube_ver)
+
+                # initialize next iteration
+                kubelet_stage = [kubeadm_version]
+
             # kubelets can 'fail' the build. Return abruptly if it does
             # todo(abailey): change this once all lock/unlock are removed from kubelet
             if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
                 return
 
+        # Update kubelet to the final version if it isn't already
+        if kubelet_stage:
+            kubelet_version = kubelet_stage[0]
+            kube_ver = kubelet_stage[-1]
+            if kubelet_version != self._to_version:
+                self._add_kube_upgrade_kubelets_stage(kube_ver)
+                if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
+                    return
+        else:
+            # Ensure worker hosts are unlocked if they are already at the
+            # target kubelet version. This handles the case where the
+            # upgrade strategy was aborted/recreated, leaving workers locked
+            # even though no kubelet upgrade stage is generated for them.
+            # Although AIO hosts also have the worker personality, this
+            # block should not be reachable with a locked controller
+            locked_workers = []
+            already_upgraded_hosts = self._query_already_upgraded_hosts(self._to_version)
+            for host in already_upgraded_hosts:
+                if (HOST_PERSONALITY.WORKER in host.personality and
+                    kubelet_map.get(host.uuid) == self._to_version and
+                    host.is_locked()):
+                    locked_workers.append(host)
+
+            if locked_workers:
+                stage = strategy.StrategyStage(
+                    strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_UNLOCK_LOCKED_WORKERS)
+                stage.add_step(strategy.UnlockHostsStep(locked_workers))
+                stage.add_step(strategy.SystemStabilizeStep())
+                self.apply_phase.add_stage(stage)
+
         self._add_kube_host_uncordon_stage()
+
+    def _query_already_upgraded_hosts(self, kube_ver):
+        from nfv_vim import tables
+
+        host_table = tables.tables_get_host_table()
+        kubelet_map = self._kubelet_map()
+
+        already_upgraded_hosts = list()
+        for host in list(host_table.values()):
+            if kubelet_map.get(host.uuid) == self._to_version:
+                DLOG.info("Host %s kubelet already up to date" % host.name)
+                already_upgraded_hosts.append(host)
+                continue
+            if kubelet_map.get(host.uuid) == kube_ver:
+                DLOG.info("Host %s kubelet already at interim version" % host.name)
+                already_upgraded_hosts.append(host)
+                continue
+
+        return already_upgraded_hosts
 
     def _add_kube_host_uncordon_stage(self):
         """Add host uncordon stage for a host"""

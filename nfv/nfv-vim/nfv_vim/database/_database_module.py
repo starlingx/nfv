@@ -1,8 +1,11 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016,2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+
+import subprocess
+
 from nfv_vim.database._database import database_create
 from nfv_vim.database._database import database_get
 
@@ -38,8 +41,11 @@ def database_initialize(config):
     database_create(config['database_dir'])
 
 
-def database_finalize():
+def database_finalize(config=None):
     """
     Finalize the database package
     """
-    return
+    database = database_get()
+    database.end_session()
+    if config:
+        subprocess.call(["sync", config['database_dir']])

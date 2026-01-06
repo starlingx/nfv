@@ -1,11 +1,12 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
 import re
 import requests
+import ssl
 
 from six.moves import BaseHTTPServer
 from six.moves import http_client as httplib
@@ -20,6 +21,7 @@ from nfv_common import selobj
 from nfv_common import timers
 
 from nfv_common.helpers import coroutine
+from nfv_common.helpers import get_system_ca_file
 from nfv_common.helpers import Object
 from nfv_common.helpers import Result
 
@@ -29,6 +31,8 @@ from nfv_plugins.nfvi_plugins.openstack.openstack_log import log_error
 from nfv_plugins.nfvi_plugins.openstack.openstack_log import log_info
 
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.rest_api')
+
+_ssl_context = None
 
 
 class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -204,6 +208,14 @@ class RestAPIServer(SocketServer.TCPServer):
         self._port = port
         self._http_handler = RestAPIRequestDispatcher
         self._http_handler.protocol = "HTTP/1.1"
+        try:
+            socket.inet_pton(socket.AF_INET6, ip)
+            self.address_family = socket.AF_INET6
+            DLOG.info(f"REST API setup to listen on IPv6 address {ip}")
+        except Exception as e:
+            DLOG.debug(f"Cannot transform {ip} to IPv6. {e}")
+            socket.inet_pton(socket.AF_INET, ip)  # If not IPv6, asserts IPv4
+            DLOG.info(f"REST API setup to listen on IPv4 address {ip}")
         SocketServer.TCPServer.__init__(self, (ip, int(port)),
                                         self._http_handler,
                                         bind_and_activate=False)
@@ -344,8 +356,20 @@ def _rest_api_request(token_id,
                 response_raw = request.text
 
         else:
+            global _ssl_context
+            ssl_context = None
+            if api_cmd.startswith('https://'):
+                if _ssl_context is None:
+                    ca_file = get_system_ca_file()
+                    if ca_file:
+                        _ssl_context = ssl.create_default_context(
+                            ssl.Purpose.CLIENT_AUTH,
+                            cafile=ca_file
+                        )
+                ssl_context = _ssl_context
             with urllib.request.urlopen(request_info,
-                                        timeout=timeout_in_secs) as request:
+                                        timeout=timeout_in_secs,
+                                        context=ssl_context) as request:
                 headers = list()  # list of tuples
                 for key, value in request.info().items():
                     if key not in headers_per_hop:

@@ -13,6 +13,7 @@ import time
 from nfv_common import config
 from nfv_common import debug
 from nfv_common import tcp
+from nfv_vim.api.acl.policies import base as base_policy
 from nfv_vim.api.acl import policy
 
 from nfv_common.helpers import Object
@@ -186,8 +187,8 @@ class AccessPolicyHook(hooks.PecanHook):
                 controller_method = state.controller.__name__
                 controller.enforce_policy(controller_method, state.request.environ['auth_context'])
             else:
-                policy.check("admin_in_system_projects", {}, state.request.environ['auth_context'],
-                               exc=policy.PolicyForbidden)
+                policy.check(base_policy.ADMIN_OR_CONFIGURATOR, {},
+                             state.request.environ['auth_context'], exc=policy.PolicyForbidden)
 
         except policy.PolicyForbidden:
             DLOG.warn("caught forbidden exception")

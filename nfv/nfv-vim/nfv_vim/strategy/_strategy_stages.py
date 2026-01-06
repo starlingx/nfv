@@ -77,6 +77,7 @@ class StrategyStageNames(Constants):
     KUBE_UPGRADE_KUBELETS_CONTROLLERS = \
        Constant('kube-upgrade-kubelets-controllers')
     KUBE_UPGRADE_KUBELETS_WORKERS = Constant('kube-upgrade-kubelets-workers')
+    KUBE_UPGRADE_UNLOCK_LOCKED_WORKERS = Constant('kube-upgrade-unlock-locked-workers')
     KUBE_POST_APPLICATION_UPDATE = Constant('kube-post-application-update')
     KUBE_UPGRADE_COMPLETE = Constant('kube-upgrade-complete')
     KUBE_UPGRADE_CLEANUP = Constant('kube-upgrade-cleanup')
