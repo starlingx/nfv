@@ -75,7 +75,6 @@ class StrategyStepNames(Constants):
     KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS = Constant('kube-rootca-update-pods-trustbothcas')
     KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA = Constant('kube-rootca-update-pods-trustnewca')
     KUBE_ROOTCA_UPDATE_START = Constant('kube-rootca-update-start')
-    KUBE_ROOTCA_UPDATE_UPLOAD_CERT = Constant('kube-rootca-update-upload-cert')
     QUERY_KUBE_ROOTCA_UPDATE = Constant('query-kube-rootca-update')
     QUERY_KUBE_ROOTCA_HOST_UPDATES = Constant('query-kube-rootca-host-updates')
     # kube upgrade steps
@@ -4552,60 +4551,6 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
         return data
 
 
-class KubeRootcaUpdateUploadCertStep(AbstractKubeRootcaUpdateStep):
-    """Kube RootCA Update - Upload Cert - Strategy Step"""
-
-    def __init__(self, cert_file):
-        from nfv_vim import nfvi
-        super(KubeRootcaUpdateUploadCertStep, self).__init__(
-            STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_UPLOAD_CERT,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_UPLOADED,
-            None,  # sysinv API does not have in-progress state for this action
-            None,  # sysinv API does not have a FAILED state for this action
-            timeout_in_secs=300)
-        self._cert_file = cert_file
-
-    @coroutine
-    def _response_callback(self):
-        """Upload Cert is a blocking call that returns an identifier
-        Polling the update is how we proceed to next state
-        """
-        response = (yield)
-        DLOG.debug("%s callback response=%s." % (self._name, response))
-        if response['completed']:
-            # We do not set 'success' here, let the handle_event do this
-            # The API returns a certificate identifier
-            pass
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, response['reason'])
-
-    def apply(self):
-        """Kube RootCA Update - Upload Cert"""
-        from nfv_vim import nfvi
-
-        DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_kube_rootca_update_upload_cert(self._cert_file,
-                                                 self._response_callback())
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
-        super(KubeRootcaUpdateUploadCertStep, self).from_dict(data)
-        self._cert_file = data['cert_file']
-        return self
-
-    def as_dict(self):
-        """
-        Represent the kube upgrade step as a dictionary
-        """
-        data = super(KubeRootcaUpdateUploadCertStep, self).as_dict()
-        data['cert_file'] = self._cert_file
-        return data
-
-
 ##########################################################
 # Kube Upgrade Steps
 ##########################################################
@@ -5762,8 +5707,6 @@ def strategy_step_rebuild_from_dict(data):
             KubeRootcaUpdatePodsTrustNewcaStep,
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_START:
             KubeRootcaUpdateStartStep,
-        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_UPLOAD_CERT:
-            KubeRootcaUpdateUploadCertStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_UPDATE:
             QueryKubeRootcaUpdateStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_HOST_UPDATES:

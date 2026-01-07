@@ -983,50 +983,6 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def kube_rootca_update_upload_cert(self, future, cert_file, callback):
-        """Invokes sysinv kube-rootca-update-upload-cert"""
-        response = dict()
-        response['completed'] = False
-        response['reason'] = ''
-        action_type = 'kube-rootca-update-upload-cert'
-        sysinv_method = sysinv.kube_rootca_update_upload_cert
-        try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
-            if self._platform_token is None or \
-                    self._platform_token.is_expired():
-                future.work(openstack.get_token, self._platform_directory)
-                future.result = (yield)
-                if not future.result.is_complete() or \
-                        future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete.")
-                    return
-                self._platform_token = future.result.data
-            future.work(sysinv_method, self._platform_token,
-                        cert_file=cert_file)
-            future.result = (yield)
-            if not future.result.is_complete():
-                DLOG.error("%s did not complete." % action_type)
-                return
-            api_data = future.result.data
-            new_cert_identifier = api_data['success']
-            response['result-data'] = new_cert_identifier
-            response['completed'] = True
-        except exceptions.OpenStackRestAPIException as e:
-            if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
-                if self._platform_token is not None:
-                    self._platform_token.set_expired()
-            else:
-                DLOG.exception("Caught API exception while trying %s. error=%s"
-                               % (action_type, e))
-            response['reason'] = e.http_response_reason
-        except Exception as e:
-            DLOG.exception("Caught exception while trying %s. error=%s"
-                           % (action_type, e))
-        finally:
-            callback.send(response)
-            callback.close()
-
     def kube_rootca_update_host(self, future, host_uuid, host_name,
                                update_type,
                                in_progress_state,

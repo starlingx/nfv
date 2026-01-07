@@ -305,7 +305,6 @@ function _swmanager()
                                 --alarm-restrictions
                                 --expiry-date
                                 --subject
-                                --cert-file
                             "
                             local createopt=${prev}
                             case "$createopt" in
@@ -338,10 +337,6 @@ function _swmanager()
                                     return 0
                                     ;;
                                 --subject)
-                                    COMPREPLY=( $(compgen -- ${cur}))
-                                    return 0
-                                    ;;
-                                --cert-file)
                                     COMPREPLY=( $(compgen -- ${cur}))
                                     return 0
                                     ;;

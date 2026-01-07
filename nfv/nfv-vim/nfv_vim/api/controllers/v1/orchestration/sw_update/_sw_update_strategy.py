@@ -235,9 +235,6 @@ class KubeRootcaUpdateStrategyCreateData(wsme_types.Base):
     subject = wsme_types.wsattr(six.text_type,
                                 mandatory=False,
                                 name='subject')
-    cert_file = wsme_types.wsattr(six.text_type,
-                                  mandatory=False,
-                                  name='cert-file')
     storage_apply_type = wsme_types.wsattr(SwUpdateApplyTypes,
                                            mandatory=True,
                                            name='storage-apply-type')
@@ -810,9 +807,6 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
             if not is_valid:
                 return pecan.abort(httplib.BAD_REQUEST, reason)
             rpc_request.subject = request_data.subject
-        if wsme_types.Unset != request_data.cert_file:
-            # todo(abailey): Should investigate if cert_file can be validated
-            rpc_request.cert_file = request_data.cert_file
         rpc_request.controller_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.worker_apply_type = request_data.worker_apply_type

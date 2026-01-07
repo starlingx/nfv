@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -31,7 +31,6 @@ from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateHostUpdateCertsStep
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdatePodsTrustBothcasStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdatePodsTrustNewcaStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateStartStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateUploadCertStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeCleanupAbortedStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeCleanupStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeCompleteStep  # noqa: F401

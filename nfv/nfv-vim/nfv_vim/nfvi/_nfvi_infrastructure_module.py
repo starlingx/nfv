@@ -243,15 +243,6 @@ def nfvi_kube_rootca_update_start(force, alarm_ignore_list, callback):
     return cmd_id
 
 
-def nfvi_kube_rootca_update_upload_cert(cert_file, callback):
-    """Kube RootCA Update - Upload Cert"""
-    cmd_id = _infrastructure_plugin.invoke_plugin(
-        'kube_rootca_update_upload_cert',
-        cert_file=cert_file,
-        callback=callback)
-    return cmd_id
-
-
 def nfvi_kube_upgrade_abort(callback):
     """Kube Upgrade - Abort"""
     cmd_id = _infrastructure_plugin.invoke_plugin(

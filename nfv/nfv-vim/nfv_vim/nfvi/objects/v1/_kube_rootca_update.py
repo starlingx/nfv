@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2021,2025 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,7 +19,6 @@ class KubeRootcaUpdateState(Constants):
     These values are copied from sysinv/common/kubernetes.py
     """
     KUBE_ROOTCA_UPDATE_STARTED = Constant('update-started')
-    KUBE_ROOTCA_UPDATE_CERT_UPLOADED = Constant('update-new-rootca-cert-uploaded')
     KUBE_ROOTCA_UPDATE_CERT_GENERATED = Constant('update-new-rootca-cert-generated')
     KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS = 'updating-pods-trust-both-cas'
     KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS = 'updated-pods-trust-both-cas'

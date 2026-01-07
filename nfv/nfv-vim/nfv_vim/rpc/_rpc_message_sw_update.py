@@ -96,7 +96,6 @@ class APIRequestCreateKubeRootcaUpdateStrategy(APIRequestCreateSwUpdateStrategy)
     """
     expiry_date = None
     subject = None
-    cert_file = None
 
     def __init__(self, msg_version=RPC_MSG_VERSION.VERSION_1_0,
                  msg_type=RPC_MSG_TYPE.CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST,
@@ -108,13 +107,11 @@ class APIRequestCreateKubeRootcaUpdateStrategy(APIRequestCreateSwUpdateStrategy)
         super(APIRequestCreateKubeRootcaUpdateStrategy, self).serialize_payload(msg)
         msg['expiry_date'] = self.expiry_date
         msg['subject'] = self.subject
-        msg['cert_file'] = self.cert_file
 
     def deserialize_payload(self, msg):
         super(APIRequestCreateKubeRootcaUpdateStrategy, self).deserialize_payload(msg)
         self.expiry_date = msg.get('expiry_date', None)
         self.subject = msg.get('subject', None)
-        self.cert_file = msg.get('cert_file', None)
 
     def __str__(self):
         return "create-kube-rootca-update-strategy request: %s" % self.deserialize_payload
