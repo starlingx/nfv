@@ -350,13 +350,14 @@ class SwMgmtDirector(object):
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_REBOOT_FAILED, host)
 
-    def host_swact_failed(self, host):
+    def host_swact_failed(self, host, reason=None):
         """
         Called when a swact of a host failed
         """
         if self._sw_update is not None:
+            event_data = {'host': host, 'reason': reason}
             self._sw_update.handle_event(
-                strategy.STRATEGY_EVENT.HOST_SWACT_FAILED, host)
+                strategy.STRATEGY_EVENT.HOST_SWACT_FAILED, event_data)
 
     def host_upgrade_failed(self, result):
         """

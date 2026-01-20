@@ -5,6 +5,7 @@
 #
 import json
 import six
+import socket
 import time
 
 from nfv_common import config
@@ -100,6 +101,11 @@ class StrategyStepNames(Constants):
     # system config update specific steps
     QUERY_SYSTEM_CONFIG_UPDATE_HOSTS = Constant('query-system-config-update-hosts')
     SYSTEM_CONFIG_UPDATE_HOSTS = Constant('system-config-update-hosts')
+    # Retryable swact failure classifications
+    HOST_SWACT_RETRY_CONFIG_NOT_APPLIED = \
+        Constant('host-swact-retry-config-not-applied')
+    HOST_SWACT_RETRY_APPLY_IN_PROGRESS = \
+        Constant('host-swact-retry-apply-in-progress')
 
 
 # Constant Instantiation
@@ -617,6 +623,44 @@ class SwactHostsStep(strategy.StrategyStep):
             self._host_uuids.append(host.uuid)
         self._wait_time = 0
 
+        # Retry state:
+        self._retry_count = 0
+        self._retry_after_ts = 0
+        self._last_failure_reason = ""
+
+        self._max_retries = 12
+        self._retry_interval_secs = 5
+
+    def classify_swact_failure_reason(self, reason):
+        """
+        Classify a swact failure reason into retryable categories.
+        """
+        if not reason:
+            return None
+
+        reason_l = str(reason).lower()
+
+        # "target Config ... not yet applied"
+        if 'target config' in reason_l and 'not yet applied' in reason_l:
+            return STRATEGY_STEP_NAME.HOST_SWACT_RETRY_CONFIG_NOT_APPLIED
+
+        # "apply is in progress"
+        if 'apply is in progress' in reason_l:
+            return STRATEGY_STEP_NAME.HOST_SWACT_RETRY_APPLY_IN_PROGRESS
+
+        return None
+
+    def _schedule_retry(self, reason):
+        now_ts = time.perf_counter()
+        self._last_failure_reason = reason or ""
+        self._retry_count += 1
+
+        self._retry_after_ts = now_ts + self._retry_interval_secs
+        DLOG.warn("Step (%s) swact retry scheduled (attempt=%d/%d) in %ss. "
+                  "Reason: %s",
+                  self._name, self._retry_count, self._max_retries,
+                  self._retry_interval_secs, self._last_failure_reason)
+
     def apply(self):
         """
         Swact hosts
@@ -626,6 +670,16 @@ class SwactHostsStep(strategy.StrategyStep):
         DLOG.info("Step (%s) apply for hosts %s." % (self._name,
                                                      self._host_names))
 
+        # If we previously hit a retryable failure, honor backoff
+        now_ts = time.perf_counter()
+        if self._retry_after_ts and now_ts < self._retry_after_ts:
+            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+        if self._retry_count >= self._max_retries:
+            return (strategy.STRATEGY_STEP_RESULT.FAILED,
+                    "host swact failed (exceeded retry limit): %s"
+                    % (self._last_failure_reason or "unknown reason"))
+
         host_director = directors.get_host_director()
         operation = host_director.swact_hosts(self._host_names)
         if operation is None:
@@ -633,6 +687,11 @@ class SwactHostsStep(strategy.StrategyStep):
         elif operation.is_inprogress():
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
         elif operation.is_failed():
+            # Retry transient swact blocks
+            retry_event = self.classify_swact_failure_reason(operation.reason)
+            if retry_event is not None:
+                self._schedule_retry(operation.reason)
+                return strategy.STRATEGY_STEP_RESULT.WAIT, ""
             return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
 
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
@@ -644,21 +703,61 @@ class SwactHostsStep(strategy.StrategyStep):
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event == STRATEGY_EVENT.HOST_SWACT_FAILED:
-            host = event_data
+            host = None
+            reason = None
+            if isinstance(event_data, dict):
+                host = event_data.get('host')
+                reason = event_data.get('reason')
+            else:
+                host = event_data
+
             if host is not None and host.name in self._host_names:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, "host swact failed")
-                return True
+                if self.classify_swact_failure_reason(reason) is not None:
+                    self._schedule_retry(reason)
+                    DLOG.warn("Step (%s) swact failed for host %s; retrying. Reason: %s",
+                              self._name, host.name, str(reason))
+                    return True  # keep step alive for retry
+                return False     # non-retryable, let framework fail/abort
+
+            return True
 
         elif event == STRATEGY_EVENT.HOST_AUDIT:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+            # If a retry is pending and the backoff time has elapsed, retry now
+            if self._retry_after_ts:
+                now_ts = time.perf_counter()
+                if now_ts >= self._retry_after_ts:
+                    DLOG.info("Step (%s) retry timer expired; re-attempting swact.",
+                              self._name)
 
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            if 120 <= secs_expired:
-                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                self.stage.step_complete(result, '')
+                    # Clear retry timer so apply() does not immediately WAIT
+                    self._retry_after_ts = 0
+
+                    result, reason = self.apply()
+                    if result in (strategy.STRATEGY_STEP_RESULT.SUCCESS,
+                                  strategy.STRATEGY_STEP_RESULT.FAILED):
+                        self.stage.step_complete(result, reason)
+                    return True
+            if 0 == self._wait_time:
+                self._wait_time = time.perf_counter()
+
+            now_ts = time.perf_counter()
+            secs_expired = int(now_ts - self._wait_time)
+            # Avoid auto-success while a retry is pending/backing off
+            if 120 <= secs_expired and not self._retry_after_ts:
+                current_host = None
+                try:
+                    current_host = socket.gethostname()
+                except Exception:
+                    current_host = None
+
+                if current_host is not None and current_host not in self._host_names:
+                    result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                    self.stage.step_complete(result, '')
+                else:
+                    DLOG.info("Step (%s) swact verification failed (still on %s); "
+                              "continuing to wait.",
+                              self._name, current_host)
+
             return True
 
         return False
@@ -678,6 +777,18 @@ class SwactHostsStep(strategy.StrategyStep):
                 self._hosts.append(host)
                 self._host_uuids.append(host.uuid)
         self._wait_time = 0
+
+        # Reset retry state on restore
+        self._retry_count = data.get('retry_count', 0)
+        self._last_failure_reason = data.get('last_failure_reason', "")
+        self._max_retries = data.get('max_retries', 12)
+        self._retry_interval_secs = data.get('retry_interval_secs', 5)
+
+        retry_after_in_secs = data.get('retry_after_in_secs', 0)
+        if retry_after_in_secs and retry_after_in_secs > 0:
+            self._retry_after_ts = time.perf_counter() + retry_after_in_secs
+        else:
+            self._retry_after_ts = 0
         return self
 
     def as_dict(self):
@@ -688,6 +799,19 @@ class SwactHostsStep(strategy.StrategyStep):
         data['entity_type'] = 'hosts'
         data['entity_names'] = self._host_names
         data['entity_uuids'] = self._host_uuids
+
+        # Export retry state so step can resume after VIM restart.
+        now_ts = time.perf_counter()
+        retry_after_in_secs = 0
+        if getattr(self, '_retry_after_ts', 0):
+            retry_after_in_secs = max(0, int(self._retry_after_ts - now_ts))
+
+        data['retry_count'] = self._retry_count
+        data['retry_after_in_secs'] = retry_after_in_secs
+        data['last_failure_reason'] = self._last_failure_reason
+        data['max_retries'] = self._max_retries
+        data['retry_interval_secs'] = self._retry_interval_secs
+
         return data
 
 
