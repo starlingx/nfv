@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -2384,6 +2384,13 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     )
                 else:
                     error_msg = f"Software deploy precheck was rejected: {error_msg}"
+                    DLOG.exception(error_msg)
+
+                    # If the traceback is also present in the error message, remove it.
+                    error_msg = error_msg.split("Traceback")[0].strip()
+                    error_msg = (
+                        f"{error_msg} Please, check nfv-vim.log for more information."
+                    )
 
             elif not error_msg:
                 error_msg = f"Caught exception while trying software deploy precheck, error={e}"
