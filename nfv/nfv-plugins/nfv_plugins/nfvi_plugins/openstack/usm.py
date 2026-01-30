@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2024-2025 Wind River Systems, Inc.
+# Copyright (c) 2024-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,6 +14,7 @@ from nfv_vim import nfvi
 import software.states as usm_states
 
 REST_API_REQUEST_TIMEOUT = 60
+REST_API_DEPLOY_START_TIMEOUT = 120
 REST_API_DEPLOY_HOST_TIMEOUT = 240
 REST_API_DEPLOY_DELETE_TIMEOUT = 300
 
@@ -138,7 +139,7 @@ def sw_deploy_start(token, release, force=False, snapshot=False):
     if snapshot:
         data["options"] = ["snapshot=true"]
 
-    response = _api_post(token, url, data)
+    response = _api_post(token, url, data, timeout_in_secs=REST_API_DEPLOY_START_TIMEOUT)
     return response
 
 
