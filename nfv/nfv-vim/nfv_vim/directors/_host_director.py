@@ -341,7 +341,7 @@ class HostDirector(object):
                 return
 
             sw_mgmt_director = directors.get_sw_mgmt_director()
-            sw_mgmt_director.host_swact_failed(host)
+            sw_mgmt_director.host_swact_failed(host, response.get('reason'))
 
     def _nfvi_swact_host(self, host_uuid, host_name):
         """
