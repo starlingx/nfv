@@ -1,14 +1,14 @@
 #
-# Copyright (c) 2016-2025 Wind River Systems, Inc.
+# Copyright (c) 2016-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import sys
 import textwrap
 
+from nfv_client.auth_types import AUTH_TYPES
 from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
-from nfv_common.strategy import AUTH_TYPES
 from platform_util.oidc import oidc_utils
 from urllib.parse import urlparse
 
@@ -275,18 +275,6 @@ def _get_auth_token_and_url(os_auth_uri, os_project_name,
         if not token_id:
             raise ValueError("No OIDC token found.")
 
-        # Check if this is a DC system
-        is_dc_system = False
-        try:
-            with open('/etc/platform/platform.conf', 'r') as f:
-                for line in f:
-                    if line.startswith('distributed_cloud_role='):
-                        role = line.split('=')[1].strip()
-                        is_dc_system = role in ['subcloud', 'systemcontroller']
-                        break
-        except FileNotFoundError:
-            pass  # Non-DC systems may not have distributed_cloud_role
-
         # TODO(rummadis): Generalize OIDC URL construction instead of hardcoding
         # ports and protocols (similar to Keystone approach)
         if os_interface == 'public':
@@ -296,12 +284,8 @@ def _get_auth_token_and_url(os_auth_uri, os_project_name,
             protocol = 'http'
             port = '4545'
         else:  # admin
-            if is_dc_system:
-                protocol = 'https'
-                port = '4546'
-            else:
-                protocol = 'http'
-                port = '4545'
+            protocol = 'https'
+            port = '4546'
 
         # Handle IPv6
         if controller_ip.count(':') >= 2 and not controller_ip.startswith("["):

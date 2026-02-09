@@ -1,13 +1,13 @@
 #
-# Copyright (c) 2016-2025 Wind River Systems, Inc.
+# Copyright (c) 2016-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
 
+from nfv_client.auth_types import AUTH_TYPES
 from nfv_client.openstack import rest_api
 from nfv_client import sw_update
-from nfv_common.strategy import AUTH_TYPES
 
 
 class StrategyStep(object):

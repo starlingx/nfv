@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016, 2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2025-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -61,18 +61,8 @@ class StrategyStates(Constants):
     ABORTED = Constant('aborted')
 
 
-@six.add_metaclass(Singleton)
-class AuthTypes(Constants):
-    """
-    Authentication Type Constants
-    """
-    KEYSTONE = Constant('Keystone')
-    OIDC = Constant('oidc')
-
-
 # Constant Instantiation
 STRATEGY_APPLY_TYPE = StrategyApplyTypes()
 STRATEGY_ALARM_RESTRICTION_TYPES = StrategyAlarmRestrictionTypes()
 STRATEGY_PHASE = StrategyPhases()
 STRATEGY_STATE = StrategyStates()
-AUTH_TYPES = AuthTypes()

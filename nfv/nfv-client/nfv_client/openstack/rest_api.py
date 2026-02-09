@@ -7,8 +7,8 @@ import json
 import os
 import requests
 
+from nfv_client.auth_types import AUTH_TYPES
 from nfv_client import sw_update
-from nfv_common.strategy import AUTH_TYPES
 
 
 CAFILE = os.environ.get('REQUESTS_CA_BUNDLE')
