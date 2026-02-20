@@ -4958,6 +4958,7 @@ class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
     @coroutine
     def _response_callback(self):
         """Kube Upgrade - Abort - Callback"""
+        from nfv_vim import nfvi
 
         response = (yield)
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -4978,6 +4979,9 @@ class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
         elif self.strategy.nfvi_kube_upgrade.state == self._success_state:
             self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS,
                                      "")
+        elif (self.strategy.nfvi_kube_upgrade.state ==
+              nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTING):
+            pass
         else:
             # If the state does not match, the abort failed.
             result = strategy.STRATEGY_STEP_RESULT.FAILED
