@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023,2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -758,7 +758,10 @@ class Host(ObjectData):
         """
 
         if service is not None:
-            if host_service_state == self._host_service_state[service]:
+            if (
+                    service in self._host_service_state and
+                    host_service_state == self._host_service_state[service]
+            ):
                 # No change to the state of the service
                 return
 
