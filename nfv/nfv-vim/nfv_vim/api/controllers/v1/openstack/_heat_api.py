@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,7 +25,7 @@ def expose_proxy_http():
             'content_types': {'text/xml': 'wsmexml:',
                               'application/json': 'wsmejson:',
                               'application/xml': 'wsmexml:'},
-            'argspec': inspect.getargspec(func),
+            'argspec': inspect.getfullargspec(func),
             'template': ['wsmexml:', 'wsmexml:', 'wsmejson:'],
             'content_type': 'application/json'
         }
