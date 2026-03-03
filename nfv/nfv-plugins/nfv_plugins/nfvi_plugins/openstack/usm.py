@@ -94,7 +94,9 @@ def sw_deploy_host_list(token):
     return _api_get(token, _usm_api_cmd(token, "deploy_host"))
 
 
-def sw_deploy_precheck(token, release, force=False, snapshot=False):
+def sw_deploy_precheck(
+    token, release, force=False, snapshot=False, pre_upgrade_deploy=False
+):
     """Ask USM to precheck before a deployment."""
 
     url = _usm_api_cmd(token, "deploy/precheck")
@@ -103,11 +105,15 @@ def sw_deploy_precheck(token, release, force=False, snapshot=False):
         data["force"] = force
     if snapshot:
         data["options"] = ["snapshot=true"]
+    if pre_upgrade_deploy:
+        data["pre_upgrade_deploy"] = pre_upgrade_deploy
     response = _api_post(token, url, data)
     return response
 
 
-def sw_deploy_start(token, release, force=False, snapshot=False):
+def sw_deploy_start(
+    token, release, force=False, snapshot=False, pre_upgrade_deploy=False
+):
     """Ask USM to start a deployment."""
 
     url = _usm_api_cmd(token, "deploy/start")
@@ -116,6 +122,8 @@ def sw_deploy_start(token, release, force=False, snapshot=False):
         data["force"] = force
     if snapshot:
         data["options"] = ["snapshot=true"]
+    if pre_upgrade_deploy:
+        data["pre_upgrade_deploy"] = pre_upgrade_deploy
 
     response = _api_post(
         token, url, data, timeout_in_secs=REST_API_DEPLOY_START_TIMEOUT

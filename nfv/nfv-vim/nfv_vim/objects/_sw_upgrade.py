@@ -48,6 +48,7 @@ class SwUpgrade(SwUpdate, KubeUpgradeMixin):
         cleanup,
         snapshot,
         kube_upgrade,
+        pre_upgrade_deploy,
         ignore_alarms,
         single_controller,
     ):
@@ -85,6 +86,7 @@ class SwUpgrade(SwUpdate, KubeUpgradeMixin):
             cleanup,
             snapshot,
             kube_upgrade,
+            pre_upgrade_deploy,
             ignore_alarms,
             single_controller,
         )

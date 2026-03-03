@@ -31,8 +31,6 @@ class Upgrade(ObjectData):
         hosts_info,
         system_deploy=None,
     ):
-        # TODO(rlima): map the major_release property from the usm requests rather
-        # than using the current validation logic.
         super().__init__("1.0.0")
         self.release = release
         self.metapackages = metapackages

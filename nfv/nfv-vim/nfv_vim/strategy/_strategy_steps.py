@@ -774,10 +774,11 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
 class SwDeployPrecheckStep(strategy.StrategyStep):
     """Software Deploy Precheck - Strategy Step."""
 
-    def __init__(self, release, snapshot=False):
+    def __init__(self, release, snapshot=False, pre_upgrade_deploy=False):
         super().__init__(STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
         self._snapshot = snapshot
+        self._pre_upgrade_deploy = pre_upgrade_deploy
 
     @coroutine
     def _sw_deploy_precheck_callback(self):
@@ -821,6 +822,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
             self._release,
             force,
             self._snapshot,
+            self._pre_upgrade_deploy,
             self._sw_deploy_precheck_callback(),
         )
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -833,6 +835,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         super().from_dict(data)
         self._release = normalize_release(data["release"])
         self._snapshot = data.get("snapshot", False)
+        self._pre_upgrade_deploy = data.get("pre_upgrade_deploy", False)
         return self
 
     def as_dict(self):
@@ -841,6 +844,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         data = super().as_dict()
         data["release"] = self._release
         data["snapshot"] = self._snapshot
+        data["pre_upgrade_deploy"] = self._pre_upgrade_deploy
         data["entity_type"] = ""
         data["entity_names"] = []
         data["entity_uuids"] = []
@@ -1172,11 +1176,12 @@ class UpgradeHostsStep(strategy.StrategyStep):
 class UpgradeStartStep(strategy.StrategyStep):
     """Upgrade Start - Strategy Step."""
 
-    def __init__(self, release, snapshot=False, timeout=None):
+    def __init__(self, release, snapshot=False, pre_upgrade_deploy=False, timeout=None):
         super().__init__(STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
         self._snapshot = snapshot
+        self._pre_upgrade_deploy = pre_upgrade_deploy
         self._query_inprogress = False
 
     @property
@@ -1269,7 +1274,11 @@ class UpgradeStartStep(strategy.StrategyStep):
             ]
 
             nfvi.nfvi_upgrade_start(
-                self._release, force, self._snapshot, self._start_upgrade_callback()
+                self._release,
+                force,
+                self._snapshot,
+                self._pre_upgrade_deploy,
+                self._start_upgrade_callback(),
             )
 
         return result, reason
@@ -1299,6 +1308,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         super().from_dict(data)
         self._release = normalize_release(data["release"])
         self._snapshot = data.get("snapshot", False)
+        self._pre_upgrade_deploy = data.get("pre_upgrade_deploy", False)
         self._query_inprogress = False
         return self
 
@@ -1311,6 +1321,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         data["entity_uuids"] = []
         data["release"] = self._release
         data["snapshot"] = self._snapshot
+        data["pre_upgrade_deploy"] = self._pre_upgrade_deploy
         return data
 
 

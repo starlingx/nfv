@@ -96,6 +96,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         cleanup=False,
         snapshot=False,
         kube_upgrade_version=None,
+        pre_upgrade_deploy=False,
         nfvi_upgrade=None,
         single_controller=False,
     ):
@@ -118,6 +119,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             cleanup=cleanup,
             snapshot=snapshot,
             kube_upgrade_version=kube_upgrade_version,
+            pre_upgrade_deploy=pre_upgrade_deploy,
             ignore_alarms=[],
             single_controller=single_controller,
         )

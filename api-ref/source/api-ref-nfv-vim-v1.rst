@@ -570,7 +570,9 @@ The details of the strategy can be checked using below response parameter.
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -1076,9 +1078,10 @@ Creates a sw-deploy strategy
             Default value is ``2``."
             "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
             ``strict`` or ``relaxed`` (recommended option)."
-            "release", "plain", "xsd:string", "The release identification name."
+            "release", "plain", "xsd:list", "The list of software releases to deploy. Accepts one or more release identifiers."
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be marked complete."
+            "pre-upgrade-deploy", "plain", "xsd:bool", "The flag that indicates a pre-upgrade-deploy. It can only be used for major releases."
 
 **Request body example**
 
@@ -1090,6 +1093,7 @@ Creates a sw-deploy strategy
              "release": "stx-10.0.1",
              "rollback": false,
              "delete": true,
+             "pre-upgrade-deploy": false,
              "storage-apply-type": "serial/ignore",
              "worker-apply-type": "serial/parallel/ignore",
              "alarm-restrictions": "strict/relaxed"
@@ -1122,7 +1126,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -1146,6 +1152,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
                   "current-phase-completion-percentage": 0,
                   "uuid": "ac9b953a-caf1-4abe-8d53-498b598e6731",
                   "release-id": "stx-10.0.1",
+                  "metapackages": ["stx-distcloud-1.0.0"],
                   "worker-apply-type": "serial",
                   "storage-apply-type": "serial",
                   "max-parallel-worker-hosts": 2,
@@ -1331,7 +1338,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -3919,10 +3928,11 @@ Creates software deploy strategy
             Default value is ``2``."
             "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
             ``strict`` or ``relaxed``."
-            "release", "plain", "xsd:string", "The release identification name."
+            "release", "plain", "xsd:list", "The list of software releases to deploy. Accepts one or more release identifiers."
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be
             marked complete."
+            "pre-upgrade-deploy", "plain", "xsd:bool", "The flag that indicates a pre-upgrade-deploy. It can only be used for major releases."
 
 **Request body example**
 
@@ -3934,6 +3944,7 @@ Creates software deploy strategy
              "release": "stx-10.0.1",
              "rollback": false,
              "delete": true,
+             "pre-upgrade-deploy": false,
              "storage-apply-type": "serial/ignore",
              "worker-apply-type": "serial/parallel/ignore",
              "alarm-restrictions": "strict/relaxed"
@@ -3966,7 +3977,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -3990,6 +4003,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
                   "current-phase-completion-percentage": 0,
                   "uuid": "ac9b953a-caf1-4abe-8d53-498b598e6731",
                   "release-id": "stx-10.0.1",
+                  "metapackages": ["stx-distcloud-1.0.0"],
                   "worker-apply-type": "serial",
                   "storage-apply-type": "serial",
                   "max-parallel-worker-hosts": 2,
@@ -4071,7 +4085,9 @@ The details of the strategy can be checked using below response parameter.
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -4175,7 +4191,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -4308,7 +4326,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -4408,7 +4428,9 @@ The details of the strategy can be checked using below response parameter.
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -4650,9 +4672,10 @@ Create software deploy strategy.
             Default value is ``2``."
             "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
             ``strict`` or ``relaxed``."
-            "release", "plain", "xsd:string", "The release identification name."
+            "release", "plain", "xsd:list", "The list of software releases to deploy. Accepts one or more release identifiers."
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be marked complete."
+            "pre-upgrade-deploy", "plain", "xsd:bool", "The flag that indicates a pre-upgrade-deploy. It can only be used for major releases."
 
 **Request body example**
 
@@ -4664,6 +4687,7 @@ Create software deploy strategy.
              "release": "stx-10.0.1",
              "rollback": false,
              "delete": true,
+             "pre-upgrade-deploy": false,
              "storage-apply-type": "serial/ignore",
              "worker-apply-type": "serial/parallel/ignore",
              "alarm-restrictions": "strict/relaxed"
@@ -4696,7 +4720,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -4720,6 +4746,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
                   "current-phase-completion-percentage": 0,
                   "uuid": "ac9b953a-caf1-4abe-8d53-498b598e6731",
                   "release-id": "stx-10.0.1",
+                  "metapackages": ["stx-distcloud-1.0.0"],
                   "worker-apply-type": "serial",
                   "storage-apply-type": "serial",
                   "max-parallel-worker-hosts": 2,
@@ -4801,7 +4828,9 @@ The details of the strategy can be checked using below response parameter.
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -4905,7 +4934,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -5038,7 +5069,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -5135,7 +5168,9 @@ The details of the strategy can be checked using below response parameter.
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -5480,9 +5515,10 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
             parallel``. Default value is ``2``."
             "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm
             checks:``strict`` or ``relaxed``."
-            "release", "plain", "xsd:string", "The release identification name."
+            "release", "plain", "xsd:list", "The list of software releases to deploy. Accepts one or more release identifiers."
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
             "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be marked complete."
+            "pre-upgrade-deploy", "plain", "xsd:bool", "The flag that indicates a pre-upgrade-deploy. It can only be used for major releases."
 
 
 **Request body example**
@@ -5495,6 +5531,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
              "release": null,
              "rollback": true,
              "delete": null,
+             "pre-upgrade-deploy": false,
              "storage-apply-type": "serial/ignore",
              "worker-apply-type": "serial/parallel/ignore",
              "alarm-restrictions": "strict/relaxed"
@@ -5539,7 +5576,9 @@ The details of the strategy can be checked using below response parameter.
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -5643,7 +5682,9 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."
@@ -5740,7 +5781,9 @@ The details of the strategy can be checked using below response parameter.
    :widths: 20, 20, 20, 60
 
    "name", "plain", "xsd:string", "The current strategy name."
-   "release", "plain", "xsd:string", "The release identification name."
+   "release", "plain", "xsd:list", "The list of releases in the deployment. Only present when release-id and metapackages are not."
+   "release-id", "plain", "xsd:string", "The release identifier of the software deployment. Present once the release information has been retrieved."
+   "metapackages", "plain", "xsd:list", "The list of software metapackages included in the deployment. Present once the release information has been retrieved."
    "controller-apply-type", "plain", "xsd:string", "Apply type of controller host."
    "storage-apply-type", "plain", "xsd:string", "Apply type of storage host."
    "worker-apply-type", "plain", "xsd:string", "Apply type of worker host."

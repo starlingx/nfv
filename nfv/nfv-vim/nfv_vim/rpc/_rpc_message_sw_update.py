@@ -65,6 +65,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
     cleanup = None
     snapshot = None
     kube_upgrade = None
+    pre_upgrade_deploy = None
 
     def __init__(
         self,
@@ -82,6 +83,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         msg["cleanup"] = self.cleanup
         msg["snapshot"] = self.snapshot
         msg["kube_upgrade"] = self.kube_upgrade
+        msg["pre_upgrade_deploy"] = self.pre_upgrade_deploy
 
     def deserialize_payload(self, msg):
         super().deserialize_payload(msg)
@@ -91,6 +93,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         self.cleanup = msg.get("cleanup", None)
         self.snapshot = msg.get("snapshot", None)
         self.kube_upgrade = msg.get("kube_upgrade", None)
+        self.pre_upgrade_deploy = msg.get("pre_upgrade_deploy", None)
 
     def __str__(self):
         return "create-sw-deploy-strategy request: %s" % self.deserialize_payload

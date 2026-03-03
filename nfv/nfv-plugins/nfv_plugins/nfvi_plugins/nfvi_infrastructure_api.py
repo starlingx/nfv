@@ -2379,7 +2379,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
         self._upgrade_obj = None
 
-    def sw_deploy_precheck(self, future, release, force, snapshot, callback):
+    def sw_deploy_precheck(
+        self, future, release, force, snapshot, pre_upgrade_deploy, callback
+    ):
         """Precheck a USM software deploy."""
 
         response = {}
@@ -2402,7 +2404,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 self._platform_token = future.result.data
 
             future.work(
-                usm.sw_deploy_precheck, self._platform_token, release, force, snapshot
+                usm.sw_deploy_precheck,
+                self._platform_token,
+                release,
+                force,
+                snapshot,
+                pre_upgrade_deploy,
             )
             future.result = yield
             if not future.result.is_complete():
@@ -2496,7 +2503,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def sw_deploy_start(self, future, release, force, snapshot, callback):
+    def sw_deploy_start(
+        self, future, release, force, snapshot, pre_upgrade_deploy, callback
+    ):
         """Start a USM software deploy."""
 
         response = {}
@@ -2516,7 +2525,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 self._platform_token = future.result.data
 
             future.work(
-                usm.sw_deploy_start, self._platform_token, release, force, snapshot
+                usm.sw_deploy_start,
+                self._platform_token,
+                release,
+                force,
+                snapshot,
+                pre_upgrade_deploy,
             )
             future.result = yield
 

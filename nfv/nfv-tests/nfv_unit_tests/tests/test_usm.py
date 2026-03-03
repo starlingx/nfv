@@ -138,6 +138,24 @@ class TestSwDeployPrecheck(BaseTestUsm):
             {"releases": ["r1"], "force": True, "options": ["snapshot=true"]},
         )
 
+    def test_sw_deploy_precheck_succeeds_with_pre_upgrade_deploy(self):
+        response = usm.sw_deploy_precheck(self.token, ["r1"], pre_upgrade_deploy=True)
+
+        self._assert_request(
+            "deploy/precheck",
+            response,
+            {"releases": ["r1"], "pre_upgrade_deploy": True},
+        )
+
+    def test_sw_deploy_precheck_succeeds_with_omitted_pre_upgrade_deploy(self):
+        response = usm.sw_deploy_precheck(self.token, ["r1"], pre_upgrade_deploy=False)
+
+        self._assert_request(
+            "deploy/precheck",
+            response,
+            {"releases": ["r1"]},
+        )
+
 
 class TestSwDeployStart(BaseTestUsm):
     """Unit tests for the sw_deploy_start payload construction."""
@@ -159,6 +177,26 @@ class TestSwDeployStart(BaseTestUsm):
             "deploy/start",
             response,
             {"releases": ["r1"], "force": True, "options": ["snapshot=true"]},
+            usm.REST_API_DEPLOY_START_TIMEOUT,
+        )
+
+    def test_sw_deploy_start_succeeds_with_pre_upgrade_deploy(self):
+        response = usm.sw_deploy_start(self.token, ["r1"], pre_upgrade_deploy=True)
+
+        self._assert_request(
+            "deploy/start",
+            response,
+            {"releases": ["r1"], "pre_upgrade_deploy": True},
+            usm.REST_API_DEPLOY_START_TIMEOUT,
+        )
+
+    def test_sw_deploy_start_succeeds_with_omitted_pre_upgrade_deploy(self):
+        response = usm.sw_deploy_start(self.token, ["r1"], pre_upgrade_deploy=False)
+
+        self._assert_request(
+            "deploy/start",
+            response,
+            {"releases": ["r1"]},
             usm.REST_API_DEPLOY_START_TIMEOUT,
         )
 

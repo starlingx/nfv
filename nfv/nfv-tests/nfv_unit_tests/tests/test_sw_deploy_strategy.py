@@ -161,6 +161,7 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         cleanup=False,
         snapshot=False,
         kube_upgrade_version=None,
+        pre_upgrade_deploy=False,
         nfvi_upgrade=None,
         single_controller=False,
     ):
@@ -185,6 +186,7 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             cleanup=cleanup,
             snapshot=snapshot,
             kube_upgrade_version=kube_upgrade_version,
+            pre_upgrade_deploy=pre_upgrade_deploy,
             ignore_alarms=[],
             single_controller=single_controller,
         )
@@ -4298,6 +4300,7 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         single_controller=True,
         rollback=False,
         delete=False,
+        release=None,
     ):
         """Create a SwUpgradeStrategy with kube_upgrade_version populated.
 
@@ -4307,6 +4310,9 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         if kube_upgrade_version is None:
             kube_upgrade_version = self.KUBE_VER
 
+        if release is None:
+            release = self.RELEASE
+
         strategy = SwUpgradeStrategy(
             uuid=str(uuid.uuid4()),
             controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -4315,12 +4321,13 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
             max_parallel_worker_hosts=10,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
-            release=self.RELEASE,
+            release=release,
             rollback=rollback,
             delete=delete,
             cleanup=False,
             snapshot=False,
             kube_upgrade_version=kube_upgrade_version,
+            pre_upgrade_deploy=False,
             ignore_alarms=[],
             single_controller=single_controller,
         )
@@ -4818,8 +4825,13 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         - strategy state is BUILD_FAILED immediately after build()
         - result_reason contains 'Cannot set both kube_upgrade and rollback'
         """
+        # By default the release will be set as [] when sent through the CLI. In such
+        # case, adding the rollback flag would result in a rollback strategy.
+        # To skip the release definition in the _create_combined_strategy, it is used
+        # here as well.
         strategy = self._create_combined_strategy(
             rollback=True,
+            release=[],
             nfvi_upgrade=_make_nfvi_upgrade(self.RELEASE, state="deploying"),
         )
         strategy.sw_update_obj = self.fake_upgrade_obj

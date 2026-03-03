@@ -55,6 +55,8 @@ def get_extra_create_args(cmd_area, args):
         # release is a positional arg.
         if args.release and args.rollback:
             raise ValueError("Cannot set both --rollback and release")
+        elif args.pre_upgrade_deploy and not args.release:
+            raise ValueError("Cannot set pre-upgrade deploy without a release")
         elif args.rollback and args.delete:
             raise ValueError("Cannot set both --rollback and --delete")
         elif args.rollback and args.snapshot:
@@ -75,6 +77,7 @@ def get_extra_create_args(cmd_area, args):
             "snapshot": args.snapshot,
             "kube_upgrade": args.kube_upgrade,
             "cleanup": args.cleanup,
+            "pre_upgrade_deploy": args.pre_upgrade_deploy,
         }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
@@ -525,6 +528,16 @@ def setup_sw_deploy_parser(commands):
         help=("Kubernetes version to upgrade to as part of sw-deploy"),
         type=str,
         default=None,
+        required=False,
+    )
+
+    create_strategy_cmd.add_argument(
+        "--pre-upgrade-deploy",
+        help=(
+            "Uses the metapackages from the pre-upgrade-deploy section of the release "
+            "metadata. Only applicable for major releases."
+        ),
+        action=argparse.BooleanOptionalAction,
         required=False,
     )
 

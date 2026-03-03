@@ -1434,6 +1434,7 @@ class SwUpgradeStrategy(
         cleanup,
         snapshot,
         kube_upgrade_version,
+        pre_upgrade_deploy,
         ignore_alarms,
         single_controller,
     ):
@@ -1455,6 +1456,7 @@ class SwUpgradeStrategy(
         self._delete = delete
         self._cleanup = cleanup
         self._snapshot = snapshot
+        self._pre_upgrade_deploy = pre_upgrade_deploy
         if kube_upgrade_version and not kube_upgrade_version.startswith("v"):
             kube_upgrade_version = "v" + kube_upgrade_version
         self._kube_upgrade_version = kube_upgrade_version
@@ -1549,7 +1551,9 @@ class SwUpgradeStrategy(
         # Precheck is part of create phase because DC requested it
         stage.add_step(
             strategy.SwDeployPrecheckStep(
-                release=self._release, snapshot=self._snapshot
+                release=self._release,
+                snapshot=self._snapshot,
+                pre_upgrade_deploy=self._pre_upgrade_deploy,
             )
         )
         self.build_phase.add_stage(stage)
@@ -1577,26 +1581,25 @@ class SwUpgradeStrategy(
     def build(self):
         """Build the strategy."""
 
-        if self._kube_upgrade_version and self._rollback:
-            reason = "Cannot set both kube_upgrade and rollback"
-            self.report_build_failure(reason)
-        elif self._release and self._rollback:
-            reason = "Cannot set both release and rollback"
-            self.report_build_failure(reason)
-
-        elif self._rollback and self._delete is not None:
-            reason = "Cannot set both delete and rollback, delete is set by default"
-            self.report_build_failure(reason)
-
+        # The build validations should be the same as the ones in the client
+        # (nfv/nfv-client/nfv_client/shell.py)
+        if self._release and self._rollback:
+            self.report_build_failure("Cannot set both release and rollback")
+        elif self._pre_upgrade_deploy and not self._release:
+            self.report_build_failure("Cannot set pre-upgrade deploy without a release")
+        elif self._rollback and self._delete:
+            self.report_build_failure(
+                "Cannot set both delete and rollback, delete is set by default"
+            )
         # TODO(sshathee): Remove this conditon when implementing snapshot
         # with rollback command
-        elif self._rollback and self._snapshot is not None:
-            reason = (
+        elif self._rollback and self._snapshot:
+            self.report_build_failure(
                 "Cannot set both snapshot and rollback, if snapshot"
                 "is available it will be forcibly used."
             )
-            self.report_build_failure(reason)
-
+        elif self._rollback and self._kube_upgrade_version:
+            self.report_build_failure("Cannot set both kube_upgrade and rollback")
         elif self._cleanup and any(
             [
                 self._release,
@@ -1606,11 +1609,10 @@ class SwUpgradeStrategy(
                 self._kube_upgrade_version,
             ]
         ):
-            reason = (
+            self.report_build_failure(
                 "Cannot set release, rollback, snapshot, delete or kube-upgrade "
                 "when cleanup is set"
             )
-            self.report_build_failure(reason)
 
         elif self._rollback:
             return self._build_rollback()
@@ -1649,7 +1651,11 @@ class SwUpgradeStrategy(
         # sw-deploy start for major releases must be done on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(
-            strategy.UpgradeStartStep(release=self._release, snapshot=self._snapshot)
+            strategy.UpgradeStartStep(
+                release=self._release,
+                snapshot=self._snapshot,
+                pre_upgrade_deploy=self._pre_upgrade_deploy,
+            )
         )
         stage.add_step(
             strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms)

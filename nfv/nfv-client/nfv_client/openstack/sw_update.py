@@ -330,6 +330,8 @@ def create_strategy(
         # the parameters are not provided.
         if kwargs.get("snapshot"):
             api_cmd_payload["snapshot"] = kwargs.get("snapshot")
+        if kwargs.get("pre_upgrade_deploy"):
+            api_cmd_payload["pre-upgrade-deploy"] = kwargs.get("pre_upgrade_deploy")
         if kwargs.get("kube_upgrade"):
             api_cmd_payload["kube-upgrade"] = kwargs.get("kube_upgrade")
         if kwargs.get("cleanup"):
