@@ -1,11 +1,13 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
 import os
+
 from six.moves import urllib
+import ssl
 
 from nfv_client.openstack.objects import Token
 
@@ -34,9 +36,14 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
     """
     Ask OpenStack for a token
     """
+
+    ssl_context = None
     try:
         # handle auth_uri re-direct (300)
-        with urllib.request.urlopen(auth_uri, cafile=CAFILE):
+        ssl_context = ssl.create_default_context(
+            ssl.Purpose.CLIENT_AUTH, cafile=CAFILE
+        )
+        with urllib.request.urlopen(auth_uri, context=ssl_context):
             pass
 
     except urllib.error.HTTPError as e:
@@ -44,6 +51,8 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
             auth_uri = e.headers['location']
             if auth_uri.endswith('/'):
                 auth_uri = auth_uri[:-1]
+    except Exception:
+        print("An error occurred when retrieving the token")
 
     try:
         url = auth_uri + "/auth/tokens"
@@ -74,8 +83,9 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
 
         request_info.data = payload.encode()
 
-        with urllib.request.urlopen(request_info, timeout=30,
-                                    cafile=CAFILE) as request:
+        with urllib.request.urlopen(
+            request_info, timeout=30, context=ssl_context
+        ) as request:
             # Identity API v3 returns token id in X-Subject-Token
             # response header.
             token_id = request.headers.get('X-Subject-Token')
