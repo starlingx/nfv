@@ -1848,6 +1848,7 @@ class SwUpgradeStrategy(
                          '900.022',  # Deploy in host-rollback-done state
                          '900.023',  # Software release deploy operation in progress
                          '900.201',  # Software upgrade auto apply in progress
+                         '900.202',  # Software deploy auto-apply aborting
                          '900.231',  # Software deployment data is out of sync
                          '900.701',  # Node tainted
                          ]
@@ -3469,6 +3470,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             '900.022',  # Clean up deployment data
             '900.023',  # Software release deploy operation in progress.
             '900.401',  # kube-upgrade-auto-apply-inprogress
+            '900.402',  # Kubernetes upgrade auto-apply aborting
             '900.701',  # Node tainted
         ]
         # self._ignore_alarms is declared in parent class

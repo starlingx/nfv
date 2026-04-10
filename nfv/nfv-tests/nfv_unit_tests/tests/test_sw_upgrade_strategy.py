@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2025 Wind River Systems, Inc.
+# Copyright (c) 2016-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -46,6 +46,7 @@ IGNORE_ALARMS_LIST = [
     "900.022",
     "900.023",
     "900.201",
+    "900.202",
     "900.231",
     "900.701",
 ]
