@@ -2318,12 +2318,6 @@ class SwUpgradeStrategy(
             (controller_strategy, controllers_hosts),
         ]
 
-        if not self.nfvi_upgrade.major_release:
-            # Patch rollback order is controller, storage then worker nodes
-            # in USM
-            # TODO(sshathee) Revisit the patch order once its unified in USM
-            strategy_pairs.reverse()
-
         for stage_func, host_list in strategy_pairs:
             if host_list:
                 success, reason = stage_func(host_list, reboot_required)
