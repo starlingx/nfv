@@ -1,5 +1,5 @@
 
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -428,9 +428,11 @@ class SwUpdateStrategyActionAPI(rest.RestController):
             rpc_request.sw_update_type = _get_sw_update_type_from_path(
                 pecan.request.path)
             rpc_request.stage_id = request_data.stage_id
+
             vim_connection = pecan.request.vim.open_connection()
             vim_connection.send(rpc_request.serialize())
             msg = vim_connection.receive(timeout_in_secs=30)
+
             if msg is None:
                 DLOG.error("No response received.")
                 return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
@@ -450,6 +452,10 @@ class SwUpdateStrategyActionAPI(rest.RestController):
             elif rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
                 DLOG.info("No strategy exists")
                 return pecan.abort(httplib.NOT_FOUND)
+
+            elif rpc.RPC_MSG_RESULT.FAILED == response.result:
+                DLOG.info(f"Abort failed: {response.error_string}")
+                return pecan.abort(httplib.BAD_REQUEST, response.error_string)
 
             DLOG.error("Unexpected result received, result=%s." % response.result)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
