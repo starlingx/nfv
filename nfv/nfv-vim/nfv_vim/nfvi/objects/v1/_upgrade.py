@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2024 Wind River Systems, Inc.
+# Copyright (c) 2016-2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,10 +25,10 @@ class Upgrade(ObjectData):
     """
     def __init__(self, release, release_info, deploy_info, hosts_info):
         super(Upgrade, self).__init__('1.0.0')
-        self.update(dict(release=release,
-                         release_info=release_info,
-                         deploy_info=deploy_info,
-                         hosts_info=hosts_info))
+        self.release = release
+        self.release_info = release_info
+        self.deploy_info = deploy_info
+        self.hosts_info = hosts_info
 
     @property
     def release_id(self):
