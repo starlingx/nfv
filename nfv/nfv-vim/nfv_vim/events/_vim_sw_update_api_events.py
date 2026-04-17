@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,6 +7,7 @@ from nfv_common import debug
 from nfv_vim import directors
 from nfv_vim import objects
 from nfv_vim import rpc
+from nfv_vim.strategy._strategy_steps import STRATEGY_STEP_NAME
 
 DLOG = debug.debug_get_logger('nfv_vim.vim_sw_update_api_events')
 
@@ -262,6 +263,64 @@ def _vim_sw_update_api_abort_strategy_callback(success, reason, strategy):
             del _sw_update_strategy_abort_operations[strategy.uuid]
 
 
+def _send_response(connection, error_message):
+    DLOG.warn(error_message)
+
+    response = rpc.APIResponseAbortSwUpdateStrategy()
+    response.result = rpc.RPC_MSG_RESULT.FAILED
+    response.error_string = error_message
+    connection.send(response.serialize())
+
+    DLOG.verbose("Sent response=%s." % response)
+    connection.close()
+
+
+def _is_abort_supported(connection, strategy):
+    """Validates if the strategy, in the current stage and step, accepts abort"""
+
+    if not strategy.is_applying():
+        abort_rejected_msg = (
+            "Abort rejected: abort can only be executed when strategy is applying"
+        )
+        _send_response(connection, abort_rejected_msg)
+
+        return False
+
+    # Only specific strategies support the abort validation
+    if strategy.name not in [objects.SW_UPDATE_TYPE.KUBE_UPGRADE]:
+        return True
+
+    current_stage_index = strategy.apply_phase.current_stage
+
+    # If the index is equal to or higher than the amount of stages, the strategy
+    # will have just completed the last stage. Nevertheless, we maintain current
+    # behavior by allowing the abort to be executed.
+    if current_stage_index >= len(strategy.apply_phase.stages):
+        DLOG.warn("The strategy is complete, skipping abort check.")
+        return True
+
+    current_stage = strategy.apply_phase.stages[current_stage_index]
+    current_step_index = current_stage.current_step
+
+    # If the index is equal to or higher than the amount of steps, the strategy
+    # will have just completed the current stage. Nevertheless, we maintain current
+    # behavior by allowing the abort to be executed.
+    if current_step_index >= len(current_stage.steps):
+        DLOG.warn("The current stage is complete, skipping abort check.")
+        return True
+
+    current_step = current_stage.steps[current_step_index]
+
+    if current_step.name == STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE:
+        abort_rejected_msg = (
+            f"Abort rejected: cannot abort during {current_step.name} step."
+        )
+
+        _send_response(connection, abort_rejected_msg)
+        return False
+    return True
+
+
 def vim_sw_update_api_abort_strategy(connection, msg):
     """
     Handle Sw-Update Abort Strategy API request
@@ -293,10 +352,14 @@ def vim_sw_update_api_abort_strategy(connection, msg):
         connection.close()
         return
 
+    if not _is_abort_supported(connection, strategy):
+        return
+
     _sw_update_strategy_abort_operations[strategy.uuid] = connection
 
     sw_mgmt_director.abort_sw_update_strategy(
-        strategy.uuid, msg.stage_id, _vim_sw_update_api_abort_strategy_callback)
+        strategy.uuid, msg.stage_id, _vim_sw_update_api_abort_strategy_callback
+    )
 
 
 def _vim_sw_update_api_delete_strategy_callback(success, reason, strategy_uuid):

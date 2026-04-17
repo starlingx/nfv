@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -264,6 +264,7 @@ class APIResponseAbortSwUpdateStrategy(RPCMessage):
     RPC API Response Message - Abort Software Update Strategy
     """
     strategy = None
+    error_string = None
 
     def __init__(self, msg_version=RPC_MSG_VERSION.VERSION_1_0,
                  msg_type=RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_RESPONSE,
@@ -273,9 +274,11 @@ class APIResponseAbortSwUpdateStrategy(RPCMessage):
 
     def serialize_payload(self, msg):
         msg['strategy'] = self.strategy
+        msg['error_string'] = self.error_string
 
     def deserialize_payload(self, msg):
         self.strategy = msg.get('strategy', None)
+        self.error_string = msg.get('error_string', None)
 
     def __str__(self):
         return "abort-sw-update-strategy response"

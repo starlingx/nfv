@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2021, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -60,6 +60,13 @@ class StrategyStage(object):
         Sets the id of the step
         """
         self._id = value
+
+    @property
+    def current_step(self):
+        """
+        Returns the current step of the stage
+        """
+        return self._current_step
 
     @property
     def timeout_in_secs(self):
