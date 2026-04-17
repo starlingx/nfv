@@ -287,7 +287,10 @@ def _is_abort_supported(connection, strategy):
         return False
 
     # Only specific strategies support the abort validation
-    if strategy.name not in [objects.SW_UPDATE_TYPE.KUBE_UPGRADE]:
+    if strategy.name not in [
+        objects.SW_UPDATE_TYPE.KUBE_UPGRADE,
+        objects.SW_UPDATE_TYPE.SW_UPGRADE
+    ]:
         return True
 
     current_stage_index = strategy.apply_phase.current_stage
@@ -311,7 +314,10 @@ def _is_abort_supported(connection, strategy):
 
     current_step = current_stage.steps[current_step_index]
 
-    if current_step.name == STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE:
+    if current_step.name in [
+        STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE,
+        STRATEGY_STEP_NAME.LOCK_HOSTS
+    ]:
         abort_rejected_msg = (
             f"Abort rejected: cannot abort during {current_step.name} step."
         )
