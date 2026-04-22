@@ -1,11 +1,11 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import http.client as httplib
 import pecan
 from pecan import rest
-from six.moves import http_client as httplib
 from wsme import types as wsme_types
 import wsmeext.pecan as wsme_pecan
 

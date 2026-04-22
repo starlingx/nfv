@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016,2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2025-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,7 +9,6 @@ import inspect
 import logging
 import os
 from pathlib import Path
-import six
 import sys
 
 from nfv_common.debug._debug_defs import DEBUG_LEVEL
@@ -254,36 +253,36 @@ def debug_trace(trace_level):
     def trace_wrap(func):
         def trace_wrapper(*args, **kwargs):
             if trace_level >= Debug().trace_level:
-                six.print_(" " * Debug().trace_depth, file=Debug().output,
+                print(" " * Debug().trace_depth, file=Debug().output,
                            end='', sep='')
-                six.print_("entering " + func.__name__ + ":",
+                print("entering " + func.__name__ + ":",
                            file=Debug().output, end='', sep='')
 
-                six.print_(" args=", file=Debug().output, end='', sep='')
+                print(" args=", file=Debug().output, end='', sep='')
                 for arg in args:
-                    six.print_("{0} ".format(arg), file=Debug().output,
+                    print("{0} ".format(arg), file=Debug().output,
                                end='', sep='')
 
-                six.print_(" kwargs=", file=Debug().output, end='', sep='')
+                print(" kwargs=", file=Debug().output, end='', sep='')
                 for name, value in list(kwargs.items()):
-                    six.print_("{0}={1} ".format(name, value),
+                    print("{0}={1} ".format(name, value),
                                file=Debug().output, end='', sep='')
 
                 try:
                     Debug().trace_depth += 1
                     result = func(*args, **kwargs)
                 except Exception:
-                    six.print_(" " * Debug().trace_depth,
+                    print(" " * Debug().trace_depth,
                                file=Debug().output, end='', sep='')
-                    six.print_("exception", file=Debug().output,
+                    print("exception", file=Debug().output,
                                end='\n', sep='')
                     raise
                 finally:
                     Debug().trace_depth -= 1
 
-                six.print_(" " * Debug().trace_depth, file=Debug().output,
+                print(" " * Debug().trace_depth, file=Debug().output,
                            end='\n', sep='')
-                six.print_("exiting " + func.__name__, file=Debug().output,
+                print("exiting " + func.__name__, file=Debug().output,
                            end='\n', sep='')
                 return result
             else:

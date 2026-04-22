@@ -148,8 +148,8 @@ ignore-mixin-members=yes
 ignored-classes=SQLObject,sqlalchemy,scoped_session,_socketobject,ObjectData,GuestService,
   Network,SwUpdate,OpenStackRestAPIException
 
-# For compatibility of python2 and python 3, we import six.moves module, and 
-# the following py3 modules are ignored: http.client, urllib.request
+# For compatibility of python2 and python 3, the following py3 modules are
+# ignored:
 ignored-modules=http.client,urllib.request
 
 # List of members which are set dynamically and missed by pylint inference

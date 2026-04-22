@@ -1,9 +1,9 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from six.moves import configparser
+import configparser
 
 
 # Configuration Global used by other modules to get access to the configuration

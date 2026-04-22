@@ -7,15 +7,15 @@
 # (c) 2005 Ian Bicking and contributors; written for Paste (http://pythonpaste.org)
 # Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import http.client as httplib
 from paste.proxy import parse_headers
 from paste.proxy import TransparentProxy
-from six.moves import http_client as httplib
-from six.moves import urllib
+import urllib.parse
 
 from oslo_log import log as logging
 

@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -11,8 +10,7 @@ from nfv_common.helpers import Singleton
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
-@six.add_metaclass(Singleton)
-class HypervisorAdministrativeState(Constants):
+class HypervisorAdministrativeState(Constants, metaclass=Singleton):
     """
     Hypervisor Administrative State Constants
     """
@@ -21,8 +19,7 @@ class HypervisorAdministrativeState(Constants):
     UNLOCKED = Constant('unlocked')
 
 
-@six.add_metaclass(Singleton)
-class HypervisorOperationalState(Constants):
+class HypervisorOperationalState(Constants, metaclass=Singleton):
     """
     Hypervisor Operational State Constants
     """

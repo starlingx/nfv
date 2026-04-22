@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from datetime import datetime
-import six
 
 from nfv_vim.nfvi.objects.v1._instance_type import INSTANCE_TYPE_EXTENSION
 from nfv_vim.nfvi.objects.v1._object import ObjectData
@@ -15,8 +14,7 @@ from nfv_common.helpers import Object
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class InstanceAdministrativeState(Constants):
+class InstanceAdministrativeState(Constants, metaclass=Singleton):
     """
     Instance Administrative State Constants
     """
@@ -25,8 +23,7 @@ class InstanceAdministrativeState(Constants):
     UNLOCKED = Constant('unlocked')
 
 
-@six.add_metaclass(Singleton)
-class InstanceOperationalState(Constants):
+class InstanceOperationalState(Constants, metaclass=Singleton):
     """
     Instance Operational State Constants
     """
@@ -35,8 +32,7 @@ class InstanceOperationalState(Constants):
     DISABLED = Constant('disabled')
 
 
-@six.add_metaclass(Singleton)
-class InstanceAvailabilityStatus(Constants):
+class InstanceAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Instance Availability Status Constants
     """
@@ -57,8 +53,7 @@ class InstanceAvailabilityStatus(Constants):
     UNHEALTHY = Constant('unhealthy')
 
 
-@six.add_metaclass(Singleton)
-class InstanceAction(Constants):
+class InstanceAction(Constants, metaclass=Singleton):
     """
     Instance Action Constants
     """
@@ -100,8 +95,7 @@ class InstanceAction(Constants):
         return action_type
 
 
-@six.add_metaclass(Singleton)
-class InstanceActionType(Constants):
+class InstanceActionType(Constants, metaclass=Singleton):
     """
     Instance Action Type Constants
     """
@@ -126,8 +120,7 @@ class InstanceActionType(Constants):
     DELETE = Constant('delete')
 
 
-@six.add_metaclass(Singleton)
-class InstanceActionState(Constants):
+class InstanceActionState(Constants, metaclass=Singleton):
     """
     Instance Action State Constants
     """
@@ -140,16 +133,14 @@ class InstanceActionState(Constants):
     COMPLETED = Constant('completed')
 
 
-@six.add_metaclass(Singleton)
-class InstanceRebootOption(Constants):
+class InstanceRebootOption(Constants, metaclass=Singleton):
     """
     Instance Reboot Option Constants
     """
     GRACEFUL_SHUTDOWN = Constant('graceful-shutdown')
 
 
-@six.add_metaclass(Singleton)
-class InstanceLiveMigrateOption(Constants):
+class InstanceLiveMigrateOption(Constants, metaclass=Singleton):
     """
     Instance Live Migrate Option Constants
     """
@@ -157,16 +148,14 @@ class InstanceLiveMigrateOption(Constants):
     HOST = Constant('host')
 
 
-@six.add_metaclass(Singleton)
-class InstanceResizeOption(Constants):
+class InstanceResizeOption(Constants, metaclass=Singleton):
     """
     Instance Resize Option Constants
     """
     INSTANCE_TYPE_UUID = Constant('instance-type-uuid')
 
 
-@six.add_metaclass(Singleton)
-class InstanceRebuildOption(Constants):
+class InstanceRebuildOption(Constants, metaclass=Singleton):
     """
     Instance Rebuild Option Constants
     """
@@ -174,8 +163,7 @@ class InstanceRebuildOption(Constants):
     INSTANCE_NAME = Constant('instance-name')
 
 
-@six.add_metaclass(Singleton)
-class InstanceGuestServiceState(Constants):
+class InstanceGuestServiceState(Constants, metaclass=Singleton):
     """
     Instance Guest Service State Constants
     """
@@ -385,10 +373,9 @@ class InstanceActionData(ObjectData):
             # in the `context` dictionary are bytes instead of strings.
             # This can lead to some exceptions later in the code when
             # attempting to serialize this object into JSON.
-            if six.PY3:
-                for key, value in context.items():
-                    if isinstance(value, bytes):
-                        context[key] = value.decode()
+            for key, value in context.items():
+                if isinstance(value, bytes):
+                    context[key] = value.decode()
 
             data['context'] = context
 

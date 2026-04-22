@@ -1,10 +1,9 @@
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import http.client as httplib
 import pecan
-import six
-from six.moves import http_client as httplib
 from wsme import types as wsme_types
 import wsmeext.pecan as wsme_pecan
 
@@ -28,80 +27,80 @@ class NetworkCreateInputData(wsme_types.Base):
     """
     Virtualised Resources - Network Create Input Data
     """
-    network_resource_id = wsme_types.wsattr(six.text_type, mandatory=True)
-    reservation_id = wsme_types.wsattr(six.text_type, mandatory=False)
+    network_resource_id = wsme_types.wsattr(str, mandatory=True)
+    reservation_id = wsme_types.wsattr(str, mandatory=False)
     network_resource_type = wsme_types.wsattr(NetworkResourceClass,
                                               mandatory=True)
     type_network_data = wsme_types.wsattr(NetworkType, mandatory=False,
                                           default=None)
     type_subnet_data = wsme_types.wsattr(NetworkSubnetType, mandatory=False,
                                          default=None)
-    meta_data = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    meta_data = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class NetworkCreateOutputData(wsme_types.Base):
     """
     Virtualised Resources - Network Create Output Data
     """
-    operation_result = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
     network_data = wsme_types.wsattr(NetworkResourceType, mandatory=False)
     subnet_data = wsme_types.wsattr(NetworkSubnetResourceType, mandatory=False)
-    message = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    message = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class NetworkUpdateInputData(wsme_types.Base):
     """
     Virtualised Resources - Network Create Input Data
     """
-    network_resource_id = wsme_types.wsattr(six.text_type, mandatory=True)
+    network_resource_id = wsme_types.wsattr(str, mandatory=True)
     update_network_data = wsme_types.wsattr(NetworkType, mandatory=False,
                                             default=None)
     update_subnet_data = wsme_types.wsattr(NetworkSubnetType, mandatory=False,
                                            default=None)
-    meta_data = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    meta_data = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class NetworkUpdateOutputData(wsme_types.Base):
     """
     Virtualised Resources - Network Update Output Data
     """
-    operation_result = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
-    network_resource_id = wsme_types.wsattr(six.text_type, mandatory=True)
+    operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
+    network_resource_id = wsme_types.wsattr(str, mandatory=True)
     network_data = wsme_types.wsattr(NetworkResourceType, mandatory=False)
     subnet_data = wsme_types.wsattr(NetworkSubnetResourceType, mandatory=False)
-    message = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    message = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class NetworkDeleteInputData(wsme_types.Base):
     """
     Virtualised Resources - Network Delete Input Data
     """
-    network_resource_ids = wsme_types.wsattr([six.text_type], mandatory=True)
+    network_resource_ids = wsme_types.wsattr([str], mandatory=True)
 
 
 class NetworkDeleteOutputData(wsme_types.Base):
     """
     Virtualised Resources - Network Delete Output Data
     """
-    operation_result = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
-    network_resource_ids = wsme_types.wsattr([six.text_type], mandatory=False)
-    message = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
+    network_resource_ids = wsme_types.wsattr([str], mandatory=False)
+    message = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class NetworkQueryOutputData(wsme_types.Base):
     """
     Virtualised Resources - Network Query Output Data
     """
-    operation_result = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
     query_result = wsme_types.wsattr([NetworkResourceType], mandatory=False)
-    message = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    message = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class NetworksAPI(pecan.rest.RestController):
     """
     Virtualised Resources - Networks API
     """
-    @wsme_pecan.wsexpose(NetworkQueryOutputData, six.text_type,
+    @wsme_pecan.wsexpose(NetworkQueryOutputData, str,
                          status_code=httplib.OK)
     def get_one(self, network_resource_id):
         DLOG.verbose("Network-API get called for network %s."

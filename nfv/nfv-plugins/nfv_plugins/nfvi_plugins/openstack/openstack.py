@@ -1,10 +1,11 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-from six.moves import urllib
+import urllib.error
+import urllib.request
 
 from nfv_common import debug
 from nfv_plugins.nfvi_plugins.openstack.objects import Directory

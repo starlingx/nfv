@@ -1,10 +1,8 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
-
 from nfv_common import event_log
 
 # Log Template Definitions
@@ -915,14 +913,14 @@ def sw_update_issue_log(event_id, additional_text=None, event_context=None,
     if additional_text is None:
         data['additional_text'] = ""
     else:
-        data['additional_text'] = six.text_type(
+        data['additional_text'] = str(
             additional_text).rstrip('. \t\n\r')
 
     if reason is None or '' == reason:
         data['reason'] = ""
     else:
         data['reason'] = (", reason = %s"
-                          % six.text_type(reason).rstrip('. \t\n\r'))
+                          % str(reason).rstrip('. \t\n\r'))
 
     event_list = list()
 

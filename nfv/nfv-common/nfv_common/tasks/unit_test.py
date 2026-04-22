@@ -1,10 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
-
 from nfv_common import config
 from nfv_common import debug
 from nfv_common import selobj
@@ -27,19 +25,19 @@ def unit_test(title):
                 global _test_complete, _test_result
                 _test_complete = False
                 _test_result = None
-                six.print_("%-40s: " % title, end='')
+                print("%-40s: " % title, end='')
                 result = func(*args, **kwargs)
                 _test_result = result
                 while not _test_complete:
                     selobj.selobj_dispatch(500)
                     timers.timers_schedule()
                 if _test_result:
-                    six.print_("PASSED", end='\n')
+                    print("PASSED", end='\n')
                 else:
-                    six.print_("%s FAILED", end='\n')
+                    print("%s FAILED", end='\n')
             except Exception as e:
                 DLOG.exception("%s" % e)
-                six.print_("%s FAILED", end='\n')
+                print("%s FAILED", end='\n')
         return func_wrapper
     return unit_test_wrapper
 
@@ -115,8 +113,8 @@ class UnitTest(object):
         return _test_result
 
     def run(self):
-        six.print_("TASKS UNIT TESTS", end='\n')
-        six.print_("================", end='\n')
+        print("TASKS UNIT TESTS", end='\n')
+        print("================", end='\n')
         self.test_normal_function_call()
         self.test_coroutine_function_call()
         self.test_coroutine_timer_function_call()

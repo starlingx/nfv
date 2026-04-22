@@ -1,17 +1,15 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class _EventId(Constants):
+class _EventId(Constants, metaclass=Singleton):
     """
     Event Type Constants
     """
@@ -209,8 +207,7 @@ class _EventId(Constants):
     SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTED = Constant('system-config-update-auto-apply-aborted')
 
 
-@six.add_metaclass(Singleton)
-class _EventType(Constants):
+class _EventType(Constants, metaclass=Singleton):
     """
     Event Type Constants
     """
@@ -221,8 +218,7 @@ class _EventType(Constants):
     PROCESSING_ERROR = Constant('processing-error')
 
 
-@six.add_metaclass(Singleton)
-class _EventContext(Constants):
+class _EventContext(Constants, metaclass=Singleton):
     """
     Event Context Constants
     """
@@ -230,8 +226,7 @@ class _EventContext(Constants):
     TENANT = Constant('tenant')
 
 
-@six.add_metaclass(Singleton)
-class _EventImportance(Constants):
+class _EventImportance(Constants, metaclass=Singleton):
     """
     Event Importance Constants
     """
@@ -241,8 +236,7 @@ class _EventImportance(Constants):
     LOW = Constant('low')
 
 
-@six.add_metaclass(Singleton)
-class _EventInitiatedBy(Constants):
+class _EventInitiatedBy(Constants, metaclass=Singleton):
     """
     Initiated-By Constants
     """

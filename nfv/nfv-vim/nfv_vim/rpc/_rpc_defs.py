@@ -1,17 +1,15 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class _RPCMessageVersion(Constants):
+class _RPCMessageVersion(Constants, metaclass=Singleton):
     """
     RPC Message Version Constants
     """
@@ -19,8 +17,7 @@ class _RPCMessageVersion(Constants):
     VERSION_1_0 = Constant('1.0')
 
 
-@six.add_metaclass(Singleton)
-class _RPCMessageType(Constants):
+class _RPCMessageType(Constants, metaclass=Singleton):
     """
     RPC Message Type Constants
     """
@@ -111,8 +108,7 @@ class _RPCMessageType(Constants):
     GET_SW_UPDATE_STRATEGY_RESPONSE = Constant('get-sw-update-strategy-response')
 
 
-@six.add_metaclass(Singleton)
-class _RPCMessageResult(Constants):
+class _RPCMessageResult(Constants, metaclass=Singleton):
     """
     RPC Message Result Constants
     """

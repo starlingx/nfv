@@ -1,17 +1,15 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class _AlarmType(Constants):
+class _AlarmType(Constants, metaclass=Singleton):
     """
     Alarm Type Constants
     """
@@ -55,8 +53,7 @@ class _AlarmType(Constants):
     SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED = Constant('system-config-update-auto-apply-failed')
 
 
-@six.add_metaclass(Singleton)
-class _AlarmContext(Constants):
+class _AlarmContext(Constants, metaclass=Singleton):
     """
     Alarm Context Constants
     """
@@ -64,8 +61,7 @@ class _AlarmContext(Constants):
     TENANT = Constant('tenant')
 
 
-@six.add_metaclass(Singleton)
-class _AlarmEventType(Constants):
+class _AlarmEventType(Constants, metaclass=Singleton):
     """
     Alarm Event Type Constants
     """
@@ -83,8 +79,7 @@ class _AlarmEventType(Constants):
     TIME_DOMAIN_VIOLATION = Constant('time-domain-violation')
 
 
-@six.add_metaclass(Singleton)
-class _AlarmProbableCause(Constants):
+class _AlarmProbableCause(Constants, metaclass=Singleton):
     """
     Alarm Probable Cause Constants
     """
@@ -96,8 +91,7 @@ class _AlarmProbableCause(Constants):
     PROCEDURAL_ERROR = Constant('procedural-error')
 
 
-@six.add_metaclass(Singleton)
-class _AlarmSeverity(Constants):
+class _AlarmSeverity(Constants, metaclass=Singleton):
     """
     Alarm Severity Constants
     """
@@ -110,8 +104,7 @@ class _AlarmSeverity(Constants):
     CRITICAL = Constant('critical')
 
 
-@six.add_metaclass(Singleton)
-class _AlarmTrendIndication(Constants):
+class _AlarmTrendIndication(Constants, metaclass=Singleton):
     """
     Alarm Trend Indication Constants
     """

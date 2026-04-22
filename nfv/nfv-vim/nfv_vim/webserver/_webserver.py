@@ -1,15 +1,15 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import datetime
+import http.client as httplib
+import http.server as BaseHTTPServer
 import json
 import re
-from six.moves import BaseHTTPServer
-from six.moves import http_client as httplib
-from six.moves import socketserver
 import socket
+import socketserver
 import threading
 
 from nfv_common import debug

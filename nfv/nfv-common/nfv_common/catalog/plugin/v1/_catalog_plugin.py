@@ -1,36 +1,37 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from abc import ABCMeta
 from abc import abstractmethod
-from abc import abstractproperty
 
 
-@six.add_metaclass(ABCMeta)
-class CatalogPlugin(object):
+class CatalogPlugin(object, metaclass=ABCMeta):
     """
     Abstract Catalog Plugin Class Definition
     """
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self):
         """The name of plugin """
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def version(self):
         """The versions of the plugin  """
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def provider(self):
         """Vendor created the plugin """
         pass
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def signature(self):
         """Signature of the plugin """
         pass

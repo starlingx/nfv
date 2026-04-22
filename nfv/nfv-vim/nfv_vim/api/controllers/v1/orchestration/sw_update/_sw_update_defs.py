@@ -1,8 +1,7 @@
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from wsme import types as wsme_types
 
@@ -11,8 +10,7 @@ from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateNames(Constants):
+class SwUpdateNames(Constants, metaclass=Singleton):
     """
     Software Update - Name Constants
     """
@@ -24,8 +22,7 @@ class SwUpdateNames(Constants):
     CURRENT_STRATEGY = Constant('current-strategy')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateApplyTypes(Constants):
+class SwUpdateApplyTypes(Constants, metaclass=Singleton):
     """
     Software Update - Apply Type Constants
     """
@@ -34,8 +31,7 @@ class SwUpdateApplyTypes(Constants):
     IGNORE = Constant('ignore')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateInstanceActionTypes(Constants):
+class SwUpdateInstanceActionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Instance Action Type Constants
     """
@@ -43,8 +39,7 @@ class SwUpdateInstanceActionTypes(Constants):
     STOP_START = Constant('stop-start')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateActions(Constants):
+class SwUpdateActions(Constants, metaclass=Singleton):
     """
     Software Update - Action Constants
     """
@@ -54,8 +49,7 @@ class SwUpdateActions(Constants):
     ABORT_STAGE = Constant('abort-stage')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateAlarmRestrictionTypes(Constants):
+class SwUpdateAlarmRestrictionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Alarm Restriction Type Constants
     """

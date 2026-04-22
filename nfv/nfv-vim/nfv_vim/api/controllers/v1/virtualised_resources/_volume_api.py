@@ -1,12 +1,11 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import http.client as httplib
 import json
 import pecan
-import six
-from six.moves import http_client as httplib
 from wsme import types as wsme_types
 import wsmeext.pecan as wsme_pecan
 
@@ -22,10 +21,10 @@ class VolumeCreateData(wsme_types.Base):
     """
     Volume - Create Data
     """
-    name = wsme_types.wsattr(six.text_type, mandatory=True)
-    description = wsme_types.wsattr(six.text_type, mandatory=False, default="")
+    name = wsme_types.wsattr(str, mandatory=True)
+    description = wsme_types.wsattr(str, mandatory=False, default="")
     disk_size = wsme_types.wsattr(int, mandatory=True)
-    image_uuid = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    image_uuid = wsme_types.wsattr(str, mandatory=False, default=None)
 
     def __str__(self):
         return ("name=%s, description=%s, disk_size=%s, image_uuid=%s"
@@ -37,21 +36,21 @@ class VolumeUpdateData(wsme_types.Base):
     """
     Volume - Update Data
     """
-    description = wsme_types.wsattr(six.text_type, mandatory=False, default=None)
+    description = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class VolumeQueryData(wsme_types.Base):
     """
     Volume - Query Data
     """
-    uuid = six.text_type
-    name = six.text_type
-    description = six.text_type
-    disk_size = six.text_type
-    bootable = six.text_type
-    encrypted = six.text_type
-    availability_status = [six.text_type]
-    action = six.text_type
+    uuid = str
+    name = str
+    description = str
+    disk_size = str
+    bootable = str
+    encrypted = str
+    availability_status = [str]
+    action = str
 
     def __json__(self):
         json_data = dict()
@@ -109,7 +108,7 @@ class VolumeAPI(pecan.rest.RestController):
                    % (volume_uuid, response.result))
         return httplib.INTERNAL_SERVER_ERROR
 
-    @wsme_pecan.wsexpose(VolumeQueryData, six.text_type, status_code=httplib.OK)
+    @wsme_pecan.wsexpose(VolumeQueryData, str, status_code=httplib.OK)
     def get_one(self, volume_uuid):
         DLOG.verbose("Volume-API get called for volume %s." % volume_uuid)
 
@@ -212,7 +211,7 @@ class VolumeAPI(pecan.rest.RestController):
                    % (volume_create_data.name, response.result))
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
-    @wsme_pecan.wsexpose(VolumeQueryData, six.text_type, body=VolumeUpdateData,
+    @wsme_pecan.wsexpose(VolumeQueryData, str, body=VolumeUpdateData,
                          status_code=httplib.OK)
     def put(self, volume_uuid, volume_update_data):
         DLOG.verbose("Volume-API update called for volume %s." % volume_uuid)
@@ -262,7 +261,7 @@ class VolumeAPI(pecan.rest.RestController):
                    % (volume_uuid, response.result))
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
-    @wsme_pecan.wsexpose(None, six.text_type, status_code=httplib.NO_CONTENT)
+    @wsme_pecan.wsexpose(None, str, status_code=httplib.NO_CONTENT)
     def delete(self, volume_uuid):
         DLOG.verbose("Volume-API delete called for volume %s." % volume_uuid)
 

@@ -1,17 +1,15 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class StateNames(Constants):
+class StateNames(Constants, metaclass=Singleton):
     """
     Host - State Name Constants
     """
@@ -27,8 +25,7 @@ class StateNames(Constants):
     DELETED = Constant('deleted')
 
 
-@six.add_metaclass(Singleton)
-class EventNames(Constants):
+class EventNames(Constants, metaclass=Singleton):
     """
     Host - Event Name Constants
     """
@@ -49,8 +46,7 @@ class EventNames(Constants):
     INSTANCES_STOPPED = Constant('instances-stopped')
 
 
-@six.add_metaclass(Singleton)
-class TaskNames(Constants):
+class TaskNames(Constants, metaclass=Singleton):
     """
     Host - Task Name Constants
     """

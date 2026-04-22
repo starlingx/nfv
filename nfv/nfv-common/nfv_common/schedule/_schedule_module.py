@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 import socket
 
 from nfv_common import selobj
@@ -14,11 +13,7 @@ _send_socket = None
 _receive_socket = None
 _pending_function_calls = list()
 
-if six.PY3:
-    # python3 requires the string be converted to bytes
-    MESSAGE_ONE = '1'.encode('utf-8')
-else:
-    MESSAGE_ONE = '1'
+MESSAGE_ONE = b'1'
 
 
 def schedule_function_call(func, *args, **kwargs):

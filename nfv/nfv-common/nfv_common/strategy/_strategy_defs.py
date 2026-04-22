@@ -3,15 +3,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class StrategyApplyTypes(Constants):
+class StrategyApplyTypes(Constants, metaclass=Singleton):
     """
     Strategy - Apply Type Constants
     """
@@ -20,8 +18,7 @@ class StrategyApplyTypes(Constants):
     IGNORE = Constant('ignore')
 
 
-@six.add_metaclass(Singleton)
-class StrategyAlarmRestrictionTypes(Constants):
+class StrategyAlarmRestrictionTypes(Constants, metaclass=Singleton):
     """
     Strategy - Alarm Restriction Type Constants
     """
@@ -30,8 +27,7 @@ class StrategyAlarmRestrictionTypes(Constants):
     PERMISSIVE = Constant('permissive')
 
 
-@six.add_metaclass(Singleton)
-class StrategyPhases(Constants):
+class StrategyPhases(Constants, metaclass=Singleton):
     """
     Strategy - Phase Constants
     """
@@ -41,8 +37,7 @@ class StrategyPhases(Constants):
     ABORT = Constant('abort')
 
 
-@six.add_metaclass(Singleton)
-class StrategyStates(Constants):
+class StrategyStates(Constants, metaclass=Singleton):
     """
     Strategy - State Constants
     """

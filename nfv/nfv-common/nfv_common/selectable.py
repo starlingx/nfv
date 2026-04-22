@@ -1,12 +1,12 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import multiprocessing
 import socket
 
-from six.moves import queue as threading_queue
+import queue as threading_queue
 
 
 class ThreadQueue(object):

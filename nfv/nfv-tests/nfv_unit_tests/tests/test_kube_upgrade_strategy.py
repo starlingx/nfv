@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2025 Wind River Systems, Inc.
+# Copyright (c) 2020-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -32,14 +32,18 @@ DEFAULT_TO_VERSION = MID1_KUBE_VERSION
 FAKE_LOAD = '12.01'
 
 
-@mock.patch('nfv_vim.event_log._instance._event_issue',
-            sw_update_testcase.fake_event_issue)
-@mock.patch('nfv_vim.objects._sw_update.SwUpdate.save',
-            sw_update_testcase.fake_save)
-@mock.patch('nfv_vim.objects._sw_update.timers.timers_create_timer',
-            sw_update_testcase.fake_timer)
-@mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
-            sw_update_testcase.fake_nfvi_compute_plugin_disabled)
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
 class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     def _create_kube_upgrade_strategy(self,

@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2023,2026 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common import debug
 from nfv_common import state_machine
@@ -21,8 +20,7 @@ from nfv_vim import nfvi
 DLOG = debug.debug_get_logger('nfv_vim.objects.host')
 
 
-@six.add_metaclass(Singleton)
-class HostPersonality(object):
+class HostPersonality(object, metaclass=Singleton):
     """
     Host Personality Constants
     """
@@ -33,8 +31,7 @@ class HostPersonality(object):
     WORKER = Constant('worker')
 
 
-@six.add_metaclass(Singleton)
-class HostNames(object):
+class HostNames(object, metaclass=Singleton):
     """
     Host Name Constants
     """
@@ -43,8 +40,7 @@ class HostNames(object):
     STORAGE_0 = Constant('storage-0')
 
 
-@six.add_metaclass(Singleton)
-class HostServicesState(object):
+class HostServicesState(object, metaclass=Singleton):
     """
     Host-Services State Constants
     """
@@ -53,8 +49,7 @@ class HostServicesState(object):
     FAILED = Constant('failed')
 
 
-@six.add_metaclass(Singleton)
-class HostServices(object):
+class HostServices(object, metaclass=Singleton):
     """
     Host-Services Constants
     """

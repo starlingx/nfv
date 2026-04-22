@@ -1,11 +1,10 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
 import multiprocessing
-import six
 import sys
 import threading
 
@@ -28,8 +27,7 @@ class DebugLoggingThreadFormatter(logging.Formatter):
             super(DebugLoggingThreadFormatter, self).format(record)
 
 
-@six.add_metaclass(Singleton)
-class DebugLoggingThread(object):
+class DebugLoggingThread(object, metaclass=Singleton):
     """
     Debug Logging Thread
     """

@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import six
 import socket
 import time
 
@@ -30,8 +29,7 @@ KUBE_CERT_UPDATE_TRUSTNEWCA = "trust-new-ca"
 KUBE_CERT_UPDATE_UPDATECERTS = "update-certs"
 
 
-@six.add_metaclass(Singleton)
-class StrategyStepNames(Constants):
+class StrategyStepNames(Constants, metaclass=Singleton):
     """
     Strategy Step Names
     """

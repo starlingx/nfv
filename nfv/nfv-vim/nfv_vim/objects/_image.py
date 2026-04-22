@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 
 from nfv_common import debug
@@ -20,8 +19,7 @@ from nfv_vim import nfvi
 DLOG = debug.debug_get_logger('nfv_vim.objects.image')
 
 
-@six.add_metaclass(Singleton)
-class ImageAvailabilityStatus(Constants):
+class ImageAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Image Availability Status Constants
     """
@@ -31,8 +29,7 @@ class ImageAvailabilityStatus(Constants):
     DELETED = Constant('deleted')
 
 
-@six.add_metaclass(Singleton)
-class ImageAction(Constants):
+class ImageAction(Constants, metaclass=Singleton):
     """
     Image Action Constants
     """
@@ -42,8 +39,7 @@ class ImageAction(Constants):
     DELETING = Constant('deleting')
 
 
-@six.add_metaclass(Singleton)
-class ImageProperty(Constants):
+class ImageProperty(Constants, metaclass=Singleton):
     """
     Image Property Constants
     """

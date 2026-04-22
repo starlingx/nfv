@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common import debug
 from nfv_common import thread
@@ -15,8 +14,7 @@ from nfv_common.event_log._event_log_handlers import EventLogHandlers
 DLOG = debug.debug_get_logger('nfv_common.event_log.event_log_thread')
 
 
-@six.add_metaclass(Singleton)
-class EventLogWorker(thread.ThreadWorker):
+class EventLogWorker(thread.ThreadWorker, metaclass=Singleton):
     """
     Event Log Worker
     """
@@ -48,8 +46,7 @@ class EventLogWorker(thread.ThreadWorker):
             self._handlers.log(work['log-data'])
 
 
-@six.add_metaclass(Singleton)
-class EventLogThread(thread.Thread):
+class EventLogThread(thread.Thread, metaclass=Singleton):
     """
     Event Log Thread
     """

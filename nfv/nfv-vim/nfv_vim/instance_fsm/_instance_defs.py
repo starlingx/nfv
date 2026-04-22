@@ -1,16 +1,14 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class StateNames(object):
+class StateNames(object, metaclass=Singleton):
     """
     Instance - State Name Constants
     """
@@ -45,8 +43,7 @@ class StateNames(object):
     GUEST_SERVICES_NOTIFY = Constant('guest-services-notify')
 
 
-@six.add_metaclass(Singleton)
-class EventNames(object):
+class EventNames(object, metaclass=Singleton):
     """
     Instance - Event Name Constants
     """
@@ -71,8 +68,7 @@ class EventNames(object):
     TASK_TIMEOUT = Constant('task-timeout')
 
 
-@six.add_metaclass(Singleton)
-class TaskNames(object):
+class TaskNames(object, metaclass=Singleton):
     """
     Instance - Task Name Constants
     """

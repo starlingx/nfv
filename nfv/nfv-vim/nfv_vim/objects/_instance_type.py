@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -14,8 +13,7 @@ from nfv_vim.objects._object import ObjectData
 DLOG = debug.debug_get_logger('nfv_vim.objects.instance_type')
 
 
-@six.add_metaclass(Singleton)
-class InstanceTypeStorage(Constants):
+class InstanceTypeStorage(Constants, metaclass=Singleton):
     """
     Instance Type Storage Constants
     """
@@ -24,8 +22,7 @@ class InstanceTypeStorage(Constants):
     LOCAL_IMAGE_BACKED = Constant('local_image')
 
 
-@six.add_metaclass(Singleton)
-class InstanceTypeExtension(Constants):
+class InstanceTypeExtension(Constants, metaclass=Singleton):
     """
     Instance Type Extension Constants
     """

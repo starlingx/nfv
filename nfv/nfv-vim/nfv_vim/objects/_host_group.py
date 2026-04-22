@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_vim.objects._object import ObjectData
 
@@ -16,8 +15,7 @@ from nfv_common.helpers import Singleton
 DLOG = debug.debug_get_logger('nfv_vim.objects.host_group')
 
 
-@six.add_metaclass(Singleton)
-class HostGroupPolicy(Constants):
+class HostGroupPolicy(Constants, metaclass=Singleton):
     """
     Host Group Policy Constants
     """

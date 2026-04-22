@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -12,8 +11,7 @@ from nfv_common.helpers import Singleton
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
-@six.add_metaclass(Singleton)
-class GuestServiceNames(Constants):
+class GuestServiceNames(Constants, metaclass=Singleton):
     """
     Guest Service Name Constants
     """
@@ -21,8 +19,7 @@ class GuestServiceNames(Constants):
     HEARTBEAT = Constant('heartbeat')
 
 
-@six.add_metaclass(Singleton)
-class GuestServiceAdministrativeState(Constants):
+class GuestServiceAdministrativeState(Constants, metaclass=Singleton):
     """
     Guest Service Administrative State Constants
     """
@@ -31,8 +28,7 @@ class GuestServiceAdministrativeState(Constants):
     UNLOCKED = Constant('unlocked')
 
 
-@six.add_metaclass(Singleton)
-class GuestServiceOperationalState(Constants):
+class GuestServiceOperationalState(Constants, metaclass=Singleton):
     """
     Guest Service Operational State Constants
     """

@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import coroutine
@@ -23,8 +22,7 @@ DLOG = debug.debug_get_logger('nfv_vim.host_director')
 _host_director = None
 
 
-@six.add_metaclass(Singleton)
-class HostDirector(object):
+class HostDirector(object, metaclass=Singleton):
     """
     Host Director
     """

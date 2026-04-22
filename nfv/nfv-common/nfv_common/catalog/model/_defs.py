@@ -1,16 +1,14 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class ConnectionType(object):
+class ConnectionType(object, metaclass=Singleton):
     """
     Connection Type Constants
     """
@@ -21,8 +19,7 @@ class ConnectionType(object):
     PHYSICAL_NIC_ADDRESS = Constant('physical-nic-address')
 
 
-@six.add_metaclass(Singleton)
-class ConnectivityType(object):
+class ConnectivityType(object, metaclass=Singleton):
     """
     Connectivity Type Constants
     """

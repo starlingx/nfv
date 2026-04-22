@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2019 Wind River Systems, Inc.
+# Copyright (c) 2015-2019, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -19,8 +18,7 @@ from nfv_vim import nfvi
 DLOG = debug.debug_get_logger('nfv_vim.dhcp_rebalance')
 
 
-@six.add_metaclass(Singleton)
-class AgentType(Constants):
+class AgentType(Constants, metaclass=Singleton):
     """
     AGENT TYPE Constants
     """
@@ -31,8 +29,7 @@ class AgentType(Constants):
 AGENT_TYPE = AgentType()
 
 
-@six.add_metaclass(Singleton)
-class DHCPRebalanceState(Constants):
+class DHCPRebalanceState(Constants, metaclass=Singleton):
     """
     DHCP REBALANCE STATE Constants
     """
@@ -48,8 +45,7 @@ class DHCPRebalanceState(Constants):
 DHCP_REBALANCE_STATE = DHCPRebalanceState()
 
 
-@six.add_metaclass(Singleton)
-class DHCPAgentRebalance(object):
+class DHCPAgentRebalance(object, metaclass=Singleton):
     def __init__(self):
         # Our state.
         self.state = DHCP_REBALANCE_STATE.DONE
