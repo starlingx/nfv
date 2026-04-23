@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016,2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -17,13 +17,14 @@ from nfv_common.helpers import coroutine
 
 from nfv_common.thread._thread_progress_marker import ThreadProgressMarker
 
-DLOG = debug.debug_get_logger('nfv_common.thread')
+DLOG = debug.debug_get_logger("nfv_common.thread")
 
 
 class ThreadState(object):
     """
     Thread State
     """
+
     def __init__(self):
         self.stay_on = True
         self.debug_reload = False
@@ -33,6 +34,7 @@ class Thread(object):
     """
     Thread
     """
+
     ACTION_DEBUG_CONFIG_RELOAD = "thread-debug-config-reload"
     ACTION_STOP = "thread-stop"
 
@@ -44,11 +46,17 @@ class Thread(object):
         self._work_queue = selectable.MultiprocessQueue()
         self._thread_worker = thread_worker
         self._progress_marker = ThreadProgressMarker()
-        self._process = Process(target=_thread_main,
-                                args=(self._name, self._progress_marker,
-                                      debug.debug_get_config(),
-                                      thread_worker, self._work_queue),
-                                name=self._name)
+        self._process = Process(
+            target=_thread_main,
+            args=(
+                self._name,
+                self._progress_marker,
+                debug.debug_get_config(),
+                thread_worker,
+                self._work_queue,
+            ),
+            name=self._name,
+        )
         self._process.daemon = True
         self._check_timer_id = None
         self._check_interval_in_secs = check_interval_in_secs
@@ -91,13 +99,19 @@ class Thread(object):
             if self._last_marker_value is not None:
                 if self._last_marker_value == self._progress_marker.value:
                     if self._stall_timestamp_ms is None:
-                        self._stall_timestamp_ms = \
+                        self._stall_timestamp_ms = (
                             timers.get_monotonic_timestamp_in_ms()
+                        )
 
-                    DLOG.error("Thread %s stalled, progress_marker=%s, "
-                               "elapsed_secs=%s." % (self._name,
-                                                     self._progress_marker.value,
-                                                     self.stall_elapsed_secs))
+                    DLOG.error(
+                        "Thread %s stalled, progress_marker=%s, "
+                        "elapsed_secs=%s."
+                        % (
+                            self._name,
+                            self._progress_marker.value,
+                            self.stall_elapsed_secs,
+                        )
+                    )
                 else:
                     self._stall_timestamp_ms = None
 
@@ -110,8 +124,11 @@ class Thread(object):
         self._process.start()
         if self._check_timer_id is None:
             self._check_timer_id = timers.timers_create_timer(
-                self._name, self._check_interval_in_secs,
-                self._check_interval_in_secs, self.do_check)
+                self._name,
+                self._check_interval_in_secs,
+                self._check_interval_in_secs,
+                self.do_check,
+            )
 
     def stop(self, max_wait_in_seconds):
         """
@@ -147,7 +164,7 @@ def _thread_dispatch_work(thread_state, thread_worker, work_queue):
     Dispatch thread work
     """
     while True:
-        select_obj = (yield)
+        select_obj = yield
         if select_obj == work_queue.selobj:
             work_entry = work_queue.get()
             if work_entry is not None:
@@ -165,8 +182,7 @@ def _thread_dispatch_work(thread_state, thread_worker, work_queue):
                     thread_worker.do_work(action, work)
 
 
-def _thread_main(thread_name, progress_marker, debug_config, thread_worker,
-                 work_queue):
+def _thread_main(thread_name, progress_marker, debug_config, thread_worker, work_queue):
     """
     Main loop for the thread
     """
@@ -198,15 +214,22 @@ def _thread_main(thread_name, progress_marker, debug_config, thread_worker,
 
         debug.debug_initialize(debug_config, thread_name=thread_name)
         selobj.selobj_initialize()
-        timers.timers_initialize(thread_worker.tick_interval_in_ms,
-                                 thread_worker.tick_max_delay_in_ms,
-                                 thread_worker.tick_delay_debounce_in_ms)
+        timers.timers_initialize(
+            thread_worker.tick_interval_in_ms,
+            thread_worker.tick_max_delay_in_ms,
+            thread_worker.tick_delay_debounce_in_ms,
+        )
 
         DLOG.debug("Thread %s: initializing." % thread_name)
         thread_worker.initialize()
 
-        selobj.selobj_add_read_obj(work_queue.selobj, _thread_dispatch_work,
-                                   thread_state, thread_worker, work_queue)
+        selobj.selobj_add_read_obj(
+            work_queue.selobj,
+            _thread_dispatch_work,
+            thread_state,
+            thread_worker,
+            work_queue,
+        )
 
         DLOG.debug("Thread %s: started." % thread_name)
         while thread_state.stay_on:

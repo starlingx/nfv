@@ -14,17 +14,17 @@ import struct
 from nfv_common import debug
 from nfv_common import timers
 
-DLOG = debug.debug_get_logger('nfv_common.tcp')
+DLOG = debug.debug_get_logger("nfv_common.tcp")
 
 
 class TCPConnection(object):
     """
     TCP Connection
     """
+
     AUTH_VECTOR_MAX_SIZE = 64
 
-    def __init__(self, ip, port, sock=None, blocking=True, owner=None,
-                 auth_key=None):
+    def __init__(self, ip, port, sock=None, blocking=True, owner=None, auth_key=None):
         """
         Create a TCP connection
         """
@@ -36,8 +36,7 @@ class TCPConnection(object):
             result = None
             for family in (socket.AF_INET6, socket.AF_INET):
                 try:
-                    result = socket.getaddrinfo(ip, None, family,
-                                                socket.SOCK_STREAM)
+                    result = socket.getaddrinfo(ip, None, family, socket.SOCK_STREAM)
                     break
                 except socket.error:
                     continue
@@ -110,8 +109,9 @@ class TCPConnection(object):
             self._socket.setblocking(self._blocking)
 
         except socket.error as e:
-            DLOG.error("Connect to end-point failed, ip=%s, port=%s, error=%s."
-                       % (ip, port, e))
+            DLOG.error(
+                "Connect to end-point failed, ip=%s, port=%s, error=%s." % (ip, port, e)
+            )
             self.close()
             raise
 
@@ -125,15 +125,16 @@ class TCPConnection(object):
 
         if self._socket is not None:
             if self._auth_key is None:
-                msg = struct.pack('!L', socket.htonl(len(payload)))
-                msg += bytes(payload, 'utf-8')
+                msg = struct.pack("!L", socket.htonl(len(payload)))
+                msg += bytes(payload, "utf-8")
             else:
-                auth_vector = hmac.new(self._auth_key, msg=payload,
-                                       digestmod=hashlib.sha512).digest()
+                auth_vector = hmac.new(
+                    self._auth_key, msg=payload, digestmod=hashlib.sha512
+                ).digest()
                 msg_len = len(auth_vector) + len(payload)
-                msg = struct.pack('!L', socket.htonl(msg_len))
-                msg += auth_vector[:self.AUTH_VECTOR_MAX_SIZE]
-                msg += bytes(payload, 'utf-8')
+                msg = struct.pack("!L", socket.htonl(msg_len))
+                msg += auth_vector[: self.AUTH_VECTOR_MAX_SIZE]
+                msg += bytes(payload, "utf-8")
 
             bytes_sent = self._socket.send(bytes(msg))
         return bytes_sent
@@ -151,9 +152,9 @@ class TCPConnection(object):
         try:
             if -1 == self._msg_len_remaining:
                 if 0 == self._msg_len:
-                    read_len = struct.calcsize('!L')
+                    read_len = struct.calcsize("!L")
                 else:
-                    read_len = struct.calcsize('!L') - self._msg_len
+                    read_len = struct.calcsize("!L") - self._msg_len
 
                 msg_block = self._socket.recv(read_len)
                 if 0 == len(msg_block):
@@ -164,9 +165,9 @@ class TCPConnection(object):
                     msg = b"".join(self._msg_parts)
                     self._msg_len = len(msg_block)
 
-                    if struct.calcsize('!L') == len(msg):
+                    if struct.calcsize("!L") == len(msg):
                         self._msg_parts[:] = list()
-                        self._msg_len = socket.ntohl(struct.unpack('!L', msg)[0])
+                        self._msg_len = socket.ntohl(struct.unpack("!L", msg)[0])
                         self._msg_len_remaining = self._msg_len
 
             else:
@@ -188,26 +189,32 @@ class TCPConnection(object):
                         else:
                             auth_vector = msg[:self.AUTH_VECTOR_MAX_SIZE]
                             message = msg[self.AUTH_VECTOR_MAX_SIZE:]
-                            expected = hmac.new(self._auth_key, msg=message,
-                                                digestmod=hashlib.sha512).digest()
+                            expected = hmac.new(
+                                self._auth_key, msg=message, digestmod=hashlib.sha512
+                            ).digest()
 
                             if auth_vector != expected:
                                 auth_vector_str = base64.b64encode(auth_vector)
                                 expected_str = base64.b64encode(expected)
 
-                                DLOG.info("Authorization vector mismatch, msg=%s, "
-                                          "auth_vector=%s, expected=%s."
-                                          % (message, auth_vector_str,
-                                             expected_str))
+                                DLOG.info(
+                                    "Authorization vector mismatch, msg=%s, "
+                                    "auth_vector=%s, expected=%s."
+                                    % (message, auth_vector_str, expected_str)
+                                )
                                 message = None
 
         except socket.timeout as e:
-            DLOG.info("TCP socket timeout, ip=%s, por=%s, error=%s."
-                      % (self._ip, self._port, e))
+            DLOG.info(
+                "TCP socket timeout, ip=%s, por=%s, error=%s."
+                % (self._ip, self._port, e)
+            )
 
         except socket.error as e:
-            DLOG.error("TCP socket error, ip=%s, port=%s, error=%s."
-                       % (self._ip, self._port, e))
+            DLOG.error(
+                "TCP socket error, ip=%s, port=%s, error=%s."
+                % (self._ip, self._port, e)
+            )
             self.close()
 
         finally:
@@ -225,8 +232,9 @@ class TCPConnection(object):
         while self._socket is not None:
             read_objs = [self._socket.fileno()]
             try:
-                readable, writeable, in_error \
-                    = select.select(read_objs, [], [], timeout_in_secs)
+                readable, writeable, in_error = select.select(
+                    read_objs, [], [], timeout_in_secs
+                )
 
                 for selobj in readable:
                     if selobj == self._socket.fileno():

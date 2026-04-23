@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,13 +11,14 @@ from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import LiveMigrateTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.instance')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class LiveMigrateState(state_machine.State):
     """
     Instance - Live Migrate State
     """
+
     def __init__(self, name):
         super(LiveMigrateState, self).__init__(name)
 
@@ -53,12 +54,13 @@ class LiveMigrateState(state_machine.State):
         Handle event while in the live migrate state
         """
         from nfv_vim import directors
+
         instance_director = directors.get_instance_director()
 
         if event_data is not None:
-            reason = event_data.get('reason', '')
+            reason = event_data.get("reason", "")
         else:
-            reason = ''
+            reason = ""
 
         if instance.task.inprogress():
             if instance.task.handle_event(event, event_data):
@@ -69,12 +71,18 @@ class LiveMigrateState(state_machine.State):
 
         elif INSTANCE_EVENT.NFVI_HOST_CHANGED == event:
             if instance.action_fsm.from_host_name != instance.host_name:
-                DLOG.info("Live-Migrate for %s from host %s to host %s."
-                          % (instance.name, instance.action_fsm.from_host_name,
-                             instance.host_name))
+                DLOG.info(
+                    "Live-Migrate for %s from host %s to host %s."
+                    % (
+                        instance.name,
+                        instance.action_fsm.from_host_name,
+                        instance.host_name,
+                    )
+                )
 
                 instance_director.instance_migrate_complete(
-                    instance, instance.action_fsm.from_host_name)
+                    instance, instance.action_fsm.from_host_name
+                )
 
                 guest_services = instance.guest_services
                 if guest_services.are_provisioned():
@@ -89,7 +97,8 @@ class LiveMigrateState(state_machine.State):
             # Tell the instance director that the live migrate failed so it
             # can update any host operation that may be in progress.
             instance_director.instance_migrate_complete(
-                instance, instance.action_fsm.from_host_name, failed=True)
+                instance, instance.action_fsm.from_host_name, failed=True
+            )
             if guest_services.are_provisioned():
                 return INSTANCE_STATE.LIVE_MIGRATE_FINISH
             else:
@@ -102,7 +111,8 @@ class LiveMigrateState(state_machine.State):
             DLOG.info("Live-Migrate failed for %s." % instance.name)
             instance.fail_action(instance.action_fsm_action_type, reason)
             instance_director.instance_migrate_complete(
-                instance, instance.action_fsm.from_host_name, failed=True)
+                instance, instance.action_fsm.from_host_name, failed=True
+            )
             return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.TASK_TIMEOUT == event:
@@ -114,10 +124,11 @@ class LiveMigrateState(state_machine.State):
                     DLOG.info("Live-Migrate starting for %s." % instance.name)
                     # Live migration has started
                     instance._live_migration_started = True
-            elif instance._live_migration_started and \
-                    instance.action_fsm.from_host_name == instance.host_name:
-                DLOG.info("Live-Migrate no longer in progress for %s." %
-                          instance.name)
+            elif (
+                instance._live_migration_started
+                and instance.action_fsm.from_host_name == instance.host_name
+            ):
+                DLOG.info("Live-Migrate no longer in progress for %s." % instance.name)
                 # Live migration was in progress once, but is no longer and
                 # the host has not changed. Nova does this (for example) if it
                 # fails to schedule a destination host for the live migration.
@@ -127,7 +138,8 @@ class LiveMigrateState(state_machine.State):
                 # can update any host operation that may be in progress.
                 guest_services = instance.guest_services
                 instance_director.instance_migrate_complete(
-                    instance, instance.action_fsm.from_host_name, failed=True)
+                    instance, instance.action_fsm.from_host_name, failed=True
+                )
                 if guest_services.are_provisioned():
                     return INSTANCE_STATE.LIVE_MIGRATE_FINISH
                 else:
@@ -136,7 +148,8 @@ class LiveMigrateState(state_machine.State):
         elif INSTANCE_EVENT.AUDIT == event:
             if instance.action_fsm.from_host_name != instance.host_name:
                 instance_director.instance_migrate_complete(
-                    instance, instance.action_fsm.from_host_name)
+                    instance, instance.action_fsm.from_host_name
+                )
 
                 guest_services = instance.guest_services
                 if guest_services.are_provisioned():
@@ -146,39 +159,47 @@ class LiveMigrateState(state_machine.State):
 
             elif not (instance.task.inprogress() or instance.is_migrating()):
                 if 0 == instance.action_fsm.wait_time:
-                    instance.action_fsm.wait_time \
-                        = timers.get_monotonic_timestamp_in_ms()
+                    instance.action_fsm.wait_time = (
+                        timers.get_monotonic_timestamp_in_ms()
+                    )
 
                 now_ms = timers.get_monotonic_timestamp_in_ms()
                 secs_expired = (now_ms - instance.action_fsm.wait_time) // 1000
                 if 60 <= secs_expired:
-                    instance.fail_action(instance.action_fsm_action_type, 'timeout')
+                    instance.fail_action(instance.action_fsm_action_type, "timeout")
                     instance_director.instance_migrate_complete(
-                        instance, instance.action_fsm.from_host_name,
-                        failed=False, timed_out=True)
+                        instance,
+                        instance.action_fsm.from_host_name,
+                        failed=False,
+                        timed_out=True,
+                    )
                     return INSTANCE_STATE.INITIAL
 
             else:
                 now_ms = timers.get_monotonic_timestamp_in_ms()
                 secs_expired = (now_ms - instance.action_fsm.start_time) // 1000
-                max_live_migrate_wait_in_secs = \
-                    instance.max_live_migrate_wait_in_secs
+                max_live_migrate_wait_in_secs = instance.max_live_migrate_wait_in_secs
                 if 0 != max_live_migrate_wait_in_secs:
                     # Add 60 seconds buffer on top of nova timeout value
                     max_wait = max_live_migrate_wait_in_secs + 60
                     if max_wait <= secs_expired:
-                        instance.fail_action(instance.action_fsm_action_type,
-                                             'timeout')
+                        instance.fail_action(instance.action_fsm_action_type, "timeout")
                         instance_director.instance_migrate_complete(
-                            instance, instance.action_fsm.from_host_name,
-                            failed=False, timed_out=True)
+                            instance,
+                            instance.action_fsm.from_host_name,
+                            failed=False,
+                            timed_out=True,
+                        )
                         return INSTANCE_STATE.INITIAL
 
                 elif instance.task.timed_out():
-                    instance.fail_action(instance.action_fsm_action_type, 'timeout')
+                    instance.fail_action(instance.action_fsm_action_type, "timeout")
                     instance_director.instance_migrate_complete(
-                        instance, instance.action_fsm.from_host_name,
-                        failed=False, timed_out=True)
+                        instance,
+                        instance.action_fsm.from_host_name,
+                        failed=False,
+                        timed_out=True,
+                    )
                     return INSTANCE_STATE.INITIAL
 
         else:

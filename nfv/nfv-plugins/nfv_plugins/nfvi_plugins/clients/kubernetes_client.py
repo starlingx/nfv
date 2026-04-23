@@ -20,11 +20,11 @@ from nfv_common.helpers import Result
 import http.client as httplib
 import subprocess
 
-K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split('.', maxsplit=1)[0])
+K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split(".", maxsplit=1)[0])
 
 fmapi = fm_api.FaultAPIs()
 
-DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.clients.kubernetes_client')
+DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.clients.kubernetes_client")
 
 
 # https://github.com/kubernetes-client/python/issues/895
@@ -47,11 +47,13 @@ def names(self, names):
 
 # Replacing address of "names" in V1ContainerImage
 # with the "names" defined above
-V1ContainerImage.names = V1ContainerImage.names.setter(names)  # pylint: disable=assignment-from-no-return
+V1ContainerImage.names = V1ContainerImage.names.setter(  # pylint: disable=assignment-from-no-return
+    names
+)
 
 
 def get_client():
-    kubernetes.config.load_kube_config('/etc/kubernetes/admin.conf')
+    kubernetes.config.load_kube_config("/etc/kubernetes/admin.conf")
 
     # Workaround: Turn off SSL/TLS verification
     if K8S_MODULE_MAJOR_VERSION < 12:
@@ -68,7 +70,7 @@ def get_kubertnetes_https_client():
     """
     Get Kubernetes client with HTTPS enabled
     """
-    kubernetes.config.load_kube_config('/etc/kubernetes/admin.conf')
+    kubernetes.config.load_kube_config("/etc/kubernetes/admin.conf")
 
     if K8S_MODULE_MAJOR_VERSION < 12:
         c = kubernetes.client.Configuration()
@@ -88,8 +90,7 @@ def get_customobjects_api_instance():
 
 def raise_alarm(node_name):
 
-    entity_instance_id = "%s=%s" % (fm_constants.FM_ENTITY_TYPE_HOST,
-            node_name)
+    entity_instance_id = "%s=%s" % (fm_constants.FM_ENTITY_TYPE_HOST, node_name)
     fault = fm_api.Fault(
         alarm_id=fm_constants.FM_ALARM_ID_USM_NODE_TAINTED,
         alarm_state=fm_constants.FM_ALARM_STATE_SET,
@@ -99,20 +100,28 @@ def raise_alarm(node_name):
         reason_text=("Node tainted."),
         alarm_type=fm_constants.FM_ALARM_TYPE_7,
         probable_cause=fm_constants.ALARM_PROBABLE_CAUSE_8,
-        proposed_repair_action=("Execute 'kubectl taint nodes %s services=disabled:NoExecute-'. "
+        proposed_repair_action=(
+            "Execute 'kubectl taint nodes %s services=disabled:NoExecute-'. "
             "If it fails, Execute 'system host-lock %s' followed by 'system host-unlock %s'. "
             "If issue still persists, contact next level of support."
-            % (node_name, node_name, node_name)),
-        service_affecting=True)
-    DLOG.info("Raising alarm %s on %s " % (fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, node_name))
+            % (node_name, node_name, node_name)
+        ),
+        service_affecting=True,
+    )
+    DLOG.info(
+        "Raising alarm %s on %s "
+        % (fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, node_name)
+    )
     fmapi.set_fault(fault)
 
 
 def clear_alarm(node_name):
 
-    entity_instance_id = "%s=%s" % (fm_constants.FM_ENTITY_TYPE_HOST,
-            node_name)
-    DLOG.info("Clearing alarm %s on %s " % (fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, node_name))
+    entity_instance_id = "%s=%s" % (fm_constants.FM_ENTITY_TYPE_HOST, node_name)
+    DLOG.info(
+        "Clearing alarm %s on %s "
+        % (fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, node_name)
+    )
     fmapi.clear_fault(fm_constants.FM_ALARM_ID_USM_NODE_TAINTED, entity_instance_id)
 
 
@@ -130,8 +139,7 @@ def taint_node(node_name, effect, key, value):
             # In some cases we may attempt to taint a node that exists in
             # the VIM, but not yet in kubernetes (e.g. when the node is first
             # being configured). Ignore the failure.
-            DLOG.info("Not tainting node %s because it doesn't exist" %
-                      node_name)
+            DLOG.info("Not tainting node %s because it doesn't exist" % node_name)
             return
         else:
             raise
@@ -144,9 +152,10 @@ def taint_node(node_name, effect, key, value):
             if taint.key == key and taint.effect == effect:
                 add_taint = False
                 if taint.value != value:
-                    msg = ("Duplicate value - key: %s effect: %s "
-                           "value: %s new value %s" % (key, effect,
-                                                       taint.value, value))
+                    msg = (
+                        "Duplicate value - key: %s effect: %s "
+                        "value: %s new value %s" % (key, effect, taint.value, value)
+                    )
                     DLOG.error(msg)
                     raise Exception(msg)
                 else:
@@ -154,8 +163,7 @@ def taint_node(node_name, effect, key, value):
                     break
 
     if add_taint:
-        DLOG.info("Adding %s=%s:%s taint to node %s" % (key, value, effect,
-                                                        node_name))
+        DLOG.info("Adding %s=%s:%s taint to node %s" % (key, value, effect, node_name))
         # Preserve any existing taints
         if taints is not None:
             body = {"spec": {"taints": taints}}
@@ -193,11 +201,11 @@ def untaint_node(node_name, effect, key):
                 break
 
     if remove_taint:
-        DLOG.info("Removing %s:%s taint from node %s" % (key, effect,
-                                                         node_name))
+        DLOG.info("Removing %s:%s taint from node %s" % (key, effect, node_name))
         # Preserve any existing taints
-        updated_taints = [taint for taint in taints if taint.key != key or
-                          taint.effect != effect]
+        updated_taints = [
+            taint for taint in taints if taint.key != key or taint.effect != effect
+        ]
         DLOG.info("Updated taints %s" % (updated_taints))
         body = {"spec": {"taints": updated_taints}}
         response = kube_client.patch_node(node_name, body)
@@ -206,9 +214,11 @@ def untaint_node(node_name, effect, key):
         DLOG.info("Existing taint %s" % (taints))
         if taints is not None:
             for taint in taints:
-                if (taint.key == key and taint.effect == effect):
-                    DLOG.info("Removing %s:%s taint from node %s failed" % (key,
-                        effect, node_name))
+                if taint.key == key and taint.effect == effect:
+                    DLOG.info(
+                        "Removing %s:%s taint from node %s failed"
+                        % (key, effect, node_name)
+                    )
                     raise_alarm(node_name)
                     break
             else:
@@ -243,8 +253,7 @@ def delete_node(node_name):
             # In some cases we may attempt to delete a node that exists in
             # the VIM, but not yet in kubernetes (e.g. when the node is first
             # being configured). Ignore the failure.
-            DLOG.info("Not deleting node %s because it doesn't exist" %
-                      node_name)
+            DLOG.info("Not deleting node %s because it doesn't exist" % node_name)
             return
         else:
             raise
@@ -263,7 +272,8 @@ def mark_all_pods_not_ready(node_name, reason):
 
     # Retrieve the pods on the specified node.
     response = kube_client.list_namespaced_pod(
-        "", field_selector="spec.nodeName=%s" % node_name)
+        "", field_selector="spec.nodeName=%s" % node_name
+    )
 
     pods = response.items
     if pods is not None:
@@ -272,23 +282,31 @@ def mark_all_pods_not_ready(node_name, reason):
                 if condition.type == "Ready":
                     if condition.status != "False":
                         # Update the Ready status to False
-                        body = {"status":
-                                {"conditions":
-                                 [{"type": "Ready",
-                                   "status": "False",
-                                   "reason": reason,
-                                   }]}}
+                        body = {
+                            "status": {
+                                "conditions": [
+                                    {
+                                        "type": "Ready",
+                                        "status": "False",
+                                        "reason": reason,
+                                    }
+                                ]
+                            }
+                        }
                         try:
                             DLOG.debug(
-                                "Marking pod %s in namespace %s not ready" %
-                                (pod.metadata.name, pod.metadata.namespace))
+                                "Marking pod %s in namespace %s not ready"
+                                % (pod.metadata.name, pod.metadata.namespace)
+                            )
                             kube_client.patch_namespaced_pod_status(
-                                pod.metadata.name, pod.metadata.namespace, body)
+                                pod.metadata.name, pod.metadata.namespace, body
+                            )
                         except ApiException:
                             DLOG.exception(
                                 "Failed to update status for pod %s in "
-                                "namespace %s" % (pod.metadata.name,
-                                                  pod.metadata.namespace))
+                                "namespace %s"
+                                % (pod.metadata.name, pod.metadata.namespace)
+                            )
                     break
     return
 
@@ -302,7 +320,8 @@ def get_terminating_pods(node_name):
 
     # Retrieve the pods on the specified node.
     response = kube_client.list_namespaced_pod(
-        "", field_selector="spec.nodeName=%s" % node_name)
+        "", field_selector="spec.nodeName=%s" % node_name
+    )
 
     terminating_pods = list()
     pods = response.items
@@ -313,7 +332,7 @@ def get_terminating_pods(node_name):
             if pod.metadata.deletion_timestamp is not None:
                 terminating_pods.append(pod.metadata.name)
 
-    return Result(','.join(terminating_pods))
+    return Result(",".join(terminating_pods))
 
 
 def get_namespaced_custom_object(name, plural, group, version, namespace):
@@ -325,17 +344,14 @@ def get_namespaced_custom_object(name, plural, group, version, namespace):
 
     try:
         resource = api_instance.get_namespaced_custom_object(
-            group=group,
-            version=version,
-            name=name,
-            namespace=namespace,
-            plural=plural
+            group=group, version=version, name=name, namespace=namespace, plural=plural
         )
         return Result(resource)
     except ApiException as e:
         DLOG.exception(
             "Failed to get object %s from namespace %s, "
-            "reason: %s" % (name, namespace, e.reason))
+            "reason: %s" % (name, namespace, e.reason)
+        )
         return None
 
 
@@ -348,19 +364,20 @@ def get_deployment_host(name):
 
     try:
         resource = api_instance.get_namespaced_custom_object(
-            group='starlingx.windriver.com',
-            version='v1',
+            group="starlingx.windriver.com",
+            version="v1",
             name=name,
-            namespace='deployment',
-            plural='hosts'
+            namespace="deployment",
+            plural="hosts",
         )
-        unlock_request = resource.get('status').get('strategyRequired')
-        result = {'name': name, 'unlock_request': unlock_request}
+        unlock_request = resource.get("status").get("strategyRequired")
+        result = {"name": name, "unlock_request": unlock_request}
         return Result(result)
     except ApiException as e:
         DLOG.exception(
             "Failed to get object %s from namespace deployment, "
-            "reason: %s" % (name, e.reason))
+            "reason: %s" % (name, e.reason)
+        )
         return None
 
 
@@ -373,16 +390,14 @@ def list_namespaced_custom_objects(plural, group, version, namespace):
 
     try:
         resources = api_instance.list_namespaced_custom_object(
-            group=group,
-            version=version,
-            namespace=namespace,
-            plural=plural
+            group=group, version=version, namespace=namespace, plural=plural
         )
         return Result(resources)
     except ApiException as e:
         DLOG.exception(
             "Failed to list objects %s from namespace %s, "
-            "reason: %s" % (plural, namespace, e.reason))
+            "reason: %s" % (plural, namespace, e.reason)
+        )
         return None
 
 
@@ -395,27 +410,26 @@ def list_deployment_hosts():
 
     try:
         resources = api_instance.list_namespaced_custom_object(
-            group='starlingx.windriver.com',
-            version='v1',
-            namespace='deployment',
-            plural='hosts'
+            group="starlingx.windriver.com",
+            version="v1",
+            namespace="deployment",
+            plural="hosts",
         )
 
         if not resources:
             return None
 
         results = list()
-        for resource in resources.get('items'):
-            name = resource.get('metadata').get('name')
-            unlock_request = resource.get('status').get('strategyRequired')
-            results.append({'name': name,
-                            'unlock_request': unlock_request})
+        for resource in resources.get("items"):
+            name = resource.get("metadata").get("name")
+            unlock_request = resource.get("status").get("strategyRequired")
+            results.append({"name": name, "unlock_request": unlock_request})
 
         return Result(results)
     except ApiException as e:
         DLOG.exception(
-            "Failed to list hosts from deployment namespace, "
-            "reason: %s" % e.reason)
+            "Failed to list hosts from deployment namespace, reason: %s" % e.reason
+        )
         return None
 
 
@@ -428,11 +442,13 @@ def get_namespaced_running_pods(namespace, name):
     try:
         response = api_instance.list_namespaced_pod(
             namespace=namespace,
-            field_selector="status.phase=Running",)
+            field_selector="status.phase=Running",
+        )
     except ApiException as e:
         DLOG.exception(
             "Failed to list pods from namespace %s, "
-            "reason: %s" % (namespace, e.reason))
+            "reason: %s" % (namespace, e.reason)
+        )
         return None
 
     pods = response.items
@@ -442,16 +458,26 @@ def get_namespaced_running_pods(namespace, name):
             if name in pod.metadata.name:
                 found.append(pod.metadata.name)
 
-    return Result(','.join(found))
+    return Result(",".join(found))
 
 
 class DrainNodeException(Exception):
     """Custom exception for drain node failures."""
+
     pass
 
 
-def drain_node(kubeconfig_path="/etc/kubernetes/admin.conf", host_name=None, delete_emptydir_data=True, ignore_daemonsets=True, force=False,
-               pod_selector="", skip_wait_for_delete_timeout=None, grace_period=None, timeout=None):
+def drain_node(
+    kubeconfig_path="/etc/kubernetes/admin.conf",
+    host_name=None,
+    delete_emptydir_data=True,
+    ignore_daemonsets=True,
+    force=False,
+    pod_selector="",
+    skip_wait_for_delete_timeout=None,
+    grace_period=None,
+    timeout=None,
+):
     """
     Drain a Kubernetes node by marking it unschedulable and evicting all the pods running on it using kubectl drain.
 
@@ -482,18 +508,22 @@ def drain_node(kubeconfig_path="/etc/kubernetes/admin.conf", host_name=None, del
     try:
         # Construct the kubectl drain command
         drain_cmd = [
-            "kubectl", "drain", host_name,
+            "kubectl",
+            "drain",
+            host_name,
             f"--ignore-daemonsets={ignore_daemonsets}",
             f"--delete-emptydir-data={delete_emptydir_data}",
             f"--pod-selector={pod_selector}",
-            f"--kubeconfig={kubeconfig_path}"
+            f"--kubeconfig={kubeconfig_path}",
         ]
 
         # Add optional parameters if set
         if force:
             drain_cmd.append("--force")
         if skip_wait_for_delete_timeout is not None:
-            drain_cmd.append(f"--skip-wait-for-delete-timeout={skip_wait_for_delete_timeout}")
+            drain_cmd.append(
+                f"--skip-wait-for-delete-timeout={skip_wait_for_delete_timeout}"
+            )
         if grace_period is not None:
             drain_cmd.append(f"--grace-period={grace_period}")
         if timeout is not None:
@@ -512,12 +542,16 @@ def drain_node(kubeconfig_path="/etc/kubernetes/admin.conf", host_name=None, del
             DLOG.debug(f"Successfully drained node {host_name}.")
             return True
         else:
-            DLOG.error(f"Failed to drain node {host_name}. Command output: {process.stdout}")
+            DLOG.error(
+                f"Failed to drain node {host_name}. Command output: {process.stdout}"
+            )
             DLOG.error(f"Error: {process.stderr}")
             return False
 
     except Exception as e:
-        DLOG.exception(f"Exception occurred while draining node {host_name}, error: {str(e)}")
+        DLOG.exception(
+            f"Exception occurred while draining node {host_name}, error: {str(e)}"
+        )
         return False
 
 
@@ -530,7 +564,14 @@ def uncordon_node(host_name):
     """
     try:
         # Get Kubernetes configuration and create API client
-        kubecfg = next((line.split('=')[-1].strip() for line in open('/etc/profile.d/kubeconfig.sh') if 'export KUBECONFIG=' in line), None)
+        kubecfg = next(
+            (
+                line.split("=")[-1].strip()
+                for line in open("/etc/profile.d/kubeconfig.sh")
+                if "export KUBECONFIG=" in line
+            ),
+            None,
+        )
         config.load_kube_config(kubecfg)
         v1 = client.CoreV1Api()
 
@@ -540,11 +581,7 @@ def uncordon_node(host_name):
         # Check if the node is currently unschedulable
         if node.spec.unschedulable:
             # Mark the node as schedulable (uncordon)
-            body = {
-                "spec": {
-                    "unschedulable": False
-                }
-            }
+            body = {"spec": {"unschedulable": False}}
 
             # Apply the change
             v1.patch_node(name=host_name, body=body)
@@ -559,5 +596,7 @@ def uncordon_node(host_name):
         return False
 
     except Exception as e:
-        DLOG.exception(f"Exception occurred while uncordoning node {host_name}, error: {str(e)}")
+        DLOG.exception(
+            f"Exception occurred while uncordoning node {host_name}, error: {str(e)}"
+        )
         return False

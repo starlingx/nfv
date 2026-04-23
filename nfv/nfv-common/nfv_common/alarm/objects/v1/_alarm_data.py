@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,6 +10,7 @@ class AlarmStateData(object):
     """
     Alarm State Data
     """
+
     def __init__(self, state):
         self.state = state
 
@@ -21,6 +22,7 @@ class AlarmThresholdData(object):
     """
     Alarm Threshold Data
     """
+
     def __init__(self, threshold_value, observed_value):
         self.threshold_value = threshold_value
         self.observed_value = observed_value
@@ -34,12 +36,26 @@ class AlarmData(object):
     Alarm Data
     """
 
-    def __init__(self, alarm_uuid, alarm_type, alarm_context, entity_type,
-                 entity, event_type, probable_cause, perceived_severity,
-                 trend_indication, specific_problem_text, proposed_repair_action,
-                 additional_text="", state_data=None, threshold_data=None,
-                 service_affecting=True, suppression_allowed=True,
-                 raised_timestamp=None):
+    def __init__(
+        self,
+        alarm_uuid,
+        alarm_type,
+        alarm_context,
+        entity_type,
+        entity,
+        event_type,
+        probable_cause,
+        perceived_severity,
+        trend_indication,
+        specific_problem_text,
+        proposed_repair_action,
+        additional_text="",
+        state_data=None,
+        threshold_data=None,
+        service_affecting=True,
+        suppression_allowed=True,
+        raised_timestamp=None,
+    ):
 
         self.alarm_uuid = alarm_uuid
         self.alarm_type = alarm_type

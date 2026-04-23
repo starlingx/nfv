@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,7 +8,7 @@ from nfv_vim import directors
 from nfv_vim import rpc
 from nfv_vim import tables
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_network_api_events')
+DLOG = debug.debug_get_logger("nfv_vim.vim_network_api_events")
 
 _subnet_create_operations = dict()
 _subnet_update_operations = dict()
@@ -19,14 +19,16 @@ _network_update_operations = dict()
 _network_delete_operations = dict()
 
 
-def _create_subnet_callback(success, network_uuid, subnet_name, subnet_ip,
-                            subnet_prefix):
+def _create_subnet_callback(
+    success, network_uuid, subnet_name, subnet_ip, subnet_prefix
+):
     """
     Handle Create-Subnet callback
     """
-    DLOG.verbose("Create subnet callback, network_uuid=%s, name=%s, ip=%s, "
-                 "prefix=%s." % (network_uuid, subnet_name, subnet_ip,
-                                 subnet_prefix))
+    DLOG.verbose(
+        "Create subnet callback, network_uuid=%s, name=%s, ip=%s, "
+        "prefix=%s." % (network_uuid, subnet_name, subnet_ip, subnet_prefix)
+    )
 
     op_index = "%s.%s.%s" % (network_uuid, subnet_ip, subnet_prefix)
     connection = _subnet_create_operations.get(op_index, None)
@@ -36,8 +38,9 @@ def _create_subnet_callback(success, network_uuid, subnet_name, subnet_ip,
             network_table = tables.tables_get_network_table()
             network = network_table.get(network_uuid)
             subnet_table = tables.tables_get_subnet_table()
-            subnet = subnet_table.get_by_network_and_ip(network_uuid, subnet_ip,
-                                                        subnet_prefix)
+            subnet = subnet_table.get_by_network_and_ip(
+                network_uuid, subnet_ip, subnet_prefix
+            )
             if network is not None and subnet is not None:
                 response.uuid = subnet.uuid
                 response.name = subnet.name
@@ -65,23 +68,31 @@ def vim_network_api_create_subnet(connection, msg):
     """
     global _subnet_create_operations
 
-    DLOG.verbose("Create subnet, ip=%s, prefix=%s for network %s."
-                 % (msg.subnet_ip, msg.subnet_prefix, msg.network_name))
+    DLOG.verbose(
+        "Create subnet, ip=%s, prefix=%s for network %s."
+        % (msg.subnet_ip, msg.subnet_prefix, msg.network_name)
+    )
     network_table = tables.tables_get_network_table()
     network = network_table.get_by_name(msg.network_name)
     if network is not None:
         subnet_table = tables.tables_get_subnet_table()
-        subnet = subnet_table.get_by_network_and_ip(network.uuid, msg.subnet_ip,
-                                                    msg.subnet_prefix)
+        subnet = subnet_table.get_by_network_and_ip(
+            network.uuid, msg.subnet_ip, msg.subnet_prefix
+        )
         if subnet is None:
-            op_index = "%s.%s.%s" % (network.uuid, msg.subnet_ip,
-                                     msg.subnet_prefix)
+            op_index = "%s.%s.%s" % (network.uuid, msg.subnet_ip, msg.subnet_prefix)
             _subnet_create_operations[op_index] = connection
             network_director = directors.get_network_director()
-            network_director.subnet_create(network.uuid, None, msg.ip_version,
-                                           msg.subnet_ip, msg.subnet_prefix,
-                                           msg.gateway_ip, msg.is_dhcp_enabled,
-                                           _create_subnet_callback)
+            network_director.subnet_create(
+                network.uuid,
+                None,
+                msg.ip_version,
+                msg.subnet_ip,
+                msg.subnet_prefix,
+                msg.gateway_ip,
+                msg.is_dhcp_enabled,
+                _create_subnet_callback,
+            )
         else:
             response = rpc.APIResponseCreateNetwork()
             response.result = rpc.RPC_MSG_RESULT.CONFLICT
@@ -96,14 +107,16 @@ def vim_network_api_create_subnet(connection, msg):
         connection.close()
 
 
-def _update_subnet_callback(success, network_uuid, subnet_uuid, subnet_name,
-                            subnet_ip, subnet_prefix):
+def _update_subnet_callback(
+    success, network_uuid, subnet_uuid, subnet_name, subnet_ip, subnet_prefix
+):
     """
     Handle Update-Subnet callback
     """
-    DLOG.verbose("Update subnet callback, network_uuid=%s, name=%s, ip=%s, "
-                 "prefix=%s." % (network_uuid, subnet_name, subnet_ip,
-                                 subnet_prefix))
+    DLOG.verbose(
+        "Update subnet callback, network_uuid=%s, name=%s, ip=%s, "
+        "prefix=%s." % (network_uuid, subnet_name, subnet_ip, subnet_prefix)
+    )
 
     op_index = "%s.%s.%s" % (network_uuid, subnet_ip, subnet_prefix)
     connection = _subnet_update_operations.get(op_index, None)
@@ -113,8 +126,9 @@ def _update_subnet_callback(success, network_uuid, subnet_uuid, subnet_name,
             network_table = tables.tables_get_network_table()
             network = network_table.get(network_uuid)
             subnet_table = tables.tables_get_subnet_table()
-            subnet = subnet_table.get_by_network_and_ip(network_uuid, subnet_ip,
-                                                        subnet_prefix)
+            subnet = subnet_table.get_by_network_and_ip(
+                network_uuid, subnet_ip, subnet_prefix
+            )
             if network is not None and subnet is not None:
                 response.uuid = subnet.uuid
                 response.name = subnet.name
@@ -142,25 +156,33 @@ def vim_network_api_update_subnet(connection, msg):
     """
     global _subnet_update_operations
 
-    DLOG.verbose("Update subnet, ip=%s, prefix=%s for network %s."
-                 % (msg.subnet_ip, msg.subnet_prefix, msg.network_name))
+    DLOG.verbose(
+        "Update subnet, ip=%s, prefix=%s for network %s."
+        % (msg.subnet_ip, msg.subnet_prefix, msg.network_name)
+    )
 
     network_table = tables.tables_get_network_table()
     network = network_table.get_by_name(msg.network_name)
     if network is not None:
         subnet_table = tables.tables_get_subnet_table()
-        subnet = subnet_table.get_by_network_and_ip(network.uuid, msg.subnet_ip,
-                                                    msg.subnet_prefix)
+        subnet = subnet_table.get_by_network_and_ip(
+            network.uuid, msg.subnet_ip, msg.subnet_prefix
+        )
         if subnet is not None:
-            op_index = "%s.%s.%s" % (network.uuid, msg.subnet_ip,
-                                     msg.subnet_prefix)
+            op_index = "%s.%s.%s" % (network.uuid, msg.subnet_ip, msg.subnet_prefix)
             _subnet_update_operations[op_index] = connection
             network_director = directors.get_network_director()
-            network_director.subnet_update(network.uuid, subnet.uuid, None,
-                                           msg.subnet_ip, msg.subnet_prefix,
-                                           msg.gateway_ip, msg.delete_gateway,
-                                           msg.is_dhcp_enabled,
-                                           _update_subnet_callback)
+            network_director.subnet_update(
+                network.uuid,
+                subnet.uuid,
+                None,
+                msg.subnet_ip,
+                msg.subnet_prefix,
+                msg.gateway_ip,
+                msg.delete_gateway,
+                msg.is_dhcp_enabled,
+                _update_subnet_callback,
+            )
         else:
             response = rpc.APIResponseUpdateSubnet()
             response.result = rpc.RPC_MSG_RESULT.NOT_FOUND
@@ -173,14 +195,16 @@ def vim_network_api_update_subnet(connection, msg):
         connection.close()
 
 
-def _delete_subnet_callback(success, network_uuid, subnet_uuid, subnet_name,
-                            subnet_ip, subnet_prefix):
+def _delete_subnet_callback(
+    success, network_uuid, subnet_uuid, subnet_name, subnet_ip, subnet_prefix
+):
     """
     Handle Delete-Subnet callback
     """
-    DLOG.verbose("Delete subnet callback, network_uuid=%s, name=%s, ip=%s, "
-                 "prefix=%s." % (network_uuid, subnet_name, subnet_ip,
-                                 subnet_prefix))
+    DLOG.verbose(
+        "Delete subnet callback, network_uuid=%s, name=%s, ip=%s, "
+        "prefix=%s." % (network_uuid, subnet_name, subnet_ip, subnet_prefix)
+    )
 
     op_index = "%s.%s.%s" % (network_uuid, subnet_ip, subnet_prefix)
     connection = _subnet_delete_operations.get(op_index, None)
@@ -207,23 +231,30 @@ def vim_network_api_delete_subnet(connection, msg):
     """
     global _subnet_delete_operations
 
-    DLOG.verbose("Delete subnet, ip=%s, prefix=%s for network %s."
-                 % (msg.subnet_ip, msg.subnet_prefix, msg.network_name))
+    DLOG.verbose(
+        "Delete subnet, ip=%s, prefix=%s for network %s."
+        % (msg.subnet_ip, msg.subnet_prefix, msg.network_name)
+    )
 
     network_table = tables.tables_get_network_table()
     network = network_table.get_by_name(msg.network_name)
     if network is not None:
         subnet_table = tables.tables_get_subnet_table()
-        subnet = subnet_table.get_by_network_and_ip(network.uuid, msg.subnet_ip,
-                                                    msg.subnet_prefix)
+        subnet = subnet_table.get_by_network_and_ip(
+            network.uuid, msg.subnet_ip, msg.subnet_prefix
+        )
         if subnet is not None:
-            op_index = "%s.%s.%s" % (network.uuid, msg.subnet_ip,
-                                     msg.subnet_prefix)
+            op_index = "%s.%s.%s" % (network.uuid, msg.subnet_ip, msg.subnet_prefix)
             _subnet_delete_operations[op_index] = connection
             network_director = directors.get_network_director()
-            network_director.subnet_delete(network.uuid, subnet.uuid, None,
-                                           msg.subnet_ip, msg.subnet_prefix,
-                                           _delete_subnet_callback)
+            network_director.subnet_delete(
+                network.uuid,
+                subnet.uuid,
+                None,
+                msg.subnet_ip,
+                msg.subnet_prefix,
+                _delete_subnet_callback,
+            )
         else:
             response = rpc.APIResponseDeleteSubnet()
             response.result = rpc.RPC_MSG_RESULT.NOT_FOUND
@@ -269,12 +300,16 @@ def vim_network_api_get_subnets(connection, msg):
     """
     subnet_table = tables.tables_get_subnet_table()
     if msg.filter_by_network_uuid is not None:
-        DLOG.verbose("Get subnet, all=%s, filter_by_network_uuid=%s."
-                     % (msg.get_all, msg.filter_by_network_uuid))
+        DLOG.verbose(
+            "Get subnet, all=%s, filter_by_network_uuid=%s."
+            % (msg.get_all, msg.filter_by_network_uuid)
+        )
         subnets = subnet_table.on_network(msg.filter_by_network_uuid)
     else:
-        DLOG.verbose("Get subnet, all=%s, filter_by_network_name=%s."
-                     % (msg.get_all, msg.filter_by_network_name))
+        DLOG.verbose(
+            "Get subnet, all=%s, filter_by_network_name=%s."
+            % (msg.get_all, msg.filter_by_network_name)
+        )
         network_table = tables.tables_get_network_table()
         network = network_table.get_by_name(msg.filter_by_network_name)
         if network is not None:
@@ -316,10 +351,8 @@ def _create_network_callback(success, network_name):
                 response.oper_state = network.oper_state
                 response.avail_status = network.avail_status
                 response.network_type = network.provider_data.network_type
-                response.segmentation_id \
-                    = network.provider_data.segmentation_id
-                response.physical_network \
-                    = network.provider_data.physical_network
+                response.segmentation_id = network.provider_data.segmentation_id
+                response.physical_network = network.provider_data.physical_network
                 response.is_shared = network.is_shared
                 response.mtu = network.mtu
             else:
@@ -346,11 +379,14 @@ def vim_network_api_create_network(connection, msg):
     if network is None:
         _network_create_operations[msg.name] = connection
         network_director = directors.get_network_director()
-        network_director.network_create(msg.name, msg.network_type,
-                                        msg.segmentation_id,
-                                        msg.physical_network,
-                                        msg.is_shared,
-                                        _create_network_callback)
+        network_director.network_create(
+            msg.name,
+            msg.network_type,
+            msg.segmentation_id,
+            msg.physical_network,
+            msg.is_shared,
+            _create_network_callback,
+        )
     else:
         response = rpc.APIResponseCreateNetwork()
         response.result = rpc.RPC_MSG_RESULT.CONFLICT
@@ -378,11 +414,9 @@ def _update_network_callback(success, network_uuid):
                 response.oper_state = network.oper_state
                 response.avail_status = network.avail_status
                 response.network_type = network.provider_data.network_type
-                response.segmentation_id \
-                    = network.provider_data.segmentation_id
+                response.segmentation_id = network.provider_data.segmentation_id
                 response.mtu = network.mtu
-                response.physical_network \
-                    = network.provider_data.physical_network
+                response.physical_network = network.provider_data.physical_network
                 response.is_shared = network.is_shared
             else:
                 response.result = rpc.RPC_MSG_RESULT.NOT_FOUND
@@ -408,8 +442,9 @@ def vim_network_api_update_network(connection, msg):
     if network is not None:
         _network_update_operations[network.uuid] = connection
         network_director = directors.get_network_director()
-        network_director.network_update(network.uuid, msg.is_shared,
-                                        _update_network_callback)
+        network_director.network_update(
+            network.uuid, msg.is_shared, _update_network_callback
+        )
     else:
         response = rpc.APIResponseUpdateNetwork()
         response.result = rpc.RPC_MSG_RESULT.NOT_FOUND

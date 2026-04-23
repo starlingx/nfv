@@ -11,17 +11,20 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_vim.api._link import Link
-from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import CurrentStrategyAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import (
+    CurrentStrategyAPI
+)
 
-DLOG = debug.debug_get_logger('nfv_vim.api.current_strategy')
+DLOG = debug.debug_get_logger("nfv_vim.api.current_strategy")
 
 
 class StrategyDescription(wsme_types.Base):
     """
     Current Strategy Description
     """
+
     id = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -30,8 +33,9 @@ class StrategyDescription(wsme_types.Base):
         description = StrategyDescription()
         description.id = "current-strategy"
         description.links = [
-            Link.make_link('self', url, 'orchestration/current-strategy'),
-            Link.make_link('strategy', url, 'orchestration/current-strategy/strategy')]
+            Link.make_link("self", url, "orchestration/current-strategy"),
+            Link.make_link("strategy", url, "orchestration/current-strategy/strategy"),
+        ]
         return description
 
 
@@ -39,9 +43,10 @@ class StrategyAPI(rest.RestController):
     """
     Current Strategy Rest API
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'strategy' == key:
+        if "strategy" == key:
             return CurrentStrategyAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)

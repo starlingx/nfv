@@ -11,18 +11,20 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_vim.api._link import Link
-from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy \
-    import SystemConfigUpdateStrategyAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import (
+    SystemConfigUpdateStrategyAPI
+)
 
-DLOG = debug.debug_get_logger('nfv_vim.api.system_config_update')
+DLOG = debug.debug_get_logger("nfv_vim.api.system_config_update")
 
 
 class SystemConfigUpdateDescription(wsme_types.Base):
     """
     System Config Update Description
     """
+
     id = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -31,12 +33,11 @@ class SystemConfigUpdateDescription(wsme_types.Base):
         description = SystemConfigUpdateDescription()
         description.id = "system-config-update"
         description.links = [
-            Link.make_link('self',
-                           url,
-                           'orchestration/system-config-update'),
-            Link.make_link('strategy',
-                           url,
-                           'orchestration/system-config-update/strategy')]
+            Link.make_link("self", url, "orchestration/system-config-update"),
+            Link.make_link(
+                "strategy", url, "orchestration/system-config-update/strategy"
+            ),
+        ]
         return description
 
 
@@ -44,9 +45,10 @@ class SystemConfigUpdateAPI(rest.RestController):
     """
     SystemConfigUpdateRest API
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'strategy' == key:
+        if "strategy" == key:
             return SystemConfigUpdateStrategyAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)

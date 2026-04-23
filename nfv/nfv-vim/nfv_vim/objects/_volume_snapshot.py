@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,15 +7,16 @@ from nfv_vim.objects._object import ObjectData
 
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.volume_snapshot')
+DLOG = debug.debug_get_logger("nfv_vim.objects.volume_snapshot")
 
 
 class VolumeSnapshot(ObjectData):
     """
     Volume Snapshot Object
     """
+
     def __init__(self, nfvi_volume_snapshot):
-        super(VolumeSnapshot, self).__init__('1.0.0')
+        super(VolumeSnapshot, self).__init__("1.0.0")
         self._nfvi_volume_snapshot = nfvi_volume_snapshot
 
     @property
@@ -72,6 +73,7 @@ class VolumeSnapshot(ObjectData):
         Persist changes to volume snapshot object
         """
         from nfv_vim import database
+
         database.database_volume_snapshot_add(self)
 
     def as_dict(self):
@@ -79,10 +81,10 @@ class VolumeSnapshot(ObjectData):
         Represent volume snapshot object as dictionary
         """
         data = dict()
-        data['uuid'] = self.uuid
-        data['name'] = self.name
-        data['description'] = self.description
-        data['size_gb'] = self.size_gb
-        data['volume_uuid'] = self.volume_uuid
-        data['nfvi_volume_snapshot'] = self.nfvi_volume_snapshot.as_dict()
+        data["uuid"] = self.uuid
+        data["name"] = self.name
+        data["description"] = self.description
+        data["size_gb"] = self.size_gb
+        data["volume_uuid"] = self.volume_uuid
+        data["nfvi_volume_snapshot"] = self.nfvi_volume_snapshot.as_dict()
         return data

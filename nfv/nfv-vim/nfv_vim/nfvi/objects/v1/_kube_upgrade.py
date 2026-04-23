@@ -16,11 +16,14 @@ class KubeHostUpgradeState(Constants, metaclass=Singleton):
     Kube Host Upgrade State Constants
     These values are copied from sysinv/common/kubernetes.py
     """
-    KUBE_HOST_UPGRADING_CONTROL_PLANE = Constant('upgrading-control-plane')
-    KUBE_HOST_UPGRADING_CONTROL_PLANE_FAILED = Constant('upgrading-control-plane-failed')
-    KUBE_HOST_UPGRADING_KUBELET = Constant('upgrading-kubelet')
-    KUBE_HOST_UPGRADING_KUBELET_FAILED = Constant('upgrading-kubelet-failed')
-    KUBE_HOST_UPGRADED_KUBELET = Constant('upgraded-kubelet')
+
+    KUBE_HOST_UPGRADING_CONTROL_PLANE = Constant("upgrading-control-plane")
+    KUBE_HOST_UPGRADING_CONTROL_PLANE_FAILED = Constant(
+        "upgrading-control-plane-failed"
+    )
+    KUBE_HOST_UPGRADING_KUBELET = Constant("upgrading-kubelet")
+    KUBE_HOST_UPGRADING_KUBELET_FAILED = Constant("upgrading-kubelet-failed")
+    KUBE_HOST_UPGRADED_KUBELET = Constant("upgraded-kubelet")
 
 
 # Kube Host Upgrade Constant Instantiation
@@ -34,39 +37,39 @@ class KubeUpgradeState(Constants, metaclass=Singleton):
     Maintaining the same order as defined in kubernetes.py
     """
 
-    KUBE_UPGRADE_STARTED = Constant('upgrade-started')
-    KUBE_UPGRADE_DOWNLOADING_IMAGES = Constant('downloading-images')
-    KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED = Constant('downloading-images-failed')
-    KUBE_UPGRADE_DOWNLOADED_IMAGES = Constant('downloaded-images')
-    KUBE_PRE_UPDATING_APPS = Constant('pre-updating-apps')
-    KUBE_PRE_UPDATING_APPS_FAILED = Constant('pre-updating-apps-failed')
-    KUBE_PRE_UPDATED_APPS = Constant('pre-updated-apps')
-    KUBE_POST_UPDATING_APPS = Constant('post-updating-apps')
-    KUBE_POST_UPDATING_APPS_FAILED = Constant('post-updating-apps-failed')
-    KUBE_POST_UPDATED_APPS = Constant('post-updated-apps')
-    KUBE_UPGRADING_NETWORKING = Constant('upgrading-networking')
-    KUBE_UPGRADING_NETWORKING_FAILED = Constant('upgrading-networking-failed')
-    KUBE_UPGRADED_NETWORKING = Constant('upgraded-networking')
-    KUBE_UPGRADING_STORAGE = Constant('upgrading-storage')
-    KUBE_UPGRADING_STORAGE_FAILED = Constant('upgrading-storage-failed')
-    KUBE_UPGRADED_STORAGE = Constant('upgraded-storage')
-    KUBE_UPGRADING_FIRST_MASTER = Constant('upgrading-first-master')
-    KUBE_UPGRADING_FIRST_MASTER_FAILED = Constant('upgrading-first-master-failed')
-    KUBE_UPGRADED_FIRST_MASTER = Constant('upgraded-first-master')
-    KUBE_UPGRADING_SECOND_MASTER = Constant('upgrading-second-master')
-    KUBE_UPGRADING_SECOND_MASTER_FAILED = Constant('upgrading-second-master-failed')
-    KUBE_UPGRADED_SECOND_MASTER = Constant('upgraded-second-master')
-    KUBE_UPGRADING_KUBELETS = Constant('upgrading-kubelets')
-    KUBE_UPGRADE_COMPLETE = Constant('upgrade-complete')
-    KUBE_UPGRADE_ABORTING = Constant('upgrade-aborting')
-    KUBE_UPGRADE_ABORTING_FAILED = Constant('upgrade-aborting-failed')
-    KUBE_UPGRADE_ABORTED = Constant('upgrade-aborted')
-    KUBE_HOST_CORDON = Constant('cordon-started')
-    KUBE_HOST_CORDON_COMPLETE = Constant('cordon-complete')
-    KUBE_HOST_CORDON_FAILED = Constant('cordon-failed')
-    KUBE_HOST_UNCORDON = Constant('uncordon-started')
-    KUBE_HOST_UNCORDON_COMPLETE = Constant('uncordon-complete')
-    KUBE_HOST_UNCORDON_FAILED = Constant('uncordon-failed')
+    KUBE_UPGRADE_STARTED = Constant("upgrade-started")
+    KUBE_UPGRADE_DOWNLOADING_IMAGES = Constant("downloading-images")
+    KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED = Constant("downloading-images-failed")
+    KUBE_UPGRADE_DOWNLOADED_IMAGES = Constant("downloaded-images")
+    KUBE_PRE_UPDATING_APPS = Constant("pre-updating-apps")
+    KUBE_PRE_UPDATING_APPS_FAILED = Constant("pre-updating-apps-failed")
+    KUBE_PRE_UPDATED_APPS = Constant("pre-updated-apps")
+    KUBE_POST_UPDATING_APPS = Constant("post-updating-apps")
+    KUBE_POST_UPDATING_APPS_FAILED = Constant("post-updating-apps-failed")
+    KUBE_POST_UPDATED_APPS = Constant("post-updated-apps")
+    KUBE_UPGRADING_NETWORKING = Constant("upgrading-networking")
+    KUBE_UPGRADING_NETWORKING_FAILED = Constant("upgrading-networking-failed")
+    KUBE_UPGRADED_NETWORKING = Constant("upgraded-networking")
+    KUBE_UPGRADING_STORAGE = Constant("upgrading-storage")
+    KUBE_UPGRADING_STORAGE_FAILED = Constant("upgrading-storage-failed")
+    KUBE_UPGRADED_STORAGE = Constant("upgraded-storage")
+    KUBE_UPGRADING_FIRST_MASTER = Constant("upgrading-first-master")
+    KUBE_UPGRADING_FIRST_MASTER_FAILED = Constant("upgrading-first-master-failed")
+    KUBE_UPGRADED_FIRST_MASTER = Constant("upgraded-first-master")
+    KUBE_UPGRADING_SECOND_MASTER = Constant("upgrading-second-master")
+    KUBE_UPGRADING_SECOND_MASTER_FAILED = Constant("upgrading-second-master-failed")
+    KUBE_UPGRADED_SECOND_MASTER = Constant("upgraded-second-master")
+    KUBE_UPGRADING_KUBELETS = Constant("upgrading-kubelets")
+    KUBE_UPGRADE_COMPLETE = Constant("upgrade-complete")
+    KUBE_UPGRADE_ABORTING = Constant("upgrade-aborting")
+    KUBE_UPGRADE_ABORTING_FAILED = Constant("upgrade-aborting-failed")
+    KUBE_UPGRADE_ABORTED = Constant("upgrade-aborted")
+    KUBE_HOST_CORDON = Constant("cordon-started")
+    KUBE_HOST_CORDON_COMPLETE = Constant("cordon-complete")
+    KUBE_HOST_CORDON_FAILED = Constant("cordon-failed")
+    KUBE_HOST_UNCORDON = Constant("uncordon-started")
+    KUBE_HOST_UNCORDON_COMPLETE = Constant("uncordon-complete")
+    KUBE_HOST_UNCORDON_FAILED = Constant("uncordon-failed")
 
 
 # Kube Upgrade Constant Instantiation
@@ -77,21 +80,25 @@ class KubeHostUpgrade(ObjectData):
     """
     NFVI Kube Host Upgrade Object
     """
-    def __init__(self,
-                 host_id,
-                 host_uuid,
-                 target_version,
-                 control_plane_version,
-                 kubelet_version,
-                 status):
-        super(KubeHostUpgrade, self).__init__('1.0.0')
+
+    def __init__(
+        self,
+        host_id,
+        host_uuid,
+        target_version,
+        control_plane_version,
+        kubelet_version,
+        status,
+    ):
+        super(KubeHostUpgrade, self).__init__("1.0.0")
         self.update(
-            dict(host_id=host_id,
-                 host_uuid=host_uuid,
-                 target_version=target_version,
-                 control_plane_version=control_plane_version,
-                 kubelet_version=kubelet_version,
-                 status=status
+            dict(
+                host_id=host_id,
+                host_uuid=host_uuid,
+                target_version=target_version,
+                control_plane_version=control_plane_version,
+                kubelet_version=kubelet_version,
+                status=status,
             )
         )
 
@@ -100,36 +107,36 @@ class KubeUpgrade(ObjectData):
     """
     NFVI Kube Upgrade Object
     """
+
     def __init__(self, state, from_version, to_version):
-        super(KubeUpgrade, self).__init__('1.0.0')
-        self.update(
-            dict(state=state,
-                 from_version=from_version,
-                 to_version=to_version
-            )
-        )
+        super(KubeUpgrade, self).__init__("1.0.0")
+        self.update(dict(state=state, from_version=from_version, to_version=to_version))
 
 
 class KubeVersion(ObjectData):
     """
     NFVI Kube Version Object
     """
-    def __init__(self,
-                 kube_version,
-                 state,
-                 target,
-                 upgrade_from,
-                 downgrade_to,
-                 applied_patches,
-                 available_patches):
-        super(KubeVersion, self).__init__('1.0.0')
+
+    def __init__(
+        self,
+        kube_version,
+        state,
+        target,
+        upgrade_from,
+        downgrade_to,
+        applied_patches,
+        available_patches,
+    ):
+        super(KubeVersion, self).__init__("1.0.0")
         self.update(
-            dict(kube_version=kube_version,
-                 state=state,
-                 target=target,
-                 upgrade_from=upgrade_from,
-                 downgrade_to=downgrade_to,
-                 applied_patches=applied_patches,
-                 available_patches=available_patches
+            dict(
+                kube_version=kube_version,
+                state=state,
+                target=target,
+                upgrade_from=upgrade_from,
+                downgrade_to=downgrade_to,
+                applied_patches=applied_patches,
+                available_patches=available_patches,
             )
         )

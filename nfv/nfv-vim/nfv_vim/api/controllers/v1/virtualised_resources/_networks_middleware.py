@@ -8,12 +8,18 @@ import pecan
 from nfv_common import debug
 from nfv_vim import rpc
 
-from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import NetworkResourceType
-from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import NetworkSubnetResourceType
-from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import NetworkSubnetType
+from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
+    NetworkResourceType
+)
+from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
+    NetworkSubnetResourceType
+)
+from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
+    NetworkSubnetType
+)
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import NetworkType
 
-DLOG = debug.debug_get_logger('nfv_vim.api.virtualised_network')
+DLOG = debug.debug_get_logger("nfv_vim.api.virtualised_network")
 
 
 def subnet_allocate(network_resource_id, subnet_type):
@@ -32,15 +38,19 @@ def subnet_allocate(network_resource_id, subnet_type):
     vim_connection.send(rpc_request.serialize())
     msg = vim_connection.receive()
     if msg is None:
-        DLOG.error("No response received for subnet %s/%s for network %s."
-                   % (subnet_type.wrs_subnet_ip, subnet_type.wrs_subnet_prefix,
-                      network_resource_id))
+        DLOG.error(
+            "No response received for subnet %s/%s for network %s."
+            % (
+                subnet_type.wrs_subnet_ip,
+                subnet_type.wrs_subnet_prefix,
+                network_resource_id,
+            )
+        )
         return httplib.INTERNAL_SERVER_ERROR, None
 
     response = rpc.RPCMessage.deserialize(msg)
     if rpc.RPC_MSG_TYPE.CREATE_SUBNET_RESPONSE != response.type:
-        DLOG.error("Unexpected message type received, msg_type=%s."
-                   % response.type)
+        DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
         return httplib.INTERNAL_SERVER_ERROR, None
 
     if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
@@ -57,10 +67,16 @@ def subnet_allocate(network_resource_id, subnet_type):
         subnet_resource_type.subnet_attributes = subnet_attributes
         return httplib.OK, subnet_resource_type
 
-    DLOG.error("Unexpected result received for subnet %s/%s for network %s, "
-               "result=%s." % (subnet_type.wrs_subnet_ip,
-                               subnet_type.wrs_subnet_prefix,
-                               network_resource_id, response.result))
+    DLOG.error(
+        "Unexpected result received for subnet %s/%s for network %s, "
+        "result=%s."
+        % (
+            subnet_type.wrs_subnet_ip,
+            subnet_type.wrs_subnet_prefix,
+            network_resource_id,
+            response.result,
+        )
+    )
     return httplib.INTERNAL_SERVER_ERROR, None
 
 
@@ -83,15 +99,19 @@ def subnet_update(network_resource_id, subnet_type):
     vim_connection.send(rpc_request.serialize())
     msg = vim_connection.receive()
     if msg is None:
-        DLOG.error("No response received for subnet %s/%s for network %s."
-                   % (subnet_type.wrs_subnet_ip, subnet_type.wrs_subnet_prefix,
-                      network_resource_id))
+        DLOG.error(
+            "No response received for subnet %s/%s for network %s."
+            % (
+                subnet_type.wrs_subnet_ip,
+                subnet_type.wrs_subnet_prefix,
+                network_resource_id,
+            )
+        )
         return httplib.INTERNAL_SERVER_ERROR, None
 
     response = rpc.RPCMessage.deserialize(msg)
     if rpc.RPC_MSG_TYPE.UPDATE_SUBNET_RESPONSE != response.type:
-        DLOG.error("Unexpected message type received, msg_type=%s."
-                   % response.type)
+        DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
         return httplib.INTERNAL_SERVER_ERROR, None
 
     if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
@@ -108,10 +128,16 @@ def subnet_update(network_resource_id, subnet_type):
         subnet_resource_type.subnet_attributes = subnet_attributes
         return httplib.OK, subnet_resource_type
 
-    DLOG.error("Unexpected result received for subnet %s/%s for network %s, "
-               "result=%s." % (subnet_type.wrs_subnet_ip,
-                               subnet_type.wrs_subnet_prefix,
-                               network_resource_id, response.result))
+    DLOG.error(
+        "Unexpected result received for subnet %s/%s for network %s, "
+        "result=%s."
+        % (
+            subnet_type.wrs_subnet_ip,
+            subnet_type.wrs_subnet_prefix,
+            network_resource_id,
+            response.result,
+        )
+    )
     return httplib.INTERNAL_SERVER_ERROR, None
 
 
@@ -127,29 +153,45 @@ def subnet_delete(network_resource_id, subnet_type):
     vim_connection.send(rpc_request.serialize())
     msg = vim_connection.receive()
     if msg is None:
-        DLOG.error("No response received for network %s subnet %s/%s."
-                   % (network_resource_id, subnet_type.wrs_subnet_ip,
-                      subnet_type.wrs_subnet_prefix))
+        DLOG.error(
+            "No response received for network %s subnet %s/%s."
+            % (
+                network_resource_id,
+                subnet_type.wrs_subnet_ip,
+                subnet_type.wrs_subnet_prefix,
+            )
+        )
         return httplib.INTERNAL_SERVER_ERROR
 
     response = rpc.RPCMessage.deserialize(msg)
     if rpc.RPC_MSG_TYPE.DELETE_SUBNET_RESPONSE != response.type:
-        DLOG.error("Unexpected message type received, msg_type=%s."
-                   % response.type)
+        DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
         return httplib.INTERNAL_SERVER_ERROR
 
     if rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
-        DLOG.debug("Network %s subnet %s/%s was not found."
-                   % (network_resource_id, subnet_type.wrs_subnet_ip,
-                      subnet_type.wrs_subnet_prefix))
+        DLOG.debug(
+            "Network %s subnet %s/%s was not found."
+            % (
+                network_resource_id,
+                subnet_type.wrs_subnet_ip,
+                subnet_type.wrs_subnet_prefix,
+            )
+        )
         return httplib.NOT_FOUND
 
     elif rpc.RPC_MSG_RESULT.SUCCESS == response.result:
         return httplib.OK
 
-    DLOG.error("Unexpected result received for network %s subnet %s/%s, "
-               "result=%s." % (network_resource_id, subnet_type.wrs_subnet_ip,
-                               subnet_type.wrs_subnet_prefix, response.result))
+    DLOG.error(
+        "Unexpected result received for network %s subnet %s/%s, "
+        "result=%s."
+        % (
+            network_resource_id,
+            subnet_type.wrs_subnet_ip,
+            subnet_type.wrs_subnet_prefix,
+            response.result,
+        )
+    )
     return httplib.INTERNAL_SERVER_ERROR
 
 
@@ -172,13 +214,11 @@ def subnet_get_all(network_resource_id):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.GET_SUBNET_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return httplib.INTERNAL_SERVER_ERROR, None
 
         if rpc.RPC_MSG_RESULT.SUCCESS != response.result:
-            DLOG.error("Unexpected result received, result=%s."
-                       % response.result)
+            DLOG.error("Unexpected result received, result=%s." % response.result)
             return httplib.INTERNAL_SERVER_ERROR, None
 
         DLOG.verbose("Received response=%s." % response)
@@ -220,8 +260,7 @@ def network_allocate(network_resource_id, network_type):
 
     response = rpc.RPCMessage.deserialize(msg)
     if rpc.RPC_MSG_TYPE.CREATE_NETWORK_RESPONSE != response.type:
-        DLOG.error("Unexpected message type received, msg_type=%s."
-                   % response.type)
+        DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
         return httplib.INTERNAL_SERVER_ERROR, None
 
     elif rpc.RPC_MSG_RESULT.CONFLICT == response.result:
@@ -236,17 +275,23 @@ def network_allocate(network_resource_id, network_type):
         network_attributes.layer3_attributes = list()
 
         for subnet_type in network_type.layer3_attributes:
-            (http_status_code, subnet_resource_type) \
-                = subnet_allocate(network_resource_id, subnet_type)
+            (http_status_code, subnet_resource_type) = subnet_allocate(
+                network_resource_id, subnet_type
+            )
 
             if httplib.OK == http_status_code:
                 network_attributes.layer3_attributes.append(subnet_type)
             else:
-                DLOG.error("Failed to allocate subnet %s/%s for network %s, "
-                           "status_code=%s."
-                           % (subnet_type.wrs_subnet_ip,
-                              subnet_type.wrs_subnet_prefix,
-                              network_resource_id, http_status_code))
+                DLOG.error(
+                    "Failed to allocate subnet %s/%s for network %s, "
+                    "status_code=%s."
+                    % (
+                        subnet_type.wrs_subnet_ip,
+                        subnet_type.wrs_subnet_prefix,
+                        network_resource_id,
+                        http_status_code,
+                    )
+                )
                 network_resource_ids = list()
                 network_resource_ids.append(network_resource_id)
                 network_delete(network_resource_ids)
@@ -258,8 +303,10 @@ def network_allocate(network_resource_id, network_type):
 
         return httplib.OK, network_resource_type
 
-    DLOG.error("Unexpected result received for network %s, result=%s."
-               % (network_resource_id, response.result))
+    DLOG.error(
+        "Unexpected result received for network %s, result=%s."
+        % (network_resource_id, response.result)
+    )
     return httplib.INTERNAL_SERVER_ERROR, None
 
 
@@ -280,8 +327,7 @@ def network_update(network_resource_id, network_type):
 
     response = rpc.RPCMessage.deserialize(msg)
     if rpc.RPC_MSG_TYPE.UPDATE_NETWORK_RESPONSE != response.type:
-        DLOG.error("Unexpected message type received, msg_type=%s."
-                   % response.type)
+        DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
         return httplib.INTERNAL_SERVER_ERROR, None
 
     elif rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
@@ -294,8 +340,7 @@ def network_update(network_resource_id, network_type):
         network_attributes.type_of_segment = str(response.segmentation_id)
         network_attributes.is_shared = response.is_shared
 
-        (http_status_code, subnet_resource_types) \
-            = subnet_get_all(response.name)
+        (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
             add_list = list()
             update_list = list()
@@ -304,10 +349,14 @@ def network_update(network_resource_id, network_type):
             for subnet_type in network_type.layer3_attributes:
                 for subnet_resource_type in subnet_resource_types:
                     subnet_attributes = subnet_resource_type.subnet_attributes
-                    if str(subnet_type.wrs_subnet_ip).lower() \
-                            == str(subnet_attributes.wrs_subnet_ip).lower():
-                        if subnet_type.wrs_subnet_prefix \
-                                == subnet_attributes.wrs_subnet_prefix:
+                    if (
+                        str(subnet_type.wrs_subnet_ip).lower()
+                        == str(subnet_attributes.wrs_subnet_ip).lower()
+                    ):
+                        if (
+                            subnet_type.wrs_subnet_prefix
+                            == subnet_attributes.wrs_subnet_prefix
+                        ):
                             update_list.append(subnet_type)
                             break
                 else:
@@ -316,68 +365,89 @@ def network_update(network_resource_id, network_type):
             for subnet_resource_type in subnet_resource_types:
                 subnet_attributes = subnet_resource_type.subnet_attributes
                 for subnet_type in network_type.layer3_attributes:
-                    if str(subnet_type.wrs_subnet_ip).lower() \
-                            == str(subnet_attributes.wrs_subnet_ip).lower():
-                        if subnet_type.wrs_subnet_prefix \
-                                == subnet_attributes.wrs_subnet_prefix:
+                    if (
+                        str(subnet_type.wrs_subnet_ip).lower()
+                        == str(subnet_attributes.wrs_subnet_ip).lower()
+                    ):
+                        if (
+                            subnet_type.wrs_subnet_prefix
+                            == subnet_attributes.wrs_subnet_prefix
+                        ):
                             break
                 else:
                     delete_list.append(subnet_attributes)
 
             for subnet_type in add_list:
                 DLOG.info("Add subnet: %s" % subnet_type.wrs_subnet_ip)
-                (http_status_code, _) \
-                    = subnet_allocate(network_resource_id, subnet_type)
+                (http_status_code, _) = subnet_allocate(
+                    network_resource_id, subnet_type
+                )
                 if httplib.OK != http_status_code:
-                    DLOG.error("Failed to add subnet %s/%s for network %s, "
-                               "status_code=%s."
-                               % (subnet_type.wrs_subnet_ip,
-                                  subnet_type.wrs_subnet_prefix, response.name,
-                                  http_status_code))
+                    DLOG.error(
+                        "Failed to add subnet %s/%s for network %s, "
+                        "status_code=%s."
+                        % (
+                            subnet_type.wrs_subnet_ip,
+                            subnet_type.wrs_subnet_prefix,
+                            response.name,
+                            http_status_code,
+                        )
+                    )
                     return http_status_code, None
 
             for subnet_type in delete_list:
                 DLOG.info("Delete subnet: %s" % subnet_type.wrs_subnet_ip)
-                http_status_code \
-                    = subnet_delete(network_resource_id, subnet_type)
-                if httplib.OK != http_status_code and \
-                        httplib.NOT_FOUND != http_status_code:
-                    DLOG.error("Failed to delete subnet %s/%s for network %s, "
-                               "status_code=%s."
-                               % (subnet_type.wrs_subnet_ip,
-                                  subnet_type.wrs_subnet_prefix, response.name,
-                                  http_status_code))
+                http_status_code = subnet_delete(network_resource_id, subnet_type)
+                if (
+                    httplib.OK != http_status_code
+                    and httplib.NOT_FOUND != http_status_code
+                ):
+                    DLOG.error(
+                        "Failed to delete subnet %s/%s for network %s, "
+                        "status_code=%s."
+                        % (
+                            subnet_type.wrs_subnet_ip,
+                            subnet_type.wrs_subnet_prefix,
+                            response.name,
+                            http_status_code,
+                        )
+                    )
                     return http_status_code, None
 
             for subnet_type in update_list:
                 DLOG.info("Update subnet: %s" % subnet_type.wrs_subnet_ip)
-                (http_status_code, _) \
-                    = subnet_update(network_resource_id, subnet_type)
+                (http_status_code, _) = subnet_update(network_resource_id, subnet_type)
                 if httplib.OK != http_status_code:
-                    DLOG.error("Failed to update subnet %s/%s for network %s, "
-                               "status_code=%s."
-                               % (subnet_type.wrs_subnet_ip,
-                                  subnet_type.wrs_subnet_prefix, response.name,
-                                  http_status_code))
+                    DLOG.error(
+                        "Failed to update subnet %s/%s for network %s, "
+                        "status_code=%s."
+                        % (
+                            subnet_type.wrs_subnet_ip,
+                            subnet_type.wrs_subnet_prefix,
+                            response.name,
+                            http_status_code,
+                        )
+                    )
                     return http_status_code, None
 
-            (http_status_code, subnet_resource_types) \
-                = subnet_get_all(response.name)
+            (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
             if httplib.OK == http_status_code:
                 layer3_attributes = list()
                 for subnet_resource_type in subnet_resource_types:
-                    layer3_attributes.append(
-                        subnet_resource_type.subnet_attributes)
+                    layer3_attributes.append(subnet_resource_type.subnet_attributes)
 
                 network_attributes.layer3_attributes = layer3_attributes
             else:
-                DLOG.error("Failed to get subnets for network %s, "
-                           "status_code=%s." % (response.name,
-                                                http_status_code))
+                DLOG.error(
+                    "Failed to get subnets for network %s, "
+                    "status_code=%s." % (response.name, http_status_code)
+                )
                 return http_status_code, None
         else:
-            DLOG.error("Failed to get subnets for network %s, status_code=%s."
-                       % (response.name, http_status_code))
+            DLOG.error(
+                "Failed to get subnets for network %s, status_code=%s."
+                % (response.name, http_status_code)
+            )
             return http_status_code, None
 
         network_resource_type = NetworkResourceType()
@@ -385,8 +455,10 @@ def network_update(network_resource_id, network_type):
         network_resource_type.network_attributes = network_attributes
         return httplib.OK, network_resource_type
 
-    DLOG.error("Unexpected result received for network %s, result=%s."
-               % (network_resource_id, response.result))
+    DLOG.error(
+        "Unexpected result received for network %s, result=%s."
+        % (network_resource_id, response.result)
+    )
     return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
 
@@ -402,14 +474,12 @@ def network_delete(network_resource_ids):
         vim_connection.send(rpc_request.serialize())
         msg = vim_connection.receive()
         if msg is None:
-            DLOG.error("No response received for network %s."
-                       % network_resource_id)
+            DLOG.error("No response received for network %s." % network_resource_id)
             continue
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.DELETE_NETWORK_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
 
         elif rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
             DLOG.debug("Network %s was not found." % network_resource_id)
@@ -435,8 +505,7 @@ def network_get(network_resource_id):
 
     response = rpc.RPCMessage.deserialize(msg)
     if rpc.RPC_MSG_TYPE.GET_NETWORK_RESPONSE != response.type:
-        DLOG.error("Unexpected message type received, msg_type=%s."
-                   % response.type)
+        DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
         return httplib.INTERNAL_SERVER_ERROR, None
 
     if rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
@@ -449,8 +518,7 @@ def network_get(network_resource_id):
         network_attributes.type_of_segment = str(response.segmentation_id)
         network_attributes.is_shared = response.is_shared
 
-        (http_status_code, subnet_resource_types) \
-            = subnet_get_all(response.name)
+        (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
             layer3_attributes = list()
             for subnet_resource_type in subnet_resource_types:
@@ -458,8 +526,10 @@ def network_get(network_resource_id):
 
             network_attributes.layer3_attributes = layer3_attributes
         else:
-            DLOG.error("Failed to get subnets for network %s, status_code=%s."
-                       % (response.name, http_status_code))
+            DLOG.error(
+                "Failed to get subnets for network %s, status_code=%s."
+                % (response.name, http_status_code)
+            )
             return http_status_code, None
 
         network_resource_type = NetworkResourceType()
@@ -467,8 +537,10 @@ def network_get(network_resource_id):
         network_resource_type.network_attributes = network_attributes
         return httplib.OK, network_resource_type
 
-    DLOG.error("Unexpected result received for network %s, result=%s."
-               % (network_resource_id, response.result))
+    DLOG.error(
+        "Unexpected result received for network %s, result=%s."
+        % (network_resource_id, response.result)
+    )
     return httplib.INTERNAL_SERVER_ERROR, None
 
 
@@ -489,14 +561,12 @@ def network_get_all():
             break
 
         response = rpc.RPCMessage.deserialize(msg)
-        if rpc .RPC_MSG_TYPE.GET_NETWORK_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+        if rpc.RPC_MSG_TYPE.GET_NETWORK_RESPONSE != response.type:
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return httplib.INTERNAL_SERVER_ERROR, None
 
         if rpc.RPC_MSG_RESULT.SUCCESS != response.result:
-            DLOG.error("Unexpected result received, result=%s."
-                       % response.result)
+            DLOG.error("Unexpected result received, result=%s." % response.result)
             return httplib.INTERNAL_SERVER_ERROR, None
 
         DLOG.verbose("Received response=%s." % response)
@@ -506,8 +576,7 @@ def network_get_all():
         network_attributes.type_of_segment = str(response.segmentation_id)
         network_attributes.is_shared = response.is_shared
 
-        (http_status_code, subnet_resource_types) \
-            = subnet_get_all(response.name)
+        (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
             layer3_attributes = list()
             for subnet_resource_type in subnet_resource_types:
@@ -515,8 +584,10 @@ def network_get_all():
 
             network_attributes.layer3_attributes = layer3_attributes
         else:
-            DLOG.error("Failed to get subnets for network %s, status_code=%s."
-                       % (response.name, http_status_code))
+            DLOG.error(
+                "Failed to get subnets for network %s, status_code=%s."
+                % (response.name, http_status_code)
+            )
             return http_status_code, None
 
         network_resource_type = NetworkResourceType()

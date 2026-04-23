@@ -10,6 +10,7 @@ class NFVISwMgmtAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Software Management API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):

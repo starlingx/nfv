@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,15 +7,16 @@ from nfv_vim.objects._object import ObjectData
 
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.host_aggregate')
+DLOG = debug.debug_get_logger("nfv_vim.objects.host_aggregate")
 
 
 class HostAggregate(ObjectData):
     """
     Host Aggregate Object
     """
+
     def __init__(self, nfvi_host_aggregate):
-        super(HostAggregate, self).__init__('1.0.0')
+        super(HostAggregate, self).__init__("1.0.0")
         self._nfvi_host_aggregate = nfvi_host_aggregate
 
     @property
@@ -58,6 +59,7 @@ class HostAggregate(ObjectData):
         Persist changes to host aggregate object
         """
         from nfv_vim import database
+
         database.database_host_aggregate_add(self)
 
     def as_dict(self):
@@ -65,8 +67,8 @@ class HostAggregate(ObjectData):
         Represent host aggregate object as dictionary
         """
         data = dict()
-        data['name'] = self.name
-        data['host_names'] = self.host_names
-        data['availability_zone'] = self.availability_zone
-        data['nfvi_host_aggregate'] = self._nfvi_host_aggregate.as_dict()
+        data["name"] = self.name
+        data["host_names"] = self.host_names
+        data["availability_zone"] = self.availability_zone
+        data["nfvi_host_aggregate"] = self._nfvi_host_aggregate.as_dict()
         return data

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,8 @@ class HostAggregate(AsDictMixin, Base):
     """
     Host Aggregate Database Table
     """
-    __tablename__ = 'host_aggregates'
+
+    __tablename__ = "host_aggregates"
 
     name = Column(String(255), nullable=False, primary_key=True)
     host_names = Column(String(2147483647), nullable=False)

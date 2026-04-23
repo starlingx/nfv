@@ -9,7 +9,7 @@ from nfv_vim import objects
 from nfv_vim import rpc
 from nfv_vim.strategy._strategy_steps import STRATEGY_STEP_NAME
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_sw_update_api_events')
+DLOG = debug.debug_get_logger("nfv_vim.vim_sw_update_api_events")
 
 _sw_update_strategy_create_operations = dict()
 _sw_update_strategy_apply_operations = dict()
@@ -24,8 +24,10 @@ def _vim_sw_update_api_create_strategy_callback(success, reason, strategy):
     global _sw_update_strategy_create_operations
 
     if strategy is not None:
-        DLOG.info("Create sw-update strategy callback, uuid=%s, reason=%s."
-                  % (strategy.uuid, reason))
+        DLOG.info(
+            "Create sw-update strategy callback, uuid=%s, reason=%s."
+            % (strategy.uuid, reason)
+        )
 
         connection = _sw_update_strategy_create_operations.get(strategy.uuid, None)
         if connection is not None:
@@ -49,30 +51,30 @@ def vim_sw_update_api_create_strategy(connection, msg):
 
     DLOG.info("Create sw-update strategy.")
 
-    if 'parallel' == msg.controller_apply_type:
+    if "parallel" == msg.controller_apply_type:
         controller_apply_type = objects.SW_UPDATE_APPLY_TYPE.PARALLEL
-    elif 'serial' == msg.controller_apply_type:
+    elif "serial" == msg.controller_apply_type:
         controller_apply_type = objects.SW_UPDATE_APPLY_TYPE.SERIAL
     else:
         controller_apply_type = objects.SW_UPDATE_APPLY_TYPE.IGNORE
 
-    if 'parallel' == msg.storage_apply_type:
+    if "parallel" == msg.storage_apply_type:
         storage_apply_type = objects.SW_UPDATE_APPLY_TYPE.PARALLEL
-    elif 'serial' == msg.storage_apply_type:
+    elif "serial" == msg.storage_apply_type:
         storage_apply_type = objects.SW_UPDATE_APPLY_TYPE.SERIAL
     else:
         storage_apply_type = objects.SW_UPDATE_APPLY_TYPE.IGNORE
 
-    if 'parallel' == msg.swift_apply_type:
+    if "parallel" == msg.swift_apply_type:
         swift_apply_type = objects.SW_UPDATE_APPLY_TYPE.PARALLEL
-    elif 'serial' == msg.swift_apply_type:
+    elif "serial" == msg.swift_apply_type:
         swift_apply_type = objects.SW_UPDATE_APPLY_TYPE.SERIAL
     else:
         swift_apply_type = objects.SW_UPDATE_APPLY_TYPE.IGNORE
 
-    if 'parallel' == msg.worker_apply_type:
+    if "parallel" == msg.worker_apply_type:
         worker_apply_type = objects.SW_UPDATE_APPLY_TYPE.PARALLEL
-    elif 'serial' == msg.worker_apply_type:
+    elif "serial" == msg.worker_apply_type:
         worker_apply_type = objects.SW_UPDATE_APPLY_TYPE.SERIAL
     else:
         worker_apply_type = objects.SW_UPDATE_APPLY_TYPE.IGNORE
@@ -82,43 +84,59 @@ def vim_sw_update_api_create_strategy(connection, msg):
     else:
         max_parallel_worker_hosts = 2
 
-    if 'migrate' == msg.default_instance_action:
+    if "migrate" == msg.default_instance_action:
         default_instance_action = objects.SW_UPDATE_INSTANCE_ACTION.MIGRATE
     else:
         default_instance_action = objects.SW_UPDATE_INSTANCE_ACTION.STOP_START
 
-    if 'strict' == msg.alarm_restrictions:
+    if "strict" == msg.alarm_restrictions:
         alarm_restrictions = objects.SW_UPDATE_ALARM_RESTRICTION.STRICT
-    elif 'permissive' == msg.alarm_restrictions:
+    elif "permissive" == msg.alarm_restrictions:
         alarm_restrictions = objects.SW_UPDATE_ALARM_RESTRICTION.PERMISSIVE
     else:
         alarm_restrictions = objects.SW_UPDATE_ALARM_RESTRICTION.RELAXED
 
     sw_mgmt_director = directors.get_sw_mgmt_director()
-    if 'sw-patch' == msg.sw_update_type:
+    if "sw-patch" == msg.sw_update_type:
         uuid, reason = sw_mgmt_director.create_sw_patch_strategy(
-            controller_apply_type, storage_apply_type,
-            swift_apply_type, worker_apply_type, max_parallel_worker_hosts,
+            controller_apply_type,
+            storage_apply_type,
+            swift_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
             default_instance_action,
-            alarm_restrictions, _vim_sw_update_api_create_strategy_callback)
-    elif 'sw-upgrade' == msg.sw_update_type:
+            alarm_restrictions,
+            _vim_sw_update_api_create_strategy_callback,
+        )
+    elif "sw-upgrade" == msg.sw_update_type:
         release = msg.release
         rollback = msg.rollback
         delete = msg.delete
         snapshot = msg.snapshot
         uuid, reason = sw_mgmt_director.create_sw_upgrade_strategy(
-            controller_apply_type, storage_apply_type,
-            worker_apply_type, max_parallel_worker_hosts,
-            default_instance_action, alarm_restrictions, release, rollback,
-            delete, snapshot, _vim_sw_update_api_create_strategy_callback)
-    elif 'fw-update' == msg.sw_update_type:
-        uuid, reason = sw_mgmt_director.create_fw_update_strategy(
-            controller_apply_type, storage_apply_type,
-            worker_apply_type, max_parallel_worker_hosts,
+            controller_apply_type,
+            storage_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            _vim_sw_update_api_create_strategy_callback)
-    elif 'kube-rootca-update' == msg.sw_update_type:
+            release,
+            rollback,
+            delete,
+            snapshot,
+            _vim_sw_update_api_create_strategy_callback,
+        )
+    elif "fw-update" == msg.sw_update_type:
+        uuid, reason = sw_mgmt_director.create_fw_update_strategy(
+            controller_apply_type,
+            storage_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
+            default_instance_action,
+            alarm_restrictions,
+            _vim_sw_update_api_create_strategy_callback,
+        )
+    elif "kube-rootca-update" == msg.sw_update_type:
         expiry_date = msg.expiry_date
         subject = msg.subject
         uuid, reason = sw_mgmt_director.create_kube_rootca_update_strategy(
@@ -130,8 +148,9 @@ def vim_sw_update_api_create_strategy(connection, msg):
             alarm_restrictions,
             expiry_date,
             subject,
-            _vim_sw_update_api_create_strategy_callback)
-    elif 'kube-upgrade' == msg.sw_update_type:
+            _vim_sw_update_api_create_strategy_callback,
+        )
+    elif "kube-upgrade" == msg.sw_update_type:
         to_version = msg.to_version
         uuid, reason = sw_mgmt_director.create_kube_upgrade_strategy(
             controller_apply_type,
@@ -141,14 +160,18 @@ def vim_sw_update_api_create_strategy(connection, msg):
             default_instance_action,
             alarm_restrictions,
             to_version,
-            _vim_sw_update_api_create_strategy_callback)
-    elif 'system-config-update' == msg.sw_update_type:
+            _vim_sw_update_api_create_strategy_callback,
+        )
+    elif "system-config-update" == msg.sw_update_type:
         uuid, reason = sw_mgmt_director.create_system_config_update_strategy(
-            controller_apply_type, storage_apply_type,
-            worker_apply_type, max_parallel_worker_hosts,
+            controller_apply_type,
+            storage_apply_type,
+            worker_apply_type,
+            max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            _vim_sw_update_api_create_strategy_callback)
+            _vim_sw_update_api_create_strategy_callback,
+        )
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
         response = rpc.APIResponseCreateSwUpdateStrategy()
@@ -185,8 +208,10 @@ def _vim_sw_update_api_apply_strategy_callback(success, reason, strategy):
     global _sw_update_strategy_apply_operations
 
     if strategy is not None:
-        DLOG.info("Apply sw-update strategy callback, uuid=%s, reason=%s."
-                  % (strategy.uuid, reason))
+        DLOG.info(
+            "Apply sw-update strategy callback, uuid=%s, reason=%s."
+            % (strategy.uuid, reason)
+        )
 
         connection = _sw_update_strategy_apply_operations.get(strategy.uuid, None)
         if connection is not None:
@@ -207,21 +232,21 @@ def vim_sw_update_api_apply_strategy(connection, msg):
     Handle Sw-Update Apply Strategy API request
     """
     DLOG.info("Apply sw-update strategy: (%s) called." % msg.sw_update_type)
-    if 'sw-patch' == msg.sw_update_type:
+    if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif 'sw-upgrade' == msg.sw_update_type:
+    elif "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
-    elif 'fw-update' == msg.sw_update_type:
+    elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
-    elif 'kube-rootca-update' == msg.sw_update_type:
+    elif "kube-rootca-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
-    elif 'kube-upgrade' == msg.sw_update_type:
+    elif "kube-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
-    elif 'system-config-update' == msg.sw_update_type:
+    elif "system-config-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
-        sw_update_type = 'unknown'
+        sw_update_type = "unknown"
     sw_mgmt_director = directors.get_sw_mgmt_director()
     strategy = sw_mgmt_director.get_sw_update_strategy(sw_update_type)
     if strategy is None:
@@ -236,7 +261,8 @@ def vim_sw_update_api_apply_strategy(connection, msg):
     _sw_update_strategy_apply_operations[strategy.uuid] = connection
 
     sw_mgmt_director.apply_sw_update_strategy(
-        strategy.uuid, msg.stage_id, _vim_sw_update_api_apply_strategy_callback)
+        strategy.uuid, msg.stage_id, _vim_sw_update_api_apply_strategy_callback
+    )
 
 
 def _vim_sw_update_api_abort_strategy_callback(success, reason, strategy):
@@ -246,8 +272,10 @@ def _vim_sw_update_api_abort_strategy_callback(success, reason, strategy):
     global _sw_update_strategy_abort_operations
 
     if strategy is not None:
-        DLOG.info("Abort sw-update strategy callback, uuid=%s, reason=%s."
-                  % (strategy.uuid, reason))
+        DLOG.info(
+            "Abort sw-update strategy callback, uuid=%s, reason=%s."
+            % (strategy.uuid, reason)
+        )
 
         connection = _sw_update_strategy_abort_operations.get(strategy.uuid, None)
         if connection is not None:
@@ -289,7 +317,7 @@ def _is_abort_supported(connection, strategy):
     # Only specific strategies support the abort validation
     if strategy.name not in [
         objects.SW_UPDATE_TYPE.KUBE_UPGRADE,
-        objects.SW_UPDATE_TYPE.SW_UPGRADE
+        objects.SW_UPDATE_TYPE.SW_UPGRADE,
     ]:
         return True
 
@@ -316,7 +344,7 @@ def _is_abort_supported(connection, strategy):
 
     if current_step.name in [
         STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE,
-        STRATEGY_STEP_NAME.LOCK_HOSTS
+        STRATEGY_STEP_NAME.LOCK_HOSTS,
     ]:
         abort_rejected_msg = (
             f"Abort rejected: cannot abort during {current_step.name} step."
@@ -332,21 +360,21 @@ def vim_sw_update_api_abort_strategy(connection, msg):
     Handle Sw-Update Abort Strategy API request
     """
     DLOG.info("Abort sw-update strategy.")
-    if 'sw-patch' == msg.sw_update_type:
+    if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif 'sw-upgrade' == msg.sw_update_type:
+    elif "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
-    elif 'fw-update' == msg.sw_update_type:
+    elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
-    elif 'kube-rootca-update' == msg.sw_update_type:
+    elif "kube-rootca-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
-    elif 'kube-upgrade' == msg.sw_update_type:
+    elif "kube-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
-    elif 'system-config-update' == msg.sw_update_type:
+    elif "system-config-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
-        sw_update_type = 'unknown'
+        sw_update_type = "unknown"
     sw_mgmt_director = directors.get_sw_mgmt_director()
     strategy = sw_mgmt_director.get_sw_update_strategy(sw_update_type)
     if strategy is None:
@@ -374,8 +402,10 @@ def _vim_sw_update_api_delete_strategy_callback(success, reason, strategy_uuid):
     """
     global _sw_update_strategy_delete_operations
 
-    DLOG.info("Delete sw-update strategy callback, uuid=%s, reason=%s."
-              % (strategy_uuid, reason))
+    DLOG.info(
+        "Delete sw-update strategy callback, uuid=%s, reason=%s."
+        % (strategy_uuid, reason)
+    )
 
     connection = _sw_update_strategy_delete_operations.get(strategy_uuid, None)
     if connection is not None:
@@ -394,21 +424,21 @@ def vim_sw_update_api_delete_strategy(connection, msg):
     Handle Sw-Update Delete Strategy API request
     """
     DLOG.info("Delete sw-update strategy, force=%s.", msg.force)
-    if 'sw-patch' == msg.sw_update_type:
+    if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif 'sw-upgrade' == msg.sw_update_type:
+    elif "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
-    elif 'fw-update' == msg.sw_update_type:
+    elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
-    elif 'kube-rootca-update' == msg.sw_update_type:
+    elif "kube-rootca-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
-    elif 'kube-upgrade' == msg.sw_update_type:
+    elif "kube-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
-    elif 'system-config-update' == msg.sw_update_type:
+    elif "system-config-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
-        sw_update_type = 'unknown'
+        sw_update_type = "unknown"
     sw_mgmt_director = directors.get_sw_mgmt_director()
     strategy = sw_mgmt_director.get_sw_update_strategy(sw_update_type)
     if strategy is None:
@@ -423,7 +453,8 @@ def vim_sw_update_api_delete_strategy(connection, msg):
     _sw_update_strategy_delete_operations[strategy.uuid] = connection
 
     sw_mgmt_director.delete_sw_update_strategy(
-        strategy.uuid, msg.force, _vim_sw_update_api_delete_strategy_callback)
+        strategy.uuid, msg.force, _vim_sw_update_api_delete_strategy_callback
+    )
 
 
 def vim_sw_update_api_get_strategy(connection, msg):
@@ -431,23 +462,23 @@ def vim_sw_update_api_get_strategy(connection, msg):
     Handle Sw-Update Get Strategy API request
     """
     DLOG.verbose("Get sw-update strategy.")
-    if 'sw-patch' == msg.sw_update_type:
+    if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif 'sw-upgrade' == msg.sw_update_type:
+    elif "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
-    elif 'fw-update' == msg.sw_update_type:
+    elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
-    elif 'kube-rootca-update' == msg.sw_update_type:
+    elif "kube-rootca-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE
-    elif 'kube-upgrade' == msg.sw_update_type:
+    elif "kube-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.KUBE_UPGRADE
-    elif 'system-config-update' == msg.sw_update_type:
+    elif "system-config-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE
-    elif 'current-strategy' == msg.sw_update_type:
+    elif "current-strategy" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.CURRENT_STRATEGY
     else:
         DLOG.error("Invalid message name: %s" % msg.sw_update_type)
-        sw_update_type = 'unknown'
+        sw_update_type = "unknown"
     response = rpc.APIResponseGetSwUpdateStrategy()
     sw_mgmt_director = directors.get_sw_mgmt_director()
     strategy = sw_mgmt_director.get_sw_update_strategy(sw_update_type)
@@ -459,8 +490,7 @@ def vim_sw_update_api_get_strategy(connection, msg):
         response.strategy = strategy.as_json()
 
     elif msg.uuid != strategy.uuid:
-        DLOG.info("No sw-update strategy exists matching strategy uuid %s."
-                  % msg.uuid)
+        DLOG.info("No sw-update strategy exists matching strategy uuid %s." % msg.uuid)
         response.result = rpc.RPC_MSG_RESULT.NOT_FOUND
 
     else:

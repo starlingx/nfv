@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,15 +9,15 @@ from nfv_common import debug
 
 from nfv_common.state_machine._state_task_result import STATE_TASK_WORK_RESULT
 
-DLOG = debug.debug_get_logger('nfv_common.state_machine.state_task_work')
+DLOG = debug.debug_get_logger("nfv_common.state_machine.state_task_work")
 
 
 class StateTaskWork(object):
     """
     State Task Work
     """
-    def __init__(self, name, task, force_pass=False, timeout_in_secs=1,
-                 max_retries=1):
+
+    def __init__(self, name, task, force_pass=False, timeout_in_secs=1, max_retries=1):
         self._name = name
         self._force_pass = force_pass
         self._max_retries = max_retries
@@ -61,8 +61,10 @@ class StateTaskWork(object):
         """
         Allow the task work timeout to be extended
         """
-        DLOG.verbose("Extending state task work timeout for %s to %s."
-                     % (self._name, timeout_in_secs))
+        DLOG.verbose(
+            "Extending state task work timeout for %s to %s."
+            % (self._name, timeout_in_secs)
+        )
         self._timeout_in_secs = timeout_in_secs
         self.task.refresh_timeouts()
 
@@ -71,14 +73,16 @@ class StateTaskWork(object):
         State Task Work Run (expected to be overridden by child class)
         """
         DLOG.verbose("Default state task work run for %s." % self._name)
-        return STATE_TASK_WORK_RESULT.SUCCESS, ''
+        return STATE_TASK_WORK_RESULT.SUCCESS, ""
 
     def complete(self, result, reason):
         """
         State Task Work Completed (can be overridden by child class)
         """
-        DLOG.verbose("Default state task work complete for %s, result=%s, "
-                     "reason=%s." % (self._name, result, reason))
+        DLOG.verbose(
+            "Default state task work complete for %s, result=%s, "
+            "reason=%s." % (self._name, result, reason)
+        )
         return result, reason
 
     def abort(self):
@@ -91,14 +95,15 @@ class StateTaskWork(object):
         """
         State Task Work Timeout (can be overridden by child class)
         """
-        DLOG.verbose("Default state task work timeout for %s, timeout=%s secs."
-                     % (self._name, self._timeout_in_secs))
-        return STATE_TASK_WORK_RESULT.TIMED_OUT, ''
+        DLOG.verbose(
+            "Default state task work timeout for %s, timeout=%s secs."
+            % (self._name, self._timeout_in_secs)
+        )
+        return STATE_TASK_WORK_RESULT.TIMED_OUT, ""
 
     def handle_event(self, event, event_data=None):
         """
         State Task Work Handle Event (expected to be overridden by child class)
         """
-        DLOG.verbose("Default state task work handle event for %s."
-                     % self._name)
+        DLOG.verbose("Default state task work handle event for %s." % self._name)
         return False

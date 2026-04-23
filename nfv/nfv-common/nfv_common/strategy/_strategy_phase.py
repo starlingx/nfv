@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016,2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,13 +19,14 @@ from nfv_common.strategy._strategy_result import strategy_phase_result_update
 from nfv_common.strategy._strategy_result import STRATEGY_STAGE_RESULT
 from nfv_common.strategy._strategy_result import STRATEGY_STEP_RESULT
 
-DLOG = debug.debug_get_logger('nfv_common.strategy.phase')
+DLOG = debug.debug_get_logger("nfv_common.strategy.phase")
 
 
 class StrategyPhase(object):
     """
     Strategy Phase
     """
+
     def __init__(self, name):
         self._name = name
         self._current_stage = 0
@@ -33,14 +34,14 @@ class StrategyPhase(object):
         self._stage_timer_id = None
         self._stages = list()
         self._result = STRATEGY_PHASE_RESULT.INITIAL
-        self._result_reason = ''
-        self._result_response = ''
+        self._result_reason = ""
+        self._result_response = ""
         self._timer_id = None
         self._timeout_in_secs = 0
         self._inprogress = False
         self._strategy_reference = None
-        self._start_date_time = ''
-        self._end_date_time = ''
+        self._start_date_time = ""
+        self._end_date_time = ""
 
     def __del__(self):
         self._cleanup()
@@ -184,11 +185,13 @@ class StrategyPhase(object):
         if self._inprogress:
             for stage in self._stages:
                 for step in stage.steps:
-                    if step.result in [STRATEGY_STEP_RESULT.SUCCESS,
-                                       STRATEGY_STEP_RESULT.DEGRADED,
-                                       STRATEGY_STEP_RESULT.FAILED,
-                                       STRATEGY_STEP_RESULT.TIMED_OUT,
-                                       STRATEGY_STEP_RESULT.ABORTED]:
+                    if step.result in [
+                        STRATEGY_STEP_RESULT.SUCCESS,
+                        STRATEGY_STEP_RESULT.DEGRADED,
+                        STRATEGY_STEP_RESULT.FAILED,
+                        STRATEGY_STEP_RESULT.TIMED_OUT,
+                        STRATEGY_STEP_RESULT.ABORTED,
+                    ]:
                         completed_steps += 1
                     total_steps += 1
 
@@ -275,11 +278,11 @@ class StrategyPhase(object):
 
         if STRATEGY_PHASE_RESULT.INITIAL == self._result:
             self._result = STRATEGY_PHASE_RESULT.ABORTED
-            self._result_reason = ''
+            self._result_reason = ""
 
         elif self._inprogress:
             self._result = STRATEGY_PHASE_RESULT.ABORTING
-            self._result_reason = ''
+            self._result_reason = ""
 
         if 0 < len(self._stages):
             if self._current_stage < len(self._stages):
@@ -289,8 +292,7 @@ class StrategyPhase(object):
                     if abort_stages:
                         abort_list += abort_stages
 
-                    DLOG.info("Phase (%s) abort stage (%s)."
-                              % (self._name, stage.name))
+                    DLOG.info("Phase (%s) abort stage (%s)." % (self._name, stage.name))
 
         DLOG.info("Phase (%s) abort." % self._name)
         return abort_list
@@ -301,16 +303,19 @@ class StrategyPhase(object):
         Phase Timeout
         """
         (yield)
-        DLOG.info("Phase (%s) timed out, timeout_in_secs=%s."
-                  % (self._name, self._timeout_in_secs))
+        DLOG.info(
+            "Phase (%s) timed out, timeout_in_secs=%s."
+            % (self._name, self._timeout_in_secs)
+        )
 
         if not self._inprogress:
-            DLOG.info("Phase timeout timer fired, but phase %s is not inprogress."
-                      % self.name)
+            DLOG.info(
+                "Phase timeout timer fired, but phase %s is not inprogress." % self.name
+            )
             return
 
         self._result = STRATEGY_PHASE_RESULT.TIMED_OUT
-        self._result_reason = 'timeout'
+        self._result_reason = "timeout"
         self._complete(self._result, self._result_reason)
 
     def result_complete_response(self, response):
@@ -319,8 +324,10 @@ class StrategyPhase(object):
         """
         # response message is converted to readable display format
         response_format = response.copy()
-        if 'error-message' in response_format:
-            response_format['error-message'] = response_format['error-message'].splitlines()
+        if "error-message" in response_format:
+            response_format["error-message"] = response_format[
+                "error-message"
+            ].splitlines()
         response_result = pprint.pformat(response_format)
         self._result_response = response_result
 
@@ -344,7 +351,7 @@ class StrategyPhase(object):
                 self._current_stage = 0
                 self._inprogress = True
                 self._result = STRATEGY_PHASE_RESULT.INPROGRESS
-                self._result_reason = ''
+                self._result_reason = ""
                 self._start_date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             else:
                 DLOG.debug("Phase (%s) not inprogress." % self._name)
@@ -359,8 +366,11 @@ class StrategyPhase(object):
             if 0 < timeout_in_secs:
                 self._timeout_in_secs = timeout_in_secs + 1
                 self._timer_id = timers.timers_create_timer(
-                    self._name, self._timeout_in_secs, self._timeout_in_secs,
-                    self._timeout)
+                    self._name,
+                    self._timeout_in_secs,
+                    self._timeout_in_secs,
+                    self._timeout,
+                )
 
         for idx in range(self._current_stage, self._stop_at_stage, 1):
             stage = self._stages[idx]
@@ -376,28 +386,35 @@ class StrategyPhase(object):
             if STRATEGY_STAGE_RESULT.WAIT == stage_result:
                 if 0 < stage.timeout_in_secs:
                     self._stage_timer_id = timers.timers_create_timer(
-                        stage.name, stage.timeout_in_secs, stage.timeout_in_secs,
-                        self._stage_timeout)
+                        stage.name,
+                        stage.timeout_in_secs,
+                        stage.timeout_in_secs,
+                        self._stage_timeout,
+                    )
 
-                DLOG.debug("Phase (%s) is waiting for stage (%s) to complete, "
-                           "timeout_in_secs=%s." % (self._name, stage.name,
-                                                    stage.timeout_in_secs))
+                DLOG.debug(
+                    "Phase (%s) is waiting for stage (%s) to complete, "
+                    "timeout_in_secs=%s."
+                    % (self._name, stage.name, stage.timeout_in_secs)
+                )
                 self._save()
-                return STRATEGY_PHASE_RESULT.WAIT, ''
+                return STRATEGY_PHASE_RESULT.WAIT, ""
 
             else:
-                DLOG.debug("Phase (%s) stage (%s) complete, result=%s, reason=%s."
-                           % (self._name, stage.name, stage_result,
-                              stage_result_reason))
+                DLOG.debug(
+                    "Phase (%s) stage (%s) complete, result=%s, reason=%s."
+                    % (self._name, stage.name, stage_result, stage_result_reason)
+                )
 
-                self._result, self._result_reason = \
-                    strategy_phase_result_update(self._result,
-                                                 self._result_reason,
-                                                 stage_result, stage_result_reason)
+                self._result, self._result_reason = strategy_phase_result_update(
+                    self._result, self._result_reason, stage_result, stage_result_reason
+                )
 
-                if STRATEGY_PHASE_RESULT.FAILED == self._result \
-                        or STRATEGY_PHASE_RESULT.ABORTED == self._result \
-                        or STRATEGY_PHASE_RESULT.TIMED_OUT == self._result:
+                if (
+                    STRATEGY_PHASE_RESULT.FAILED == self._result
+                    or STRATEGY_PHASE_RESULT.ABORTED == self._result
+                    or STRATEGY_PHASE_RESULT.TIMED_OUT == self._result
+                ):
                     return self._complete(self._result, self._result_reason)
                 else:
                     self._save()
@@ -408,10 +425,12 @@ class StrategyPhase(object):
                 # Check for a phase with no stages
                 if 0 == self._current_stage:
                     self._result = STRATEGY_PHASE_RESULT.SUCCESS
-                    self._result_reason = ''
+                    self._result_reason = ""
 
-                DLOG.debug("Phase (%s) done running, result=%s, reason=%s."
-                           % (self._name, self._result, self._result_reason))
+                DLOG.debug(
+                    "Phase (%s) done running, result=%s, reason=%s."
+                    % (self._name, self._result, self._result_reason)
+                )
                 return self._complete(self._result, self._result_reason)
             else:
                 self._cleanup()
@@ -423,21 +442,25 @@ class StrategyPhase(object):
         Strategy Stage Complete
         """
         stage = self._stages[self._current_stage]
-        DLOG.debug("Phase (%s) stage (%s) complete, result=%s, reason=%s."
-                   % (self._name, stage.name, stage_result, stage_result_reason))
+        DLOG.debug(
+            "Phase (%s) stage (%s) complete, result=%s, reason=%s."
+            % (self._name, stage.name, stage_result, stage_result_reason)
+        )
 
-        self._result, self._result_reason = \
-            strategy_phase_result_update(self._result, self._result_reason,
-                                         stage_result, stage_result_reason)
+        self._result, self._result_reason = strategy_phase_result_update(
+            self._result, self._result_reason, stage_result, stage_result_reason
+        )
 
         if STRATEGY_PHASE_RESULT.ABORTING == self._result:
             self._result = STRATEGY_PHASE_RESULT.ABORTED
-            self._result_reason = ''
+            self._result_reason = ""
             self._complete(self._result, self._result_reason)
 
-        elif STRATEGY_PHASE_RESULT.FAILED == self._result \
-                or STRATEGY_STAGE_RESULT.ABORTED == self._result \
-                or STRATEGY_STAGE_RESULT.TIMED_OUT == self._result:
+        elif (
+            STRATEGY_PHASE_RESULT.FAILED == self._result
+            or STRATEGY_STAGE_RESULT.ABORTED == self._result
+            or STRATEGY_STAGE_RESULT.TIMED_OUT == self._result
+        ):
             self._complete(self._result, self._result_reason)
 
         else:
@@ -451,18 +474,24 @@ class StrategyPhase(object):
         """
         (yield)
         if len(self._stages) <= self._current_stage:
-            DLOG.error("Stage timeout timer fired, but current stage is invalid, "
-                       "current_stage=%i." % self._current_stage)
+            DLOG.error(
+                "Stage timeout timer fired, but current stage is invalid, "
+                "current_stage=%i." % self._current_stage
+            )
             return
 
         if not self._inprogress:
-            DLOG.info("Stage timeout timer fired, but phase %s is not inprogress, "
-                      "current_stage=%i." % (self.name, self._current_stage))
+            DLOG.info(
+                "Stage timeout timer fired, but phase %s is not inprogress, "
+                "current_stage=%i." % (self.name, self._current_stage)
+            )
             return
 
         stage = self._stages[self._current_stage]
-        DLOG.info("Phase (%s) stage (%s) timed out, timeout_in_secs=%s."
-                  % (self._name, stage.name, stage.timeout_in_secs))
+        DLOG.info(
+            "Phase (%s) stage (%s) timed out, timeout_in_secs=%s."
+            % (self._name, stage.name, stage.timeout_in_secs)
+        )
 
         stage_result, stage_result_reason = stage.timeout()
 
@@ -518,13 +547,14 @@ class StrategyPhase(object):
         self._timeout_in_secs = timeout_in_secs + 1
 
         # Re-start phase timer
-        self._timer_id = timers.timers_create_timer(self._name,
-                                                    self._timeout_in_secs,
-                                                    self._timeout_in_secs,
-                                                    self._timeout)
+        self._timer_id = timers.timers_create_timer(
+            self._name, self._timeout_in_secs, self._timeout_in_secs, self._timeout
+        )
 
-        DLOG.verbose("Started overall strategy phase timer, timeout_in_sec=%s"
-                     % self._timeout_in_secs)
+        DLOG.verbose(
+            "Started overall strategy phase timer, timeout_in_sec=%s"
+            % self._timeout_in_secs
+        )
 
         if self._stage_timer_id is not None:
             timers.timers_delete_timer(self._stage_timer_id)
@@ -539,11 +569,16 @@ class StrategyPhase(object):
         stage = self._stages[self._current_stage]
         if 0 < stage.timeout_in_secs:
             self._stage_timer_id = timers.timers_create_timer(
-                stage.name, stage.timeout_in_secs, stage.timeout_in_secs,
-                self._stage_timeout)
+                stage.name,
+                stage.timeout_in_secs,
+                stage.timeout_in_secs,
+                self._stage_timeout,
+            )
 
-            DLOG.verbose("Started strategy stage timer, timeout_in_sec=%s"
-                         % stage.timeout_in_secs)
+            DLOG.verbose(
+                "Started strategy stage timer, timeout_in_sec=%s"
+                % stage.timeout_in_secs
+            )
 
         stage.refresh_timeouts()
 
@@ -573,9 +608,13 @@ class StrategyPhase(object):
         """
         DLOG.debug("Strategy Phase (%s) complete." % self._name)
         if not self.is_success() and self.result_response:
-            DLOG.error(f"Strategy Phase ({self.name}) did not succeed: {self.result_response}")
+            DLOG.error(
+                f"Strategy Phase ({self.name}) did not succeed: {self.result_response}"
+            )
         if self.strategy is not None:
-            self.strategy.phase_complete(self, result, reason)  # pylint: disable=no-member
+            self.strategy.phase_complete(  # pylint: disable=no-member
+                self, result, reason
+            )
         else:
             DLOG.info("Strategy reference is invalid for phase (%s)." % self._name)
         return self._result, self._result_reason
@@ -600,14 +639,14 @@ class StrategyPhase(object):
         """
         Initializes a strategy phase object using the given dictionary
         """
-        StrategyPhase.__init__(self, data['name'])
-        self._inprogress = data['inprogress']
-        self._current_stage = data['current_stage']
-        self._stop_at_stage = data['stop_at_stage']
-        self._result = data['result']
-        self._result_reason = data['result_reason']
-        self._start_date_time = data['start_date_time']
-        self._end_date_time = data['end_date_time']
+        StrategyPhase.__init__(self, data["name"])
+        self._inprogress = data["inprogress"]
+        self._current_stage = data["current_stage"]
+        self._stop_at_stage = data["stop_at_stage"]
+        self._result = data["result"]
+        self._result_reason = data["result_reason"]
+        self._start_date_time = data["start_date_time"]
+        self._end_date_time = data["end_date_time"]
 
         if stages is not None:
             for stage in stages:
@@ -619,7 +658,7 @@ class StrategyPhase(object):
                 if not stage.is_inprogress():
                     self._inprogress = False
                     self._result = STRATEGY_PHASE_RESULT.INITIAL
-                    self._result_reason = ''
+                    self._result_reason = ""
 
         return self
 
@@ -628,19 +667,19 @@ class StrategyPhase(object):
         Represent the strategy phase as a dictionary
         """
         data = dict()
-        data['name'] = self.name
-        data['timeout'] = self._timeout_in_secs
-        data['inprogress'] = self._inprogress
-        data['completion_percentage'] = self.completion_percentage
-        data['current_stage'] = self._current_stage
-        data['stop_at_stage'] = self._stop_at_stage
-        data['total_stages'] = len(self._stages)
-        data['stages'] = list()
+        data["name"] = self.name
+        data["timeout"] = self._timeout_in_secs
+        data["inprogress"] = self._inprogress
+        data["completion_percentage"] = self.completion_percentage
+        data["current_stage"] = self._current_stage
+        data["stop_at_stage"] = self._stop_at_stage
+        data["total_stages"] = len(self._stages)
+        data["stages"] = list()
         for stage in self._stages:
-            data['stages'].append(stage.as_dict())
-        data['result'] = self._result
-        data['result_reason'] = self._result_reason
-        data['result_response'] = self._result_response
-        data['start_date_time'] = self._start_date_time
-        data['end_date_time'] = self._end_date_time
+            data["stages"].append(stage.as_dict())
+        data["result"] = self._result
+        data["result_reason"] = self._result_reason
+        data["result_response"] = self._result_response
+        data["start_date_time"] = self._start_date_time
+        data["end_date_time"] = self._end_date_time
         return data

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -24,7 +24,12 @@ from nfv_vim.events._vim_volume_api_events import vim_volume_api_get_volumes
 from nfv_vim.events._vim_volume_api_events import vim_volume_api_initialize
 from nfv_vim.events._vim_volume_api_events import vim_volume_api_update_volume
 
-from nfv_vim.events._vim_instance_api_events import vim_instance_api_cold_migrate_instance
+from nfv_vim.events._vim_instance_api_events import (
+    vim_instance_api_cold_migrate_instance
+)
+from nfv_vim.events._vim_instance_api_events import (
+    vim_instance_api_live_migrate_instance
+)
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_create_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_delete_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_evacuate_instance
@@ -32,7 +37,6 @@ from nfv_vim.events._vim_instance_api_events import vim_instance_api_finalize
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_get_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_get_instances
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_initialize
-from nfv_vim.events._vim_instance_api_events import vim_instance_api_live_migrate_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_pause_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_reboot_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_resume_instance
@@ -62,7 +66,7 @@ from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_finalize
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_get_strategy
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_initialize
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_api_events')
+DLOG = debug.debug_get_logger("nfv_vim.vim_api_events")
 
 _server = None
 
@@ -71,8 +75,10 @@ def _vim_api_message_handler(connection, msg):
     """
     Handle messages from the vim-api
     """
-    DLOG.verbose("Received message=%s from vim-api, ip=%s, port=%s."
-                 % (msg, connection.ip, connection.port))
+    DLOG.verbose(
+        "Received message=%s from vim-api, ip=%s, port=%s."
+        % (msg, connection.ip, connection.port)
+    )
 
     msg = rpc.RPCMessage.deserialize(msg)
 
@@ -222,9 +228,11 @@ def vim_api_events_initialize():
     """
     global _server
 
-    _server = tcp.TCPServer(config.CONF['vim']['rpc_host'],
-                            config.CONF['vim']['rpc_port'],
-                            _vim_api_message_handler)
+    _server = tcp.TCPServer(
+        config.CONF["vim"]["rpc_host"],
+        config.CONF["vim"]["rpc_port"],
+        _vim_api_message_handler,
+    )
 
     vim_image_api_initialize()
     vim_volume_api_initialize()

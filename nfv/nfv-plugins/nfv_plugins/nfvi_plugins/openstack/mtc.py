@@ -13,16 +13,17 @@ from nfv_common.helpers import Singleton
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
-DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.mtc')
+DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.mtc")
 
 
 class HostSeverity(Constants, metaclass=Singleton):
     """
     Host Severity Constants
     """
-    CLEARED = Constant('cleared')
-    DEGRADED = Constant('degraded')
-    FAILED = Constant('failed')
+
+    CLEARED = Constant("cleared")
+    DEGRADED = Constant("degraded")
+    FAILED = Constant("failed")
 
 
 # Constant Instantiation
@@ -40,8 +41,8 @@ def system_query(token):
     api_cmd = url + "/v1/systems"
 
     api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
-    api_cmd_headers['User-Agent'] = "vim/1.0"
+    api_cmd_headers["Content-Type"] = "application/json"
+    api_cmd_headers["User-Agent"] = "vim/1.0"
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -58,15 +59,16 @@ def host_query(token, host_uuid, host_name):
     api_cmd = url + "/v1/hosts/%s" % host_uuid
 
     api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
-    api_cmd_headers['User-Agent'] = "vim/1.0"
+    api_cmd_headers["Content-Type"] = "application/json"
+    api_cmd_headers["User-Agent"] = "vim/1.0"
 
     api_cmd_payload = dict()
-    api_cmd_payload['uuid'] = host_uuid
-    api_cmd_payload['hostname'] = host_name
+    api_cmd_payload["uuid"] = host_uuid
+    api_cmd_payload["hostname"] = host_name
 
-    response = rest_api_request(token, "GET", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+    response = rest_api_request(
+        token, "GET", api_cmd, api_cmd_headers, json.dumps(api_cmd_payload)
+    )
     return response
 
 
@@ -81,14 +83,15 @@ def notify_host_severity(token, host_uuid, host_name, host_severity):
     api_cmd = url + "/v1/hosts/%s" % host_uuid
 
     api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
-    api_cmd_headers['User-Agent'] = "vim/1.0"
+    api_cmd_headers["Content-Type"] = "application/json"
+    api_cmd_headers["User-Agent"] = "vim/1.0"
 
     api_cmd_payload = dict()
-    api_cmd_payload['uuid'] = host_uuid
-    api_cmd_payload['hostname'] = host_name
-    api_cmd_payload['severity'] = host_severity
+    api_cmd_payload["uuid"] = host_uuid
+    api_cmd_payload["hostname"] = host_name
+    api_cmd_payload["severity"] = host_severity
 
-    response = rest_api_request(token, "PATCH", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+    response = rest_api_request(
+        token, "PATCH", api_cmd, api_cmd_headers, json.dumps(api_cmd_payload)
+    )
     return response

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2021, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,7 +7,7 @@ from nfv_common import debug
 
 from nfv_vim.nfvi._nfvi_sw_mgmt_plugin import NFVISwMgmtPlugin
 
-DLOG = debug.debug_get_logger('nfv_vim.nfvi.nfvi_sw_mgmt_module')
+DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_sw_mgmt_module")
 
 _sw_mgmt_plugin = None
 
@@ -16,7 +16,7 @@ def nfvi_sw_mgmt_query_updates(callback):
     """
     Query Software Patches
     """
-    cmd_id = _sw_mgmt_plugin.invoke_plugin('query_updates', callback=callback)
+    cmd_id = _sw_mgmt_plugin.invoke_plugin("query_updates", callback=callback)
     return cmd_id
 
 
@@ -24,7 +24,7 @@ def nfvi_sw_mgmt_query_hosts(callback):
     """
     Query Hosts
     """
-    cmd_id = _sw_mgmt_plugin.invoke_plugin('query_hosts', callback=callback)
+    cmd_id = _sw_mgmt_plugin.invoke_plugin("query_hosts", callback=callback)
     return cmd_id
 
 
@@ -32,8 +32,7 @@ def nfvi_sw_mgmt_update_host(host_name, callback):
     """
     Apply Software Patch to a host
     """
-    cmd_id = _sw_mgmt_plugin.invoke_plugin('update_host', host_name,
-                                           callback=callback)
+    cmd_id = _sw_mgmt_plugin.invoke_plugin("update_host", host_name, callback=callback)
     return cmd_id
 
 
@@ -41,9 +40,9 @@ def nfvi_sw_mgmt_apply_updates(patch_names, callback):
     """
     Apply Software Patches
     """
-    cmd_id = _sw_mgmt_plugin.invoke_plugin('apply_patches',
-                                           patch_names,
-                                           callback=callback)
+    cmd_id = _sw_mgmt_plugin.invoke_plugin(
+        "apply_patches", patch_names, callback=callback
+    )
     return cmd_id
 
 
@@ -51,8 +50,9 @@ def nfvi_sw_mgmt_update_hosts(host_names, callback):
     """
     Apply Software Patch to a list of hosts
     """
-    cmd_id = _sw_mgmt_plugin.invoke_plugin('update_hosts', host_names,
-                                           callback=callback)
+    cmd_id = _sw_mgmt_plugin.invoke_plugin(
+        "update_hosts", host_names, callback=callback
+    )
     return cmd_id
 
 
@@ -62,8 +62,8 @@ def nfvi_sw_mgmt_initialize(config, pool):
     """
     global _sw_mgmt_plugin
 
-    _sw_mgmt_plugin = NFVISwMgmtPlugin(config['namespace'], pool)
-    _sw_mgmt_plugin.initialize(config['config_file'])
+    _sw_mgmt_plugin = NFVISwMgmtPlugin(config["namespace"], pool)
+    _sw_mgmt_plugin.initialize(config["config_file"])
 
 
 def nfvi_sw_mgmt_finalize():

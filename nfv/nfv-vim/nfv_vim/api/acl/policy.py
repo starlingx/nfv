@@ -118,7 +118,7 @@ class Rules(dict):
         for key, value in self.items():
             # Use empty string for singleton TrueCheck instances
             if isinstance(value, TrueCheck):
-                out_rules[key] = ''
+                out_rules[key] = ""
             else:
                 out_rules[key] = str(value)
 
@@ -144,7 +144,9 @@ def reset():
     _rules = None
 
 
-def check(rule, target, creds, exc=None, *args, **kwargs):  # pylint: disable=keyword-arg-before-vararg
+def check(
+    rule, target, creds, exc=None, *args, **kwargs
+):  # pylint: disable=keyword-arg-before-vararg
     """
     Checks authorization of a rule against the target and credentials.
 
@@ -312,7 +314,7 @@ class AndCheck(BaseCheck):
     def __str__(self):
         """Return a string representation of this check."""
 
-        return "(%s)" % ' and '.join(str(r) for r in self.rules)
+        return "(%s)" % " and ".join(str(r) for r in self.rules)
 
     def __call__(self, target, cred):
         """
@@ -354,7 +356,7 @@ class OrCheck(BaseCheck):
     def __str__(self):
         """Return a string representation of this check."""
 
-        return "(%s)" % ' or '.join(str(r) for r in self.rules)
+        return "(%s)" % " or ".join(str(r) for r in self.rules)
 
     def __call__(self, target, cred):
         """
@@ -384,15 +386,15 @@ def _parse_check(rule):
     """
 
     # Handle the special checks
-    if rule == '!':
+    if rule == "!":
         return FalseCheck()
-    elif rule == '@':
+    elif rule == "@":
         return TrueCheck()
 
     try:
-        kind, match = rule.split(':', 1)
+        kind, match = rule.split(":", 1)
     except Exception:
-        LOG.exception("Failed to understand rule %(rule)s" % {'rule': rule})
+        LOG.exception("Failed to understand rule %(rule)s" % {"rule": rule})
         # If the rule is invalid, we'll fail closed
         return FalseCheck()
 
@@ -446,7 +448,7 @@ def _parse_list_rule(rule):
 
 
 # Used for tokenizing the policy language
-_tokenize_re = re.compile(r'\s+')
+_tokenize_re = re.compile(r"\s+")
 
 
 def _parse_tokenize(rule):
@@ -466,9 +468,9 @@ def _parse_tokenize(rule):
             continue
 
         # Handle leading parens on the token
-        clean = tok.lstrip('(')
+        clean = tok.lstrip("(")
         for i in range(len(tok) - len(clean)):
-            yield '(', '('
+            yield "(", "("
 
         # If it was only parentheses, continue
         if not clean:
@@ -477,26 +479,25 @@ def _parse_tokenize(rule):
             tok = clean
 
         # Handle trailing parens on the token
-        clean = tok.rstrip(')')
+        clean = tok.rstrip(")")
         trail = len(tok) - len(clean)
 
         # Yield the cleaned token
         lowered = clean.lower()
-        if lowered in ('and', 'or', 'not'):
+        if lowered in ("and", "or", "not"):
             # Special tokens
             yield lowered, clean
         elif clean:
             # Not a special token, but not composed solely of ')'
-            if len(tok) >= 2 and ((tok[0], tok[-1]) in
-                                  [('"', '"'), ("'", "'")]):
+            if len(tok) >= 2 and ((tok[0], tok[-1]) in [('"', '"'), ("'", "'")]):
                 # It's a quoted string
-                yield 'string', tok[1:-1]
+                yield "string", tok[1:-1]
             else:
-                yield 'check', _parse_check(clean)
+                yield "check", _parse_check(clean)
 
         # Yield the trailing parens
         for i in range(trail):
-            yield ')', ')'
+            yield ")", ")"
 
 
 class ParseStateMeta(type):
@@ -515,12 +516,12 @@ class ParseStateMeta(type):
         reducers = []
 
         for key, value in cls_dict.items():
-            if not hasattr(value, 'reducers'):
+            if not hasattr(value, "reducers"):
                 continue
             for reduction in value.reducers:
                 reducers.append((reduction, key))
 
-        cls_dict['reducers'] = reducers
+        cls_dict["reducers"] = reducers
 
         return super(ParseStateMeta, mcs).__new__(mcs, name, bases, cls_dict)
 
@@ -534,7 +535,7 @@ def reducer(*tokens):
 
     def decorator(func):
         # Make sure we have a list of reducer sequences
-        if not hasattr(func, 'reducers'):
+        if not hasattr(func, "reducers"):
             func.reducers = []
 
         # Add the tokens to the list of reducer sequences
@@ -572,8 +573,10 @@ class ParseState(object, metaclass=ParseStateMeta):
         """
 
         for reduction, methname in self.reducers:  # pylint: disable=no-member
-            if (len(self.tokens) >= len(reduction) and
-                    self.tokens[-len(reduction):] == reduction):
+            if (
+                len(self.tokens) >= len(reduction)
+                and self.tokens[-len(reduction):] == reduction
+            ):
                 # Get the reduction method
                 meth = getattr(self, methname)
 
@@ -607,53 +610,53 @@ class ParseState(object, metaclass=ParseStateMeta):
             raise ValueError("Could not parse rule")
         return self.values[0]
 
-    @reducer('(', 'check', ')')
-    @reducer('(', 'and_expr', ')')
-    @reducer('(', 'or_expr', ')')
+    @reducer("(", "check", ")")
+    @reducer("(", "and_expr", ")")
+    @reducer("(", "or_expr", ")")
     def _wrap_check(self, _p1, check, _p2):
         """Turn parenthesized expressions into a 'check' token."""
 
-        return [('check', check)]
+        return [("check", check)]
 
-    @reducer('check', 'and', 'check')
+    @reducer("check", "and", "check")
     def _make_and_expr(self, check1, _and, check2):
         """
         Create an 'and_expr' from two checks joined by the 'and'
         operator.
         """
 
-        return [('and_expr', AndCheck([check1, check2]))]
+        return [("and_expr", AndCheck([check1, check2]))]
 
-    @reducer('and_expr', 'and', 'check')
+    @reducer("and_expr", "and", "check")
     def _extend_and_expr(self, and_expr, _and, check):
         """
         Extend an 'and_expr' by adding one more check.
         """
 
-        return [('and_expr', and_expr.add_check(check))]
+        return [("and_expr", and_expr.add_check(check))]
 
-    @reducer('check', 'or', 'check')
+    @reducer("check", "or", "check")
     def _make_or_expr(self, check1, _or, check2):
         """
         Create an 'or_expr' from two checks joined by the 'or'
         operator.
         """
 
-        return [('or_expr', OrCheck([check1, check2]))]
+        return [("or_expr", OrCheck([check1, check2]))]
 
-    @reducer('or_expr', 'or', 'check')
+    @reducer("or_expr", "or", "check")
     def _extend_or_expr(self, or_expr, _or, check):
         """
         Extend an 'or_expr' by adding one more check.
         """
 
-        return [('or_expr', or_expr.add_check(check))]
+        return [("or_expr", or_expr.add_check(check))]
 
-    @reducer('not', 'check')
+    @reducer("not", "check")
     def _make_not_expr(self, _not, check):
         """Invert the result of another check."""
 
-        return [('check', NotCheck(check))]
+        return [("check", NotCheck(check))]
 
 
 def _parse_text_rule(rule):
@@ -675,7 +678,7 @@ def _parse_text_rule(rule):
         return state.result
     except ValueError:
         # Couldn't parse the rule
-        LOG.exception("Failed to understand rule %(rule)r" % {'rule': rule})
+        LOG.exception("Failed to understand rule %(rule)r" % {"rule": rule})
 
         # Fail closed
         return FalseCheck()
@@ -738,10 +741,10 @@ class RoleCheck(Check):
     def __call__(self, target, creds):
         """Check that there is a matching role in the cred dict."""
 
-        return self.match.lower() in [x.lower() for x in creds['roles']]
+        return self.match.lower() in [x.lower() for x in creds["roles"]]
 
 
-@register('http')
+@register("http")
 class HttpCheck(Check):
     def __call__(self, target, creds):
         """
@@ -751,9 +754,11 @@ class HttpCheck(Check):
         is exactly 'True'.
         """
 
-        url = ('http:' + self.match) % target
-        data = {'target': jsonutils.dumps(target),
-                'credentials': jsonutils.dumps(creds)}
+        url = ("http:" + self.match) % target
+        data = {
+            "target": jsonutils.dumps(target),
+            "credentials": jsonutils.dumps(creds),
+        }
         post_data = urlencode(data)
         f = urlopen(url, post_data)
         return f.read() == "True"

@@ -1,4 +1,4 @@
-# Copyright (c) 2022,2025 Wind River Systems, Inc.
+# Copyright (c) 2022,2025-2026 Wind River Systems, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -16,25 +16,25 @@
 
 from nfv_vim.api.acl.policies import base
 
-POLICY_ROOT = 'nfv_api:kube_upgrade_strategy:%s'
+POLICY_ROOT = "nfv_api:kube_upgrade_strategy:%s"
 
 
 kube_upgrade_strategy_rules = [
     base.RuleDefault(
-        name=POLICY_ROOT % 'add',
-        check_str='rule:' + base.ADMIN_OR_CONFIGURATOR,
+        name=POLICY_ROOT % "add",
+        check_str="rule:" + base.ADMIN_OR_CONFIGURATOR,
         description="Add a kube_upgrade_strategy",
     ),
     base.RuleDefault(
-        name=POLICY_ROOT % 'delete',
-        check_str='rule:' + base.ADMIN_OR_CONFIGURATOR,
+        name=POLICY_ROOT % "delete",
+        check_str="rule:" + base.ADMIN_OR_CONFIGURATOR,
         description="Delete a kube_upgrade_strategy",
     ),
     base.RuleDefault(
-        name=POLICY_ROOT % 'get',
-        check_str='rule:' + base.READER_OR_OPERATOR_OR_CONFIGURATOR,
+        name=POLICY_ROOT % "get",
+        check_str="rule:" + base.READER_OR_OPERATOR_OR_CONFIGURATOR,
         description="Get a kube_upgrade_strategy",
-    )
+    ),
 ]
 
 

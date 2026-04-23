@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016,2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2016,2025-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -38,7 +38,7 @@ def database_initialize(config):
     """
     Initialize the database package
     """
-    database_create(config['database_dir'])
+    database_create(config["database_dir"])
 
 
 def database_finalize(config=None):
@@ -48,4 +48,4 @@ def database_finalize(config=None):
     database = database_get()
     database.end_session()
     if config:
-        subprocess.call(["sync", config['database_dir']])
+        subprocess.call(["sync", config["database_dir"]])

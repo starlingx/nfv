@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,7 +10,7 @@ from nfv_vim import objects
 from nfv_vim import rpc
 from nfv_vim import tables
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_instance_api_events')
+DLOG = debug.debug_get_logger("nfv_vim.vim_instance_api_events")
 
 _instance_create_operations = dict()
 
@@ -34,8 +34,9 @@ def _create_instance_callback(success, instance_name, instance_uuid):
                 response.avail_status = instance.avail_status
                 response.action = instance.action
                 response.host_name = instance.host_name
-                response.instance_type_original_name \
-                    = instance.instance_type_original_name
+                response.instance_type_original_name = (
+                    instance.instance_type_original_name
+                )
                 response.image_uuid = instance.image_uuid
                 response.vcpus = instance.vcpus
                 response.memory_mb = instance.memory_mb
@@ -43,10 +44,10 @@ def _create_instance_callback(success, instance_name, instance_uuid):
                 response.ephemeral_gb = instance.ephemeral_gb
                 response.swap_gb = instance.swap_gb
                 response.auto_recovery = instance.auto_recovery
-                response.live_migration_timeout \
-                    = instance.max_live_migrate_wait_in_secs
-                response.live_migration_max_downtime \
-                    = instance.max_live_migration_downtime_in_ms
+                response.live_migration_timeout = instance.max_live_migrate_wait_in_secs
+                response.live_migration_max_downtime = (
+                    instance.max_live_migration_downtime_in_ms
+                )
                 if instance.host_name is not None:
                     host_table = tables.tables_get_host_table()
                     host = host_table.get(instance.host_name, None)
@@ -78,13 +79,22 @@ def vim_instance_api_create_instance(connection, msg):
     network["uuid"] = msg.network_uuid
     networks.append(network)
 
-    instance_director.create_instance(msg.name, msg.instance_type_uuid,
-                                      msg.vcpus, msg.memory_mb, msg.disk_gb,
-                                      msg.ephemeral_gb, msg.swap_gb,
-                                      msg.image_uuid, None, networks,
-                                      msg.auto_recovery, msg.live_migration_timeout,
-                                      msg.live_migration_max_downtime,
-                                      _create_instance_callback)
+    instance_director.create_instance(
+        msg.name,
+        msg.instance_type_uuid,
+        msg.vcpus,
+        msg.memory_mb,
+        msg.disk_gb,
+        msg.ephemeral_gb,
+        msg.swap_gb,
+        msg.image_uuid,
+        None,
+        networks,
+        msg.auto_recovery,
+        msg.live_migration_timeout,
+        msg.live_migration_max_downtime,
+        _create_instance_callback,
+    )
 
 
 def vim_instance_api_start_instance(connection, msg):
@@ -302,8 +312,7 @@ def vim_instance_api_get_instance(connection, msg):
         response.avail_status = instance.avail_status
         response.action = instance.action
         response.host_name = instance.host_name
-        response.instance_type_original_name \
-            = instance.instance_type_original_name
+        response.instance_type_original_name = instance.instance_type_original_name
         response.image_uuid = instance.image_uuid
         response.vcpus = instance.vcpus
         response.memory_mb = instance.memory_mb
@@ -311,10 +320,10 @@ def vim_instance_api_get_instance(connection, msg):
         response.ephemeral_gb = instance.ephemeral_gb
         response.swap_gb = instance.swap_gb
         response.auto_recovery = instance.auto_recovery
-        response.live_migration_timeout \
-            = instance.max_live_migrate_wait_in_secs
-        response.live_migration_max_downtime \
-            = instance.max_live_migration_downtime_in_ms
+        response.live_migration_timeout = instance.max_live_migrate_wait_in_secs
+        response.live_migration_max_downtime = (
+            instance.max_live_migration_downtime_in_ms
+        )
         if instance.host_name is not None:
             host_table = tables.tables_get_host_table()
             host = host_table.get(instance.host_name, None)
@@ -343,8 +352,7 @@ def vim_instance_api_get_instances(connection, msg):
         response.avail_status = instance.avail_status
         response.action = instance.action
         response.host_name = instance.host_name
-        response.instance_type_original_name \
-            = instance.instance_type_original_name
+        response.instance_type_original_name = instance.instance_type_original_name
         response.image_uuid = instance.image_uuid
         response.vcpus = instance.vcpus
         response.memory_mb = instance.memory_mb
@@ -352,10 +360,10 @@ def vim_instance_api_get_instances(connection, msg):
         response.ephemeral_gb = instance.ephemeral_gb
         response.swap_gb = instance.swap_gb
         response.auto_recovery = instance.auto_recovery
-        response.live_migration_timeout \
-            = instance.max_live_migrate_wait_in_secs
-        response.live_migration_max_downtime \
-            = instance.max_live_migration_downtime_in_ms
+        response.live_migration_timeout = instance.max_live_migrate_wait_in_secs
+        response.live_migration_max_downtime = (
+            instance.max_live_migration_downtime_in_ms
+        )
         if instance.host_name is not None:
             host_table = tables.tables_get_host_table()
             host = host_table.get(instance.host_name, None)

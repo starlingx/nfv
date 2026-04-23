@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,6 +10,7 @@ class Paging(object):
     """
     Paging Object
     """
+
     def __init__(self, page_limit):
         self._page_request_id = str(uuid.uuid4())
         self._page_limit = page_limit
@@ -69,5 +70,8 @@ class Paging(object):
         """
         Provide a string representation
         """
-        return ("Paging: page_limit=%s, done=%s, next_page=%s"
-                % (self.page_limit, self.done, self.next_page))
+        return "Paging: page_limit=%s, done=%s, next_page=%s" % (
+            self.page_limit,
+            self.done,
+            self.next_page,
+        )

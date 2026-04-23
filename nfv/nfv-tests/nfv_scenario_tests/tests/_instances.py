@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,7 +13,7 @@ from nfv_plugins.nfvi_plugins.openstack import openstack
 from tests import _alarms
 from tests import _event_logs
 
-DLOG = debug.debug_get_logger('nfv_tests.instances')
+DLOG = debug.debug_get_logger("nfv_tests.instances")
 
 _token = None
 _directory = None
@@ -26,8 +26,9 @@ def _get_token():
     global _directory, _token
 
     if _directory is None:
-        _directory = openstack.get_directory(config,
-                                             openstack.SERVICE_CATEGORY.OPENSTACK)
+        _directory = openstack.get_directory(
+            config, openstack.SERVICE_CATEGORY.OPENSTACK
+        )
 
     if _token is None:
         _token = openstack.get_token(_directory)
@@ -45,7 +46,7 @@ def instance_get(instance_uuid):
     token = _get_token()
 
     server_data = nova.get_server(token, instance_uuid).result_data
-    return server_data['server']
+    return server_data["server"]
 
 
 def instance_get_by_name(instance_name):
@@ -55,31 +56,31 @@ def instance_get_by_name(instance_name):
     token = _get_token()
 
     servers = nova.get_servers(token).result_data
-    for instance_data in servers['servers']:
-        if instance_data['name'] == instance_name:
-            server_data = nova.get_server(token, instance_data['id']).result_data
-            return server_data['server']
+    for instance_data in servers["servers"]:
+        if instance_data["name"] == instance_name:
+            server_data = nova.get_server(token, instance_data["id"]).result_data
+            return server_data["server"]
 
 
 def instance_get_uuid(instance):
     """
     Retrieve the instance uuid
     """
-    return instance['id']
+    return instance["id"]
 
 
 def instance_get_host(instance):
     """
     Retrieve the host the instance is located on
     """
-    return instance['OS-EXT-SRV-ATTR:host']
+    return instance["OS-EXT-SRV-ATTR:host"]
 
 
 def instance_on_host(instance, host_name):
     """
     Returns true if the instance is located on the host
     """
-    if host_name != instance['OS-EXT-SRV-ATTR:host']:
+    if host_name != instance["OS-EXT-SRV-ATTR:host"]:
         return False, "instance is not on host"
 
     return True, "instance is on host"
@@ -89,9 +90,9 @@ def instance_is_running(instance):
     """
     Returns true if the instance is running
     """
-    if nova.VM_STATE.ACTIVE == instance['OS-EXT-STS:vm_state']:
-        if nova.VM_POWER_STATE.RUNNING == instance['OS-EXT-STS:power_state']:
-            if instance['OS-EXT-STS:task_state'] is None:
+    if nova.VM_STATE.ACTIVE == instance["OS-EXT-STS:vm_state"]:
+        if nova.VM_POWER_STATE.RUNNING == instance["OS-EXT-STS:power_state"]:
+            if instance["OS-EXT-STS:task_state"] is None:
                 return True, "instance is running"
 
     return False, "instance is not running"
@@ -103,14 +104,15 @@ def instance_is_rebooting(instance):
     """
     is_rebooting = False
 
-    if instance['OS-EXT-STS:task_state'] is not None:
-        if instance['OS-EXT-STS:task_state'] in \
-                [nova.VM_TASK_STATE.REBOOTING,
-                 nova.VM_TASK_STATE.REBOOT_PENDING,
-                 nova.VM_TASK_STATE.REBOOT_STARTED,
-                 nova.VM_TASK_STATE.REBOOTING_HARD,
-                 nova.VM_TASK_STATE.REBOOT_PENDING_HARD,
-                 nova.VM_TASK_STATE.REBOOT_STARTED_HARD]:
+    if instance["OS-EXT-STS:task_state"] is not None:
+        if instance["OS-EXT-STS:task_state"] in [
+            nova.VM_TASK_STATE.REBOOTING,
+            nova.VM_TASK_STATE.REBOOT_PENDING,
+            nova.VM_TASK_STATE.REBOOT_STARTED,
+            nova.VM_TASK_STATE.REBOOTING_HARD,
+            nova.VM_TASK_STATE.REBOOT_PENDING_HARD,
+            nova.VM_TASK_STATE.REBOOT_STARTED_HARD,
+        ]:
             is_rebooting = True
 
     if not is_rebooting:
@@ -125,11 +127,12 @@ def instance_is_rebuilding(instance):
     """
     is_rebuilding = False
 
-    if instance['OS-EXT-STS:task_state'] is not None:
-        if instance['OS-EXT-STS:task_state'] in \
-                [nova.VM_TASK_STATE.REBUILDING,
-                 nova.VM_TASK_STATE.REBUILD_BLOCK_DEVICE_MAPPING,
-                 nova.VM_TASK_STATE.REBUILD_SPAWNING]:
+    if instance["OS-EXT-STS:task_state"] is not None:
+        if instance["OS-EXT-STS:task_state"] in [
+            nova.VM_TASK_STATE.REBUILDING,
+            nova.VM_TASK_STATE.REBUILD_BLOCK_DEVICE_MAPPING,
+            nova.VM_TASK_STATE.REBUILD_SPAWNING,
+        ]:
             is_rebuilding = True
 
     if not is_rebuilding:
@@ -144,9 +147,9 @@ def instance_is_resized(instance):
     """
     is_resized = False
 
-    if nova.VM_STATE.RESIZED == instance['OS-EXT-STS:vm_state']:
-        if nova.VM_POWER_STATE.RUNNING == instance['OS-EXT-STS:power_state']:
-            if instance['OS-EXT-STS:task_state'] is None:
+    if nova.VM_STATE.RESIZED == instance["OS-EXT-STS:vm_state"]:
+        if nova.VM_POWER_STATE.RUNNING == instance["OS-EXT-STS:power_state"]:
+            if instance["OS-EXT-STS:task_state"] is None:
                 is_resized = True
 
     if not is_resized:
@@ -161,9 +164,9 @@ def instance_is_stopped(instance):
     """
     in_stopped_state = False
 
-    if nova.VM_STATE.STOPPED == instance['OS-EXT-STS:vm_state']:
-        if nova.VM_POWER_STATE.SHUTDOWN == instance['OS-EXT-STS:power_state']:
-            if instance['OS-EXT-STS:task_state'] is None:
+    if nova.VM_STATE.STOPPED == instance["OS-EXT-STS:vm_state"]:
+        if nova.VM_POWER_STATE.SHUTDOWN == instance["OS-EXT-STS:power_state"]:
+            if instance["OS-EXT-STS:task_state"] is None:
                 in_stopped_state = True
 
     if not in_stopped_state:
@@ -178,9 +181,9 @@ def instance_is_paused(instance):
     """
     in_paused_state = False
 
-    if nova.VM_STATE.PAUSED == instance['OS-EXT-STS:vm_state']:
-        if nova.VM_POWER_STATE.PAUSED == instance['OS-EXT-STS:power_state']:
-            if instance['OS-EXT-STS:task_state'] is None:
+    if nova.VM_STATE.PAUSED == instance["OS-EXT-STS:vm_state"]:
+        if nova.VM_POWER_STATE.PAUSED == instance["OS-EXT-STS:power_state"]:
+            if instance["OS-EXT-STS:task_state"] is None:
                 in_paused_state = True
 
     if not in_paused_state:
@@ -195,9 +198,9 @@ def instance_is_suspended(instance):
     """
     in_suspended_state = False
 
-    if nova.VM_STATE.SUSPENDED == instance['OS-EXT-STS:vm_state']:
-        if nova.VM_POWER_STATE.SHUTDOWN == instance['OS-EXT-STS:power_state']:
-            if instance['OS-EXT-STS:task_state'] is None:
+    if nova.VM_STATE.SUSPENDED == instance["OS-EXT-STS:vm_state"]:
+        if nova.VM_POWER_STATE.SHUTDOWN == instance["OS-EXT-STS:power_state"]:
+            if instance["OS-EXT-STS:task_state"] is None:
                 in_suspended_state = True
 
     if not in_suspended_state:
@@ -212,7 +215,7 @@ def instance_is_failed(instance):
     """
     in_failed_state = False
 
-    if nova.VM_STATE.ERROR == instance['OS-EXT-STS:vm_state']:
+    if nova.VM_STATE.ERROR == instance["OS-EXT-STS:vm_state"]:
         in_failed_state = True
 
     if not in_failed_state:
@@ -221,9 +224,17 @@ def instance_is_failed(instance):
     return True, "instance is failed"
 
 
-def instance_has_started(instance, log_files, alarms, event_logs, alarm_history,
-                         start_datetime, end_datetime, action=False,
-                         guest_hb=False):
+def instance_has_started(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has started
     """
@@ -237,19 +248,27 @@ def instance_has_started(instance, log_files, alarms, event_logs, alarm_history,
     if not _event_logs.are_start_logs_created(event_logs, instance, guest_hb):
         return False, "instance start logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_start_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has started"
 
 
-def instance_has_stopped(instance, log_files, alarms, event_logs, alarm_history,
-                         start_datetime, end_datetime, action=False,
-                         guest_hb=False):
+def instance_has_stopped(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has stopped
     """
@@ -263,19 +282,27 @@ def instance_has_stopped(instance, log_files, alarms, event_logs, alarm_history,
     if not _event_logs.are_stop_logs_created(event_logs, instance, guest_hb):
         return False, "instance stop logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_stop_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has stopped"
 
 
-def instance_has_paused(instance, log_files, alarms, event_logs, alarm_history,
-                        start_datetime, end_datetime, action=False,
-                        guest_hb=False):
+def instance_has_paused(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has paused
     """
@@ -289,19 +316,27 @@ def instance_has_paused(instance, log_files, alarms, event_logs, alarm_history,
     if not _event_logs.are_pause_logs_created(event_logs, instance, guest_hb):
         return False, "instance pause logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_pause_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has paused"
 
 
-def instance_has_unpaused(instance, log_files, alarms, event_logs, alarm_history,
-                          start_datetime, end_datetime, action=False,
-                          guest_hb=False):
+def instance_has_unpaused(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has unpaused
     """
@@ -315,19 +350,27 @@ def instance_has_unpaused(instance, log_files, alarms, event_logs, alarm_history
     if not _event_logs.are_unpause_logs_created(event_logs, instance, guest_hb):
         return False, "instance unpause logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_unpause_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has unpaused"
 
 
-def instance_has_suspended(instance, log_files, alarms, event_logs, alarm_history,
-                           start_datetime, end_datetime, action=False,
-                           guest_hb=False):
+def instance_has_suspended(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has suspended
     """
@@ -341,19 +384,27 @@ def instance_has_suspended(instance, log_files, alarms, event_logs, alarm_histor
     if not _event_logs.are_suspend_logs_created(event_logs, instance, guest_hb):
         return False, "instance suspend logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_suspend_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has suspended"
 
 
-def instance_has_resumed(instance, log_files, alarms, event_logs, alarm_history,
-                         start_datetime, end_datetime, action=False,
-                         guest_hb=False):
+def instance_has_resumed(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has resumed
     """
@@ -367,19 +418,27 @@ def instance_has_resumed(instance, log_files, alarms, event_logs, alarm_history,
     if not _event_logs.are_resume_logs_created(event_logs, instance, guest_hb):
         return False, "instance resume logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_resume_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has resumed"
 
 
-def instance_has_rebooted(instance, log_files, alarms, event_logs, alarm_history,
-                          start_datetime, end_datetime, action=False,
-                          guest_hb=False):
+def instance_has_rebooted(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has rebooted
     """
@@ -394,19 +453,27 @@ def instance_has_rebooted(instance, log_files, alarms, event_logs, alarm_history
     if not _event_logs.are_reboot_logs_created(event_logs, instance, guest_hb):
         return False, "instance reboot logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_reboot_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has rebooted"
 
 
-def instance_was_rebuilt(instance, log_files, alarms, event_logs, alarm_history,
-                         start_datetime, end_datetime, action=False,
-                         guest_hb=False):
+def instance_was_rebuilt(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has been rebuilt
     """
@@ -421,20 +488,29 @@ def instance_was_rebuilt(instance, log_files, alarms, event_logs, alarm_history,
     if not _event_logs.are_rebuild_logs_created(event_logs, instance, guest_hb):
         return False, "instance rebuild logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_rebuild_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has been rebuilt"
 
 
-def instance_has_live_migrated(instance, log_files, alarms, event_logs,
-                               alarm_history, start_datetime, end_datetime,
-                               original_host, to_host=None, action=False,
-                               guest_hb=False):
+def instance_has_live_migrated(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    original_host,
+    to_host=None,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has live-migrated
     """
@@ -442,35 +518,42 @@ def instance_has_live_migrated(instance, log_files, alarms, event_logs,
     if not success:
         return False, reason
 
-    if original_host == instance['OS-EXT-SRV-ATTR:host']:
+    if original_host == instance["OS-EXT-SRV-ATTR:host"]:
         return False, "instance has not live-migrated"
 
     if to_host is not None:
-        if to_host != instance['OS-EXT-SRV-ATTR:host']:
+        if to_host != instance["OS-EXT-SRV-ATTR:host"]:
             return False, "instance did not live-migrate to specified host"
 
-    if not _alarms.was_instance_live_migrate_alarm(alarm_history, instance,
-                                                   guest_hb):
+    if not _alarms.was_instance_live_migrate_alarm(alarm_history, instance, guest_hb):
         return False, "instance live-migrate alarms were not created"
 
-    if not _event_logs.are_live_migrate_logs_created(event_logs, instance,
-                                                     guest_hb):
+    if not _event_logs.are_live_migrate_logs_created(event_logs, instance, guest_hb):
         return False, "instance live-migrate logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_live_migrate_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has migrated"
 
 
-def instance_has_cold_migrated(instance, log_files, alarms, event_logs,
-                               alarm_history, start_datetime, end_datetime,
-                               original_host, to_host=None, action=False,
-                               guest_hb=False):
+def instance_has_cold_migrated(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    original_host,
+    to_host=None,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has cold-migrated
     """
@@ -483,37 +566,43 @@ def instance_has_cold_migrated(instance, log_files, alarms, event_logs,
         if not success:
             return False, reason
 
-    if original_host == instance['OS-EXT-SRV-ATTR:host']:
+    if original_host == instance["OS-EXT-SRV-ATTR:host"]:
         return False, "instance has not cold-migrated"
 
     if to_host is not None:
-        if to_host != instance['OS-EXT-SRV-ATTR:host']:
+        if to_host != instance["OS-EXT-SRV-ATTR:host"]:
             return False, "instance did not cold-migrate to specified host"
 
     if not _alarms.is_instance_cold_migrated_alarm(alarms, instance, guest_hb):
         return False, "instance cold-migrated alarm was not created"
 
-    if not _alarms.was_instance_cold_migrate_alarm(alarm_history, instance,
-                                                   guest_hb):
+    if not _alarms.was_instance_cold_migrate_alarm(alarm_history, instance, guest_hb):
         return False, "instance cold-migrate alarms were not created"
 
-    if not _event_logs.are_cold_migrate_logs_created(event_logs, instance,
-                                                     guest_hb):
+    if not _event_logs.are_cold_migrate_logs_created(event_logs, instance, guest_hb):
         return False, "instance cold-migrate logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_cold_migrate_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has migrated"
 
 
-def instance_has_cold_migrate_confirmed(instance, log_files, alarms, event_logs,
-                                        alarm_history, start_datetime, end_datetime,
-                                        action=False, guest_hb=False):
+def instance_has_cold_migrate_confirmed(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance cold-migrate has been confirmed
     """
@@ -521,23 +610,32 @@ def instance_has_cold_migrate_confirmed(instance, log_files, alarms, event_logs,
     if not success:
         return False, reason
 
-    if not _event_logs.are_cold_migrate_confirm_logs_created(event_logs, instance,
-                                                             guest_hb):
+    if not _event_logs.are_cold_migrate_confirm_logs_created(
+        event_logs, instance, guest_hb
+    ):
         return False, "instance cold-migrate-confirm logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_cold_migrate_confirm_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance migrate has been confirmed"
 
 
-def instance_has_cold_migrate_reverted(instance, log_files, alarms, event_logs,
-                                       alarm_history, start_datetime, end_datetime,
-                                       action=False, guest_hb=False):
+def instance_has_cold_migrate_reverted(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance cold-migrate has been reverted
     """
@@ -545,27 +643,37 @@ def instance_has_cold_migrate_reverted(instance, log_files, alarms, event_logs,
     if not success:
         return False, reason
 
-    if not _alarms.was_instance_cold_migrate_revert_alarm(alarm_history, instance,
-                                                          guest_hb):
+    if not _alarms.was_instance_cold_migrate_revert_alarm(
+        alarm_history, instance, guest_hb
+    ):
         return False, "instance cold-migrate-revert alarms were not created"
 
-    if not _event_logs.are_cold_migrate_revert_logs_created(event_logs, instance,
-                                                            guest_hb):
+    if not _event_logs.are_cold_migrate_revert_logs_created(
+        event_logs, instance, guest_hb
+    ):
         return False, "instance cold-migrate-revert logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_cold_migrate_revert_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance migrate has been reverted"
 
 
-def instance_has_resized(instance, log_files, alarms, event_logs, alarm_history,
-                         start_datetime, end_datetime, action=False,
-                         guest_hb=False):
+def instance_has_resized(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance has resized
     """
@@ -587,19 +695,27 @@ def instance_has_resized(instance, log_files, alarms, event_logs, alarm_history,
     if not _event_logs.are_resize_logs_created(event_logs, instance, guest_hb):
         return False, "instance resize logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_resize_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance has been resized"
 
 
-def instance_has_resize_confirmed(instance, log_files, alarms, event_logs,
-                                  alarm_history, start_datetime, end_datetime,
-                                  action=False, guest_hb=False):
+def instance_has_resize_confirmed(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance resize has been confirmed
     """
@@ -607,23 +723,30 @@ def instance_has_resize_confirmed(instance, log_files, alarms, event_logs,
     if not success:
         return False, reason
 
-    if not _event_logs.are_resize_confirm_logs_created(event_logs, instance,
-                                                       guest_hb):
+    if not _event_logs.are_resize_confirm_logs_created(event_logs, instance, guest_hb):
         return False, "instance resize-confirm logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_resize_confirm_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 
     return True, "instance resize has been confirmed"
 
 
-def instance_has_resize_reverted(instance, log_files, alarms, event_logs,
-                                 alarm_history, start_datetime, end_datetime,
-                                 action=False, guest_hb=False):
+def instance_has_resize_reverted(
+    instance,
+    log_files,
+    alarms,
+    event_logs,
+    alarm_history,
+    start_datetime,
+    end_datetime,
+    action=False,
+    guest_hb=False,
+):
     """
     Returns true if the instance resize has been reverted
     """
@@ -631,18 +754,16 @@ def instance_has_resize_reverted(instance, log_files, alarms, event_logs,
     if not success:
         return False, reason
 
-    if not _alarms.was_instance_resize_revert_alarm(alarm_history, instance,
-                                                    guest_hb):
+    if not _alarms.was_instance_resize_revert_alarm(alarm_history, instance, guest_hb):
         return False, "instance resize-revert alarms were not created"
 
-    if not _event_logs.are_resize_revert_logs_created(event_logs, instance,
-                                                      guest_hb):
+    if not _event_logs.are_resize_revert_logs_created(event_logs, instance, guest_hb):
         return False, "instance resize-revert logs not created"
 
-    records = forensic.evidence_from_files(log_files, start_datetime,
-                                           end_datetime)
+    records = forensic.evidence_from_files(log_files, start_datetime, end_datetime)
     success, reason = forensic.analysis_instance_resize_revert_success(
-        instance['id'], instance['name'], records, action, guest_hb)
+        instance["id"], instance["name"], records, action, guest_hb
+    )
     if not success:
         return False, reason
 

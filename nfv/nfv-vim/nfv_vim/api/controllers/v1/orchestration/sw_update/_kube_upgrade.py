@@ -11,18 +11,20 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_vim.api._link import Link
-from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy \
-    import KubeUpgradeStrategyAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import (
+    KubeUpgradeStrategyAPI
+)
 
-DLOG = debug.debug_get_logger('nfv_vim.api.kube_upgrade')
+DLOG = debug.debug_get_logger("nfv_vim.api.kube_upgrade")
 
 
 class KubeUpgradeDescription(wsme_types.Base):
     """
     Kubernetes Update Description
     """
+
     id = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -31,12 +33,9 @@ class KubeUpgradeDescription(wsme_types.Base):
         description = KubeUpgradeDescription()
         description.id = "kube-upgrade"
         description.links = [
-            Link.make_link('self',
-                           url,
-                           'orchestration/kube-upgrade'),
-            Link.make_link('strategy',
-                           url,
-                           'orchestration/kube-upgrade/strategy')]
+            Link.make_link("self", url, "orchestration/kube-upgrade"),
+            Link.make_link("strategy", url, "orchestration/kube-upgrade/strategy"),
+        ]
         return description
 
 
@@ -44,9 +43,10 @@ class KubeUpgradeAPI(rest.RestController):
     """
     KubeUpgradeRest API
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'strategy' == key:
+        if "strategy" == key:
             return KubeUpgradeStrategyAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)

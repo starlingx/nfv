@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -17,13 +17,14 @@ from nfv_common.tasks._task import Task
 from nfv_common.tasks._task import TASK_PRIORITY
 from nfv_common.tasks._task_future import TaskFuture
 
-DLOG = debug.debug_get_logger('nfv_common.tasks.task_scheduler')
+DLOG = debug.debug_get_logger("nfv_common.tasks.task_scheduler")
 
 
 class TaskScheduler(object):
     """
     Task Scheduler
     """
+
     def __init__(self, name, task_worker_pool):
         """
         Create a task scheduler
@@ -69,8 +70,9 @@ class TaskScheduler(object):
         if inspect.isgeneratorfunction(target):
             future = TaskFuture(self)
             task = Task(self, priority, target(future, *args, **kwargs))
-            DLOG.debug("Pool %s: Add Task, name=%s."
-                       % (self._task_worker_pool.name, task.name))
+            DLOG.debug(
+                "Pool %s: Add Task, name=%s." % (self._task_worker_pool.name, task.name)
+            )
             self.schedule_task(task)
             result = task.id
         else:
@@ -81,8 +83,9 @@ class TaskScheduler(object):
         """
         Delete a task from the task scheduler
         """
-        DLOG.debug("Pool %s: Delete Task, name=%s."
-                   % (self._task_worker_pool.name, task.name))
+        DLOG.debug(
+            "Pool %s: Delete Task, name=%s." % (self._task_worker_pool.name, task.name)
+        )
         for timer_id, timer_owner in list(self._task_timers.items()):
             if timer_owner.id == task.id:
                 timers.timers_delete_timer(timer_id)
@@ -109,9 +112,9 @@ class TaskScheduler(object):
         """
         Add timer for a task
         """
-        timer_id = timers.timers_create_timer(name, interval_secs,
-                                              interval_secs,
-                                              self.task_timer_timeout)
+        timer_id = timers.timers_create_timer(
+            name, interval_secs, interval_secs, self.task_timer_timeout
+        )
         self._task_timers[timer_id] = task
         return timer_id
 
@@ -128,7 +131,7 @@ class TaskScheduler(object):
         Called when a task timer has fired
         """
         while True:
-            timer_id = (yield)
+            timer_id = yield
             task = self._task_timers.get(timer_id, None)
             if task is None:
                 break
@@ -179,7 +182,7 @@ class TaskScheduler(object):
         readable or writeable
         """
         while True:
-            select_obj = (yield)
+            select_obj = yield
             task = self._task_read_selobjs.get(select_obj, None)
             if task is None:
                 task = self._task_write_selobjs.get(select_obj, None)
@@ -236,8 +239,10 @@ class TaskScheduler(object):
         """
         Schedule or Reschedule a task
         """
-        DLOG.verbose("Pool %s: Scheduling Task, name=%s."
-                     % (self._task_worker_pool.name, task.name))
+        DLOG.verbose(
+            "Pool %s: Scheduling Task, name=%s."
+            % (self._task_worker_pool.name, task.name)
+        )
         self._tasks[task.id] = task
 
         for pri in TASK_PRIORITY:
@@ -249,10 +254,11 @@ class TaskScheduler(object):
             else:
                 self._ready_queue[task.priority].appendleft(task.id)
 
-            histogram.add_histogram_data(self._name +
-                                         ' [tasks-queue-p%i]' % task.priority,
-                                         len(self._ready_queue[task.priority]),
-                                         "ready-tasks")
+            histogram.add_histogram_data(
+                self._name + " [tasks-queue-p%i]" % task.priority,
+                len(self._ready_queue[task.priority]),
+                "ready-tasks",
+            )
 
         if not self._tasks_scheduled:
             self._schedule_next_task()
@@ -283,25 +289,30 @@ class TaskScheduler(object):
         if worker is not None:
             task_work = self._wait_queue.pop()
 
-            DLOG.verbose("Pool %s: Task worker available to run TaskWork, "
-                         "name=%s." % (self._task_worker_pool.name,
-                                       task_work.name))
+            DLOG.verbose(
+                "Pool %s: Task worker available to run TaskWork, "
+                "name=%s." % (self._task_worker_pool.name, task_work.name)
+            )
 
             selobj.selobj_add_read_obj(worker.selobj, self.task_work_complete)
             self._workers_selobj[worker.selobj] = worker
             worker.submit_task_work(task_work)
 
             if task_work.timeout_in_secs is not None:
-                timer_id = timers.timers_create_timer(task_work.name,
-                                                      task_work.timeout_in_secs,
-                                                      task_work.timeout_in_secs,
-                                                      self.task_work_timeout)
+                timer_id = timers.timers_create_timer(
+                    task_work.name,
+                    task_work.timeout_in_secs,
+                    task_work.timeout_in_secs,
+                    self.task_work_timeout,
+                )
                 self._task_work_timers[timer_id] = task_work
                 self._workers_timer[timer_id] = worker
             return True
         else:
-            DLOG.verbose("Pool %s: No task worker available to run TaskWork."
-                         % self._task_worker_pool.name)
+            DLOG.verbose(
+                "Pool %s: No task worker available to run TaskWork."
+                % self._task_worker_pool.name
+            )
             return False
 
     @coroutine
@@ -310,7 +321,7 @@ class TaskScheduler(object):
         A task worker has completed it's assigned work
         """
         while True:
-            select_obj = (yield)
+            select_obj = yield
             worker = self._workers_selobj.get(select_obj, None)
             if worker is not None:
                 self._task_worker_pool.release_worker(worker)
@@ -341,7 +352,7 @@ class TaskScheduler(object):
         """
         Work being done by the task has timed out
         """
-        timer_id = (yield)
+        timer_id = yield
         worker = self._workers_timer.get(timer_id, None)
         if worker is not None:
             self._task_worker_pool.timeout_worker(worker)
@@ -368,20 +379,22 @@ class TaskScheduler(object):
         Run tasks that are ready to run
         """
         while True:
-            select_obj = (yield)
+            select_obj = yield
             if select_obj == self._run_queue.selobj:
                 self._tasks_scheduled = False
                 task_id = self._run_queue.get()
                 if self._tasks:
-                    DLOG.verbose("Pool %s: Total tasks=%s."
-                                 % (self._task_worker_pool.name,
-                                    len(self._tasks)))
+                    DLOG.verbose(
+                        "Pool %s: Total tasks=%s."
+                        % (self._task_worker_pool.name, len(self._tasks))
+                    )
                     self._running_task = self._tasks.get(task_id, None)
                     if self._running_task is not None:
                         try:
-                            DLOG.verbose("Pool %s: Running task, name=%s."
-                                         % (self._task_worker_pool.name,
-                                            self._running_task.name))
+                            DLOG.verbose(
+                                "Pool %s: Running task, name=%s."
+                                % (self._task_worker_pool.name, self._running_task.name)
+                            )
                             self._running_task.run()
 
                         except (StopIteration, RuntimeError):
@@ -393,5 +406,6 @@ class TaskScheduler(object):
                     self._schedule_next_task()
 
                 else:
-                    DLOG.verbose("Pool %s: No tasks to schedule."
-                                 % self._task_worker_pool.name)
+                    DLOG.verbose(
+                        "Pool %s: No tasks to schedule." % self._task_worker_pool.name
+                    )

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,13 +11,14 @@ from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
 
-DLOG = debug.debug_get_logger('nfv_vim.rpc')
+DLOG = debug.debug_get_logger("nfv_vim.rpc")
 
 
 class RPCMessage(object):
     """
     RPC Message
     """
+
     version = RPC_MSG_VERSION.UNKNOWN
     type = RPC_MSG_TYPE.UNKNOWN
     result = RPC_MSG_RESULT.SUCCESS
@@ -38,9 +39,9 @@ class RPCMessage(object):
         Serialize RPC Message
         """
         msg = dict()
-        msg['version'] = self.version
-        msg['type'] = self.type
-        msg['result'] = self.result
+        msg["version"] = self.version
+        msg["type"] = self.type
+        msg["result"] = self.result
         self.serialize_payload(msg)
         serialized_msg = json.dumps(msg)
         return serialized_msg
@@ -57,18 +58,18 @@ class RPCMessage(object):
         Deserialize RPC Message
         """
         msg = json.loads(msg)
-        msg_version = msg.get('version', RPC_MSG_VERSION.UNKNOWN)
-        msg_type = msg.get('type', RPC_MSG_TYPE.UNKNOWN)
-        msg_result = msg.get('result', RPC_MSG_RESULT.UNKNOWN)
+        msg_version = msg.get("version", RPC_MSG_VERSION.UNKNOWN)
+        msg_type = msg.get("type", RPC_MSG_TYPE.UNKNOWN)
+        msg_result = msg.get("result", RPC_MSG_RESULT.UNKNOWN)
 
         if RPC_MSG_VERSION.UNKNOWN == msg_version:
-            DLOG.info("Unknown rpc message version received, msg_version=%s."
-                      % msg_version)
+            DLOG.info(
+                "Unknown rpc message version received, msg_version=%s." % msg_version
+            )
             return RPCMessage(msg_version, msg_type, msg_result)
 
         if RPC_MSG_TYPE.UNKNOWN == msg_type:
-            DLOG.info("Unknown rpc message type received, msg_type=%s."
-                      % msg_type)
+            DLOG.info("Unknown rpc message type received, msg_type=%s." % msg_type)
             return RPCMessage(msg_version, msg_type, msg_result)
 
         return RPCMessageFactory.get(msg_version, msg_type, msg_result, msg)
@@ -78,6 +79,7 @@ class RPCMessageFactory(object):
     """
     RPC Message Factory
     """
+
     from nfv_vim.rpc._rpc_message_image import APIRequestCreateImage
     from nfv_vim.rpc._rpc_message_image import APIRequestDeleteImage
     from nfv_vim.rpc._rpc_message_image import APIRequestGetImage
@@ -141,13 +143,17 @@ class RPCMessageFactory(object):
     from nfv_vim.rpc._rpc_message_network import APIResponseGetNetwork
     from nfv_vim.rpc._rpc_message_network import APIResponseUpdateNetwork
 
+    from nfv_vim.rpc._rpc_message_sw_update import (
+        APIRequestCreateKubeRootcaUpdateStrategy
+    )
+    from nfv_vim.rpc._rpc_message_sw_update import (
+        APIRequestCreateSystemConfigUpdateStrategy
+    )
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestAbortSwUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestApplySwUpdateStrategy
-    from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateKubeRootcaUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateKubeUpgradeStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSwUpgradeStrategy
-    from nfv_vim.rpc._rpc_message_sw_update import APIRequestCreateSystemConfigUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestDeleteSwUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestGetSwUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIResponseAbortSwUpdateStrategy
@@ -166,7 +172,6 @@ class RPCMessageFactory(object):
         RPC_MSG_TYPE.DELETE_IMAGE_RESPONSE: APIResponseDeleteImage,
         RPC_MSG_TYPE.GET_IMAGE_REQUEST: APIRequestGetImage,
         RPC_MSG_TYPE.GET_IMAGE_RESPONSE: APIResponseGetImage,
-
         # Volume Mapping
         RPC_MSG_TYPE.CREATE_VOLUME_REQUEST: APIRequestCreateVolume,
         RPC_MSG_TYPE.CREATE_VOLUME_RESPONSE: APIResponseCreateVolume,
@@ -176,7 +181,6 @@ class RPCMessageFactory(object):
         RPC_MSG_TYPE.DELETE_VOLUME_RESPONSE: APIResponseDeleteVolume,
         RPC_MSG_TYPE.GET_VOLUME_REQUEST: APIRequestGetVolume,
         RPC_MSG_TYPE.GET_VOLUME_RESPONSE: APIResponseGetVolume,
-
         # Instance Mapping
         RPC_MSG_TYPE.CREATE_INSTANCE_REQUEST: APIRequestCreateInstance,
         RPC_MSG_TYPE.CREATE_INSTANCE_RESPONSE: APIResponseCreateInstance,
@@ -204,7 +208,6 @@ class RPCMessageFactory(object):
         RPC_MSG_TYPE.DELETE_INSTANCE_RESPONSE: APIResponseDeleteInstance,
         RPC_MSG_TYPE.GET_INSTANCE_REQUEST: APIRequestGetInstance,
         RPC_MSG_TYPE.GET_INSTANCE_RESPONSE: APIResponseGetInstance,
-
         # Subnet Mapping
         RPC_MSG_TYPE.CREATE_SUBNET_REQUEST: APIRequestCreateSubnet,
         RPC_MSG_TYPE.CREATE_SUBNET_RESPONSE: APIResponseCreateSubnet,
@@ -214,7 +217,6 @@ class RPCMessageFactory(object):
         RPC_MSG_TYPE.DELETE_SUBNET_RESPONSE: APIResponseDeleteSubnet,
         RPC_MSG_TYPE.GET_SUBNET_REQUEST: APIRequestGetSubnet,
         RPC_MSG_TYPE.GET_SUBNET_RESPONSE: APIResponseGetSubnet,
-
         # Network Mapping
         RPC_MSG_TYPE.CREATE_NETWORK_REQUEST: APIRequestCreateNetwork,
         RPC_MSG_TYPE.CREATE_NETWORK_RESPONSE: APIResponseCreateNetwork,
@@ -224,7 +226,6 @@ class RPCMessageFactory(object):
         RPC_MSG_TYPE.DELETE_NETWORK_RESPONSE: APIResponseDeleteNetwork,
         RPC_MSG_TYPE.GET_NETWORK_REQUEST: APIRequestGetNetwork,
         RPC_MSG_TYPE.GET_NETWORK_RESPONSE: APIResponseGetNetwork,
-
         # Software Update Mapping
         RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_REQUEST: APIRequestCreateSwUpdateStrategy,
         RPC_MSG_TYPE.CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST: APIRequestCreateKubeRootcaUpdateStrategy,
@@ -253,6 +254,5 @@ class RPCMessageFactory(object):
             rpc_msg.deserialize_payload(msg)
             return rpc_msg
         else:
-            DLOG.info("Unknown rpc message type received, msg_type=%s."
-                      % msg_type)
+            DLOG.info("Unknown rpc message type received, msg_type=%s." % msg_type)
             return RPCMessage(msg_version, msg_type, msg_result)

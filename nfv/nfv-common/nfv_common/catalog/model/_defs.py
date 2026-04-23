@@ -12,21 +12,23 @@ class ConnectionType(object, metaclass=Singleton):
     """
     Connection Type Constants
     """
-    UNKNOWN = Constant('unknown')
-    VIRTUAL_PORT = Constant('virtual-port')
-    VIRTUAL_NIC_ADDRESS = Constant('virtual-nic-address')
-    PHYSICAL_PORT = Constant('physical-port')
-    PHYSICAL_NIC_ADDRESS = Constant('physical-nic-address')
+
+    UNKNOWN = Constant("unknown")
+    VIRTUAL_PORT = Constant("virtual-port")
+    VIRTUAL_NIC_ADDRESS = Constant("virtual-nic-address")
+    PHYSICAL_PORT = Constant("physical-port")
+    PHYSICAL_NIC_ADDRESS = Constant("physical-nic-address")
 
 
 class ConnectivityType(object, metaclass=Singleton):
     """
     Connectivity Type Constants
     """
-    UNKNOWN = Constant('unknown')
-    E_LINE = Constant('E-Line')
-    E_LAN = Constant('E-LAN')
-    E_TREE = Constant('E-Tree')
+
+    UNKNOWN = Constant("unknown")
+    E_LINE = Constant("E-Line")
+    E_LAN = Constant("E-LAN")
+    E_TREE = Constant("E-Tree")
 
 
 # Constant Instantiation

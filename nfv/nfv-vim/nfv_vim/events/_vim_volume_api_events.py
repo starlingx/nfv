@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,16 +8,24 @@ from nfv_vim import directors
 from nfv_vim import rpc
 from nfv_vim import tables
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_volume_api_events')
+DLOG = debug.debug_get_logger("nfv_vim.vim_volume_api_events")
 
 _volume_create_operations = dict()
 _volume_update_operations = dict()
 _volume_delete_operations = dict()
 
 
-def _create_volume_callback(success, volume_uuid, volume_name,
-                            volume_description, size_gb, bootable,
-                            encrypted, avail_status, action):
+def _create_volume_callback(
+    success,
+    volume_uuid,
+    volume_name,
+    volume_description,
+    size_gb,
+    bootable,
+    encrypted,
+    avail_status,
+    action,
+):
     """
     Handle Create-Volume callback
     """
@@ -53,13 +61,22 @@ def vim_volume_api_create_volume(connection, msg):
     DLOG.verbose("Create volume, name=%s." % msg.name)
     _volume_create_operations[msg.name] = connection
     volume_director = directors.get_volume_director()
-    volume_director.volume_create(msg.name, msg.description, msg.size_gb,
-                                  msg.image_uuid, _create_volume_callback)
+    volume_director.volume_create(
+        msg.name, msg.description, msg.size_gb, msg.image_uuid, _create_volume_callback
+    )
 
 
-def _update_volume_callback(success, volume_uuid, volume_name,
-                            volume_description, size_gb, bootable,
-                            encrypted, avail_status, action):
+def _update_volume_callback(
+    success,
+    volume_uuid,
+    volume_name,
+    volume_description,
+    size_gb,
+    bootable,
+    encrypted,
+    avail_status,
+    action,
+):
     """
     Handle Update-Volume callback
     """
@@ -95,8 +112,7 @@ def vim_volume_api_update_volume(connection, msg):
     DLOG.verbose("Update volume, uuid=%s." % msg.uuid)
     _volume_update_operations[msg.uuid] = connection
     volume_director = directors.get_volume_director()
-    volume_director.volume_update(msg.uuid, msg.description,
-                                  _update_volume_callback)
+    volume_director.volume_update(msg.uuid, msg.description, _update_volume_callback)
 
 
 def _delete_volume_callback(success, volume_uuid):

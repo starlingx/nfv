@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,7 +11,7 @@ import socket
 
 
 def syscall_retry_on_interrupt(func, *args):
-    """Attempt system call again if interrupted by EINTR """
+    """Attempt system call again if interrupted by EINTR"""
     for _ in range(0, 5):
         try:
             return func(*args)
@@ -22,7 +22,7 @@ def syscall_retry_on_interrupt(func, *args):
 
 def local_uptime_in_secs():
     try:
-        with open('/proc/uptime', 'r') as f:
+        with open("/proc/uptime", "r") as f:
             uptime_secs = int(float(f.readline().split()[0]))
     except IOError:
         uptime_secs = 0
@@ -40,6 +40,7 @@ class Object(object):
     """
     Class Object Type Definition
     """
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
@@ -51,13 +52,16 @@ class Result(object):
     """
     Generic Result Object Type Definition
     """
+
     def __init__(self, result_data, ancillary_data=None):
         self.result_data = result_data
         self.ancillary_data = ancillary_data
 
     def __str__(self):
-        return ("Result: result-data: %s  ancillary-data: %s"
-                % (self.result_data, self.ancillary_data))
+        return "Result: result-data: %s  ancillary-data: %s" % (
+            self.result_data,
+            self.ancillary_data,
+        )
 
 
 class Constants(object):
@@ -72,6 +76,7 @@ class Constant(object):
     """
     Constant Type Definition
     """
+
     def __init__(self, value):
         self.value = value
 
@@ -89,12 +94,12 @@ class Singleton(type):
     """
     Singleton Type Definition
     """
+
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = \
-                super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
 
@@ -102,11 +107,13 @@ def coroutine(func):
     """
     Co-Routine decorator that wraps a function and starts the co-routine
     """
+
     def start(*args, **kwargs):
         target = func(*args, **kwargs)
         target.send(None)
         functools.update_wrapper(start, func)
         return target
+
     return start
 
 
@@ -121,10 +128,12 @@ def get_system_ca_file():
     """Return path to system default CA file."""
     # Standard CA file locations for Debian/Ubuntu, RedHat/Fedora,
     # Suse, FreeBSD/OpenBSD
-    ca_path = ['/etc/ssl/certs/ca-certificates.crt',
-               '/etc/pki/tls/certs/ca-bundle.crt',
-               '/etc/ssl/ca-bundle.pem',
-               '/etc/ssl/cert.pem']
+    ca_path = [
+        "/etc/ssl/certs/ca-certificates.crt",
+        "/etc/pki/tls/certs/ca-bundle.crt",
+        "/etc/ssl/ca-bundle.pem",
+        "/etc/ssl/cert.pem",
+    ]
     for ca in ca_path:
         if os.path.exists(ca):
             return ca

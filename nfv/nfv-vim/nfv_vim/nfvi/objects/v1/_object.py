@@ -10,12 +10,13 @@ class ObjectData(collections.abc.MutableMapping):
     """
     Generic Object Data Class
     """
+
     def __init__(self, version, data=None):
         """
         Initialize Object Data
         """
-        super(ObjectData, self).__setattr__('_version', version)
-        super(ObjectData, self).__setattr__('_fields', dict())
+        super(ObjectData, self).__setattr__("_version", version)
+        super(ObjectData, self).__setattr__("_fields", dict())
 
         if data is not None:
             for key, value in list(data.items()):

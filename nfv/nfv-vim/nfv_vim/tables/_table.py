@@ -10,6 +10,7 @@ class Table(collections.abc.MutableMapping):
     """
     Generic Table Class
     """
+
     def __init__(self):
         """
         Initialize Table

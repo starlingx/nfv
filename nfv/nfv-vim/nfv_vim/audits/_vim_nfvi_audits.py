@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,7 +18,7 @@ from nfv_vim import nfvi
 from nfv_vim import objects
 from nfv_vim import tables
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_nfvi_audits')
+DLOG = debug.debug_get_logger("nfv_vim.vim_nfvi_audits")
 
 _main_audit_inprogress = False
 
@@ -87,19 +87,20 @@ def _audit_nfvi_system_info_callback(timer_id):
     """
     global _main_audit_inprogress
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-System callback, responses=%s." % response)
 
-    if response['completed']:
-        nfvi_system = response['result-data']
+    if response["completed"]:
+        nfvi_system = response["result-data"]
         system_table = tables.tables_get_system_table()
         deletable_systems = list(system_table)
 
         if nfvi_system is not None:
             system = system_table.get(nfvi_system.name, None)
             if system is None:
-                system_table[nfvi_system.name] \
-                    = objects.System(nfvi_system.name, nfvi_system.description)
+                system_table[nfvi_system.name] = objects.System(
+                    nfvi_system.name, nfvi_system.description
+                )
             else:
                 deletable_systems.remove(system.name)
 
@@ -107,8 +108,7 @@ def _audit_nfvi_system_info_callback(timer_id):
             del system_table[system_name]
 
     else:
-        DLOG.error("Audit-System callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-System callback, not completed, responses=%s." % response)
 
     _main_audit_inprogress = False
     timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -121,20 +121,22 @@ def _audit_nfvi_hosts_callback(timer_id):
     """
     global _main_audit_inprogress
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Hosts callback, responses=%s." % response)
 
-    if response['completed']:
+    if response["completed"]:
         host_table = tables.tables_get_host_table()
         deletable_host_groups = list(host_table)
 
-        for host_name in response['incomplete-hosts']:
+        for host_name in response["incomplete-hosts"]:
             if host_name in deletable_host_groups:
                 deletable_host_groups.remove(host_name)
-                DLOG.info("Not deleting host %s, incomplete information "
-                          "returned." % host_name)
+                DLOG.info(
+                    "Not deleting host %s, incomplete information "
+                    "returned." % host_name
+                )
 
-        for nfvi_host in response['result-data']:
+        for nfvi_host in response["result-data"]:
             host = host_table.get(nfvi_host.name, None)
             if host is None:
                 host = objects.Host(nfvi_host)
@@ -164,17 +166,19 @@ def _audit_nfvi_hosts_callback(timer_id):
         host_group_table = tables.tables_get_host_group_table()
         deletable_host_groups = list(host_group_table)
 
-        for host_name in response['incomplete-hosts']:
-            host_group = next((x for x in host_group_table
-                               if host_name in x.member_names), None)
+        for host_name in response["incomplete-hosts"]:
+            host_group = next(
+                (x for x in host_group_table if host_name in x.member_names), None
+            )
             if host_group is not None:
                 if host_group.name in deletable_host_groups:
                     deletable_host_groups.remove(host_group.name)
-                    DLOG.info("Not deleting host group %s, incomplete information "
-                              "returned for host %s." % (host_group.name,
-                                                         host_name))
+                    DLOG.info(
+                        "Not deleting host group %s, incomplete information "
+                        "returned for host %s." % (host_group.name, host_name)
+                    )
 
-        for nfvi_host_group in response['host-groups']:
+        for nfvi_host_group in response["host-groups"]:
             host_group = host_group_table.get(nfvi_host_group.name, None)
             if host_group is None:
                 host_group = objects.HostGroup(nfvi_host_group)
@@ -188,8 +192,7 @@ def _audit_nfvi_hosts_callback(timer_id):
             del host_group_table[host_group_name]
 
     else:
-        DLOG.error("Audit-Hosts callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-Hosts callback, not completed, responses=%s." % response)
 
     _main_audit_inprogress = False
     timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -202,16 +205,15 @@ def _audit_nfvi_host_aggregates_callback(timer_id):
     """
     global _main_audit_inprogress
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Host Aggregates callback, responses=%s." % response)
 
-    if response['completed']:
+    if response["completed"]:
         host_aggregate_table = tables.tables_get_host_aggregate_table()
         deletable_host_aggregates = list(host_aggregate_table)
 
-        for nfvi_host_aggregate in response['result-data']:
-            host_aggregate = host_aggregate_table.get(
-                nfvi_host_aggregate.name, None)
+        for nfvi_host_aggregate in response["result-data"]:
+            host_aggregate = host_aggregate_table.get(nfvi_host_aggregate.name, None)
             if host_aggregate is None:
                 host_aggregate = objects.HostAggregate(nfvi_host_aggregate)
                 host_aggregate_table[host_aggregate.name] = host_aggregate
@@ -225,8 +227,9 @@ def _audit_nfvi_host_aggregates_callback(timer_id):
                 del host_aggregate_table[host_aggregate_name]
 
     else:
-        DLOG.error("Audit-Host Aggregates callback, not completed, responses=%s."
-                   % response)
+        DLOG.error(
+            "Audit-Host Aggregates callback, not completed, responses=%s." % response
+        )
 
     _main_audit_inprogress = False
     timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -240,15 +243,15 @@ def _audit_nfvi_hypervisors_callback(timer_id):
     global _main_audit_inprogress
     global _nfvi_hypervisors_to_audit
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Hypervisors callback, response=%s." % response)
 
     trigger_recovery = False
-    if response['completed']:
+    if response["completed"]:
         hypervisor_table = tables.tables_get_hypervisor_table()
         deletable_hypervisors = list(hypervisor_table)
 
-        for nfvi_hypervisor in response['result-data']:
+        for nfvi_hypervisor in response["result-data"]:
             hypervisor = hypervisor_table.get(nfvi_hypervisor.uuid, None)
             if hypervisor is None:
                 hypervisor = objects.Hypervisor(nfvi_hypervisor)
@@ -258,15 +261,16 @@ def _audit_nfvi_hypervisors_callback(timer_id):
                 deletable_hypervisors.remove(nfvi_hypervisor.uuid)
 
             if nfvi_hypervisor.uuid not in _nfvi_hypervisors_to_audit:
-                _nfvi_hypervisors_to_audit[nfvi_hypervisor.uuid] \
-                    = nfvi_hypervisor.uuid
+                _nfvi_hypervisors_to_audit[nfvi_hypervisor.uuid] = nfvi_hypervisor.uuid
 
             prev_state = hypervisor.oper_state
             hypervisor.nfvi_hypervisor_update(nfvi_hypervisor)
 
-            if (hypervisor.oper_state != prev_state and
-                    nfvi.objects.v1.HYPERVISOR_OPER_STATE.ENABLED ==
-                    hypervisor.oper_state):
+            if (
+                hypervisor.oper_state != prev_state
+                and nfvi.objects.v1.HYPERVISOR_OPER_STATE.ENABLED
+                == hypervisor.oper_state
+            ):
                 trigger_recovery = True
 
         for hypervisor_id in deletable_hypervisors:
@@ -275,8 +279,9 @@ def _audit_nfvi_hypervisors_callback(timer_id):
                 del _nfvi_hypervisors_to_audit[hypervisor_id]
 
     else:
-        DLOG.error("Audit-Hypervisors callback, not completed, responses=%s."
-                   % response)
+        DLOG.error(
+            "Audit-Hypervisors callback, not completed, responses=%s." % response
+        )
 
     _main_audit_inprogress = False
     timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -295,19 +300,22 @@ def _audit_nfvi_tenants_callback(timer_id):
     """
     global _main_audit_inprogress
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Tenants callback, responses=%s." % response)
 
-    if response['completed']:
+    if response["completed"]:
         tenant_table = tables.tables_get_tenant_table()
         deletable_tenants = list(tenant_table)
 
-        for nfvi_tenant in response['result-data']:
+        for nfvi_tenant in response["result-data"]:
             tenant = tenant_table.get(nfvi_tenant.uuid, None)
             if tenant is None:
-                tenant = objects.Tenant(nfvi_tenant.uuid, nfvi_tenant.name,
-                                        nfvi_tenant.description,
-                                        nfvi_tenant.enabled)
+                tenant = objects.Tenant(
+                    nfvi_tenant.uuid,
+                    nfvi_tenant.name,
+                    nfvi_tenant.description,
+                    nfvi_tenant.enabled,
+                )
                 tenant_table[nfvi_tenant.uuid] = tenant
             else:
                 tenant.name = nfvi_tenant.name
@@ -319,8 +327,7 @@ def _audit_nfvi_tenants_callback(timer_id):
             del tenant_table[tenant_uuid]
 
     else:
-        DLOG.error("Audit-Tenants callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-Tenants callback, not completed, responses=%s." % response)
 
     _main_audit_inprogress = False
     timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -335,42 +342,45 @@ def _audit_nfvi_instance_types_callback(timer_id):
     global _deletable_instance_types, _nfvi_instance_types_paging
     global _nfvi_instance_types_to_audit, _nfvi_instance_types_outstanding
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Instance-Types callback, response=%s." % response)
 
-    if response['completed']:
-        if response['page-request-id'] == \
-                _nfvi_instance_types_paging.page_request_id:
+    if response["completed"]:
+        if response["page-request-id"] == _nfvi_instance_types_paging.page_request_id:
 
             instance_type_table = tables.tables_get_instance_type_table()
 
             if _deletable_instance_types is None:
                 _deletable_instance_types = list(instance_type_table)
 
-            for nfvi_instance_type in response['result-data']:
-                instance_type = instance_type_table.get(nfvi_instance_type.uuid,
-                                                        None)
+            for nfvi_instance_type in response["result-data"]:
+                instance_type = instance_type_table.get(nfvi_instance_type.uuid, None)
                 if instance_type is None:
-                    instance_type = objects.InstanceType(nfvi_instance_type.uuid,
-                                                         nfvi_instance_type.name)
+                    instance_type = objects.InstanceType(
+                        nfvi_instance_type.uuid, nfvi_instance_type.name
+                    )
                     instance_type_table[nfvi_instance_type.uuid] = instance_type
                 else:
                     if nfvi_instance_type.uuid in _deletable_instance_types:
                         _deletable_instance_types.remove(nfvi_instance_type.uuid)
 
                 if nfvi_instance_type.uuid not in _nfvi_instance_types_to_audit:
-                    _nfvi_instance_types_to_audit[nfvi_instance_type.uuid] \
-                        = nfvi_instance_type.name
+                    _nfvi_instance_types_to_audit[nfvi_instance_type.uuid] = (
+                        nfvi_instance_type.name
+                    )
 
                 if nfvi_instance_type.have_details():
                     instance_type.update_details(
-                        nfvi_instance_type.vcpus, nfvi_instance_type.mem_mb,
-                        nfvi_instance_type.disk_gb, nfvi_instance_type.ephemeral_gb,
+                        nfvi_instance_type.vcpus,
+                        nfvi_instance_type.mem_mb,
+                        nfvi_instance_type.disk_gb,
+                        nfvi_instance_type.ephemeral_gb,
                         nfvi_instance_type.swap_gb,
                         nfvi_instance_type.guest_services,
                         nfvi_instance_type.auto_recovery,
                         nfvi_instance_type.live_migration_timeout,
-                        nfvi_instance_type.live_migration_max_downtime)
+                        nfvi_instance_type.live_migration_max_downtime,
+                    )
 
             if _nfvi_instance_types_paging.done:
                 for instance_type_uuid in _deletable_instance_types:
@@ -383,15 +393,18 @@ def _audit_nfvi_instance_types_callback(timer_id):
                 _deletable_instance_types = list(instance_type_table)
                 _nfvi_instance_types_paging.first_page()
         else:
-            DLOG.error("Audit-Instance-Types callback, page-request-id mismatch, "
-                       "responses=%s, page-request-id=%s."
-                       % (response, _nfvi_instance_types_paging.page_request_id))
+            DLOG.error(
+                "Audit-Instance-Types callback, page-request-id mismatch, "
+                "responses=%s, page-request-id=%s."
+                % (response, _nfvi_instance_types_paging.page_request_id)
+            )
             instance_type_table = tables.tables_get_instance_type_table()
             _deletable_instance_types = list(instance_type_table)
             _nfvi_instance_types_paging.first_page()
     else:
-        DLOG.error("Audit-Instance-Types callback, not completed, "
-                   "responses=%s." % response)
+        DLOG.error(
+            "Audit-Instance-Types callback, not completed, responses=%s." % response
+        )
         instance_type_table = tables.tables_get_instance_type_table()
         _deletable_instance_types = list(instance_type_table)
         _nfvi_instance_types_paging.first_page()
@@ -410,18 +423,18 @@ def _audit_nfvi_instances_callback(timer_id):
     global _deletable_instances, _nfvi_instances_paging
     global _nfvi_instances_to_audit, _nfvi_instance_outstanding
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Instances callback, response=%s." % response)
 
     trigger_recovery = False
-    if response['completed']:
-        if response['page-request-id'] == _nfvi_instances_paging.page_request_id:
+    if response["completed"]:
+        if response["page-request-id"] == _nfvi_instances_paging.page_request_id:
             instance_table = tables.tables_get_instance_table()
 
             if _deletable_instances is None:
                 _deletable_instances = list(instance_table)
 
-            for instance_uuid, instance_name in response['result-data']:
+            for instance_uuid, instance_name in response["result-data"]:
                 instance = instance_table.get(instance_uuid, None)
                 if instance is not None:
                     if instance.uuid in _deletable_instances:
@@ -433,8 +446,9 @@ def _audit_nfvi_instances_callback(timer_id):
                 for instance_uuid in _deletable_instances:
                     instance = instance_table.get(instance_uuid, None)
                     if instance is not None:
-                        DLOG.info("Deleting instance %s, audit mismatch"
-                                  % instance_uuid)
+                        DLOG.info(
+                            "Deleting instance %s, audit mismatch" % instance_uuid
+                        )
 
                         instance.nfvi_instance_deleted()
                         if instance.is_deleted():
@@ -450,15 +464,16 @@ def _audit_nfvi_instances_callback(timer_id):
             else:
                 DLOG.verbose("Paging is not done for instances.")
         else:
-            DLOG.error("Audit-Instances callback, page-request-id mismatch, "
-                       "responses=%s, page-request-id=%s."
-                       % (response, _nfvi_instances_paging.page_request_id))
+            DLOG.error(
+                "Audit-Instances callback, page-request-id mismatch, "
+                "responses=%s, page-request-id=%s."
+                % (response, _nfvi_instances_paging.page_request_id)
+            )
             instance_table = tables.tables_get_instance_table()
             _deletable_instances = list(instance_table)
             _nfvi_instances_paging.first_page()
     else:
-        DLOG.error("Audit-Instances callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-Instances callback, not completed, responses=%s." % response)
         instance_table = tables.tables_get_instance_table()
         _deletable_instances = list(instance_table)
         _nfvi_instances_paging.first_page()
@@ -481,17 +496,16 @@ def _audit_nfvi_instance_groups_callback(timer_id):
     """
     global _main_audit_inprogress
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Instance-Groups callback, response=%s." % response)
 
-    if response['completed']:
+    if response["completed"]:
         instance_group_table = tables.tables_get_instance_group_table()
 
         _deletable_instance_groups = list(instance_group_table)
 
-        for nfvi_instance_group in response['result-data']:
-            instance_group = instance_group_table.get(nfvi_instance_group.uuid,
-                                                      None)
+        for nfvi_instance_group in response["result-data"]:
+            instance_group = instance_group_table.get(nfvi_instance_group.uuid, None)
             if instance_group is None:
                 instance_group = objects.InstanceGroup(nfvi_instance_group)
                 instance_group_table[nfvi_instance_group.uuid] = instance_group
@@ -507,8 +521,9 @@ def _audit_nfvi_instance_groups_callback(timer_id):
                 del instance_group_table[instance_group_uuid]
 
     else:
-        DLOG.error("Audit-Instance-Groups callback, not completed, "
-                   "responses=%s." % response)
+        DLOG.error(
+            "Audit-Instance-Groups callback, not completed, responses=%s." % response
+        )
 
     _main_audit_inprogress = False
     timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -522,17 +537,17 @@ def _audit_nfvi_images_callback(timer_id):
     global _main_audit_inprogress
     global _deletable_images, _nfvi_images_paging
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Images callback, response=%s." % response)
 
-    if response['completed']:
-        if response['page-request-id'] == _nfvi_images_paging.page_request_id:
+    if response["completed"]:
+        if response["page-request-id"] == _nfvi_images_paging.page_request_id:
             image_table = tables.tables_get_image_table()
 
             if _deletable_images is None:
                 _deletable_images = list(image_table)
 
-            for nfvi_image in response['result-data']:
+            for nfvi_image in response["result-data"]:
                 image = image_table.get(nfvi_image.uuid, None)
                 if image is None:
                     image = objects.Image(nfvi_image)
@@ -553,15 +568,16 @@ def _audit_nfvi_images_callback(timer_id):
                 _deletable_images = list(image_table)
                 _nfvi_images_paging.first_page()
         else:
-            DLOG.error("Audit-Images callback, page-request-id mismatch, "
-                       "responses=%s, page-request-id=%s."
-                       % (response, _nfvi_images_paging.page_request_id))
+            DLOG.error(
+                "Audit-Images callback, page-request-id mismatch, "
+                "responses=%s, page-request-id=%s."
+                % (response, _nfvi_images_paging.page_request_id)
+            )
             image_table = tables.tables_get_image_table()
             _deletable_images = list(image_table)
             _nfvi_images_paging.first_page()
     else:
-        DLOG.error("Audit-Images callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-Images callback, not completed, responses=%s." % response)
         image_table = tables.tables_get_image_table()
         _deletable_images = list(image_table)
         _nfvi_images_paging.first_page()
@@ -580,11 +596,11 @@ def _audit_nfvi_volumes_callback(timer_id):
     global _added_volumes, _deletable_volumes, _nfvi_volumes_paging
     global _nfvi_volumes_to_audit, _nfvi_volumes_outstanding
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Volumes callback, response=%s." % response)
 
-    if response['completed']:
-        if response['page-request-id'] == _nfvi_volumes_paging.page_request_id:
+    if response["completed"]:
+        if response["page-request-id"] == _nfvi_volumes_paging.page_request_id:
             volume_table = tables.tables_get_volume_table()
 
             if _added_volumes is None:
@@ -593,7 +609,7 @@ def _audit_nfvi_volumes_callback(timer_id):
             if _deletable_volumes is None:
                 _deletable_volumes = list(volume_table)
 
-            for volume_uuid, volume_name in response['result-data']:
+            for volume_uuid, volume_name in response["result-data"]:
                 volume = volume_table.get(volume_uuid, None)
                 if volume is not None:
                     if volume.uuid in _deletable_volumes:
@@ -625,9 +641,11 @@ def _audit_nfvi_volumes_callback(timer_id):
                 _deletable_volumes = list(volume_table)
                 _nfvi_volumes_paging.first_page()
         else:
-            DLOG.error("Audit-Volumes callback, page-request-id mismatch, "
-                       "responses=%s, page-request-id=%s."
-                       % (response, _nfvi_volumes_paging.page_request_id))
+            DLOG.error(
+                "Audit-Volumes callback, page-request-id mismatch, "
+                "responses=%s, page-request-id=%s."
+                % (response, _nfvi_volumes_paging.page_request_id)
+            )
             volume_table = tables.tables_get_volume_table()
             if _added_volumes is None:
                 _added_volumes = list()
@@ -636,8 +654,7 @@ def _audit_nfvi_volumes_callback(timer_id):
             _deletable_volumes = list(volume_table)
             _nfvi_volumes_paging.first_page()
     else:
-        DLOG.error("Audit-Volumes callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-Volumes callback, not completed, responses=%s." % response)
         volume_table = tables.tables_get_volume_table()
         if _added_volumes is None:
             _added_volumes = list()
@@ -658,17 +675,16 @@ def _audit_nfvi_volume_snapshots_callback(timer_id):
     """
     global _main_audit_inprogress
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Volume-Snapshots callback, response=%s." % response)
 
-    if response['completed']:
+    if response["completed"]:
         volume_snapshot_table = tables.tables_get_volume_snapshot_table()
 
         _deletable_volume_snapshots = list(volume_snapshot_table)
 
-        for nfvi_volume_snapshot in response['result-data']:
-            volume_snapshot = volume_snapshot_table.get(nfvi_volume_snapshot.uuid,
-                                                        None)
+        for nfvi_volume_snapshot in response["result-data"]:
+            volume_snapshot = volume_snapshot_table.get(nfvi_volume_snapshot.uuid, None)
             if volume_snapshot is None:
                 volume_snapshot = objects.VolumeSnapshot(nfvi_volume_snapshot)
                 volume_snapshot_table[nfvi_volume_snapshot.uuid] = volume_snapshot
@@ -682,8 +698,10 @@ def _audit_nfvi_volume_snapshots_callback(timer_id):
                 del volume_snapshot_table[volume_snapshot_uuid]
 
     else:
-        DLOG.error("Audit-Volume-Snapshots callback, not completed, "
-                   "responses=%s." % response)
+        DLOG.error(
+            "Audit-Volume-Snapshots callback, not completed, "
+            "responses=%s." % response
+        )
 
     _main_audit_inprogress = False
     timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -697,25 +715,28 @@ def _audit_nfvi_subnets_callback(timer_id):
     global _main_audit_inprogress
     global _deletable_subnets, _nfvi_subnets_paging
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Subnets callback, response=%s." % response)
-    if response['completed']:
-        if response['page-request-id'] == _nfvi_subnets_paging.page_request_id:
+    if response["completed"]:
+        if response["page-request-id"] == _nfvi_subnets_paging.page_request_id:
             subnet_table = tables.tables_get_subnet_table()
 
             if _deletable_subnets is None:
                 _deletable_subnets = list(subnet_table)
 
-            for nfvi_subnet in response['result-data']:
+            for nfvi_subnet in response["result-data"]:
                 subnet = subnet_table.get(nfvi_subnet.uuid, None)
                 if subnet is None:
-                    subnet = objects.Subnet(nfvi_subnet.uuid, nfvi_subnet.name,
-                                            nfvi_subnet.ip_version,
-                                            nfvi_subnet.subnet_ip,
-                                            nfvi_subnet.subnet_prefix,
-                                            nfvi_subnet.gateway_ip,
-                                            nfvi_subnet.network_uuid,
-                                            nfvi_subnet.is_dhcp_enabled)
+                    subnet = objects.Subnet(
+                        nfvi_subnet.uuid,
+                        nfvi_subnet.name,
+                        nfvi_subnet.ip_version,
+                        nfvi_subnet.subnet_ip,
+                        nfvi_subnet.subnet_prefix,
+                        nfvi_subnet.gateway_ip,
+                        nfvi_subnet.network_uuid,
+                        nfvi_subnet.is_dhcp_enabled,
+                    )
                     subnet_table[nfvi_subnet.uuid] = subnet
                 else:
                     subnet.is_dhcp_enabled = nfvi_subnet.is_dhcp_enabled
@@ -730,15 +751,16 @@ def _audit_nfvi_subnets_callback(timer_id):
                 _deletable_subnets = list(subnet_table)
                 _nfvi_subnets_paging.first_page()
         else:
-            DLOG.error("Audit-Subnets callback, page-request-id mismatch, "
-                       "responses=%s, page-request-id=%s."
-                       % (response, _nfvi_subnets_paging.page_request_id))
+            DLOG.error(
+                "Audit-Subnets callback, page-request-id mismatch, "
+                "responses=%s, page-request-id=%s."
+                % (response, _nfvi_subnets_paging.page_request_id)
+            )
             subnet_table = tables.tables_get_subnet_table()
             _deletable_subnets = list(subnet_table)
             _nfvi_subnets_paging.first_page()
     else:
-        DLOG.error("Audit-Subnets callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-Subnets callback, not completed, responses=%s." % response)
         subnet_table = tables.tables_get_subnet_table()
         _deletable_subnets = list(subnet_table)
         _nfvi_subnets_paging.first_page()
@@ -756,27 +778,29 @@ def _audit_nfvi_networks_callback(timer_id):
     global _main_audit_inprogress
     global _deletable_networks, _nfvi_networks_paging
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Networks callback, response=%s." % response)
 
-    if response['completed']:
-        if response['page-request-id'] == _nfvi_networks_paging.page_request_id:
+    if response["completed"]:
+        if response["page-request-id"] == _nfvi_networks_paging.page_request_id:
             network_table = tables.tables_get_network_table()
 
             if _deletable_networks is None:
                 _deletable_networks = list(network_table)
 
-            for nfvi_network in response['result-data']:
+            for nfvi_network in response["result-data"]:
                 network = network_table.get(nfvi_network.uuid, None)
                 if network is None:
-                    network = objects.Network(nfvi_network.uuid,
-                                              nfvi_network.name,
-                                              nfvi_network.admin_state,
-                                              nfvi_network.oper_state,
-                                              nfvi_network.avail_status,
-                                              nfvi_network.is_shared,
-                                              nfvi_network.mtu,
-                                              nfvi_network.provider_data)
+                    network = objects.Network(
+                        nfvi_network.uuid,
+                        nfvi_network.name,
+                        nfvi_network.admin_state,
+                        nfvi_network.oper_state,
+                        nfvi_network.avail_status,
+                        nfvi_network.is_shared,
+                        nfvi_network.mtu,
+                        nfvi_network.provider_data,
+                    )
                     network_table[nfvi_network.uuid] = network
                 else:
                     network.admin_state = nfvi_network.admin_state
@@ -796,15 +820,16 @@ def _audit_nfvi_networks_callback(timer_id):
                 _deletable_networks = list(network_table)
                 _nfvi_networks_paging.first_page()
         else:
-            DLOG.error("Audit-Networks callback, page-request-id mismatch, "
-                       "responses=%s, page-request-id=%s."
-                       % (response, _nfvi_networks_paging.page_request_id))
+            DLOG.error(
+                "Audit-Networks callback, page-request-id mismatch, "
+                "responses=%s, page-request-id=%s."
+                % (response, _nfvi_networks_paging.page_request_id)
+            )
             network_table = tables.tables_get_network_table()
             _deletable_networks = list(network_table)
             _nfvi_networks_paging.first_page()
     else:
-        DLOG.error("Audit-Networks callback, not completed, responses=%s."
-                   % response)
+        DLOG.error("Audit-Networks callback, not completed, responses=%s." % response)
         network_table = tables.tables_get_network_table()
         _deletable_networks = list(network_table)
         _nfvi_networks_paging.first_page()
@@ -814,7 +839,7 @@ def _audit_nfvi_networks_callback(timer_id):
     timers.timers_reschedule_timer(timer_id, 20)  # 20 seconds later
 
 
-@timers.interval_timer('audit_nfvi', initial_delay_secs=1, interval_secs=1)
+@timers.interval_timer("audit_nfvi", initial_delay_secs=1, interval_secs=1)
 def _audit_nfvi():
     """
     Audit NFVI
@@ -825,12 +850,10 @@ def _audit_nfvi():
     _last_audit_time_ms = timers.get_monotonic_timestamp_in_ms()
 
     while True:
-        timer_id = (yield)
+        timer_id = yield
 
         if database_sw_update_exists():
-            DLOG.verbose(
-                "Active strategy detected, continuing with the audit."
-            )
+            DLOG.verbose("Active strategy detected, continuing with the audit.")
         else:
             current_time_ms = timers.get_monotonic_timestamp_in_ms()
             elapsed_ms = current_time_ms - _last_audit_time_ms
@@ -849,38 +872,36 @@ def _audit_nfvi():
                     f"audit after {AUDIT_DELAY_SECONDS} seconds."
                 )
 
-        DLOG.verbose("Audit system information called, timer_id=%s."
-                     % timer_id)
+        DLOG.verbose("Audit system information called, timer_id=%s." % timer_id)
         nfvi.nfvi_get_system_info(_audit_nfvi_system_info_callback(timer_id))
 
         _main_audit_inprogress = True
         while _main_audit_inprogress:
-            timer_id = (yield)
+            timer_id = yield
 
         DLOG.verbose("Audit hosts called, timer_id=%s." % timer_id)
         nfvi.nfvi_get_hosts(_audit_nfvi_hosts_callback(timer_id))
 
         _main_audit_inprogress = True
         while _main_audit_inprogress:
-            timer_id = (yield)
+            timer_id = yield
 
         if not nfvi.nfvi_compute_plugin_disabled():
-            DLOG.verbose("Audit host aggregates called, timer_id=%s."
-                         % timer_id)
+            DLOG.verbose("Audit host aggregates called, timer_id=%s." % timer_id)
             nfvi.nfvi_get_host_aggregates(
-                _audit_nfvi_host_aggregates_callback(timer_id))
+                _audit_nfvi_host_aggregates_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
             DLOG.verbose("Audit hypervisors called, timer_id=%s." % timer_id)
-            nfvi.nfvi_get_hypervisors(
-                _audit_nfvi_hypervisors_callback(timer_id))
+            nfvi.nfvi_get_hypervisors(_audit_nfvi_hypervisors_callback(timer_id))
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
         # This is to avoid making frequent /project requests against the platform's
         # keystone. This audit is relevant when stx-openstack is installed because it
@@ -895,85 +916,92 @@ def _audit_nfvi():
         # plugin should be disabled and use here in vim like [2].
         # [1] https://opendev.org/starlingx/config/src/commit/7f3ae1c40df99274c61e4691803662ad04198620/sysinv/sysinv/sysinv/sysinv/puppet/nfv.py#L295
         # [2] https://opendev.org/starlingx/nfv/src/commit/d3ed569df7989e405df17ee67f62574575f196ca/nfv/nfv-vim/nfv_vim/audits/_vim_nfvi_audits.py#L867
-        if any(host.openstack_control for host in tables.tables_get_host_table().values()):
+        if any(
+            host.openstack_control for host in tables.tables_get_host_table().values()
+        ):
             DLOG.verbose("Audit tenants called, timer_id=%s." % timer_id)
             nfvi.nfvi_get_tenants(_audit_nfvi_tenants_callback(timer_id))
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
         if not nfvi.nfvi_compute_plugin_disabled():
-            DLOG.verbose("Audit instance types called, timer_id=%s."
-                         % timer_id)
+            DLOG.verbose("Audit instance types called, timer_id=%s." % timer_id)
             nfvi.nfvi_get_instance_types(
                 _nfvi_instance_types_paging,
-                _audit_nfvi_instance_types_callback(timer_id))
+                _audit_nfvi_instance_types_callback(timer_id),
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
             DLOG.info("Audit instances called, timer_id=%s." % timer_id)
-            nfvi.nfvi_get_instances(_nfvi_instances_paging,
-                                    _audit_nfvi_instances_callback(timer_id))
+            nfvi.nfvi_get_instances(
+                _nfvi_instances_paging, _audit_nfvi_instances_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
-            DLOG.verbose("Audit instance groups called, timer_id=%s."
-                         % timer_id)
+            DLOG.verbose("Audit instance groups called, timer_id=%s." % timer_id)
             nfvi.nfvi_get_instance_groups(
-                _audit_nfvi_instance_groups_callback(timer_id))
+                _audit_nfvi_instance_groups_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
         if not nfvi.nfvi_image_plugin_disabled():
             DLOG.verbose("Audit images called, timer_id=%s." % timer_id)
-            nfvi.nfvi_get_images(_nfvi_images_paging,
-                                 _audit_nfvi_images_callback(timer_id))
+            nfvi.nfvi_get_images(
+                _nfvi_images_paging, _audit_nfvi_images_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
         if not nfvi.nfvi_block_storage_plugin_disabled():
             DLOG.verbose("Audit volumes called, timer_id=%s." % timer_id)
-            nfvi.nfvi_get_volumes(_nfvi_volumes_paging,
-                                  _audit_nfvi_volumes_callback(timer_id))
+            nfvi.nfvi_get_volumes(
+                _nfvi_volumes_paging, _audit_nfvi_volumes_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
-            DLOG.verbose("Audit volume snapshots called, timer_id=%s."
-                         % timer_id)
+            DLOG.verbose("Audit volume snapshots called, timer_id=%s." % timer_id)
             nfvi.nfvi_get_volume_snapshots(
-                _audit_nfvi_volume_snapshots_callback(timer_id))
+                _audit_nfvi_volume_snapshots_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
         if not nfvi.nfvi_network_plugin_disabled():
             DLOG.verbose("Audit subnets called, timer_id=%s." % timer_id)
-            nfvi.nfvi_get_subnets(_nfvi_subnets_paging,
-                                  _audit_nfvi_subnets_callback(timer_id))
+            nfvi.nfvi_get_subnets(
+                _nfvi_subnets_paging, _audit_nfvi_subnets_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
             DLOG.verbose("Audit networks called, timer_id=%s." % timer_id)
-            nfvi.nfvi_get_networks(_nfvi_networks_paging,
-                                   _audit_nfvi_networks_callback(timer_id))
+            nfvi.nfvi_get_networks(
+                _nfvi_networks_paging, _audit_nfvi_networks_callback(timer_id)
+            )
 
             _main_audit_inprogress = True
             while _main_audit_inprogress:
-                timer_id = (yield)
+                timer_id = yield
 
         # Reset the last audit time
         _last_audit_time_ms = timers.get_monotonic_timestamp_in_ms()
@@ -986,21 +1014,23 @@ def _audit_nfvi_instance_callback(instance_uuid):
     """
     global _nfvi_instance_outstanding
 
-    response = (yield)
+    response = yield
 
     if instance_uuid in _nfvi_instance_outstanding:
         del _nfvi_instance_outstanding[instance_uuid]
 
-    if response['completed']:
-        nfvi_instance = response['result-data']
+    if response["completed"]:
+        nfvi_instance = response["result-data"]
 
         DLOG.info("Audit-Instance callback for %s" % nfvi_instance.uuid)
 
         instance_table = tables.tables_get_instance_table()
         instance = instance_table.get(nfvi_instance.uuid, None)
         if instance is None:
-            if nfvi.objects.v1.INSTANCE_AVAIL_STATUS.DELETED \
-                    not in nfvi_instance.avail_status:
+            if (
+                nfvi.objects.v1.INSTANCE_AVAIL_STATUS.DELETED
+                not in nfvi_instance.avail_status
+            ):
                 instance = objects.Instance(nfvi_instance)
                 instance_table[instance.uuid] = instance
                 instance.nfvi_instance_update(nfvi_instance)
@@ -1010,15 +1040,12 @@ def _audit_nfvi_instance_callback(instance_uuid):
                 instance.nfvi_instance_audit_in_progress = False
                 instance.nfvi_instance_update(nfvi_instance)
             else:
-                DLOG.info("Ignoring stale audit reply for %s" %
-                          nfvi_instance.uuid)
+                DLOG.info("Ignoring stale audit reply for %s" % nfvi_instance.uuid)
     else:
-        DLOG.error("Audit-Instance callback, not completed, response=%s."
-                   % response)
+        DLOG.error("Audit-Instance callback, not completed, response=%s." % response)
 
 
-@timers.interval_timer('audit_nfvi_instance', initial_delay_secs=10,
-                       interval_secs=10)
+@timers.interval_timer("audit_nfvi_instance", initial_delay_secs=10, interval_secs=10)
 def _audit_nfvi_instance():
     """
     Audit NFVI for Instance Details
@@ -1026,7 +1053,7 @@ def _audit_nfvi_instance():
     global _nfvi_instances_to_audit, _nfvi_instance_outstanding
 
     while True:
-        timer_id = (yield)
+        timer_id = yield
         DLOG.verbose("Audit instance called, timer_id=%s." % timer_id)
 
         instance_table = tables.tables_get_instance_table()
@@ -1036,8 +1063,10 @@ def _audit_nfvi_instance():
                 del _nfvi_instance_outstanding[instance_uuid]
 
         if 0 < len(_nfvi_instance_outstanding):
-            DLOG.info("Audit instance queries still outstanding, outstanding=%s"
-                      % _nfvi_instance_outstanding)
+            DLOG.info(
+                "Audit instance queries still outstanding, outstanding=%s"
+                % _nfvi_instance_outstanding
+            )
             _audit_dump_debug_info()
         else:
             _audit_dump_debug_info(do_dump=False)
@@ -1057,10 +1086,12 @@ def _audit_nfvi_instance():
 
             if do_audit:
                 DLOG.info("Auditing instance %s." % instance_uuid)
-                nfvi.nfvi_get_instance(instance_uuid,
-                                       _audit_nfvi_instance_callback(instance_uuid))
-                _nfvi_instance_outstanding[instance_uuid] \
-                    = _nfvi_instances_to_audit[instance_uuid]
+                nfvi.nfvi_get_instance(
+                    instance_uuid, _audit_nfvi_instance_callback(instance_uuid)
+                )
+                _nfvi_instance_outstanding[instance_uuid] = _nfvi_instances_to_audit[
+                    instance_uuid
+                ]
 
             del _nfvi_instances_to_audit[instance_uuid]
 
@@ -1070,11 +1101,11 @@ def _audit_nfvi_hypervisor_callback():
     """
     Audit Hypervisor
     """
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Hypervisor callback, response=%s." % response)
 
-    if response['completed']:
-        nfvi_hypervisor = response['result-data']
+    if response["completed"]:
+        nfvi_hypervisor = response["result-data"]
         hypervisor_table = tables.tables_get_hypervisor_table()
         hypervisor = hypervisor_table.get(nfvi_hypervisor.uuid, None)
         if hypervisor is None:
@@ -1083,12 +1114,10 @@ def _audit_nfvi_hypervisor_callback():
         hypervisor.nfvi_hypervisor_update(nfvi_hypervisor)
 
     else:
-        DLOG.error("Audit-Hypervisor callback, not completed, response=%s."
-                   % response)
+        DLOG.error("Audit-Hypervisor callback, not completed, response=%s." % response)
 
 
-@timers.interval_timer('audit_hypervisor', initial_delay_secs=4,
-                       interval_secs=4)
+@timers.interval_timer("audit_hypervisor", initial_delay_secs=4, interval_secs=4)
 def _audit_nfvi_hypervisor_details():
     """
     Audit NFVI for Hypervisor Details
@@ -1096,12 +1125,11 @@ def _audit_nfvi_hypervisor_details():
     global _nfvi_hypervisors_to_audit
 
     while True:
-        timer_id = (yield)
+        timer_id = yield
         DLOG.verbose("Audit hypervisor details called, timer_id=%s." % timer_id)
 
         for hypervisor_uuid in list(_nfvi_hypervisors_to_audit.keys()):
-            nfvi.nfvi_get_hypervisor(hypervisor_uuid,
-                                     _audit_nfvi_hypervisor_callback())
+            nfvi.nfvi_get_hypervisor(hypervisor_uuid, _audit_nfvi_hypervisor_callback())
             del _nfvi_hypervisors_to_audit[hypervisor_uuid]
             break
 
@@ -1113,35 +1141,38 @@ def _audit_nfvi_instance_type_callback(instance_type_uuid):
     """
     global _nfvi_instance_types_outstanding
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Instance-Type callback, response=%s." % response)
 
     if instance_type_uuid in _nfvi_instance_types_outstanding:
         del _nfvi_instance_types_outstanding[instance_type_uuid]
 
-    if response['completed']:
-        instance_type = response['result-data']
-        instance_type_obj = objects.InstanceType(instance_type.uuid,
-                                                 instance_type.name)
+    if response["completed"]:
+        instance_type = response["result-data"]
+        instance_type_obj = objects.InstanceType(instance_type.uuid, instance_type.name)
         if instance_type.have_details():
             instance_type_obj.update_details(
-                instance_type.vcpus, instance_type.mem_mb,
-                instance_type.disk_gb, instance_type.ephemeral_gb,
-                instance_type.swap_gb, instance_type.guest_services,
+                instance_type.vcpus,
+                instance_type.mem_mb,
+                instance_type.disk_gb,
+                instance_type.ephemeral_gb,
+                instance_type.swap_gb,
+                instance_type.guest_services,
                 instance_type.auto_recovery,
                 instance_type.live_migration_timeout,
-                instance_type.live_migration_max_downtime)
+                instance_type.live_migration_max_downtime,
+            )
 
         instance_type_table = tables.tables_get_instance_type_table()
         instance_type_table[instance_type.uuid] = instance_type_obj
 
     else:
-        DLOG.error("Audit-Instance-Type callback, not completed, "
-                   "response=%s." % response)
+        DLOG.error(
+            "Audit-Instance-Type callback, not completed, response=%s." % response
+        )
 
 
-@timers.interval_timer('audit_instance_type', initial_delay_secs=2,
-                       interval_secs=2)
+@timers.interval_timer("audit_instance_type", initial_delay_secs=2, interval_secs=2)
 def _audit_nfvi_instance_type_details():
     """
     Audit NFVI for Instance Type Details
@@ -1149,9 +1180,8 @@ def _audit_nfvi_instance_type_details():
     global _nfvi_instance_types_to_audit, _nfvi_instance_types_outstanding
 
     while True:
-        timer_id = (yield)
-        DLOG.verbose("Audit instance type details called, timer_id=%s."
-                     % timer_id)
+        timer_id = yield
+        DLOG.verbose("Audit instance type details called, timer_id=%s." % timer_id)
 
         for instance_type_uuid in list(_nfvi_instance_types_outstanding.keys()):
             instance_type_table = tables.tables_get_instance_type_table()
@@ -1163,12 +1193,14 @@ def _audit_nfvi_instance_type_details():
             if 4 <= len(_nfvi_instance_types_outstanding):
                 break
 
-            nfvi.nfvi_get_instance_type(instance_type_uuid,
-                                        _audit_nfvi_instance_type_callback(
-                                            instance_type_uuid))
+            nfvi.nfvi_get_instance_type(
+                instance_type_uuid,
+                _audit_nfvi_instance_type_callback(instance_type_uuid),
+            )
 
-            _nfvi_instance_types_outstanding[instance_type_uuid] \
-                = _nfvi_instance_types_to_audit[instance_type_uuid]
+            _nfvi_instance_types_outstanding[instance_type_uuid] = (
+                _nfvi_instance_types_to_audit[instance_type_uuid]
+            )
 
             del _nfvi_instance_types_to_audit[instance_type_uuid]
 
@@ -1180,14 +1212,14 @@ def _audit_nfvi_volume_callback(volume_uuid):
     """
     global _nfvi_volumes_outstanding
 
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Volume callback, response=%s." % response)
 
     if volume_uuid in _nfvi_volumes_outstanding:
         del _nfvi_volumes_outstanding[volume_uuid]
 
-    if response['completed']:
-        nfvi_volume = response['result-data']
+    if response["completed"]:
+        nfvi_volume = response["result-data"]
         volume_table = tables.tables_get_volume_table()
         volume = volume_table.get(nfvi_volume.uuid, None)
         if volume is None:
@@ -1196,12 +1228,10 @@ def _audit_nfvi_volume_callback(volume_uuid):
         volume.nfvi_volume_update(nfvi_volume)
 
     else:
-        DLOG.error("Audit-Volume callback, not completed, response=%s."
-                   % response)
+        DLOG.error("Audit-Volume callback, not completed, response=%s." % response)
 
 
-@timers.interval_timer('audit_nfvi_volume', initial_delay_secs=10,
-                       interval_secs=10)
+@timers.interval_timer("audit_nfvi_volume", initial_delay_secs=10, interval_secs=10)
 def _audit_nfvi_volume():
     """
     Audit NFVI Volume
@@ -1209,7 +1239,7 @@ def _audit_nfvi_volume():
     global _nfvi_volumes_to_audit, _nfvi_volumes_outstanding
 
     while True:
-        timer_id = (yield)
+        timer_id = yield
         DLOG.verbose("Audit volume called, timer_id=%s." % timer_id)
 
         for volume_uuid in list(_nfvi_volumes_outstanding.keys()):
@@ -1223,11 +1253,9 @@ def _audit_nfvi_volume():
                 break
 
             DLOG.verbose("Auditing volume %s." % volume_uuid)
-            nfvi.nfvi_get_volume(volume_uuid,
-                                 _audit_nfvi_volume_callback(volume_uuid))
+            nfvi.nfvi_get_volume(volume_uuid, _audit_nfvi_volume_callback(volume_uuid))
 
-            _nfvi_volumes_outstanding[volume_uuid] \
-                = _nfvi_volumes_to_audit[volume_uuid]
+            _nfvi_volumes_outstanding[volume_uuid] = _nfvi_volumes_to_audit[volume_uuid]
 
             del _nfvi_volumes_to_audit[volume_uuid]
 
@@ -1237,34 +1265,35 @@ def _audit_nfvi_guest_services_callback():
     """
     Audit Guest Services
     """
-    response = (yield)
+    response = yield
     DLOG.verbose("Audit-Guest-Services callback, response=%s." % response)
 
-    if response['completed']:
-        result_data = response.get('result-data', None)
+    if response["completed"]:
+        result_data = response.get("result-data", None)
         if result_data is not None:
-            instance_uuid = result_data['instance_uuid']
+            instance_uuid = result_data["instance_uuid"]
             instance_table = tables.tables_get_instance_table()
             instance = instance_table.get(instance_uuid, None)
             if instance is not None:
-                host_name = result_data.get('host_name', None)
-                nfvi_guest_services = result_data.get('services', list())
-                instance.nfvi_guest_services_update(nfvi_guest_services,
-                                                    host_name)
+                host_name = result_data.get("host_name", None)
+                nfvi_guest_services = result_data.get("services", list())
+                instance.nfvi_guest_services_update(nfvi_guest_services, host_name)
 
     else:
-        DLOG.error("Audit-Guest-Services callback, not completed, "
-                   "response=%s." % response)
+        DLOG.error(
+            "Audit-Guest-Services callback, not completed, response=%s." % response
+        )
 
 
-@timers.interval_timer('audit_nfvi_guest_services', initial_delay_secs=30,
-                       interval_secs=30)
+@timers.interval_timer(
+    "audit_nfvi_guest_services", initial_delay_secs=30, interval_secs=30
+)
 def _audit_nfvi_guest_services():
     """
     Audit NFVI Guest Services
     """
     while True:
-        timer_id = (yield)
+        timer_id = yield
         DLOG.verbose("Audit guest services called, timer_id=%s." % timer_id)
         instance_table = tables.tables_get_instance_table()
         for instance_uuid in list(instance_table.keys()):
@@ -1273,7 +1302,8 @@ def _audit_nfvi_guest_services():
                 if not instance.is_deleted():
                     if instance.guest_services.are_provisioned():
                         nfvi.nfvi_guest_services_query(
-                            instance_uuid, _audit_nfvi_guest_services_callback())
+                            instance_uuid, _audit_nfvi_guest_services_callback()
+                        )
 
 
 def vim_nfvi_audits_initialize():

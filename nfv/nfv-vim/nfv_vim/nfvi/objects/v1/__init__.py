@@ -1,14 +1,18 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 
 from nfv_vim.nfvi.objects.v1._alarm import Alarm  # noqa: F401
 from nfv_vim.nfvi.objects.v1._alarm import ALARM_SEVERITY  # noqa: F401
-from nfv_vim.nfvi.objects.v1._guest_service import GUEST_SERVICE_ADMIN_STATE  # noqa: F401
+from nfv_vim.nfvi.objects.v1._guest_service import (  # noqa: F401
+    GUEST_SERVICE_ADMIN_STATE
+)
+from nfv_vim.nfvi.objects.v1._guest_service import (  # noqa: F401
+    GUEST_SERVICE_OPER_STATE
+)
 from nfv_vim.nfvi.objects.v1._guest_service import GUEST_SERVICE_NAME  # noqa: F401
-from nfv_vim.nfvi.objects.v1._guest_service import GUEST_SERVICE_OPER_STATE  # noqa: F401
 from nfv_vim.nfvi.objects.v1._guest_service import GuestService  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host import Host  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host import HOST_ACTION  # noqa: F401
@@ -23,7 +27,9 @@ from nfv_vim.nfvi.objects.v1._host_fw_update import HostFwUpdate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_group import HOST_GROUP_POLICY  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_group import HostGroup  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_sw_patch import HostSwPatch  # noqa: F401
-from nfv_vim.nfvi.objects.v1._host_system_config_update import HostSystemConfigUpdate  # noqa: F401
+from nfv_vim.nfvi.objects.v1._host_system_config_update import (  # noqa: F401
+    HostSystemConfigUpdate
+)
 from nfv_vim.nfvi.objects.v1._hypervisor import Hypervisor  # noqa: F401
 from nfv_vim.nfvi.objects.v1._hypervisor import HYPERVISOR_ADMIN_STATE  # noqa: F401
 from nfv_vim.nfvi.objects.v1._hypervisor import HYPERVISOR_OPER_STATE  # noqa: F401
@@ -50,8 +56,12 @@ from nfv_vim.nfvi.objects.v1._instance_group import InstanceGroup  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import INSTANCE_TYPE_EXTENSION  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceType  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceTypeAttributes  # noqa: F401
-from nfv_vim.nfvi.objects.v1._kube_rootca_update import KUBE_ROOTCA_UPDATE_STATE  # noqa: F401
-from nfv_vim.nfvi.objects.v1._kube_rootca_update import KubeRootcaHostUpdate  # noqa: F401
+from nfv_vim.nfvi.objects.v1._kube_rootca_update import (  # noqa: F401
+    KUBE_ROOTCA_UPDATE_STATE
+)
+from nfv_vim.nfvi.objects.v1._kube_rootca_update import (  # noqa: F401
+    KubeRootcaHostUpdate
+)
 from nfv_vim.nfvi.objects.v1._kube_rootca_update import KubeRootcaUpdate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._kube_upgrade import KUBE_HOST_UPGRADE_STATE  # noqa: F401
 from nfv_vim.nfvi.objects.v1._kube_upgrade import KUBE_UPGRADE_STATE  # noqa: F401

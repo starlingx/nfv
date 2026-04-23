@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,7 +9,7 @@ import socket
 
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_common.selobj')
+DLOG = debug.debug_get_logger("nfv_common.selobj")
 
 _read_callbacks = dict()
 _write_callbacks = dict()
@@ -58,8 +58,7 @@ def selobj_del_write_obj(selobj):
         _write_callbacks.pop(selobj)
 
 
-def selobj_add_error_callback(selobj, callback, *callback_args,
-                              **callback_kwargs):
+def selobj_add_error_callback(selobj, callback, *callback_args, **callback_kwargs):
     """
     Add selection object error callback which is a co-routine that is
     called when the selection object is in error
@@ -94,8 +93,9 @@ def selobj_dispatch(timeout_in_ms):
     write_objs = list(_write_callbacks)
 
     try:
-        readable, writeable, in_error = select.select(read_objs, write_objs, [],
-                                                      timeout_in_ms / 1000.0)
+        readable, writeable, in_error = select.select(
+            read_objs, write_objs, [], timeout_in_ms / 1000.0
+        )
 
         for selobj in readable:
             callback = _read_callbacks.get(selobj, None)
@@ -106,8 +106,9 @@ def selobj_dispatch(timeout_in_ms):
                 except (StopIteration, RuntimeError):
                     _read_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
-                histogram.add_histogram_data("selobj read: " + callback.__name__,
-                                             elapsed_ms // 100, "decisecond")
+                histogram.add_histogram_data(
+                    "selobj read: " + callback.__name__, elapsed_ms // 100, "decisecond"
+                )
 
         for selobj in writeable:
             callback = _write_callbacks.get(selobj, None)
@@ -118,8 +119,11 @@ def selobj_dispatch(timeout_in_ms):
                 except (StopIteration, RuntimeError):
                     _write_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
-                histogram.add_histogram_data("selobj write: " + callback.__name__,
-                                             elapsed_ms // 100, "decisecond")
+                histogram.add_histogram_data(
+                    "selobj write: " + callback.__name__,
+                    elapsed_ms // 100,
+                    "decisecond",
+                )
 
         for selobj in in_error:
             callback = _error_callbacks.get(selobj, None)
@@ -130,8 +134,11 @@ def selobj_dispatch(timeout_in_ms):
                 except (StopIteration, RuntimeError):
                     _error_callbacks.pop(selobj)
                 elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
-                histogram.add_histogram_data("selobj error: " + callback.__name__,
-                                             elapsed_ms // 100, "decisecond")
+                histogram.add_histogram_data(
+                    "selobj error: " + callback.__name__,
+                    elapsed_ms // 100,
+                    "decisecond",
+                )
 
             if selobj in list(_read_callbacks):
                 _read_callbacks.pop(selobj)

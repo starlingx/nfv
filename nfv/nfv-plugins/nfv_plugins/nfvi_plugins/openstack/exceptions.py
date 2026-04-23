@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,6 +10,7 @@ class OpenStackException(exceptions.PickleableException):
     """
     OpenStack Exception
     """
+
     def __init__(self, method, url, headers, body, message, reason):
         """
         Create an OpenStack exception
@@ -26,9 +27,11 @@ class OpenStackException(exceptions.PickleableException):
         """
         Return a string representing the exception
         """
-        return ("[OpenStack Exception: method=%s, url=%s, headers=%s, "
-                "body=%s, reason=%s]" % (self._method, self._url, self._headers,
-                                         self._body, self._reason))
+        return (
+            "[OpenStack Exception: method=%s, url=%s, headers=%s, "
+            "body=%s, reason=%s]"
+            % (self._method, self._url, self._headers, self._body, self._reason)
+        )
 
     def __repr__(self):
         """
@@ -40,8 +43,17 @@ class OpenStackException(exceptions.PickleableException):
         """
         Return a tuple so that we can properly pickle the exception
         """
-        return (OpenStackException, (self._method, self._url, self._headers,
-                                     self._body, self.message, self._reason))
+        return (
+            OpenStackException,
+            (
+                self._method,
+                self._url,
+                self._headers,
+                self._body,
+                self.message,
+                self._reason,
+            ),
+        )
 
     @property
     def message(self):
@@ -62,8 +74,20 @@ class OpenStackRestAPIException(exceptions.PickleableException):
     """
     OpenStack Rest-API Exception
     """
-    def __init__(self, method, url, headers, body, status_code, message,
-                 reason, response_headers, response_body, response_reason):
+
+    def __init__(
+        self,
+        method,
+        url,
+        headers,
+        body,
+        status_code,
+        message,
+        reason,
+        response_headers,
+        response_body,
+        response_reason,
+    ):
         """
         Create an OpenStack Rest-API exception
         """
@@ -83,12 +107,21 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         """
         Return a string representing the exception
         """
-        return ("[OpenStack Rest-API Exception: method=%s, url=%s, "
-                "headers=%s, body=%s, status_code=%s, reason=%s, "
-                "response_headers=%s, response_body=%s]"
-                % (self._method, self._url, self._headers, self._body,
-                   self._status_code, self._reason, self._response_headers,
-                   self._response_body))
+        return (
+            "[OpenStack Rest-API Exception: method=%s, url=%s, "
+            "headers=%s, body=%s, status_code=%s, reason=%s, "
+            "response_headers=%s, response_body=%s]"
+            % (
+                self._method,
+                self._url,
+                self._headers,
+                self._body,
+                self._status_code,
+                self._reason,
+                self._response_headers,
+                self._response_body,
+            )
+        )
 
     def __repr__(self):
         """
@@ -100,16 +133,21 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         """
         Return a tuple so that we can properly pickle the exception
         """
-        return (OpenStackRestAPIException, (self._method,
-                                            self._url,
-                                            self._headers,
-                                            self._body,
-                                            self._status_code,
-                                            self.message,
-                                            self._reason,
-                                            self._response_headers,
-                                            self._response_body,
-                                            self._response_reason))
+        return (
+            OpenStackRestAPIException,
+            (
+                self._method,
+                self._url,
+                self._headers,
+                self._body,
+                self._status_code,
+                self.message,
+                self._reason,
+                self._response_headers,
+                self._response_body,
+                self._response_reason,
+            ),
+        )
 
     @property
     def http_status_code(self):
@@ -158,6 +196,7 @@ class NotFound(exceptions.PickleableException):
     """
     Not Found Exception
     """
+
     def __init__(self, message):
         """
         Create an OpenStack exception

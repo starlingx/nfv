@@ -15,11 +15,12 @@ class Config(configparser.ConfigParser):
     """
     Override ConfigParser class to add dictionary functionality.
     """
+
     def as_dict(self):
         d = dict(self._sections)
         for key in d:
             d[key] = dict(self._defaults, **d[key])
-            d[key].pop('__name__', None)
+            d[key].pop("__name__", None)
         return d
 
 

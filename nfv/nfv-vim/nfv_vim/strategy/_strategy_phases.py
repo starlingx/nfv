@@ -1,12 +1,12 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
 from nfv_common import strategy
 
-DLOG = debug.debug_get_logger('nfv_vim.strategy.phase')
+DLOG = debug.debug_get_logger("nfv_vim.strategy.phase")
 
 
 def strategy_phase_rebuild_from_dict(data):
@@ -19,7 +19,7 @@ def strategy_phase_rebuild_from_dict(data):
         return None
 
     stages = list()
-    for stage_data in data['stages']:
+    for stage_data in data["stages"]:
         stage = strategy_stage_rebuild_from_dict(stage_data)
         stages.append(stage)
 

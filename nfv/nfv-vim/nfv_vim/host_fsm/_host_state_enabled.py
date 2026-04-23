@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import AuditEnabledHostTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class EnabledState(state_machine.State):
     """
     Host - Enabled State
     """
+
     def __init__(self, name):
         super(EnabledState, self).__init__(name)
 
@@ -48,24 +49,31 @@ class EnabledState(state_machine.State):
         if HOST_EVENT.DELETE == event:
             return HOST_STATE.DELETING
 
-        elif HOST_EVENT.LOCK == event or HOST_EVENT.DISABLE == event \
-                or HOST_EVENT.UNLOCK == event:
+        elif (
+            HOST_EVENT.LOCK == event
+            or HOST_EVENT.DISABLE == event
+            or HOST_EVENT.UNLOCK == event
+        ):
             return HOST_STATE.DISABLING
 
         elif HOST_EVENT.TASK_COMPLETED == event:
             # Do not disable this host if only the compute service is disabled.
             # We will raise an alarm, but there is no way to safely move work
             # off the host if the compute service is down.
-            if objects.HOST_SERVICE_STATE.ENABLED != \
-                    host.host_service_state_aggregate(
-                        ignore_services=[objects.HOST_SERVICES.COMPUTE]):
+            if objects.HOST_SERVICE_STATE.ENABLED != host.host_service_state_aggregate(
+                ignore_services=[objects.HOST_SERVICES.COMPUTE]
+            ):
                 if not host.host_services_locked:
-                    DLOG.info("Host services are not enabled on %s. "
-                              "Disabling host." % host.name)
+                    DLOG.info(
+                        "Host services are not enabled on %s. "
+                        "Disabling host." % host.name
+                    )
                     return HOST_STATE.DISABLING
                 else:
-                    DLOG.info("Host services are not enabled on %s. "
-                              "Host services are locked." % host.name)
+                    DLOG.info(
+                        "Host services are not enabled on %s. "
+                        "Host services are locked." % host.name
+                    )
 
         elif HOST_EVENT.TASK_FAILED == event:
             DLOG.info("Audit failed for %s." % host.name)

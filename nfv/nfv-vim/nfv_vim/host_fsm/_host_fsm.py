@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,37 +18,33 @@ from nfv_vim.host_fsm._host_state_enabled import EnabledState
 from nfv_vim.host_fsm._host_state_enabling import EnablingState
 from nfv_vim.host_fsm._host_state_initial import InitialState
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
-HOST_STATES = dict([
-    (HOST_STATE.INITIAL,
-     InitialState(HOST_STATE.INITIAL)),
-    (HOST_STATE.CONFIGURE,
-     ConfigureState(HOST_STATE.CONFIGURE)),
-    (HOST_STATE.ENABLING,
-     EnablingState(HOST_STATE.ENABLING)),
-    (HOST_STATE.ENABLED,
-     EnabledState(HOST_STATE.ENABLED)),
-    (HOST_STATE.DISABLED,
-     DisabledState(HOST_STATE.DISABLED)),
-    (HOST_STATE.DISABLING,
-     DisablingState(HOST_STATE.DISABLING)),
-    (HOST_STATE.DISABLING_FAILED,
-     DisablingFailedState(HOST_STATE.DISABLING_FAILED)),
-    (HOST_STATE.DELETING,
-     DeletingState(HOST_STATE.DELETING)),
-    (HOST_STATE.DELETING_FAILED,
-     DeletingFailedState(HOST_STATE.DELETING_FAILED)),
-    (HOST_STATE.DELETED,
-     DeletedState(HOST_STATE.DELETED))
-])
+HOST_STATES = dict(
+    [
+        (HOST_STATE.INITIAL, InitialState(HOST_STATE.INITIAL)),
+        (HOST_STATE.CONFIGURE, ConfigureState(HOST_STATE.CONFIGURE)),
+        (HOST_STATE.ENABLING, EnablingState(HOST_STATE.ENABLING)),
+        (HOST_STATE.ENABLED, EnabledState(HOST_STATE.ENABLED)),
+        (HOST_STATE.DISABLED, DisabledState(HOST_STATE.DISABLED)),
+        (HOST_STATE.DISABLING, DisablingState(HOST_STATE.DISABLING)),
+        (
+            HOST_STATE.DISABLING_FAILED,
+            DisablingFailedState(HOST_STATE.DISABLING_FAILED),
+        ),
+        (HOST_STATE.DELETING, DeletingState(HOST_STATE.DELETING)),
+        (HOST_STATE.DELETING_FAILED, DeletingFailedState(HOST_STATE.DELETING_FAILED)),
+        (HOST_STATE.DELETED, DeletedState(HOST_STATE.DELETED)),
+    ]
+)
 
 
 class HostStateMachine(state_machine.StateMachine):
     """
     Host State Machine
     """
+
     def __init__(self, host, initial_state):
-        super(HostStateMachine, self).__init__(host, None, None,
-                                               HOST_STATES[initial_state],
-                                               HOST_STATES)
+        super(HostStateMachine, self).__init__(
+            host, None, None, HOST_STATES[initial_state], HOST_STATES
+        )

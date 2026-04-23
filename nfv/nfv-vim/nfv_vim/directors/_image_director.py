@@ -15,7 +15,7 @@ from nfv_vim import nfvi
 from nfv_vim import objects
 from nfv_vim import tables
 
-DLOG = debug.debug_get_logger('nfv_vim.image_director')
+DLOG = debug.debug_get_logger("nfv_vim.image_director")
 
 _image_director = None
 
@@ -24,20 +24,22 @@ class OperationTypes(Constants, metaclass=Singleton):
     """
     Operation - Type Constants
     """
-    IMAGE_CREATE = Constant('image-create')
-    IMAGE_UPDATE = Constant('image-update')
-    IMAGE_DELETE = Constant('image-delete')
+
+    IMAGE_CREATE = Constant("image-create")
+    IMAGE_UPDATE = Constant("image-update")
+    IMAGE_DELETE = Constant("image-delete")
 
 
 class OperationStates(Constants, metaclass=Singleton):
     """
     Operation - State Constants
     """
-    READY = Constant('ready')
-    INPROGRESS = Constant('inprogress')
-    COMPLETED = Constant('completed')
-    FAILED = Constant('failed')
-    TIMED_OUT = Constant('timed-out')
+
+    READY = Constant("ready")
+    INPROGRESS = Constant("inprogress")
+    COMPLETED = Constant("completed")
+    FAILED = Constant("failed")
+    TIMED_OUT = Constant("timed-out")
 
 
 # Constant Instantiation
@@ -49,15 +51,16 @@ class ImageDirector(object, metaclass=Singleton):
     """
     Image Director
     """
+
     @coroutine
     def _image_create_callback(self, image_name, callback):
         """
         Image Create Callback
         """
-        response = (yield)
+        response = yield
         DLOG.verbose("Image-Create callback response=%s." % response)
-        if response['completed']:
-            nfvi_image = response['result-data']
+        if response["completed"]:
+            nfvi_image = response["result-data"]
             image_table = tables.tables_get_image_table()
             image = image_table.get(nfvi_image.uuid, None)
             if image is None:
@@ -65,39 +68,82 @@ class ImageDirector(object, metaclass=Singleton):
                 image_table[nfvi_image.uuid] = image
             image.nfvi_image_update(nfvi_image)
 
-            callback(response['completed'], nfvi_image.uuid, image_name,
-                     nfvi_image.description, nfvi_image.container_format,
-                     nfvi_image.disk_format, nfvi_image.min_disk_size_gb,
-                     nfvi_image.min_memory_size_mb, nfvi_image.visibility,
-                     nfvi_image.protected, nfvi_image.avail_status,
-                     nfvi_image.action, nfvi_image.properties)
+            callback(
+                response["completed"],
+                nfvi_image.uuid,
+                image_name,
+                nfvi_image.description,
+                nfvi_image.container_format,
+                nfvi_image.disk_format,
+                nfvi_image.min_disk_size_gb,
+                nfvi_image.min_memory_size_mb,
+                nfvi_image.visibility,
+                nfvi_image.protected,
+                nfvi_image.avail_status,
+                nfvi_image.action,
+                nfvi_image.properties,
+            )
         else:
-            callback(response['completed'], None, image_name, None, None, None,
-                     None, None, None, None, None, None, None)
+            callback(
+                response["completed"],
+                None,
+                image_name,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
 
-    def image_create(self, image_name, image_description, container_format,
-                     disk_format, min_disk_size_gb, min_memory_size_mb,
-                     visibility, protected, properties, image_data_ref,
-                     callback):
+    def image_create(
+        self,
+        image_name,
+        image_description,
+        container_format,
+        disk_format,
+        min_disk_size_gb,
+        min_memory_size_mb,
+        visibility,
+        protected,
+        properties,
+        image_data_ref,
+        callback,
+    ):
         """
         Image Create
         """
         image_attributes = nfvi.objects.v1.ImageAttributes(
-            container_format, disk_format, min_disk_size_gb,
-            min_memory_size_mb, visibility, protected, properties)
+            container_format,
+            disk_format,
+            min_disk_size_gb,
+            min_memory_size_mb,
+            visibility,
+            protected,
+            properties,
+        )
         image_create_callback = self._image_create_callback(image_name, callback)
-        nfvi.nfvi_create_image(image_name, image_description, image_attributes,
-                               image_data_ref, image_create_callback)
+        nfvi.nfvi_create_image(
+            image_name,
+            image_description,
+            image_attributes,
+            image_data_ref,
+            image_create_callback,
+        )
 
     @coroutine
     def _image_update_callback(self, image_uuid, callback):
         """
         Image Update Callback
         """
-        response = (yield)
+        response = yield
         DLOG.verbose("Image-Update callback response=%s." % response)
-        if response['completed']:
-            nfvi_image = response['result-data']
+        if response["completed"]:
+            nfvi_image = response["result-data"]
             image_table = tables.tables_get_image_table()
             image = image_table.get(nfvi_image.uuid, None)
             if image is not None:
@@ -105,51 +151,90 @@ class ImageDirector(object, metaclass=Singleton):
                 image_table[nfvi_image.uuid] = image
             image.nfvi_image_update(nfvi_image)
 
-            callback(response['completed'], image_uuid, nfvi_image.name,
-                     nfvi_image.description, nfvi_image.container_format,
-                     nfvi_image.disk_format, nfvi_image.min_disk_size_gb,
-                     nfvi_image.min_memory_size_mb, nfvi_image.visibility,
-                     nfvi_image.protected, nfvi_image.avail_status,
-                     nfvi_image.action, nfvi_image.properties)
+            callback(
+                response["completed"],
+                image_uuid,
+                nfvi_image.name,
+                nfvi_image.description,
+                nfvi_image.container_format,
+                nfvi_image.disk_format,
+                nfvi_image.min_disk_size_gb,
+                nfvi_image.min_memory_size_mb,
+                nfvi_image.visibility,
+                nfvi_image.protected,
+                nfvi_image.avail_status,
+                nfvi_image.action,
+                nfvi_image.properties,
+            )
         else:
-            callback(response['completed'], image_uuid, None, None, None, None,
-                     None, None, None, None, None, None, None)
+            callback(
+                response["completed"],
+                image_uuid,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
 
-    def image_update(self, image_uuid, image_description, min_disk_size_gb,
-                     min_memory_size_mb, visibility, protected, properties,
-                     callback):
+    def image_update(
+        self,
+        image_uuid,
+        image_description,
+        min_disk_size_gb,
+        min_memory_size_mb,
+        visibility,
+        protected,
+        properties,
+        callback,
+    ):
         """
         Image Update
         """
         image_attributes = nfvi.objects.v1.ImageAttributes(
-            None, None, min_disk_size_gb, min_memory_size_mb, visibility,
-            protected, properties)
-        nfvi.nfvi_update_image(image_uuid, image_description, image_attributes,
-                               self._image_update_callback(image_uuid,
-                                                           callback))
+            None,
+            None,
+            min_disk_size_gb,
+            min_memory_size_mb,
+            visibility,
+            protected,
+            properties,
+        )
+        nfvi.nfvi_update_image(
+            image_uuid,
+            image_description,
+            image_attributes,
+            self._image_update_callback(image_uuid, callback),
+        )
 
     @coroutine
     def _image_delete_callback(self, image_uuid, callback):
         """
         Image Delete Callback
         """
-        response = (yield)
+        response = yield
         DLOG.verbose("Image-Delete callback response=%s." % response)
-        if response['completed']:
+        if response["completed"]:
             image_table = tables.tables_get_image_table()
             image = image_table.get(image_uuid, None)
             if image is not None:
                 if image.is_deleted():
                     del image_table[image_uuid]
-        callback(response['completed'], image_uuid)
+        callback(response["completed"], image_uuid)
 
     def image_delete(self, image_uuid, callback):
         """
         Image Delete
         """
-        nfvi.nfvi_delete_image(image_uuid,
-                               self._image_delete_callback(image_uuid,
-                                                           callback))
+        nfvi.nfvi_delete_image(
+            image_uuid, self._image_delete_callback(image_uuid, callback)
+        )
 
 
 def get_image_director():

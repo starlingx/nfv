@@ -22,6 +22,7 @@ class DebugLogFormatter(logging.Formatter):
     """
     Debug Log Formatter
     """
+
     def formatTime(self, record, date_format=None):
         dt = datetime.datetime.fromtimestamp(record.created)
         if date_format is None:
@@ -35,6 +36,7 @@ class DebugLogHandler(logging.Handler):
     """
     Debug Log Handler
     """
+
     def __init__(self):
         super(DebugLogHandler, self).__init__()
         self.process_name = None
@@ -49,8 +51,10 @@ class DebugLogHandler(logging.Handler):
 
         # To keep syslog-ng happy, we need to add the who field twice.  Newer
         # syslog-ng removes the header formatting
-        fmt = (f"%(asctime)s %(who)36s[%(process)d]: %(who)36s[%(process){pid_size}d] "
-                "%(levelname)8s %(message)s")
+        fmt = (
+            f"%(asctime)s %(who)36s[%(process)d]: %(who)36s[%(process){pid_size}d] "
+            "%(levelname)8s %(message)s"
+        )
         formatter = DebugLogFormatter(fmt)
         self.setFormatter(formatter)
 
@@ -85,10 +89,9 @@ class DebugLogHandler(logging.Handler):
 
         if self.process_name is not None:
             if self.thread_name is not None:
-                log_record.who = ("%s_%s_Thread" % (self.process_name,
-                                                    self.thread_name))
+                log_record.who = "%s_%s_Thread" % (self.process_name, self.thread_name)
             else:
-                log_record.who = ("%s_Thread" % self.process_name)
+                log_record.who = "%s_Thread" % self.process_name
         else:
             log_record.who = "UNKNOWN"
 
@@ -120,17 +123,21 @@ class DebugLogger(object):
     """
     Debug Logger
     """
-    log_level_mapping = {DEBUG_LEVEL.NONE: logging.NOTSET,
-                         DEBUG_LEVEL.VERBOSE: logging.DEBUG,
-                         DEBUG_LEVEL.DEBUG: logging.DEBUG,
-                         DEBUG_LEVEL.INFO: logging.INFO,
-                         DEBUG_LEVEL.NOTICE: logging.INFO,
-                         DEBUG_LEVEL.WARN: logging.WARNING,
-                         DEBUG_LEVEL.ERROR: logging.ERROR,
-                         DEBUG_LEVEL.CRITICAL: logging.CRITICAL}
 
-    def __init__(self, name, debug_level=DEBUG_LEVEL.NONE, process_name=None,
-                 thread_name=None):
+    log_level_mapping = {
+        DEBUG_LEVEL.NONE: logging.NOTSET,
+        DEBUG_LEVEL.VERBOSE: logging.DEBUG,
+        DEBUG_LEVEL.DEBUG: logging.DEBUG,
+        DEBUG_LEVEL.INFO: logging.INFO,
+        DEBUG_LEVEL.NOTICE: logging.INFO,
+        DEBUG_LEVEL.WARN: logging.WARNING,
+        DEBUG_LEVEL.ERROR: logging.ERROR,
+        DEBUG_LEVEL.CRITICAL: logging.CRITICAL,
+    }
+
+    def __init__(
+        self, name, debug_level=DEBUG_LEVEL.NONE, process_name=None, thread_name=None
+    ):
         """
         Create debug logger
         """
@@ -250,46 +257,52 @@ def debug_trace(trace_level):
     """
     Decorator function used to trace entering and exiting functions
     """
+
     def trace_wrap(func):
         def trace_wrapper(*args, **kwargs):
             if trace_level >= Debug().trace_level:
-                print(" " * Debug().trace_depth, file=Debug().output,
-                           end='', sep='')
-                print("entering " + func.__name__ + ":",
-                           file=Debug().output, end='', sep='')
+                print(" " * Debug().trace_depth, file=Debug().output, end="", sep="")
+                print(
+                    "entering " + func.__name__ + ":",
+                    file=Debug().output,
+                    end="",
+                    sep="",
+                )
 
-                print(" args=", file=Debug().output, end='', sep='')
+                print(" args=", file=Debug().output, end="", sep="")
                 for arg in args:
-                    print("{0} ".format(arg), file=Debug().output,
-                               end='', sep='')
+                    print("{0} ".format(arg), file=Debug().output, end="", sep="")
 
-                print(" kwargs=", file=Debug().output, end='', sep='')
+                print(" kwargs=", file=Debug().output, end="", sep="")
                 for name, value in list(kwargs.items()):
-                    print("{0}={1} ".format(name, value),
-                               file=Debug().output, end='', sep='')
+                    print(
+                        "{0}={1} ".format(name, value),
+                        file=Debug().output,
+                        end="",
+                        sep="",
+                    )
 
                 try:
                     Debug().trace_depth += 1
                     result = func(*args, **kwargs)
                 except Exception:
-                    print(" " * Debug().trace_depth,
-                               file=Debug().output, end='', sep='')
-                    print("exception", file=Debug().output,
-                               end='\n', sep='')
+                    print(
+                        " " * Debug().trace_depth, file=Debug().output, end="", sep=""
+                    )
+                    print("exception", file=Debug().output, end="\n", sep="")
                     raise
                 finally:
                     Debug().trace_depth -= 1
 
-                print(" " * Debug().trace_depth, file=Debug().output,
-                           end='\n', sep='')
-                print("exiting " + func.__name__, file=Debug().output,
-                           end='\n', sep='')
+                print(" " * Debug().trace_depth, file=Debug().output, end="\n", sep="")
+                print("exiting " + func.__name__, file=Debug().output, end="\n", sep="")
                 return result
             else:
                 return func(*args, **kwargs)
 
         functools.update_wrapper(trace_wrapper, func)
         return trace_wrapper
+
     return trace_wrap
 
 
@@ -300,13 +313,12 @@ def debug_dump_loggers(directory):
     if os.path.exists(directory):
         program_name = os.path.basename(sys.argv[0])
 
-        with open(directory + program_name + '.dbg.conf', 'a') as f:
+        with open(directory + program_name + ".dbg.conf", "a") as f:
             for name in _debug_loggers:
-                f.write(name + '\n')
+                f.write(name + "\n")
 
 
-def debug_get_logger(name, debug_level=None, process_name=None,
-                     thread_name=None):
+def debug_get_logger(name, debug_level=None, process_name=None, thread_name=None):
     """
     Create a logger if it does not already exist
     """

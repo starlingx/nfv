@@ -10,6 +10,7 @@ class NFVIImageAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Image API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):
@@ -50,8 +51,15 @@ class NFVIImageAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def create_image(self, future, image_name, image_description,
-                     image_attributes, image_data_url, callback):
+    def create_image(
+        self,
+        future,
+        image_name,
+        image_description,
+        image_attributes,
+        image_data_url,
+        callback,
+    ):
         """
         Create an image using the plugin
         """
@@ -65,8 +73,9 @@ class NFVIImageAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def update_image(self, future, image_uuid, image_description,
-                     image_attributes, callback):
+    def update_image(
+        self, future, image_uuid, image_description, image_attributes, callback
+    ):
         """
         Update an image using the plugin
         """

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,13 +9,14 @@ from nfv_common import timers
 
 from nfv_common.helpers import Result
 
-DLOG = debug.debug_get_logger('nfv_common.tasks.task_work')
+DLOG = debug.debug_get_logger("nfv_common.tasks.task_work")
 
 
 class TaskWork(object):
     """
     Task Work
     """
+
     _id = 0
 
     def __init__(self, timeout, target, *args, **kwargs):
@@ -33,8 +34,10 @@ class TaskWork(object):
         self._ancillary_result_data = None
         self._create_timestamp_ms = timers.get_monotonic_timestamp_in_ms()
 
-        DLOG.debug("TaskWork created, id=%s, name=%s, timeout_in_secs=%i."
-                   % (self._id, self._name, self._timeout_in_secs))
+        DLOG.debug(
+            "TaskWork created, id=%s, name=%s, timeout_in_secs=%i."
+            % (self._id, self._name, self._timeout_in_secs)
+        )
         TaskWork._id += 1
 
     @property

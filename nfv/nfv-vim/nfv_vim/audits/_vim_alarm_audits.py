@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,11 +9,10 @@ from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import tables
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_alarm_audits')
+DLOG = debug.debug_get_logger("nfv_vim.vim_alarm_audits")
 
 
-@timers.interval_timer('audit_alarms', initial_delay_secs=60,
-                       interval_secs=10)
+@timers.interval_timer("audit_alarms", initial_delay_secs=60, interval_secs=10)
 def _audit_alarms():
     """
     Audit Alarms. This is being done to allow hold off times to be supported
@@ -22,7 +21,7 @@ def _audit_alarms():
     time expiring.
     """
     while True:
-        timer_id = (yield)
+        timer_id = yield
         DLOG.verbose("Audit alarms called, timer_id=%s." % timer_id)
         instance_table = tables.tables_get_instance_table()
         for instance in list(instance_table.values()):

@@ -15,26 +15,28 @@ class VolumeAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Volume Availability Status Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    AVAILABLE = Constant('available')
-    IN_USE = Constant('in-use')
-    FAILED = Constant('failed')
-    DELETED = Constant('deleted')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    AVAILABLE = Constant("available")
+    IN_USE = Constant("in-use")
+    FAILED = Constant("failed")
+    DELETED = Constant("deleted")
 
 
 class VolumeAction(Constants, metaclass=Singleton):
     """
     Volume Action Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    BUILDING = Constant('building')
-    ATTACHING = Constant('attaching')
-    BACKING_UP = Constant('backing-up')
-    RESTORING_BACKUP = Constant('restoring-backup')
-    DOWNLOADING = Constant('downloading')
-    DELETING = Constant('deleting')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    BUILDING = Constant("building")
+    ATTACHING = Constant("attaching")
+    BACKING_UP = Constant("backing-up")
+    RESTORING_BACKUP = Constant("restoring-backup")
+    DOWNLOADING = Constant("downloading")
+    DELETING = Constant("deleting")
 
 
 # Volume Constant Instantiation
@@ -46,10 +48,30 @@ class Volume(ObjectData):
     """
     NFVI Volume Object
     """
-    def __init__(self, uuid, name, description, avail_status, action,
-                 size_gb, bootable, encrypted, image_uuid):
-        super(Volume, self).__init__('1.0.0')
-        self.update(dict(uuid=uuid, name=name, description=description,
-                         avail_status=avail_status, action=action,
-                         size_gb=size_gb, bootable=bootable,
-                         encrypted=encrypted, image_uuid=image_uuid))
+
+    def __init__(
+        self,
+        uuid,
+        name,
+        description,
+        avail_status,
+        action,
+        size_gb,
+        bootable,
+        encrypted,
+        image_uuid,
+    ):
+        super(Volume, self).__init__("1.0.0")
+        self.update(
+            dict(
+                uuid=uuid,
+                name=name,
+                description=description,
+                avail_status=avail_status,
+                action=action,
+                size_gb=size_gb,
+                bootable=bootable,
+                encrypted=encrypted,
+                image_uuid=image_uuid,
+            )
+        )

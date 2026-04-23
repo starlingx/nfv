@@ -15,12 +15,13 @@ class InstanceGroupPolicy(Constants, metaclass=Singleton):
     """
     Instance Group Policy Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    AFFINITY = Constant('affinity')
-    ANTI_AFFINITY = Constant('anti-affinity')
-    AFFINITY_BEST_EFFORT = Constant('affinity-best-effort')
-    ANTI_AFFINITY_BEST_EFFORT = Constant('anti-affinity-best-effort')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    AFFINITY = Constant("affinity")
+    ANTI_AFFINITY = Constant("anti-affinity")
+    AFFINITY_BEST_EFFORT = Constant("affinity-best-effort")
+    ANTI_AFFINITY_BEST_EFFORT = Constant("anti-affinity-best-effort")
 
 
 # Instance Group Constant Instantiation
@@ -31,7 +32,9 @@ class InstanceGroup(ObjectData):
     """
     NFVI Instance Group Object
     """
+
     def __init__(self, uuid, name, member_uuids, policies):
-        super(InstanceGroup, self).__init__('1.0.0')
-        self.update(dict(uuid=uuid, name=name, member_uuids=member_uuids,
-                         policies=policies))
+        super(InstanceGroup, self).__init__("1.0.0")
+        self.update(
+            dict(uuid=uuid, name=name, member_uuids=member_uuids, policies=policies)
+        )

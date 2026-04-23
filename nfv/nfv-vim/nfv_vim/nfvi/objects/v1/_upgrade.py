@@ -23,8 +23,9 @@ class Upgrade(ObjectData):
     """
     NFVI Upgrade Object
     """
+
     def __init__(self, release, release_info, deploy_info, hosts_info):
-        super(Upgrade, self).__init__('1.0.0')
+        super(Upgrade, self).__init__("1.0.0")
         self.release = release
         self.release_info = release_info
         self.deploy_info = deploy_info
@@ -172,15 +173,22 @@ class Upgrade(ObjectData):
 
     @property
     def is_activate_rollback_pending(self):
-        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_PENDING.value
+        return (
+            self.deploy_state
+            == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_PENDING.value
+        )
 
     @property
     def is_activate_rollback_done(self):
-        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_DONE.value
+        return (
+            self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_DONE.value
+        )
 
     @property
     def is_activate_rollback_failed(self):
-        return self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_FAILED.value
+        return (
+            self.deploy_state == usm_states.DEPLOY_STATES.ACTIVATE_ROLLBACK_FAILED.value
+        )
 
     @property
     def is_rollback_hosts(self):
@@ -200,10 +208,7 @@ class Upgrade(ObjectData):
 
     @property
     def host_states(self):
-        return {
-            v["hostname"]: v["host_state"]
-            for v in self.hosts_info
-        }
+        return {v["hostname"]: v["host_state"] for v in self.hosts_info}
 
     def is_host_deployed(self, hostname):
         if not self.hosts_info:
@@ -227,4 +232,7 @@ class Upgrade(ObjectData):
 
         for v in self.hosts_info:
             if v["hostname"] == hostname:
-                return v["host_state"] == usm_states.DEPLOY_HOST_STATES.ROLLBACK_DEPLOYED.value
+                return (
+                    v["host_state"]
+                    == usm_states.DEPLOY_HOST_STATES.ROLLBACK_DEPLOYED.value
+                )

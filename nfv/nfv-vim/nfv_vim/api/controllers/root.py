@@ -17,9 +17,10 @@ class Root(wsme_types.Base):
     """
     Root
     """
+
     name = wsme_types.text
     description = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -28,7 +29,7 @@ class Root(wsme_types.Base):
         root = Root()
         root.name = "nfv-vim"
         root.description = "NFV - Virtual Infrastructure Manager"
-        root.links = [Link.make_link('api', url, 'api')]
+        root.links = [Link.make_link("api", url, "api")]
         return root
 
 
@@ -36,9 +37,10 @@ class RootController(rest.RestController):
     """
     Root Controller
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'api' == key:
+        if "api" == key:
             return APIController(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)

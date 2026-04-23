@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,6 +14,7 @@ class InstanceGroupTable(Table):
     """
     Instance Group Table
     """
+
     def __init__(self):
         super(InstanceGroupTable, self).__init__()
 
@@ -41,8 +42,10 @@ class InstanceGroupTable(Table):
             if instance_policy not in instance_group.policies:
                 continue
 
-            if instance_uuid in instance_group.member_uuids and \
-                    peer_instance_uuid in instance_group.member_uuids:
+            if (
+                instance_uuid in instance_group.member_uuids
+                and peer_instance_uuid in instance_group.member_uuids
+            ):
                 return True
         return False
 

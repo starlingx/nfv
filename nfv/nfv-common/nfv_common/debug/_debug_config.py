@@ -42,14 +42,17 @@ class DebugConfig(object, metaclass=Singleton):
     """
     Debug Configuration
     """
-    debug_level_mapping = {'debug.level.none': DEBUG_LEVEL.NONE,
-                           'debug.level.verbose': DEBUG_LEVEL.VERBOSE,
-                           'debug.level.debug': DEBUG_LEVEL.DEBUG,
-                           'debug.level.info': DEBUG_LEVEL.INFO,
-                           'debug.level.notice': DEBUG_LEVEL.NOTICE,
-                           'debug.level.warn': DEBUG_LEVEL.WARN,
-                           'debug.level.error': DEBUG_LEVEL.ERROR,
-                           'debug.level.critical': DEBUG_LEVEL.CRITICAL}
+
+    debug_level_mapping = {
+        "debug.level.none": DEBUG_LEVEL.NONE,
+        "debug.level.verbose": DEBUG_LEVEL.VERBOSE,
+        "debug.level.debug": DEBUG_LEVEL.DEBUG,
+        "debug.level.info": DEBUG_LEVEL.INFO,
+        "debug.level.notice": DEBUG_LEVEL.NOTICE,
+        "debug.level.warn": DEBUG_LEVEL.WARN,
+        "debug.level.error": DEBUG_LEVEL.ERROR,
+        "debug.level.critical": DEBUG_LEVEL.CRITICAL,
+    }
 
     def __init__(self, filename):
         """
@@ -82,13 +85,14 @@ class DebugConfig(object, metaclass=Singleton):
 
         if self._config is not None:
             try:
-                level_str = self._config.get('debug-overall', 'debug_level')
-                debug_level = self.debug_level_mapping.get(level_str,
-                                                           DEBUG_LEVEL.NONE)
+                level_str = self._config.get("debug-overall", "debug_level")
+                debug_level = self.debug_level_mapping.get(level_str, DEBUG_LEVEL.NONE)
 
             except configparser.NoOptionError:
-                print("Debug configuration has no debug_level option in the "
-                      "debug-overall section.")
+                print(
+                    "Debug configuration has no debug_level option in the "
+                    "debug-overall section."
+                )
 
             except configparser.NoSectionError:
                 print("Debug configuration has no debug-overall section.")
@@ -104,13 +108,14 @@ class DebugConfig(object, metaclass=Singleton):
 
         if self._config is not None:
             try:
-                level_str = self._config.get('debug-overall', 'trace_level')
-                trace_level = self.debug_level_mapping.get(level_str,
-                                                           DEBUG_LEVEL.NONE)
+                level_str = self._config.get("debug-overall", "trace_level")
+                trace_level = self.debug_level_mapping.get(level_str, DEBUG_LEVEL.NONE)
 
             except configparser.NoOptionError:
-                print("Debug configuration has no trace_level option in the "
-                      "debug-overall section.")
+                print(
+                    "Debug configuration has no trace_level option in the "
+                    "debug-overall section."
+                )
 
             except configparser.NoSectionError:
                 print("Debug configuration has no debug-overall section.")
@@ -126,9 +131,13 @@ class DebugConfig(object, metaclass=Singleton):
 
         if self._config is not None:
             try:
-                for name, level_str in list(self._config.items('debug-loggers')):
-                    debug_list.append((name, self.debug_level_mapping.get(
-                        level_str, DEBUG_LEVEL.NONE)))
+                for name, level_str in list(self._config.items("debug-loggers")):
+                    debug_list.append(
+                        (
+                            name,
+                            self.debug_level_mapping.get(level_str, DEBUG_LEVEL.NONE),
+                        )
+                    )
 
             except configparser.NoSectionError:
                 print("Debug configuration file has no debug-loggers section.")

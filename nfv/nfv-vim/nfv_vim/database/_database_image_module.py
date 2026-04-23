@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -74,18 +74,20 @@ def database_image_get_list():
     image_objs = list()
     for image in query.all():
         nfvi_image_data = json.loads(image.nfvi_image_data)
-        nfvi_image = nfvi.objects.v1.Image(nfvi_image_data['uuid'],
-                                           nfvi_image_data['name'],
-                                           nfvi_image_data['description'],
-                                           nfvi_image_data['avail_status'],
-                                           nfvi_image_data['action'],
-                                           nfvi_image_data['container_format'],
-                                           nfvi_image_data['disk_format'],
-                                           nfvi_image_data['min_disk_size_gb'],
-                                           nfvi_image_data['min_memory_size_mb'],
-                                           nfvi_image_data['visibility'],
-                                           nfvi_image_data['protected'],
-                                           nfvi_image_data['properties'])
+        nfvi_image = nfvi.objects.v1.Image(
+            nfvi_image_data["uuid"],
+            nfvi_image_data["name"],
+            nfvi_image_data["description"],
+            nfvi_image_data["avail_status"],
+            nfvi_image_data["action"],
+            nfvi_image_data["container_format"],
+            nfvi_image_data["disk_format"],
+            nfvi_image_data["min_disk_size_gb"],
+            nfvi_image_data["min_memory_size_mb"],
+            nfvi_image_data["visibility"],
+            nfvi_image_data["protected"],
+            nfvi_image_data["properties"],
+        )
         image_obj = objects.Image(nfvi_image)
         image_objs.append(image_obj)
     return image_objs

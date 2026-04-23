@@ -12,35 +12,35 @@ from nfv_client.openstack import sw_update
 from platform_util.oidc import oidc_utils
 from urllib.parse import urlparse
 
-STRATEGY_NAME_SW_DEPLOY = 'sw-deploy'
-STRATEGY_NAME_SW_UPGRADE = 'sw-upgrade'
-STRATEGY_NAME_FW_UPDATE = 'fw-update'
-STRATEGY_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update'
-STRATEGY_NAME_KUBE_UPGRADE = 'kube-upgrade'
-STRATEGY_NAME_SYSTEM_CONFIG_UPDATE = 'system-config-update'
+STRATEGY_NAME_SW_DEPLOY = "sw-deploy"
+STRATEGY_NAME_SW_UPGRADE = "sw-upgrade"
+STRATEGY_NAME_FW_UPDATE = "fw-update"
+STRATEGY_NAME_KUBE_ROOTCA_UPDATE = "kube-rootca-update"
+STRATEGY_NAME_KUBE_UPGRADE = "kube-upgrade"
+STRATEGY_NAME_SYSTEM_CONFIG_UPDATE = "system-config-update"
 
-CMD_NAME_SW_DEPLOY = 'sw-deploy-strategy'
-CMD_NAME_FW_UPDATE = 'fw-update-strategy'
-CMD_NAME_KUBE_ROOTCA_UPDATE = 'kube-rootca-update-strategy'
-CMD_NAME_KUBE_UPGRADE = 'kube-upgrade-strategy'
-CMD_NAME_SYSTEM_CONFIG_UPDATE = 'system-config-update-strategy'
+CMD_NAME_SW_DEPLOY = "sw-deploy-strategy"
+CMD_NAME_FW_UPDATE = "fw-update-strategy"
+CMD_NAME_KUBE_ROOTCA_UPDATE = "kube-rootca-update-strategy"
+CMD_NAME_KUBE_UPGRADE = "kube-upgrade-strategy"
+CMD_NAME_SYSTEM_CONFIG_UPDATE = "system-config-update-strategy"
 
-APPLY_TYPE_SERIAL = 'serial'
-APPLY_TYPE_PARALLEL = 'parallel'
-APPLY_TYPE_IGNORE = 'ignore'
+APPLY_TYPE_SERIAL = "serial"
+APPLY_TYPE_PARALLEL = "parallel"
+APPLY_TYPE_IGNORE = "ignore"
 
-INSTANCE_ACTION_MIGRATE = 'migrate'
-INSTANCE_ACTION_STOP_START = 'stop-start'
+INSTANCE_ACTION_MIGRATE = "migrate"
+INSTANCE_ACTION_STOP_START = "stop-start"
 
-ALARM_RESTRICTIONS_STRICT = 'strict'
-ALARM_RESTRICTIONS_RELAXED = 'relaxed'
-ALARM_RESTRICTIONS_PERMISSIVE = 'permissive'
+ALARM_RESTRICTIONS_STRICT = "strict"
+ALARM_RESTRICTIONS_RELAXED = "relaxed"
+ALARM_RESTRICTIONS_PERMISSIVE = "permissive"
 
-STRATEGY_APPLYING = 'applying'
-STRATEGY_READY_TO_APPLY = 'ready-to-apply'
+STRATEGY_APPLYING = "applying"
+STRATEGY_READY_TO_APPLY = "ready-to-apply"
 
 
-def _print(indent_by, field, value, remains=''):
+def _print(indent_by, field, value, remains=""):
     full_field = f"{field}:"
     if isinstance(value, str) and "\n" in value:
         full_field = f"{full_field} |\n"
@@ -50,12 +50,19 @@ def _print(indent_by, field, value, remains=''):
         full_value = f"{value} {remains}"
 
     if not (isinstance(value, str) and "\n" in value):
-        print("%s%s%s%s" % (' ' * indent_by, full_field,
-                            ' ' * (42 - indent_by - len('%s' % field) - 1), full_value))
+        print(
+            "%s%s%s%s"
+            % (
+                " " * indent_by,
+                full_field,
+                " " * (42 - indent_by - len("%s" % field) - 1),
+                full_value,
+            )
+        )
 
     else:
         full_value = textwrap.indent(full_value, " " * (indent_by + 2))
-        print("%s%s%s" % (' ' * indent_by, full_field, full_value))
+        print("%s%s%s" % (" " * indent_by, full_field, full_value))
 
 
 def _display_strategy_step(strategy_step, active=False):
@@ -66,7 +73,7 @@ def _display_strategy_step(strategy_step, active=False):
     # skip steps that are not started:'initial' or completed cleanly: 'success'
     # this leaves failed and in-progress states
     if active:
-        if strategy_step.result in ['initial', 'success']:
+        if strategy_step.result in ["initial", "success"]:
             return False
     _print(12, "step-id", strategy_step.step_id)
     _print(12, "step-name", strategy_step.step_name)
@@ -76,7 +83,7 @@ def _display_strategy_step(strategy_step, active=False):
         _print(12, "entity-names", strategy_step.entity_names)
     if 0 < len(strategy_step.entity_uuids):
         _print(12, "entity-uuids", strategy_step.entity_uuids)
-    _print(12, "timeout", strategy_step.timeout, 'seconds')
+    _print(12, "timeout", strategy_step.timeout, "seconds")
     if 0 < len(strategy_step.start_date_time):
         _print(12, "start-date-time", strategy_step.start_date_time)
     if 0 < len(strategy_step.end_date_time):
@@ -108,8 +115,8 @@ def _get_current_stage_and_step(strategy):
             for step in current_stage.steps:
                 current_step = step
                 if (
-                        step.result not in ['initial', 'timed-out', 'success'] or
-                        step == current_stage.steps[-1]
+                    step.result not in ["initial", "timed-out", "success"]
+                    or step == current_stage.steps[-1]
                 ):
                     break
             break
@@ -129,7 +136,7 @@ def _display_strategy_stage(strategy_stage, details=False, active=False):
     _print(8, "stage-name", strategy_stage.stage_name)
     _print(8, "total-steps", strategy_stage.total_steps)
     _print(8, "current-step", strategy_stage.current_step)
-    _print(8, "timeout", strategy_stage.timeout, 'seconds')
+    _print(8, "timeout", strategy_stage.timeout, "seconds")
     _print(8, "start-date-time", strategy_stage.start_date_time)
     if strategy_stage.inprogress:
         _print(8, "inprogress", "true")
@@ -158,9 +165,8 @@ def _display_strategy_phase(strategy_phase, details=False, active=False):
     _print(4, "total-stages", strategy_phase.total_stages)
     _print(4, "current-stage", strategy_phase.current_stage)
     _print(4, "stop-at-stage", strategy_phase.stop_at_stage)
-    _print(4, "timeout", strategy_phase.timeout, 'seconds')
-    _print(4, "completion-percentage",
-           ("%s%%" % strategy_phase.completion_percentage))
+    _print(4, "timeout", strategy_phase.timeout, "seconds")
+    _print(4, "completion-percentage", ("%s%%" % strategy_phase.completion_percentage))
     _print(4, "start-date-time", strategy_phase.start_date_time)
     if strategy_phase.inprogress:
         _print(4, "inprogress", "true")
@@ -201,8 +207,7 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
     _print(2, "storage-apply-type", strategy.storage_apply_type)
     _print(2, "worker-apply-type", strategy.worker_apply_type)
     if APPLY_TYPE_PARALLEL == strategy.worker_apply_type:
-        _print(2, "max-parallel-worker-hosts",
-               strategy.max_parallel_worker_hosts)
+        _print(2, "max-parallel-worker-hosts", strategy.max_parallel_worker_hosts)
     _print(2, "default-instance-action", strategy.default_instance_action)
     _print(2, "alarm-restrictions", strategy.alarm_restrictions)
     _print(2, "current-phase", strategy.current_phase)
@@ -213,8 +218,11 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
         _print(2, "current-step", current_step.step_name)
         if current_step.entity_type == "hosts" and current_step.entity_names:
             _print(2, "entity-names", current_step.entity_names)
-    _print(2, "current-phase-completion",
-           ("%s%%" % strategy.current_phase_completion_percentage))
+    _print(
+        2,
+        "current-phase-completion",
+        ("%s%%" % strategy.current_phase_completion_percentage),
+    )
     _print(2, "state", strategy.state)
 
     if details or active:
@@ -261,10 +269,17 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
                 _print(2, "abort-error-response", strategy.abort_phase.response)
 
 
-def _get_auth_token_and_url(os_auth_uri, os_project_name,
-                            os_project_domain_name, os_username,
-                            os_password, os_user_domain_name,
-                            os_region_name, os_interface, stx_auth_type):
+def _get_auth_token_and_url(
+    os_auth_uri,
+    os_project_name,
+    os_project_domain_name,
+    os_username,
+    os_password,
+    os_user_domain_name,
+    os_region_name,
+    os_interface,
+    stx_auth_type,
+):
     """Get authentication context for OIDC or Keystone"""
 
     if stx_auth_type == AUTH_TYPES.OIDC:
@@ -277,18 +292,18 @@ def _get_auth_token_and_url(os_auth_uri, os_project_name,
 
         # TODO(rummadis): Generalize OIDC URL construction instead of hardcoding
         # ports and protocols (similar to Keystone approach)
-        if os_interface == 'public':
-            protocol = 'https'
-            port = '4545'
-        elif os_interface == 'internal':
-            protocol = 'http'
-            port = '4545'
+        if os_interface == "public":
+            protocol = "https"
+            port = "4545"
+        elif os_interface == "internal":
+            protocol = "http"
+            port = "4545"
         else:  # admin
-            protocol = 'https'
-            port = '4546'
+            protocol = "https"
+            port = "4546"
 
         # Handle IPv6
-        if controller_ip.count(':') >= 2 and not controller_ip.startswith("["):
+        if controller_ip.count(":") >= 2 and not controller_ip.startswith("["):
             controller_ip = f"[{controller_ip}]"
 
         url = f"{protocol}://{controller_ip}:{port}"
@@ -296,28 +311,49 @@ def _get_auth_token_and_url(os_auth_uri, os_project_name,
         return token_id, url
     else:
         # Keystone authentication path
-        token = openstack.get_token(os_auth_uri, os_project_name,
-                                    os_project_domain_name, os_username,
-                                    os_password, os_user_domain_name)
+        token = openstack.get_token(
+            os_auth_uri,
+            os_project_name,
+            os_project_domain_name,
+            os_username,
+            os_password,
+            os_user_domain_name,
+        )
         if token is None:
             raise ValueError("Invalid keystone token")
 
-        url = token.get_service_url(os_region_name, openstack.SERVICE.VIM,
-                                    openstack.SERVICE_TYPE.NFV, os_interface)
+        url = token.get_service_url(
+            os_region_name,
+            openstack.SERVICE.VIM,
+            openstack.SERVICE_TYPE.NFV,
+            os_interface,
+        )
         if url is None:
             raise ValueError("NFV-VIM URL is invalid")
 
         return token.get_id(), url
 
 
-def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                    os_username, os_password, os_user_domain_name,
-                    os_region_name, os_interface,
-                    strategy_name, controller_apply_type,
-                    storage_apply_type, swift_apply_type, worker_apply_type,
-                    max_parallel_worker_hosts,
-                    default_instance_action, alarm_restrictions, stx_auth_type,
-                    **kwargs):
+def create_strategy(
+    os_auth_uri,
+    os_project_name,
+    os_project_domain_name,
+    os_username,
+    os_password,
+    os_user_domain_name,
+    os_region_name,
+    os_interface,
+    strategy_name,
+    controller_apply_type,
+    storage_apply_type,
+    swift_apply_type,
+    worker_apply_type,
+    max_parallel_worker_hosts,
+    default_instance_action,
+    alarm_restrictions,
+    stx_auth_type,
+    **kwargs,
+):
     """
     Software Update - Create Strategy
     """
@@ -331,55 +367,79 @@ def create_strategy(os_auth_uri, os_project_name, os_project_domain_name,
         if response != "yes":
             sys.exit(1)
 
-    token_id, url = _get_auth_token_and_url(os_auth_uri,
-                                            os_project_name,
-                                            os_project_domain_name,
-                                            os_username,
-                                            os_password,
-                                            os_user_domain_name,
-                                            os_region_name,
-                                            os_interface,
-                                            stx_auth_type)
+    token_id, url = _get_auth_token_and_url(
+        os_auth_uri,
+        os_project_name,
+        os_project_domain_name,
+        os_username,
+        os_password,
+        os_user_domain_name,
+        os_region_name,
+        os_interface,
+        stx_auth_type,
+    )
 
-    strategy = sw_update.create_strategy(token_id, url,
-                                         strategy_name,
-                                         controller_apply_type,
-                                         storage_apply_type, swift_apply_type,
-                                         worker_apply_type,
-                                         max_parallel_worker_hosts,
-                                         default_instance_action,
-                                         alarm_restrictions,
-                                         os_username, os_user_domain_name,
-                                         os_username,
-                                         auth_type=stx_auth_type,
-                                         **kwargs)
+    strategy = sw_update.create_strategy(
+        token_id,
+        url,
+        strategy_name,
+        controller_apply_type,
+        storage_apply_type,
+        swift_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        os_username,
+        os_user_domain_name,
+        os_username,
+        auth_type=stx_auth_type,
+        **kwargs,
+    )
     if not strategy:
         raise Exception("Strategy creation failed")
 
     _display_strategy(strategy)
 
 
-def delete_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                    os_username, os_password, os_user_domain_name,
-                    os_region_name, os_interface, strategy_name, stx_auth_type,
-                    force=False):
+def delete_strategy(
+    os_auth_uri,
+    os_project_name,
+    os_project_domain_name,
+    os_username,
+    os_password,
+    os_user_domain_name,
+    os_region_name,
+    os_interface,
+    strategy_name,
+    stx_auth_type,
+    force=False,
+):
     """
     Software Update - Delete Strategy
     """
-    token_id, url = _get_auth_token_and_url(os_auth_uri,
-                                            os_project_name,
-                                            os_project_domain_name,
-                                            os_username,
-                                            os_password,
-                                            os_user_domain_name,
-                                            os_region_name,
-                                            os_interface,
-                                            stx_auth_type)
+    token_id, url = _get_auth_token_and_url(
+        os_auth_uri,
+        os_project_name,
+        os_project_domain_name,
+        os_username,
+        os_password,
+        os_user_domain_name,
+        os_region_name,
+        os_interface,
+        stx_auth_type,
+    )
 
-    success = sw_update.delete_strategy(token_id, url,
-                                        strategy_name, force,
-                                        os_username, os_user_domain_name,
-                                        os_username, auth_type=stx_auth_type)
+    success = sw_update.delete_strategy(
+        token_id,
+        url,
+        strategy_name,
+        force,
+        os_username,
+        os_user_domain_name,
+        os_username,
+        auth_type=stx_auth_type,
+    )
     if success:
         print("Strategy deleted")
         return
@@ -387,42 +447,65 @@ def delete_strategy(os_auth_uri, os_project_name, os_project_domain_name,
         raise Exception("Nothing to delete")
 
 
-def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                   os_username, os_password, os_user_domain_name,
-                   os_region_name, os_interface, strategy_name, stx_auth_type,
-                   stage_id=None):
+def apply_strategy(
+    os_auth_uri,
+    os_project_name,
+    os_project_domain_name,
+    os_username,
+    os_password,
+    os_user_domain_name,
+    os_region_name,
+    os_interface,
+    strategy_name,
+    stx_auth_type,
+    stage_id=None,
+):
     """
     Software Update - Apply Strategy
     """
-    token_id, url = _get_auth_token_and_url(os_auth_uri,
-                                            os_project_name,
-                                            os_project_domain_name,
-                                            os_username,
-                                            os_password,
-                                            os_user_domain_name,
-                                            os_region_name,
-                                            os_interface,
-                                            stx_auth_type)
+    token_id, url = _get_auth_token_and_url(
+        os_auth_uri,
+        os_project_name,
+        os_project_domain_name,
+        os_username,
+        os_password,
+        os_user_domain_name,
+        os_region_name,
+        os_interface,
+        stx_auth_type,
+    )
 
-    strategy = sw_update.get_strategies(token_id, url, strategy_name,
-                                        os_username, os_user_domain_name,
-                                        os_username, auth_type=stx_auth_type)
+    strategy = sw_update.get_strategies(
+        token_id,
+        url,
+        strategy_name,
+        os_username,
+        os_user_domain_name,
+        os_username,
+        auth_type=stx_auth_type,
+    )
 
     if not strategy:
         raise Exception("No strategy available. Nothing to apply.")
     else:
         if strategy.state == STRATEGY_APPLYING:
-            raise Exception(
-                    "Strategy already applied.")
+            raise Exception("Strategy already applied.")
 
         elif strategy.state != STRATEGY_READY_TO_APPLY:
             raise Exception(
-                    "Strategy cannot be applied. %s is not a valid state." % strategy.state)
+                "Strategy cannot be applied. %s is not a valid state." % strategy.state
+            )
 
-    strategy = sw_update.apply_strategy(token_id, url,
-                                        strategy_name, stage_id,
-                                        os_username, os_user_domain_name,
-                                        os_username, auth_type=stx_auth_type)
+    strategy = sw_update.apply_strategy(
+        token_id,
+        url,
+        strategy_name,
+        stage_id,
+        os_username,
+        os_user_domain_name,
+        os_username,
+        auth_type=stx_auth_type,
+    )
     if not strategy:
         if stage_id is None:
             raise Exception("Strategy apply failed")
@@ -432,27 +515,44 @@ def apply_strategy(os_auth_uri, os_project_name, os_project_domain_name,
     _display_strategy(strategy)
 
 
-def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                   os_username, os_password, os_user_domain_name,
-                   os_region_name, os_interface, strategy_name, stx_auth_type,
-                   stage_id=None):
+def abort_strategy(
+    os_auth_uri,
+    os_project_name,
+    os_project_domain_name,
+    os_username,
+    os_password,
+    os_user_domain_name,
+    os_region_name,
+    os_interface,
+    strategy_name,
+    stx_auth_type,
+    stage_id=None,
+):
     """
     Software Update - Abort Strategy
     """
-    token_id, url = _get_auth_token_and_url(os_auth_uri,
-                                            os_project_name,
-                                            os_project_domain_name,
-                                            os_username,
-                                            os_password,
-                                            os_user_domain_name,
-                                            os_region_name,
-                                            os_interface,
-                                            stx_auth_type)
+    token_id, url = _get_auth_token_and_url(
+        os_auth_uri,
+        os_project_name,
+        os_project_domain_name,
+        os_username,
+        os_password,
+        os_user_domain_name,
+        os_region_name,
+        os_interface,
+        stx_auth_type,
+    )
 
-    strategy = sw_update.abort_strategy(token_id, url,
-                                        strategy_name, stage_id,
-                                        os_username, os_user_domain_name,
-                                        os_username, auth_type=stx_auth_type)
+    strategy = sw_update.abort_strategy(
+        token_id,
+        url,
+        strategy_name,
+        stage_id,
+        os_username,
+        os_user_domain_name,
+        os_username,
+        auth_type=stx_auth_type,
+    )
     if not strategy:
         if stage_id is None:
             raise Exception("Strategy abort failed")
@@ -462,26 +562,45 @@ def abort_strategy(os_auth_uri, os_project_name, os_project_domain_name,
     _display_strategy(strategy)
 
 
-def show_strategy(os_auth_uri, os_project_name, os_project_domain_name,
-                  os_username, os_password, os_user_domain_name, os_region_name,
-                  os_interface, strategy_name, stx_auth_type, details=False,
-                  active=False, error_details=False):
+def show_strategy(
+    os_auth_uri,
+    os_project_name,
+    os_project_domain_name,
+    os_username,
+    os_password,
+    os_user_domain_name,
+    os_region_name,
+    os_interface,
+    strategy_name,
+    stx_auth_type,
+    details=False,
+    active=False,
+    error_details=False,
+):
     """
     Software Update - Show Strategy
     """
-    token_id, url = _get_auth_token_and_url(os_auth_uri,
-                                            os_project_name,
-                                            os_project_domain_name,
-                                            os_username,
-                                            os_password,
-                                            os_user_domain_name,
-                                            os_region_name,
-                                            os_interface,
-                                            stx_auth_type)
+    token_id, url = _get_auth_token_and_url(
+        os_auth_uri,
+        os_project_name,
+        os_project_domain_name,
+        os_username,
+        os_password,
+        os_user_domain_name,
+        os_region_name,
+        os_interface,
+        stx_auth_type,
+    )
 
-    strategy = sw_update.get_strategies(token_id, url, strategy_name,
-                                        os_username, os_user_domain_name,
-                                        os_username, auth_type=stx_auth_type)
+    strategy = sw_update.get_strategies(
+        token_id,
+        url,
+        strategy_name,
+        os_username,
+        os_user_domain_name,
+        os_username,
+        auth_type=stx_auth_type,
+    )
     if not strategy:
         print("No strategy available")
         return

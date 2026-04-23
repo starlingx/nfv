@@ -31,7 +31,7 @@ from nfv_plugins.nfvi_plugins.openstack.exceptions import OpenStackRestAPIExcept
 from nfv_plugins.nfvi_plugins.openstack.openstack_log import log_error
 from nfv_plugins.nfvi_plugins.openstack.openstack_log import log_info
 
-DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.rest_api')
+DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.rest_api")
 
 _ssl_context = None
 
@@ -40,6 +40,7 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
     """
     Reset-API Request Handler
     """
+
     _handlers = dict()
 
     def __init__(self, request, client_address, server):
@@ -47,8 +48,9 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         self._response_delayed = False
 
         # Call old-style class __init__
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
-                                                       client_address, server)
+        BaseHTTPServer.BaseHTTPRequestHandler.__init__(
+            self, request, client_address, server
+        )
 
     def response_delayed(self):
         """
@@ -61,25 +63,22 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         Override send_header so that the Server header is not returned.
         """
         if not self._is_shutdown:
-            if 'server' != keyword.lower():
-                BaseHTTPServer.BaseHTTPRequestHandler.send_header(self, keyword,
-                                                                  value)
+            if "server" != keyword.lower():
+                BaseHTTPServer.BaseHTTPRequestHandler.send_header(self, keyword, value)
 
     def send_response(self, code, message=None):
         """
         Override send_response.
         """
         if not self._is_shutdown:
-            BaseHTTPServer.BaseHTTPRequestHandler.send_response(self, code,
-                                                                message)
+            BaseHTTPServer.BaseHTTPRequestHandler.send_response(self, code, message)
 
     def send_error(self, code, message=None):
         """
         Override send_error.
         """
         if not self._is_shutdown:
-            BaseHTTPServer.BaseHTTPRequestHandler.send_error(self, code,
-                                                             message)
+            BaseHTTPServer.BaseHTTPRequestHandler.send_error(self, code, message)
 
     def log_error(self, format, *args):
         """
@@ -144,31 +143,31 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         """
         Handle GET Rest-API command
         """
-        self._dispatch(self._handlers[self.server.port]['GET'])
+        self._dispatch(self._handlers[self.server.port]["GET"])
 
     def do_POST(self):
         """
         Handle POST Rest-API command
         """
-        self._dispatch(self._handlers[self.server.port]['POST'])
+        self._dispatch(self._handlers[self.server.port]["POST"])
 
     def do_PATCH(self):
         """
         Handle PATCH Rest-API command
         """
-        self._dispatch(self._handlers[self.server.port]['PATCH'])
+        self._dispatch(self._handlers[self.server.port]["PATCH"])
 
     def do_DELETE(self):
         """
         Handle DELETE Rest-API command
         """
-        self._dispatch(self._handlers[self.server.port]['DELETE'])
+        self._dispatch(self._handlers[self.server.port]["DELETE"])
 
     def do_PUT(self):
         """
         Handle PUT Rest-API command
         """
-        self._dispatch(self._handlers[self.server.port]['PUT'])
+        self._dispatch(self._handlers[self.server.port]["PUT"])
 
     @classmethod
     def add_handler(cls, host, port, operation, path, handler):
@@ -198,6 +197,7 @@ class RestAPIServer(SocketServer.TCPServer):
     """
     Rest-API Server
     """
+
     def __init__(self, ip, port):
         """
         Create the Rest-API Server
@@ -217,14 +217,15 @@ class RestAPIServer(SocketServer.TCPServer):
             DLOG.debug(f"Cannot transform {ip} to IPv6. {e}")
             socket.inet_pton(socket.AF_INET, ip)  # If not IPv6, asserts IPv4
             DLOG.info(f"REST API setup to listen on IPv4 address {ip}")
-        SocketServer.TCPServer.__init__(self, (ip, int(port)),
-                                        self._http_handler,
-                                        bind_and_activate=False)
+        SocketServer.TCPServer.__init__(
+            self, (ip, int(port)), self._http_handler, bind_and_activate=False
+        )
         self.request_queue_size = 64
         self.allow_reuse_address = True
         self.socket.setblocking(False)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER,
-                               struct.pack('ii', l_on_off, l_linger))
+        self.socket.setsockopt(
+            socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", l_on_off, l_linger)
+        )
         self.server_bind()
         self.server_activate()
         selobj.selobj_add_read_obj(self.fileno(), self.dispatch_rest_api)
@@ -247,8 +248,7 @@ class RestAPIServer(SocketServer.TCPServer):
         """
         Add Rest-API handler
         """
-        self._http_handler.add_handler(self._ip, self._port, operation, path,
-                                       handler)
+        self._http_handler.add_handler(self._ip, self._port, operation, path, handler)
 
     def del_handler(self, operation, path):
         """
@@ -271,14 +271,13 @@ class RestAPIServer(SocketServer.TCPServer):
         Dispatch Rest-API received
         """
         while True:
-            select_obj = (yield)
+            select_obj = yield
             if select_obj == self.fileno():
                 try:
                     request, client_address = self.get_request()
 
                 except socket.error:
-                    DLOG.error("Socket error on get request, error=%s."
-                               % socket.error)
+                    DLOG.error("Socket error on get request, error=%s." % socket.error)
                     return
 
                 # Set the maximum timeout for socket reads and writes.
@@ -289,13 +288,14 @@ class RestAPIServer(SocketServer.TCPServer):
                         self.process_request(request, client_address)
 
                     except BaseException as e:
-                        DLOG.error("Caught exception while processing "
-                                   "request, error=%s." % e)
+                        DLOG.error(
+                            "Caught exception while processing "
+                            "request, error=%s." % e
+                        )
                         self.handle_error(request, client_address)
                         self.shutdown_request(request)
                 else:
-                    DLOG.error("Failed to verify request, request=%s."
-                               % request)
+                    DLOG.error("Failed to verify request, request=%s." % request)
                     self.shutdown_request(request)
 
 
@@ -307,19 +307,28 @@ def rest_api_get_server(host, port):
     return RestAPIServer(host, port)
 
 
-def _rest_api_request(token_id,
-                      method,
-                      api_cmd,
-                      api_cmd_headers,
-                      api_cmd_payload,
-                      timeout_in_secs,
-                      file_to_post):
+def _rest_api_request(
+    token_id,
+    method,
+    api_cmd,
+    api_cmd_headers,
+    api_cmd_payload,
+    timeout_in_secs,
+    file_to_post,
+):
     """
     Internal: make a rest-api request
     """
-    headers_per_hop = ['connection', 'keep-alive', 'proxy-authenticate',
-                       'proxy-authorization', 'te', 'trailers',
-                       'transfer-encoding', 'upgrade']
+    headers_per_hop = [
+        "connection",
+        "keep-alive",
+        "proxy-authenticate",
+        "proxy-authorization",
+        "te",
+        "trailers",
+        "transfer-encoding",
+        "upgrade",
+    ]
 
     start_ms = timers.get_monotonic_timestamp_in_ms()
 
@@ -339,9 +348,10 @@ def _rest_api_request(token_id,
             else:
                 request_info.data = api_cmd_payload
 
-        DLOG.verbose("Rest-API method=%s, api_cmd=%s, api_cmd_headers=%s, "
-                     "api_cmd_payload=%s" % (method, api_cmd, api_cmd_headers,
-                                             api_cmd_payload))
+        DLOG.verbose(
+            "Rest-API method=%s, api_cmd=%s, api_cmd_headers=%s, "
+            "api_cmd_payload=%s" % (method, api_cmd, api_cmd_headers, api_cmd_payload)
+        )
 
         # Enable Debug
         # handler = urllib.request.HTTPHandler(debuglevel=1)
@@ -350,32 +360,31 @@ def _rest_api_request(token_id,
 
         if file_to_post is not None:
             headers = {"X-Auth-Token": token_id}
-            files = {'file': ("for_upload", file_to_post)}
-            with requests.post(api_cmd, headers=headers, files=files,
-                               timeout=timeout_in_secs) as request:
+            files = {"file": ("for_upload", file_to_post)}
+            with requests.post(
+                api_cmd, headers=headers, files=files, timeout=timeout_in_secs
+            ) as request:
                 status_code = request.status_code
                 response_raw = request.text
 
         else:
             global _ssl_context
             ssl_context = None
-            if api_cmd.startswith('https://'):
+            if api_cmd.startswith("https://"):
                 if _ssl_context is None:
                     ca_file = get_system_ca_file()
                     if ca_file:
                         _ssl_context = ssl.create_default_context(
-                            ssl.Purpose.SERVER_AUTH,
-                            cafile=ca_file
+                            ssl.Purpose.SERVER_AUTH, cafile=ca_file
                         )
                 ssl_context = _ssl_context
-            with urllib.request.urlopen(request_info,
-                                        timeout=timeout_in_secs,
-                                        context=ssl_context) as request:
+            with urllib.request.urlopen(
+                request_info, timeout=timeout_in_secs, context=ssl_context
+            ) as request:
                 headers = list()  # list of tuples
                 for key, value in request.info().items():
                     if key not in headers_per_hop:
-                        cap_key = '-'.join((ck.capitalize()
-                                            for ck in key.split('-')))
+                        cap_key = "-".join((ck.capitalize() for ck in key.split("-")))
                         headers.append((cap_key, value))
 
                 response_raw = request.read()
@@ -390,17 +399,32 @@ def _rest_api_request(token_id,
         elapsed_ms = now_ms - start_ms
         elapsed_secs = elapsed_ms // 1000
 
-        DLOG.verbose("Rest-API code=%s, headers=%s, response=%s"
-                     % (status_code, headers, response))
+        DLOG.verbose(
+            "Rest-API code=%s, headers=%s, response=%s"
+            % (status_code, headers, response)
+        )
 
-        log_info("Rest-API status=%s, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
-                 % (status_code, method, api_cmd, api_cmd_headers,
-                    api_cmd_payload, int(elapsed_ms)))
+        log_info(
+            "Rest-API status=%s, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
+            % (
+                status_code,
+                method,
+                api_cmd,
+                api_cmd_headers,
+                api_cmd_payload,
+                int(elapsed_ms),
+            )
+        )
 
-        return Result(response, Object(status_code=status_code,
-                                       headers=headers,
-                                       response=response_raw,
-                                       execution_time=elapsed_secs))
+        return Result(
+            response,
+            Object(
+                status_code=status_code,
+                headers=headers,
+                response=response_raw,
+                execution_time=elapsed_secs,
+            ),
+        )
 
     except urllib.error.HTTPError as e:
         headers = list()
@@ -410,8 +434,7 @@ def _rest_api_request(token_id,
             headers = list()  # list of tuples
             for key, value in e.fp.info().items():
                 if key not in headers_per_hop:
-                    cap_key = '-'.join((ck.capitalize()
-                                        for ck in key.split('-')))
+                    cap_key = "-".join((ck.capitalize() for ck in key.split("-")))
                     headers.append((cap_key, value))
 
             response_raw = e.fp.read()
@@ -419,89 +442,120 @@ def _rest_api_request(token_id,
         now_ms = timers.get_monotonic_timestamp_in_ms()
         elapsed_ms = now_ms - start_ms
 
-        log_error("Rest-API status=%s, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
-                  % (e.code, method, api_cmd, api_cmd_headers,
-                     api_cmd_payload, int(elapsed_ms)))
+        log_error(
+            "Rest-API status=%s, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
+            % (
+                e.code,
+                method,
+                api_cmd,
+                api_cmd_headers,
+                api_cmd_payload,
+                int(elapsed_ms),
+            )
+        )
 
         if httplib.FOUND == e.code:
-            return Result(response_raw, Object(status_code=e.code, headers=headers,
-                                               response=response_raw))
+            return Result(
+                response_raw,
+                Object(status_code=e.code, headers=headers, response=response_raw),
+            )
 
         # Attempt to get the reason for the http error from the response
-        reason = ''
+        reason = ""
         for header, value in headers:
-            if 'Content-Type' == header:
-                if 'application/json' == value.split(';')[0]:
+            if "Content-Type" == header:
+                if "application/json" == value.split(";")[0]:
                     try:
                         response = json.loads(response_raw)
 
-                        compute_fault = response.get('computeFault', None)
+                        compute_fault = response.get("computeFault", None)
                         if compute_fault is not None:
-                            message = compute_fault.get('message', None)
+                            message = compute_fault.get("message", None)
                             if message is not None:
-                                reason = str(message.lower().rstrip('.'))
+                                reason = str(message.lower().rstrip("."))
 
                         if not reason:
-                            bad_request = response.get('badRequest', None)
+                            bad_request = response.get("badRequest", None)
                             if bad_request is not None:
-                                message = bad_request.get('message', None)
+                                message = bad_request.get("message", None)
                                 if message is not None:
-                                    reason = str(message.lower().rstrip('.'))
+                                    reason = str(message.lower().rstrip("."))
 
                         if not reason:
-                            error_message = response.get('error_message', None)
+                            error_message = response.get("error_message", None)
                             if error_message is not None:
                                 error_message = json.loads(error_message)
-                                message = error_message.get('faultstring', None)
+                                message = error_message.get("faultstring", None)
                                 if message is not None:
-                                    reason = str(message.lower().rstrip('.'))
+                                    reason = str(message.lower().rstrip("."))
 
                     except ValueError:
                         pass
 
-        raise OpenStackRestAPIException(method, api_cmd, api_cmd_headers,
-                                        api_cmd_payload, e.code, str(e),
-                                        str(e), headers, response_raw, reason)
+        raise OpenStackRestAPIException(
+            method,
+            api_cmd,
+            api_cmd_headers,
+            api_cmd_payload,
+            e.code,
+            str(e),
+            str(e),
+            headers,
+            response_raw,
+            reason,
+        )
 
     except urllib.error.URLError as e:
         now_ms = timers.get_monotonic_timestamp_in_ms()
         elapsed_ms = now_ms - start_ms
 
-        log_error("Rest-API status=ERR, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
-                  % (method, api_cmd, api_cmd_headers, api_cmd_payload,
-                     int(elapsed_ms)))
+        log_error(
+            "Rest-API status=ERR, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
+            % (method, api_cmd, api_cmd_headers, api_cmd_payload, int(elapsed_ms))
+        )
 
-        raise OpenStackException(method, api_cmd, api_cmd_headers,
-                                 api_cmd_payload, str(e), str(e))
+        raise OpenStackException(
+            method, api_cmd, api_cmd_headers, api_cmd_payload, str(e), str(e)
+        )
 
     except Exception as e:
         now_ms = timers.get_monotonic_timestamp_in_ms()
         elapsed_ms = now_ms - start_ms
 
-        log_error("Rest-API failure, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
-                  % (method, api_cmd, api_cmd_headers, api_cmd_payload,
-                     int(elapsed_ms)))
+        log_error(
+            "Rest-API failure, %s, %s, hdrs=%s, payload=%s, elapsed_ms=%s"
+            % (method, api_cmd, api_cmd_headers, api_cmd_payload, int(elapsed_ms))
+        )
 
-        raise OpenStackException(method, api_cmd, api_cmd_headers,
-                                 api_cmd_payload, str(e), str(e))
+        raise OpenStackException(
+            method, api_cmd, api_cmd_headers, api_cmd_payload, str(e), str(e)
+        )
 
 
-def rest_api_request(token,
-                     method,
-                     api_cmd,
-                     api_cmd_headers=None,
-                     api_cmd_payload=None,
-                     timeout_in_secs=20,
-                     file_to_post=None):
+def rest_api_request(
+    token,
+    method,
+    api_cmd,
+    api_cmd_headers=None,
+    api_cmd_payload=None,
+    timeout_in_secs=20,
+    file_to_post=None,
+):
     """
     Make a rest-api request using the given token
     WARNING: Any change to the default timeout must be reflected in the timeout
     calculations done in the TaskFuture class.
     """
     try:
-        return _rest_api_request(token.get_id(), method, api_cmd,
-                                 api_cmd_headers, api_cmd_payload,
-                                 timeout_in_secs, file_to_post)
+        return _rest_api_request(
+            token.get_id(),
+            method,
+            api_cmd,
+            api_cmd_headers,
+            api_cmd_payload,
+            timeout_in_secs,
+            file_to_post,
+        )
 
     except OpenStackRestAPIException as e:
         if httplib.UNAUTHORIZED == e.http_status_code:
@@ -509,18 +563,26 @@ def rest_api_request(token,
         raise
 
 
-def rest_api_request_with_context(context,
-                                  method,
-                                  api_cmd,
-                                  api_cmd_headers=None,
-                                  api_cmd_payload=None,
-                                  timeout_in_secs=20,
-                                  file_to_post=None):
+def rest_api_request_with_context(
+    context,
+    method,
+    api_cmd,
+    api_cmd_headers=None,
+    api_cmd_payload=None,
+    timeout_in_secs=20,
+    file_to_post=None,
+):
     """
     Make a rest-api request using the given context
     WARNING: Any change to the default timeout must be reflected in the timeout
     calculations done in the TaskFuture class.
     """
-    return _rest_api_request(context.token_id, method, api_cmd,
-                             api_cmd_headers, api_cmd_payload,
-                             timeout_in_secs, file_to_post)
+    return _rest_api_request(
+        context.token_id,
+        method,
+        api_cmd,
+        api_cmd_headers,
+        api_cmd_payload,
+        timeout_in_secs,
+        file_to_post,
+    )

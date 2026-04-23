@@ -16,36 +16,39 @@ from nfv_vim.objects._object import ObjectData
 
 from nfv_vim import nfvi
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.image')
+DLOG = debug.debug_get_logger("nfv_vim.objects.image")
 
 
 class ImageAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Image Availability Status Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    AVAILABLE = Constant('available')
-    DELETED = Constant('deleted')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    AVAILABLE = Constant("available")
+    DELETED = Constant("deleted")
 
 
 class ImageAction(Constants, metaclass=Singleton):
     """
     Image Action Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    SAVING = Constant('saving')
-    DELETING = Constant('deleting')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    SAVING = Constant("saving")
+    DELETING = Constant("deleting")
 
 
 class ImageProperty(Constants, metaclass=Singleton):
     """
     Image Property Constants
     """
-    INSTANCE_AUTO_RECOVERY = Constant('sw_wrs_auto_recovery')
-    LIVE_MIGRATION_TIMEOUT = Constant('hw_wrs_live_migration_timeout')
-    LIVE_MIGRATION_MAX_DOWNTIME = Constant('hw_wrs_live_migration_max_downtime')
+
+    INSTANCE_AUTO_RECOVERY = Constant("sw_wrs_auto_recovery")
+    LIVE_MIGRATION_TIMEOUT = Constant("hw_wrs_live_migration_timeout")
+    LIVE_MIGRATION_MAX_DOWNTIME = Constant("hw_wrs_live_migration_max_downtime")
 
 
 # Image Constant Instantiation
@@ -58,25 +61,40 @@ class ImageAttributes(ObjectData):
     """
     Image Attributes Object
     """
-    def __init__(self, container_format, disk_format, min_disk_size_gb,
-                 min_memory_size_mb, visibility, protected, properties=None):
-        super(ImageAttributes, self).__init__('1.0.0')
-        self.update(dict(container_format=container_format,
-                         disk_format=disk_format,
-                         min_disk_size_gb=min_disk_size_gb,
-                         min_memory_size_mb=min_memory_size_mb,
-                         visibility=visibility, protected=protected,
-                         properties=properties))
+
+    def __init__(
+        self,
+        container_format,
+        disk_format,
+        min_disk_size_gb,
+        min_memory_size_mb,
+        visibility,
+        protected,
+        properties=None,
+    ):
+        super(ImageAttributes, self).__init__("1.0.0")
+        self.update(
+            dict(
+                container_format=container_format,
+                disk_format=disk_format,
+                min_disk_size_gb=min_disk_size_gb,
+                min_memory_size_mb=min_memory_size_mb,
+                visibility=visibility,
+                protected=protected,
+                properties=properties,
+            )
+        )
 
 
 class Image(ObjectData):
     """
     Image Object
     """
+
     def __init__(self, nfvi_image):
-        super(Image, self).__init__('1.0.0')
+        super(Image, self).__init__("1.0.0")
         self._nfvi_image = nfvi_image
-        self.task = state_machine.StateTask('EmptyTask', list())
+        self.task = state_machine.StateTask("EmptyTask", list())
 
     @property
     def uuid(self):
@@ -178,7 +196,8 @@ class Image(ObjectData):
         """
         if self._nfvi_image.properties is not None:
             return self._nfvi_image.properties.get(
-                nfvi.objects.v1.IMAGE_PROPERTY.INSTANCE_AUTO_RECOVERY, None)
+                nfvi.objects.v1.IMAGE_PROPERTY.INSTANCE_AUTO_RECOVERY, None
+            )
         else:
             return None
 
@@ -189,7 +208,8 @@ class Image(ObjectData):
         """
         if self._nfvi_image.properties is not None:
             return self._nfvi_image.properties.get(
-                nfvi.objects.v1.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT, None)
+                nfvi.objects.v1.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT, None
+            )
         else:
             return None
 
@@ -200,7 +220,8 @@ class Image(ObjectData):
         """
         if self._nfvi_image.properties is not None:
             return self._nfvi_image.properties.get(
-                nfvi.objects.v1.IMAGE_PROPERTY.LIVE_MIGRATION_MAX_DOWNTIME, None)
+                nfvi.objects.v1.IMAGE_PROPERTY.LIVE_MIGRATION_MAX_DOWNTIME, None
+            )
         else:
             return None
 
@@ -215,8 +236,9 @@ class Image(ObjectData):
         """
         Returns true if this image has been deleted
         """
-        return (nfvi.objects.v1.IMAGE_AVAIL_STATUS.DELETED
-                in self._nfvi_image.avail_status)
+        return (
+            nfvi.objects.v1.IMAGE_AVAIL_STATUS.DELETED in self._nfvi_image.avail_status
+        )
 
     def nfvi_image_update(self, nfvi_image):
         """
@@ -235,16 +257,20 @@ class Image(ObjectData):
         """
         NFVI Image Deleted
         """
-        if nfvi.objects.v1.IMAGE_AVAIL_STATUS.DELETED \
-                not in self._nfvi_image.avail_status:
+        if (
+            nfvi.objects.v1.IMAGE_AVAIL_STATUS.DELETED
+            not in self._nfvi_image.avail_status
+        ):
             self._nfvi_image.avail_status.append(
-                nfvi.objects.v1.IMAGE_AVAIL_STATUS.DELETED)
+                nfvi.objects.v1.IMAGE_AVAIL_STATUS.DELETED
+            )
 
     def _persist(self):
         """
         Persist changes to image object
         """
         from nfv_vim import database
+
         database.database_image_add(self)
 
     def as_dict(self):
@@ -252,19 +278,19 @@ class Image(ObjectData):
         Represent image object as dictionary
         """
         data = dict()
-        data['uuid'] = self.uuid
-        data['name'] = self.name
-        data['description'] = self.description
-        data['avail_status'] = self.avail_status
-        data['action'] = self.action
-        data['container_format'] = self.container_format
-        data['disk_format'] = self.disk_format
-        data['min_disk_size_gb'] = self.min_disk_size_gb
-        data['min_memory_size_mb'] = self.min_memory_size_mb
-        data['visibility'] = self.visibility
-        data['protected'] = self.protected
-        data['auto_recovery'] = self.auto_recovery
-        data['live_migration_timeout'] = self.live_migration_timeout
-        data['live_migration_max_downtime'] = self.live_migration_max_downtime
-        data['nfvi_image'] = self.nfvi_image.as_dict()
+        data["uuid"] = self.uuid
+        data["name"] = self.name
+        data["description"] = self.description
+        data["avail_status"] = self.avail_status
+        data["action"] = self.action
+        data["container_format"] = self.container_format
+        data["disk_format"] = self.disk_format
+        data["min_disk_size_gb"] = self.min_disk_size_gb
+        data["min_memory_size_mb"] = self.min_memory_size_mb
+        data["visibility"] = self.visibility
+        data["protected"] = self.protected
+        data["auto_recovery"] = self.auto_recovery
+        data["live_migration_timeout"] = self.live_migration_timeout
+        data["live_migration_max_downtime"] = self.live_migration_max_downtime
+        data["nfvi_image"] = self.nfvi_image.as_dict()
         return data

@@ -1,12 +1,12 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
 from nfv_common.forensic import _parsers
 
-DLOG = debug.debug_get_logger('forensic-evidence')
+DLOG = debug.debug_get_logger("forensic-evidence")
 
 
 def evidence_from_files(files, start_date, end_date, progress=None):
@@ -48,7 +48,7 @@ def evidence_from_files(files, start_date, end_date, progress=None):
                 earliest = (file_name, parser_name, f, record)
             else:
                 _, _, _, earliest_record = earliest
-                if earliest_record['timestamp'] > record['timestamp']:
+                if earliest_record["timestamp"] > record["timestamp"]:
                     earliest = (file_name, parser_name, f, record)
 
         if earliest is not None:

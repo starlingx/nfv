@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2021 Wind River Systems, Inc.
+# Copyright (c) 2016-2021, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,7 +8,7 @@ from nfv_common import debug
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
-DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.patching')
+DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.patching")
 
 # WARNING: Any change to this timeout must be reflected in the config.ini
 # file for the nfvi plugins.
@@ -53,8 +53,9 @@ def apply_patch(token, patch_name):
 
     api_cmd = url + "/v1/apply/%s" % str(patch_name)
 
-    response = rest_api_request(token, "POST", api_cmd,
-                                timeout_in_secs=REST_API_PATCH_APPLY_TIMEOUT)
+    response = rest_api_request(
+        token, "POST", api_cmd, timeout_in_secs=REST_API_PATCH_APPLY_TIMEOUT
+    )
     return response
 
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016,2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,7 +7,7 @@ from nfv_common import debug
 
 from nfv_common.tasks._task_work import TaskWork
 
-DLOG = debug.debug_get_logger('nfv_common.tasks.task_future')
+DLOG = debug.debug_get_logger("nfv_common.tasks.task_future")
 
 TASK_TIMEOUT = 20
 
@@ -16,6 +16,7 @@ class TaskFuture(object):
     """
     Task Future
     """
+
     def __init__(self, scheduler):
         """
         Create a task future
@@ -38,7 +39,7 @@ class TaskFuture(object):
         timeout_in_secs = None
         if self._timeouts is not None:
             # Look for a target specific timeout
-            module_name = target.__module__.split('.')[-1]
+            module_name = target.__module__.split(".")[-1]
             timeout_name = "%s.%s" % (module_name, target.__name__)
             timeout_in_secs = self._timeouts.get(timeout_name, None)
             if timeout_in_secs is not None:
@@ -52,9 +53,9 @@ class TaskFuture(object):
 
         if timeout_in_secs is None:
             if kwargs:
-                timeout_in_secs = kwargs.get('timeout_in_secs', None)
+                timeout_in_secs = kwargs.get("timeout_in_secs", None)
                 if timeout_in_secs is not None:
-                    del kwargs['timeout_in_secs']
+                    del kwargs["timeout_in_secs"]
 
         if timeout_in_secs is None:
             # WARNING: Any change to the default timeout must be reflected in
@@ -92,8 +93,7 @@ class TaskFuture(object):
         that has fired
         """
         if self._scheduler.running_task is not None:
-            timer_id = self._scheduler.running_task.add_timer(name,
-                                                              interval_secs)
+            timer_id = self._scheduler.running_task.add_timer(name, interval_secs)
             return timer_id
         else:
             raise LookupError("Running task no longer running")

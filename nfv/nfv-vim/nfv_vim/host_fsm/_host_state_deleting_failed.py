@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import NotifyDeleteFailedTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class DeletingFailedState(state_machine.State):
     """
     Host - Deleting Failed State
     """
+
     def __init__(self, name):
         super(DeletingFailedState, self).__init__(name)
 
@@ -77,7 +78,8 @@ class DeletingFailedState(state_machine.State):
                     host.task.start()
 
             else:
-                DLOG.verbose("Delete-Failed ignoring %s event for %s." %
-                             (event, host.name))
+                DLOG.verbose(
+                    "Delete-Failed ignoring %s event for %s." % (event, host.name)
+                )
 
         return self.name

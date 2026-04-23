@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,13 +9,14 @@ import traceback
 
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_tests.test_base')
+DLOG = debug.debug_get_logger("nfv_tests.test_base")
 
 
 class Test(object):
     """
     Test Base Class
     """
+
     LOG_FILES = {}
 
     def __init__(self, name, timeout_secs):
@@ -64,7 +65,7 @@ class Test(object):
         Clears the log files so that they are empty, expected to be overloaded
         """
         for file_name in list(self.LOG_FILES.values()):
-            with open(file_name, 'w'):
+            with open(file_name, "w"):
                 pass
 
     def _do_setup(self):
@@ -93,14 +94,12 @@ class Test(object):
             self._start_datetime = datetime.datetime.now()
             success, reason = self._do_setup()
             if not success:
-                DLOG.error("Test setup %s failure, reason=%s."
-                           % (self._name, reason))
+                DLOG.error("Test setup %s failure, reason=%s." % (self._name, reason))
                 return False
             return True
 
         except Exception as e:
-            DLOG.error("Test setup %s exception, exception=%s."
-                       % (self._name, e))
+            DLOG.error("Test setup %s exception, exception=%s." % (self._name, e))
             traceback.print_exc()
             return False
 
@@ -116,21 +115,22 @@ class Test(object):
             self._reset_log_files()
             success, reason = self._do_test()
             if not success:
-                DLOG.error("Test run %s do_test failed, reason=%s."
-                           % (self._name, reason))
+                DLOG.error(
+                    "Test run %s do_test failed, reason=%s." % (self._name, reason)
+                )
                 return False
 
             time.sleep(5)
 
-            max_end_datetime = (self._start_datetime +
-                                datetime.timedelta(seconds=self.timeout_secs))
+            max_end_datetime = self._start_datetime + datetime.timedelta(
+                seconds=self.timeout_secs
+            )
             self._end_datetime = datetime.datetime.now()
             success, reason = self._test_passed()
             while not success:
                 self._end_datetime = datetime.datetime.now()
                 if self._end_datetime > max_end_datetime:
-                    DLOG.error("Test run %s timeout, reason=%s."
-                               % (self._name, reason))
+                    DLOG.error("Test run %s timeout, reason=%s." % (self._name, reason))
                     return False
 
                 time.sleep(5)

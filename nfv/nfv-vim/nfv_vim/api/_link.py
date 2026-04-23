@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,6 +11,7 @@ class Link(wsme_types.Base):
     """
     Representation of a Link using JSON Hyper-Schema
     """
+
     title = wsme_types.text
     rel = wsme_types.text
     href = wsme_types.text
@@ -18,21 +19,32 @@ class Link(wsme_types.Base):
     type = wsme_types.text
 
     @classmethod
-    def make_link(cls, rel, url, resource, resource_args=None,
-                  title=wsme_types.Unset, method=wsme_types.Unset,
-                  type=wsme_types.Unset):
+    def make_link(
+        cls,
+        rel,
+        url,
+        resource,
+        resource_args=None,
+        title=wsme_types.Unset,
+        method=wsme_types.Unset,
+        type=wsme_types.Unset,
+    ):
 
-        forwarded_proto = pecan.request.headers.get('X-Forwarded-Proto', '')
-        if 'https' == forwarded_proto.lower():
-            if url.startswith('http:'):
-                url = url.replace('http', 'https', 1)
+        forwarded_proto = pecan.request.headers.get("X-Forwarded-Proto", "")
+        if "https" == forwarded_proto.lower():
+            if url.startswith("http:"):
+                url = url.replace("http", "https", 1)
 
         if resource_args is None:
-            resource_args = ''
+            resource_args = ""
 
-        template = '%s/%s'
-        template += '%s' if resource_args.startswith('?') else '/%s'
+        template = "%s/%s"
+        template += "%s" if resource_args.startswith("?") else "/%s"
 
-        return Link(title=title, rel=rel,
-                    href=template % (url, resource, resource_args),
-                    method=method, type=type)
+        return Link(
+            title=title,
+            rel=rel,
+            href=template % (url, resource, resource_args),
+            method=method,
+            type=type,
+        )

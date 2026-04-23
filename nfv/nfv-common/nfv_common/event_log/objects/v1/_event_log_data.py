@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,6 +10,7 @@ class EventLogStateData(object):
     """
     Event Log State Data
     """
+
     def __init__(self, state):
         self.state = state
 
@@ -18,6 +19,7 @@ class EventLogThresholdData(object):
     """
     Event Log Threshold Data
     """
+
     def __init__(self, threshold_value, observed_value):
         self.threshold_value = threshold_value
         self.observed_value = observed_value
@@ -27,11 +29,23 @@ class EventLogData(object):
     """
     Event Log Data
     """
+
     _id = 1
 
-    def __init__(self, event_id, event_type, event_context, entity_type, entity,
-                 reason_text, importance, additional_text="", state_data=None,
-                 threshold_data=None, suppression_allowed=True):
+    def __init__(
+        self,
+        event_id,
+        event_type,
+        event_context,
+        entity_type,
+        entity,
+        reason_text,
+        importance,
+        additional_text="",
+        state_data=None,
+        threshold_data=None,
+        suppression_allowed=True,
+    ):
         self.log_id = EventLogData._id
         self.event_id = event_id
         self.event_type = event_type

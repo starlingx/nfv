@@ -15,7 +15,7 @@ from nfv_common import validate
 
 from nfv_vim import rpc
 
-DLOG = debug.debug_get_logger('nfv_vim.api.image')
+DLOG = debug.debug_get_logger("nfv_vim.api.image")
 
 # The following container-format types are supported:
 #    ami  - Amazon Machine Image
@@ -24,8 +24,7 @@ DLOG = debug.debug_get_logger('nfv_vim.api.image')
 #    bare - No Container
 #    ovf  - Open Virtualization Format
 #    ova  - Open Virtual Application
-ContainerFormatType = wsme_types.Enum(str, 'ami', 'ari', 'aki', 'bare',
-                                      'ovf', 'ova')
+ContainerFormatType = wsme_types.Enum(str, "ami", "ari", "aki", "bare", "ovf", "ova")
 
 # The following disk-format types are supported:
 #    ami   - Amazon Machine Image
@@ -37,52 +36,63 @@ ContainerFormatType = wsme_types.Enum(str, 'ami', 'ari', 'aki', 'bare',
 #    qcow2 - QEMU Emulator supported file that supports Copy-On-Write
 #    vdi   - Virtual Disk image
 #    iso   - Archive Format ISO-9660, UDF standards
-DiskFormatType = wsme_types.Enum(str, 'ami', 'ari', 'aki', 'vhd', 'vmdk',
-                                 'raw', 'qcow2', 'vdi', 'iso')
+DiskFormatType = wsme_types.Enum(
+    str, "ami", "ari", "aki", "vhd", "vmdk", "raw", "qcow2", "vdi", "iso"
+)
 
 # The following visibility types are supported:
 #    private - private to the owner
 #    public  - image is available to all users
 #    shared  - image is shared
-VisibilityType = wsme_types.Enum(str, 'private', 'public', 'shared')
+VisibilityType = wsme_types.Enum(str, "private", "public", "shared")
 
 
 class ImageCreateData(wsme_types.Base):
     """
     Image - Create Data
     """
+
     name = wsme_types.wsattr(str, mandatory=True)
     description = wsme_types.wsattr(str, mandatory=False, default="")
     container_format = wsme_types.wsattr(ContainerFormatType, mandatory=True)
     disk_format = wsme_types.wsattr(DiskFormatType, mandatory=True)
     minimum_disk_size = wsme_types.wsattr(int, mandatory=False, default=0)
     minimum_memory_size = wsme_types.wsattr(int, mandatory=False, default=0)
-    visibility = wsme_types.wsattr(VisibilityType, mandatory=False,
-                                   default="public")
+    visibility = wsme_types.wsattr(VisibilityType, mandatory=False, default="public")
     protected = wsme_types.wsattr(bool, mandatory=False, default=False)
     properties = wsme_types.wsattr(str, mandatory=False, default=None)
     image_data_ref = wsme_types.wsattr(str, mandatory=True)
 
     def __str__(self):
-        return ("name=%s, description=%s, container_format=%s, "
-                "disk_format=%s, minimum_disk_size=%s, "
-                "minimum_memory_size=%s, visibility=%s, protected=%s, "
-                "properties=%s, image_data_ref=%s"
-                % (self.name, self.description, self.container_format,
-                   self.disk_format, self.minimum_disk_size,
-                   self.minimum_memory_size, self.visibility, self.protected,
-                   self.properties, self.image_data_ref))
+        return (
+            "name=%s, description=%s, container_format=%s, "
+            "disk_format=%s, minimum_disk_size=%s, "
+            "minimum_memory_size=%s, visibility=%s, protected=%s, "
+            "properties=%s, image_data_ref=%s"
+            % (
+                self.name,
+                self.description,
+                self.container_format,
+                self.disk_format,
+                self.minimum_disk_size,
+                self.minimum_memory_size,
+                self.visibility,
+                self.protected,
+                self.properties,
+                self.image_data_ref,
+            )
+        )
 
 
 class ImageUpdateData(wsme_types.Base):
     """
     Image - Update Data
     """
+
     description = wsme_types.wsattr(str, mandatory=False, default=None)
     minimum_disk_size = wsme_types.wsattr(int, mandatory=False, default=None)
     minimum_memory_size = wsme_types.wsattr(int, mandatory=False, default=None)
-    visibility = wsme_types.wsattr(VisibilityType, mandatory=False,
-                                   default=None)
+    visibility = wsme_types.wsattr(VisibilityType, mandatory=False, default=None)
     protected = wsme_types.wsattr(bool, mandatory=False, default=None)
     properties = wsme_types.wsattr(str, mandatory=False, default=None)
 
@@ -91,6 +101,7 @@ class ImageQueryData(wsme_types.Base):
     """
     Image - Query Data
     """
+
     uuid = str
     name = str
     description = str
@@ -106,18 +117,18 @@ class ImageQueryData(wsme_types.Base):
 
     def __json__(self):
         json_data = dict()
-        json_data['uuid'] = self.uuid
-        json_data['name'] = self.name
-        json_data['description'] = self.description
-        json_data['container_format'] = self.container_format
-        json_data['disk_format'] = self.disk_format
-        json_data['minimum_disk_size'] = self.minimum_disk_size
-        json_data['minimum_memory_size'] = self.minimum_memory_size
-        json_data['visibility'] = self.visibility
-        json_data['protected'] = self.protected
-        json_data['availability_status'] = json.dumps(self.availability_status)
-        json_data['action'] = self.action
-        json_data['properties'] = json.dumps(self.properties)
+        json_data["uuid"] = self.uuid
+        json_data["name"] = self.name
+        json_data["description"] = self.description
+        json_data["container_format"] = self.container_format
+        json_data["disk_format"] = self.disk_format
+        json_data["minimum_disk_size"] = self.minimum_disk_size
+        json_data["minimum_memory_size"] = self.minimum_memory_size
+        json_data["visibility"] = self.visibility
+        json_data["protected"] = self.protected
+        json_data["availability_status"] = json.dumps(self.availability_status)
+        json_data["action"] = self.action
+        json_data["properties"] = json.dumps(self.properties)
         return json_data
 
 
@@ -125,6 +136,7 @@ class ImageAPI(rest.RestController):
     """
     Image Rest API
     """
+
     @staticmethod
     def _get_image_details(image_uuid, image):
         """
@@ -141,8 +153,7 @@ class ImageAPI(rest.RestController):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.GET_IMAGE_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return httplib.INTERNAL_SERVER_ERROR
 
         if rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
@@ -164,8 +175,10 @@ class ImageAPI(rest.RestController):
             image.properties = response.properties
             return httplib.OK
 
-        DLOG.error("Unexpected result received for image %s, result=%s."
-                   % (image_uuid, response.result))
+        DLOG.error(
+            "Unexpected result received for image %s, result=%s."
+            % (image_uuid, response.result)
+        )
         return httplib.INTERNAL_SERVER_ERROR
 
     @wsme_pecan.wsexpose(ImageQueryData, str, status_code=httplib.OK)
@@ -200,14 +213,14 @@ class ImageAPI(rest.RestController):
                 break
 
             response = rpc.RPCMessage.deserialize(msg)
-            if rpc .RPC_MSG_TYPE.GET_IMAGE_RESPONSE != response.type:
-                DLOG.error("Unexpected message type received, msg_type=%s."
-                           % response.type)
+            if rpc.RPC_MSG_TYPE.GET_IMAGE_RESPONSE != response.type:
+                DLOG.error(
+                    "Unexpected message type received, msg_type=%s." % response.type
+                )
                 return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
             if rpc.RPC_MSG_RESULT.SUCCESS != response.result:
-                DLOG.error("Unexpected result received, result=%s."
-                           % response.result)
+                DLOG.error("Unexpected result received, result=%s." % response.result)
                 return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
             DLOG.verbose("Received response=%s." % response)
@@ -228,18 +241,23 @@ class ImageAPI(rest.RestController):
 
         return images
 
-    @wsme_pecan.wsexpose(ImageQueryData, body=ImageCreateData,
-                         status_code=httplib.CREATED)
+    @wsme_pecan.wsexpose(
+        ImageQueryData, body=ImageCreateData, status_code=httplib.CREATED
+    )
     def post(self, image_create_data):
-        DLOG.verbose("Image-API create called for image %s, request=%s."
-                     % (image_create_data.name, image_create_data))
+        DLOG.verbose(
+            "Image-API create called for image %s, request=%s."
+            % (image_create_data.name, image_create_data)
+        )
 
         if image_create_data.properties is not None:
             try:
                 properties = json.loads(image_create_data.properties)
             except ValueError:
-                DLOG.error("Invalid properties received, properties=%s."
-                           % image_create_data.properties)
+                DLOG.error(
+                    "Invalid properties received, properties=%s."
+                    % image_create_data.properties
+                )
                 return pecan.abort(httplib.BAD_REQUEST)
         else:
             properties = None
@@ -259,14 +277,12 @@ class ImageAPI(rest.RestController):
         vim_connection.send(rpc_request.serialize())
         msg = vim_connection.receive(timeout_in_secs=180)
         if msg is None:
-            DLOG.error("No response received for image %s."
-                       % image_create_data.name)
+            DLOG.error("No response received for image %s." % image_create_data.name)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.CREATE_IMAGE_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
@@ -285,12 +301,15 @@ class ImageAPI(rest.RestController):
             image.properties = response.properties
             return image
 
-        DLOG.error("Unexpected result received for image %s, result=%s."
-                   % (image_create_data.name, response.result))
+        DLOG.error(
+            "Unexpected result received for image %s, result=%s."
+            % (image_create_data.name, response.result)
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
-    @wsme_pecan.wsexpose(ImageQueryData, str, body=ImageUpdateData,
-                         status_code=httplib.OK)
+    @wsme_pecan.wsexpose(
+        ImageQueryData, str, body=ImageUpdateData, status_code=httplib.OK
+    )
     def put(self, image_uuid, image_update_data):
         DLOG.verbose("Image-API update called for image %s." % image_uuid)
 
@@ -318,8 +337,7 @@ class ImageAPI(rest.RestController):
         if image_update_data.minimum_memory_size is None:
             rpc_request.min_memory_size_mb = image_data.minimum_memory_size
         else:
-            rpc_request.min_memory_size_mb \
-                = image_update_data.minimum_memory_size
+            rpc_request.min_memory_size_mb = image_update_data.minimum_memory_size
 
         if image_update_data.visibility is None:
             rpc_request.visibility = image_data.visibility
@@ -335,11 +353,12 @@ class ImageAPI(rest.RestController):
             rpc_request.properties = json.loads(image_data.properties)
         else:
             try:
-                rpc_request.properties \
-                    = json.loads(image_update_data.properties)
+                rpc_request.properties = json.loads(image_update_data.properties)
             except ValueError:
-                DLOG.error("Invalid properties received, properties=%s."
-                           % image_update_data.properties)
+                DLOG.error(
+                    "Invalid properties received, properties=%s."
+                    % image_update_data.properties
+                )
                 return pecan.abort(httplib.BAD_REQUEST)
         vim_connection = pecan.request.vim.open_connection()
         vim_connection.send(rpc_request.serialize())
@@ -350,8 +369,7 @@ class ImageAPI(rest.RestController):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.UPDATE_IMAGE_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
@@ -370,8 +388,10 @@ class ImageAPI(rest.RestController):
             image.properties = response.properties
             return image
 
-        DLOG.error("Unexpected result received for image %s, result=%s."
-                   % (image_uuid, response.result))
+        DLOG.error(
+            "Unexpected result received for image %s, result=%s."
+            % (image_uuid, response.result)
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
     @wsme_pecan.wsexpose(None, str, status_code=httplib.NO_CONTENT)
@@ -393,8 +413,7 @@ class ImageAPI(rest.RestController):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.DELETE_IMAGE_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         if rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
@@ -404,6 +423,8 @@ class ImageAPI(rest.RestController):
         elif rpc.RPC_MSG_RESULT.SUCCESS == response.result:
             return None
 
-        DLOG.error("Unexpected result received for image %s, result=%s."
-                   % (image_uuid, response.result))
+        DLOG.error(
+            "Unexpected result received for image %s, result=%s."
+            % (image_uuid, response.result)
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)

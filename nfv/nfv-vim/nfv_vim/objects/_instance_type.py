@@ -10,26 +10,28 @@ from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 from nfv_vim.objects._object import ObjectData
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.instance_type')
+DLOG = debug.debug_get_logger("nfv_vim.objects.instance_type")
 
 
 class InstanceTypeStorage(Constants, metaclass=Singleton):
     """
     Instance Type Storage Constants
     """
-    UNKNOWN = Constant('unknown')
-    REMOTE_BACKED = Constant('remote')
-    LOCAL_IMAGE_BACKED = Constant('local_image')
+
+    UNKNOWN = Constant("unknown")
+    REMOTE_BACKED = Constant("remote")
+    LOCAL_IMAGE_BACKED = Constant("local_image")
 
 
 class InstanceTypeExtension(Constants, metaclass=Singleton):
     """
     Instance Type Extension Constants
     """
-    INSTANCE_AUTO_RECOVERY = Constant('sw:wrs:auto_recovery')
-    LIVE_MIGRATION_TIMEOUT = Constant('hw:wrs:live_migration_timeout')
-    LIVE_MIGRATION_MAX_DOWNTIME = Constant('hw:wrs:live_migration_max_downtime')
-    GUEST_HEARTBEAT = Constant('sw:wrs:guest:heartbeat')
+
+    INSTANCE_AUTO_RECOVERY = Constant("sw:wrs:auto_recovery")
+    LIVE_MIGRATION_TIMEOUT = Constant("hw:wrs:live_migration_timeout")
+    LIVE_MIGRATION_MAX_DOWNTIME = Constant("hw:wrs:live_migration_max_downtime")
+    GUEST_HEARTBEAT = Constant("sw:wrs:guest:heartbeat")
 
 
 # Instance Type Constant Instantiation
@@ -40,35 +42,69 @@ class InstanceTypeAttributes(ObjectData):
     """
     Instance Type Attributes Object
     """
-    def __init__(self, vcpus, mem_mb, disk_gb, ephemeral_gb, swap_gb,
-                 guest_services, auto_recovery, live_migration_timeout,
-                 live_migration_max_downtime):
-        super(InstanceTypeAttributes, self).__init__('1.0.0')
-        self.update(dict(vcpus=vcpus, mem_mb=mem_mb, disk_gb=disk_gb,
-                         ephemeral_gb=ephemeral_gb, swap_gb=swap_gb,
-                         guest_services=guest_services,
-                         auto_recovery=auto_recovery,
-                         live_migration_timeout=live_migration_timeout,
-                         live_migration_max_downtime=live_migration_max_downtime))
+
+    def __init__(
+        self,
+        vcpus,
+        mem_mb,
+        disk_gb,
+        ephemeral_gb,
+        swap_gb,
+        guest_services,
+        auto_recovery,
+        live_migration_timeout,
+        live_migration_max_downtime,
+    ):
+        super(InstanceTypeAttributes, self).__init__("1.0.0")
+        self.update(
+            dict(
+                vcpus=vcpus,
+                mem_mb=mem_mb,
+                disk_gb=disk_gb,
+                ephemeral_gb=ephemeral_gb,
+                swap_gb=swap_gb,
+                guest_services=guest_services,
+                auto_recovery=auto_recovery,
+                live_migration_timeout=live_migration_timeout,
+                live_migration_max_downtime=live_migration_max_downtime,
+            )
+        )
 
 
 class InstanceType(ObjectData):
     """
     Instance Type Object
     """
+
     def __init__(self, uuid, name):
-        super(InstanceType, self).__init__('1.0.0')
+        super(InstanceType, self).__init__("1.0.0")
         self.update(dict(uuid=uuid, name=name))
 
-    def update_details(self, vcpus, mem_mb, disk_gb, ephemeral_gb, swap_gb,
-                       guest_services, auto_recovery, live_migration_timeout,
-                       live_migration_max_downtime):
-        self.update(dict(vcpus=vcpus, mem_mb=mem_mb, disk_gb=disk_gb,
-                         ephemeral_gb=ephemeral_gb, swap_gb=swap_gb,
-                         guest_services=guest_services,
-                         auto_recovery=auto_recovery,
-                         live_migration_timeout=live_migration_timeout,
-                         live_migration_max_downtime=live_migration_max_downtime))
+    def update_details(
+        self,
+        vcpus,
+        mem_mb,
+        disk_gb,
+        ephemeral_gb,
+        swap_gb,
+        guest_services,
+        auto_recovery,
+        live_migration_timeout,
+        live_migration_max_downtime,
+    ):
+        self.update(
+            dict(
+                vcpus=vcpus,
+                mem_mb=mem_mb,
+                disk_gb=disk_gb,
+                ephemeral_gb=ephemeral_gb,
+                swap_gb=swap_gb,
+                guest_services=guest_services,
+                auto_recovery=auto_recovery,
+                live_migration_timeout=live_migration_timeout,
+                live_migration_max_downtime=live_migration_max_downtime,
+            )
+        )
 
     def have_details(self):
-        return self.get('vcpus', None) is not None
+        return self.get("vcpus", None) is not None

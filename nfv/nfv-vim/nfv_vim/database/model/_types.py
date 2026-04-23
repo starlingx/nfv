@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,6 +13,7 @@ class Secret(str):
     """
     Secret
     """
+
     def __new__(cls, value, encrypt=True, salt=None, rounds=40000):
         if encrypt:
             value = sha512_crypt.encrypt(value, salt=salt, rounds=rounds)
@@ -34,6 +35,7 @@ class SecretType(TypeDecorator):
     """
     Secret Database Type
     """
+
     impl = String(128)
 
     def process_bind_param(self, value, dialect):
@@ -47,6 +49,7 @@ class VNF_UUID(TypeDecorator):
     """
     VNF UUID Database Type
     """
+
     impl = String(64)  # Prefix string (28 characters) + uuid (36 characters)
 
     def process_bind_param(self, value, dialect):

@@ -15,10 +15,11 @@ class AlarmSeverity(Constants, metaclass=Singleton):
     """
     Alarm Severity Constants
     """
-    NONE = Constant('')
-    MINOR = Constant('minor')
-    MAJOR = Constant('major')
-    CRITICAL = Constant('critical')
+
+    NONE = Constant("")
+    MINOR = Constant("minor")
+    MAJOR = Constant("major")
+    CRITICAL = Constant("critical")
 
 
 # Alarm Constant Instantiation
@@ -29,10 +30,26 @@ class Alarm(ObjectData):
     """
     NFVI Alarm Object
     """
-    def __init__(self, alarm_uuid, alarm_id, entity_instance_id, severity,
-                 reason_text, timestamp, mgmt_affecting):
-        super(Alarm, self).__init__('1.0.0')
-        self.update(dict(alarm_uuid=alarm_uuid, alarm_id=alarm_id,
-                         entity_instance_id=entity_instance_id, severity=severity,
-                         reason_text=reason_text, timestamp=timestamp,
-                         mgmt_affecting=mgmt_affecting))
+
+    def __init__(
+        self,
+        alarm_uuid,
+        alarm_id,
+        entity_instance_id,
+        severity,
+        reason_text,
+        timestamp,
+        mgmt_affecting,
+    ):
+        super(Alarm, self).__init__("1.0.0")
+        self.update(
+            dict(
+                alarm_uuid=alarm_uuid,
+                alarm_id=alarm_id,
+                entity_instance_id=entity_instance_id,
+                severity=severity,
+                reason_text=reason_text,
+                timestamp=timestamp,
+                mgmt_affecting=mgmt_affecting,
+            )
+        )

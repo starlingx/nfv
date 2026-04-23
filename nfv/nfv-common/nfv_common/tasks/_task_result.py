@@ -1,20 +1,27 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_common.tasks.task_result')
+DLOG = debug.debug_get_logger("nfv_common.tasks.task_result")
 
 
 class TaskResult(object):
     """
     Task Result
     """
-    def __init__(self, complete=False, aborted=False, timer_result=False,
-                 selobj_result=False, result_data=None,
-                 ancillary_result_data=None):
+
+    def __init__(
+        self,
+        complete=False,
+        aborted=False,
+        timer_result=False,
+        selobj_result=False,
+        result_data=None,
+        ancillary_result_data=None,
+    ):
         """
         Create a task result
         """

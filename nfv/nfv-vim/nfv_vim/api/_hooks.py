@@ -19,13 +19,14 @@ from nfv_vim.api.acl import policy
 from nfv_common.helpers import Object
 
 
-DLOG = debug.debug_get_logger('nfv_vim.api')
+DLOG = debug.debug_get_logger("nfv_vim.api")
 
 
 class VimConnectionMgmt(object):
     """
     VIM Connection Management
     """
+
     def __init__(self):
         super(VimConnectionMgmt, self).__init__()
 
@@ -35,10 +36,12 @@ class VimConnectionMgmt(object):
         """
         Open a connection to the VIM
         """
-        connection = tcp.TCPConnection(config.CONF['vim-api']['rpc_host'],
-                                       config.CONF['vim-api']['rpc_port'])
-        connection.connect(config.CONF['vim']['rpc_host'],
-                           config.CONF['vim']['rpc_port'])
+        connection = tcp.TCPConnection(
+            config.CONF["vim-api"]["rpc_host"], config.CONF["vim-api"]["rpc_port"]
+        )
+        connection.connect(
+            config.CONF["vim"]["rpc_host"], config.CONF["vim"]["rpc_port"]
+        )
         self._connections.append(connection)
         return connection
 
@@ -63,6 +66,7 @@ class ConnectionHook(hooks.PecanHook):
     """
     Connection Hook
     """
+
     def __init__(self):
         super(ConnectionHook, self).__init__()
 
@@ -71,7 +75,7 @@ class ConnectionHook(hooks.PecanHook):
 
     def after(self, state):
         try:
-            getattr(state.request, 'vim')
+            getattr(state.request, "vim")
 
         except AttributeError:
             pass
@@ -85,19 +89,20 @@ class ContextHook(hooks.PecanHook):
     """
     Context Hook
     """
+
     def __init__(self, acl_public_routes):
         super(ContextHook, self).__init__()
         self.acl_public_routes = acl_public_routes
 
     def before(self, state):
-        auth_token = state.request.headers.get('X-Auth-Token', None)
+        auth_token = state.request.headers.get("X-Auth-Token", None)
         state.request.context = Object(auth_token=auth_token)
 
 
 class AuditLoggingHook(hooks.PecanHook):
     """
-        Performs audit logging of all Fault Manager
-        ["POST", "PUT", "PATCH", "DELETE"] REST requests.
+    Performs audit logging of all Fault Manager
+    ["POST", "PUT", "PATCH", "DELETE"] REST requests.
     """
 
     def __init__(self):
@@ -124,26 +129,28 @@ class AuditLoggingHook(hooks.PecanHook):
 
         response_content_length = state.response.content_length
 
-        user_name = state.request.headers.get('X-User')
-        tenant = state.request.headers.get('X-Tenant')
-        domain_name = state.request.headers.get('X-User-Domain-Name')
+        user_name = state.request.headers.get("X-User")
+        tenant = state.request.headers.get("X-Tenant")
+        domain_name = state.request.headers.get("X-User-Domain-Name")
 
         url_path = urlparse(state.request.path_qs).path
 
         def json_post_data(rest_state):
-            if 'form-data' in rest_state.request.headers.get('Content-Type'):
+            if "form-data" in rest_state.request.headers.get("Content-Type"):
                 return " POST: {}".format(rest_state.request.params)
-            if not hasattr(rest_state.request, 'json'):
+            if not hasattr(rest_state.request, "json"):
                 return ""
             return " POST: {}".format(rest_state.request.json)
 
         # Filter password from log
-        filtered_json = re.sub(r'{[^{}]*(passwd_hash|community|password)[^{}]*},*',
-                               '',
-                               json_post_data(state))
+        filtered_json = re.sub(
+            r"{[^{}]*(passwd_hash|community|password)[^{}]*},*",
+            "",
+            json_post_data(state),
+        )
 
-        log_data = \
-            "{} \"{} {} {}\" status: {} len: {} time: {}{} host:{}" \
+        log_data = (
+            '{} "{} {} {}" status: {} len: {} time: {}{} host:{}'
             " agent:{} user: {} tenant: {} domain: {}".format(
                 state.request.remote_addr,
                 state.request.method,
@@ -157,7 +164,9 @@ class AuditLoggingHook(hooks.PecanHook):
                 state.request.user_agent,
                 user_name,
                 tenant,
-                domain_name)
+                domain_name,
+            )
+        )
 
         DLOG.info("{}".format(log_data))
 
@@ -170,7 +179,9 @@ class AuditLoggingHook(hooks.PecanHook):
             DLOG.exception("Exception in AuditLoggingHook on event 'after'")
 
     def on_error(self, state, e):
-        DLOG.exception("Exception in AuditLoggingHook passed to event 'on_error': " + str(e))
+        DLOG.exception(
+            "Exception in AuditLoggingHook passed to event 'on_error': " + str(e)
+        )
 
 
 class AccessPolicyHook(hooks.PecanHook):
@@ -180,15 +191,22 @@ class AccessPolicyHook(hooks.PecanHook):
     specified. The rules enforcement is done using the openstack policy engine.
 
     """
+
     def before(self, state):
         controller = state.controller.__self__
         try:
-            if hasattr(controller, 'enforce_policy'):
+            if hasattr(controller, "enforce_policy"):
                 controller_method = state.controller.__name__
-                controller.enforce_policy(controller_method, state.request.environ['auth_context'])
+                controller.enforce_policy(
+                    controller_method, state.request.environ["auth_context"]
+                )
             else:
-                policy.check(base_policy.ADMIN_OR_CONFIGURATOR, {},
-                             state.request.environ['auth_context'], exc=policy.PolicyForbidden)
+                policy.check(
+                    base_policy.ADMIN_OR_CONFIGURATOR,
+                    {},
+                    state.request.environ["auth_context"],
+                    exc=policy.PolicyForbidden,
+                )
 
         except policy.PolicyForbidden:
             DLOG.warn("caught forbidden exception")

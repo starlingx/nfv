@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,17 +10,28 @@ from nfv_vim import directors
 from nfv_vim import rpc
 from nfv_vim import tables
 
-DLOG = debug.debug_get_logger('nfv_vim.vim_image_api_events')
+DLOG = debug.debug_get_logger("nfv_vim.vim_image_api_events")
 
 _image_create_operations = dict()
 _image_update_operations = dict()
 _image_delete_operations = dict()
 
 
-def _create_image_callback(success, image_uuid, image_name, image_description,
-                           container_format, disk_format, min_disk_size_gb,
-                           min_memory_size_mb, visibility, protected,
-                           avail_status, action, properties):
+def _create_image_callback(
+    success,
+    image_uuid,
+    image_name,
+    image_description,
+    container_format,
+    disk_format,
+    min_disk_size_gb,
+    min_memory_size_mb,
+    visibility,
+    protected,
+    avail_status,
+    action,
+    properties,
+):
     """
     Handle Create-Image callback
     """
@@ -60,17 +71,36 @@ def vim_image_api_create_image(connection, msg):
     DLOG.verbose("Create image, name=%s." % msg.name)
     _image_create_operations[msg.name] = connection
     image_director = directors.get_image_director()
-    image_director.image_create(msg.name, msg.description,
-                                msg.container_format, msg.disk_format,
-                                msg.min_disk_size_gb, msg.min_memory_size_mb,
-                                msg.visibility, msg.protected, msg.properties,
-                                msg.image_data_ref, _create_image_callback)
+    image_director.image_create(
+        msg.name,
+        msg.description,
+        msg.container_format,
+        msg.disk_format,
+        msg.min_disk_size_gb,
+        msg.min_memory_size_mb,
+        msg.visibility,
+        msg.protected,
+        msg.properties,
+        msg.image_data_ref,
+        _create_image_callback,
+    )
 
 
-def _update_image_callback(success, image_uuid, image_name, image_description,
-                           container_format, disk_format, min_disk_size_gb,
-                           min_memory_size_mb, visibility, protected,
-                           avail_status, action, properties):
+def _update_image_callback(
+    success,
+    image_uuid,
+    image_name,
+    image_description,
+    container_format,
+    disk_format,
+    min_disk_size_gb,
+    min_memory_size_mb,
+    visibility,
+    protected,
+    avail_status,
+    action,
+    properties,
+):
     """
     Handle Update-Image callback
     """
@@ -110,10 +140,16 @@ def vim_image_api_update_image(connection, msg):
     DLOG.verbose("Update image, uuid=%s." % msg.uuid)
     _image_update_operations[msg.uuid] = connection
     image_director = directors.get_image_director()
-    image_director.image_update(msg.uuid, msg.description,
-                                msg.min_disk_size_gb, msg.min_memory_size_mb,
-                                msg.visibility, msg.protected, msg.properties,
-                                _update_image_callback)
+    image_director.image_update(
+        msg.uuid,
+        msg.description,
+        msg.min_disk_size_gb,
+        msg.min_memory_size_mb,
+        msg.visibility,
+        msg.protected,
+        msg.properties,
+        _update_image_callback,
+    )
 
 
 def _delete_image_callback(success, image_uuid):

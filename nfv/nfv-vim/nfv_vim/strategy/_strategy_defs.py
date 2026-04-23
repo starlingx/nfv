@@ -12,33 +12,33 @@ class EventNames(object, metaclass=Singleton):
     """
     Strategy - Event Name Constants
     """
-    HOST_LOCK_FAILED = Constant('host-lock-failed')
-    HOST_UNLOCK_FAILED = Constant('host-unlock-failed')
-    HOST_REBOOT_FAILED = Constant('host-reboot-failed')
-    HOST_UPGRADE_FAILED = Constant('host-upgrade-failed')
-    HOST_UPGRADE_CHANGED = Constant('host-upgrade-changed')
-    HOST_FW_UPDATE_FAILED = Constant('host-fw-update-failed')
-    HOST_FW_UPDATE_ABORT_FAILED = Constant('host-fw-update-abort-failed')
-    HOST_SWACT_FAILED = Constant('host-swact-failed')
-    HOST_STATE_CHANGED = Constant('host-state-changed')
-    HOST_AUDIT = Constant('host-audit')
-    INSTANCE_STATE_CHANGED = Constant('instance-state-chagned')
-    INSTANCE_AUDIT = Constant('instance-audit')
-    DISABLE_HOST_SERVICES_FAILED = Constant('disable-host-services-failed')
-    ENABLE_HOST_SERVICES_FAILED = Constant('enable-host-services-failed')
-    MIGRATE_INSTANCES_FAILED = Constant('migrate-instances-failed')
-    KUBE_HOST_CORDON_FAILED = Constant('kube-host-cordon-failed')
-    KUBE_HOST_UNCORDON_FAILED = Constant('kube-host-uncordon-failed')
-    KUBE_HOST_UPGRADE_CHANGED = Constant('kube-host-upgrade-changed')
-    KUBE_HOST_UPGRADE_CONTROL_PLANE_FAILED = \
-        Constant('kube-host-upgrade-control-plane-failed')
-    KUBE_HOST_UPGRADE_KUBELET_FAILED = \
-        Constant('kube-host-upgrade-kubelet-failed')
-    KUBE_ROOTCA_UPDATE_HOST_FAILED = Constant('kube-rootca-update-host-failed')
-    KUBE_UPGRADE_CHANGED = Constant('kube-upgrade-changed')
-    QUERY_KUBE_HOST_UPGRADE_FAILED = Constant('query-kube-host-upgrade-failed')
-    QUERY_KUBE_HOST_UPGRADE_COMPLETED = \
-        Constant('query-kube-host-upgrade-completed')
+
+    HOST_LOCK_FAILED = Constant("host-lock-failed")
+    HOST_UNLOCK_FAILED = Constant("host-unlock-failed")
+    HOST_REBOOT_FAILED = Constant("host-reboot-failed")
+    HOST_UPGRADE_FAILED = Constant("host-upgrade-failed")
+    HOST_UPGRADE_CHANGED = Constant("host-upgrade-changed")
+    HOST_FW_UPDATE_FAILED = Constant("host-fw-update-failed")
+    HOST_FW_UPDATE_ABORT_FAILED = Constant("host-fw-update-abort-failed")
+    HOST_SWACT_FAILED = Constant("host-swact-failed")
+    HOST_STATE_CHANGED = Constant("host-state-changed")
+    HOST_AUDIT = Constant("host-audit")
+    INSTANCE_STATE_CHANGED = Constant("instance-state-chagned")
+    INSTANCE_AUDIT = Constant("instance-audit")
+    DISABLE_HOST_SERVICES_FAILED = Constant("disable-host-services-failed")
+    ENABLE_HOST_SERVICES_FAILED = Constant("enable-host-services-failed")
+    MIGRATE_INSTANCES_FAILED = Constant("migrate-instances-failed")
+    KUBE_HOST_CORDON_FAILED = Constant("kube-host-cordon-failed")
+    KUBE_HOST_UNCORDON_FAILED = Constant("kube-host-uncordon-failed")
+    KUBE_HOST_UPGRADE_CHANGED = Constant("kube-host-upgrade-changed")
+    KUBE_HOST_UPGRADE_CONTROL_PLANE_FAILED = Constant(
+        "kube-host-upgrade-control-plane-failed"
+    )
+    KUBE_HOST_UPGRADE_KUBELET_FAILED = Constant("kube-host-upgrade-kubelet-failed")
+    KUBE_ROOTCA_UPDATE_HOST_FAILED = Constant("kube-rootca-update-host-failed")
+    KUBE_UPGRADE_CHANGED = Constant("kube-upgrade-changed")
+    QUERY_KUBE_HOST_UPGRADE_FAILED = Constant("query-kube-host-upgrade-failed")
+    QUERY_KUBE_HOST_UPGRADE_COMPLETED = Constant("query-kube-host-upgrade-completed")
 
 
 # Constants
@@ -49,16 +49,17 @@ class FirmwareUpdateLabels(object, metaclass=Singleton):
     """
     Firmware Update Labels
     """
+
     # Host image update pending key label : True / False
-    DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE = Constant('needs_firmware_update')
+    DEVICE_IMAGE_NEEDS_FIRMWARE_UPDATE = Constant("needs_firmware_update")
 
     # Device Image Status
-    DEVICE_IMAGE_UPDATE_NULL = Constant('')
-    DEVICE_IMAGE_UPDATE_PENDING = Constant('pending')
-    DEVICE_IMAGE_UPDATE_IN_PROGRESS = Constant('in-progress')
-    DEVICE_IMAGE_UPDATE_COMPLETED = Constant('completed')
-    DEVICE_IMAGE_UPDATE_FAILED = Constant('failed')
-    DEVICE_IMAGE_UPDATE_IN_PROGRESS_ABORTED = Constant('in-progress-aborted')
+    DEVICE_IMAGE_UPDATE_NULL = Constant("")
+    DEVICE_IMAGE_UPDATE_PENDING = Constant("pending")
+    DEVICE_IMAGE_UPDATE_IN_PROGRESS = Constant("in-progress")
+    DEVICE_IMAGE_UPDATE_COMPLETED = Constant("completed")
+    DEVICE_IMAGE_UPDATE_FAILED = Constant("failed")
+    DEVICE_IMAGE_UPDATE_IN_PROGRESS_ABORTED = Constant("in-progress-aborted")
 
 
 FW_UPDATE_LABEL = FirmwareUpdateLabels()

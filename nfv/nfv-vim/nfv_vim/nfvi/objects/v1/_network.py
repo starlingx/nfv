@@ -14,28 +14,31 @@ class NetworkAdministrativeState(Constants, metaclass=Singleton):
     """
     Network Administrative State Constants
     """
-    UNKNOWN = Constant('unknown')
-    LOCKED = Constant('locked')
-    UNLOCKED = Constant('unlocked')
+
+    UNKNOWN = Constant("unknown")
+    LOCKED = Constant("locked")
+    UNLOCKED = Constant("unlocked")
 
 
 class NetworkOperationalState(Constants, metaclass=Singleton):
     """
     Network Operational State Constants
     """
-    UNKNOWN = Constant('unknown')
-    ENABLED = Constant('enabled')
-    DISABLED = Constant('disabled')
+
+    UNKNOWN = Constant("unknown")
+    ENABLED = Constant("enabled")
+    DISABLED = Constant("disabled")
 
 
 class NetworkAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Network Availability Status Constants
     """
-    UNKNOWN = Constant('unknown')
-    NONE = Constant('')
-    FAILED = Constant('failed')
-    BUILDING = Constant('building')
+
+    UNKNOWN = Constant("unknown")
+    NONE = Constant("")
+    FAILED = Constant("failed")
+    BUILDING = Constant("building")
 
 
 # Network Constant Instantiation
@@ -48,21 +51,44 @@ class NetworkProviderData(ObjectData):
     """
     NFVI Network Provider Data Object
     """
+
     def __init__(self, physical_network, network_type, segmentation_id):
-        super(NetworkProviderData, self).__init__('1.0.0')
-        self.update(dict(physical_network=physical_network,
-                         network_type=network_type,
-                         segmentation_id=segmentation_id))
+        super(NetworkProviderData, self).__init__("1.0.0")
+        self.update(
+            dict(
+                physical_network=physical_network,
+                network_type=network_type,
+                segmentation_id=segmentation_id,
+            )
+        )
 
 
 class Network(ObjectData):
     """
     NFVI Network Object
     """
-    def __init__(self, uuid, name, admin_state, oper_state, avail_status,
-                 is_shared, mtu, provider_data=None):
-        super(Network, self).__init__('1.0.0')
-        self.update(dict(uuid=uuid, name=name, admin_state=admin_state,
-                         oper_state=oper_state, avail_status=avail_status,
-                         is_shared=is_shared, mtu=mtu,
-                         provider_data=provider_data))
+
+    def __init__(
+        self,
+        uuid,
+        name,
+        admin_state,
+        oper_state,
+        avail_status,
+        is_shared,
+        mtu,
+        provider_data=None,
+    ):
+        super(Network, self).__init__("1.0.0")
+        self.update(
+            dict(
+                uuid=uuid,
+                name=name,
+                admin_state=admin_state,
+                oper_state=oper_state,
+                avail_status=avail_status,
+                is_shared=is_shared,
+                mtu=mtu,
+                provider_data=provider_data,
+            )
+        )

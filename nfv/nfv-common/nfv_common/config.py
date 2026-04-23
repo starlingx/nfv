@@ -7,7 +7,7 @@ import configparser
 
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_common.config')
+DLOG = debug.debug_get_logger("nfv_common.config")
 
 # Configuration Global used by other modules to get access to the configuration
 # specified in the ini file.
@@ -18,11 +18,12 @@ class Config(configparser.ConfigParser):
     """
     Override ConfigParser class to add dictionary functionality.
     """
+
     def as_dict(self):
         d = dict(self._sections)
         for key in d:
             d[key] = dict(self._defaults, **d[key])
-            d[key].pop('__name__', None)
+            d[key].pop("__name__", None)
         return d
 
 

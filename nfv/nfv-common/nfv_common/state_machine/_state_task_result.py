@@ -14,15 +14,17 @@ class _StateTaskResult(object, metaclass=Singleton):
     """
     State Task Result - Constants
     """
-    SUCCESS = Constant('success')
-    FAILED = Constant('failed')
-    DEGRADED = Constant('degraded')
-    ABORTED = Constant('aborted')
-    TIMED_OUT = Constant('timed-out')
+
+    SUCCESS = Constant("success")
+    FAILED = Constant("failed")
+    DEGRADED = Constant("degraded")
+    ABORTED = Constant("aborted")
+    TIMED_OUT = Constant("timed-out")
 
 
-def state_task_result_update(task_result, task_result_reason, task_work_result,
-                             task_work_result_reason):
+def state_task_result_update(
+    task_result, task_result_reason, task_work_result, task_work_result_reason
+):
     """
     Update State Task Result given a state task work result
     """

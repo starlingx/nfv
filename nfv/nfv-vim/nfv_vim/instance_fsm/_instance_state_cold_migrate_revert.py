@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import ColdMigrateRevertTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.instance')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ColdMigrateRevertState(state_machine.State):
     """
     Instance - Cold Migrate Revert State
     """
+
     def __init__(self, name):
         super(ColdMigrateRevertState, self).__init__(name)
 
@@ -47,9 +48,9 @@ class ColdMigrateRevertState(state_machine.State):
         Handle event while in the cold migrate revert state
         """
         if event_data is not None:
-            reason = event_data.get('reason', '')
+            reason = event_data.get("reason", "")
         else:
-            reason = ''
+            reason = ""
 
         handled = False
 
@@ -61,20 +62,17 @@ class ColdMigrateRevertState(state_machine.State):
                 return INSTANCE_STATE.INITIAL
 
             elif INSTANCE_EVENT.TASK_COMPLETED == event:
-                DLOG.debug("Cold-Migrate-Revert complete for %s."
-                           % instance.name)
+                DLOG.debug("Cold-Migrate-Revert complete for %s." % instance.name)
                 return INSTANCE_STATE.INITIAL
 
             elif INSTANCE_EVENT.TASK_FAILED == event:
-                DLOG.info("Cold-Migrate-Revert failed for %s."
-                          % instance.name)
+                DLOG.info("Cold-Migrate-Revert failed for %s." % instance.name)
                 instance.fail_action(instance.action_fsm_action_type, reason)
                 return INSTANCE_STATE.INITIAL
 
             elif INSTANCE_EVENT.TASK_TIMEOUT == event:
-                DLOG.info("Cold-Migrate-Revert timed out for %s."
-                          % instance.name)
-                instance.fail_action(instance.action_fsm_action_type, 'timeout')
+                DLOG.info("Cold-Migrate-Revert timed out for %s." % instance.name)
+                instance.fail_action(instance.action_fsm_action_type, "timeout")
                 return INSTANCE_STATE.INITIAL
 
             else:

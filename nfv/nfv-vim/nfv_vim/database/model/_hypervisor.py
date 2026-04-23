@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -16,7 +16,8 @@ class Hypervisor(AsDictMixin, Base):
     """
     Hypervisor Database Table
     """
-    __tablename__ = 'hypervisors'
+
+    __tablename__ = "hypervisors"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     admin_state = Column(String(64), nullable=False)

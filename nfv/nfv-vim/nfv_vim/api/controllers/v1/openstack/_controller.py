@@ -17,8 +17,9 @@ class OpenStackDescription(wsme_types.Base):
     """
     OpenStack Description
     """
+
     id = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -27,8 +28,9 @@ class OpenStackDescription(wsme_types.Base):
         description = OpenStackDescription()
         description.id = "openstack"
         description.links = [
-            Link.make_link('self', url, 'openstack'),
-            Link.make_link('heat', url, 'openstack/heat')]
+            Link.make_link("self", url, "openstack"),
+            Link.make_link("heat", url, "openstack/heat"),
+        ]
         return description
 
 
@@ -36,9 +38,10 @@ class OpenStackAPI(rest.RestController):
     """
     OpenStack API
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'heat' == key:
+        if "heat" == key:
             return HeatAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)

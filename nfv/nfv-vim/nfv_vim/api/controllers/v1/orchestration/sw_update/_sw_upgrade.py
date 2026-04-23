@@ -11,17 +11,20 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_vim.api._link import Link
-from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import SwUpgradeStrategyAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import (
+    SwUpgradeStrategyAPI
+)
 
-DLOG = debug.debug_get_logger('nfv_vim.api.sw_upgrade')
+DLOG = debug.debug_get_logger("nfv_vim.api.sw_upgrade")
 
 
 class SwUpgradeDescription(wsme_types.Base):
     """
     Software Upgrade Description
     """
+
     id = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -30,8 +33,9 @@ class SwUpgradeDescription(wsme_types.Base):
         description = SwUpgradeDescription()
         description.id = "sw-upgrade"
         description.links = [
-            Link.make_link('self', url, 'orchestration/sw-upgrade'),
-            Link.make_link('strategy', url, 'orchestration/sw-upgrade/strategy')]
+            Link.make_link("self", url, "orchestration/sw-upgrade"),
+            Link.make_link("strategy", url, "orchestration/sw-upgrade/strategy"),
+        ]
         return description
 
 
@@ -39,9 +43,10 @@ class SwUpgradeAPI(rest.RestController):
     """
     Software Upgrade Rest API
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'strategy' == key:
+        if "strategy" == key:
             return SwUpgradeStrategyAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)

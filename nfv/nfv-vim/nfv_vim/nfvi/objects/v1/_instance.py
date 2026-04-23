@@ -18,61 +18,65 @@ class InstanceAdministrativeState(Constants, metaclass=Singleton):
     """
     Instance Administrative State Constants
     """
-    UNKNOWN = Constant('unknown')
-    LOCKED = Constant('locked')
-    UNLOCKED = Constant('unlocked')
+
+    UNKNOWN = Constant("unknown")
+    LOCKED = Constant("locked")
+    UNLOCKED = Constant("unlocked")
 
 
 class InstanceOperationalState(Constants, metaclass=Singleton):
     """
     Instance Operational State Constants
     """
-    UNKNOWN = Constant('unknown')
-    ENABLED = Constant('enabled')
-    DISABLED = Constant('disabled')
+
+    UNKNOWN = Constant("unknown")
+    ENABLED = Constant("enabled")
+    DISABLED = Constant("disabled")
 
 
 class InstanceAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Instance Availability Status Constants
     """
-    UNKNOWN = Constant('unknown')
-    NONE = Constant('')
-    DEGRADED = Constant('degraded')
-    FAILED = Constant('failed')
-    INTEST = Constant('intest')
-    OFFDUTY = Constant('offduty')
-    OFFLINE = Constant('offline')
-    ONLINE = Constant('online')
-    POWER_OFF = Constant('power-off')
-    RESIZED = Constant('resized')
-    PAUSED = Constant('paused')
-    SUSPENDED = Constant('suspended')
-    DELETED = Constant('deleted')
-    CRASHED = Constant('crashed')
-    UNHEALTHY = Constant('unhealthy')
+
+    UNKNOWN = Constant("unknown")
+    NONE = Constant("")
+    DEGRADED = Constant("degraded")
+    FAILED = Constant("failed")
+    INTEST = Constant("intest")
+    OFFDUTY = Constant("offduty")
+    OFFLINE = Constant("offline")
+    ONLINE = Constant("online")
+    POWER_OFF = Constant("power-off")
+    RESIZED = Constant("resized")
+    PAUSED = Constant("paused")
+    SUSPENDED = Constant("suspended")
+    DELETED = Constant("deleted")
+    CRASHED = Constant("crashed")
+    UNHEALTHY = Constant("unhealthy")
 
 
 class InstanceAction(Constants, metaclass=Singleton):
     """
     Instance Action Constants
     """
-    UNKNOWN = Constant('unknown')
-    NONE = Constant('')
-    MIGRATING = Constant('migrating')
-    MIGRATING_ROLLBACK = Constant('migrating-rollback')
-    RESIZING = Constant('resizing')
-    REBOOTING = Constant('rebooting')
-    SUSPENDING = Constant('suspending')
-    DISABLING = Constant('disabling')
-    DELETING = Constant('deleting')
-    POWERING_OFF = Constant('powering-off')
-    POWERING_ON = Constant('powering-on')
-    BUILDING = Constant('building')
-    REBUILDING = Constant('rebuilding')
-    PAUSING = Constant('pausing')
-    UNPAUSING = Constant('unpausing')
-    RESUMING = Constant('resuming')
+
+    UNKNOWN = Constant("unknown")
+    NONE = Constant("")
+    MIGRATING = Constant("migrating")
+    MIGRATING_ROLLBACK = Constant("migrating-rollback")
+    RESIZING = Constant("resizing")
+    REBOOTING = Constant("rebooting")
+    SUSPENDING = Constant("suspending")
+    DISABLING = Constant("disabling")
+    DELETING = Constant("deleting")
+    POWERING_OFF = Constant("powering-off")
+    POWERING_ON = Constant("powering-on")
+    BUILDING = Constant("building")
+    REBUILDING = Constant("rebuilding")
+    PAUSING = Constant("pausing")
+    UNPAUSING = Constant("unpausing")
+    RESUMING = Constant("resuming")
 
     @staticmethod
     def get_action_type(action):
@@ -99,78 +103,85 @@ class InstanceActionType(Constants, metaclass=Singleton):
     """
     Instance Action Type Constants
     """
-    UNKNOWN = Constant('unknown')
-    NONE = Constant('')
-    PAUSE = Constant('pause')
-    UNPAUSE = Constant('unpause')
-    SUSPEND = Constant('suspend')
-    RESUME = Constant('resume')
-    LIVE_MIGRATE = Constant('live-migrate')
-    LIVE_MIGRATE_ROLLBACK = Constant('live-migrate-rollback')
-    COLD_MIGRATE = Constant('cold-migrate')
-    RESIZE = Constant('resize')
-    CONFIRM_RESIZE = Constant('confirm-resize')
-    REVERT_RESIZE = Constant('revert-resize')
-    REBOOT = Constant('reboot')
-    START = Constant('start')
-    STOP = Constant('stop')
-    REBUILD = Constant('rebuild')
-    EVACUATE = Constant('evacuate')
-    LOG = Constant('log')
-    DELETE = Constant('delete')
+
+    UNKNOWN = Constant("unknown")
+    NONE = Constant("")
+    PAUSE = Constant("pause")
+    UNPAUSE = Constant("unpause")
+    SUSPEND = Constant("suspend")
+    RESUME = Constant("resume")
+    LIVE_MIGRATE = Constant("live-migrate")
+    LIVE_MIGRATE_ROLLBACK = Constant("live-migrate-rollback")
+    COLD_MIGRATE = Constant("cold-migrate")
+    RESIZE = Constant("resize")
+    CONFIRM_RESIZE = Constant("confirm-resize")
+    REVERT_RESIZE = Constant("revert-resize")
+    REBOOT = Constant("reboot")
+    START = Constant("start")
+    STOP = Constant("stop")
+    REBUILD = Constant("rebuild")
+    EVACUATE = Constant("evacuate")
+    LOG = Constant("log")
+    DELETE = Constant("delete")
 
 
 class InstanceActionState(Constants, metaclass=Singleton):
     """
     Instance Action State Constants
     """
-    UNKNOWN = Constant('unknown')
-    INITIAL = Constant('initial')
-    PROCEED = Constant('proceed')
-    ALLOWED = Constant('allowed')
-    REJECTED = Constant('rejected')
-    STARTED = Constant('started')
-    COMPLETED = Constant('completed')
+
+    UNKNOWN = Constant("unknown")
+    INITIAL = Constant("initial")
+    PROCEED = Constant("proceed")
+    ALLOWED = Constant("allowed")
+    REJECTED = Constant("rejected")
+    STARTED = Constant("started")
+    COMPLETED = Constant("completed")
 
 
 class InstanceRebootOption(Constants, metaclass=Singleton):
     """
     Instance Reboot Option Constants
     """
-    GRACEFUL_SHUTDOWN = Constant('graceful-shutdown')
+
+    GRACEFUL_SHUTDOWN = Constant("graceful-shutdown")
 
 
 class InstanceLiveMigrateOption(Constants, metaclass=Singleton):
     """
     Instance Live Migrate Option Constants
     """
-    BLOCK_MIGRATION = Constant('block-migration')
-    HOST = Constant('host')
+
+    BLOCK_MIGRATION = Constant("block-migration")
+    HOST = Constant("host")
 
 
 class InstanceResizeOption(Constants, metaclass=Singleton):
     """
     Instance Resize Option Constants
     """
-    INSTANCE_TYPE_UUID = Constant('instance-type-uuid')
+
+    INSTANCE_TYPE_UUID = Constant("instance-type-uuid")
 
 
 class InstanceRebuildOption(Constants, metaclass=Singleton):
     """
     Instance Rebuild Option Constants
     """
-    INSTANCE_IMAGE_UUID = Constant('instance-image-uuid')
-    INSTANCE_NAME = Constant('instance-name')
+
+    INSTANCE_IMAGE_UUID = Constant("instance-image-uuid")
+    INSTANCE_NAME = Constant("instance-name")
 
 
 class InstanceGuestServiceState(Constants, metaclass=Singleton):
     """
     Instance Guest Service State Constants
     """
-    CONFIGURED = Constant('configured')
-    CREATED = Constant('created')
-    ENABLED = Constant('enabled')
-    DISABLED = Constant('disabled')
+
+    CONFIGURED = Constant("configured")
+    CREATED = Constant("created")
+    ENABLED = Constant("enabled")
+    DISABLED = Constant("disabled")
 
 
 # Instance Constant Instantiation
@@ -191,12 +202,22 @@ class InstanceActionData(ObjectData):
     """
     NFVI Instance Action Data Object
     """
-    def __init__(self, action_uuid, action_type, action_parameters=None,
-                 action_state=INSTANCE_ACTION_STATE.INITIAL, reason="",
-                 created_timestamp=None, last_update_timestamp=None,
-                 skip_guest_vote=False, skip_guest_notify=False,
-                 from_cli=False, context=None):
-        super(InstanceActionData, self).__init__('1.0.0')
+
+    def __init__(
+        self,
+        action_uuid,
+        action_type,
+        action_parameters=None,
+        action_state=INSTANCE_ACTION_STATE.INITIAL,
+        reason="",
+        created_timestamp=None,
+        last_update_timestamp=None,
+        skip_guest_vote=False,
+        skip_guest_notify=False,
+        from_cli=False,
+        context=None,
+    ):
+        super(InstanceActionData, self).__init__("1.0.0")
 
         self._action_uuid = action_uuid
         self._action_type = action_type
@@ -213,14 +234,14 @@ class InstanceActionData(ObjectData):
             self._context = context
 
         if created_timestamp is None:
-            self._created_timestamp \
-                = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            self._created_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         else:
             self._created_timestamp = created_timestamp
 
         if last_update_timestamp is None:
-            self._last_updated_timestamp \
-                = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            self._last_updated_timestamp = datetime.utcnow().strftime(
+                "%Y-%m-%dT%H:%M:%SZ"
+            )
         else:
             self._last_updated_timestamp = last_update_timestamp
 
@@ -265,8 +286,7 @@ class InstanceActionData(ObjectData):
         Allow setting the state of the action
         """
         self._action_state = value
-        self._last_updated_timestamp \
-            = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        self._last_updated_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     @property
     def reason(self):
@@ -281,8 +301,7 @@ class InstanceActionData(ObjectData):
         Allows the reason for the action state to be set
         """
         self._reason = value
-        self._last_updated_timestamp \
-            = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        self._last_updated_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     @property
     def created_timestamp(self):
@@ -351,21 +370,21 @@ class InstanceActionData(ObjectData):
         Represent instance action data object as dictionary
         """
         data = dict()
-        data['action_uuid'] = str(self.action_uuid)
-        data['action_type'] = self.action_type
+        data["action_uuid"] = str(self.action_uuid)
+        data["action_type"] = self.action_type
         if self.action_parameters is None:
-            data['action_parameters'] = ""
+            data["action_parameters"] = ""
         else:
-            data['action_parameters'] = "%s" % self.action_parameters
-        data['action_state'] = self.action_state
-        data['reason'] = self.reason
-        data['created_timestamp'] = self.created_timestamp
-        data['last_update_timestamp'] = self.last_updated_timestamp
-        data['skip_guest_vote'] = self.skip_guest_vote
-        data['skip_guest_notify'] = self.skip_guest_notify
-        data['from_cli'] = self.from_cli
+            data["action_parameters"] = "%s" % self.action_parameters
+        data["action_state"] = self.action_state
+        data["reason"] = self.reason
+        data["created_timestamp"] = self.created_timestamp
+        data["last_update_timestamp"] = self.last_updated_timestamp
+        data["skip_guest_vote"] = self.skip_guest_vote
+        data["skip_guest_notify"] = self.skip_guest_notify
+        data["from_cli"] = self.from_cli
         if self.context is None:
-            data['context'] = dict()
+            data["context"] = dict()
         else:
             context = self.context.as_dict().copy()
 
@@ -377,40 +396,65 @@ class InstanceActionData(ObjectData):
                 if isinstance(value, bytes):
                     context[key] = value.decode()
 
-            data['context'] = context
+            data["context"] = context
 
         return data
 
     def __str__(self):
-        return ("Instance action, type=%s, params=%s, state=%s, reason=%s"
-                % (self._action_type, self._action_parameters,
-                   self._action_state, self._reason))
+        return "Instance action, type=%s, params=%s, state=%s, reason=%s" % (
+            self._action_type,
+            self._action_parameters,
+            self._action_state,
+            self._reason,
+        )
 
 
 class Instance(ObjectData):
     """
     NFVI Instance Object
     """
-    def __init__(self, uuid, name, tenant_id, admin_state, oper_state,
-                 avail_status, action, host_name, instance_type,
-                 image_uuid=None, live_migration_support=None,
-                 attached_volumes=None, nfvi_data=None,
-                 recovery_priority=None, live_migration_timeout=None):
-        super(Instance, self).__init__('1.0.0')
+
+    def __init__(
+        self,
+        uuid,
+        name,
+        tenant_id,
+        admin_state,
+        oper_state,
+        avail_status,
+        action,
+        host_name,
+        instance_type,
+        image_uuid=None,
+        live_migration_support=None,
+        attached_volumes=None,
+        nfvi_data=None,
+        recovery_priority=None,
+        live_migration_timeout=None,
+    ):
+        super(Instance, self).__init__("1.0.0")
 
         if attached_volumes is None:
             attached_volumes = list()
 
-        self.update(dict(uuid=uuid, name=name, tenant_id=tenant_id,
-                         admin_state=admin_state, oper_state=oper_state,
-                         avail_status=avail_status, action=action,
-                         host_name=host_name,
-                         instance_type=instance_type,
-                         image_uuid=image_uuid,
-                         live_migration_support=live_migration_support,
-                         attached_volumes=attached_volumes,
-                         recovery_priority=recovery_priority,
-                         live_migration_timeout=live_migration_timeout))
+        self.update(
+            dict(
+                uuid=uuid,
+                name=name,
+                tenant_id=tenant_id,
+                admin_state=admin_state,
+                oper_state=oper_state,
+                avail_status=avail_status,
+                action=action,
+                host_name=host_name,
+                instance_type=instance_type,
+                image_uuid=image_uuid,
+                live_migration_support=live_migration_support,
+                attached_volumes=attached_volumes,
+                recovery_priority=recovery_priority,
+                live_migration_timeout=live_migration_timeout,
+            )
+        )
 
         self.nfvi_data = nfvi_data
 
@@ -419,42 +463,42 @@ class Instance(ObjectData):
         """
         Returns the vcpus from the flavor
         """
-        return self.get('instance_type').get('vcpus')
+        return self.get("instance_type").get("vcpus")
 
     @property
     def instance_type_mem_mb(self):
         """
         Returns the ram from the flavor
         """
-        return self.get('instance_type').get('ram')
+        return self.get("instance_type").get("ram")
 
     @property
     def instance_type_disk_gb(self):
         """
         Returns the disk from the flavor
         """
-        return self.get('instance_type').get('disk')
+        return self.get("instance_type").get("disk")
 
     @property
     def instance_type_ephemeral_gb(self):
         """
         Returns the ephemeral from the flavor
         """
-        return self.get('instance_type').get('ephemeral')
+        return self.get("instance_type").get("ephemeral")
 
     @property
     def instance_type_swap_gb(self):
         """
         Returns the swap from the flavor
         """
-        return self.get('instance_type').get('swap')
+        return self.get("instance_type").get("swap")
 
     @property
     def instance_type_original_name(self):
         """
         Returns the original name from the flavor
         """
-        return self.get('instance_type').get('original_name')
+        return self.get("instance_type").get("original_name")
 
     @property
     def instance_type_guest_services(self):
@@ -462,16 +506,17 @@ class Instance(ObjectData):
         Returns the guest services from the flavor extra specs
         """
         guest_services = dict()
-        flavor_data_extra = self.get('instance_type').get('extra_specs', None)
+        flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
             heartbeat = flavor_data_extra.get(
-                INSTANCE_TYPE_EXTENSION.GUEST_HEARTBEAT, None)
-            if heartbeat and 'true' == heartbeat.lower():
+                INSTANCE_TYPE_EXTENSION.GUEST_HEARTBEAT, None
+            )
+            if heartbeat and "true" == heartbeat.lower():
                 guest_heartbeat = INSTANCE_GUEST_SERVICE_STATE.CONFIGURED
             else:
                 guest_heartbeat = None
             if guest_heartbeat is not None:
-                guest_services['heartbeat'] = guest_heartbeat
+                guest_services["heartbeat"] = guest_heartbeat
 
         return guest_services
 
@@ -481,19 +526,21 @@ class Instance(ObjectData):
         Returns the auto recovery from the flavor extra specs
         """
         auto_recovery = None
-        flavor_data_extra = self.get('instance_type').get('extra_specs', None)
+        flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
             auto_recovery = flavor_data_extra.get(
-                INSTANCE_TYPE_EXTENSION.INSTANCE_AUTO_RECOVERY, None)
+                INSTANCE_TYPE_EXTENSION.INSTANCE_AUTO_RECOVERY, None
+            )
             if auto_recovery is not None:
-                if 'false' == auto_recovery.lower():
+                if "false" == auto_recovery.lower():
                     auto_recovery = False
-                elif 'true' == auto_recovery.lower():
+                elif "true" == auto_recovery.lower():
                     auto_recovery = True
                 else:
-                    raise AttributeError("sw:wrs:auto_recovery is %s, "
-                                         "expecting 'true' or 'false'"
-                                         % auto_recovery)
+                    raise AttributeError(
+                        "sw:wrs:auto_recovery is %s, "
+                        "expecting 'true' or 'false'" % auto_recovery
+                    )
 
         return auto_recovery
 
@@ -503,10 +550,11 @@ class Instance(ObjectData):
         Returns the live migration timeout from the flavor extra specs
         """
         live_migration_timeout = None
-        flavor_data_extra = self.get('instance_type').get('extra_specs', None)
+        flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
             live_migration_timeout = flavor_data_extra.get(
-                INSTANCE_TYPE_EXTENSION.LIVE_MIGRATION_TIMEOUT, None)
+                INSTANCE_TYPE_EXTENSION.LIVE_MIGRATION_TIMEOUT, None
+            )
 
         return live_migration_timeout
 
@@ -516,9 +564,10 @@ class Instance(ObjectData):
         Returns the live migration max downtime from the flavor extra specs
         """
         live_migration_max_downtime = None
-        flavor_data_extra = self.get('instance_type').get('extra_specs', None)
+        flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
             live_migration_max_downtime = flavor_data_extra.get(
-                INSTANCE_TYPE_EXTENSION.LIVE_MIGRATION_MAX_DOWNTIME, None)
+                INSTANCE_TYPE_EXTENSION.LIVE_MIGRATION_MAX_DOWNTIME, None
+            )
 
         return live_migration_max_downtime

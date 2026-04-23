@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -12,13 +12,14 @@ from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import DeleteHostTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class DeletingState(state_machine.State):
     """
     Host - Deleting State
     """
+
     def __init__(self, name):
         super(DeletingState, self).__init__(name)
 
@@ -67,10 +68,9 @@ class DeletingState(state_machine.State):
             return HOST_STATE.DELETING_FAILED
 
         elif HOST_EVENT.AUDIT == event:
-            if config.section_exists('host-configuration'):
-                section = config.CONF['host-configuration']
-                max_wait = int(section.get('max_host_deleting_wait_in_secs',
-                                           60))
+            if config.section_exists("host-configuration"):
+                section = config.CONF["host-configuration"]
+                max_wait = int(section.get("max_host_deleting_wait_in_secs", 60))
             else:
                 max_wait = 60
 
@@ -87,8 +87,7 @@ class DeletingState(state_machine.State):
                 elif host.task.is_failed() or host.task.timed_out():
                     host.task.start()
             else:
-                DLOG.info("Timed out waiting for delete completion of %s."
-                          % host.name)
+                DLOG.info("Timed out waiting for delete completion of %s." % host.name)
                 return HOST_STATE.CONFIGURE
 
         elif HOST_EVENT.TASK_TIMEOUT == event:

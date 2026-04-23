@@ -11,6 +11,7 @@ class NFVIFaultMgmtAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Fault Management API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):

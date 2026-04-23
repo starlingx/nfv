@@ -13,25 +13,26 @@ from nfv_common.helpers import Singleton
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
-DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.cinder')
+DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.cinder")
 
 
 class VolumeStatus(Constants, metaclass=Singleton):
     """
     VOLUME STATUS Constants
     """
-    CREATING = Constant('creating')
-    AVAILABLE = Constant('available')
-    ATTACHING = Constant('attaching')
-    IN_USE = Constant('in-use')
-    BACKING_UP = Constant('backing-up')
-    RESTORING_BACKUP = Constant('restoring-backup')
-    DOWNLOADING = Constant('downloading')
-    DELETING = Constant('deleting')
-    ERROR = Constant('error')
-    ERROR_DELETING = Constant('error_deleting')
-    ERROR_RESTORING = Constant('error_restoring')
-    ERROR_EXTENDING = Constant('error_extending')
+
+    CREATING = Constant("creating")
+    AVAILABLE = Constant("available")
+    ATTACHING = Constant("attaching")
+    IN_USE = Constant("in-use")
+    BACKING_UP = Constant("backing-up")
+    RESTORING_BACKUP = Constant("restoring-backup")
+    DOWNLOADING = Constant("downloading")
+    DELETING = Constant("deleting")
+    ERROR = Constant("error")
+    ERROR_DELETING = Constant("error_deleting")
+    ERROR_RESTORING = Constant("error_restoring")
+    ERROR_EXTENDING = Constant("error_extending")
 
 
 # Constant Instantiation
@@ -64,8 +65,9 @@ def get_volumes(token, page_limit=None, next_page=None, all_tenants=True):
     return response
 
 
-def create_volume(token, volume_name, volume_description, size_gb,
-                  image_id=None, bootable=None):
+def create_volume(
+    token, volume_name, volume_description, size_gb, image_id=None, bootable=None
+):
     """
     Asks OpenStack Cinder to create a volume
     """
@@ -76,24 +78,25 @@ def create_volume(token, volume_name, volume_description, size_gb,
     api_cmd = url + "/volumes"
 
     api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers["Content-Type"] = "application/json"
 
     volume = dict()
-    volume['name'] = volume_name
-    volume['description'] = volume_description
-    volume['size'] = size_gb
+    volume["name"] = volume_name
+    volume["description"] = volume_description
+    volume["size"] = size_gb
 
     if image_id is not None:
-        volume['imageRef'] = image_id
+        volume["imageRef"] = image_id
 
     if bootable is not None:
-        volume['bootable'] = bootable
+        volume["bootable"] = bootable
 
     api_cmd_payload = dict()
-    api_cmd_payload['volume'] = volume
+    api_cmd_payload["volume"] = volume
 
-    response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+    response = rest_api_request(
+        token, "POST", api_cmd, api_cmd_headers, json.dumps(api_cmd_payload)
+    )
     return response
 
 
@@ -108,16 +111,17 @@ def update_volume(token, volume_id, volume_description):
     api_cmd = url + "/volumes/%s" % volume_id
 
     api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers["Content-Type"] = "application/json"
 
     volume = dict()
-    volume['description'] = volume_description
+    volume["description"] = volume_description
 
     api_cmd_payload = dict()
-    api_cmd_payload['volume'] = volume
+    api_cmd_payload["volume"] = volume
 
-    response = rest_api_request(token, "PUT", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+    response = rest_api_request(
+        token, "PUT", api_cmd, api_cmd_headers, json.dumps(api_cmd_payload)
+    )
     return response
 
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,23 +13,43 @@ from nfv_vim.strategy._strategy import SwUpgradeStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import SystemConfigUpdateStrategy  # noqa: F401
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT  # noqa: F401
 from nfv_vim.strategy._strategy_stages import STRATEGY_STAGE_NAME  # noqa: F401
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    KubeHostUpgradeControlPlaneStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    KubeRootcaUpdateGenerateCertStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    KubeRootcaUpdateHostTrustBothcasStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    KubeRootcaUpdateHostTrustNewcaStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    KubeRootcaUpdateHostUpdateCertsStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    KubeRootcaUpdatePodsTrustBothcasStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    KubeRootcaUpdatePodsTrustNewcaStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    QueryKubeRootcaHostUpdatesStep
+)
+from nfv_vim.strategy._strategy_steps import (   # noqa: F401
+    QuerySystemConfigUpdateHostsStep
+)
 from nfv_vim.strategy._strategy_steps import ApplySwPatchesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import DisableHostServicesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import FwUpdateAbortHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import FwUpdateHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeHostCordonStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeHostUncordonStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeHostUpgradeControlPlaneStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeHostUpgradeKubeletStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubePostApplicationUpdateStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubePreApplicationUpdateStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateCompleteStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateGenerateCertStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateHostTrustBothcasStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateHostTrustNewcaStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateHostUpdateCertsStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeRootcaUpdatePodsTrustBothcasStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import KubeRootcaUpdatePodsTrustNewcaStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeRootcaUpdateStartStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeCleanupAbortedStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import KubeUpgradeCleanupStep  # noqa: F401
@@ -44,13 +64,11 @@ from nfv_vim.strategy._strategy_steps import MigrateInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryAlarmsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryFwUpdateHostStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryKubeHostUpgradeStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import QueryKubeRootcaHostUpdatesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryKubeRootcaUpdateStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryKubeUpgradeStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryKubeVersionsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QuerySwPatchHostsStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import QuerySystemConfigUpdateHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryUpgradeStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import RebootHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import StartInstancesStep  # noqa: F401

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -71,15 +71,17 @@ def database_volume_get_list():
     volume_objs = list()
     for volume in query.all():
         nfvi_volume_data = json.loads(volume.nfvi_volume_data)
-        nfvi_volume = nfvi.objects.v1.Volume(nfvi_volume_data['uuid'],
-                                             nfvi_volume_data['name'],
-                                             nfvi_volume_data['description'],
-                                             nfvi_volume_data['avail_status'],
-                                             nfvi_volume_data['action'],
-                                             nfvi_volume_data['size_gb'],
-                                             nfvi_volume_data['bootable'],
-                                             nfvi_volume_data['encrypted'],
-                                             nfvi_volume_data['image_uuid'])
+        nfvi_volume = nfvi.objects.v1.Volume(
+            nfvi_volume_data["uuid"],
+            nfvi_volume_data["name"],
+            nfvi_volume_data["description"],
+            nfvi_volume_data["avail_status"],
+            nfvi_volume_data["action"],
+            nfvi_volume_data["size_gb"],
+            nfvi_volume_data["bootable"],
+            nfvi_volume_data["encrypted"],
+            nfvi_volume_data["image_uuid"],
+        )
         volume_obj = objects.Volume(nfvi_volume)
         volume_objs.append(volume_obj)
     return volume_objs
@@ -101,16 +103,18 @@ def database_volume_snapshot_add(volume_snapshot_obj):
         volume_snapshot.description = volume_snapshot_obj.description
         volume_snapshot.size_gb = volume_snapshot_obj.size_gb
         volume_snapshot.volume_uuid = volume_snapshot_obj.volume_uuid
-        volume_snapshot.nfvi_volume_snapshot_data = \
-            json.dumps(volume_snapshot_obj.nfvi_volume_snapshot.as_dict())
+        volume_snapshot.nfvi_volume_snapshot_data = json.dumps(
+            volume_snapshot_obj.nfvi_volume_snapshot.as_dict()
+        )
         session.add(volume_snapshot)
     else:
         volume_snapshot.name = volume_snapshot_obj.name
         volume_snapshot.description = volume_snapshot_obj.description
         volume_snapshot.size_gb = volume_snapshot_obj.size_gb
         volume_snapshot.volume_uuid = volume_snapshot_obj.volume_uuid
-        volume_snapshot.nfvi_volume_snapshot_data = \
-            json.dumps(volume_snapshot_obj.nfvi_volume_snapshot.as_dict())
+        volume_snapshot.nfvi_volume_snapshot_data = json.dumps(
+            volume_snapshot_obj.nfvi_volume_snapshot.as_dict()
+        )
     db.commit()
 
 
@@ -136,14 +140,16 @@ def database_volume_snapshot_get_list():
 
     volume_snapshot_objs = list()
     for volume_snapshot in query.all():
-        nfvi_volume_snapshot_data = \
-            json.loads(volume_snapshot.nfvi_volume_snapshot_data)
+        nfvi_volume_snapshot_data = json.loads(
+            volume_snapshot.nfvi_volume_snapshot_data
+        )
         nfvi_volume_snapshot = nfvi.objects.v1.VolumeSnapshot(
-            nfvi_volume_snapshot_data['uuid'],
-            nfvi_volume_snapshot_data['name'],
-            nfvi_volume_snapshot_data['description'],
-            nfvi_volume_snapshot_data['size_gb'],
-            nfvi_volume_snapshot_data['volume_uuid'])
+            nfvi_volume_snapshot_data["uuid"],
+            nfvi_volume_snapshot_data["name"],
+            nfvi_volume_snapshot_data["description"],
+            nfvi_volume_snapshot_data["size_gb"],
+            nfvi_volume_snapshot_data["volume_uuid"],
+        )
         volume_snapshot_obj = objects.VolumeSnapshot(nfvi_volume_snapshot)
         volume_snapshot_objs.append(volume_snapshot_obj)
     return volume_snapshot_objs

@@ -18,13 +18,13 @@ from nfv_plugins.nfvi_plugins.openstack import fm
 from nfv_plugins.nfvi_plugins.openstack import openstack
 from nfv_vim import database
 
-DLOG = debug.debug_get_logger('nfv_vim.webserver.webserver')
+DLOG = debug.debug_get_logger("nfv_vim.webserver.webserver")
 
 _lock = threading.Lock()
 _token = None
 _directory = None
-_webserver_src_dir = '/'
-_vim_api_ip = ''
+_webserver_src_dir = "/"
+_vim_api_ip = ""
 
 
 def _bare_address_string(self):
@@ -43,23 +43,24 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """
     HTTP Request Handler
     """
+
     def do_GET(self):
         global _lock, _token
 
-        if self.path == '/':
-            with open(_webserver_src_dir + '/html/index.html', 'r') as f:
+        if self.path == "/":
+            with open(_webserver_src_dir + "/html/index.html", "r") as f:
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'text/html')
+                self.send_header("Content-Type", "text/html")
                 self.end_headers()
                 self.wfile.write(f.read().encode())
-        elif self.path == '/StarlingX_Icon_RGB_Stacked_2color.png':
-            with open(_webserver_src_dir + '/images' + self.path, 'r') as f:
+        elif self.path == "/StarlingX_Icon_RGB_Stacked_2color.png":
+            with open(_webserver_src_dir + "/images" + self.path, "r") as f:
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'image/x-icon')
+                self.send_header("Content-Type", "image/x-icon")
                 self.end_headers()
                 self.wfile.write(f.read().encode())
 
-        elif re.search('/vim/overview', self.path) is not None:
+        elif re.search("/vim/overview", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 locked_hosts = 0
@@ -171,47 +172,53 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 total_instances = len(instances)
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(
-                    (query_obj.group(1) + "(" +
-                    json.dumps(
-                        {'locked_hosts': locked_hosts,
-                         'unlocked_hosts': unlocked_hosts,
-                         'locking_hosts': locking_hosts,
-                         'unlocking_hosts': unlocking_hosts,
-                         'enabled_hosts': enabled_hosts,
-                         'disabled_hosts': disabled_hosts,
-                         'offline_hosts': offline_hosts,
-                         'failed_hosts': failed_hosts,
-                         'nfvi_enabled_hosts': nfvi_enabled_hosts,
-                         'total_hosts': total_hosts,
-                         'locked_instances': locked_instances,
-                         'unlocked_instances': unlocked_instances,
-                         'enabled_instances': enabled_instances,
-                         'disabled_instances': disabled_instances,
-                         'failed_instances': failed_instances,
-                         'powering_off_instances': powering_off_instances,
-                         'pausing_instances': pausing_instances,
-                         'paused_instances': paused_instances,
-                         'suspended_instances': suspended_instances,
-                         'suspending_instances': suspending_instances,
-                         'resizing_instances': resizing_instances,
-                         'rebooting_instances': rebooting_instances,
-                         'rebuilding_instances': rebuilding_instances,
-                         'migrating_instances': migrating_instances,
-                         'deleting_instances': deleting_instances,
-                         'deleted_instances': deleted_instances,
-                         'total_instances': total_instances,
-                         'datetime': str(datetime.datetime.now())[:-3]
-                         }) + ")").encode())
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps(
+                            {
+                                "locked_hosts": locked_hosts,
+                                "unlocked_hosts": unlocked_hosts,
+                                "locking_hosts": locking_hosts,
+                                "unlocking_hosts": unlocking_hosts,
+                                "enabled_hosts": enabled_hosts,
+                                "disabled_hosts": disabled_hosts,
+                                "offline_hosts": offline_hosts,
+                                "failed_hosts": failed_hosts,
+                                "nfvi_enabled_hosts": nfvi_enabled_hosts,
+                                "total_hosts": total_hosts,
+                                "locked_instances": locked_instances,
+                                "unlocked_instances": unlocked_instances,
+                                "enabled_instances": enabled_instances,
+                                "disabled_instances": disabled_instances,
+                                "failed_instances": failed_instances,
+                                "powering_off_instances": powering_off_instances,
+                                "pausing_instances": pausing_instances,
+                                "paused_instances": paused_instances,
+                                "suspended_instances": suspended_instances,
+                                "suspending_instances": suspending_instances,
+                                "resizing_instances": resizing_instances,
+                                "rebooting_instances": rebooting_instances,
+                                "rebuilding_instances": rebuilding_instances,
+                                "migrating_instances": migrating_instances,
+                                "deleting_instances": deleting_instances,
+                                "deleted_instances": deleted_instances,
+                                "total_instances": total_instances,
+                                "datetime": str(datetime.datetime.now())[:-3],
+                            }
+                        )
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/alarms', self.path) is not None:
+        elif re.search("/vim/alarms", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 critical_alarms = 0
@@ -227,38 +234,44 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
                 result = fm.get_alarms(_token)
                 if result.result_data:
-                    for alarm in result.result_data['alarms']:
-                        if 'critical' == alarm['severity']:
+                    for alarm in result.result_data["alarms"]:
+                        if "critical" == alarm["severity"]:
                             critical_alarms += 1
-                        elif 'major' == alarm['severity']:
+                        elif "major" == alarm["severity"]:
                             major_alarms += 1
-                        elif 'minor' == alarm['severity']:
+                        elif "minor" == alarm["severity"]:
                             minor_alarms += 1
-                        elif 'warning' == alarm['severity']:
+                        elif "warning" == alarm["severity"]:
                             warning_alarms += 1
                         else:
                             indeterminate_alarms += 1
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(
-                    (query_obj.group(1) + "(" +
-                    json.dumps(
-                        {'critical_alarms': critical_alarms,
-                         'major_alarms': major_alarms,
-                         'minor_alarms': minor_alarms,
-                         'warning_alarms': warning_alarms,
-                         'indeterminate_alarms': indeterminate_alarms,
-                         'datetime': str(datetime.datetime.now())[:-3]
-                         }) + ")").encode())
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps(
+                            {
+                                "critical_alarms": critical_alarms,
+                                "major_alarms": major_alarms,
+                                "minor_alarms": minor_alarms,
+                                "warning_alarms": warning_alarms,
+                                "indeterminate_alarms": indeterminate_alarms,
+                                "datetime": str(datetime.datetime.now())[:-3],
+                            }
+                        )
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/systems', self.path) is not None:
+        elif re.search("/vim/systems", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 system_list = list()
@@ -267,18 +280,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     system_list.append(system.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'systems': system_list}) +
-                                  ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"systems": system_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/hosts', self.path) is not None:
+        elif re.search("/vim/hosts", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 host_list = list()
@@ -287,18 +304,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     host_list.append(host.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'hosts': host_list}) +
-                                  ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"hosts": host_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/host_groups', self.path) is not None:
+        elif re.search("/vim/host_groups", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 host_group_list = list()
@@ -307,18 +328,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     host_group_list.append(host_group.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'host_groups': host_group_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"host_groups": host_group_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/host_aggregates', self.path) is not None:
+        elif re.search("/vim/host_aggregates", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 host_aggregate_list = list()
@@ -327,19 +352,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     host_aggregate_list.append(host_aggregate.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'host_aggregates':
-                                             host_aggregate_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"host_aggregates": host_aggregate_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/hypervisors', self.path) is not None:
+        elif re.search("/vim/hypervisors", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 hypervisor_list = list()
@@ -348,18 +376,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     hypervisor_list.append(hypervisor.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'hypervisors': hypervisor_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"hypervisors": hypervisor_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/instances', self.path) is not None:
+        elif re.search("/vim/instances", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 instance_list = list()
@@ -368,18 +400,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     instance_list.append(instance.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'instances': instance_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"instances": instance_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/instance_types', self.path) is not None:
+        elif re.search("/vim/instance_types", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 instance_type_list = list()
@@ -388,19 +424,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     instance_type_list.append(instance_type.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'instance_types':
-                                             instance_type_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"instance_types": instance_type_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/instance_groups', self.path) is not None:
+        elif re.search("/vim/instance_groups", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 instance_group_list = list()
@@ -409,19 +448,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     instance_group_list.append(instance_group.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'instance_groups':
-                                             instance_group_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"instance_groups": instance_group_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/images', self.path) is not None:
+        elif re.search("/vim/images", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 image_list = list()
@@ -430,18 +472,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     image_list.append(image.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'images': image_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"images": image_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/volumes', self.path) is not None:
+        elif re.search("/vim/volumes", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 volume_list = list()
@@ -450,18 +496,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     volume_list.append(volume.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'volumes': volume_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"volumes": volume_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/volume_snapshots', self.path) is not None:
+        elif re.search("/vim/volume_snapshots", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 volume_snapshot_list = list()
@@ -470,19 +520,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     volume_snapshot_list.append(volume_snapshot.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'volume_snapshots':
-                                            volume_snapshot_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"volume_snapshots": volume_snapshot_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/subnets', self.path) is not None:
+        elif re.search("/vim/subnets", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 subnet_list = list()
@@ -491,18 +544,22 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     subnet_list.append(subnet.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'subnets': subnet_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"subnets": subnet_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/vim/networks', self.path) is not None:
+        elif re.search("/vim/networks", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
                 network_list = list()
@@ -511,59 +568,63 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     network_list.append(network.as_dict())
 
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/json')
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write((query_obj.group(1) + "(" +
-                                 json.dumps({'networks': network_list}) +
-                                 ")").encode())
+                self.wfile.write(
+                    (
+                        query_obj.group(1)
+                        + "("
+                        + json.dumps({"networks": network_list})
+                        + ")"
+                    ).encode()
+                )
             else:
-                self.send_response(httplib.BAD_REQUEST,
-                                   'Bad Request: does not exist')
-                self.send_header('Content-Type', 'application/json')
+                self.send_response(httplib.BAD_REQUEST, "Bad Request: does not exist")
+                self.send_header("Content-Type", "application/json")
                 self.end_headers()
 
-        elif re.search('/fonts', self.path) is not None:
-            with open(_webserver_src_dir + self.path, 'r') as f:
+        elif re.search("/fonts", self.path) is not None:
+            with open(_webserver_src_dir + self.path, "r") as f:
                 self.send_response(httplib.OK)
-                self.send_header('Content-Type', 'application/font-woff')
+                self.send_header("Content-Type", "application/font-woff")
                 self.end_headers()
                 self.wfile.write(f.read().encode())
 
         else:
-            mime_type = 'unsupported'
+            mime_type = "unsupported"
             send_reply = False
             if self.path.endswith(".html"):
-                mime_type = 'text/html'
+                mime_type = "text/html"
                 send_reply = True
             elif self.path.endswith(".svg"):
-                mime_type = 'image/svg+xml'
+                mime_type = "image/svg+xml"
                 send_reply = True
             elif self.path.endswith(".jpg"):
-                mime_type = 'image/jpg'
+                mime_type = "image/jpg"
                 send_reply = True
             elif self.path.endswith(".gif"):
-                mime_type = 'image/gif'
+                mime_type = "image/gif"
                 send_reply = True
             elif self.path.endswith(".png"):
-                mime_type = 'image/png'
+                mime_type = "image/png"
                 send_reply = True
             elif self.path.endswith(".ico"):
-                mime_type = 'image/x-icon'
+                mime_type = "image/x-icon"
                 send_reply = True
             elif self.path.endswith(".js"):
-                mime_type = 'application/javascript'
+                mime_type = "application/javascript"
                 send_reply = True
             elif self.path.endswith(".css"):
-                mime_type = 'text/css'
+                mime_type = "text/css"
                 send_reply = True
             elif self.path.endswith(".handlebars"):
-                mime_type = 'text/x-handlebars-template'
+                mime_type = "text/x-handlebars-template"
                 send_reply = True
 
             if send_reply:
-                with open(_webserver_src_dir + self.path, 'r') as f:
+                with open(_webserver_src_dir + self.path, "r") as f:
                     self.send_response(httplib.OK)
-                    self.send_header('Content-Type', mime_type)
+                    self.send_header("Content-Type", mime_type)
                     self.end_headers()
                     self.wfile.write(f.read().encode())
 
@@ -572,6 +633,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, BaseHTTPServer.HTTPServer)
     """
     Threaded HTTP Server
     """
+
     allow_reuse_address = True
 
     def shutdown(self):
@@ -583,26 +645,28 @@ class SimpleHttpServer(object):
     """
     Simple HTTP Server
     """
+
     def __init__(self, webserver_config, nfvi_config, vim_api_config):
         global _webserver_src_dir, _directory, _vim_api_ip
 
-        _webserver_src_dir = webserver_config['source_dir']
+        _webserver_src_dir = webserver_config["source_dir"]
 
-        ip = webserver_config['host']
-        port = int(webserver_config['port'])
-        if ':' in ip:
+        ip = webserver_config["host"]
+        port = int(webserver_config["port"])
+        if ":" in ip:
             # Configure server class to use IPv6
             ThreadedHTTPServer.address_family = socket.AF_INET6
         self.server = ThreadedHTTPServer((ip, port), HTTPRequestHandler)
         self.server_thread = None
 
-        config.load(nfvi_config['config_file'])
-        _directory = openstack.get_directory(config,
-                                             openstack.SERVICE_CATEGORY.OPENSTACK)
-        _vim_api_ip = vim_api_config['host']
-        if ':' in _vim_api_ip:
+        config.load(nfvi_config["config_file"])
+        _directory = openstack.get_directory(
+            config, openstack.SERVICE_CATEGORY.OPENSTACK
+        )
+        _vim_api_ip = vim_api_config["host"]
+        if ":" in _vim_api_ip:
             # Wrap IPv6 address for use in URLs
-            _vim_api_ip = '[' + _vim_api_ip + ']'
+            _vim_api_ip = "[" + _vim_api_ip + "]"
 
     def start(self):
         self.server_thread = threading.Thread(target=self.server.serve_forever)

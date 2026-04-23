@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,6 +14,7 @@ class HostGroupTable(Table):
     """
     Host Group Table
     """
+
     def __init__(self):
         super(HostGroupTable, self).__init__()
 
@@ -41,8 +42,10 @@ class HostGroupTable(Table):
             if host_policy not in host_group.policies:
                 continue
 
-            if host_name in host_group.member_names and \
-                    peer_host_name in host_group.member_names:
+            if (
+                host_name in host_group.member_names
+                and peer_host_name in host_group.member_names
+            ):
                 return True
         return False
 

@@ -13,38 +13,40 @@ class OperationTypes(Constants, metaclass=Singleton):
     """
     Operation - Type Constants
     """
-    HOST_LOCK = Constant('host-lock')
-    HOST_LOCK_FORCE = Constant('host-lock-force')
-    HOST_DISABLE = Constant('host-disable')
-    HOST_FAILED = Constant('host-failed')
-    INSTANCE_CREATE = Constant('instance-create')
-    LOCK_HOSTS = Constant('lock-hosts')
-    UNLOCK_HOSTS = Constant('unlock-hosts')
-    REBOOT_HOSTS = Constant('reboot-hosts')
-    UPGRADE_HOSTS = Constant('upgrade-hosts')
-    SWACT_HOSTS = Constant('swact-hosts')
-    FW_UPDATE_HOSTS = Constant('fw-update-hosts')
-    FW_UPDATE_ABORT_HOSTS = Constant('fw-update-abort-hosts')
-    KUBE_ROOTCA_UPDATE_HOSTS = Constant('kube-rootca-update-hosts')
-    KUBE_UPGRADE_HOSTS = Constant('kube-upgrade-hosts')
-    START_INSTANCES = Constant('start-instances')
-    START_INSTANCES_SERIAL = Constant('start-instances-serial')
-    STOP_INSTANCES = Constant('stop-instances')
-    MIGRATE_INSTANCES = Constant('migrate-instances')
-    DISABLE_HOST_SERVICES = Constant('disable-host-services')
-    ENABLE_HOST_SERVICES = Constant('enable-host-services')
+
+    HOST_LOCK = Constant("host-lock")
+    HOST_LOCK_FORCE = Constant("host-lock-force")
+    HOST_DISABLE = Constant("host-disable")
+    HOST_FAILED = Constant("host-failed")
+    INSTANCE_CREATE = Constant("instance-create")
+    LOCK_HOSTS = Constant("lock-hosts")
+    UNLOCK_HOSTS = Constant("unlock-hosts")
+    REBOOT_HOSTS = Constant("reboot-hosts")
+    UPGRADE_HOSTS = Constant("upgrade-hosts")
+    SWACT_HOSTS = Constant("swact-hosts")
+    FW_UPDATE_HOSTS = Constant("fw-update-hosts")
+    FW_UPDATE_ABORT_HOSTS = Constant("fw-update-abort-hosts")
+    KUBE_ROOTCA_UPDATE_HOSTS = Constant("kube-rootca-update-hosts")
+    KUBE_UPGRADE_HOSTS = Constant("kube-upgrade-hosts")
+    START_INSTANCES = Constant("start-instances")
+    START_INSTANCES_SERIAL = Constant("start-instances-serial")
+    STOP_INSTANCES = Constant("stop-instances")
+    MIGRATE_INSTANCES = Constant("migrate-instances")
+    DISABLE_HOST_SERVICES = Constant("disable-host-services")
+    ENABLE_HOST_SERVICES = Constant("enable-host-services")
 
 
 class OperationStates(Constants, metaclass=Singleton):
     """
     Operation - State Constants
     """
-    READY = Constant('ready')
-    INPROGRESS = Constant('inprogress')
-    COMPLETED = Constant('completed')
-    FAILED = Constant('failed')
-    TIMED_OUT = Constant('timed-out')
-    CANCELLED = Constant('cancelled')
+
+    READY = Constant("ready")
+    INPROGRESS = Constant("inprogress")
+    COMPLETED = Constant("completed")
+    FAILED = Constant("failed")
+    TIMED_OUT = Constant("timed-out")
+    CANCELLED = Constant("cancelled")
 
 
 # Constant Instantiation
@@ -56,6 +58,7 @@ class Operation(object):
     """
     Operation Object
     """
+
     def __init__(self, operation_type):
         self._operation_type = operation_type
         self._hosts = dict()
@@ -152,8 +155,10 @@ class Operation(object):
         """
         Returns true if instance exists and is in the READY state.
         """
-        return instance_uuid in self._instances and \
-            OPERATION_STATE.READY == self._instances[instance_uuid]
+        return (
+            instance_uuid in self._instances
+            and OPERATION_STATE.READY == self._instances[instance_uuid]
+        )
 
     def add_instance(self, instance_uuid, operation_state):
         """
@@ -207,23 +212,27 @@ class Operation(object):
         """
         Returns true if the operation is inprogress
         """
-        return (OPERATION_STATE.INPROGRESS in list(self._hosts.values()) or
-                OPERATION_STATE.READY in list(self._hosts.values()) or
-                OPERATION_STATE.INPROGRESS in list(self._instances.values()) or
-                OPERATION_STATE.READY in list(self._instances.values()))
+        return (
+            OPERATION_STATE.INPROGRESS in list(self._hosts.values())
+            or OPERATION_STATE.READY in list(self._hosts.values())
+            or OPERATION_STATE.INPROGRESS in list(self._instances.values())
+            or OPERATION_STATE.READY in list(self._instances.values())
+        )
 
     def is_failed(self):
         """
         Returns true if the operation has failed
         """
         if not self._operation_failed:
-            return (OPERATION_STATE.FAILED in list(self._hosts.values()) or
-                    OPERATION_STATE.FAILED in list(self._instances.values()))
+            return OPERATION_STATE.FAILED in list(
+                self._hosts.values()
+            ) or OPERATION_STATE.FAILED in list(self._instances.values())
         return True
 
     def is_timed_out(self):
         """
         Returns true if the operation has timed out
         """
-        return (OPERATION_STATE.TIMED_OUT in list(self._hosts.values()) or
-                OPERATION_STATE.TIMED_OUT in list(self._instances.values()))
+        return OPERATION_STATE.TIMED_OUT in list(
+            self._hosts.values()
+        ) or OPERATION_STATE.TIMED_OUT in list(self._instances.values())

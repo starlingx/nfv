@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,13 +9,14 @@ from nfv_common import debug
 
 from nfv_common.tasks._task_worker import TaskWorkerThread
 
-DLOG = debug.debug_get_logger('nfv_common.tasks.task_worker_pool')
+DLOG = debug.debug_get_logger("nfv_common.tasks.task_worker_pool")
 
 
 class TaskWorkerPool(object):
     """
     Task Worker Pool
     """
+
     def __init__(self, pool_name, num_workers=1):
         """
         Create Task Worker Pool

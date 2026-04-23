@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,8 +19,7 @@ def database_sw_update_add(sw_update_obj):
     db = database_get()
     session = db.session()
     query = session.query(model.SoftwareUpdate)
-    sw_update = query.filter(model.SoftwareUpdate.uuid ==
-                             sw_update_obj.uuid).first()
+    sw_update = query.filter(model.SoftwareUpdate.uuid == sw_update_obj.uuid).first()
     if not sw_update:
         sw_update = model.SoftwareUpdate()
         sw_update.uuid = sw_update_obj.uuid
@@ -70,16 +69,15 @@ def database_sw_update_get_list():
             fw_update_obj = objects.FwUpdate(sw_update.uuid, strategy_data)
             sw_update_objs.append(fw_update_obj)
         elif objects.SW_UPDATE_TYPE.KUBE_ROOTCA_UPDATE == sw_update.sw_update_type:
-            kube_rootca_obj = objects.KubeRootcaUpdate(sw_update.uuid,
-                                                        strategy_data)
+            kube_rootca_obj = objects.KubeRootcaUpdate(sw_update.uuid, strategy_data)
             sw_update_objs.append(kube_rootca_obj)
         elif objects.SW_UPDATE_TYPE.KUBE_UPGRADE == sw_update.sw_update_type:
-            kube_upgrade_obj = objects.KubeUpgrade(sw_update.uuid,
-                                                   strategy_data)
+            kube_upgrade_obj = objects.KubeUpgrade(sw_update.uuid, strategy_data)
             sw_update_objs.append(kube_upgrade_obj)
         elif objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE == sw_update.sw_update_type:
-            system_config_update_obj = objects.SystemConfigUpdate(sw_update.uuid,
-                                                                  strategy_data)
+            system_config_update_obj = objects.SystemConfigUpdate(
+                sw_update.uuid, strategy_data
+            )
             sw_update_objs.append(system_config_update_obj)
     return sw_update_objs
 

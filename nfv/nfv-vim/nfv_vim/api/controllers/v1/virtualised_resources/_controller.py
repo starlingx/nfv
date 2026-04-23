@@ -20,8 +20,9 @@ class VirtualisedResourcesDescription(wsme_types.Base):
     """
     Virtualised Resources Description
     """
+
     id = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -30,11 +31,12 @@ class VirtualisedResourcesDescription(wsme_types.Base):
         description = VirtualisedResourcesDescription()
         description.id = "virtualised-resources"
         description.links = [
-            Link.make_link('self', url, 'virtualised-resources'),
-            Link.make_link('computes', url, 'virtualised-resources/computes'),
-            Link.make_link('networks', url, 'virtualised-resources/networks'),
-            Link.make_link('images', url, 'virtualised-resources/images'),
-            Link.make_link('volumes', url, 'virtualised-resources/volumes')]
+            Link.make_link("self", url, "virtualised-resources"),
+            Link.make_link("computes", url, "virtualised-resources/computes"),
+            Link.make_link("networks", url, "virtualised-resources/networks"),
+            Link.make_link("images", url, "virtualised-resources/images"),
+            Link.make_link("volumes", url, "virtualised-resources/volumes"),
+        ]
         return description
 
 
@@ -42,18 +44,19 @@ class VirtualisedResourcesAPI(rest.RestController):
     """
     Virtualised Resources API
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'computes' == key:
+        if "computes" == key:
             return ComputesAPI(), remainder
 
-        elif 'networks' == key:
+        elif "networks" == key:
             return NetworksAPI(), remainder
 
-        elif 'images' == key:
+        elif "images" == key:
             return ImageAPI(), remainder
 
-        elif 'volumes' == key:
+        elif "volumes" == key:
             return VolumeAPI(), remainder
 
         else:

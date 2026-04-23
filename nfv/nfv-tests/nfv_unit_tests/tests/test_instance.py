@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -65,24 +65,55 @@ class TestInstance(testcase.NFVTestCase):
         self._host_group_table.persist = False
         self._host_aggregate_table.persist = False
 
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._tenant_table._tenant_table',
-                                             self._tenant_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._host_table._host_table',
-                                             self._host_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._instance_group_table._instance_group_table',
-                                             self._instance_group_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._host_group_table._host_group_table',
-                                             self._host_group_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._host_aggregate_table._host_aggregate_table',
-                                             self._host_aggregate_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._instance_table._instance_table',
-                                             self._instance_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._instance_type_table._instance_type_table',
-                                             self._instance_type_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.tables._image_table._image_table',
-                                             self._image_table))
-        self.useFixture(fixtures.MonkeyPatch('nfv_vim.event_log._instance._event_issue',
-                                             fake_event_issue))
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._tenant_table._tenant_table", self._tenant_table
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._host_table._host_table", self._host_table
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._instance_group_table._instance_group_table",
+                self._instance_group_table,
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._host_group_table._host_group_table",
+                self._host_group_table,
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._host_aggregate_table._host_aggregate_table",
+                self._host_aggregate_table,
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._instance_table._instance_table", self._instance_table
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._instance_type_table._instance_type_table",
+                self._instance_type_table,
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.tables._image_table._image_table", self._image_table
+            )
+        )
+        self.useFixture(
+            fixtures.MonkeyPatch(
+                "nfv_vim.event_log._instance._event_issue", fake_event_issue
+            )
+        )
 
     def tearDown(self):
         """
@@ -98,15 +129,21 @@ class TestInstance(testcase.NFVTestCase):
         self._host_group_table.clear()
         self._host_aggregate_table.clear()
 
-    def create_instance(self, instance_name, instance_type_name, image_name, host_name,
-                        admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.UNLOCKED,
-                        live_migration_timeout=None):
+    def create_instance(
+        self,
+        instance_name,
+        instance_type_name,
+        image_name,
+        host_name,
+        admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.UNLOCKED,
+        live_migration_timeout=None,
+    ):
         """
         Create an instance
         """
         tenant_uuid = str(uuid.uuid4())
 
-        tenant = objects.Tenant(tenant_uuid, "%s_name" % tenant_uuid, '', True)
+        tenant = objects.Tenant(tenant_uuid, "%s_name" % tenant_uuid, "", True)
         self._tenant_table[tenant_uuid] = tenant
 
         for instance_type in list(self._instance_type_table.values()):
@@ -116,16 +153,20 @@ class TestInstance(testcase.NFVTestCase):
                         instance_uuid = str(uuid.uuid4())
 
                         nfvi_instance = nfvi.objects.v1.Instance(
-                            instance_uuid, instance_name, tenant_uuid,
+                            instance_uuid,
+                            instance_name,
+                            tenant_uuid,
                             admin_state=admin_state,
                             oper_state=nfvi.objects.v1.INSTANCE_OPER_STATE.ENABLED,
                             avail_status=list(),
                             action=nfvi.objects.v1.INSTANCE_ACTION.NONE,
                             host_name=host_name,
                             instance_type=utils.instance_type_to_flavor_dict(
-                                instance_type),
+                                instance_type
+                            ),
                             image_uuid=image.uuid,
-                            live_migration_timeout=live_migration_timeout)
+                            live_migration_timeout=live_migration_timeout,
+                        )
 
                         instance = objects.Instance(nfvi_instance)
                         self._instance_table[instance.uuid] = instance
@@ -138,14 +179,18 @@ class TestInstance(testcase.NFVTestCase):
         Create an instance type
         """
         instance_type_uuid = str(uuid.uuid4())
-        instance_type = objects.InstanceType(instance_type_uuid,
-                                             instance_type_name)
+        instance_type = objects.InstanceType(instance_type_uuid, instance_type_name)
         instance_type.update_details(
-            vcpus=1, mem_mb=64, disk_gb=1, ephemeral_gb=0,
-            swap_gb=0, guest_services=None,
+            vcpus=1,
+            mem_mb=64,
+            disk_gb=1,
+            ephemeral_gb=0,
+            swap_gb=0,
+            guest_services=None,
             auto_recovery=True,
             live_migration_timeout=live_migration_timeout,
-            live_migration_max_downtime=500)
+            live_migration_max_downtime=500,
+        )
         self._instance_type_table[instance_type_uuid] = instance_type
 
     def create_image(self, image_name, properties=None):
@@ -153,16 +198,20 @@ class TestInstance(testcase.NFVTestCase):
         Create an image
         """
         image_uuid = str(uuid.uuid4())
-        nfvi_image = nfvi_objects.Image(image_uuid, image_name, 'description',
-                                        nfvi_objects.IMAGE_AVAIL_STATUS.AVAILABLE,
-                                        nfvi_objects.IMAGE_ACTION.NONE,
-                                        'BARE',
-                                        'QCOW2',
-                                        1,
-                                        64,
-                                        'public',
-                                        False,
-                                        properties=properties)
+        nfvi_image = nfvi_objects.Image(
+            image_uuid,
+            image_name,
+            "description",
+            nfvi_objects.IMAGE_AVAIL_STATUS.AVAILABLE,
+            nfvi_objects.IMAGE_ACTION.NONE,
+            "BARE",
+            "QCOW2",
+            1,
+            64,
+            "public",
+            False,
+            properties=properties,
+        )
         image = objects.Image(nfvi_image)
         self._image_table[image_uuid] = image
 
@@ -179,27 +228,30 @@ class TestInstance(testcase.NFVTestCase):
             uuid=str(uuid.uuid4()),
             name=name,
             member_uuids=member_uuids,
-            policies=policies
+            policies=policies,
         )
 
         instance_group = objects.InstanceGroup(nfvi_instance_group)
         self._instance_group_table[instance_group.uuid] = instance_group
 
-    def create_host(self, host_name,
-                    cpe=False,
-                    admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED,
-                    sw_version='12.01'):
+    def create_host(
+        self,
+        host_name,
+        cpe=False,
+        admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED,
+        sw_version="12.01",
+    ):
         """
         Create a host
         """
-        personality = ''
-        if host_name.startswith('controller'):
+        personality = ""
+        if host_name.startswith("controller"):
             personality = HOST_PERSONALITY.CONTROLLER
             if cpe:
-                personality = personality + ',' + HOST_PERSONALITY.WORKER
-        elif host_name.startswith('compute'):
+                personality = personality + "," + HOST_PERSONALITY.WORKER
+        elif host_name.startswith("compute"):
             personality = HOST_PERSONALITY.WORKER
-        elif host_name.startswith('storage'):
+        elif host_name.startswith("storage"):
             personality = HOST_PERSONALITY.STORAGE
         else:
             assert 0, "Invalid host_name: %s" % host_name
@@ -216,11 +268,10 @@ class TestInstance(testcase.NFVTestCase):
             openstack_compute=False,
             openstack_control=False,
             remote_storage=False,
-            uptime='1000'
+            uptime="1000",
         )
 
-        host = objects.Host(nfvi_host,
-                            initial_state=host_fsm.HOST_STATE.ENABLED)
+        host = objects.Host(nfvi_host, initial_state=host_fsm.HOST_STATE.ENABLED)
         self._host_table[host.name] = host
 
     def create_host_group(self, name, members, policies):
@@ -233,9 +284,7 @@ class TestInstance(testcase.NFVTestCase):
                 member_uuids.append(instance_uuid)
 
         nfvi_host_group = nfvi.objects.v1.HostGroup(
-            name=name,
-            member_names=members,
-            policies=policies
+            name=name, member_names=members, policies=policies
         )
 
         host_group = objects.HostGroup(nfvi_host_group)
@@ -246,120 +295,128 @@ class TestInstance(testcase.NFVTestCase):
         Create a host aggregate
         """
         nfvi_host_aggregate = nfvi.objects.v1.HostAggregate(
-            name=name,
-            host_names=host_names,
-            availability_zone=''
+            name=name, host_names=host_names, availability_zone=""
         )
 
         host_aggregate = objects.HostAggregate(nfvi_host_aggregate)
         self._host_aggregate_table[host_aggregate.name] = host_aggregate
 
     def test_live_migration_completion_timeout(self):
-        self.create_instance_type('small')
-        self.create_image('image_0')
-        instance = self.create_instance('test_instance_0',
-                                       'small',
-                                       'image_0',
-                                       'compute-0')
+        self.create_instance_type("small")
+        self.create_image("image_0")
+        instance = self.create_instance(
+            "test_instance_0", "small", "image_0", "compute-0"
+        )
         assert 800 == instance.max_live_migrate_wait_in_secs
 
     def test_live_migration_completion_timeout_from_flavor(self):
-        self.create_instance_type('small', live_migration_timeout=300)
-        self.create_image('image_0')
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0')
+        self.create_instance_type("small", live_migration_timeout=300)
+        self.create_image("image_0")
+        instance = self.create_instance(
+            "test_instance_0", "small", "image_0", "compute-0"
+        )
         assert 300 == instance.max_live_migrate_wait_in_secs
 
     def test_live_migration_completion_timeout_from_image(self):
-        self.create_instance_type('small')
-        self.create_image('image_0',
-                          properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "400"})
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0')
+        self.create_instance_type("small")
+        self.create_image(
+            "image_0",
+            properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "400"},
+        )
+        instance = self.create_instance(
+            "test_instance_0", "small", "image_0", "compute-0"
+        )
         assert 400 == instance.max_live_migrate_wait_in_secs
 
     def test_live_migration_completion_timeout_from_instance(self):
-        self.create_instance_type('small')
-        self.create_image('image_0')
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0',
-                                        live_migration_timeout=200)
+        self.create_instance_type("small")
+        self.create_image("image_0")
+        instance = self.create_instance(
+            "test_instance_0",
+            "small",
+            "image_0",
+            "compute-0",
+            live_migration_timeout=200,
+        )
         assert 200 == instance.max_live_migrate_wait_in_secs
 
     def test_live_migration_completion_timeout_flavor_overwrite_image(self):
-        self.create_instance_type('small', live_migration_timeout=300)
-        self.create_image('image_0',
-                          properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "400"})
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0')
+        self.create_instance_type("small", live_migration_timeout=300)
+        self.create_image(
+            "image_0",
+            properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "400"},
+        )
+        instance = self.create_instance(
+            "test_instance_0", "small", "image_0", "compute-0"
+        )
         assert 300 == instance.max_live_migrate_wait_in_secs
 
     def test_live_migration_completion_timeout_image_overwrite_flavor(self):
-        self.create_instance_type('small', live_migration_timeout=300)
-        self.create_image('image_0',
-                          properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "200"})
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0')
+        self.create_instance_type("small", live_migration_timeout=300)
+        self.create_image(
+            "image_0",
+            properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "200"},
+        )
+        instance = self.create_instance(
+            "test_instance_0", "small", "image_0", "compute-0"
+        )
         assert 200 == instance.max_live_migrate_wait_in_secs
 
     def test_live_migration_completion_timeout_instance_overwrite_all(self):
-        self.create_instance_type('small', live_migration_timeout=300)
-        self.create_image('image_0',
-                          properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "200"})
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0',
-                                        live_migration_timeout=100)
+        self.create_instance_type("small", live_migration_timeout=300)
+        self.create_image(
+            "image_0",
+            properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "200"},
+        )
+        instance = self.create_instance(
+            "test_instance_0",
+            "small",
+            "image_0",
+            "compute-0",
+            live_migration_timeout=100,
+        )
         assert 100 == instance.max_live_migrate_wait_in_secs
 
     def test_live_migration_completion_timeout_overwrite_zero(self):
-        self.create_instance_type('small', live_migration_timeout=300)
-        self.create_image('image_0',
-                          properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "0"})
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0',
-                                        live_migration_timeout=400)
+        self.create_instance_type("small", live_migration_timeout=300)
+        self.create_image(
+            "image_0",
+            properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "0"},
+        )
+        instance = self.create_instance(
+            "test_instance_0",
+            "small",
+            "image_0",
+            "compute-0",
+            live_migration_timeout=400,
+        )
         assert 300 == instance.max_live_migrate_wait_in_secs
 
-        self.create_instance_type('small_2', live_migration_timeout=0)
-        self.create_image('image_1',
-                          properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "200"})
-        instance = self.create_instance('test_instance_0',
-                                        'small_2',
-                                        'image_1',
-                                        'compute-0')
+        self.create_instance_type("small_2", live_migration_timeout=0)
+        self.create_image(
+            "image_1",
+            properties={nfvi_objects.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT: "200"},
+        )
+        instance = self.create_instance(
+            "test_instance_0", "small_2", "image_1", "compute-0"
+        )
         assert 200 == instance.max_live_migrate_wait_in_secs
 
     # NOTE: End of tests from nova
 
     def test_live_migration_completion_timeout_out_of_range(self):
-        config.CONF = {'instance-configuration': {}}
+        config.CONF = {"instance-configuration": {}}
 
-        self.create_instance_type('small', live_migration_timeout=1000)
-        self.create_image('image_0')
-        instance = self.create_instance('test_instance_0',
-                                        'small',
-                                        'image_0',
-                                        'compute-0')
+        self.create_instance_type("small", live_migration_timeout=1000)
+        self.create_image("image_0")
+        instance = self.create_instance(
+            "test_instance_0", "small", "image_0", "compute-0"
+        )
         assert 800 == instance.max_live_migrate_wait_in_secs
 
-        self.create_instance_type('small_2', live_migration_timeout=10)
-        self.create_image('image_0')
-        instance = self.create_instance('test_instance_1',
-                                        'small_2',
-                                        'image_0',
-                                        'compute-0')
+        self.create_instance_type("small_2", live_migration_timeout=10)
+        self.create_image("image_0")
+        instance = self.create_instance(
+            "test_instance_1", "small_2", "image_0", "compute-0"
+        )
         assert 120 == instance.max_live_migrate_wait_in_secs

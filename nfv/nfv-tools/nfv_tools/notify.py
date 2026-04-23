@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,13 +20,13 @@ def process_main():
 
     try:
         exit_code = 1
-        syslog.openlog('NFV-NOTIFY', facility=syslog.LOG_LOCAL1)
+        syslog.openlog("NFV-NOTIFY", facility=syslog.LOG_LOCAL1)
 
         arg_parser = argparse.ArgumentParser()
-        arg_parser.add_argument('-n', '--hostname', help='target host')
-        arg_parser.add_argument('-p', '--port', help='target port')
-        arg_parser.add_argument('-t', '--type', help='notification type')
-        arg_parser.add_argument('-d', '--data', help='notification data')
+        arg_parser.add_argument("-n", "--hostname", help="target host")
+        arg_parser.add_argument("-p", "--port", help="target port")
+        arg_parser.add_argument("-t", "--type", help="notification type")
+        arg_parser.add_argument("-d", "--data", help="notification data")
 
         args = arg_parser.parse_args()
 
@@ -46,18 +46,21 @@ def process_main():
             syslog.syslog(syslog.LOG_INFO, "No notification data given.")
             sys.exit(1)
 
-        syslog.syslog(syslog.LOG_INFO, "Arguments: hostname=%s, port=%s, "
-                      "type=%s, data=%s." % (args.hostname, args.port, args.type,
-                                             args.data))
+        syslog.syslog(
+            syslog.LOG_INFO,
+            "Arguments: hostname=%s, port=%s, "
+            "type=%s, data=%s." % (args.hostname, args.port, args.type, args.data),
+        )
 
-        connection = tcp.TCPConnection(socket.gethostname(), 0,
-                                       auth_key='NFV Infrastructure Notification')
+        connection = tcp.TCPConnection(
+            socket.gethostname(), 0, auth_key="NFV Infrastructure Notification"
+        )
         connection.connect(args.hostname, int(args.port))
 
         request = dict()
-        request['version'] = 1
-        request['notify-type'] = args.type
-        request['notify-data'] = args.data
+        request["version"] = 1
+        request["notify-type"] = args.type
+        request["notify-data"] = args.data
 
         syslog.syslog(syslog.LOG_INFO, "Request=%s" % request)
 
@@ -67,10 +70,10 @@ def process_main():
             response = json.loads(msg)
             syslog.syslog(syslog.LOG_INFO, "Response=%s" % response)
 
-            status = response.get('status', None)
-            if 'okay' == status:
+            status = response.get("status", None)
+            if "okay" == status:
                 exit_code = 0
-            elif 'accepted' == status:
+            elif "accepted" == status:
                 exit_code = 254
             else:
                 exit_code = 1
@@ -86,5 +89,5 @@ def process_main():
             connection.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     process_main()

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,8 @@ class InstanceGroup(AsDictMixin, Base):
     """
     Instance Group Database Table
     """
-    __tablename__ = 'instance_groups'
+
+    __tablename__ = "instance_groups"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)

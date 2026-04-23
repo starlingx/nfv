@@ -16,11 +16,12 @@ class Config(configparser.ConfigParser):
     """
     Override ConfigParser class to add dictionary functionality.
     """
+
     def as_dict(self):
         d = dict(self._sections)
         for key in d:
             d[key] = dict(self._defaults, **d[key])
-            d[key].pop('__name__', None)
+            d[key].pop("__name__", None)
         return d
 
 
@@ -32,11 +33,11 @@ def config_load():
 
     if not CONF:
         nfvi_config = Config()
-        nfvi_config.read(config.CONF['nfvi']['config_file'])
+        nfvi_config.read(config.CONF["nfvi"]["config_file"])
         CONF = nfvi_config.as_dict()
 
-        region_name = CONF['openstack'].get('region_name', None)
+        region_name = CONF["openstack"].get("region_name", None)
         if region_name is None:
-            CONF['openstack']['region_name'] = "RegionOne"
+            CONF["openstack"]["region_name"] = "RegionOne"
 
     return CONF

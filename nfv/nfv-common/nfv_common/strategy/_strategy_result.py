@@ -12,64 +12,69 @@ class StrategyResult(object, metaclass=Singleton):
     """
     Strategy Result - Constants
     """
-    INITIAL = Constant('initial')
-    INPROGRESS = Constant('inprogress')
-    WAIT = Constant('wait')
-    SUCCESS = Constant('success')
-    DEGRADED = Constant('degraded')
-    FAILED = Constant('failed')
-    TIMED_OUT = Constant('timed-out')
-    ABORTING = Constant('aborted')
-    ABORTED = Constant('aborted')
+
+    INITIAL = Constant("initial")
+    INPROGRESS = Constant("inprogress")
+    WAIT = Constant("wait")
+    SUCCESS = Constant("success")
+    DEGRADED = Constant("degraded")
+    FAILED = Constant("failed")
+    TIMED_OUT = Constant("timed-out")
+    ABORTING = Constant("aborted")
+    ABORTED = Constant("aborted")
 
 
 class StrategyPhaseResult(object, metaclass=Singleton):
     """
     Strategy Phase Result - Constants
     """
-    INITIAL = Constant('initial')
-    INPROGRESS = Constant('inprogress')
-    WAIT = Constant('wait')
-    SUCCESS = Constant('success')
-    DEGRADED = Constant('degraded')
-    FAILED = Constant('failed')
-    TIMED_OUT = Constant('timed-out')
-    ABORTING = Constant('aborted')
-    ABORTED = Constant('aborted')
+
+    INITIAL = Constant("initial")
+    INPROGRESS = Constant("inprogress")
+    WAIT = Constant("wait")
+    SUCCESS = Constant("success")
+    DEGRADED = Constant("degraded")
+    FAILED = Constant("failed")
+    TIMED_OUT = Constant("timed-out")
+    ABORTING = Constant("aborted")
+    ABORTED = Constant("aborted")
 
 
 class StrategyStageResult(object, metaclass=Singleton):
     """
     Strategy Stage Result - Constants
     """
-    INITIAL = Constant('initial')
-    INPROGRESS = Constant('inprogress')
-    WAIT = Constant('wait')
-    SUCCESS = Constant('success')
-    DEGRADED = Constant('degraded')
-    FAILED = Constant('failed')
-    TIMED_OUT = Constant('timed-out')
-    ABORTING = Constant('aborted')
-    ABORTED = Constant('aborted')
+
+    INITIAL = Constant("initial")
+    INPROGRESS = Constant("inprogress")
+    WAIT = Constant("wait")
+    SUCCESS = Constant("success")
+    DEGRADED = Constant("degraded")
+    FAILED = Constant("failed")
+    TIMED_OUT = Constant("timed-out")
+    ABORTING = Constant("aborted")
+    ABORTED = Constant("aborted")
 
 
 class StrategyStepResult(object, metaclass=Singleton):
     """
     Strategy Step Result - Constants
     """
-    INITIAL = Constant('initial')
-    INPROGRESS = Constant('inprogress')
-    WAIT = Constant('wait')
-    SUCCESS = Constant('success')
-    DEGRADED = Constant('degraded')
-    FAILED = Constant('failed')
-    TIMED_OUT = Constant('timed-out')
-    ABORTING = Constant('aborted')
-    ABORTED = Constant('aborted')
+
+    INITIAL = Constant("initial")
+    INPROGRESS = Constant("inprogress")
+    WAIT = Constant("wait")
+    SUCCESS = Constant("success")
+    DEGRADED = Constant("degraded")
+    FAILED = Constant("failed")
+    TIMED_OUT = Constant("timed-out")
+    ABORTING = Constant("aborted")
+    ABORTED = Constant("aborted")
 
 
-def strategy_result_update(strategy_result, strategy_result_reason, phase_result,
-                           phase_result_reason):
+def strategy_result_update(
+    strategy_result, strategy_result_reason, phase_result, phase_result_reason
+):
     """
     Update Strategy Stage Result given a strategy phase result
     """
@@ -154,8 +159,9 @@ def strategy_result_update(strategy_result, strategy_result_reason, phase_result
     return strategy_result, strategy_result_reason
 
 
-def strategy_phase_result_update(phase_result, phase_result_reason, stage_result,
-                                 stage_result_reason):
+def strategy_phase_result_update(
+    phase_result, phase_result_reason, stage_result, stage_result_reason
+):
     """
     Update Strategy Phase Result given a strategy stage result
     """
@@ -240,8 +246,9 @@ def strategy_phase_result_update(phase_result, phase_result_reason, stage_result
     return phase_result, phase_result_reason
 
 
-def strategy_stage_result_update(stage_result, stage_result_reason, step_result,
-                                 step_result_reason):
+def strategy_stage_result_update(
+    stage_result, stage_result_reason, step_result, step_result_reason
+):
     """
     Update Strategy Stage Result given a strategy step result
     """

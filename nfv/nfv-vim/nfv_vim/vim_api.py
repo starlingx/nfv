@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,9 +22,9 @@ PROCESS_TICK_INTERVAL_IN_MS = 500
 PROCESS_TICK_MAX_DELAY_IN_MS = 2000
 PROCESS_TICK_DELAY_DEBOUNCE_IN_MS = 2000
 
-PROCESS_NOT_RUNNING_FILE = '/var/run/.nfv-vim-api.not_running'
+PROCESS_NOT_RUNNING_FILE = "/var/run/.nfv-vim-api.not_running"
 
-DLOG = debug.debug_get_logger('nfv_vim.api')
+DLOG = debug.debug_get_logger("nfv_vim.api")
 
 stay_on = True
 do_reload = False
@@ -63,7 +63,7 @@ def process_event_handler(wsgi):
     Virtual Infrastructure Manager API - Event Handler
     """
     while True:
-        select_obj = (yield)
+        select_obj = yield
         if select_obj == wsgi:
             try:
                 request, client_address = wsgi.get_request()
@@ -96,18 +96,21 @@ def process_initialize():
     """
     Virtual Infrastructure Manager API - Initialize
     """
-    debug.debug_initialize(config.CONF['debug'], 'VIM-API')
+    debug.debug_initialize(config.CONF["debug"], "VIM-API")
     selobj.selobj_initialize()
-    timers.timers_initialize(PROCESS_TICK_INTERVAL_IN_MS,
-                             PROCESS_TICK_MAX_DELAY_IN_MS,
-                             PROCESS_TICK_DELAY_DEBOUNCE_IN_MS)
+    timers.timers_initialize(
+        PROCESS_TICK_INTERVAL_IN_MS,
+        PROCESS_TICK_MAX_DELAY_IN_MS,
+        PROCESS_TICK_DELAY_DEBOUNCE_IN_MS,
+    )
 
-    ip = config.CONF['vim-api']['host']
-    port = int(config.CONF['vim-api']['port'])
+    ip = config.CONF["vim-api"]["host"]
+    port = int(config.CONF["vim-api"]["port"])
     # In order to support IPv6, set the address family before creating the server.
     simple_server.WSGIServer.address_family = get_address_family(ip)
-    wsgi = simple_server.make_server(ip, port, Application(),
-                                     handler_class=get_handler_cls())
+    wsgi = simple_server.make_server(
+        ip, port, Application(), handler_class=get_handler_cls()
+    )
     selobj.selobj_add_read_obj(wsgi, process_event_handler, wsgi)
 
 
@@ -132,17 +135,18 @@ def process_main():
         signal.signal(signal.SIGTERM, process_signal_handler)
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-c', '--config', help='configuration file')
-        parser.add_argument('-t', '--tox', action="store_true",
-                            help='tox test environment')
+        parser.add_argument("-c", "--config", help="configuration file")
+        parser.add_argument(
+            "-t", "--tox", action="store_true", help="tox test environment"
+        )
         args = parser.parse_args()
         config.load(args.config)
 
         if args.tox:
             # Append the tox root directory to the system path to get
             # the config.ini and debug.ini files.
-            debug_ini = sys.prefix + '/' + config.CONF['debug']['config_file']
-            config.CONF['debug']['config_file'] = debug_ini
+            debug_ini = sys.prefix + "/" + config.CONF["debug"]["config_file"]
+            config.CONF["debug"]["config_file"] = debug_ini
 
         process_initialize()
 
@@ -163,5 +167,5 @@ def process_main():
         sys.exit(200)
 
     finally:
-        open(PROCESS_NOT_RUNNING_FILE, 'w').close()
+        open(PROCESS_NOT_RUNNING_FILE, "w").close()
         process_finalize()

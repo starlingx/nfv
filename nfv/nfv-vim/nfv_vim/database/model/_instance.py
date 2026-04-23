@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -16,7 +16,8 @@ class Instance_v4(AsDictMixin, Base):
     """
     Instance Database Table
     """
-    __tablename__ = 'instances_v4'
+
+    __tablename__ = "instances_v4"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -45,7 +46,8 @@ class Instance_v5(AsDictMixin, Base):
     """
     Instance Database Table
     """
-    __tablename__ = 'instances_v5'
+
+    __tablename__ = "instances_v5"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)

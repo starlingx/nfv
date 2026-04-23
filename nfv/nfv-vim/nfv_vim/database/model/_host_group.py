@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,8 @@ class HostGroup(AsDictMixin, Base):
     """
     Host Group Database Table
     """
-    __tablename__ = 'host_groups'
+
+    __tablename__ = "host_groups"
 
     name = Column(String(64), nullable=False, primary_key=True)
     member_names = Column(String(2147483647), nullable=False)

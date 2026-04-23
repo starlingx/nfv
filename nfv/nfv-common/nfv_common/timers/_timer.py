@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,17 +7,25 @@ from nfv_common import debug
 
 from nfv_common.timers._timestamp import get_monotonic_timestamp_in_ms
 
-DLOG = debug.debug_get_logger('nfv_common.timers.timer')
+DLOG = debug.debug_get_logger("nfv_common.timers.timer")
 
 
 class Timer(object):
     """
     Timer
     """
+
     _id = 1
 
-    def __init__(self, timer_name, initial_delay_secs, interval_secs,
-                 callback, *callback_args, **callback_kwargs):
+    def __init__(
+        self,
+        timer_name,
+        initial_delay_secs,
+        interval_secs,
+        callback,
+        *callback_args,
+        **callback_kwargs
+    ):
         """
         Create timer
         """
@@ -62,8 +70,9 @@ class Timer(object):
         rearm = True
         secs_expired = (now_ms - self._arm_timestamp) // 1000
         if secs_expired > self._next_expiry_in_secs:
-            DLOG.verbose("Timer %s with timer id %s fired." % (self._timer_name,
-                                                               self._timer_id))
+            DLOG.verbose(
+                "Timer %s with timer id %s fired." % (self._timer_name, self._timer_id)
+            )
             try:
                 self._callback.send(self._timer_id)
                 self._arm_timestamp = get_monotonic_timestamp_in_ms()

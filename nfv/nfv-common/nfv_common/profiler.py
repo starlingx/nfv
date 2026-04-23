@@ -1,15 +1,16 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_common.profiler')
+DLOG = debug.debug_get_logger("nfv_common.profiler")
 
 try:
     import guppy
     import objgraph
+
     memory_profiling = guppy.hpy()
 
 except ImportError:
@@ -22,10 +23,12 @@ def profile_memory_references(obj_type, obj_name):
     """
     if memory_profiling is not None:
         objs = objgraph.by_type(obj_type)
-        objgraph.show_backrefs(objs, max_depth=5,
-                               filename='/tmp/%s_memory_back_refs.dot' % obj_name)
-        objgraph.show_refs(objs, max_depth=5,
-                           filename='/tmp/%s_memory_refs.dot' % obj_name)
+        objgraph.show_backrefs(
+            objs, max_depth=5, filename="/tmp/%s_memory_back_refs.dot" % obj_name
+        )
+        objgraph.show_refs(
+            objs, max_depth=5, filename="/tmp/%s_memory_refs.dot" % obj_name
+        )
 
 
 def profile_memory_set_reference():
@@ -41,10 +44,10 @@ def profile_memory_dump():
     Dumps the current memory usage
     """
     if memory_profiling is not None:
-        DLOG.info("%s" % '-' * 120)
+        DLOG.info("%s" % "-" * 120)
         DLOG.info("Memory Profile: %s" % memory_profiling.heap())
-        profile_memory_references('nfv_vim.objects._instance.Instance', 'instance')
-        DLOG.info("%s" % '-' * 120)
+        profile_memory_references("nfv_vim.objects._instance.Instance", "instance")
+        DLOG.info("%s" % "-" * 120)
 
 
 def profiler_initialize():

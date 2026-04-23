@@ -10,6 +10,7 @@ class NFVIIdentityAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Identity API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,14 +18,15 @@ from nfv_plugins.nfvi_plugins.openstack import openstack
 from tests import _instances
 from tests import _test_base
 
-DLOG = debug.debug_get_logger('nfv_tests.test_instances')
+DLOG = debug.debug_get_logger("nfv_tests.test_instances")
 
 
 class TestInstance(_test_base.Test):
     """
     Test Instance Base Class
     """
-    LOG_FILES = {'nfv-vim': '/var/log/nfv-vim.log'}
+
+    LOG_FILES = {"nfv-vim": "/var/log/nfv-vim.log"}
 
     def __init__(self, name, instance_name, timeout_secs):
         super(TestInstance, self).__init__(name, timeout_secs)
@@ -37,13 +38,19 @@ class TestInstance(_test_base.Test):
         self._customer_logs = None
         self._customer_alarm_history = None
         self._platform_directory = openstack.get_directory(
-            config, openstack.SERVICE_CATEGORY.PLATFORM)
+            config, openstack.SERVICE_CATEGORY.PLATFORM
+        )
         self._openstack_directory = openstack.get_directory(
-            config, openstack.SERVICE_CATEGORY.OPENSTACK)
-        name = name.replace(' ', '_')
-        self._output_dir = (config.CONF['test-output']['dir'] + '/' +
-                            name.translate(None, ''.join(['(', ')'])) + '_' +
-                            instance_name.replace(' ', '_'))
+            config, openstack.SERVICE_CATEGORY.OPENSTACK
+        )
+        name = name.replace(" ", "_")
+        self._output_dir = (
+            config.CONF["test-output"]["dir"]
+            + "/"
+            + name.translate(None, "".join(["(", ")"]))
+            + "_"
+            + instance_name.replace(" ", "_")
+        )
         os.mkdir(self._output_dir, 0o755)
 
     @property
@@ -66,7 +73,7 @@ class TestInstance(_test_base.Test):
         Returns the host the instance is located
         """
         if self._instance_data is not None:
-            return self._instance_data['OS-EXT-SRV-ATTR:host']
+            return self._instance_data["OS-EXT-SRV-ATTR:host"]
         return None
 
     @property
@@ -88,12 +95,10 @@ class TestInstance(_test_base.Test):
         Returns the openstack token
         """
         if self._openstack_token is None:
-            self._openstack_token = openstack.get_token(
-                self._openstack_directory)
+            self._openstack_token = openstack.get_token(self._openstack_directory)
 
         elif self._openstack_token.is_expired():
-            self._openstack_token = openstack.get_token(
-                self._openstack_directory)
+            self._openstack_token = openstack.get_token(self._openstack_directory)
 
         return self._openstack_token
 
@@ -101,32 +106,33 @@ class TestInstance(_test_base.Test):
         """
         Save debug information
         """
-        with open(self._output_dir + '/test_result', 'w') as f:
+        with open(self._output_dir + "/test_result", "w") as f:
             f.write("success=%s, reason=%s\n" % (test_success, test_reason))
 
         for log_name, log_file in self.LOG_FILES.items():
-            shutil.copyfile(log_file, self._output_dir + '/' + log_name + '.log')
+            shutil.copyfile(log_file, self._output_dir + "/" + log_name + ".log")
 
         if self._instance_data is not None:
-            with open(self._output_dir + '/instance_data', 'w') as f:
+            with open(self._output_dir + "/instance_data", "w") as f:
                 f.write("%s\n" % self._instance_data)
 
         if self._customer_alarms is not None:
-            with open(self._output_dir + '/alarm_data', 'w') as f:
+            with open(self._output_dir + "/alarm_data", "w") as f:
                 f.write("%s\n" % self._customer_alarms)
 
         if self._customer_logs is not None:
-            with open(self._output_dir + '/event_log_data', 'w') as f:
+            with open(self._output_dir + "/event_log_data", "w") as f:
                 f.write("%s\n" % self._customer_logs)
 
         if self._customer_alarm_history is not None:
-            with open(self._output_dir + '/alarm_history_data', 'w') as f:
+            with open(self._output_dir + "/alarm_history_data", "w") as f:
                 f.write("%s\n" % self._customer_alarm_history)
 
-        self.save_customer_alarms(self._output_dir + '/customer-alarms', wipe=True)
-        self.save_customer_logs(self._output_dir + '/customer-logs', wipe=True)
-        self.save_customer_alarm_history(self._output_dir +
-                                         '/customer-alarms-history', wipe=True)
+        self.save_customer_alarms(self._output_dir + "/customer-alarms", wipe=True)
+        self.save_customer_logs(self._output_dir + "/customer-logs", wipe=True)
+        self.save_customer_alarm_history(
+            self._output_dir + "/customer-alarms-history", wipe=True
+        )
 
     @staticmethod
     def save_customer_alarms(filename, wipe=False):
@@ -134,38 +140,42 @@ class TestInstance(_test_base.Test):
         Save the customer alarms
         """
         if wipe:
-            open(filename, 'w').close()
+            open(filename, "w").close()
 
-        os.system("source /etc/platform/openrc; echo -e '\tALARM-LIST' >> %s; "
-                  "fm alarm-list --nowrap | sed 's/^/\t /' >> %s; "
-                  "echo -e '\n' >> %s" % (filename, filename, filename))
+        os.system(
+            "source /etc/platform/openrc; echo -e '\tALARM-LIST' >> %s; "
+            "fm alarm-list --nowrap | sed 's/^/\t /' >> %s; "
+            "echo -e '\n' >> %s" % (filename, filename, filename)
+        )
 
     def save_customer_logs(self, filename, wipe=False):
         """
         Save the customer logs
         """
         if wipe:
-            open(filename, 'w').close()
+            open(filename, "w").close()
 
-        os.system("source /etc/platform/openrc; echo -e '\tLOG-LIST' >> %s; "
-                  "fm event-list --logs --nowrap --nopaging --limit 100 --query "
-                  "'start=%s;end=%s' | sed 's/^/\t /' >> %s; echo -e '\n' >> %s"
-                  % (filename, self._start_datetime, self._end_datetime,
-                     filename, filename))
+        os.system(
+            "source /etc/platform/openrc; echo -e '\tLOG-LIST' >> %s; "
+            "fm event-list --logs --nowrap --nopaging --limit 100 --query "
+            "'start=%s;end=%s' | sed 's/^/\t /' >> %s; echo -e '\n' >> %s"
+            % (filename, self._start_datetime, self._end_datetime, filename, filename)
+        )
 
     def save_customer_alarm_history(self, filename, wipe=False):
         """
         Save the customer alarm history
         """
         if wipe:
-            open(filename, 'w').close()
+            open(filename, "w").close()
 
-        os.system("source /etc/platform/openrc; echo -e '\tALARM-HISTORY' >> %s; "
-                  "fm event-list --alarms --nowrap --nopaging --limit 100 "
-                  "--query 'start=%s;end=%s' | sed 's/^/\t /' >> %s; "
-                  "echo -e '\n' >> %s"
-                  % (filename, self._start_datetime, self._end_datetime,
-                     filename, filename))
+        os.system(
+            "source /etc/platform/openrc; echo -e '\tALARM-HISTORY' >> %s; "
+            "fm event-list --alarms --nowrap --nopaging --limit 100 "
+            "--query 'start=%s;end=%s' | sed 's/^/\t /' >> %s; "
+            "echo -e '\n' >> %s"
+            % (filename, self._start_datetime, self._end_datetime, filename, filename)
+        )
 
     def _refresh_instance_data(self):
         """
@@ -187,30 +197,31 @@ class TestInstance(_test_base.Test):
         """
         Fetch the customer logs
         """
-        self._customer_logs = fm.get_logs(self.platform_token,
-                                          self.start_datetime,
-                                          self.end_datetime).result_data
+        self._customer_logs = fm.get_logs(
+            self.platform_token, self.start_datetime, self.end_datetime
+        ).result_data
 
     def _refresh_customer_alarm_history(self):
         """
         Fetch the customer alarm history
         """
         self._customer_alarm_history = fm.get_alarm_history(
-            self.platform_token,
-            self.start_datetime,
-            self.end_datetime).result_data
+            self.platform_token, self.start_datetime, self.end_datetime
+        ).result_data
 
 
 class TestInstanceStart(TestInstance):
     """
     Test - Start Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceStart, self).__init__("Instance-Start",
-                                                instance_name, timeout_secs)
+        super(TestInstanceStart, self).__init__(
+            "Instance-Start", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -236,9 +247,16 @@ class TestInstanceStart(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_started(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -247,12 +265,14 @@ class TestInstanceStop(TestInstance):
     """
     Test - Stop Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceStop, self).__init__("Instance-Stop",
-                                               instance_name, timeout_secs)
+        super(TestInstanceStop, self).__init__(
+            "Instance-Stop", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -278,9 +298,16 @@ class TestInstanceStop(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_stopped(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -289,12 +316,14 @@ class TestInstancePause(TestInstance):
     """
     Test - Pause Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstancePause, self).__init__("Instance-Pause",
-                                                instance_name, timeout_secs)
+        super(TestInstancePause, self).__init__(
+            "Instance-Pause", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -329,9 +358,16 @@ class TestInstancePause(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_paused(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -340,12 +376,14 @@ class TestInstanceUnpause(TestInstance):
     """
     Test - Unpause Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb):
         """
         Initialize test
         """
-        super(TestInstanceUnpause, self).__init__("Instance-Unpause",
-                                                  instance_name, timeout_secs)
+        super(TestInstanceUnpause, self).__init__(
+            "Instance-Unpause", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -371,9 +409,16 @@ class TestInstanceUnpause(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_unpaused(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -382,12 +427,14 @@ class TestInstanceSuspend(TestInstance):
     """
     Test - Suspend Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceSuspend, self).__init__("Instance-Suspend",
-                                                  instance_name, timeout_secs)
+        super(TestInstanceSuspend, self).__init__(
+            "Instance-Suspend", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -413,9 +460,16 @@ class TestInstanceSuspend(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_suspended(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -424,12 +478,14 @@ class TestInstanceResume(TestInstance):
     """
     Test - Resume Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceResume, self).__init__("Instance-Resume",
-                                                 instance_name, timeout_secs)
+        super(TestInstanceResume, self).__init__(
+            "Instance-Resume", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -455,9 +511,16 @@ class TestInstanceResume(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_resumed(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -466,6 +529,7 @@ class TestInstanceReboot(TestInstance):
     """
     Test - Reboot Instance
     """
+
     def __init__(self, instance_name, timeout_secs, hard=False, guest_hb=False):
         """
         Initialize test
@@ -475,8 +539,7 @@ class TestInstanceReboot(TestInstance):
         else:
             test_name = "Instance-Reboot (soft)"
 
-        super(TestInstanceReboot, self).__init__(test_name, instance_name,
-                                                 timeout_secs)
+        super(TestInstanceReboot, self).__init__(test_name, instance_name, timeout_secs)
         self._hard = hard
         self._guest_hb = guest_hb
 
@@ -501,11 +564,13 @@ class TestInstanceReboot(TestInstance):
         Perform test
         """
         if self._hard:
-            nova.reboot_server(self.openstack_token, self.instance_uuid,
-                               nova.VM_REBOOT_TYPE.HARD)
+            nova.reboot_server(
+                self.openstack_token, self.instance_uuid, nova.VM_REBOOT_TYPE.HARD
+            )
         else:
-            nova.reboot_server(self.openstack_token, self.instance_uuid,
-                               nova.VM_REBOOT_TYPE.SOFT)
+            nova.reboot_server(
+                self.openstack_token, self.instance_uuid, nova.VM_REBOOT_TYPE.SOFT
+            )
         return True, "instance is rebooting"
 
     def _test_passed(self):
@@ -517,9 +582,16 @@ class TestInstanceReboot(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_rebooted(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -528,12 +600,14 @@ class TestInstanceRebuild(TestInstance):
     """
     Test - Rebuild Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceRebuild, self).__init__('Instance-Rebuild', instance_name,
-                                                  timeout_secs)
+        super(TestInstanceRebuild, self).__init__(
+            "Instance-Rebuild", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -541,11 +615,11 @@ class TestInstanceRebuild(TestInstance):
         Setup test
         """
         self._refresh_instance_data()
-        image_data = self._instance_data.get('image', None)
+        image_data = self._instance_data.get("image", None)
         if image_data is None:
             return False, "instance does not have image data"
 
-        image_uuid = image_data.get('id', None)
+        image_uuid = image_data.get("id", None)
         if image_uuid is None:
             return False, "instance was not created from an image"
 
@@ -561,9 +635,12 @@ class TestInstanceRebuild(TestInstance):
         """
         # try block added to work around nova bug for now
         try:
-            nova.rebuild_server(self.openstack_token, self.instance_uuid,
-                                self.instance_name,
-                                self._instance_data['image']['id'])
+            nova.rebuild_server(
+                self.openstack_token,
+                self.instance_uuid,
+                self.instance_name,
+                self._instance_data["image"]["id"],
+            )
         except ValueError:
             pass
 
@@ -578,9 +655,16 @@ class TestInstanceRebuild(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_was_rebuilt(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -589,13 +673,14 @@ class TestInstanceLiveMigrate(TestInstance):
     """
     Test - Live-Migrate Instance
     """
+
     def __init__(self, instance_name, timeout_secs, to_host=None, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceLiveMigrate, self).__init__('Instance-Live-Migrate',
-                                                      instance_name,
-                                                      timeout_secs)
+        super(TestInstanceLiveMigrate, self).__init__(
+            "Instance-Live-Migrate", instance_name, timeout_secs
+        )
         self._original_host = None
         self._to_host = to_host
         self._guest_hb = guest_hb
@@ -612,8 +697,9 @@ class TestInstanceLiveMigrate(TestInstance):
         """
         Perform test
         """
-        nova.live_migrate_server(self.openstack_token, self.instance_uuid,
-                                 self._to_host)
+        nova.live_migrate_server(
+            self.openstack_token, self.instance_uuid, self._to_host
+        )
         return True, "instance is live-migrating"
 
     def _test_passed(self):
@@ -625,10 +711,18 @@ class TestInstanceLiveMigrate(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_live_migrated(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, self._original_host, self._to_host, action=True,
-            guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            self._original_host,
+            self._to_host,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -637,13 +731,14 @@ class TestInstanceColdMigrate(TestInstance):
     """
     Test - Cold-Migrate Instance
     """
+
     def __init__(self, instance_name, timeout_secs, to_host=None, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceColdMigrate, self).__init__('Instance-Cold-Migrate',
-                                                      instance_name,
-                                                      timeout_secs)
+        super(TestInstanceColdMigrate, self).__init__(
+            "Instance-Cold-Migrate", instance_name, timeout_secs
+        )
         self._original_host = None
         self._to_host = to_host
         self._guest_hb = guest_hb
@@ -660,8 +755,9 @@ class TestInstanceColdMigrate(TestInstance):
         """
         Perform test
         """
-        nova.cold_migrate_server(self.openstack_token, self.instance_uuid,
-                                 self._to_host)
+        nova.cold_migrate_server(
+            self.openstack_token, self.instance_uuid, self._to_host
+        )
         return True, "instance is cold-migrating"
 
     def _test_passed(self):
@@ -673,10 +769,18 @@ class TestInstanceColdMigrate(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_cold_migrated(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, self._original_host, self._to_host, action=True,
-            guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            self._original_host,
+            self._to_host,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -685,12 +789,14 @@ class TestInstanceColdMigrateConfirm(TestInstance):
     """
     Test - Cold-Migrate Confirm Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
         super(TestInstanceColdMigrateConfirm, self).__init__(
-            'Instance-Cold-Migrate-Confirm', instance_name, timeout_secs)
+            "Instance-Cold-Migrate-Confirm", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -705,13 +811,16 @@ class TestInstanceColdMigrateConfirm(TestInstance):
 
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
-            return False, ("instance needs to be migrated for test, but is not in "
-                           "the running state")
+            return False, (
+                "instance needs to be migrated for test, but is not in "
+                "the running state"
+            )
 
         nova.cold_migrate_server(self.openstack_token, self.instance_uuid)
 
-        max_end_datetime = (self._start_datetime +
-                            datetime.timedelta(seconds=self.timeout_secs))
+        max_end_datetime = self._start_datetime + datetime.timedelta(
+            seconds=self.timeout_secs
+        )
         while True:
             self._refresh_instance_data()
             self._end_datetime = datetime.datetime.now()
@@ -721,8 +830,10 @@ class TestInstanceColdMigrateConfirm(TestInstance):
                 break
 
             if self._end_datetime > max_end_datetime:
-                DLOG.error("Test setup %s timeout for instance %s."
-                           % (self._name, self.instance_name))
+                DLOG.error(
+                    "Test setup %s timeout for instance %s."
+                    % (self._name, self.instance_name)
+                )
                 return False, ("instance %s failed to migrate" % self.instance_name)
 
             time.sleep(5)
@@ -733,8 +844,7 @@ class TestInstanceColdMigrateConfirm(TestInstance):
         """
         Perform test
         """
-        nova.cold_migrate_server_confirm(self.openstack_token,
-                                         self.instance_uuid)
+        nova.cold_migrate_server_confirm(self.openstack_token, self.instance_uuid)
         return True, "confirming instance cold-migrate"
 
     def _test_passed(self):
@@ -746,9 +856,16 @@ class TestInstanceColdMigrateConfirm(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_cold_migrate_confirmed(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -757,12 +874,14 @@ class TestInstanceColdMigrateRevert(TestInstance):
     """
     Test - Cold-Migrate Revert Instance
     """
+
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
         super(TestInstanceColdMigrateRevert, self).__init__(
-            'Instance-Cold-Migrate-Revert', instance_name, timeout_secs)
+            "Instance-Cold-Migrate-Revert", instance_name, timeout_secs
+        )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -777,13 +896,16 @@ class TestInstanceColdMigrateRevert(TestInstance):
 
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
-            return False, ("instance needs to be migrated for test, but is not in "
-                           "the running state")
+            return False, (
+                "instance needs to be migrated for test, but is not in "
+                "the running state"
+            )
 
         nova.cold_migrate_server(self.openstack_token, self.instance_uuid)
 
-        max_end_datetime = (self._start_datetime +
-                            datetime.timedelta(seconds=self.timeout_secs))
+        max_end_datetime = self._start_datetime + datetime.timedelta(
+            seconds=self.timeout_secs
+        )
         while True:
             self._refresh_instance_data()
             self._end_datetime = datetime.datetime.now()
@@ -793,8 +915,10 @@ class TestInstanceColdMigrateRevert(TestInstance):
                 break
 
             if self._end_datetime > max_end_datetime:
-                DLOG.error("Test setup %s timeout for instance %s."
-                           % (self._name, self.instance_name))
+                DLOG.error(
+                    "Test setup %s timeout for instance %s."
+                    % (self._name, self.instance_name)
+                )
                 return False, ("instance %s failed to migrate" % self.instance_name)
 
             time.sleep(5)
@@ -805,8 +929,7 @@ class TestInstanceColdMigrateRevert(TestInstance):
         """
         Perform test
         """
-        nova.cold_migrate_server_revert(self.openstack_token,
-                                        self.instance_uuid)
+        nova.cold_migrate_server_revert(self.openstack_token, self.instance_uuid)
         return True, "reverting instance cold-migrate"
 
     def _test_passed(self):
@@ -818,9 +941,16 @@ class TestInstanceColdMigrateRevert(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_cold_migrate_reverted(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -829,12 +959,14 @@ class TestInstanceResize(TestInstance):
     """
     Test - Resize Instance
     """
+
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
-        super(TestInstanceResize, self).__init__('Instance-Resize', instance_name,
-                                                 timeout_secs)
+        super(TestInstanceResize, self).__init__(
+            "Instance-Resize", instance_name, timeout_secs
+        )
         self._flavor_names = flavor_names
         self._flavor_id = None
         self._guest_hb = guest_hb
@@ -845,9 +977,9 @@ class TestInstanceResize(TestInstance):
         """
         flavor_id = None
         flavors = nova.get_flavors(self.openstack_token).result_data
-        for flavor in flavors['flavors']:
-            if flavor['name'] == flavor_name:
-                flavor_id = flavor['id']
+        for flavor in flavors["flavors"]:
+            if flavor["name"] == flavor_name:
+                flavor_id = flavor["id"]
                 break
         return flavor_id
 
@@ -858,21 +990,24 @@ class TestInstanceResize(TestInstance):
         self._refresh_instance_data()
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
-            DLOG.error("Test setup %s failure for instance %s, reason=%s."
-                       % (self._name, self.instance_name, reason))
+            DLOG.error(
+                "Test setup %s failure for instance %s, reason=%s."
+                % (self._name, self.instance_name, reason)
+            )
             return False, reason
 
         flavor_id = None
         for flavor_name in self._flavor_names:
             flavor_id = self._get_flavor_id(flavor_name)
-            if flavor_name != self._instance_data['flavor']['original_name']:
+            if flavor_name != self._instance_data["flavor"]["original_name"]:
                 self._flavor_id = flavor_id
                 break
 
         if flavor_id is None:
-            DLOG.error("Test setup %s failure for instance %s, reason=could not "
-                       "find flavor to resize with."
-                       % (self._name, self.instance_name))
+            DLOG.error(
+                "Test setup %s failure for instance %s, reason=could not "
+                "find flavor to resize with." % (self._name, self.instance_name)
+            )
             return False, "no valid flavors given"
 
         return True, "instance setup complete"
@@ -881,8 +1016,7 @@ class TestInstanceResize(TestInstance):
         """
         Perform test
         """
-        nova.resize_server(self.openstack_token, self.instance_uuid,
-                           self._flavor_id)
+        nova.resize_server(self.openstack_token, self.instance_uuid, self._flavor_id)
         return True, "instance is resizing"
 
     def _test_passed(self):
@@ -894,9 +1028,16 @@ class TestInstanceResize(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_resized(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -905,12 +1046,14 @@ class TestInstanceResizeConfirm(TestInstance):
     """
     Test - Resize Confirm Instance
     """
+
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
         super(TestInstanceResizeConfirm, self).__init__(
-            'Instance-Resize-Confirm', instance_name, timeout_secs)
+            "Instance-Resize-Confirm", instance_name, timeout_secs
+        )
         self._flavor_names = flavor_names
         self._guest_hb = guest_hb
 
@@ -920,9 +1063,9 @@ class TestInstanceResizeConfirm(TestInstance):
         """
         flavor_id = None
         flavors = nova.get_flavors(self.openstack_token).result_data
-        for flavor in flavors['flavors']:
-            if flavor['name'] == flavor_name:
-                flavor_id = flavor['id']
+        for flavor in flavors["flavors"]:
+            if flavor["name"] == flavor_name:
+                flavor_id = flavor["id"]
                 break
         return flavor_id
 
@@ -938,25 +1081,29 @@ class TestInstanceResizeConfirm(TestInstance):
 
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
-            return False, ("instance needs to be resized for test, but is not in "
-                           "the running state")
+            return False, (
+                "instance needs to be resized for test, but is not in "
+                "the running state"
+            )
 
         flavor_id = None
         for flavor_name in self._flavor_names:
             flavor_id = self._get_flavor_id(flavor_name)
-            if flavor_name != self._instance_data['flavor']['original_name']:
+            if flavor_name != self._instance_data["flavor"]["original_name"]:
                 break
 
         if flavor_id is None:
-            DLOG.error("Test setup %s failure for instance %s, reason=could not "
-                       "find flavor to resize with."
-                       % (self._name, self.instance_name))
+            DLOG.error(
+                "Test setup %s failure for instance %s, reason=could not "
+                "find flavor to resize with." % (self._name, self.instance_name)
+            )
             return False, "no valid flavors given"
 
         nova.resize_server(self.openstack_token, self.instance_uuid, flavor_id)
 
-        max_end_datetime = (self._start_datetime +
-                            datetime.timedelta(seconds=self.timeout_secs))
+        max_end_datetime = self._start_datetime + datetime.timedelta(
+            seconds=self.timeout_secs
+        )
         while True:
             self._refresh_instance_data()
             self._end_datetime = datetime.datetime.now()
@@ -966,8 +1113,10 @@ class TestInstanceResizeConfirm(TestInstance):
                 break
 
             if self._end_datetime > max_end_datetime:
-                DLOG.error("Test setup %s timeout for instance %s."
-                           % (self._name, self.instance_name))
+                DLOG.error(
+                    "Test setup %s timeout for instance %s."
+                    % (self._name, self.instance_name)
+                )
                 return False, ("instance %s failed to resize" % self.instance_name)
 
             time.sleep(5)
@@ -990,9 +1139,16 @@ class TestInstanceResizeConfirm(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_resize_confirmed(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason
 
@@ -1001,12 +1157,14 @@ class TestInstanceResizeRevert(TestInstance):
     """
     Test - Resize Revert Instance
     """
+
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
         """
         Initialize test
         """
         super(TestInstanceResizeRevert, self).__init__(
-            'Instance-Resize-Revert', instance_name, timeout_secs)
+            "Instance-Resize-Revert", instance_name, timeout_secs
+        )
         self._flavor_names = flavor_names
         self._guest_hb = guest_hb
 
@@ -1016,9 +1174,9 @@ class TestInstanceResizeRevert(TestInstance):
         """
         flavor_id = None
         flavors = nova.get_flavors(self.openstack_token).result_data
-        for flavor in flavors['flavors']:
-            if flavor['name'] == flavor_name:
-                flavor_id = flavor['id']
+        for flavor in flavors["flavors"]:
+            if flavor["name"] == flavor_name:
+                flavor_id = flavor["id"]
                 break
         return flavor_id
 
@@ -1034,25 +1192,29 @@ class TestInstanceResizeRevert(TestInstance):
 
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
-            return False, ("instance needs to be resized for test, but is not in "
-                           "the running state")
+            return False, (
+                "instance needs to be resized for test, but is not in "
+                "the running state"
+            )
 
         flavor_id = None
         for flavor_name in self._flavor_names:
             flavor_id = self._get_flavor_id(flavor_name)
-            if flavor_name != self._instance_data['flavor']['original_name']:
+            if flavor_name != self._instance_data["flavor"]["original_name"]:
                 break
 
         if flavor_id is None:
-            DLOG.error("Test setup %s failure for instance %s, reason=could not "
-                       "find flavor to resize with."
-                       % (self._name, self.instance_name))
+            DLOG.error(
+                "Test setup %s failure for instance %s, reason=could not "
+                "find flavor to resize with." % (self._name, self.instance_name)
+            )
             return False, "no valid flavors given"
 
         nova.resize_server(self.openstack_token, self.instance_uuid, flavor_id)
 
-        max_end_datetime = (self._start_datetime +
-                            datetime.timedelta(seconds=self.timeout_secs))
+        max_end_datetime = self._start_datetime + datetime.timedelta(
+            seconds=self.timeout_secs
+        )
         while True:
             self._refresh_instance_data()
             self._end_datetime = datetime.datetime.now()
@@ -1062,8 +1224,10 @@ class TestInstanceResizeRevert(TestInstance):
                 break
 
             if self._end_datetime > max_end_datetime:
-                DLOG.error("Test setup %s timeout for instance %s."
-                           % (self._name, self.instance_name))
+                DLOG.error(
+                    "Test setup %s timeout for instance %s."
+                    % (self._name, self.instance_name)
+                )
                 return False, ("instance %s failed to resize" % self.instance_name)
 
             time.sleep(5)
@@ -1086,8 +1250,15 @@ class TestInstanceResizeRevert(TestInstance):
         self._refresh_customer_logs()
         self._refresh_customer_alarm_history()
         success, reason = _instances.instance_has_resize_reverted(
-            self._instance_data, self.LOG_FILES, self._customer_alarms,
-            self._customer_logs, self._customer_alarm_history, self.start_datetime,
-            self.end_datetime, action=True, guest_hb=self._guest_hb)
+            self._instance_data,
+            self.LOG_FILES,
+            self._customer_alarms,
+            self._customer_logs,
+            self._customer_alarm_history,
+            self.start_datetime,
+            self.end_datetime,
+            action=True,
+            guest_hb=self._guest_hb,
+        )
         self._save_debug(success, reason)
         return success, reason

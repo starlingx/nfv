@@ -24,7 +24,7 @@ from nfv_vim.objects import INSTANCE_GROUP_POLICY
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 
-DLOG = debug.debug_get_logger('nfv_vim.strategy')
+DLOG = debug.debug_get_logger("nfv_vim.strategy")
 
 
 def filter_highest_patch_versions(ver_list):
@@ -45,12 +45,13 @@ class StrategyNames(Constants, metaclass=Singleton):
     """
     Strategy Names
     """
-    SW_PATCH = Constant('sw-patch')
-    SW_UPGRADE = Constant('sw-upgrade')
-    FW_UPDATE = Constant('fw-update')
-    KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
-    KUBE_UPGRADE = Constant('kube-upgrade')
-    SYSYTEM_CONFIG_UPDATE = Constant('system-config-update')
+
+    SW_PATCH = Constant("sw-patch")
+    SW_UPGRADE = Constant("sw-upgrade")
+    FW_UPDATE = Constant("fw-update")
+    KUBE_ROOTCA_UPDATE = Constant("kube-rootca-update")
+    KUBE_UPGRADE = Constant("kube-upgrade")
+    SYSYTEM_CONFIG_UPDATE = Constant("system-config-update")
 
 
 # Constant Instantiation
@@ -64,8 +65,8 @@ MTCE_DELAY = 15
 NO_REBOOT_DELAY = 30
 
 # constants used by the patching API for state and repo state
-PATCH_REPO_STATE_APPLIED = 'Applied'
-PATCH_STATE_APPLIED = 'Applied'
+PATCH_REPO_STATE_APPLIED = "Applied"
+PATCH_STATE_APPLIED = "Applied"
 WAIT_ALARM_TIMEOUT = 2400
 
 # constants used by kube upgrade
@@ -81,12 +82,20 @@ class SwUpdateStrategy(strategy.Strategy):
     """
     Software Update - Strategy
     """
-    def __init__(self, uuid, strategy_name, controller_apply_type,
-                 storage_apply_type,
-                 swift_apply_type, worker_apply_type,
-                 max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions,
-                 ignore_alarms):
+
+    def __init__(
+        self,
+        uuid,
+        strategy_name,
+        controller_apply_type,
+        storage_apply_type,
+        swift_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        ignore_alarms,
+    ):
         super(SwUpdateStrategy, self).__init__(uuid, strategy_name)
         self._controller_apply_type = controller_apply_type
         self._storage_apply_type = storage_apply_type
@@ -155,14 +164,16 @@ class SwUpdateStrategy(strategy.Strategy):
 
             for host in storage_hosts:
                 if HOST_PERSONALITY.STORAGE not in host.personality:
-                    DLOG.error("Host inventory personality storage mismatch "
-                               "detected for host %s." % host.name)
-                    reason = 'host inventory personality storage mismatch detected'
+                    DLOG.error(
+                        "Host inventory personality storage mismatch "
+                        "detected for host %s." % host.name
+                    )
+                    reason = "host inventory personality storage mismatch detected"
                     return None, reason
 
             if 2 > host_table.total_by_personality(HOST_PERSONALITY.STORAGE):
                 DLOG.warn("Not enough storage hosts to apply software updates.")
-                reason = 'not enough storage hosts to apply software updates'
+                reason = "not enough storage hosts to apply software updates"
                 return None, reason
 
         host_lists = list()
@@ -180,8 +191,9 @@ class SwUpdateStrategy(strategy.Strategy):
                 # else create a new list
                 for host_list in host_lists:
                     for peer_host in host_list:
-                        if host_group_table.same_group(policy, host.name,
-                                                       peer_host.name):
+                        if host_group_table.same_group(
+                            policy, host.name, peer_host.name
+                        ):
                             break
                     else:
                         host_list.append(host)
@@ -191,7 +203,7 @@ class SwUpdateStrategy(strategy.Strategy):
         else:
             DLOG.verbose("Storage apply type set to ignore.")
 
-        return host_lists, ''
+        return host_lists, ""
 
     def _create_worker_host_lists(self, worker_hosts, reboot):
         """
@@ -203,11 +215,14 @@ class SwUpdateStrategy(strategy.Strategy):
             for instance in instance_table.on_host(host.name):
                 for peer_instance in instance_table.on_host(peer_host.name):
                     for policy in policies:
-                        if instance_group_table.same_group(policy, instance.uuid,
-                                                           peer_instance.uuid):
+                        if instance_group_table.same_group(
+                            policy, instance.uuid, peer_instance.uuid
+                        ):
                             return True
-            DLOG.debug("No instance group policy conflict between host %s and "
-                       "host %s." % (host.name, peer_host.name))
+            DLOG.debug(
+                "No instance group policy conflict between host %s and "
+                "host %s." % (host.name, peer_host.name)
+            )
             return False
 
         def calculate_host_aggregate_limits():
@@ -220,16 +235,14 @@ class SwUpdateStrategy(strategy.Strategy):
             # are multiple aggregates, that will help us select hosts
             # from more than one aggregate for each stage.
             host_table = tables.tables_get_host_table()
-            num_worker_hosts = host_table.total_by_personality(
-                HOST_PERSONALITY.WORKER)
+            num_worker_hosts = host_table.total_by_personality(HOST_PERSONALITY.WORKER)
             # Limit the ratio to half the worker hosts in an aggregate
             aggregate_ratio = min(
-                float(self._max_parallel_worker_hosts) / num_worker_hosts,
-                0.5)
+                float(self._max_parallel_worker_hosts) / num_worker_hosts, 0.5
+            )
 
             for host_aggregate in host_aggregate_table:
-                aggregate_count = len(
-                    host_aggregate_table[host_aggregate].host_names)
+                aggregate_count = len(host_aggregate_table[host_aggregate].host_names)
                 if aggregate_count == 1:
                     # only one host in this aggregate
                     host_aggregate_limit[host_aggregate] = 1
@@ -237,7 +250,8 @@ class SwUpdateStrategy(strategy.Strategy):
                     # multiple hosts in the aggregate - use the ratio,
                     # rounding down, but no lower than 1.
                     host_aggregate_limit[host_aggregate] = max(
-                        1, int(aggregate_count * aggregate_ratio))
+                        1, int(aggregate_count * aggregate_ratio)
+                    )
 
         def aggregate_limit_reached():
             """
@@ -254,8 +268,7 @@ class SwUpdateStrategy(strategy.Strategy):
             # count the number of hosts from the current host_list in each aggregate
             host_aggregate_count = {}
             for existing_host in host_list:
-                for aggregate in host_aggregate_table.get_by_host(
-                        existing_host.name):
+                for aggregate in host_aggregate_table.get_by_host(existing_host.name):
                     if aggregate.name in host_aggregate_count:
                         host_aggregate_count[aggregate.name] += 1
                     else:
@@ -265,8 +278,10 @@ class SwUpdateStrategy(strategy.Strategy):
             # for any aggregate
             for aggregate in host_aggregate_table.get_by_host(host.name):
                 if aggregate.name in host_aggregate_count:
-                    if host_aggregate_count[aggregate.name] == \
-                            host_aggregate_limit[aggregate.name]:
+                    if (
+                        host_aggregate_count[aggregate.name]
+                        == host_aggregate_limit[aggregate.name]
+                    ):
                         return True
 
             DLOG.debug("No host aggregate limit reached for host %s." % (host.name))
@@ -278,9 +293,11 @@ class SwUpdateStrategy(strategy.Strategy):
         if SW_UPDATE_APPLY_TYPE.IGNORE != self._worker_apply_type:
             for host in worker_hosts:
                 if HOST_PERSONALITY.WORKER not in host.personality:
-                    DLOG.error("Host inventory personality worker mismatch "
-                               "detected for host %s." % host.name)
-                    reason = 'host inventory personality worker mismatch detected'
+                    DLOG.error(
+                        "Host inventory personality worker mismatch "
+                        "detected for host %s." % host.name
+                    )
+                    reason = "host inventory personality worker mismatch detected"
                     return None, reason
 
             # Do not allow reboots if there are locked instances that
@@ -291,13 +308,16 @@ class SwUpdateStrategy(strategy.Strategy):
                 for instance in list(instance_table.values()):
                     if instance.is_locked():
                         for instance_group in instance_group_table.get_by_instance(
-                                instance.uuid):
+                            instance.uuid
+                        ):
                             DLOG.warn(
                                 "Instance %s in group %s must not be shut down"
-                                % (instance.name, instance_group.name))
-                            reason = (
-                                'instance %s in group %s must not be shut down'
-                                % (instance.name, instance_group.name))
+                                % (instance.name, instance_group.name)
+                            )
+                            reason = "instance %s in group %s must not be shut down" % (
+                                instance.name,
+                                instance_group.name,
+                            )
                             return None, reason
 
         host_lists = list()
@@ -322,8 +342,10 @@ class SwUpdateStrategy(strategy.Strategy):
                 host_lists += host_with_instances_lists
 
         elif SW_UPDATE_APPLY_TYPE.PARALLEL == self._worker_apply_type:
-            policies = [INSTANCE_GROUP_POLICY.ANTI_AFFINITY,
-                        INSTANCE_GROUP_POLICY.ANTI_AFFINITY_BEST_EFFORT]
+            policies = [
+                INSTANCE_GROUP_POLICY.ANTI_AFFINITY,
+                INSTANCE_GROUP_POLICY.ANTI_AFFINITY_BEST_EFFORT,
+            ]
 
             host_aggregate_table = tables.tables_get_host_aggregate_table()
             host_aggregate_limit = {}
@@ -394,14 +416,15 @@ class SwUpdateStrategy(strategy.Strategy):
             else:
                 sized_host_lists.append(host_list)
 
-        return sized_host_lists, ''
+        return sized_host_lists, ""
 
     def build_complete(self, result, result_reason):
         """
         Strategy Build Complete
         """
-        result, result_reason = \
-            super(SwUpdateStrategy, self).build_complete(result, result_reason)
+        result, result_reason = super(SwUpdateStrategy, self).build_complete(
+            result, result_reason
+        )
         return result, result_reason
 
     def apply(self, stage_id):
@@ -415,22 +438,30 @@ class SwUpdateStrategy(strategy.Strategy):
         """
         Strategy Apply Complete
         """
-        result, result_reason = \
-            super(SwUpdateStrategy, self).apply_complete(result, result_reason)
+        result, result_reason = super(SwUpdateStrategy, self).apply_complete(
+            result, result_reason
+        )
 
         if result == strategy.STRATEGY_RESULT.SUCCESS:
-            DLOG.info("Apply Complete Callback, result=%s, reason=%s."
-                      % (result, result_reason))
+            DLOG.info(
+                "Apply Complete Callback, result=%s, reason=%s."
+                % (result, result_reason)
+            )
         else:
-            DLOG.error("Apply Complete Callback, result=%s, reason=%s."
-                       % (result, result_reason))
+            DLOG.error(
+                "Apply Complete Callback, result=%s, reason=%s."
+                % (result, result_reason)
+            )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
-            self.sw_update_obj.strategy_apply_complete(True, '')
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
+            self.sw_update_obj.strategy_apply_complete(True, "")
         else:
             self.sw_update_obj.strategy_apply_complete(
-                False, self.apply_phase.result_reason)
+                False, self.apply_phase.result_reason
+            )
 
     def abort(self, stage_id):
         """
@@ -443,22 +474,30 @@ class SwUpdateStrategy(strategy.Strategy):
         """
         Strategy Abort Complete
         """
-        result, result_reason = \
-            super(SwUpdateStrategy, self).abort_complete(result, result_reason)
+        result, result_reason = super(SwUpdateStrategy, self).abort_complete(
+            result, result_reason
+        )
 
         if result == strategy.STRATEGY_RESULT.SUCCESS:
-            DLOG.info("Abort Complete Callback, result=%s, reason=%s."
-                      % (result, result_reason))
+            DLOG.info(
+                "Abort Complete Callback, result=%s, reason=%s."
+                % (result, result_reason)
+            )
         else:
-            DLOG.error("Abort Complete Callback, result=%s, reason=%s."
-                       % (result, result_reason))
+            DLOG.error(
+                "Abort Complete Callback, result=%s, reason=%s."
+                % (result, result_reason)
+            )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
-            self.sw_update_obj.strategy_abort_complete(True, '')
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
+            self.sw_update_obj.strategy_abort_complete(True, "")
         else:
             self.sw_update_obj.strategy_abort_complete(
-                False, self.abort_phase.result_reason)
+                False, self.abort_phase.result_reason
+            )
 
     def report_build_failure(self, reason):
         """
@@ -471,8 +510,8 @@ class SwUpdateStrategy(strategy.Strategy):
         self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
         self.build_phase.result_reason = reason
         self.sw_update_obj.strategy_build_complete(
-            False,
-            self.build_phase.result_reason)
+            False, self.build_phase.result_reason
+        )
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
@@ -481,24 +520,29 @@ class SwUpdateStrategy(strategy.Strategy):
         """
         from nfv_vim import nfvi
 
-        super(SwUpdateStrategy, self).from_dict(data, build_phase, apply_phase,
-                                                abort_phase)
-        self._controller_apply_type = data['controller_apply_type']
-        self._storage_apply_type = data['storage_apply_type']
-        self._swift_apply_type = data['swift_apply_type']
-        self._worker_apply_type = data['worker_apply_type']
-        self._max_parallel_worker_hosts = data['max_parallel_worker_hosts']
-        self._default_instance_action = data['default_instance_action']
-        self._alarm_restrictions = data['alarm_restrictions']
-        self._ignore_alarms = data['ignore_alarms']
+        super(SwUpdateStrategy, self).from_dict(
+            data, build_phase, apply_phase, abort_phase
+        )
+        self._controller_apply_type = data["controller_apply_type"]
+        self._storage_apply_type = data["storage_apply_type"]
+        self._swift_apply_type = data["swift_apply_type"]
+        self._worker_apply_type = data["worker_apply_type"]
+        self._max_parallel_worker_hosts = data["max_parallel_worker_hosts"]
+        self._default_instance_action = data["default_instance_action"]
+        self._alarm_restrictions = data["alarm_restrictions"]
+        self._ignore_alarms = data["ignore_alarms"]
 
         nfvi_alarms = list()
-        for alarm_data in data['nfvi_alarms_data']:
+        for alarm_data in data["nfvi_alarms_data"]:
             alarm = nfvi.objects.v1.Alarm(
-                alarm_data['alarm_uuid'], alarm_data['alarm_id'],
-                alarm_data['entity_instance_id'], alarm_data['severity'],
-                alarm_data['reason_text'], alarm_data['timestamp'],
-                alarm_data['mgmt_affecting'])
+                alarm_data["alarm_uuid"],
+                alarm_data["alarm_id"],
+                alarm_data["entity_instance_id"],
+                alarm_data["severity"],
+                alarm_data["reason_text"],
+                alarm_data["timestamp"],
+                alarm_data["mgmt_affecting"],
+            )
             nfvi_alarms.append(alarm)
         self._nfvi_alarms = nfvi_alarms
 
@@ -509,19 +553,19 @@ class SwUpdateStrategy(strategy.Strategy):
         Represent the software update strategy as a dictionary
         """
         data = super(SwUpdateStrategy, self).as_dict()
-        data['controller_apply_type'] = self._controller_apply_type
-        data['storage_apply_type'] = self._storage_apply_type
-        data['swift_apply_type'] = self._swift_apply_type
-        data['worker_apply_type'] = self._worker_apply_type
-        data['max_parallel_worker_hosts'] = self._max_parallel_worker_hosts
-        data['default_instance_action'] = self._default_instance_action
-        data['alarm_restrictions'] = self._alarm_restrictions
-        data['ignore_alarms'] = self._ignore_alarms
+        data["controller_apply_type"] = self._controller_apply_type
+        data["storage_apply_type"] = self._storage_apply_type
+        data["swift_apply_type"] = self._swift_apply_type
+        data["worker_apply_type"] = self._worker_apply_type
+        data["max_parallel_worker_hosts"] = self._max_parallel_worker_hosts
+        data["default_instance_action"] = self._default_instance_action
+        data["alarm_restrictions"] = self._alarm_restrictions
+        data["ignore_alarms"] = self._ignore_alarms
 
         nfvi_alarms_data = list()
         for alarm in self._nfvi_alarms:
             nfvi_alarms_data.append(alarm.as_dict())
-        data['nfvi_alarms_data'] = nfvi_alarms_data
+        data["nfvi_alarms_data"] = nfvi_alarms_data
 
         return data
 
@@ -581,12 +625,13 @@ class QuerySwPatchesMixin(QueryMixinBase):
         from nfv_vim import nfvi
 
         mixin_data = list()
-        for sw_patch_data in data['nfvi_sw_patches_data']:
+        for sw_patch_data in data["nfvi_sw_patches_data"]:
             sw_patch = nfvi.objects.v1.SwPatch(
-                sw_patch_data['name'],
-                sw_patch_data['sw_version'],
-                sw_patch_data['repo_state'],
-                sw_patch_data['patch_state'])
+                sw_patch_data["name"],
+                sw_patch_data["sw_version"],
+                sw_patch_data["repo_state"],
+                sw_patch_data["patch_state"],
+            )
             mixin_data.append(sw_patch)
         self._nfvi_sw_patches = mixin_data
 
@@ -598,7 +643,7 @@ class QuerySwPatchesMixin(QueryMixinBase):
         mixin_data = list()
         for sw_patch in self._nfvi_sw_patches:
             mixin_data.append(sw_patch.as_dict())
-        data['nfvi_sw_patches_data'] = mixin_data
+        data["nfvi_sw_patches_data"] = mixin_data
 
 
 class QuerySwPatchHostsMixin(QueryMixinBase):
@@ -631,12 +676,17 @@ class QuerySwPatchHostsMixin(QueryMixinBase):
         from nfv_vim import nfvi
 
         mixin_data = list()
-        for host_data in data['nfvi_sw_patch_hosts_data']:
+        for host_data in data["nfvi_sw_patch_hosts_data"]:
             host = nfvi.objects.v1.HostSwPatch(
-                host_data['name'], host_data['personality'],
-                host_data['sw_version'], host_data['requires_reboot'],
-                host_data['patch_current'], host_data['state'],
-                host_data['patch_failed'], host_data['interim_state'])
+                host_data["name"],
+                host_data["personality"],
+                host_data["sw_version"],
+                host_data["requires_reboot"],
+                host_data["patch_current"],
+                host_data["state"],
+                host_data["patch_failed"],
+                host_data["interim_state"],
+            )
             mixin_data.append(host)
         self._nfvi_sw_patch_hosts = mixin_data
 
@@ -648,7 +698,7 @@ class QuerySwPatchHostsMixin(QueryMixinBase):
         mixin_data = list()
         for host in self._nfvi_sw_patch_hosts:
             mixin_data.append(host.as_dict())
-        data['nfvi_sw_patch_hosts_data'] = mixin_data
+        data["nfvi_sw_patch_hosts_data"] = mixin_data
 
 
 class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
@@ -681,15 +731,16 @@ class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
         from nfv_vim import nfvi
 
         mixin_data = list()
-        for list_data in data['nfvi_kube_rootca_host_update_list_data']:
+        for list_data in data["nfvi_kube_rootca_host_update_list_data"]:
             new_object = nfvi.objects.v1.KubeRootcaHostUpdate(
-                list_data['host_id'],
-                list_data['hostname'],
-                list_data['target_rootca_cert'],
-                list_data['effective_rootca_cert'],
-                list_data['state'],
-                list_data['created_at'],
-                list_data['updated_at'])
+                list_data["host_id"],
+                list_data["hostname"],
+                list_data["target_rootca_cert"],
+                list_data["effective_rootca_cert"],
+                list_data["state"],
+                list_data["created_at"],
+                list_data["updated_at"],
+            )
             mixin_data.append(new_object)
         self._nfvi_kube_rootca_host_update_list = mixin_data
 
@@ -701,7 +752,7 @@ class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
         mixin_data = list()
         for list_entry in self._nfvi_kube_rootca_host_update_list:
             mixin_data.append(list_entry.as_dict())
-        data['nfvi_kube_rootca_host_update_list_data'] = mixin_data
+        data["nfvi_kube_rootca_host_update_list_data"] = mixin_data
 
 
 class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
@@ -733,10 +784,11 @@ class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
 
         from nfv_vim import nfvi
 
-        mixin_data = data['nfvi_kube_rootca_update_data']
+        mixin_data = data["nfvi_kube_rootca_update_data"]
         if mixin_data:
             self._nfvi_kube_rootca_update = nfvi.objects.v1.KubeRootcaUpdate(
-                mixin_data['state'])
+                mixin_data["state"]
+            )
         else:
             self._nfvi_kube_rootca_update = None
 
@@ -748,7 +800,7 @@ class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
         mixin_data = None
         if self._nfvi_kube_rootca_update:
             mixin_data = self._nfvi_kube_rootca_update.as_dict()
-        data['nfvi_kube_rootca_update_data'] = mixin_data
+        data["nfvi_kube_rootca_update_data"] = mixin_data
 
 
 class QueryKubeUpgradesMixin(QueryMixinBase):
@@ -780,12 +832,13 @@ class QueryKubeUpgradesMixin(QueryMixinBase):
 
         from nfv_vim import nfvi
 
-        mixin_data = data['nfvi_kube_upgrade_data']
+        mixin_data = data["nfvi_kube_upgrade_data"]
         if mixin_data:
             self._nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
-                mixin_data['state'],
-                mixin_data['from_version'],
-                mixin_data['to_version'])
+                mixin_data["state"],
+                mixin_data["from_version"],
+                mixin_data["to_version"],
+            )
         else:
             self._nfvi_kube_upgrade = None
 
@@ -797,7 +850,7 @@ class QueryKubeUpgradesMixin(QueryMixinBase):
         mixin_data = None
         if self._nfvi_kube_upgrade:
             mixin_data = self._nfvi_kube_upgrade.as_dict()
-        data['nfvi_kube_upgrade_data'] = mixin_data
+        data["nfvi_kube_upgrade_data"] = mixin_data
 
 
 class QueryKubeHostUpgradesMixin(QueryMixinBase):
@@ -830,14 +883,15 @@ class QueryKubeHostUpgradesMixin(QueryMixinBase):
         from nfv_vim import nfvi
 
         mixin_data = list()
-        for kube_host_upgrade_data in data['nfvi_kube_host_upgrade_list_data']:
+        for kube_host_upgrade_data in data["nfvi_kube_host_upgrade_list_data"]:
             kube_host_upgrade = nfvi.objects.v1.KubeHostUpgrade(
-                kube_host_upgrade_data['host_id'],
-                kube_host_upgrade_data['host_uuid'],
-                kube_host_upgrade_data['target_version'],
-                kube_host_upgrade_data['control_plane_version'],
-                kube_host_upgrade_data['kubelet_version'],
-                kube_host_upgrade_data['status'])
+                kube_host_upgrade_data["host_id"],
+                kube_host_upgrade_data["host_uuid"],
+                kube_host_upgrade_data["target_version"],
+                kube_host_upgrade_data["control_plane_version"],
+                kube_host_upgrade_data["kubelet_version"],
+                kube_host_upgrade_data["status"],
+            )
             mixin_data.append(kube_host_upgrade)
         self._nfvi_kube_host_upgrade_list = mixin_data
 
@@ -849,7 +903,7 @@ class QueryKubeHostUpgradesMixin(QueryMixinBase):
         mixin_data = list()
         for kube_host_upgrade in self._nfvi_kube_host_upgrade_list:
             mixin_data.append(kube_host_upgrade.as_dict())
-        data['nfvi_kube_host_upgrade_list_data'] = mixin_data
+        data["nfvi_kube_host_upgrade_list_data"] = mixin_data
 
 
 class QueryKubeVersionsMixin(QueryMixinBase):
@@ -882,15 +936,16 @@ class QueryKubeVersionsMixin(QueryMixinBase):
         from nfv_vim import nfvi
 
         mixin_data = list()
-        for data_item in data['nfvi_kube_versions_list_data']:
+        for data_item in data["nfvi_kube_versions_list_data"]:
             mixin_object = nfvi.objects.v1.KubeVersion(
-                data_item['kube_version'],
-                data_item['state'],
-                data_item['target'],
-                data_item['upgrade_from'],
-                data_item['downgrade_to'],
-                data_item['applied_patches'],
-                data_item['available_patches'])
+                data_item["kube_version"],
+                data_item["state"],
+                data_item["target"],
+                data_item["upgrade_from"],
+                data_item["downgrade_to"],
+                data_item["applied_patches"],
+                data_item["available_patches"],
+            )
             mixin_data.append(mixin_object)
         self._nfvi_kube_versions_list = mixin_data
 
@@ -902,7 +957,7 @@ class QueryKubeVersionsMixin(QueryMixinBase):
         mixin_data = list()
         for mixin_obj in self._nfvi_kube_versions_list:
             mixin_data.append(mixin_obj.as_dict())
-        data['nfvi_kube_versions_list_data'] = mixin_data
+        data["nfvi_kube_versions_list_data"] = mixin_data
 
 
 class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
@@ -935,10 +990,10 @@ class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
         from nfv_vim import nfvi
 
         mixin_data = list()
-        for host_data in data['nfvi_system_config_update_hosts_data']:
+        for host_data in data["nfvi_system_config_update_hosts_data"]:
             host = nfvi.objects.v1.HostSystemConfigUpdate(
-                host_data['name'],
-                host_data['unlock_request'])
+                host_data["name"], host_data["unlock_request"]
+            )
             mixin_data.append(host)
         self._nfvi_system_config_update_hosts = mixin_data
 
@@ -950,17 +1005,19 @@ class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
         mixin_data = list()
         for host in self._nfvi_system_config_update_hosts:
             mixin_data.append(host.as_dict())
-        data['nfvi_system_config_update_hosts_data'] = mixin_data
+        data["nfvi_system_config_update_hosts_data"] = mixin_data
 
 
 class UpdateControllerHostsMixin(object):
 
-    def _add_update_controller_strategy_stages(self,
-                                               controllers,
-                                               reboot,
-                                               strategy_stage_name,
-                                               host_action_step,
-                                               extra_args=None):
+    def _add_update_controller_strategy_stages(
+        self,
+        controllers,
+        reboot,
+        strategy_stage_name,
+        host_action_step,
+        extra_args=None,
+    ):
         """
         Add controller software stages for a controller list to a strategy
         """
@@ -972,17 +1029,20 @@ class UpdateControllerHostsMixin(object):
 
             for host in controllers:
                 if HOST_PERSONALITY.CONTROLLER not in host.personality:
-                    DLOG.error("Host inventory personality controller mismatch "
-                               "detected for host %s." % host.name)
-                    reason = ('host inventory personality controller mismatch '
-                              'detected')
+                    DLOG.error(
+                        "Host inventory personality controller mismatch "
+                        "detected for host %s." % host.name
+                    )
+                    reason = (
+                        "host inventory personality controller mismatch detected"
+                    )
                     return False, reason
 
-            if (not self._single_controller and
-                    2 > host_table.total_by_personality(
-                    HOST_PERSONALITY.CONTROLLER)):
+            if not self._single_controller and 2 > host_table.total_by_personality(
+                HOST_PERSONALITY.CONTROLLER
+            ):
                 DLOG.warn("Not enough controllers to apply software update.")
-                reason = 'not enough controllers to apply software update'
+                reason = "not enough controllers to apply software update"
                 return False, reason
 
         if self._controller_apply_type == SW_UPDATE_APPLY_TYPE.SERIAL:
@@ -997,7 +1057,10 @@ class UpdateControllerHostsMixin(object):
             # Deploy order: [controller-1, controller-0]
             # Rollback order: [controller-0, controller-1]
             try:
-                if isinstance(self, SwUpgradeStrategy) and self.nfvi_upgrade.major_release:
+                if (
+                    isinstance(self, SwUpgradeStrategy)
+                    and self.nfvi_upgrade.major_release
+                ):
                     if self._rollback and not self._single_controller:
                         # Rollback case
                         local_host_name = HOST_NAME.CONTROLLER_1
@@ -1005,7 +1068,10 @@ class UpdateControllerHostsMixin(object):
                         # Upgrade case
                         local_host_name = HOST_NAME.CONTROLLER_0
             except Exception as e:
-                DLOG.warn("While checking for software major upgrade got exception: ", exc_info=e)
+                DLOG.warn(
+                    "While checking for software major upgrade got exception: ",
+                    exc_info=e,
+                )
 
             for host in controllers:
                 if HOST_PERSONALITY.WORKER not in host.personality:
@@ -1014,10 +1080,13 @@ class UpdateControllerHostsMixin(object):
                     else:
                         host_list = [host]
                         stage = strategy.StrategyStage(strategy_stage_name)
-                        stage.add_step(strategy.QueryAlarmsStep(
-                            not isinstance(self, SwUpgradeStrategy),
-                            ignore_alarms=self._ignore_alarms,
-                            ignore_alarms_conditional=self._ignore_alarms_conditional))
+                        stage.add_step(
+                            strategy.QueryAlarmsStep(
+                                not isinstance(self, SwUpgradeStrategy),
+                                ignore_alarms=self._ignore_alarms,
+                                ignore_alarms_conditional=self._ignore_alarms_conditional,
+                            )
+                        )
                         if reboot:
                             stage.add_step(strategy.SwactHostsStep(host_list))
                             stage.add_step(strategy.LockHostsStep(host_list))
@@ -1029,31 +1098,41 @@ class UpdateControllerHostsMixin(object):
                         if reboot:
                             # Cannot unlock right away after certain actions
                             # like SwPatchHostsStep
-                            stage.add_step(strategy.SystemStabilizeStep(
-                                timeout_in_secs=MTCE_DELAY))
+                            stage.add_step(
+                                strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
+                            )
                             stage.add_step(strategy.UnlockHostsStep(host_list))
                             # After controller node(s) are unlocked, we need extra time to
                             # allow the OSDs to go back in sync and the storage related
                             # alarms to clear. Note: not all controller nodes will have
                             # OSDs configured, but the alarms should clear quickly in
                             # that case so this will not delay the update strategy.
-                            stage.add_step(strategy.WaitAlarmsClearStep(
-                                           timeout_in_secs=WAIT_ALARM_TIMEOUT,
-                                           ignore_alarms=self._ignore_alarms,
-                                           ignore_alarms_conditional=self._ignore_alarms_conditional))
+                            stage.add_step(
+                                strategy.WaitAlarmsClearStep(
+                                    timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                                    ignore_alarms=self._ignore_alarms,
+                                    ignore_alarms_conditional=self._ignore_alarms_conditional,
+                                )
+                            )
                         elif not isinstance(self, SwUpgradeStrategy):
                             # Less time required if host is not rebooting
-                            stage.add_step(strategy.SystemStabilizeStep(
-                                           timeout_in_secs=NO_REBOOT_DELAY))
+                            stage.add_step(
+                                strategy.SystemStabilizeStep(
+                                    timeout_in_secs=NO_REBOOT_DELAY
+                                )
+                            )
                         self.apply_phase.add_stage(stage)
 
             if local_host is not None:
                 host_list = [local_host]
                 stage = strategy.StrategyStage(strategy_stage_name)
-                stage.add_step(strategy.QueryAlarmsStep(
-                    not isinstance(self, SwUpgradeStrategy),
-                    ignore_alarms=self._ignore_alarms,
-                    ignore_alarms_conditional=self._ignore_alarms_conditional))
+                stage.add_step(
+                    strategy.QueryAlarmsStep(
+                        not isinstance(self, SwUpgradeStrategy),
+                        ignore_alarms=self._ignore_alarms,
+                        ignore_alarms_conditional=self._ignore_alarms_conditional,
+                    )
+                )
                 if reboot:
                     stage.add_step(strategy.SwactHostsStep(host_list))
                     stage.add_step(strategy.LockHostsStep(host_list))
@@ -1065,53 +1144,62 @@ class UpdateControllerHostsMixin(object):
                 if reboot:
                     # Cannot unlock right away after certain actions
                     # like SwPatchHostsStep
-                    stage.add_step(strategy.SystemStabilizeStep(
-                                   timeout_in_secs=MTCE_DELAY))
+                    stage.add_step(
+                        strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
+                    )
                     stage.add_step(strategy.UnlockHostsStep(host_list))
                     # After controller node(s) are unlocked, we need extra time to
                     # allow the OSDs to go back in sync and the storage related
                     # alarms to clear. Note: not all controller nodes will have
                     # OSDs configured, but the alarms should clear quickly in
                     # that case so this will not delay the update strategy.
-                    stage.add_step(strategy.WaitAlarmsClearStep(
-                                   timeout_in_secs=WAIT_ALARM_TIMEOUT,
-                                   ignore_alarms=self._ignore_alarms,
-                                   ignore_alarms_conditional=self._ignore_alarms_conditional))
+                    stage.add_step(
+                        strategy.WaitAlarmsClearStep(
+                            timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                            ignore_alarms=self._ignore_alarms,
+                            ignore_alarms_conditional=self._ignore_alarms_conditional,
+                        )
+                    )
                 elif not isinstance(self, SwUpgradeStrategy):
                     # Less time required if host is not rebooting
-                    stage.add_step(strategy.SystemStabilizeStep(
-                                   timeout_in_secs=NO_REBOOT_DELAY))
+                    stage.add_step(
+                        strategy.SystemStabilizeStep(timeout_in_secs=NO_REBOOT_DELAY)
+                    )
 
                 self.apply_phase.add_stage(stage)
 
         elif self._controller_apply_type == SW_UPDATE_APPLY_TYPE.PARALLEL:
             DLOG.warn("Parallel apply type cannot be used for controllers.")
-            reason = 'parallel apply type not allowed for controllers'
+            reason = "parallel apply type not allowed for controllers"
             return False, reason
         else:
             DLOG.verbose("Controller apply type set to ignore.")
 
-        return True, ''
+        return True, ""
 
 
 class PatchControllerHostsMixin(UpdateControllerHostsMixin):
     def _add_controller_strategy_stages(self, controllers, reboot):
         from nfv_vim import strategy
+
         return self._add_update_controller_strategy_stages(
             controllers,
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_PATCH_CONTROLLERS,
-            strategy.SwPatchHostsStep)
+            strategy.SwPatchHostsStep,
+        )
 
 
 class SwDeployControllerHostsMixin(UpdateControllerHostsMixin):
     def _add_controller_strategy_stages(self, controllers, reboot):
         from nfv_vim import strategy
+
         return self._add_update_controller_strategy_stages(
             controllers,
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
-            strategy.UpgradeHostsStep)
+            strategy.UpgradeHostsStep,
+        )
 
 
 class UpdateSystemConfigControllerHostsMixin(UpdateControllerHostsMixin):
@@ -1120,22 +1208,28 @@ class UpdateSystemConfigControllerHostsMixin(UpdateControllerHostsMixin):
         Add controller system config update stages to a strategy
         """
         from nfv_vim import strategy
+
         return self._add_update_controller_strategy_stages(
             controllers,
             True,
             strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_CONTROLLERS,
-            strategy.SystemConfigUpdateHostsStep)
+            strategy.SystemConfigUpdateHostsStep,
+        )
 
 
 class UpgradeKubeletControllerHostsMixin(UpdateControllerHostsMixin):
-    def _add_kubelet_controller_strategy_stages(self, controllers, to_version, reboot, stage_name):
+    def _add_kubelet_controller_strategy_stages(
+        self, controllers, to_version, reboot, stage_name
+    ):
         from nfv_vim import strategy
+
         return self._add_update_controller_strategy_stages(
             controllers,
             reboot,
             stage_name,
             strategy.KubeHostUpgradeKubeletStep,
-            extra_args=to_version)
+            extra_args=to_version,
+        )
 
 
 class UpdateStorageHostsMixin(object):
@@ -1146,11 +1240,9 @@ class UpdateStorageHostsMixin(object):
     - SwUpdateStrategy: - provides _create_storage_host_lists
     """
 
-    def _add_update_storage_strategy_stages(self,
-                                            storage_hosts,
-                                            reboot,
-                                            strategy_stage_name,
-                                            host_action_step):
+    def _add_update_storage_strategy_stages(
+        self, storage_hosts, reboot, strategy_stage_name, host_action_step
+    ):
         """
         Add storage update stages to a strategy
         The strategy_stage_name is the type of stage (patch, kube, etc..)
@@ -1164,30 +1256,35 @@ class UpdateStorageHostsMixin(object):
 
         for host_list in host_lists:
             stage = strategy.StrategyStage(strategy_stage_name)
-            stage.add_step(strategy.QueryAlarmsStep(
-                not isinstance(self, SwUpgradeStrategy),
-                ignore_alarms=self._ignore_alarms,
-                ignore_alarms_conditional=self._ignore_alarms_conditional))
+            stage.add_step(
+                strategy.QueryAlarmsStep(
+                    not isinstance(self, SwUpgradeStrategy),
+                    ignore_alarms=self._ignore_alarms,
+                    ignore_alarms_conditional=self._ignore_alarms_conditional,
+                )
+            )
             if reboot:
                 stage.add_step(strategy.LockHostsStep(host_list))
             # Add the action step for these hosts (patch, etc..)
             stage.add_step(host_action_step(host_list))
             if reboot:
                 # Cannot unlock right away after the host action
-                stage.add_step(strategy.SystemStabilizeStep(
-                               timeout_in_secs=MTCE_DELAY))
+                stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
                 stage.add_step(strategy.UnlockHostsStep(host_list))
                 # After storage node(s) are unlocked, we need extra time to
                 # allow the OSDs to go back in sync and the storage related
                 # alarms to clear.
-                stage.add_step(strategy.WaitDataSyncStep(
-                    timeout_in_secs=30 * 60,
-                    ignore_alarms=self._ignore_alarms))
+                stage.add_step(
+                    strategy.WaitDataSyncStep(
+                        timeout_in_secs=30 * 60, ignore_alarms=self._ignore_alarms
+                    )
+                )
             elif not isinstance(self, SwUpgradeStrategy):
-                stage.add_step(strategy.SystemStabilizeStep(
-                               timeout_in_secs=NO_REBOOT_DELAY))
+                stage.add_step(
+                    strategy.SystemStabilizeStep(timeout_in_secs=NO_REBOOT_DELAY)
+                )
             self.apply_phase.add_stage(stage)
-        return True, ''
+        return True, ""
 
 
 class PatchStorageHostsMixin(UpdateStorageHostsMixin):
@@ -1196,11 +1293,13 @@ class PatchStorageHostsMixin(UpdateStorageHostsMixin):
         Add storage software patch stages to a strategy
         """
         from nfv_vim import strategy
+
         return self._add_update_storage_strategy_stages(
             storage_hosts,
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_PATCH_STORAGE_HOSTS,
-            strategy.SwPatchHostsStep)
+            strategy.SwPatchHostsStep,
+        )
 
 
 class SwDeployStorageHostsMixin(UpdateStorageHostsMixin):
@@ -1209,11 +1308,13 @@ class SwDeployStorageHostsMixin(UpdateStorageHostsMixin):
         Add storage software patch stages to a strategy
         """
         from nfv_vim import strategy
+
         return self._add_update_storage_strategy_stages(
             storage_hosts,
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_STORAGE_HOSTS,
-            strategy.UpgradeHostsStep)
+            strategy.UpgradeHostsStep,
+        )
 
 
 class UpdateSystemConfigStorageHostsMixin(UpdateStorageHostsMixin):
@@ -1222,11 +1323,13 @@ class UpdateSystemConfigStorageHostsMixin(UpdateStorageHostsMixin):
         Add storage system config update stages to a strategy
         """
         from nfv_vim import strategy
+
         return self._add_update_storage_strategy_stages(
             storage_hosts,
             True,
             strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_STORAGE_HOSTS,
-            strategy.SystemConfigUpdateHostsStep)
+            strategy.SystemConfigUpdateHostsStep,
+        )
 
 
 class UpdateWorkerHostsMixin(object):
@@ -1244,12 +1347,14 @@ class UpdateWorkerHostsMixin(object):
        '_ignore_alarms'
     """
 
-    def _add_update_worker_strategy_stages(self,
-                                           worker_hosts,
-                                           reboot,
-                                           strategy_stage_name,
-                                           host_action_step,
-                                           extra_args=None):
+    def _add_update_worker_strategy_stages(
+        self,
+        worker_hosts,
+        reboot,
+        strategy_stage_name,
+        host_action_step,
+        extra_args=None,
+    ):
         """
         Add worker update stages to a strategy
         The strategy_stage_name is the type of stage (patch, kube, etc..)
@@ -1263,18 +1368,23 @@ class UpdateWorkerHostsMixin(object):
             # OpenStack, only allow the stop/start instance action.
             if self._single_controller:
                 for host in worker_hosts:
-                    if host.openstack_compute and \
-                            HOST_PERSONALITY.CONTROLLER in host.personality and \
-                            SW_UPDATE_INSTANCE_ACTION.STOP_START != \
-                            self._default_instance_action:
-                        DLOG.error("Cannot migrate instances in a single "
-                                   "controller configuration")
-                        reason = 'cannot migrate instances in a single ' \
-                                 'controller configuration'
+                    if (
+                        host.openstack_compute
+                        and HOST_PERSONALITY.CONTROLLER in host.personality
+                        and SW_UPDATE_INSTANCE_ACTION.STOP_START
+                        != self._default_instance_action
+                    ):
+                        DLOG.error(
+                            "Cannot migrate instances in a single "
+                            "controller configuration"
+                        )
+                        reason = (
+                            "cannot migrate instances in a single "
+                            "controller configuration"
+                        )
                         return False, reason
 
-        host_lists, reason = self._create_worker_host_lists(worker_hosts,
-                                                            reboot)
+        host_lists, reason = self._create_worker_host_lists(worker_hosts, reboot)
         if host_lists is None:
             return False, reason
 
@@ -1296,9 +1406,8 @@ class UpdateWorkerHostsMixin(object):
             hosts_to_lock = list()
             hosts_to_reboot = list()
             if reboot:
-                if (
-                    isinstance(self, SwUpgradeStrategy) and
-                    any(HOST_PERSONALITY.CONTROLLER in v.personality for v in host_list)
+                if isinstance(self, SwUpgradeStrategy) and any(
+                    HOST_PERSONALITY.CONTROLLER in v.personality for v in host_list
                 ):
                     # Always lock/unlock controllers during rollback/upgrade
                     hosts_to_lock = host_list
@@ -1309,10 +1418,13 @@ class UpdateWorkerHostsMixin(object):
 
             stage = strategy.StrategyStage(strategy_stage_name)
 
-            stage.add_step(strategy.QueryAlarmsStep(
-                not isinstance(self, SwUpgradeStrategy),
-                ignore_alarms=self._ignore_alarms,
-                ignore_alarms_conditional=self._ignore_alarms_conditional))
+            stage.add_step(
+                strategy.QueryAlarmsStep(
+                    not isinstance(self, SwUpgradeStrategy),
+                    ignore_alarms=self._ignore_alarms,
+                    ignore_alarms_conditional=self._ignore_alarms_conditional,
+                )
+            )
 
             if reboot:
                 if 1 == len(host_list):
@@ -1330,29 +1442,37 @@ class UpdateWorkerHostsMixin(object):
                             # Disable host services before migrating to ensure
                             # instances do not migrate to worker hosts in the
                             # same set of hosts.
-                            stage.add_step(strategy.DisableHostServicesStep(
-                                openstack_hosts, HOST_SERVICES.COMPUTE))
+                            stage.add_step(
+                                strategy.DisableHostServicesStep(
+                                    openstack_hosts, HOST_SERVICES.COMPUTE
+                                )
+                            )
                             # TODO(ksmith)
                             # When support is added for orchestration on
                             # non-OpenStack worker nodes, support for disabling
                             # kubernetes services will have to be added.
-                        stage.add_step(strategy.MigrateInstancesFromHostStep(
-                            openstack_hosts, instance_list))
+                        stage.add_step(
+                            strategy.MigrateInstancesFromHostStep(
+                                openstack_hosts, instance_list
+                            )
+                        )
                 elif len(instance_list):
                     stage.add_step(strategy.StopInstancesStep(instance_list))
 
                 if hosts_to_lock:
                     wait_until_disabled = True
                     if 1 == len(hosts_to_lock):
-                        if HOST_PERSONALITY.CONTROLLER in \
-                                hosts_to_lock[0].personality:
+                        if HOST_PERSONALITY.CONTROLLER in hosts_to_lock[0].personality:
                             if self._single_controller:
                                 # A single controller will not go disabled when
                                 # it is locked.
                                 wait_until_disabled = False
                     # Lock hosts
-                    stage.add_step(strategy.LockHostsStep(
-                        hosts_to_lock, wait_until_disabled=wait_until_disabled))
+                    stage.add_step(
+                        strategy.LockHostsStep(
+                            hosts_to_lock, wait_until_disabled=wait_until_disabled
+                        )
+                    )
 
             # Add the action step for these hosts (patch, etc..)
             if extra_args is None:
@@ -1362,8 +1482,7 @@ class UpdateWorkerHostsMixin(object):
 
             if reboot:
                 # Cannot unlock right away after the action step
-                stage.add_step(strategy.SystemStabilizeStep(
-                               timeout_in_secs=MTCE_DELAY))
+                stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
                 if hosts_to_lock:
                     # Unlock hosts that were locked
                     stage.add_step(strategy.UnlockHostsStep(hosts_to_lock))
@@ -1373,7 +1492,10 @@ class UpdateWorkerHostsMixin(object):
 
                 if len(instance_list):
                     # Start any instances that were stopped
-                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE != self._default_instance_action:
+                    if (
+                        SW_UPDATE_INSTANCE_ACTION.MIGRATE
+                        != self._default_instance_action
+                    ):
                         stage.add_step(strategy.StartInstancesStep(instance_list))
                 # After controller node(s) are unlocked, we need extra time to
                 # allow the OSDs to go back in sync and the storage related
@@ -1382,64 +1504,94 @@ class UpdateWorkerHostsMixin(object):
                 # that case so this will not delay the update strategy.
                 if isinstance(self, (SwUpgradeStrategy, KubeUpgradeStrategy)):
                     # TODO(jkraitbe): Workers can now support OSDs but VIM lacks a way to check.
-                    stage.add_step(strategy.WaitAlarmsClearStep(
-                                timeout_in_secs=WAIT_ALARM_TIMEOUT,
-                                ignore_alarms=self._ignore_alarms,
-                                ignore_alarms_conditional=self._ignore_alarms_conditional))
-                elif any([HOST_PERSONALITY.CONTROLLER in host.personality
-                        for host in hosts_to_lock + hosts_to_reboot]):
+                    stage.add_step(
+                        strategy.WaitAlarmsClearStep(
+                            timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                            ignore_alarms=self._ignore_alarms,
+                            ignore_alarms_conditional=self._ignore_alarms_conditional,
+                        )
+                    )
+                elif any(
+                    [
+                        HOST_PERSONALITY.CONTROLLER in host.personality
+                        for host in hosts_to_lock + hosts_to_reboot
+                    ]
+                ):
                     # Multiple personality nodes that need to wait for OSDs to sync:
-                    stage.add_step(strategy.WaitAlarmsClearStep(
-                                   timeout_in_secs=WAIT_ALARM_TIMEOUT,
-                                   ignore_alarms=self._ignore_alarms,
-                                   ignore_alarms_conditional=self._ignore_alarms_conditional))
+                    stage.add_step(
+                        strategy.WaitAlarmsClearStep(
+                            timeout_in_secs=WAIT_ALARM_TIMEOUT,
+                            ignore_alarms=self._ignore_alarms,
+                            ignore_alarms_conditional=self._ignore_alarms_conditional,
+                        )
+                    )
                 else:
-                    if any([host.openstack_control or host.openstack_compute
-                            for host in hosts_to_lock + hosts_to_reboot]):
+                    if any(
+                        [
+                            host.openstack_control or host.openstack_compute
+                            for host in hosts_to_lock + hosts_to_reboot
+                        ]
+                    ):
                         # Hosts with openstack that just need to wait for services to start up:
-                        stage.add_step(strategy.WaitAlarmsClearStep(
+                        stage.add_step(
+                            strategy.WaitAlarmsClearStep(
                                 timeout_in_secs=10 * 60,
-                                ignore_alarms=self._ignore_alarms))
+                                ignore_alarms=self._ignore_alarms,
+                            )
+                        )
                     else:
                         # Worker host wihout multiple personalities or openstack:
                         stage.add_step(strategy.SystemStabilizeStep())
             elif not isinstance(self, SwUpgradeStrategy):
                 # Less time required if host is not rebooting:
-                stage.add_step(strategy.SystemStabilizeStep(
-                               timeout_in_secs=NO_REBOOT_DELAY))
+                stage.add_step(
+                    strategy.SystemStabilizeStep(timeout_in_secs=NO_REBOOT_DELAY)
+                )
             self.apply_phase.add_stage(stage)
-        return True, ''
+        return True, ""
 
 
 class PatchWorkerHostsMixin(UpdateWorkerHostsMixin):
     def _add_worker_strategy_stages(self, worker_hosts, reboot):
         from nfv_vim import strategy
+
         return self._add_update_worker_strategy_stages(
             worker_hosts,
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_PATCH_WORKER_HOSTS,
-            strategy.SwPatchHostsStep)
+            strategy.SwPatchHostsStep,
+        )
 
 
 class SwDeployWorkerHostsMixin(UpdateWorkerHostsMixin):
     def _add_worker_strategy_stages(self, worker_hosts, reboot, do_nothing=False):
         from nfv_vim import strategy
+
         return self._add_update_worker_strategy_stages(
             worker_hosts,
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS,
-            strategy.UpgradeHostsStep if not do_nothing else strategy.SwDeployDoNothingStep)
+            (
+                strategy.UpgradeHostsStep
+                if not do_nothing
+                else strategy.SwDeployDoNothingStep
+            ),
+        )
 
 
 class UpgradeKubeletWorkerHostsMixin(UpdateWorkerHostsMixin):
-    def _add_kubelet_worker_strategy_stages(self, worker_hosts, to_version, reboot, stage_name):
+    def _add_kubelet_worker_strategy_stages(
+        self, worker_hosts, to_version, reboot, stage_name
+    ):
         from nfv_vim import strategy
+
         return self._add_update_worker_strategy_stages(
             worker_hosts,
             reboot,
             stage_name,
             strategy.KubeHostUpgradeKubeletStep,
-            extra_args=to_version)
+            extra_args=to_version,
+        )
 
 
 class UpdateSystemConfigWorkerHostsMixin(UpdateWorkerHostsMixin):
@@ -1448,11 +1600,13 @@ class UpdateSystemConfigWorkerHostsMixin(UpdateWorkerHostsMixin):
         Add worker system config update stages to a strategy
         """
         from nfv_vim import strategy
+
         return self._add_update_worker_strategy_stages(
             worker_hosts,
             True,
             strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_WORKER_HOSTS,
-            strategy.SystemConfigUpdateHostsStep)
+            strategy.SystemConfigUpdateHostsStep,
+        )
 
 
 ###################################################################
@@ -1460,21 +1614,31 @@ class UpdateSystemConfigWorkerHostsMixin(UpdateWorkerHostsMixin):
 # The Software Patch Strategy
 #
 ###################################################################
-class SwPatchStrategy(SwUpdateStrategy,
-                      QuerySwPatchesMixin,
-                      QuerySwPatchHostsMixin,
-                      PatchControllerHostsMixin,
-                      PatchStorageHostsMixin,
-                      PatchWorkerHostsMixin):
+class SwPatchStrategy(
+    SwUpdateStrategy,
+    QuerySwPatchesMixin,
+    QuerySwPatchHostsMixin,
+    PatchControllerHostsMixin,
+    PatchStorageHostsMixin,
+    PatchWorkerHostsMixin,
+):
     """
     Software Patch - Strategy
     """
-    def __init__(self, uuid, controller_apply_type, storage_apply_type,
-                 swift_apply_type, worker_apply_type,
-                 max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions,
-                 ignore_alarms,
-                 single_controller):
+
+    def __init__(
+        self,
+        uuid,
+        controller_apply_type,
+        storage_apply_type,
+        swift_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        ignore_alarms,
+        single_controller,
+    ):
         super(SwPatchStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.SW_PATCH,
@@ -1485,19 +1649,21 @@ class SwPatchStrategy(SwUpdateStrategy,
             max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            ignore_alarms)
+            ignore_alarms,
+        )
 
         # The following alarms will not prevent a software patch operation
-        IGNORE_ALARMS = ['900.001',  # Patch in progress
-                         '900.005',  # Upgrade in progress
-                         '900.101',  # Software patch auto apply in progress
-                         '200.001',  # Maintenance host lock alarm
-                         '700.004',  # VM stopped
-                         '280.002',  # Subcloud resource out-of-sync
-                         '100.119',  # PTP alarm for SyncE
-                         '900.701',  # Node tainted
-                         ]
-        IGNORE_ALARMS_CONDITIONAL = {'750.006': 120}
+        IGNORE_ALARMS = [
+            "900.001",  # Patch in progress
+            "900.005",  # Upgrade in progress
+            "900.101",  # Software patch auto apply in progress
+            "200.001",  # Maintenance host lock alarm
+            "700.004",  # VM stopped
+            "280.002",  # Subcloud resource out-of-sync
+            "100.119",  # PTP alarm for SyncE
+            "900.701",  # Node tainted
+        ]
+        IGNORE_ALARMS_CONDITIONAL = {"750.006": 120}
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
 
@@ -1514,11 +1680,13 @@ class SwPatchStrategy(SwUpdateStrategy,
         """
         from nfv_vim import strategy
 
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.SW_PATCH_QUERY)
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_PATCH_QUERY)
         stage.add_step(
-            strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms,
-            ignore_alarms_conditional=self._ignore_alarms_conditional))
+            strategy.QueryAlarmsStep(
+                ignore_alarms=self._ignore_alarms,
+                ignore_alarms_conditional=self._ignore_alarms_conditional,
+            )
+        )
         stage.add_step(strategy.QuerySwPatchesStep())
         stage.add_step(strategy.QuerySwPatchHostsStep())
         self.build_phase.add_stage(stage)
@@ -1537,41 +1705,49 @@ class SwPatchStrategy(SwUpdateStrategy,
 
             for host in swift_hosts:
                 if HOST_PERSONALITY.SWIFT not in host.personality:
-                    DLOG.error("Host inventory personality swift mismatch "
-                               "detected for host %s." % host.name)
-                    reason = 'host inventory personality swift mismatch detected'
+                    DLOG.error(
+                        "Host inventory personality swift mismatch "
+                        "detected for host %s." % host.name
+                    )
+                    reason = "host inventory personality swift mismatch detected"
                     return False, reason
 
             if 2 > host_table.total_by_personality(HOST_PERSONALITY.SWIFT):
                 DLOG.warn("Not enough swift hosts to apply software patches.")
-                reason = 'not enough swift hosts to apply software patches'
+                reason = "not enough swift hosts to apply software patches"
                 return False, reason
 
-        if self._swift_apply_type in [SW_UPDATE_APPLY_TYPE.SERIAL,
-                                      SW_UPDATE_APPLY_TYPE.PARALLEL]:
+        if self._swift_apply_type in [
+            SW_UPDATE_APPLY_TYPE.SERIAL,
+            SW_UPDATE_APPLY_TYPE.PARALLEL,
+        ]:
             for host in swift_hosts:
                 host_list = [host]
                 stage = strategy.StrategyStage(
-                    strategy.STRATEGY_STAGE_NAME.SW_PATCH_SWIFT_HOSTS)
-                stage.add_step(strategy.QueryAlarmsStep(
-                    True, ignore_alarms=self._ignore_alarms))
+                    strategy.STRATEGY_STAGE_NAME.SW_PATCH_SWIFT_HOSTS
+                )
+                stage.add_step(
+                    strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms)
+                )
                 if reboot:
                     stage.add_step(strategy.LockHostsStep(host_list))
                 stage.add_step(strategy.SwPatchHostsStep(host_list))
                 if reboot:
                     # Cannot unlock right away after SwPatchHostsStep
-                    stage.add_step(strategy.SystemStabilizeStep(
-                                   timeout_in_secs=MTCE_DELAY))
+                    stage.add_step(
+                        strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
+                    )
                     stage.add_step(strategy.UnlockHostsStep(host_list))
                     stage.add_step(strategy.SystemStabilizeStep())
                 else:
-                    stage.add_step(strategy.SystemStabilizeStep(
-                                   timeout_in_secs=NO_REBOOT_DELAY))
+                    stage.add_step(
+                        strategy.SystemStabilizeStep(timeout_in_secs=NO_REBOOT_DELAY)
+                    )
                 self.apply_phase.add_stage(stage)
         else:
             DLOG.verbose("Swift apply type set to ignore.")
 
-        return True, ''
+        return True, ""
 
     def build_complete(self, result, result_reason):
         """
@@ -1580,14 +1756,18 @@ class SwPatchStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
         from nfv_vim import tables
 
-        result, result_reason = \
-            super(SwPatchStrategy, self).build_complete(result, result_reason)
+        result, result_reason = super(SwPatchStrategy, self).build_complete(
+            result, result_reason
+        )
 
-        DLOG.info("Build Complete Callback, result=%s, reason=%s."
-                  % (result, result_reason))
+        DLOG.info(
+            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
+        )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
 
             host_table = tables.tables_get_host_table()
 
@@ -1595,9 +1775,10 @@ class SwPatchStrategy(SwUpdateStrategy,
                 DLOG.warn("No software patches found.")
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = 'no software patches found'
+                self.build_phase.result_reason = "no software patches found"
                 self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
 
@@ -1605,35 +1786,49 @@ class SwPatchStrategy(SwUpdateStrategy,
                 DLOG.warn("Active alarms found, can't apply software patches.")
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = 'active alarms present'
+                self.build_phase.result_reason = "active alarms present"
                 self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
 
             for host in list(host_table.values()):
-                if HOST_PERSONALITY.WORKER in host.personality and \
-                        HOST_PERSONALITY.CONTROLLER not in host.personality:
+                if (
+                    HOST_PERSONALITY.WORKER in host.personality
+                    and HOST_PERSONALITY.CONTROLLER not in host.personality
+                ):
                     # Allow patch orchestration when worker hosts are available,
                     # locked or powered down.
-                    if not ((host.is_unlocked() and host.is_enabled() and
-                             host.is_available()) or
-                            (host.is_locked() and host.is_disabled() and
-                             host.is_offline()) or
-                            (host.is_locked() and host.is_disabled() and
-                             host.is_online())):
+                    if not (
+                        (
+                            host.is_unlocked()
+                            and host.is_enabled()
+                            and host.is_available()
+                        )
+                        or (
+                            host.is_locked()
+                            and host.is_disabled()
+                            and host.is_offline()
+                        )
+                        or (
+                            host.is_locked() and host.is_disabled() and host.is_online()
+                        )
+                    ):
                         DLOG.warn(
                             "All worker hosts must be unlocked-enabled-available, "
                             "locked-disabled-online or locked-disabled-offline, "
-                            "can't apply software patches.")
+                            "can't apply software patches."
+                        )
                         self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = \
-                            strategy.STRATEGY_PHASE_RESULT.FAILED
+                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                         self.build_phase.result_reason = (
-                            'all worker hosts must be unlocked-enabled-available, '
-                            'locked-disabled-online or locked-disabled-offline')
+                            "all worker hosts must be unlocked-enabled-available, "
+                            "locked-disabled-online or locked-disabled-offline"
+                        )
                         self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason)
+                            False, self.build_phase.result_reason
+                        )
                         self.save()
                         return
                 else:
@@ -1641,19 +1836,22 @@ class SwPatchStrategy(SwUpdateStrategy,
                     # storage and swift hosts are available. It is not safe to
                     # automate patch application when we do not have full
                     # redundancy.
-                    if not (host.is_unlocked() and host.is_enabled() and
-                            host.is_available()):
+                    if not (
+                        host.is_unlocked() and host.is_enabled() and host.is_available()
+                    ):
                         DLOG.warn(
                             "All %s hosts must be unlocked-enabled-available, "
-                            "can't apply software patches." % host.personality)
+                            "can't apply software patches." % host.personality
+                        )
                         self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = \
-                            strategy.STRATEGY_PHASE_RESULT.FAILED
+                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                         self.build_phase.result_reason = (
-                            'all %s hosts must be unlocked-enabled-available' %
-                            host.personality)
+                            "all %s hosts must be unlocked-enabled-available"
+                            % host.personality
+                        )
                         self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason)
+                            False, self.build_phase.result_reason
+                        )
                         self.save()
                         return
 
@@ -1669,30 +1867,34 @@ class SwPatchStrategy(SwUpdateStrategy,
             for sw_patch_host in self.nfvi_sw_patch_hosts:
                 host = host_table.get(sw_patch_host.name, None)
                 if host is None:
-                    DLOG.error("Host inventory mismatch detected for host %s."
-                               % sw_patch_host.name)
+                    DLOG.error(
+                        "Host inventory mismatch detected for host %s."
+                        % sw_patch_host.name
+                    )
                     self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = \
-                        strategy.STRATEGY_PHASE_RESULT.FAILED
-                    self.build_phase.result_reason = \
-                        'host inventory mismatch detected'
+                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+                    self.build_phase.result_reason = "host inventory mismatch detected"
                     self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
+                        False, self.build_phase.result_reason
+                    )
                     self.save()
                     return
 
                 if sw_patch_host.interim_state:
                     # A patch operation has been done recently and we don't
                     # have an up-to-date state for this host.
-                    DLOG.warn("Host %s is in pending patch current state."
-                              % sw_patch_host.name)
+                    DLOG.warn(
+                        "Host %s is in pending patch current state."
+                        % sw_patch_host.name
+                    )
                     self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = \
-                        strategy.STRATEGY_PHASE_RESULT.FAILED
+                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                     self.build_phase.result_reason = (
-                        'at least one host is in pending patch current state')
+                        "at least one host is in pending patch current state"
+                    )
                     self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
+                        False, self.build_phase.result_reason
+                    )
                     self.save()
                     return
 
@@ -1729,36 +1931,30 @@ class SwPatchStrategy(SwUpdateStrategy,
                             worker_hosts_no_reboot.append(host)
 
             STRATEGY_CREATION_COMMANDS = [
-                (self._add_controller_strategy_stages,
-                 controllers_no_reboot, False),
-                (self._add_controller_strategy_stages,
-                 controllers, True),
-                (self._add_storage_strategy_stages,
-                 storage_hosts_no_reboot, False),
-                (self._add_storage_strategy_stages,
-                 storage_hosts, True),
-                (self._add_swift_strategy_stages,
-                 swift_hosts_no_reboot, False),
-                (self._add_swift_strategy_stages,
-                 swift_hosts, True),
-                (self._add_worker_strategy_stages,
-                 worker_hosts_no_reboot, False),
-                (self._add_worker_strategy_stages,
-                 worker_hosts, True)
+                (self._add_controller_strategy_stages, controllers_no_reboot, False),
+                (self._add_controller_strategy_stages, controllers, True),
+                (self._add_storage_strategy_stages, storage_hosts_no_reboot, False),
+                (self._add_storage_strategy_stages, storage_hosts, True),
+                (self._add_swift_strategy_stages, swift_hosts_no_reboot, False),
+                (self._add_swift_strategy_stages, swift_hosts, True),
+                (self._add_worker_strategy_stages, worker_hosts_no_reboot, False),
+                (self._add_worker_strategy_stages, worker_hosts, True),
             ]
 
-            for add_strategy_stages_function, host_list, reboot in \
-                    STRATEGY_CREATION_COMMANDS:
+            for (
+                add_strategy_stages_function,
+                host_list,
+                reboot,
+            ) in STRATEGY_CREATION_COMMANDS:
                 if host_list:
-                    success, reason = add_strategy_stages_function(
-                        host_list, reboot)
+                    success, reason = add_strategy_stages_function(host_list, reboot)
                     if not success:
                         self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = \
-                            strategy.STRATEGY_PHASE_RESULT.FAILED
+                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                         self.build_phase.result_reason = reason
                         self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason)
+                            False, self.build_phase.result_reason
+                        )
                         self.save()
                         return
 
@@ -1766,27 +1962,31 @@ class SwPatchStrategy(SwUpdateStrategy,
                 DLOG.warn("No software patches need to be applied.")
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = ('no software patches need to be '
-                                                  'applied')
+                self.build_phase.result_reason = (
+                    "no software patches need to be applied"
+                )
                 self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
         else:
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
 
-        self.sw_update_obj.strategy_build_complete(True, '')
+        self.sw_update_obj.strategy_build_complete(True, "")
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """
         Initializes a software patch strategy object using the given dictionary
         """
-        super(SwPatchStrategy, self).from_dict(data, build_phase, apply_phase,
-                                               abort_phase)
+        super(SwPatchStrategy, self).from_dict(
+            data, build_phase, apply_phase, abort_phase
+        )
 
-        self._single_controller = data['single_controller']
+        self._single_controller = data["single_controller"]
 
         # get the fields associated with the mixins:
         # ie: self._nfvi_sw_patch_hosts
@@ -1799,7 +1999,7 @@ class SwPatchStrategy(SwUpdateStrategy,
         """
         data = super(SwPatchStrategy, self).as_dict()
 
-        data['single_controller'] = self._single_controller
+        data["single_controller"] = self._single_controller
 
         # store mixin data to the data structure
         # ie: self._nfvi_sw_patch_hosts
@@ -1821,11 +2021,23 @@ class SwUpgradeStrategy(
     """
     Software Upgrade - Strategy
     """
-    def __init__(self, uuid,
-                 controller_apply_type, storage_apply_type, worker_apply_type,
-                 max_parallel_worker_hosts, default_instance_action,
-                 alarm_restrictions, release, rollback, delete, snapshot,
-                 ignore_alarms, single_controller):
+
+    def __init__(
+        self,
+        uuid,
+        controller_apply_type,
+        storage_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        release,
+        rollback,
+        delete,
+        snapshot,
+        ignore_alarms,
+        single_controller,
+    ):
         super(SwUpgradeStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.SW_UPGRADE,
@@ -1836,7 +2048,8 @@ class SwUpgradeStrategy(
             max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            ignore_alarms)
+            ignore_alarms,
+        )
 
         self._release = release
         self._rollback = rollback
@@ -1844,28 +2057,29 @@ class SwUpgradeStrategy(
         self._snapshot = snapshot
 
         # The following alarms will not prevent a software upgrade operation
-        IGNORE_ALARMS = ['100.119',  # PTP alarm for SyncE
-                         '200.001',  # Node locked
-                         '200.003',  # Pxeboot network communication failure
-                         '250.001',  # System Config out of date
-                         '280.001',  # Subcloud is offline
-                         '280.002',  # Subcloud resource out-of-sync
-                         '280.003',  # Subcloud backup failure
-                         '280.004',  # Subcloud peer group in disconnected state
-                         '280.005',  # Subcloud peer group managed with lower priority
-                         '700.004',  # VM stopped
-                         '750.006',  # Configuration change requires reapply of cert-manager
-                         '900.004',  # Incorrect software load
-                         '900.005',  # Upgrade in progress
-                         '900.020',  # Deploy host completed
-                         '900.021',  # Deploy host failed
-                         '900.022',  # Deploy in host-rollback-done state
-                         '900.023',  # Software release deploy operation in progress
-                         '900.201',  # Software upgrade auto apply in progress
-                         '900.202',  # Software deploy auto-apply aborting
-                         '900.231',  # Software deployment data is out of sync
-                         '900.701',  # Node tainted
-                         ]
+        IGNORE_ALARMS = [
+            "100.119",  # PTP alarm for SyncE
+            "200.001",  # Node locked
+            "200.003",  # Pxeboot network communication failure
+            "250.001",  # System Config out of date
+            "280.001",  # Subcloud is offline
+            "280.002",  # Subcloud resource out-of-sync
+            "280.003",  # Subcloud backup failure
+            "280.004",  # Subcloud peer group in disconnected state
+            "280.005",  # Subcloud peer group managed with lower priority
+            "700.004",  # VM stopped
+            "750.006",  # Configuration change requires reapply of cert-manager
+            "900.004",  # Incorrect software load
+            "900.005",  # Upgrade in progress
+            "900.020",  # Deploy host completed
+            "900.021",  # Deploy host failed
+            "900.022",  # Deploy in host-rollback-done state
+            "900.023",  # Software release deploy operation in progress
+            "900.201",  # Software upgrade auto apply in progress
+            "900.202",  # Software deploy auto-apply aborting
+            "900.231",  # Software deployment data is out of sync
+            "900.701",  # Node tainted
+        ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
         self._nfvi_upgrade = None
@@ -1892,8 +2106,11 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
         # Precheck is part of create phase because DC requested it
-        stage.add_step(strategy.SwDeployPrecheckStep(release=self._release,
-                                                     snapshot=self._snapshot))
+        stage.add_step(
+            strategy.SwDeployPrecheckStep(
+                release=self._release, snapshot=self._snapshot
+            )
+        )
         self.build_phase.add_stage(stage)
         super(SwUpgradeStrategy, self).build()
 
@@ -1918,7 +2135,8 @@ class SwUpgradeStrategy(
             self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
             self.build_phase.result_reason = reason
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
             self.save()
             super(SwUpgradeStrategy, self).build()
 
@@ -1929,7 +2147,8 @@ class SwUpgradeStrategy(
             self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
             self.build_phase.result_reason = reason
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
             self.save()
             super(SwUpgradeStrategy, self).build()
 
@@ -1940,21 +2159,25 @@ class SwUpgradeStrategy(
             self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
             self.build_phase.result_reason = reason
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
             self.save()
             super(SwUpgradeStrategy, self).build()
 
         # TODO(sshathee): Remove this conditon when implementing snapshot
         # with rollback command
         elif self._rollback and self._snapshot is not None:
-            reason = "Cannot set both snapshot and rollback, if snapshot" \
-                      "is available it will be forcibly used."
+            reason = (
+                "Cannot set both snapshot and rollback, if snapshot"
+                "is available it will be forcibly used."
+            )
             DLOG.error(reason)
             self._state = strategy.STRATEGY_STATE.BUILD_FAILED
             self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
             self.build_phase.result_reason = reason
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
             self.save()
             super(SwUpgradeStrategy, self).build()
 
@@ -1994,8 +2217,12 @@ class SwUpgradeStrategy(
 
         # sw-deploy start for major releases must be done on controller-0
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(strategy.UpgradeStartStep(release=self._release, snapshot=self._snapshot))
-        stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
+        stage.add_step(
+            strategy.UpgradeStartStep(release=self._release, snapshot=self._snapshot)
+        )
+        stage.add_step(
+            strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms)
+        )
         self.apply_phase.add_stage(stage)
 
     def _add_upgrade_hosts_stages(self):
@@ -2011,7 +2238,9 @@ class SwUpgradeStrategy(
 
         for host in host_table.values():
             if host.is_unlocked() and self.nfvi_upgrade.is_host_deployed(host.name):
-                DLOG.info(f"Skipping deploy-host for already deployed host: {host.name}")
+                DLOG.info(
+                    f"Skipping deploy-host for already deployed host: {host.name}"
+                )
                 continue
 
             if HOST_PERSONALITY.CONTROLLER in host.personality:
@@ -2029,12 +2258,11 @@ class SwUpgradeStrategy(
             else:
                 DLOG.error(f"Unsupported personality for host {host.name}.")
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                self.build_phase.result = \
-                    strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = \
-                    'Unsupported personality for host'
+                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.build_phase.result_reason = "Unsupported personality for host"
                 self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
 
@@ -2057,15 +2285,12 @@ class SwUpgradeStrategy(
                 key=lambda x: x.name == local_host_name,
             )
 
-        storage_hosts = sorted(
-            storage_hosts,
-            key=lambda x: int(x.name.split("-")[1])
-        )
+        storage_hosts = sorted(storage_hosts, key=lambda x: int(x.name.split("-")[1]))
 
         strategy_pairs = [
             (controller_strategy, controllers_hosts),
             (self._add_storage_strategy_stages, storage_hosts),
-            (self._add_worker_strategy_stages, worker_hosts)
+            (self._add_worker_strategy_stages, worker_hosts),
         ]
 
         for stage_func, host_list in strategy_pairs:
@@ -2073,11 +2298,11 @@ class SwUpgradeStrategy(
                 success, reason = stage_func(host_list, reboot_required)
                 if not success:
                     self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = \
-                        strategy.STRATEGY_PHASE_RESULT.FAILED
+                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                     self.build_phase.result_reason = reason
                     self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
+                        False, self.build_phase.result_reason
+                    )
                     self.save()
                     return
 
@@ -2092,21 +2317,26 @@ class SwUpgradeStrategy(
         # Add a stabilization on NRR to allow software agent to catch up.
         # But only if we did some deploy-host steps.
         if (
-                not self.nfvi_upgrade.reboot_required and
-                self.apply_phase.stages and
-                self.apply_phase.stages[-1].name in [
-                    strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
-                    strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_STORAGE_HOSTS,
-                    strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS,
-                ]
+            not self.nfvi_upgrade.reboot_required
+            and self.apply_phase.stages
+            and self.apply_phase.stages[-1].name
+            in [
+                strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
+                strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_STORAGE_HOSTS,
+                strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_WORKER_HOSTS,
+            ]
         ):
             stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
 
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
+        stage.add_step(
+            strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms)
+        )
         stage.add_step(strategy.UpgradeActivateStep(release=self._release))
         stage.add_step(strategy.UpgradeCompleteStep(release=self._release))
-        stage.add_step(strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms))
+        stage.add_step(
+            strategy.QueryAlarmsStep(False, ignore_alarms=self._ignore_alarms)
+        )
         self.apply_phase.add_stage(stage)
 
     def _add_deploy_delete_stage(self):
@@ -2125,18 +2355,25 @@ class SwUpgradeStrategy(
         from nfv_vim import strategy
 
         reason = ""
-        result, result_reason = \
-            super(SwUpgradeStrategy, self).build_complete(result, result_reason)
+        result, result_reason = super(SwUpgradeStrategy, self).build_complete(
+            result, result_reason
+        )
 
         if result == strategy.STRATEGY_RESULT.SUCCESS:
-            DLOG.info("Build Complete Callback, result=%s, reason=%s."
-                      % (result, result_reason))
+            DLOG.info(
+                "Build Complete Callback, result=%s, reason=%s."
+                % (result, result_reason)
+            )
         else:
-            DLOG.error("Build Complete Callback, result=%s, reason=%s."
-                       % (result, result_reason))
+            DLOG.error(
+                "Build Complete Callback, result=%s, reason=%s."
+                % (result, result_reason)
+            )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
             if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
                 reason = "Software release does not exist or is unavailable"
 
@@ -2149,7 +2386,8 @@ class SwUpgradeStrategy(
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                 self.build_phase.result_reason = reason
                 self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
 
@@ -2160,18 +2398,18 @@ class SwUpgradeStrategy(
 
             # Skip start if started
             if (
-                    self.nfvi_upgrade.is_start_done or
-                    self.nfvi_upgrade.is_deploying_hosts or
-                    self.nfvi_upgrade.is_deploying_hosts_failed or
-                    self.nfvi_upgrade.is_deploying_hosts_done
+                self.nfvi_upgrade.is_start_done
+                or self.nfvi_upgrade.is_deploying_hosts
+                or self.nfvi_upgrade.is_deploying_hosts_failed
+                or self.nfvi_upgrade.is_deploying_hosts_done
             ):
                 do_start = False
 
             # Skip straight to end if activate is complete or failed
             elif (
-                    self.nfvi_upgrade.is_activating or
-                    self.nfvi_upgrade.is_activate_done or
-                    self.nfvi_upgrade.is_activate_failed
+                self.nfvi_upgrade.is_activating
+                or self.nfvi_upgrade.is_activate_done
+                or self.nfvi_upgrade.is_activate_failed
             ):
                 do_start = False
                 do_upgrade_hosts = False
@@ -2212,17 +2450,20 @@ class SwUpgradeStrategy(
                 DLOG.warn("No sw-deployments need to be applied.")
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = ('no sw-deployments patches need to be '
-                                                  'applied')
+                self.build_phase.result_reason = (
+                    "no sw-deployments patches need to be applied"
+                )
                 self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
         else:
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
 
-        self.sw_update_obj.strategy_build_complete(True, '')
+        self.sw_update_obj.strategy_build_complete(True, "")
         self.save()
 
     def _add_rollback_start_stage(self):
@@ -2232,7 +2473,9 @@ class SwUpgradeStrategy(
 
         from nfv_vim import strategy
 
-        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_START)
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_START
+        )
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.SwDeployAbortStep())
@@ -2259,10 +2502,12 @@ class SwUpgradeStrategy(
 
         for host in host_table.values():
             if (
-                    (host.is_unlocked() and self.nfvi_upgrade.is_host_rollback_deployed(host.name)) or
-                    (host.is_unlocked() and self.nfvi_upgrade.is_host_pending(host.name))
-            ):
-                DLOG.info(f"Skipping rollback-host for already rolled back host: {host.name}")
+                host.is_unlocked()
+                and self.nfvi_upgrade.is_host_rollback_deployed(host.name)
+            ) or (host.is_unlocked() and self.nfvi_upgrade.is_host_pending(host.name)):
+                DLOG.info(
+                    f"Skipping rollback-host for already rolled back host: {host.name}"
+                )
                 continue
 
             if HOST_PERSONALITY.CONTROLLER in host.personality:
@@ -2270,8 +2515,8 @@ class SwUpgradeStrategy(
                 if HOST_PERSONALITY.WORKER in host.personality:
                     # We need to use this strategy on AIO type
                     controller_strategy = functools.partial(
-                        self._add_worker_strategy_stages,
-                        do_nothing=do_nothing)
+                        self._add_worker_strategy_stages, do_nothing=do_nothing
+                    )
 
             elif HOST_PERSONALITY.STORAGE in host.personality:
                 storage_hosts.append(host)
@@ -2282,12 +2527,11 @@ class SwUpgradeStrategy(
             else:
                 DLOG.error(f"Unsupported personality for host {host.name}.")
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                self.build_phase.result = \
-                    strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = \
-                    'Unsupported personality for host'
+                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+                self.build_phase.result_reason = "Unsupported personality for host"
                 self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
 
@@ -2303,9 +2547,7 @@ class SwUpgradeStrategy(
             # Dependency in USM to rollback storage hosts in
             # reverse order of deployment for major release
             storage_hosts = sorted(
-                storage_hosts,
-                key=lambda x: int(x.name.split("-")[1]),
-                reverse=True
+                storage_hosts, key=lambda x: int(x.name.split("-")[1]), reverse=True
             )
 
         else:
@@ -2322,8 +2564,7 @@ class SwUpgradeStrategy(
             # TODO(sshathee) Reverse the storage host order once its done in
             # USM to maintain same order for major and patch rollback
             storage_hosts = sorted(
-                storage_hosts,
-                key=lambda x: int(x.name.split("-")[1])
+                storage_hosts, key=lambda x: int(x.name.split("-")[1])
             )
 
         strategy_pairs = [
@@ -2337,11 +2578,11 @@ class SwUpgradeStrategy(
                 success, reason = stage_func(host_list, reboot_required)
                 if not success:
                     self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = \
-                        strategy.STRATEGY_PHASE_RESULT.FAILED
+                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                     self.build_phase.result_reason = reason
                     self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason)
+                        False, self.build_phase.result_reason
+                    )
                     self.save()
                     return
 
@@ -2351,29 +2592,39 @@ class SwUpgradeStrategy(
         """
         from nfv_vim import strategy
 
-        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_COMPLETE)
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_COMPLETE
+        )
 
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         # sw-deploy delete must be done on controller-0 for major release
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(strategy.SwDeployDeleteStep(release=self.nfvi_upgrade.release_id))
+        stage.add_step(
+            strategy.SwDeployDeleteStep(release=self.nfvi_upgrade.release_id)
+        )
         self.apply_phase.add_stage(stage)
 
     def _build_complete_rollback(self, result, result_reason):
         from nfv_vim import strategy
 
         reason = ""
-        result, result_reason = \
-            super(SwUpgradeStrategy, self).build_complete(result, result_reason)
+        result, result_reason = super(SwUpgradeStrategy, self).build_complete(
+            result, result_reason
+        )
 
-        DLOG.info("Build Complete Callback, result=%s, reason=%s."
-                  % (result, result_reason))
+        DLOG.info(
+            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
+        )
 
-        if result not in [strategy.STRATEGY_RESULT.SUCCESS, strategy.STRATEGY_RESULT.DEGRADED]:
+        if result not in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
 
-            self.sw_update_obj.strategy_build_complete(True, '')
+            self.sw_update_obj.strategy_build_complete(True, "")
             self.save()
             return
 
@@ -2382,8 +2633,8 @@ class SwUpgradeStrategy(
 
         elif not self.nfvi_upgrade.is_deploying:
             reason = (
-                "Software release must be deploying for a rollback, " +
-                f"found={self.nfvi_upgrade.release_info}"
+                "Software release must be deploying for a rollback, "
+                + f"found={self.nfvi_upgrade.release_info}"
             )
 
         elif self.nfvi_upgrade.is_starting:
@@ -2395,16 +2646,14 @@ class SwUpgradeStrategy(
             self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
             self.build_phase.result_reason = reason
             self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
             self.save()
             return
 
         do_nothing = False
 
-        if (
-            self.nfvi_upgrade.is_start_done or
-            self.nfvi_upgrade.is_start_failed
-        ):
+        if self.nfvi_upgrade.is_start_done or self.nfvi_upgrade.is_start_failed:
             do_nothing = True
 
         # Unlike with normal deployments we will defer skip logic to the steps
@@ -2445,18 +2694,20 @@ class SwUpgradeStrategy(
         """
         from nfv_vim import nfvi
 
-        super(SwUpgradeStrategy, self).from_dict(data, build_phase, apply_phase,
-                                                 abort_phase)
-        self._single_controller = data['single_controller']
-        self._release = data['release']
-        self._rollback = data['rollback']
-        nfvi_upgrade_data = data['nfvi_upgrade_data']
+        super(SwUpgradeStrategy, self).from_dict(
+            data, build_phase, apply_phase, abort_phase
+        )
+        self._single_controller = data["single_controller"]
+        self._release = data["release"]
+        self._rollback = data["rollback"]
+        nfvi_upgrade_data = data["nfvi_upgrade_data"]
         if nfvi_upgrade_data:
             self._nfvi_upgrade = nfvi.objects.v1.Upgrade(
-                nfvi_upgrade_data['release'],
-                nfvi_upgrade_data['release_info'],
-                nfvi_upgrade_data['deploy_info'],
-                nfvi_upgrade_data['hosts_info'])
+                nfvi_upgrade_data["release"],
+                nfvi_upgrade_data["release_info"],
+                nfvi_upgrade_data["deploy_info"],
+                nfvi_upgrade_data["hosts_info"],
+            )
         else:
             self._nfvi_upgrade = None
 
@@ -2467,14 +2718,14 @@ class SwUpgradeStrategy(
         Represent the software upgrade strategy as a dictionary
         """
         data = super(SwUpgradeStrategy, self).as_dict()
-        data['single_controller'] = self._single_controller
-        data['release'] = self._release
-        data['rollback'] = self._rollback
+        data["single_controller"] = self._single_controller
+        data["release"] = self._release
+        data["rollback"] = self._rollback
         if self._nfvi_upgrade:
             nfvi_upgrade_data = self._nfvi_upgrade.as_dict()
         else:
             nfvi_upgrade_data = None
-        data['nfvi_upgrade_data'] = nfvi_upgrade_data
+        data["nfvi_upgrade_data"] = nfvi_upgrade_data
 
         return data
 
@@ -2484,18 +2735,29 @@ class SwUpgradeStrategy(
 # The System Config Update Strategy
 #
 ###################################################################
-class SystemConfigUpdateStrategy(SwUpdateStrategy,
-                                 QuerySystemConfigUpdateHostsMixin,
-                                 UpdateSystemConfigControllerHostsMixin,
-                                 UpdateSystemConfigStorageHostsMixin,
-                                 UpdateSystemConfigWorkerHostsMixin):
+class SystemConfigUpdateStrategy(
+    SwUpdateStrategy,
+    QuerySystemConfigUpdateHostsMixin,
+    UpdateSystemConfigControllerHostsMixin,
+    UpdateSystemConfigStorageHostsMixin,
+    UpdateSystemConfigWorkerHostsMixin,
+):
     """
     System Config Update - Strategy
     """
-    def __init__(self, uuid, controller_apply_type, storage_apply_type,
-                 worker_apply_type, max_parallel_worker_hosts,
-                 default_instance_action, alarm_restrictions,
-                 ignore_alarms, single_controller):
+
+    def __init__(
+        self,
+        uuid,
+        controller_apply_type,
+        storage_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        ignore_alarms,
+        single_controller,
+    ):
         super(SystemConfigUpdateStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.SYSYTEM_CONFIG_UPDATE,
@@ -2506,26 +2768,28 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
             max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            ignore_alarms)
+            ignore_alarms,
+        )
 
         # The following alarms will not prevent a system config update operation
-        IGNORE_ALARMS = ['100.103',  # Memory threshold exceeded
-                         '100.119',  # PTP alarm for SyncE
-                         '200.001',  # Locked Host
-                         '250.001',  # System Config out of date
-                         '260.001',  # Unreconciled resource
-                         '260.002',  # Unsynchronized resource
-                         '280.001',  # Subcloud resource off-line
-                         '280.002',  # Subcloud resource out-of-sync
-                         '280.003',  # Subcloud backup failed
-                         '400.005',  # Communication failure detected during oam reconfiguration
-                         '500.200',  # Certificate expiring soon
-                         '700.004',  # VM stopped
-                         '750.006',  # Configuration change requires reapply of an application
-                         '900.010',  # System Config Update in progress
-                         '900.601',  # System Config Update Auto Apply in progress
-                         '900.701',  # Node tainted
-                         ]
+        IGNORE_ALARMS = [
+            "100.103",  # Memory threshold exceeded
+            "100.119",  # PTP alarm for SyncE
+            "200.001",  # Locked Host
+            "250.001",  # System Config out of date
+            "260.001",  # Unreconciled resource
+            "260.002",  # Unsynchronized resource
+            "280.001",  # Subcloud resource off-line
+            "280.002",  # Subcloud resource out-of-sync
+            "280.003",  # Subcloud backup failed
+            "400.005",  # Communication failure detected during oam reconfiguration
+            "500.200",  # Certificate expiring soon
+            "700.004",  # VM stopped
+            "750.006",  # Configuration change requires reapply of an application
+            "900.010",  # System Config Update in progress
+            "900.601",  # System Config Update Auto Apply in progress
+            "900.701",  # Node tainted
+        ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
         self._ignore_alarms_conditional = None
@@ -2539,9 +2803,9 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_QUERY)
-        stage.add_step(strategy.QueryAlarmsStep(
-            ignore_alarms=self._ignore_alarms))
+            strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_QUERY
+        )
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QuerySystemConfigUpdateHostsStep())
         self.build_phase.add_stage(stage)
         super(SystemConfigUpdateStrategy, self).build()
@@ -2553,52 +2817,72 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
         from nfv_vim import tables
 
-        result, result_reason = \
-            super(SystemConfigUpdateStrategy, self).build_complete(result, result_reason)
+        result, result_reason = super(SystemConfigUpdateStrategy, self).build_complete(
+            result, result_reason
+        )
 
-        DLOG.info("Build Complete Callback, result=%s, reason=%s."
-                  % (result, result_reason))
+        DLOG.info(
+            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
+        )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
 
             if self._nfvi_alarms:
                 alarm_id_set = set()
                 for alarm_data in self._nfvi_alarms:
-                    alarm_id_set.add(alarm_data['alarm_id'])
+                    alarm_id_set.add(alarm_data["alarm_id"])
                 alarm_id_list = ", ".join(sorted(alarm_id_set))
-                DLOG.warn("System config update: Active alarms present [ %s ]"
-                          % alarm_id_list)
-                self.report_build_failure("active alarms present [ %s ]"
-                                          % alarm_id_list)
+                DLOG.warn(
+                    "System config update: Active alarms present [ %s ]" % alarm_id_list
+                )
+                self.report_build_failure(
+                    "active alarms present [ %s ]" % alarm_id_list
+                )
 
                 return
 
             host_table = tables.tables_get_host_table()
             for host in list(host_table.values()):
-                if HOST_PERSONALITY.WORKER in host.personality and \
-                        HOST_PERSONALITY.CONTROLLER not in host.personality:
+                if (
+                    HOST_PERSONALITY.WORKER in host.personality
+                    and HOST_PERSONALITY.CONTROLLER not in host.personality
+                ):
                     # Allow system config update orchestration when worker
                     # hosts are available, locked or powered down.
-                    if not ((host.is_unlocked() and host.is_enabled() and
-                             host.is_available()) or
-                            (host.is_locked() and host.is_disabled() and
-                             host.is_offline()) or
-                            (host.is_locked() and host.is_disabled() and
-                             host.is_online())):
+                    if not (
+                        (
+                            host.is_unlocked()
+                            and host.is_enabled()
+                            and host.is_available()
+                        )
+                        or (
+                            host.is_locked()
+                            and host.is_disabled()
+                            and host.is_offline()
+                        )
+                        or (
+                            host.is_locked() and host.is_disabled() and host.is_online()
+                        )
+                    ):
                         self.report_build_failure(
                             "all worker hosts must be unlocked-enabled-available, "
-                            "locked-disabled-online or locked-disabled-offline")
+                            "locked-disabled-online or locked-disabled-offline"
+                        )
                         return
                 else:
                     # Only allow system config update orchestration when all
                     # controller and storage hosts are available. The config
                     # update wil be blocked when we do not have full redundancy.
-                    if not (host.is_unlocked() and host.is_enabled() and
-                            host.is_available()):
+                    if not (
+                        host.is_unlocked() and host.is_enabled() and host.is_available()
+                    ):
                         self.report_build_failure(
                             "all %s hosts must be unlocked-enabled-available, "
-                            % host.personality)
+                            % host.personality
+                        )
                         return
 
             controller_hosts = list()
@@ -2609,16 +2893,22 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
             for host_resource in self.nfvi_system_config_update_hosts:
                 for host in host_list:
                     if host_resource.name == host.name:
-                        if HOST_PERSONALITY.CONTROLLER in host.personality and \
-                                host_resource.unlock_request != 'not_required':
+                        if (
+                            HOST_PERSONALITY.CONTROLLER in host.personality
+                            and host_resource.unlock_request != "not_required"
+                        ):
                             controller_hosts.append(host)
 
-                        elif HOST_PERSONALITY.STORAGE in host.personality and \
-                                host_resource.unlock_request != 'not_required':
+                        elif (
+                            HOST_PERSONALITY.STORAGE in host.personality
+                            and host_resource.unlock_request != "not_required"
+                        ):
                             storage_hosts.append(host)
 
-                        if HOST_PERSONALITY.WORKER in host.personality and \
-                                host_resource.unlock_request != 'not_required':
+                        if (
+                            HOST_PERSONALITY.WORKER in host.personality
+                            and host_resource.unlock_request != "not_required"
+                        ):
                             worker_hosts.append(host)
 
                         host_list.remove(host)
@@ -2628,23 +2918,23 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
             # Sort the controller such that host other than
             # current local_host_name is the first element in the list.
             # This sorting is to reduce the number of swact required.
-            controller_hosts = sorted(controller_hosts,
-                    key=lambda x: x.name == local_host_name,)
+            controller_hosts = sorted(
+                controller_hosts,
+                key=lambda x: x.name == local_host_name,
+            )
 
-            worker_hosts = sorted(worker_hosts,
-                    key=lambda x: x.name == local_host_name,)
+            worker_hosts = sorted(
+                worker_hosts,
+                key=lambda x: x.name == local_host_name,
+            )
 
             STRATEGY_CREATION_COMMANDS = [
-                (self._add_system_config_controller_strategy_stages,
-                 controller_hosts),
-                (self._add_system_config_storage_strategy_stages,
-                 storage_hosts),
-                (self._add_system_config_worker_strategy_stages,
-                 worker_hosts)
+                (self._add_system_config_controller_strategy_stages, controller_hosts),
+                (self._add_system_config_storage_strategy_stages, storage_hosts),
+                (self._add_system_config_worker_strategy_stages, worker_hosts),
             ]
 
-            for add_strategy_stages_function, host_list in \
-                    STRATEGY_CREATION_COMMANDS:
+            for add_strategy_stages_function, host_list in STRATEGY_CREATION_COMMANDS:
                 if host_list:
                     success, reason = add_strategy_stages_function(host_list)
                     if not success:
@@ -2652,14 +2942,16 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
                         return
 
             if 0 == len(self.apply_phase.stages):
-                self.report_build_failure(
-                    "no system config updates need to be applied")
+                self.report_build_failure("no system config updates need to be applied")
                 return
         else:
             self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
 
-        self.sw_update_obj.strategy_build_complete(True, '')  # pylint: disable=no-member
+        self.sw_update_obj.strategy_build_complete(
+            True, ""
+        )  # pylint: disable=no-member
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
@@ -2668,8 +2960,9 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
         dictionary
         """
         super(SystemConfigUpdateStrategy, self).from_dict(
-            data, build_phase, apply_phase, abort_phase)
-        self._single_controller = data['single_controller']
+            data, build_phase, apply_phase, abort_phase
+        )
+        self._single_controller = data["single_controller"]
 
         self.mixin_from_dict(data)
         return self
@@ -2679,7 +2972,7 @@ class SystemConfigUpdateStrategy(SwUpdateStrategy,
         Represent the software upgrade strategy as a dictionary
         """
         data = super(SystemConfigUpdateStrategy, self).as_dict()
-        data['single_controller'] = self._single_controller
+        data["single_controller"] = self._single_controller
 
         self.mixin_as_dict(data)
         return data
@@ -2694,11 +2987,19 @@ class FwUpdateStrategy(SwUpdateStrategy):
     """
     Firmware Update - Strategy - FPGA
     """
-    def __init__(self, uuid, controller_apply_type, storage_apply_type,
-                 worker_apply_type, max_parallel_worker_hosts,
-                 default_instance_action,
-                 alarm_restrictions, ignore_alarms,
-                 single_controller):
+
+    def __init__(
+        self,
+        uuid,
+        controller_apply_type,
+        storage_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        ignore_alarms,
+        single_controller,
+    ):
         super(FwUpdateStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.FW_UPDATE,
@@ -2709,17 +3010,19 @@ class FwUpdateStrategy(SwUpdateStrategy):
             max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            ignore_alarms)
+            ignore_alarms,
+        )
 
         # The following alarms will not prevent a firmware update operation
-        IGNORE_ALARMS = ['700.004',  # VM stopped
-                         '280.002',  # Subcloud resource out-of-sync
-                         '900.006',  # Device Image Update in progress
-                         '900.301',  # Fw Update Auto Apply in progress
-                         '200.001',  # Locked Host
-                         '100.119',  # PTP alarm for SyncE
-                         '900.701',  # Node tainted
-                         ]
+        IGNORE_ALARMS = [
+            "700.004",  # VM stopped
+            "280.002",  # Subcloud resource out-of-sync
+            "900.006",  # Device Image Update in progress
+            "900.301",  # Fw Update Auto Apply in progress
+            "200.001",  # Locked Host
+            "100.119",  # PTP alarm for SyncE
+            "900.701",  # Node tainted
+        ]
 
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
@@ -2751,26 +3054,31 @@ class FwUpdateStrategy(SwUpdateStrategy):
         from nfv_vim import tables
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.FW_UPDATE_HOSTS_QUERY)
+            strategy.STRATEGY_STAGE_NAME.FW_UPDATE_HOSTS_QUERY
+        )
 
         # Firmware update is only supported for hosts that support
         # the worker function.
         if self._worker_apply_type == SW_UPDATE_APPLY_TYPE.IGNORE:
-            msg = "apply type is 'ignore' ; must be '%s' or '%s'" % \
-                  (SW_UPDATE_APPLY_TYPE.SERIAL,
-                   SW_UPDATE_APPLY_TYPE.PARALLEL)
+            msg = "apply type is 'ignore' ; must be '%s' or '%s'" % (
+                SW_UPDATE_APPLY_TYPE.SERIAL,
+                SW_UPDATE_APPLY_TYPE.PARALLEL,
+            )
             DLOG.warn("Worker %s" % msg)
             self._state = strategy.STRATEGY_STATE.BUILD_FAILED
             self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
             self.build_phase.result_reason = "Worker " + msg
             self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
             self.save()
             return
 
-        stage.add_step(strategy.QueryAlarmsStep(
-            self._fail_on_alarms,
-            ignore_alarms=self._ignore_alarms))
+        stage.add_step(
+            strategy.QueryAlarmsStep(
+                self._fail_on_alarms, ignore_alarms=self._ignore_alarms
+            )
+        )
 
         # using existing vim host inventory add a step for each host
         host_table = tables.tables_get_host_table()
@@ -2789,23 +3097,29 @@ class FwUpdateStrategy(SwUpdateStrategy):
         from nfv_vim import strategy
         from nfv_vim import tables
 
-        hostnames = ''
+        hostnames = ""
         for host in worker_hosts:
-            hostnames += host.name + ' '
+            hostnames += host.name + " "
         DLOG.info("Worker hosts that require firmware update: %s " % hostnames)
 
         # When using a single controller/worker host that is running
         # OpenStack, only allow the stop/start instance action.
         if self._single_controller:
             for host in worker_hosts:
-                if host.openstack_compute and \
-                        HOST_PERSONALITY.CONTROLLER in host.personality and \
-                        SW_UPDATE_INSTANCE_ACTION.STOP_START != \
-                        self._default_instance_action:
-                    DLOG.error("Cannot migrate instances in a single "
-                               "controller configuration")
-                    reason = 'cannot migrate instances in a single ' \
-                             'controller configuration'
+                if (
+                    host.openstack_compute
+                    and HOST_PERSONALITY.CONTROLLER in host.personality
+                    and SW_UPDATE_INSTANCE_ACTION.STOP_START
+                    != self._default_instance_action
+                ):
+                    DLOG.error(
+                        "Cannot migrate instances in a single "
+                        "controller configuration"
+                    )
+                    reason = (
+                        "cannot migrate instances in a single "
+                        "controller configuration"
+                    )
                     return False, reason
 
         # Returns a list of 'host update lists' based on serial vs parallel
@@ -2825,7 +3139,9 @@ class FwUpdateStrategy(SwUpdateStrategy):
 
             # Start the Update Worker Hosts Stage ; the stage that includes all
             # the steps to update all the worker hosts found to need firmware update.
-            stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.FW_UPDATE_WORKER_HOSTS)
+            stage = strategy.StrategyStage(
+                strategy.STRATEGY_STAGE_NAME.FW_UPDATE_WORKER_HOSTS
+            )
 
             # build a list of unlocked instances
             instance_list = list()
@@ -2837,9 +3153,11 @@ class FwUpdateStrategy(SwUpdateStrategy):
                         instance_list.append(instance)
 
             # Handle alarms that show up after create but before apply.
-            stage.add_step(strategy.QueryAlarmsStep(
-                self._fail_on_alarms,
-                ignore_alarms=self._ignore_alarms))
+            stage.add_step(
+                strategy.QueryAlarmsStep(
+                    self._fail_on_alarms, ignore_alarms=self._ignore_alarms
+                )
+            )
 
             # Issue Firmware Update for hosts in host_list
             stage.add_step(strategy.FwUpdateHostsStep(host_list))
@@ -2857,31 +3175,33 @@ class FwUpdateStrategy(SwUpdateStrategy):
                 # Handle instance migration
                 if len(instance_list):
                     # Migrate or stop instances as necessary
-                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE == \
-                            self._default_instance_action:
-                        if SW_UPDATE_APPLY_TYPE.PARALLEL == \
-                                self._worker_apply_type:
+                    if (
+                        SW_UPDATE_INSTANCE_ACTION.MIGRATE
+                        == self._default_instance_action
+                    ):
+                        if SW_UPDATE_APPLY_TYPE.PARALLEL == self._worker_apply_type:
                             # Disable host services before migrating to ensure
                             # instances do not migrate to worker hosts in the
                             # same set of hosts.
                             if host_list[0].host_service_configured(
-                                    HOST_SERVICES.COMPUTE):
-                                stage.add_step(strategy.DisableHostServicesStep(
-                                    host_list, HOST_SERVICES.COMPUTE))
+                                HOST_SERVICES.COMPUTE
+                            ):
+                                stage.add_step(
+                                    strategy.DisableHostServicesStep(
+                                        host_list, HOST_SERVICES.COMPUTE
+                                    )
+                                )
                             # TODO(ksmith)
                             # When support is added for orchestration on
                             # non-OpenStack worker nodes, support for disabling
                             # kubernetes services will have to be added.
-                        stage.add_step(strategy.MigrateInstancesStep(
-                            instance_list))
+                        stage.add_step(strategy.MigrateInstancesStep(instance_list))
                     else:
-                        stage.add_step(strategy.StopInstancesStep(
-                            instance_list))
+                        stage.add_step(strategy.StopInstancesStep(instance_list))
 
                 wait_until_disabled = True
                 if 1 == len(host_list):
-                    if HOST_PERSONALITY.CONTROLLER in \
-                            host_list[0].personality:
+                    if HOST_PERSONALITY.CONTROLLER in host_list[0].personality:
                         if self._single_controller:
                             # Handle upgrade of AIO SX
                             # A single controller will not go disabled when
@@ -2889,7 +3209,11 @@ class FwUpdateStrategy(SwUpdateStrategy):
                             wait_until_disabled = False
 
                 # Lock hosts
-                stage.add_step(strategy.LockHostsStep(host_list, wait_until_disabled=wait_until_disabled))
+                stage.add_step(
+                    strategy.LockHostsStep(
+                        host_list, wait_until_disabled=wait_until_disabled
+                    )
+                )
 
                 # Wait for system to stabilize
                 stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
@@ -2899,20 +3223,22 @@ class FwUpdateStrategy(SwUpdateStrategy):
 
                 if 0 != len(instance_list):
                     # Start any instances that were stopped
-                    if SW_UPDATE_INSTANCE_ACTION.MIGRATE != \
-                            self._default_instance_action:
-                        stage.add_step(strategy.StartInstancesStep(
-                            instance_list))
+                    if (
+                        SW_UPDATE_INSTANCE_ACTION.MIGRATE
+                        != self._default_instance_action
+                    ):
+                        stage.add_step(strategy.StartInstancesStep(instance_list))
 
                 stage.add_step(strategy.SystemStabilizeStep())
             else:
                 # Less time required if host is not rebooting
-                stage.add_step(strategy.SystemStabilizeStep(
-                               timeout_in_secs=NO_REBOOT_DELAY))
+                stage.add_step(
+                    strategy.SystemStabilizeStep(timeout_in_secs=NO_REBOOT_DELAY)
+                )
 
             self.apply_phase.add_stage(stage)
 
-        return True, ''
+        return True, ""
 
     def build_complete(self, result, result_reason):
         """
@@ -2921,14 +3247,18 @@ class FwUpdateStrategy(SwUpdateStrategy):
         from nfv_vim import strategy
         from nfv_vim import tables
 
-        result, result_reason = \
-            super(FwUpdateStrategy, self).build_complete(result, result_reason)
+        result, result_reason = super(FwUpdateStrategy, self).build_complete(
+            result, result_reason
+        )
 
-        DLOG.verbose("Build Complete Callback, result=%s, reason=%s." %
-                    (result, result_reason))
+        DLOG.verbose(
+            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
+        )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
 
             if self._nfvi_alarms:
                 # Fail create strategy if unignored alarms present
@@ -2936,15 +3266,16 @@ class FwUpdateStrategy(SwUpdateStrategy):
                 alarm_id_list = ""
                 for alarm_data in self._nfvi_alarms:
                     if alarm_id_list:
-                        alarm_id_list += ', '
-                    alarm_id_list += alarm_data['alarm_id']
+                        alarm_id_list += ", "
+                    alarm_id_list += alarm_data["alarm_id"]
                 DLOG.warn("... active alarms: %s" % alarm_id_list)
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = 'active alarms present ; '
+                self.build_phase.result_reason = "active alarms present ; "
                 self.build_phase.result_reason += alarm_id_list
                 self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
 
@@ -2955,7 +3286,8 @@ class FwUpdateStrategy(SwUpdateStrategy):
                 self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                 self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                 self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
-                    False, self.build_phase.result_reason)
+                    False, self.build_phase.result_reason
+                )
                 self.save()
                 return
 
@@ -2966,55 +3298,61 @@ class FwUpdateStrategy(SwUpdateStrategy):
                     worker_hosts.append(host)
 
             STRATEGY_CREATION_COMMANDS = [
-                (self._add_worker_strategy_stages,
-                 worker_hosts, True)]
+                (self._add_worker_strategy_stages, worker_hosts, True)
+            ]
 
-            for add_strategy_stages_function, host_list, reboot in \
-                    STRATEGY_CREATION_COMMANDS:
+            for (
+                add_strategy_stages_function,
+                host_list,
+                reboot,
+            ) in STRATEGY_CREATION_COMMANDS:
                 if host_list:
-                    success, reason = add_strategy_stages_function(
-                        host_list, reboot)
+                    success, reason = add_strategy_stages_function(host_list, reboot)
                     if not success:
                         self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = \
-                            strategy.STRATEGY_PHASE_RESULT.FAILED
+                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                         self.build_phase.result_reason = reason
                         self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
-                            False, self.build_phase.result_reason)
+                            False, self.build_phase.result_reason
+                        )
                         self.save()
                         return
         else:
             self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
-                False, self.build_phase.result_reason)
+                False, self.build_phase.result_reason
+            )
 
-        self.sw_update_obj.strategy_build_complete(True, '')  # pylint: disable=no-member
+        self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
+            True, ""
+        )
         self.save()
 
-    def from_dict(self,
-                  data,
-                  build_phase=None,
-                  apply_phase=None,
-                  abort_phase=None):
+    def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """
         Load firmware update strategy object from dict data.
         """
         from nfv_vim import nfvi
 
         super(FwUpdateStrategy, self).from_dict(
-            data, build_phase, apply_phase, abort_phase)
+            data, build_phase, apply_phase, abort_phase
+        )
 
-        self._single_controller = data['single_controller']
+        self._single_controller = data["single_controller"]
 
         # Load nfvi alarm data
         nfvi_alarms = list()
-        nfvi_alarms_data = data.get('nfvi_alarms_data')
+        nfvi_alarms_data = data.get("nfvi_alarms_data")
         if nfvi_alarms_data:
-            for alarm_data in data['nfvi_alarms_data']:
+            for alarm_data in data["nfvi_alarms_data"]:
                 alarm = nfvi.objects.v1.Alarm(
-                    alarm_data['alarm_uuid'], alarm_data['alarm_id'],
-                    alarm_data['entity_instance_id'], alarm_data['severity'],
-                    alarm_data['reason_text'], alarm_data['timestamp'],
-                    alarm_data['mgmt_affecting'])
+                    alarm_data["alarm_uuid"],
+                    alarm_data["alarm_id"],
+                    alarm_data["entity_instance_id"],
+                    alarm_data["severity"],
+                    alarm_data["reason_text"],
+                    alarm_data["timestamp"],
+                    alarm_data["mgmt_affecting"],
+                )
                 nfvi_alarms.append(alarm)
             self._nfvi_alarms = nfvi_alarms
         return self
@@ -3025,14 +3363,14 @@ class FwUpdateStrategy(SwUpdateStrategy):
         """
         data = super(FwUpdateStrategy, self).as_dict()
 
-        data['single_controller'] = self._single_controller
+        data["single_controller"] = self._single_controller
 
         #  Save nfvi alarm info to data
         if self._nfvi_alarms:
             nfvi_alarms_data = list()
             for alarm in self._nfvi_alarms:
                 nfvi_alarms_data.append(alarm.as_dict())
-            data['nfvi_alarms_data'] = nfvi_alarms_data
+            data["nfvi_alarms_data"] = nfvi_alarms_data
         return data
 
 
@@ -3041,24 +3379,27 @@ class FwUpdateStrategy(SwUpdateStrategy):
 # The Kubernetes RootCa Update Strategy
 #
 ###################################################################
-class KubeRootcaUpdateStrategy(SwUpdateStrategy,
-                               QueryKubeRootcaUpdatesMixin,
-                               QueryKubeRootcaHostUpdatesMixin):
+class KubeRootcaUpdateStrategy(
+    SwUpdateStrategy, QueryKubeRootcaUpdatesMixin, QueryKubeRootcaHostUpdatesMixin
+):
     """
     Kubernetes RootCa Update - Strategy
     """
-    def __init__(self,
-                 uuid,
-                 controller_apply_type,
-                 storage_apply_type,
-                 worker_apply_type,
-                 max_parallel_worker_hosts,
-                 default_instance_action,
-                 alarm_restrictions,
-                 ignore_alarms,
-                 single_controller,
-                 expiry_date,
-                 subject):
+
+    def __init__(
+        self,
+        uuid,
+        controller_apply_type,
+        storage_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        ignore_alarms,
+        single_controller,
+        expiry_date,
+        subject,
+    ):
         super(KubeRootcaUpdateStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.KUBE_ROOTCA_UPDATE,
@@ -3069,24 +3410,25 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
             max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            ignore_alarms)
+            ignore_alarms,
+        )
 
         # The following alarms will NOT prevent a kube rootca update operation
         # todo(abailey): remove memory alarm from this list if possible
         IGNORE_ALARMS = [
-            '100.103',  # Memory threshold exceeded
-            '100.119',  # PTP alarm for SyncE
-            '200.001',  # Locked Host
-            '280.001',  # Subcloud resource off-line
-            '280.002',  # Subcloud resource out-of-sync
-            '500.200',  # Certificate expiring soon
-            '500.210',  # Certificate expired
-            '700.004',  # VM stopped
-            '750.006',  # Configuration change requires reapply of cert-manager
-            '900.008',  # Kubernetes rootca update in progress
-            '900.009',  # Kubernetes rootca update aborted
-            '900.501',  # Kubernetes rootca update auto-apply inprogress
-            '900.701',  # Node tainted
+            "100.103",  # Memory threshold exceeded
+            "100.119",  # PTP alarm for SyncE
+            "200.001",  # Locked Host
+            "280.001",  # Subcloud resource off-line
+            "280.002",  # Subcloud resource out-of-sync
+            "500.200",  # Certificate expiring soon
+            "500.210",  # Certificate expired
+            "700.004",  # VM stopped
+            "750.006",  # Configuration change requires reapply of cert-manager
+            "900.008",  # Kubernetes rootca update in progress
+            "900.009",  # Kubernetes rootca update aborted
+            "900.501",  # Kubernetes rootca update auto-apply inprogress
+            "900.701",  # Node tainted
         ]
         # self._ignore_alarms is declared in parent class
         self._ignore_alarms += IGNORE_ALARMS
@@ -3105,9 +3447,9 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
 
         # Initial stage is a query of existing kube rootca update
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_QUERY)
-        stage.add_step(strategy.QueryAlarmsStep(
-            ignore_alarms=self._ignore_alarms))
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_QUERY
+        )
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         # these query steps are paired with mixins that process their results
         stage.add_step(strategy.QueryKubeRootcaUpdateStep())
         stage.add_step(strategy.QueryKubeRootcaHostUpdatesStep())
@@ -3120,8 +3462,10 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         This stage only occurs when no kube rootca update has been initiated.
         """
         from nfv_vim import strategy
+
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_START)
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_START
+        )
         stage.add_step(strategy.KubeRootcaUpdateStartStep())
         self.apply_phase.add_stage(stage)
         # Proceed to the next stage
@@ -3135,11 +3479,13 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         activity.
         """
         from nfv_vim import strategy
+
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_CERT)
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_CERT
+        )
         stage.add_step(
-            strategy.KubeRootcaUpdateGenerateCertStep(self._expiry_date,
-                                                      self._subject))
+            strategy.KubeRootcaUpdateGenerateCertStep(self._expiry_date, self._subject)
+        )
         self.apply_phase.add_stage(stage)
         # Proceed to the next stage
         self._add_kube_rootca_hosts_trustbothcas_stage()
@@ -3150,6 +3496,7 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         Storage hosts are excluded
         """
         from nfv_vim import tables
+
         host_table = tables.tables_get_host_table()
 
         hosts_to_update = list()
@@ -3168,11 +3515,14 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
                 elif HOST_PERSONALITY.WORKER in host.personality:
                     hosts_to_update.append(host)
                 else:
-                    DLOG.info("Skipping host: %s of personality: %s"
-                              % (host.name, host.personality))
+                    DLOG.info(
+                        "Skipping host: %s of personality: %s"
+                        % (host.name, host.personality)
+                    )
             else:
-                DLOG.info("Skipping up to date host: %s (%s)"
-                          % (host.name, success_state))
+                DLOG.info(
+                    "Skipping up to date host: %s (%s)" % (host.name, success_state)
+                )
 
         host_lists = list()
         if hosts_to_update:
@@ -3188,14 +3538,16 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         This stage is performed on the hosts
         """
         host_lists = self._determine_kube_rootca_host_lists(
-            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS)
+            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS
+        )
         if host_lists:
             from nfv_vim import strategy
+
             stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_TRUSTBOTHCAS)
+                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_TRUSTBOTHCAS
+            )
             for hosts in host_lists:
-                stage.add_step(
-                    strategy.KubeRootcaUpdateHostTrustBothcasStep(hosts))
+                stage.add_step(strategy.KubeRootcaUpdateHostTrustBothcasStep(hosts))
             # todo(abailey) consider adding a host query
             self.apply_phase.add_stage(stage)
         # Proceed to the next stage
@@ -3207,8 +3559,10 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         This stage is performed on the pods.
         """
         from nfv_vim import strategy
+
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS)
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS
+        )
         stage.add_step(strategy.KubeRootcaUpdatePodsTrustBothcasStep())
         self.apply_phase.add_stage(stage)
         # Proceed to the next stage
@@ -3220,14 +3574,16 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         This stage is performed on the hosts
         """
         host_lists = self._determine_kube_rootca_host_lists(
-            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS)
+            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS
+        )
         if host_lists:
             from nfv_vim import strategy
+
             stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_UPDATECERTS)
+                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_UPDATECERTS
+            )
             for hosts in host_lists:
-                stage.add_step(
-                    strategy.KubeRootcaUpdateHostUpdateCertsStep(hosts))
+                stage.add_step(strategy.KubeRootcaUpdateHostUpdateCertsStep(hosts))
             self.apply_phase.add_stage(stage)
         # Proceed to the next stage
         self._add_kube_rootca_hosts_trustnewca_stage()
@@ -3238,14 +3594,16 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         This stage is performed on the hosts
         """
         host_lists = self._determine_kube_rootca_host_lists(
-            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA)
+            KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA
+        )
         if host_lists:
             from nfv_vim import strategy
+
             stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_TRUSTNEWCA)
+                strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_HOSTS_TRUSTNEWCA
+            )
             for hosts in host_lists:
-                stage.add_step(
-                    strategy.KubeRootcaUpdateHostTrustNewcaStep(hosts))
+                stage.add_step(strategy.KubeRootcaUpdateHostTrustNewcaStep(hosts))
             self.apply_phase.add_stage(stage)
         # Proceed to the next stage
         self._add_kube_rootca_update_pods_trustnewca_stage()
@@ -3256,8 +3614,10 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         This stage is performed on the pods.
         """
         from nfv_vim import strategy
+
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA)
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA
+        )
         stage.add_step(strategy.KubeRootcaUpdatePodsTrustNewcaStep())
         self.apply_phase.add_stage(stage)
         # Proceed to the next stage
@@ -3269,8 +3629,10 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         This stage occurs after all kube rootca are updated
         """
         from nfv_vim import strategy
+
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_COMPLETE)
+            strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_COMPLETE
+        )
         stage.add_step(strategy.KubeRootcaUpdateCompleteStep())
         self.apply_phase.add_stage(stage)
         # There is no next stage. this is the final stage of the strategy
@@ -3284,80 +3646,57 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
 
         RESUME_STATE = {
             # update was aborted, this means it needs to be recreated
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_ABORTED:
-                self._add_kube_rootca_update_start_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_ABORTED: self._add_kube_rootca_update_start_stage,
             # after update-started, generate cert stage
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED:
-                self._add_kube_rootca_update_cert_stage,
-
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED: self._add_kube_rootca_update_cert_stage,
             # after generated, host trustbothcas stage
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED:
-                self._add_kube_rootca_hosts_trustbothcas_stage,
-
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED: self._add_kube_rootca_hosts_trustbothcas_stage,
             # handle interruption updating hosts trustbothcas -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS:
-                self._add_kube_rootca_hosts_trustbothcas_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS: self._add_kube_rootca_hosts_trustbothcas_stage,
             # handle failure updating hosts trustbothcas -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED:
-                self._add_kube_rootca_hosts_trustbothcas_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED: self._add_kube_rootca_hosts_trustbothcas_stage,
             # handle success updating hosts trustbothcas -> pods trustbothcas
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS:
-                self._add_kube_rootca_update_pods_trustbothcas_stage,
-
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS: self._add_kube_rootca_update_pods_trustbothcas_stage,
             # handle interruption updating the pods for trust both ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS:
-                self._add_kube_rootca_update_pods_trustbothcas_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS: self._add_kube_rootca_update_pods_trustbothcas_stage,
             # handle failure updating the pods for trust both ca -> retry)
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED:
-                self._add_kube_rootca_update_pods_trustbothcas_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED: self._add_kube_rootca_update_pods_trustbothcas_stage,
             # handle success updating pods trust both ca - > update certs
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS:
-                self._add_kube_rootca_hosts_update_certs_stage,
-
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS: self._add_kube_rootca_hosts_update_certs_stage,
             # handle interruption updating the certs for hosts -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS:
-                self._add_kube_rootca_hosts_update_certs_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS: self._add_kube_rootca_hosts_update_certs_stage,
             # handle failure updating the certs for hosts -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED:
-                self._add_kube_rootca_hosts_update_certs_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED: self._add_kube_rootca_hosts_update_certs_stage,
             # handle success updating the certs for hosts -> hosts trust new ca
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS:
-                self._add_kube_rootca_hosts_trustnewca_stage,
-
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS: self._add_kube_rootca_hosts_trustnewca_stage,
             # handle interruption updating hosts trust new ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA:
-                self._add_kube_rootca_hosts_trustnewca_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA: self._add_kube_rootca_hosts_trustnewca_stage,
             # handle failure updating hosts trust new ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED:
-                self._add_kube_rootca_hosts_trustnewca_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED: self._add_kube_rootca_hosts_trustnewca_stage,
             # handle success updating hosts trust new ca -> pods trust new ca
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA:
-                self._add_kube_rootca_update_pods_trustnewca_stage,
-
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA: self._add_kube_rootca_update_pods_trustnewca_stage,
             # handle interruption updating the pods for trust new ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA:
-                self._add_kube_rootca_update_pods_trustnewca_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA: self._add_kube_rootca_update_pods_trustnewca_stage,
             # handle failure updating the pods for trust new ca -> retry)
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED:
-                self._add_kube_rootca_update_pods_trustnewca_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED: self._add_kube_rootca_update_pods_trustnewca_stage,
             # handle success while updating pods trust new ca - > complete
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA:
-                self._add_kube_rootca_update_complete_stage,
-
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA: self._add_kube_rootca_update_complete_stage,
             # update is completed, usually this gets deleted.
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED:
-                self._add_kube_rootca_update_complete_stage,
+            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED: self._add_kube_rootca_update_complete_stage,
         }
 
-        result, result_reason = \
-            super(KubeRootcaUpdateStrategy, self).build_complete(result,
-                                                                 result_reason)
+        result, result_reason = super(KubeRootcaUpdateStrategy, self).build_complete(
+            result, result_reason
+        )
 
-        DLOG.verbose("Build Complete Callback, result=%s, reason=%s."
-                     % (result, result_reason))
+        DLOG.verbose(
+            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
+        )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
 
             if self._nfvi_alarms:
                 # Fail create strategy if unignored alarms present
@@ -3365,13 +3704,15 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
                 # eliminate duplicates  using a set, and sort the list
                 alarm_id_set = set()
                 for alarm_data in self._nfvi_alarms:
-                    alarm_id_set.add(alarm_data['alarm_id'])
+                    alarm_id_set.add(alarm_data["alarm_id"])
                 alarm_id_list = ", ".join(sorted(alarm_id_set))
 
-                DLOG.warn("kube rootca update: Active alarms present [ %s ]"
-                          % alarm_id_list)
-                self.report_build_failure("active alarms present [ %s ]"
-                                          % alarm_id_list)
+                DLOG.warn(
+                    "kube rootca update: Active alarms present [ %s ]" % alarm_id_list
+                )
+                self.report_build_failure(
+                    "active alarms present [ %s ]" % alarm_id_list
+                )
                 return
 
             if self.nfvi_kube_rootca_update is None:
@@ -3384,7 +3725,8 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
                 if resume_from_stage is None:
                     self.report_build_failure(
                         "Unable to resume kube rootca update from state: %s"
-                        % current_state)
+                        % current_state
+                    )
                     return
                 else:
                     # Invoke the method that resumes the build from the stage
@@ -3395,21 +3737,19 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
             return
 
         # successful build
-        self.sw_update_obj.strategy_build_complete(True, '')
+        self.sw_update_obj.strategy_build_complete(True, "")
         self.save()
 
-    def from_dict(self, data, build_phase=None, apply_phase=None,
-                  abort_phase=None):
+    def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """
         Initializes a kube rootca update strategy object from a dictionary
         """
-        super(KubeRootcaUpdateStrategy, self).from_dict(data,
-                                                        build_phase,
-                                                        apply_phase,
-                                                        abort_phase)
-        self._single_controller = data['single_controller']
-        self._expiry_date = data.get('expiry_date')
-        self._subject = data.get('subject')
+        super(KubeRootcaUpdateStrategy, self).from_dict(
+            data, build_phase, apply_phase, abort_phase
+        )
+        self._single_controller = data["single_controller"]
+        self._expiry_date = data.get("expiry_date")
+        self._subject = data.get("subject")
         self.mixin_from_dict(data)
         return self
 
@@ -3418,9 +3758,9 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
         Represent the kube rootca update strategy as a dictionary
         """
         data = super(KubeRootcaUpdateStrategy, self).as_dict()
-        data['single_controller'] = self._single_controller
-        data['expiry_date'] = self._expiry_date
-        data['subject'] = self._subject
+        data["single_controller"] = self._single_controller
+        data["expiry_date"] = self._expiry_date
+        data["subject"] = self._subject
         self.mixin_as_dict(data)
         return data
 
@@ -3430,26 +3770,31 @@ class KubeRootcaUpdateStrategy(SwUpdateStrategy,
 # The Kubernetes Upgrade Strategy
 #
 ###################################################################
-class KubeUpgradeStrategy(SwUpdateStrategy,
-                          QueryKubeUpgradesMixin,
-                          QueryKubeHostUpgradesMixin,
-                          QueryKubeVersionsMixin,
-                          UpgradeKubeletControllerHostsMixin,
-                          UpgradeKubeletWorkerHostsMixin):
+class KubeUpgradeStrategy(
+    SwUpdateStrategy,
+    QueryKubeUpgradesMixin,
+    QueryKubeHostUpgradesMixin,
+    QueryKubeVersionsMixin,
+    UpgradeKubeletControllerHostsMixin,
+    UpgradeKubeletWorkerHostsMixin,
+):
     """
     Kubernetes Upgrade - Strategy
     """
-    def __init__(self,
-                 uuid,
-                 controller_apply_type,
-                 storage_apply_type,
-                 worker_apply_type,
-                 max_parallel_worker_hosts,
-                 default_instance_action,
-                 alarm_restrictions,
-                 ignore_alarms,
-                 to_version,
-                 single_controller):
+
+    def __init__(
+        self,
+        uuid,
+        controller_apply_type,
+        storage_apply_type,
+        worker_apply_type,
+        max_parallel_worker_hosts,
+        default_instance_action,
+        alarm_restrictions,
+        ignore_alarms,
+        to_version,
+        single_controller,
+    ):
         super(KubeUpgradeStrategy, self).__init__(
             uuid,
             STRATEGY_NAME.KUBE_UPGRADE,
@@ -3460,26 +3805,27 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             max_parallel_worker_hosts,
             default_instance_action,
             alarm_restrictions,
-            ignore_alarms)
+            ignore_alarms,
+        )
 
         # The following alarms will NOT prevent a kube upgrade operation
         # Note: if an alarm is critical (ex: memory), it will still block the
         # kube upgrade due to the host being degraded.
         # todo(abailey): remove memory alarm from this list if possible
         IGNORE_ALARMS = [
-            '100.103',  # Memory threshold exceeded
-            '100.119',  # PTP alarm for SyncE
-            '200.001',  # Locked Host
-            '280.001',  # Subcloud resource off-line
-            '280.002',  # Subcloud resource out-of-sync
-            '700.004',  # VM stopped
-            '750.006',  # Configuration change requires reapply of cert-manager
-            '900.007',  # Kube Upgrade in progress
-            '900.022',  # Clean up deployment data
-            '900.023',  # Software release deploy operation in progress.
-            '900.401',  # kube-upgrade-auto-apply-inprogress
-            '900.402',  # Kubernetes upgrade auto-apply aborting
-            '900.701',  # Node tainted
+            "100.103",  # Memory threshold exceeded
+            "100.119",  # PTP alarm for SyncE
+            "200.001",  # Locked Host
+            "280.001",  # Subcloud resource off-line
+            "280.002",  # Subcloud resource out-of-sync
+            "700.004",  # VM stopped
+            "750.006",  # Configuration change requires reapply of cert-manager
+            "900.007",  # Kube Upgrade in progress
+            "900.022",  # Clean up deployment data
+            "900.023",  # Software release deploy operation in progress.
+            "900.401",  # kube-upgrade-auto-apply-inprogress
+            "900.402",  # Kubernetes upgrade auto-apply aborting
+            "900.701",  # Node tainted
         ]
         # self._ignore_alarms is declared in parent class
         self._ignore_alarms += IGNORE_ALARMS
@@ -3505,12 +3851,10 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         # Initial stage is a query of existing kube upgrade
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_QUERY)
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_QUERY)
 
         # these query steps are paired with mixins that process their results
-        stage.add_step(strategy.QueryAlarmsStep(
-            ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryKubeVersionsStep())
         stage.add_step(strategy.QueryKubeUpgradeStep())
         # cleanup kube upgrade if 'upgrade-aborted'
@@ -3532,7 +3876,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # convert the kube_list into a dictionary indexed by version
         kube_dict = {}
         for kube in kube_list:
-            kube_dict[kube['kube_version']] = kube
+            kube_dict[kube["kube_version"]] = kube
 
         # Populate the kube_sequence
         # Start with the target version and traverse based on the
@@ -3553,7 +3897,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
 
             # We do not add the 'active' version to the front of the list
             # since it will not be updated
-            if kube['state'] == 'active':
+            if kube["state"] == "active":
                 # active means we are at the end of the sequence
                 break
 
@@ -3563,7 +3907,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             # 'partial' means we have started updating that version
             # There can be two partial states if the control plane
             # was updated, but the kubelet was not, so add  only the first
-            if kube['state'] == 'partial':
+            if kube["state"] == "partial":
                 # if its partial there is no need for another loop
                 break
 
@@ -3572,7 +3916,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             # value and allow an exception to  be raised if the list is empty
             # todo(abailey): if the list contains more than one entry the
             # algorithm may not work, since it may not converge at the active version.
-            ver = kube['upgrade_from'][0]
+            ver = kube["upgrade_from"][0]
 
             # go around the loop again...
 
@@ -3586,10 +3930,10 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
 
     def _kubelet_map(self):
         """Map the host kubelet versions by the host uuid.
-           Leave the kubelet version empty, if the status is not None,
-           since that means the kubelet may not be running the version
-           indicated.  ie: upgrading-kubelet-failed
-           """
+        Leave the kubelet version empty, if the status is not None,
+        since that means the kubelet may not be running the version
+        indicated.  ie: upgrading-kubelet-failed
+        """
         from nfv_vim import nfvi
 
         kubelet_map = dict()
@@ -3598,14 +3942,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             # or has been completed, in both cases the host version is correct.
             # for the other three states (upgrading, upgraded, failed) only
             # the upgraded state indicates the accurate kubelet version
-            if host.status is None \
-            or host.status == nfvi.objects.v1.KUBE_HOST_UPGRADE_STATE.KUBE_HOST_UPGRADED_KUBELET:
+            if (
+                host.status is None
+                or host.status
+                == nfvi.objects.v1.KUBE_HOST_UPGRADE_STATE.KUBE_HOST_UPGRADED_KUBELET
+            ):
                 kubelet_map[host.host_uuid] = host.kubelet_version
         return kubelet_map
 
     def _kubeadm_map(self):
-        """Map the host kubeadm versions by the host uuid.
-        """
+        """Map the host kubeadm versions by the host uuid."""
         kubeadm_map = dict()
         for host in self.nfvi_kube_host_upgrade_list:
             kubeadm_map[host.host_uuid] = host.control_plane_version
@@ -3617,10 +3963,9 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         This stage only occurs when no kube upgrade has been initiated.
         """
         from nfv_vim import strategy
-        stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_START)
-        stage.add_step(strategy.KubeUpgradeStartStep(self._to_version,
-                                                     force=True))
+
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_START)
+        stage.add_step(strategy.KubeUpgradeStartStep(self._to_version, force=True))
         self.apply_phase.add_stage(stage)
         # Add the stage that comes after the kube upgrade start stage
         self._add_kube_upgrade_download_images_stage()
@@ -3634,7 +3979,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES)
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES
+        )
         stage.add_step(strategy.KubeUpgradeDownloadImagesStep())
         self.apply_phase.add_stage(stage)
         # Next stage after download images is pre application update
@@ -3649,7 +3995,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_PRE_APPLICATION_UPDATE)
+            strategy.STRATEGY_STAGE_NAME.KUBE_PRE_APPLICATION_UPDATE
+        )
         stage.add_step(strategy.KubePreApplicationUpdateStep())
         self.apply_phase.add_stage(stage)
 
@@ -3665,7 +4012,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING)
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING
+        )
         stage.add_step(strategy.KubeUpgradeNetworkingStep())
         self.apply_phase.add_stage(stage)
 
@@ -3681,7 +4029,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_STORAGE)
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_STORAGE
+        )
         stage.add_step(strategy.KubeUpgradeStorageStep())
         self.apply_phase.add_stage(stage)
 
@@ -3701,13 +4050,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         if is_simplex:
             # todo(abailey): add rollback support to trigger uncordon
             stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.KUBE_HOST_CORDON)
-            stage.add_step(strategy.KubeHostCordonStep(
-                first_host,
-                self._to_version,
-                False,  # force
-                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_COMPLETE,
-                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_FAILED)
+                strategy.STRATEGY_STAGE_NAME.KUBE_HOST_CORDON
+            )
+            stage.add_step(
+                strategy.KubeHostCordonStep(
+                    first_host,
+                    self._to_version,
+                    False,  # force
+                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_COMPLETE,
+                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_FAILED,
+                )
             )
             self.apply_phase.add_stage(stage)
         self._add_kube_update_stages()
@@ -3730,10 +4082,11 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         :return: integer: skew between kubeadm minor version
                  and kubelet minor version
         """
+
         def safe_strip(input_string):
             if not input_string:
-                return ''
-            return ''.join(c for c in input_string if c in '1234567890.')
+                return ""
+            return "".join(c for c in input_string if c in "1234567890.")
 
         if any(value is None for value in (kubeadm_version, kubelet_version)):
             raise ValueError("Invalid kubelet version skew input")
@@ -3743,18 +4096,19 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             kubeadm_map = list(map(int, safe_strip(kubeadm_version).split(".")[:2]))
             kubelet_map = list(map(int, safe_strip(kubelet_version).split(".")[:2]))
         except Exception as e:
-            DLOG.error("_kubelet_version_skew: Unexpected error: %s, "
-                      "kubeadm_version=%s, kubelet_version=%s"
-                      % (e, kubeadm_version, kubelet_version))
+            DLOG.error(
+                "_kubelet_version_skew: Unexpected error: %s, "
+                "kubeadm_version=%s, kubelet_version=%s"
+                % (e, kubeadm_version, kubelet_version)
+            )
             raise ValueError("Invalid kubelet version skew input")
 
         if len(kubeadm_map) != 2 or len(kubelet_map) != 2:
             raise ValueError("Invalid kubelet version skew input")
 
         # Calculate integer skew between kubeadm and kubelet minor version
-        skew = (
-                100 * (kubeadm_map[0] - kubelet_map[0]) +
-                (kubeadm_map[1] - kubelet_map[1])
+        skew = 100 * (kubeadm_map[0] - kubelet_map[0]) + (
+            kubeadm_map[1] - kubelet_map[1]
         )
         return skew
 
@@ -3777,8 +4131,9 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
 
         first_host = self.get_first_host()
         second_host = self.get_second_host()
-        ver_list = self._get_kube_version_steps(self._to_version,
-                                                self._nfvi_kube_versions_list)
+        ver_list = self._get_kube_version_steps(
+            self._to_version, self._nfvi_kube_versions_list
+        )
         kubeadm_map = self._kubeadm_map()
         kubelet_map = self._kubelet_map()
         kubelet_min_version = min(kubelet_map.values(), key=LooseVersion, default=None)
@@ -3791,7 +4146,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # convert the kube_list into a dictionary indexed by version
         kube_dict = {}
         for kube in self._nfvi_kube_versions_list:
-            kube_dict[kube['kube_version']] = kube
+            kube_dict[kube["kube_version"]] = kube
 
         # Determine whether we have to upgrade control-plane at the
         # first kube version in the upgrade list, otherwise skip.
@@ -3819,22 +4174,25 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
 
         # detect duplex and order
         if len(set(kubeadm_map.values())) != 1:
-            if ((first_ver is not None) and
-                    all(LooseVersion(first_ver) > LooseVersion(ver)
-                        for ver in kubeadm_map.values())):
+            if (first_ver is not None) and all(
+                LooseVersion(first_ver) > LooseVersion(ver)
+                for ver in kubeadm_map.values()
+            ):
                 # first_host control-plane newer than second
                 skip_first = True
-            if ((second_ver is not None) and
-                    all(LooseVersion(second_ver) > LooseVersion(ver)
-                        for ver in kubeadm_map.values())):
+            if (second_ver is not None) and all(
+                LooseVersion(second_ver) > LooseVersion(ver)
+                for ver in kubeadm_map.values()
+            ):
                 # second_host control-plane newer than first
                 skip_second = True
 
         # initial list of kubelet_stage versions considered for upgrade
         if ver_list:
-            upgrade_from = kube_dict[ver_init]['upgrade_from'][0]
-            if (kubelet_min_version is not None and
-                    LooseVersion(kubelet_min_version) < LooseVersion(upgrade_from)):
+            upgrade_from = kube_dict[ver_init]["upgrade_from"][0]
+            if kubelet_min_version is not None and LooseVersion(
+                kubelet_min_version
+            ) < LooseVersion(upgrade_from):
                 kubelet_stage = [kubelet_min_version]
             else:
                 kubelet_stage = [upgrade_from]
@@ -3912,16 +4270,21 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             # Although AIO hosts also have the worker personality, this
             # block should not be reachable with a locked controller
             locked_workers = []
-            already_upgraded_hosts = self._query_already_upgraded_hosts(self._to_version)
+            already_upgraded_hosts = self._query_already_upgraded_hosts(
+                self._to_version
+            )
             for host in already_upgraded_hosts:
-                if (HOST_PERSONALITY.WORKER in host.personality and
-                    kubelet_map.get(host.uuid) == self._to_version and
-                    host.is_locked()):
+                if (
+                    HOST_PERSONALITY.WORKER in host.personality
+                    and kubelet_map.get(host.uuid) == self._to_version
+                    and host.is_locked()
+                ):
                     locked_workers.append(host)
 
             if locked_workers:
                 stage = strategy.StrategyStage(
-                    strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_UNLOCK_LOCKED_WORKERS)
+                    strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_UNLOCK_LOCKED_WORKERS
+                )
                 stage.add_step(strategy.UnlockHostsStep(locked_workers))
                 stage.add_step(strategy.SystemStabilizeStep())
                 self.apply_phase.add_stage(stage)
@@ -3959,13 +4322,16 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         is_simplex = second_host is None
         if is_simplex:
             stage = strategy.StrategyStage(
-                strategy.STRATEGY_STAGE_NAME.KUBE_HOST_UNCORDON)
-            stage.add_step(strategy.KubeHostUncordonStep(
-                first_host,
-                self._to_version,
-                False,  # force
-                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE,
-                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED)
+                strategy.STRATEGY_STAGE_NAME.KUBE_HOST_UNCORDON
+            )
+            stage.add_step(
+                strategy.KubeHostUncordonStep(
+                    first_host,
+                    self._to_version,
+                    False,  # force
+                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE,
+                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED,
+                )
             )
             self.apply_phase.add_stage(stage)
         # after this loop is kube upgrade complete stage
@@ -3976,17 +4342,22 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import nfvi
         from nfv_vim import strategy
 
-        stage_name = "%s %s" % (strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_FIRST_CONTROL_PLANE, kube_ver)
+        stage_name = "%s %s" % (
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_FIRST_CONTROL_PLANE,
+            kube_ver,
+        )
         stage = strategy.StrategyStage(stage_name)
         first_host = self.get_first_host()
         # force argument is ignored by control plane API
         force = True
-        stage.add_step(strategy.KubeHostUpgradeControlPlaneStep(
-            first_host,
-            kube_ver,
-            force,
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED)
+        stage.add_step(
+            strategy.KubeHostUpgradeControlPlaneStep(
+                first_host,
+                kube_ver,
+                force,
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED,
+            )
         )
         self.apply_phase.add_stage(stage)
         return True
@@ -4003,14 +4374,19 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         if second_host is not None:
             # force argument is ignored by control plane API
             force = True
-            stage_name = "%s %s" % (strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_SECOND_CONTROL_PLANE, kube_ver)
-            stage = strategy.StrategyStage(stage_name)
-            stage.add_step(strategy.KubeHostUpgradeControlPlaneStep(
-                second_host,
+            stage_name = "%s %s" % (
+                strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_SECOND_CONTROL_PLANE,
                 kube_ver,
-                force,
-                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
-                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED)
+            )
+            stage = strategy.StrategyStage(stage_name)
+            stage.add_step(
+                strategy.KubeHostUpgradeControlPlaneStep(
+                    second_host,
+                    kube_ver,
+                    force,
+                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
+                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED,
+                )
             )
             self.apply_phase.add_stage(stage)
             return True
@@ -4068,31 +4444,35 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # we only include 'reboot' in a duplex env (includes workers)
         reboot_default = not self._single_controller  # We do NOT reboot an AIO-SX host
         HOST_STAGES = [
-            (self._add_kubelet_controller_strategy_stages,
-             controller_1_std,
-             reboot_default),
-            (self._add_kubelet_controller_strategy_stages,
-             controller_0_std,
-             reboot_default),
-            (self._add_kubelet_worker_strategy_stages,
-             controller_1_workers,
-             reboot_default),
-            (self._add_kubelet_worker_strategy_stages,
-             controller_0_workers,
-             reboot_default),
-            (self._add_kubelet_worker_strategy_stages,
-             worker_hosts,
-             reboot_default)
+            (
+                self._add_kubelet_controller_strategy_stages,
+                controller_1_std,
+                reboot_default,
+            ),
+            (
+                self._add_kubelet_controller_strategy_stages,
+                controller_0_std,
+                reboot_default,
+            ),
+            (
+                self._add_kubelet_worker_strategy_stages,
+                controller_1_workers,
+                reboot_default,
+            ),
+            (
+                self._add_kubelet_worker_strategy_stages,
+                controller_0_workers,
+                reboot_default,
+            ),
+            (self._add_kubelet_worker_strategy_stages, worker_hosts, reboot_default),
         ]
         stage_name = "kube-upgrade-kubelet %s" % kube_ver
         for add_kubelet_stages_function, host_list, reboot in HOST_STAGES:
             if host_list:
-                sorted_host_list = sorted(host_list,
-                                          key=lambda host: host.name)
-                success, reason = add_kubelet_stages_function(sorted_host_list,
-                                                              kube_ver,
-                                                              reboot,
-                                                              stage_name)
+                sorted_host_list = sorted(host_list, key=lambda host: host.name)
+                success, reason = add_kubelet_stages_function(
+                    sorted_host_list, kube_ver, reboot, stage_name
+                )
                 # todo(abailey): We need revisit if this can never fail
                 if not success:
                     self.report_build_failure(reason)
@@ -4104,8 +4484,10 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         This stage occurs after all kubelets are upgraded
         """
         from nfv_vim import strategy
+
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_COMPLETE)
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_COMPLETE
+        )
         stage.add_step(strategy.KubeUpgradeCompleteStep())
         self.apply_phase.add_stage(stage)
         # Next stage after upgrade complete is post application update
@@ -4120,7 +4502,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_POST_APPLICATION_UPDATE)
+            strategy.STRATEGY_STAGE_NAME.KUBE_POST_APPLICATION_UPDATE
+        )
         stage.add_step(strategy.KubePostApplicationUpdateStep())
         self.apply_phase.add_stage(stage)
 
@@ -4133,8 +4516,10 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         This stage occurs after the post application update stage
         """
         from nfv_vim import strategy
+
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_CLEANUP)
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_CLEANUP
+        )
         stage.add_step(strategy.KubeUpgradeCleanupStep())
         self.apply_phase.add_stage(stage)
 
@@ -4166,6 +4551,7 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         In simplex env, second host: None. In duplex env: controller-0
         """
         from nfv_vim import tables
+
         controller_0_host = None
         controller_1_host = None
         host_table = tables.tables_get_host_table()
@@ -4192,113 +4578,79 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         # ie:  KUBE_UPGRADE_DOWNLOADING_IMAGES
         RESUME_STATE = {
             # after upgrade-started -> download images
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED:
-                self._add_kube_upgrade_download_images_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED: self._add_kube_upgrade_download_images_stage,
             # if downloading images failed, resume at downloading images
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED:
-                self._add_kube_upgrade_download_images_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED: self._add_kube_upgrade_download_images_stage,
             # After downloading images -> pre update applications
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES:
-                self._add_kube_pre_application_update_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES: self._add_kube_pre_application_update_stage,
             # if pre updating apps failed, resume at pre updating apps
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATING_APPS_FAILED:
-                self._add_kube_pre_application_update_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATING_APPS_FAILED: self._add_kube_pre_application_update_stage,
             # After pre updating apps -> upgrade networking
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATED_APPS:
-                self._add_kube_upgrade_networking_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATED_APPS: self._add_kube_upgrade_networking_stage,
             # if networking state failed, resync at networking state
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED:
-                self._add_kube_upgrade_networking_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED: self._add_kube_upgrade_networking_stage,
             # After networking -> upgrade storage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING:
-                self._add_kube_upgrade_storage_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING: self._add_kube_upgrade_storage_stage,
             # if storage state failed, resync at storage state
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED:
-                self._add_kube_upgrade_storage_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED: self._add_kube_upgrade_storage_stage,
             # After storage -> cordon
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE:
-                self._add_kube_host_cordon_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE: self._add_kube_host_cordon_stage,
             # If the state is cordon-failed, resume at cordon stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_FAILED:
-                self._add_kube_host_cordon_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_FAILED: self._add_kube_host_cordon_stage,
             # If the state is cordon-complete, resume at update stages
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_COMPLETE:
-                self._add_kube_update_stages,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_COMPLETE: self._add_kube_update_stages,
             # if upgrading first control plane failed, resume there
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED:
-                self._add_kube_update_stages,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED: self._add_kube_update_stages,
             # After first control plane -> upgrade second control plane
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER:
-                self._add_kube_update_stages,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER: self._add_kube_update_stages,
             # Re-attempt second control plane
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED:
-                self._add_kube_update_stages,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED: self._add_kube_update_stages,
             # After second control plane , do kubelets
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER:
-                self._add_kube_update_stages,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER: self._add_kube_update_stages,
             # kubelets transition to 'uncordon after they are done
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS:
-                self._add_kube_update_stages,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS: self._add_kube_update_stages,
             # If the state is uncordon-failed, resume at uncordon stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED:
-                self._add_kube_host_uncordon_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED: self._add_kube_host_uncordon_stage,
             # If the state is uncordon-complete, resume at complete stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE:
-                self._add_kube_upgrade_complete_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE: self._add_kube_upgrade_complete_stage,
             # upgrade is completed, post update apps
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE:
-                self._add_kube_post_application_update_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE: self._add_kube_post_application_update_stage,
             # If post updating apps failed, resume at post application update stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED:
-                self._add_kube_post_application_update_stage,
-
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED: self._add_kube_post_application_update_stage,
             # After post updating apps, delete the upgrade
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS:
-                self._add_kube_upgrade_cleanup_stage,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS: self._add_kube_upgrade_cleanup_stage,
         }
 
-        result, result_reason = \
-            super(KubeUpgradeStrategy, self).build_complete(result,
-                                                            result_reason)
+        result, result_reason = super(KubeUpgradeStrategy, self).build_complete(
+            result, result_reason
+        )
 
-        DLOG.verbose("Build Complete Callback, result=%s, reason=%s."
-                     % (result, result_reason))
+        DLOG.verbose(
+            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
+        )
 
-        if result in [strategy.STRATEGY_RESULT.SUCCESS,
-                      strategy.STRATEGY_RESULT.DEGRADED]:
+        if result in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
 
             matching_version_upgraded = False
             for kube_version_object in self._nfvi_kube_versions_list:
-                if kube_version_object['kube_version'] == self._to_version:
+                if kube_version_object["kube_version"] == self._to_version:
                     # found a matching version.  check if already upgraded
-                    matching_version_upgraded = (kube_version_object['target']
-                        and kube_version_object['state'] == 'active')
+                    matching_version_upgraded = (
+                        kube_version_object["target"]
+                        and kube_version_object["state"] == "active"
+                    )
                     break
             else:
                 # the for loop above did not find a matching kube version
-                DLOG.warn("Invalid to_version(%s) for the kube upgrade"
-                          % self._to_version)
-                self.report_build_failure("Invalid to_version value: '%s'"
-                                          % self._to_version)
+                DLOG.warn(
+                    "Invalid to_version(%s) for the kube upgrade" % self._to_version
+                )
+                self.report_build_failure(
+                    "Invalid to_version value: '%s'" % self._to_version
+                )
                 return
 
             if self._nfvi_alarms:
@@ -4307,13 +4659,15 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                 # eliminate duplicates  using a set, and sort the list
                 alarm_id_set = set()
                 for alarm_data in self._nfvi_alarms:
-                    alarm_id_set.add(alarm_data['alarm_id'])
+                    alarm_id_set.add(alarm_data["alarm_id"])
                 alarm_id_list = ", ".join(sorted(alarm_id_set))
 
-                DLOG.warn("Cannot upgrade kube: Active alarms present [ %s ]"
-                          % alarm_id_list)
-                self.report_build_failure("active alarms present [ %s ]"
-                                          % alarm_id_list)
+                DLOG.warn(
+                    "Cannot upgrade kube: Active alarms present [ %s ]" % alarm_id_list
+                )
+                self.report_build_failure(
+                    "active alarms present [ %s ]" % alarm_id_list
+                )
                 return
 
             if self.nfvi_kube_upgrade is None:
@@ -4321,8 +4675,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                 # upgraded version if no kube_upgrade exists
                 if matching_version_upgraded:
                     self.report_build_failure(
-                        "Kubernetes is already upgraded to: %s"
-                        % self._to_version)
+                        "Kubernetes is already upgraded to: %s" % self._to_version
+                    )
                     return
                     # Do NOT start a kube upgrade if none exists AND the
                     # to_version is already active
@@ -4335,8 +4689,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
                 resume_from_stage = RESUME_STATE.get(current_state)
                 if resume_from_stage is None:
                     self.report_build_failure(
-                        "Unable to resume kube upgrade from state: %s"
-                        % current_state)
+                        "Unable to resume kube upgrade from state: %s" % current_state
+                    )
                     return
                 else:
                     # Invoke the method that resumes the build from the stage
@@ -4348,20 +4702,18 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
             return
 
         # successful build
-        self.sw_update_obj.strategy_build_complete(True, '')
+        self.sw_update_obj.strategy_build_complete(True, "")
         self.save()
 
-    def from_dict(self, data, build_phase=None, apply_phase=None,
-                  abort_phase=None):
+    def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """
         Initializes a kube upgrade strategy object using the given dictionary
         """
-        super(KubeUpgradeStrategy, self).from_dict(data,
-                                                   build_phase,
-                                                   apply_phase,
-                                                   abort_phase)
-        self._to_version = data['to_version']
-        self._single_controller = data['single_controller']
+        super(KubeUpgradeStrategy, self).from_dict(
+            data, build_phase, apply_phase, abort_phase
+        )
+        self._to_version = data["to_version"]
+        self._single_controller = data["single_controller"]
         self.mixin_from_dict(data)
         return self
 
@@ -4370,8 +4722,8 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         Represent the kube upgrade strategy as a dictionary
         """
         data = super(KubeUpgradeStrategy, self).as_dict()
-        data['to_version'] = self._to_version
-        data['single_controller'] = self._single_controller
+        data["to_version"] = self._to_version
+        data["single_controller"] = self._single_controller
         self.mixin_as_dict(data)
         return data
 
@@ -4380,26 +4732,28 @@ def strategy_rebuild_from_dict(data):
     """
     Returns the strategy object initialized using the given dictionary
     """
-    from nfv_vim.strategy._strategy_phases import strategy_phase_rebuild_from_dict  # noqa: F401
+    from nfv_vim.strategy._strategy_phases import (  # noqa: F401
+        strategy_phase_rebuild_from_dict
+    )
 
     if not data:
         return None
 
-    build_phase = strategy_phase_rebuild_from_dict(data['build_phase'])
-    apply_phase = strategy_phase_rebuild_from_dict(data['apply_phase'])
-    abort_phase = strategy_phase_rebuild_from_dict(data['abort_phase'])
+    build_phase = strategy_phase_rebuild_from_dict(data["build_phase"])
+    apply_phase = strategy_phase_rebuild_from_dict(data["apply_phase"])
+    abort_phase = strategy_phase_rebuild_from_dict(data["abort_phase"])
 
-    if STRATEGY_NAME.SW_PATCH == data['name']:
+    if STRATEGY_NAME.SW_PATCH == data["name"]:
         strategy_obj = object.__new__(SwPatchStrategy)
-    elif STRATEGY_NAME.SW_UPGRADE == data['name']:
+    elif STRATEGY_NAME.SW_UPGRADE == data["name"]:
         strategy_obj = object.__new__(SwUpgradeStrategy)
-    elif STRATEGY_NAME.SYSYTEM_CONFIG_UPDATE == data['name']:
+    elif STRATEGY_NAME.SYSYTEM_CONFIG_UPDATE == data["name"]:
         strategy_obj = object.__new__(SystemConfigUpdateStrategy)
-    elif STRATEGY_NAME.FW_UPDATE == data['name']:
+    elif STRATEGY_NAME.FW_UPDATE == data["name"]:
         strategy_obj = object.__new__(FwUpdateStrategy)
-    elif STRATEGY_NAME.KUBE_ROOTCA_UPDATE == data['name']:
+    elif STRATEGY_NAME.KUBE_ROOTCA_UPDATE == data["name"]:
         strategy_obj = object.__new__(KubeRootcaUpdateStrategy)
-    elif STRATEGY_NAME.KUBE_UPGRADE == data['name']:
+    elif STRATEGY_NAME.KUBE_UPGRADE == data["name"]:
         strategy_obj = object.__new__(KubeUpgradeStrategy)
     else:
         strategy_obj = object.__new__(strategy.StrategyStage)

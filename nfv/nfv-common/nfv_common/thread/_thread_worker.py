@@ -1,20 +1,26 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
 from nfv_common import selectable
 
-DLOG = debug.debug_get_logger('nfv_common.thread.thread_worker')
+DLOG = debug.debug_get_logger("nfv_common.thread.thread_worker")
 
 
 class ThreadWorker(object):
     """
     Thread Worker
     """
-    def __init__(self, name, tick_interval_in_ms=500,
-                 tick_max_delay_in_ms=10000, tick_delay_debounce_in_ms=5000):
+
+    def __init__(
+        self,
+        name,
+        tick_interval_in_ms=500,
+        tick_max_delay_in_ms=10000,
+        tick_delay_debounce_in_ms=5000,
+    ):
         self._name = name
         self._tick_interval_in_ms = tick_interval_in_ms
         self._tick_max_delay_in_ms = tick_max_delay_in_ms
@@ -64,19 +70,16 @@ class ThreadWorker(object):
         """
         Called to do work from thread-main
         """
-        DLOG.verbose("Default thread worker do_work called for %s."
-                     % self._name)
+        DLOG.verbose("Default thread worker do_work called for %s." % self._name)
 
     def initialize(self):
         """
         Called to initialize thread worker from thread-main
         """
-        DLOG.verbose("Default thread worker initialize called for %s."
-                     % self._name)
+        DLOG.verbose("Default thread worker initialize called for %s." % self._name)
 
     def finalize(self):
         """
         Called to finalize thread worker from thread-main
         """
-        DLOG.verbose("Default thread worker finalize called for %s."
-                     % self._name)
+        DLOG.verbose("Default thread worker finalize called for %s." % self._name)

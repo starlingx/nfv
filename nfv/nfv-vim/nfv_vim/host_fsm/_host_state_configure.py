@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import AddHostTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class ConfigureState(state_machine.State):
     """
     Host - Configure State
     """
+
     def __init__(self, name):
         super(ConfigureState, self).__init__(name)
 

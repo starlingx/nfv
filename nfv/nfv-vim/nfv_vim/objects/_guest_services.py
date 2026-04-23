@@ -12,14 +12,15 @@ from nfv_vim.objects._object import ObjectData
 
 from nfv_vim import nfvi
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.guest_services')
+DLOG = debug.debug_get_logger("nfv_vim.objects.guest_services")
 
 
 class GuestServiceNames(object, metaclass=Singleton):
     """
     Guest Services Name Constants
     """
-    HEARTBEAT = Constant('heartbeat')
+
+    HEARTBEAT = Constant("heartbeat")
 
 
 # Guest Services Constant Instantiation
@@ -30,6 +31,7 @@ class GuestServices(ObjectData):
     """
     Guest Services Object
     """
+
     SERVICE_NOT_CONFIGURED = "not-configured"
     SERVICE_CONFIGURED = "configured"
     SERVICE_ENABLING = "enabling"
@@ -39,7 +41,7 @@ class GuestServices(ObjectData):
     SERVICE_DELETING = "deleting"
 
     def __init__(self, services=None, nfvi_guest_services=None):
-        super(GuestServices, self).__init__('1.0.0')
+        super(GuestServices, self).__init__("1.0.0")
 
         if services is None:
             self._services = dict()
@@ -64,17 +66,17 @@ class GuestServices(ObjectData):
         return None
 
     @staticmethod
-    def _convert_nfvi_service_state(nfvi_service_admin_state,
-                                    nfvi_service_oper_state):
+    def _convert_nfvi_service_state(nfvi_service_admin_state, nfvi_service_oper_state):
         """
         Returns the service state given the nfvi service state
         """
-        if nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED \
-                == nfvi_service_admin_state:
+        if nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED == nfvi_service_admin_state:
             return GuestServices.SERVICE_DISABLED
         else:
-            if nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.ENABLED \
-                    == nfvi_service_oper_state:
+            if (
+                nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.ENABLED
+                == nfvi_service_oper_state
+            ):
                 return GuestServices.SERVICE_ENABLED
             else:
                 return GuestServices.SERVICE_ENABLING
@@ -126,6 +128,7 @@ class GuestServices(ObjectData):
         """
         Returns the overall state of the guest services
         """
+
         def update_overall_state(current_state, state):
             """
             Returns the overall_state updated if needed
@@ -140,38 +143,48 @@ class GuestServices(ObjectData):
                 if GuestServices.SERVICE_NOT_CONFIGURED == state:
                     return GuestServices.SERVICE_NOT_CONFIGURED
 
-            if GuestServices.SERVICE_DELETING != current_state \
-                    and GuestServices.SERVICE_NOT_CONFIGURED != current_state:
+            if (
+                GuestServices.SERVICE_DELETING != current_state
+                and GuestServices.SERVICE_NOT_CONFIGURED != current_state
+            ):
                 if GuestServices.SERVICE_CONFIGURED == state:
                     return GuestServices.SERVICE_CONFIGURED
 
-            if GuestServices.SERVICE_DELETING != current_state \
-                    and GuestServices.SERVICE_NOT_CONFIGURED != current_state \
-                    and GuestServices.SERVICE_CONFIGURED != current_state:
+            if (
+                GuestServices.SERVICE_DELETING != current_state
+                and GuestServices.SERVICE_NOT_CONFIGURED != current_state
+                and GuestServices.SERVICE_CONFIGURED != current_state
+            ):
                 if GuestServices.SERVICE_DISABLING == state:
                     return GuestServices.SERVICE_DISABLING
 
-            if GuestServices.SERVICE_DELETING != current_state \
-                    and GuestServices.SERVICE_NOT_CONFIGURED != current_state \
-                    and GuestServices.SERVICE_CONFIGURED != current_state \
-                    and GuestServices.SERVICE_DISABLING != current_state:
+            if (
+                GuestServices.SERVICE_DELETING != current_state
+                and GuestServices.SERVICE_NOT_CONFIGURED != current_state
+                and GuestServices.SERVICE_CONFIGURED != current_state
+                and GuestServices.SERVICE_DISABLING != current_state
+            ):
                 if GuestServices.SERVICE_DISABLED == state:
                     return GuestServices.SERVICE_DISABLED
 
-            if GuestServices.SERVICE_DELETING != current_state \
-                    and GuestServices.SERVICE_NOT_CONFIGURED != current_state \
-                    and GuestServices.SERVICE_CONFIGURED != current_state \
-                    and GuestServices.SERVICE_DISABLING != current_state \
-                    and GuestServices.SERVICE_DISABLED != current_state:
+            if (
+                GuestServices.SERVICE_DELETING != current_state
+                and GuestServices.SERVICE_NOT_CONFIGURED != current_state
+                and GuestServices.SERVICE_CONFIGURED != current_state
+                and GuestServices.SERVICE_DISABLING != current_state
+                and GuestServices.SERVICE_DISABLED != current_state
+            ):
                 if GuestServices.SERVICE_ENABLING == state:
                     return GuestServices.SERVICE_ENABLING
 
-            if GuestServices.SERVICE_DELETING != current_state \
-                    and GuestServices.SERVICE_NOT_CONFIGURED != current_state \
-                    and GuestServices.SERVICE_CONFIGURED != current_state \
-                    and GuestServices.SERVICE_DISABLING != current_state \
-                    and GuestServices.SERVICE_DISABLED != current_state \
-                    and GuestServices.SERVICE_ENABLING != current_state:
+            if (
+                GuestServices.SERVICE_DELETING != current_state
+                and GuestServices.SERVICE_NOT_CONFIGURED != current_state
+                and GuestServices.SERVICE_CONFIGURED != current_state
+                and GuestServices.SERVICE_DISABLING != current_state
+                and GuestServices.SERVICE_DISABLED != current_state
+                and GuestServices.SERVICE_ENABLING != current_state
+            ):
                 if GuestServices.SERVICE_ENABLED == state:
                     return GuestServices.SERVICE_ENABLED
 
@@ -193,8 +206,9 @@ class GuestServices(ObjectData):
         restart_timeout = 300
 
         if self._nfvi_guest_services is not None:
-            nfvi_service_name \
-                = self._get_nfvi_service_name(GUEST_SERVICE_NAME.HEARTBEAT)
+            nfvi_service_name = self._get_nfvi_service_name(
+                GUEST_SERVICE_NAME.HEARTBEAT
+            )
 
             for nfvi_service in self._nfvi_guest_services:
                 if nfvi_service_name == nfvi_service.name:
@@ -337,8 +351,8 @@ class GuestServices(ObjectData):
 
             if nfvi_name is not None:
                 nfvi_service = dict()
-                nfvi_service['service'] = nfvi_name
-                nfvi_service['admin_state'] = nfvi_admin_state
+                nfvi_service["service"] = nfvi_name
+                nfvi_service["admin_state"] = nfvi_admin_state
                 nfvi_services.append(nfvi_service)
 
         return nfvi_services
@@ -349,18 +363,25 @@ class GuestServices(ObjectData):
         """
         for nfvi_service in nfvi_guest_services:
             # Preserve the restart-timeout, on disables it can be set to zero
-            if 0 == nfvi_service.restart_timeout \
-                    and self._nfvi_guest_services is not None:
-                prev_nfvi_service \
-                    = next((x for x in self._nfvi_guest_services
-                            if x.name == nfvi_service.name), None)
+            if (
+                0 == nfvi_service.restart_timeout
+                and self._nfvi_guest_services is not None
+            ):
+                prev_nfvi_service = next(
+                    (
+                        x
+                        for x in self._nfvi_guest_services
+                        if x.name == nfvi_service.name
+                    ),
+                    None,
+                )
                 if prev_nfvi_service is not None:
-                    nfvi_service.restart_timeout \
-                        = prev_nfvi_service.restart_timeout
+                    nfvi_service.restart_timeout = prev_nfvi_service.restart_timeout
 
             service_name = self._convert_nfvi_service_name(nfvi_service.name)
             service_state = self._convert_nfvi_service_state(
-                nfvi_service.admin_state, nfvi_service.oper_state)
+                nfvi_service.admin_state, nfvi_service.oper_state
+            )
 
             if service_name is not None:
                 current_state = self._services.get(service_name, None)
@@ -392,13 +413,14 @@ class GuestServices(ObjectData):
             service_name = self._convert_nfvi_service_name(nfvi_service.name)
             service_state = self._services.get(service_name, None)
             if service_state is not None:
-                expected_state \
-                    = self._get_nfvi_service_admin_state(service_state)
+                expected_state = self._get_nfvi_service_admin_state(service_state)
 
                 if nfvi_service.admin_state != expected_state:
-                    DLOG.verbose("Guest-Services update needed, "
-                                 "admin_state=%s, expected_admin_state=%s"
-                                 % (nfvi_service.admin_state, expected_state))
+                    DLOG.verbose(
+                        "Guest-Services update needed, "
+                        "admin_state=%s, expected_admin_state=%s"
+                        % (nfvi_service.admin_state, expected_state)
+                    )
                     return True
 
         return False
@@ -408,10 +430,10 @@ class GuestServices(ObjectData):
         Represent Guest Services as dictionary
         """
         data = dict()
-        data['state'] = self.state
-        data['services'] = self._services
-        data['nfvi_guest_services'] = list()
+        data["state"] = self.state
+        data["services"] = self._services
+        data["nfvi_guest_services"] = list()
         if self._nfvi_guest_services is not None:
             for nfvi_service in self._nfvi_guest_services:
-                data['nfvi_guest_services'].append(nfvi_service.as_dict())
+                data["nfvi_guest_services"].append(nfvi_service.as_dict())
         return data

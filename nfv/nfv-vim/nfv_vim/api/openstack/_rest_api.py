@@ -9,16 +9,23 @@ import urllib.request
 
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_vim.api.openstack')
+DLOG = debug.debug_get_logger("nfv_vim.api.openstack")
 
 
 def rest_api_request(token, method, url, headers=None, body=None):
     """
     Make a rest-api request
     """
-    headers_per_hop = ['connection', 'keep-alive', 'proxy-authenticate',
-                       'proxy-authorization', 'te', 'trailers',
-                       'transfer-encoding', 'upgrade']
+    headers_per_hop = [
+        "connection",
+        "keep-alive",
+        "proxy-authenticate",
+        "proxy-authorization",
+        "te",
+        "trailers",
+        "transfer-encoding",
+        "upgrade",
+    ]
 
     try:
         request_info = urllib.request.Request(url)
@@ -27,7 +34,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
         if headers is not None:
             for header_type, header_value in list(headers.items()):
                 # Allow the Content-Length to be set by urllib
-                if 'Content-Length' != header_type and 'Host' != header_type:
+                if "Content-Length" != header_type and "Host" != header_type:
                     request_info.add_header(header_type, header_value)
 
         request_info.add_header("Accept", "application/json")
@@ -35,7 +42,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
         if token is not None:
             request_info.add_header("X-Auth-Token", token.get_id())
 
-        if body is not None and '' != body:
+        if body is not None and "" != body:
             request_info.data = body.encode()
 
         # Enable Debug
@@ -47,8 +54,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
             headers = list()  # list of tuples
             for key, value in request.info().items():
                 if key not in headers_per_hop:
-                    cap_key = '-'.join((ck.capitalize()
-                                        for ck in key.split('-')))
+                    cap_key = "-".join((ck.capitalize() for ck in key.split("-")))
                     headers.append((cap_key, value))
 
             response = request.read()
@@ -60,8 +66,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
             headers = list()  # list of tuples
             for key, value in e.fp.info().items():
                 if key not in headers_per_hop:
-                    cap_key = '-'.join((ck.capitalize()
-                                        for ck in key.split('-')))
+                    cap_key = "-".join((ck.capitalize() for ck in key.split("-")))
                     headers.append((cap_key, value))
 
             response = e.fp.read()

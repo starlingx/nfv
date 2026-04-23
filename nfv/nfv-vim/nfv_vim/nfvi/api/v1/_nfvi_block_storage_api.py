@@ -10,6 +10,7 @@ class NFVIBlockStorageAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Block Storage API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):
@@ -50,8 +51,9 @@ class NFVIBlockStorageAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def create_volume(self, future, volume_name, volume_description, size_gb,
-                      image_uuid, callback):
+    def create_volume(
+        self, future, volume_name, volume_description, size_gb, image_uuid, callback
+    ):
         """
         Create a volume using the plugin
         """

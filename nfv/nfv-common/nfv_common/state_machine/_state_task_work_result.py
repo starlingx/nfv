@@ -12,12 +12,13 @@ class _StateTaskWorkResult(object, metaclass=Singleton):
     """
     State Task Work Result - Constants
     """
-    WAIT = Constant('wait')
-    SUCCESS = Constant('success')
-    FAILED = Constant('failed')
-    DEGRADED = Constant('degraded')
-    ABORTED = Constant('aborted')
-    TIMED_OUT = Constant('timed-out')
+
+    WAIT = Constant("wait")
+    SUCCESS = Constant("success")
+    FAILED = Constant("failed")
+    DEGRADED = Constant("degraded")
+    ABORTED = Constant("aborted")
+    TIMED_OUT = Constant("timed-out")
 
 
 # Constant Instantiation

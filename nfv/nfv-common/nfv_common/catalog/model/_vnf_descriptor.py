@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -39,6 +39,7 @@ class VNFD(object):
         manifest_file_security: a file that contains a digest of each file that
                                 it lists as part of the vnf package
     """
+
     def __init__(self, id):
         self.id = id
         self.vendor = None
@@ -63,6 +64,7 @@ class ConnectionPointVNFD(object):
                                 identifiers
         type: type of connection
     """
+
     def __init__(self, id):
         self.id = id
         self.virtual_link_reference = None
@@ -81,6 +83,7 @@ class VirtualLink(object):
         test_access: describes the test access facilities to be supported on
                      the virtual link
     """
+
     def __init__(self, id):
         self.id = id
         self.connectivity_type = CONNECTIVITY_TYPE.UNKNOWN
@@ -100,6 +103,7 @@ class DeploymentFlavor(object):
         constraint: zero or more deployment flavor constraints
         constituent_vdu: one or more ConstituentVDU() objects
     """
+
     def __init__(self, id):
         self.id = id
         self.flavor_key = None
@@ -115,6 +119,7 @@ class ConstituentVDU(object):
         constituent_vnfc: one or more vnfc identifiers that should be used for
                           this deployment
     """
+
     def __init__(self, vdu_reference):
         self.vdu_reference = vdu_reference
         self.number_of_instances = 0
@@ -142,6 +147,7 @@ class VDU(object):
         monitoring_parameter: zero or more monitoring parameters which can be
                               tracked for a vnfc based on this vdu
     """
+
     def __init__(self, id):
         self.id = id
         self.vm_image = None
@@ -162,6 +168,7 @@ class VNFC(object):
         id: unique vnfc identification within the namespace of a specific vnf
         connection_point: one or more network connections
     """
+
     def __init__(self, id):
         self.id = id
         self.connection_point = []
@@ -174,6 +181,7 @@ class ConnectionPointVNFC(object):
         virtual_link_reference: references zero or more internal virtual links
         type: type of network connection
     """
+
     def __init__(self, id):
         self.id = id
         self.virtual_link_reference = None

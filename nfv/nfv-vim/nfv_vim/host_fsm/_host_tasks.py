@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -30,7 +30,7 @@ from nfv_vim.host_fsm._host_task_work import WaitHostServicesCreatedTaskWork
 from nfv_vim.host_fsm._host_task_work import WaitHostServicesDisabledTaskWork
 from nfv_vim.host_fsm._host_task_work import WaitHostStabilizeTaskWork
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host_task')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host_task")
 
 
 class AddHostTask(state_machine.StateTask):
@@ -41,8 +41,7 @@ class AddHostTask(state_machine.StateTask):
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
-        super(AddHostTask, self).__init__(
-            'add-host_%s' % host.name, task_work_list)
+        super(AddHostTask, self).__init__("add-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -62,7 +61,7 @@ class AddHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -81,18 +80,23 @@ class DeleteHostTask(state_machine.StateTask):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(DeleteHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.COMPUTE))
+            task_work_list.append(
+                DeleteHostServicesTaskWork(self, host, objects.HOST_SERVICES.COMPUTE)
+            )
         if host.host_service_configured(objects.HOST_SERVICES.NETWORK):
-            task_work_list.append(DeleteHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.NETWORK))
+            task_work_list.append(
+                DeleteHostServicesTaskWork(self, host, objects.HOST_SERVICES.NETWORK)
+            )
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
-            task_work_list.append(DeleteHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.CONTAINER))
-        task_work_list.append(NotifyHostServicesDeletedTaskWork(
-            self, host, force_pass=True))
+            task_work_list.append(
+                DeleteHostServicesTaskWork(self, host, objects.HOST_SERVICES.CONTAINER)
+            )
+        task_work_list.append(
+            NotifyHostServicesDeletedTaskWork(self, host, force_pass=True)
+        )
         super(DeleteHostTask, self).__init__(
-            'delete-host_%s' % host.name, task_work_list)
+            "delete-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -112,7 +116,7 @@ class DeleteHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -131,31 +135,42 @@ class EnableHostTask(state_machine.StateTask):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
-            task_work_list.append(EnableHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.CONTAINER))
+            task_work_list.append(
+                EnableHostServicesTaskWork(self, host, objects.HOST_SERVICES.CONTAINER)
+            )
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             # We must wait for the compute service
             # to be created before enabling it.
-            task_work_list.append(WaitHostServicesCreatedTaskWork(
-                self, host, objects.HOST_SERVICES.COMPUTE))
-            task_work_list.append(NotifyHostEnabledTaskWork(
-                self, host, objects.HOST_SERVICES.COMPUTE))
-            task_work_list.append(EnableHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.COMPUTE))
+            task_work_list.append(
+                WaitHostServicesCreatedTaskWork(
+                    self, host, objects.HOST_SERVICES.COMPUTE
+                )
+            )
+            task_work_list.append(
+                NotifyHostEnabledTaskWork(self, host, objects.HOST_SERVICES.COMPUTE)
+            )
+            task_work_list.append(
+                EnableHostServicesTaskWork(self, host, objects.HOST_SERVICES.COMPUTE)
+            )
         if host.host_service_configured(objects.HOST_SERVICES.NETWORK):
             # We must wait for the network service
             # to be created before enabling it.
-            task_work_list.append(WaitHostServicesCreatedTaskWork(
-                self, host, objects.HOST_SERVICES.NETWORK))
-            task_work_list.append(EnableHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.NETWORK))
-        task_work_list.append(NotifyHostServicesEnabledTaskWork(
-            self, host, force_pass=True))
+            task_work_list.append(
+                WaitHostServicesCreatedTaskWork(
+                    self, host, objects.HOST_SERVICES.NETWORK
+                )
+            )
+            task_work_list.append(
+                EnableHostServicesTaskWork(self, host, objects.HOST_SERVICES.NETWORK)
+            )
+        task_work_list.append(
+            NotifyHostServicesEnabledTaskWork(self, host, force_pass=True)
+        )
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(QueryHypervisorTaskWork(
-                self, host, force_pass=True))
+            task_work_list.append(QueryHypervisorTaskWork(self, host, force_pass=True))
         super(EnableHostTask, self).__init__(
-            'enable-host_%s' % host.name, task_work_list)
+            "enable-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -175,7 +190,7 @@ class EnableHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 from nfv_vim import directors
@@ -192,13 +207,16 @@ class DisableHostTask(state_machine.StateTask):
     """
     Disable Host Task
     """
+
     def __init__(self, host):
         from nfv_vim import objects
 
         self._host_reference = weakref.ref(host)
 
-        if objects.HOST_PERSONALITY.WORKER in self._host.personality and \
-                self._host.is_force_lock():
+        if (
+            objects.HOST_PERSONALITY.WORKER in self._host.personality
+            and self._host.is_force_lock()
+        ):
             # When a worker host is being disabled due to a force lock, we
             # want it to be rebooted. To do this we need to indicate that
             # the host services disable failed.
@@ -208,23 +226,26 @@ class DisableHostTask(state_machine.StateTask):
 
         task_work_list = list()
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(DisableHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.COMPUTE))
+            task_work_list.append(
+                DisableHostServicesTaskWork(self, host, objects.HOST_SERVICES.COMPUTE)
+            )
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(QueryHypervisorTaskWork(
-                self, host, force_pass=True))
+            task_work_list.append(QueryHypervisorTaskWork(self, host, force_pass=True))
         task_work_list.append(NotifyInstancesHostDisablingTaskWork(self, host))
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(NotifyHostDisabledTaskWork(
-                self, host, objects.HOST_SERVICES.COMPUTE))
+            task_work_list.append(
+                NotifyHostDisabledTaskWork(self, host, objects.HOST_SERVICES.COMPUTE)
+            )
         if host.host_service_configured(objects.HOST_SERVICES.NETWORK):
-            task_work_list.append(NotifyHostDisabledTaskWork(
-                self, host, objects.HOST_SERVICES.NETWORK))
+            task_work_list.append(
+                NotifyHostDisabledTaskWork(self, host, objects.HOST_SERVICES.NETWORK)
+            )
         task_work_list.append(NotifyInstancesHostDisabledTaskWork(self, host))
         # Wait for latent post-live-migration cleanup
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(WaitHostStabilizeTaskWork(
-                self, host, timeout_in_secs=10))
+            task_work_list.append(
+                WaitHostStabilizeTaskWork(self, host, timeout_in_secs=10)
+            )
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
             # Only disable the container services if the host is being locked
             # (or is already locked) and we are not running in a single
@@ -232,20 +253,26 @@ class DisableHostTask(state_machine.StateTask):
             # keep the container services running.
             if self._host.is_locking() or self._host.is_locked():
                 from nfv_vim import directors
+
                 sw_mgmt_director = directors.get_sw_mgmt_director()
                 if not sw_mgmt_director.single_controller:
-                    task_work_list.append(DisableHostServicesTaskWork(
-                        self, host, objects.HOST_SERVICES.CONTAINER))
+                    task_work_list.append(
+                        DisableHostServicesTaskWork(
+                            self, host, objects.HOST_SERVICES.CONTAINER
+                        )
+                    )
                     if not self._host.is_offline():
-                        task_work_list.append(WaitHostServicesDisabledTaskWork(
-                            self, host, objects.HOST_SERVICES.CONTAINER))
-        task_work_list.append(notify_host_services_task(
-            self, host, force_pass=True))
+                        task_work_list.append(
+                            WaitHostServicesDisabledTaskWork(
+                                self, host, objects.HOST_SERVICES.CONTAINER
+                            )
+                        )
+        task_work_list.append(notify_host_services_task(self, host, force_pass=True))
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(QueryHypervisorTaskWork(
-                self, host, force_pass=True))
+            task_work_list.append(QueryHypervisorTaskWork(self, host, force_pass=True))
         super(DisableHostTask, self).__init__(
-            'disable-host_%s' % host.name, task_work_list)
+            "disable-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -270,7 +297,7 @@ class DisableHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -282,6 +309,7 @@ class OfflineHostTask(state_machine.StateTask):
     """
     Offline Host Task
     """
+
     def __init__(self, host):
         from nfv_vim import objects
 
@@ -293,13 +321,18 @@ class OfflineHostTask(state_machine.StateTask):
             # single controller configuration. In a single controller
             # configuration we keep the container services running.
             from nfv_vim import directors
+
             sw_mgmt_director = directors.get_sw_mgmt_director()
             if not sw_mgmt_director.single_controller:
-                task_work_list.append(DisableHostServicesTaskWork(
-                    self, host, objects.HOST_SERVICES.CONTAINER))
+                task_work_list.append(
+                    DisableHostServicesTaskWork(
+                        self, host, objects.HOST_SERVICES.CONTAINER
+                    )
+                )
 
         super(OfflineHostTask, self).__init__(
-            'offline-host_%s' % host.name, task_work_list)
+            "offline-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -319,11 +352,10 @@ class OfflineHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
-                self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED,
-                                            event_data)
+                self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
             else:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_FAILED, event_data)
 
@@ -332,12 +364,12 @@ class FailHostTask(state_machine.StateTask):
     """
     Fail Host Task
     """
+
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
         task_work_list.append(NotifyHostFailedTaskWork(self, host))
-        super(FailHostTask, self).__init__(
-            'fail-host_%s' % host.name, task_work_list)
+        super(FailHostTask, self).__init__("fail-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -357,7 +389,7 @@ class FailHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -369,13 +401,16 @@ class NotifyDeleteFailedTask(state_machine.StateTask):
     """
     Notify Delete Failed Host Task
     """
+
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
-        task_work_list.append(NotifyHostServicesDeleteFailedTaskWork(
-            self, host, force_pass=True))
+        task_work_list.append(
+            NotifyHostServicesDeleteFailedTaskWork(self, host, force_pass=True)
+        )
         super(NotifyDeleteFailedTask, self).__init__(
-            'notify-delete-failed-host_%s' % host.name, task_work_list)
+            "notify-delete-failed-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -395,7 +430,7 @@ class NotifyDeleteFailedTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -407,13 +442,16 @@ class NotifyDisableFailedTask(state_machine.StateTask):
     """
     Notify Disable Failed Host Task
     """
+
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
-        task_work_list.append(NotifyHostServicesDisableFailedTaskWork(
-            self, host, force_pass=True))
+        task_work_list.append(
+            NotifyHostServicesDisableFailedTaskWork(self, host, force_pass=True)
+        )
         super(NotifyDisableFailedTask, self).__init__(
-            'notify-disable-failed-host_%s' % host.name, task_work_list)
+            "notify-disable-failed-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -433,7 +471,7 @@ class NotifyDisableFailedTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -445,13 +483,16 @@ class NotifyEnabledHostTask(state_machine.StateTask):
     """
     Notify Enabled Host Task
     """
+
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
-        task_work_list.append(NotifyHostServicesEnabledTaskWork(
-            self, host, force_pass=True))
+        task_work_list.append(
+            NotifyHostServicesEnabledTaskWork(self, host, force_pass=True)
+        )
         super(NotifyEnabledHostTask, self).__init__(
-            'notify-enabled-host_%s' % host.name, task_work_list)
+            "notify-enabled-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -471,7 +512,7 @@ class NotifyEnabledHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -483,6 +524,7 @@ class NotifyDisabledHostTask(state_machine.StateTask):
     """
     Notify Disabled Host Task
     """
+
     def __init__(self, host):
         from nfv_vim import objects
 
@@ -495,14 +537,20 @@ class NotifyDisabledHostTask(state_machine.StateTask):
             # running.
             if self._host.is_locking():
                 from nfv_vim import directors
+
                 sw_mgmt_director = directors.get_sw_mgmt_director()
                 if not sw_mgmt_director.single_controller:
-                    task_work_list.append(DisableHostServicesTaskWork(
-                        self, host, objects.HOST_SERVICES.CONTAINER))
-        task_work_list.append(NotifyHostServicesDisabledTaskWork(
-            self, host, force_pass=True))
+                    task_work_list.append(
+                        DisableHostServicesTaskWork(
+                            self, host, objects.HOST_SERVICES.CONTAINER
+                        )
+                    )
+        task_work_list.append(
+            NotifyHostServicesDisabledTaskWork(self, host, force_pass=True)
+        )
         super(NotifyDisabledHostTask, self).__init__(
-            'notify-disabled-host_%s' % host.name, task_work_list)
+            "notify-disabled-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -522,7 +570,7 @@ class NotifyDisabledHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -541,15 +589,21 @@ class AuditEnabledHostTask(state_machine.StateTask):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
-            task_work_list.append(AuditHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.COMPUTE, force_pass=True))
+            task_work_list.append(
+                AuditHostServicesTaskWork(
+                    self, host, objects.HOST_SERVICES.COMPUTE, force_pass=True
+                )
+            )
         if host.host_service_configured(objects.HOST_SERVICES.NETWORK):
-            task_work_list.append(AuditHostServicesTaskWork(
-                self, host, objects.HOST_SERVICES.NETWORK, force_pass=True))
-        task_work_list.append(AuditHostServicesCompleteTaskWork(
-            self, host))
+            task_work_list.append(
+                AuditHostServicesTaskWork(
+                    self, host, objects.HOST_SERVICES.NETWORK, force_pass=True
+                )
+            )
+        task_work_list.append(AuditHostServicesCompleteTaskWork(self, host))
         super(AuditEnabledHostTask, self).__init__(
-            'audit-enabled-host_%s' % host.name, task_work_list)
+            "audit-enabled-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -569,7 +623,7 @@ class AuditEnabledHostTask(state_machine.StateTask):
             DLOG.verbose("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)
@@ -581,13 +635,14 @@ class AuditDisabledHostTask(state_machine.StateTask):
     """
     Audit Disabled Host Task
     """
+
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
         task_work_list = list()
-        task_work_list.append(AuditInstancesTaskWork(
-            self, host, force_pass=True))
+        task_work_list.append(AuditInstancesTaskWork(self, host, force_pass=True))
         super(AuditDisabledHostTask, self).__init__(
-            'audit-disabled-host_%s' % host.name, task_work_list)
+            "audit-disabled-host_%s" % host.name, task_work_list
+        )
 
     @property
     def _host(self):
@@ -607,7 +662,7 @@ class AuditDisabledHostTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._host.fsm.handle_event(HOST_EVENT.TASK_COMPLETED, event_data)

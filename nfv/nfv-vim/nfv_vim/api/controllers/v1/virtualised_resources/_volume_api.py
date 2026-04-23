@@ -14,28 +14,33 @@ from nfv_common import validate
 
 from nfv_vim import rpc
 
-DLOG = debug.debug_get_logger('nfv_vim.api.volume')
+DLOG = debug.debug_get_logger("nfv_vim.api.volume")
 
 
 class VolumeCreateData(wsme_types.Base):
     """
     Volume - Create Data
     """
+
     name = wsme_types.wsattr(str, mandatory=True)
     description = wsme_types.wsattr(str, mandatory=False, default="")
     disk_size = wsme_types.wsattr(int, mandatory=True)
     image_uuid = wsme_types.wsattr(str, mandatory=False, default=None)
 
     def __str__(self):
-        return ("name=%s, description=%s, disk_size=%s, image_uuid=%s"
-                % (self.name, self.description, self.disk_size,
-                   self.image_uuid))
+        return "name=%s, description=%s, disk_size=%s, image_uuid=%s" % (
+            self.name,
+            self.description,
+            self.disk_size,
+            self.image_uuid,
+        )
 
 
 class VolumeUpdateData(wsme_types.Base):
     """
     Volume - Update Data
     """
+
     description = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
@@ -43,6 +48,7 @@ class VolumeQueryData(wsme_types.Base):
     """
     Volume - Query Data
     """
+
     uuid = str
     name = str
     description = str
@@ -54,14 +60,14 @@ class VolumeQueryData(wsme_types.Base):
 
     def __json__(self):
         json_data = dict()
-        json_data['uuid'] = self.uuid
-        json_data['name'] = self.name
-        json_data['description'] = self.description
-        json_data['disk_size'] = self.disk_size
-        json_data['bootable'] = self.bootable
-        json_data['encrypted'] = self.encrypted
-        json_data['availability_status'] = json.dumps(self.availability_status)
-        json_data['action'] = self.action
+        json_data["uuid"] = self.uuid
+        json_data["name"] = self.name
+        json_data["description"] = self.description
+        json_data["disk_size"] = self.disk_size
+        json_data["bootable"] = self.bootable
+        json_data["encrypted"] = self.encrypted
+        json_data["availability_status"] = json.dumps(self.availability_status)
+        json_data["action"] = self.action
         return json_data
 
 
@@ -69,6 +75,7 @@ class VolumeAPI(pecan.rest.RestController):
     """
     Volume Rest API
     """
+
     @staticmethod
     def _get_volume_details(volume_uuid, volume):
         """
@@ -85,8 +92,7 @@ class VolumeAPI(pecan.rest.RestController):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.GET_VOLUME_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return httplib.INTERNAL_SERVER_ERROR
 
         if rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
@@ -104,8 +110,10 @@ class VolumeAPI(pecan.rest.RestController):
             volume.action = response.action
             return httplib.OK
 
-        DLOG.error("Unexpected result received for volume %s, result=%s."
-                   % (volume_uuid, response.result))
+        DLOG.error(
+            "Unexpected result received for volume %s, result=%s."
+            % (volume_uuid, response.result)
+        )
         return httplib.INTERNAL_SERVER_ERROR
 
     @wsme_pecan.wsexpose(VolumeQueryData, str, status_code=httplib.OK)
@@ -140,14 +148,14 @@ class VolumeAPI(pecan.rest.RestController):
                 break
 
             response = rpc.RPCMessage.deserialize(msg)
-            if rpc .RPC_MSG_TYPE.GET_VOLUME_RESPONSE != response.type:
-                DLOG.error("Unexpected message type received, msg_type=%s."
-                           % response.type)
+            if rpc.RPC_MSG_TYPE.GET_VOLUME_RESPONSE != response.type:
+                DLOG.error(
+                    "Unexpected message type received, msg_type=%s." % response.type
+                )
                 return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
             if rpc.RPC_MSG_RESULT.SUCCESS != response.result:
-                DLOG.error("Unexpected result received, result=%s."
-                           % response.result)
+                DLOG.error("Unexpected result received, result=%s." % response.result)
                 return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
             DLOG.verbose("Received response=%s." % response)
@@ -164,16 +172,20 @@ class VolumeAPI(pecan.rest.RestController):
 
         return volumes
 
-    @wsme_pecan.wsexpose(VolumeQueryData, body=VolumeCreateData,
-                         status_code=httplib.CREATED)
+    @wsme_pecan.wsexpose(
+        VolumeQueryData, body=VolumeCreateData, status_code=httplib.CREATED
+    )
     def post(self, volume_create_data):
-        DLOG.verbose("Volume-API create called for volume %s."
-                     % volume_create_data.name)
+        DLOG.verbose(
+            "Volume-API create called for volume %s." % volume_create_data.name
+        )
 
         if volume_create_data.image_uuid is not None:
             if not validate.valid_uuid_str(volume_create_data.image_uuid):
-                DLOG.error("Invalid image-uuid received, uuid=%s."
-                           % volume_create_data.image_uuid)
+                DLOG.error(
+                    "Invalid image-uuid received, uuid=%s."
+                    % volume_create_data.image_uuid
+                )
                 return pecan.abort(httplib.BAD_REQUEST)
 
         vim_connection = pecan.request.vim.open_connection()
@@ -185,14 +197,12 @@ class VolumeAPI(pecan.rest.RestController):
         vim_connection.send(rpc_request.serialize())
         msg = vim_connection.receive()
         if msg is None:
-            DLOG.error("No response received for volume %s."
-                       % volume_create_data.name)
+            DLOG.error("No response received for volume %s." % volume_create_data.name)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.CREATE_VOLUME_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
@@ -207,12 +217,15 @@ class VolumeAPI(pecan.rest.RestController):
             volume.action = response.action
             return volume
 
-        DLOG.error("Unexpected result received for volume %s, result=%s."
-                   % (volume_create_data.name, response.result))
+        DLOG.error(
+            "Unexpected result received for volume %s, result=%s."
+            % (volume_create_data.name, response.result)
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
-    @wsme_pecan.wsexpose(VolumeQueryData, str, body=VolumeUpdateData,
-                         status_code=httplib.OK)
+    @wsme_pecan.wsexpose(
+        VolumeQueryData, str, body=VolumeUpdateData, status_code=httplib.OK
+    )
     def put(self, volume_uuid, volume_update_data):
         DLOG.verbose("Volume-API update called for volume %s." % volume_uuid)
 
@@ -241,8 +254,7 @@ class VolumeAPI(pecan.rest.RestController):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.UPDATE_VOLUME_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         if rpc.RPC_MSG_RESULT.SUCCESS == response.result:
@@ -257,8 +269,10 @@ class VolumeAPI(pecan.rest.RestController):
             volume.action = response.action
             return volume
 
-        DLOG.error("Unexpected result received for volume %s, result=%s."
-                   % (volume_uuid, response.result))
+        DLOG.error(
+            "Unexpected result received for volume %s, result=%s."
+            % (volume_uuid, response.result)
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
     @wsme_pecan.wsexpose(None, str, status_code=httplib.NO_CONTENT)
@@ -280,8 +294,7 @@ class VolumeAPI(pecan.rest.RestController):
 
         response = rpc.RPCMessage.deserialize(msg)
         if rpc.RPC_MSG_TYPE.DELETE_VOLUME_RESPONSE != response.type:
-            DLOG.error("Unexpected message type received, msg_type=%s."
-                       % response.type)
+            DLOG.error("Unexpected message type received, msg_type=%s." % response.type)
             return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
         if rpc.RPC_MSG_RESULT.NOT_FOUND == response.result:
@@ -291,6 +304,8 @@ class VolumeAPI(pecan.rest.RestController):
         elif rpc.RPC_MSG_RESULT.SUCCESS == response.result:
             return None
 
-        DLOG.error("Unexpected result received for volume %s, result=%s."
-                   % (volume_uuid, response.result))
+        DLOG.error(
+            "Unexpected result received for volume %s, result=%s."
+            % (volume_uuid, response.result)
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)

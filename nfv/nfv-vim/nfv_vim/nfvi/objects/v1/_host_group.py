@@ -15,9 +15,10 @@ class HostGroupPolicy(Constants, metaclass=Singleton):
     """
     Host Group Policy Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    STORAGE_REPLICATION = Constant('storage-replication')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    STORAGE_REPLICATION = Constant("storage-replication")
 
 
 # Host Group Constant Instantiation
@@ -28,6 +29,7 @@ class HostGroup(ObjectData):
     """
     NFVI Host Group Object
     """
+
     def __init__(self, name, member_names, policies):
-        super(HostGroup, self).__init__('1.0.0')
+        super(HostGroup, self).__init__("1.0.0")
         self.update(dict(name=name, member_names=member_names, policies=policies))

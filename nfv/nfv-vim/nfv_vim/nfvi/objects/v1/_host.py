@@ -15,73 +15,80 @@ class HostAdministrativeState(Constants, metaclass=Singleton):
     """
     Host Administrative State Constants
     """
-    UNKNOWN = Constant('unknown')
-    LOCKED = Constant('locked')
-    UNLOCKED = Constant('unlocked')
+
+    UNKNOWN = Constant("unknown")
+    LOCKED = Constant("locked")
+    UNLOCKED = Constant("unlocked")
 
 
 class HostOperationalState(Constants, metaclass=Singleton):
     """
     Host Operational State Constants
     """
-    UNKNOWN = Constant('unknown')
-    ENABLED = Constant('enabled')
-    DISABLED = Constant('disabled')
+
+    UNKNOWN = Constant("unknown")
+    ENABLED = Constant("enabled")
+    DISABLED = Constant("disabled")
 
 
 class HostAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Host Availability Status Constants
     """
-    UNKNOWN = Constant('unknown')
-    NONE = Constant('none')
-    AVAILABLE = Constant('available')
-    DEGRADED = Constant('degraded')
-    FAILED = Constant('failed')
-    INTEST = Constant('intest')
-    OFFDUTY = Constant('offduty')
-    OFFLINE = Constant('offline')
-    ONLINE = Constant('online')
-    POWER_OFF = Constant('power-off')
-    FAILED_COMPONENT = Constant('failed (component)')
+
+    UNKNOWN = Constant("unknown")
+    NONE = Constant("none")
+    AVAILABLE = Constant("available")
+    DEGRADED = Constant("degraded")
+    FAILED = Constant("failed")
+    INTEST = Constant("intest")
+    OFFDUTY = Constant("offduty")
+    OFFLINE = Constant("offline")
+    ONLINE = Constant("online")
+    POWER_OFF = Constant("power-off")
+    FAILED_COMPONENT = Constant("failed (component)")
 
 
 class HostAction(Constants, metaclass=Singleton):
     """
     Host Action Constants
     """
-    UNKNOWN = Constant('unknown')
-    NONE = Constant(' none')
-    LOCK = Constant('lock')
-    UNLOCK = Constant('unlock')
-    LOCK_FORCE = Constant('lock-force')
-    DELETE = Constant('delete')
-    HOST_AUDIT = Constant('host-audit')
+
+    UNKNOWN = Constant("unknown")
+    NONE = Constant(" none")
+    LOCK = Constant("lock")
+    UNLOCK = Constant("unlock")
+    LOCK_FORCE = Constant("lock-force")
+    DELETE = Constant("delete")
+    HOST_AUDIT = Constant("host-audit")
 
 
 class HostNotifications(Constants, metaclass=Singleton):
     """
     Host Notification Constants
     """
-    UNKNOWN = Constant('unknown')
-    BOOTING = Constant('booting')
+
+    UNKNOWN = Constant("unknown")
+    BOOTING = Constant("booting")
 
 
 class KubernetesLabelValues(Constants, metaclass=Singleton):
     """
     Host Kubernetes Label Value Constants
     """
-    ENABLED = Constant('enabled')
-    DISABLED = Constant('disabled')
+
+    ENABLED = Constant("enabled")
+    DISABLED = Constant("disabled")
 
 
 class KubernetesLabelKeys(Constants, metaclass=Singleton):
     """
     Host Kubernetes Label Key Constants
     """
-    OS_COMPUTE_NODE = Constant('openstack-compute-node')
-    OS_CONTROL_PLANE = Constant('openstack-control-plane')
-    REMOTE_STORAGE = Constant('remote-storage')
+
+    OS_COMPUTE_NODE = Constant("openstack-compute-node")
+    OS_CONTROL_PLANE = Constant("openstack-control-plane")
+    REMOTE_STORAGE = Constant("remote-storage")
 
 
 # Host Constant Instantiation
@@ -98,24 +105,41 @@ class Host(ObjectData):
     """
     NFVI Host Object
     """
-    def __init__(self, uuid, name, personality, admin_state, oper_state,
-                 avail_status, action, uptime, sw_version,
-                 device_image_update=None,
-                 openstack_compute=False,
-                 openstack_control=False,
-                 remote_storage=False,
-                 nfvi_data=None):
-        super(Host, self).__init__('1.0.0')
-        self.update(dict(uuid=uuid, name=name, personality=personality,
-                         admin_state=admin_state,
-                         oper_state=oper_state,
-                         avail_status=avail_status,
-                         action=action,
-                         uptime=uptime,
-                         sw_version=sw_version,
-                         device_image_update=device_image_update,
-                         openstack_compute=openstack_compute,
-                         openstack_control=openstack_control,
-                         remote_storage=remote_storage))
+
+    def __init__(
+        self,
+        uuid,
+        name,
+        personality,
+        admin_state,
+        oper_state,
+        avail_status,
+        action,
+        uptime,
+        sw_version,
+        device_image_update=None,
+        openstack_compute=False,
+        openstack_control=False,
+        remote_storage=False,
+        nfvi_data=None,
+    ):
+        super(Host, self).__init__("1.0.0")
+        self.update(
+            dict(
+                uuid=uuid,
+                name=name,
+                personality=personality,
+                admin_state=admin_state,
+                oper_state=oper_state,
+                avail_status=avail_status,
+                action=action,
+                uptime=uptime,
+                sw_version=sw_version,
+                device_image_update=device_image_update,
+                openstack_compute=openstack_compute,
+                openstack_control=openstack_control,
+                remote_storage=remote_storage,
+            )
+        )
 
         self.nfvi_data = nfvi_data

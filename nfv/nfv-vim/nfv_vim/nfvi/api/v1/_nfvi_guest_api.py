@@ -10,6 +10,7 @@ class NFVIGuestAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Guest API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):
@@ -43,16 +44,16 @@ class NFVIGuestAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def guest_services_create(self, future, instance_uuid, host_name,
-                              services, callback):
+    def guest_services_create(
+        self, future, instance_uuid, host_name, services, callback
+    ):
         """
         Guest Services Create
         """
         pass
 
     @abc.abstractmethod
-    def guest_services_set(self, future, instance_uuid, host_name,
-                           services, callback):
+    def guest_services_set(self, future, instance_uuid, host_name, services, callback):
         """
         Guest Services Set
         """
@@ -73,56 +74,63 @@ class NFVIGuestAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def guest_services_vote(self, future, instance_uuid, host_name,
-                            action_type, callback):
+    def guest_services_vote(
+        self, future, instance_uuid, host_name, action_type, callback
+    ):
         """
         Guest Services Vote
         """
         pass
 
     @abc.abstractmethod
-    def guest_services_notify(self, future, instance_uuid, host_name,
-                              action_type, pre_notification, callback):
+    def guest_services_notify(
+        self, future, instance_uuid, host_name, action_type, pre_notification, callback
+    ):
         """
         Guest Services Notify
         """
         pass
 
     @abc.abstractmethod
-    def disable_host_services(self, future, host_uuid, host_name,
-                              host_personality, callback):
+    def disable_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Disable guest services on a host using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def enable_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def enable_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Enable guest services on a host using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def delete_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def delete_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Delete guest services on a host using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def create_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def create_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Create guest services on a host using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def query_host_services(self, future, host_uuid, host_name,
-                            host_personality, callback):
+    def query_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Query guest services on a host using the plugin
         """

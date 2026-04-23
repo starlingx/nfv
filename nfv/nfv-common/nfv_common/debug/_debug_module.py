@@ -16,6 +16,7 @@ class Debug(object, metaclass=Singleton):
     """
     Debug
     """
+
     def __init__(self):
         self._config_change_callbacks = list()
         self._config = None
@@ -88,7 +89,7 @@ class Debug(object, metaclass=Singleton):
         """
         if self._config is None:
             self._config = config
-            self._debug_config = DebugConfig(config['config_file'])
+            self._debug_config = DebugConfig(config["config_file"])
             DebugLoggingThread().send_log_config(config)
 
     @property

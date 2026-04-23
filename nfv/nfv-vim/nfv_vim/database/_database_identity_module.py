@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -52,7 +52,8 @@ def database_tenant_get_list():
 
     tenant_objs = list()
     for tenant in query.all():
-        tenant_obj = objects.Tenant(tenant.uuid, tenant.name,
-                                    tenant.description, tenant.enabled)
+        tenant_obj = objects.Tenant(
+            tenant.uuid, tenant.name, tenant.description, tenant.enabled
+        )
         tenant_objs.append(tenant_obj)
     return tenant_objs

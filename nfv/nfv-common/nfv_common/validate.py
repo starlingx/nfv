@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -41,7 +41,7 @@ def valid_bool(boolean_str):
     """
     Returns true if string given is a valid boolean
     """
-    if boolean_str.lower() in ['true', '1', 'false', '0']:
+    if boolean_str.lower() in ["true", "1", "false", "0"]:
         return True
     return False
 
@@ -71,7 +71,7 @@ def validate_certificate_subject(subject):
     if subject is None:
         return True, ""
 
-    params_supported = ['C', 'OU', 'O', 'ST', 'CN', 'L']
+    params_supported = ["C", "OU", "O", "ST", "CN", "L"]
     subject_pairs = re.findall(r"([^=]+=[^=]+)(?:\s|$)", subject)
     subject_dict = {}
     for pair_value in subject_pairs:
@@ -79,15 +79,19 @@ def validate_certificate_subject(subject):
         subject_dict[key] = value
 
     if not all([param in params_supported for param in subject_dict.keys()]):
-        return False, ("There are parameters not supported "
-                       "for the certificate subject specification. "
-                       "The subject parameter has to be in the "
-                       "format of 'C=<Country> ST=<State/Province> "
-                       "L=<Locality> O=<Organization> OU=<OrganizationUnit> "
-                       "CN=<commonName>")
-    if 'CN' not in list(subject_dict.keys()):
-        return False, ("The CN=<commonName> parameter is required to be "
-                       "specified in subject argument")
+        return False, (
+            "There are parameters not supported "
+            "for the certificate subject specification. "
+            "The subject parameter has to be in the "
+            "format of 'C=<Country> ST=<State/Province> "
+            "L=<Locality> O=<Organization> OU=<OrganizationUnit> "
+            "CN=<commonName>"
+        )
+    if "CN" not in list(subject_dict.keys()):
+        return False, (
+            "The CN=<commonName> parameter is required to be "
+            "specified in subject argument"
+        )
     return True, ""
 
 
@@ -106,13 +110,14 @@ def validate_expiry_date(expiry_date):
     try:
         date = datetime.datetime.strptime(expiry_date, "%Y-%m-%d")
     except ValueError:
-        return False, ("expiry_date %s doesn't match format "
-                       "YYYY-MM-DD" % expiry_date)
+        return False, (
+            "expiry_date %s doesn't match format YYYY-MM-DD" % expiry_date
+        )
 
     delta = date - datetime.datetime.now()
     # we sum one day (24 hours) to accomplish the certificate expiry
     # during the day specified by the user
-    duration = (delta.days * 24 + 24)
+    duration = delta.days * 24 + 24
 
     # Cert-manager manages certificates and renew them some time
     # before it expires. Along this procedure we set renewBefore
@@ -120,6 +125,8 @@ def validate_expiry_date(expiry_date):
     # has at least this amount of time. This is needed to avoid
     # cert-manager to block the creation of the resources.
     if duration <= 24:
-        return False, ("New k8s rootCA should have at least 24 hours of "
-                       "validation before expiry.")
+        return False, (
+            "New k8s rootCA should have at least 24 hours of "
+            "validation before expiry."
+        )
     return True, ""

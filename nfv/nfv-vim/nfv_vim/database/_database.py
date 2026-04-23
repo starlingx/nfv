@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -24,7 +24,7 @@ from nfv_vim.database.model import Base
 from nfv_vim.database.model import lookup_class_by_table
 
 _db_version = 1
-_db_name = 'vim_db_v%s' % _db_version
+_db_name = "vim_db_v%s" % _db_version
 _db_obj = None
 
 
@@ -32,6 +32,7 @@ class Database(object):
     """
     Database
     """
+
     def __init__(self, database_url):
         self._engine = create_engine(database_url)
         Base.metadata.create_all(self._engine)
@@ -41,34 +42,34 @@ class Database(object):
 
     def dump_data(self, filename):
         db_data = dict()
-        db_data['version'] = _db_version
-        db_data['tables'] = dict()
+        db_data["version"] = _db_version
+        db_data["tables"] = dict()
 
         metadata = MetaData()
         metadata.reflect(bind=self._engine)
         for table_name in list(metadata.tables.keys()):
-            db_data['tables'][table_name] = list()
+            db_data["tables"][table_name] = list()
             table_class = lookup_class_by_table(table_name)
             if table_class is not None:
                 for row in self._session.query(table_class).all():
-                    db_data['tables'][table_name].append(row.data)
+                    db_data["tables"][table_name].append(row.data)
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(db_data, f)
 
     def load_data(self, filename):
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             db_data = json.load(f)
 
-        for table_name in list(db_data['tables'].keys()):
+        for table_name in list(db_data["tables"].keys()):
             table_class = lookup_class_by_table(table_name)
             if table_class is None:
-                for row_data in db_data['tables'][table_name]:
+                for row_data in db_data["tables"][table_name]:
                     row = upgrade_table_row_data(table_name, row_data)
                     if row is not None:
                         self._session.add(row)
             else:
-                for row_data in db_data['tables'][table_name]:
+                for row_data in db_data["tables"][table_name]:
                     row = table_class()
                     row.data = row_data
                     self._session.add(row)
@@ -90,13 +91,14 @@ class Database(object):
 
     @coroutine
     def auto_commit(self):
-        timer_id = (yield)
+        timer_id = yield
         if timer_id == self._commit_timer_id:
             start_ms = timers.get_monotonic_timestamp_in_ms()
             self._session.commit()
             elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
-            histogram.add_histogram_data("database-commits (periodic)",
-                                         elapsed_ms // 100, "decisecond")
+            histogram.add_histogram_data(
+                "database-commits (periodic)", elapsed_ms // 100, "decisecond"
+            )
             self._commit_timer_id = None
 
     def commit(self):
@@ -104,13 +106,14 @@ class Database(object):
             start_ms = timers.get_monotonic_timestamp_in_ms()
             self._session.commit()
             elapsed_ms = timers.get_monotonic_timestamp_in_ms() - start_ms
-            histogram.add_histogram_data("database-commits (inline)",
-                                         elapsed_ms // 100, "decisecond")
+            histogram.add_histogram_data(
+                "database-commits (inline)", elapsed_ms // 100, "decisecond"
+            )
         else:
             if self._commit_timer_id is None:
-                self._commit_timer_id \
-                    = timers.timers_create_timer('db-auto-commit', 1, 1,
-                                                 self.auto_commit)
+                self._commit_timer_id = timers.timers_create_timer(
+                    "db-auto-commit", 1, 1, self.auto_commit
+                )
 
 
 @event.listens_for(Engine, "connect")
@@ -141,5 +144,6 @@ def database_create(database_dir):
             if errno.EEXIST != e.errno:
                 raise
 
-    _db_obj = Database("sqlite:///%s/%s?check_same_thread=False"
-                       % (database_dir, _db_name))
+    _db_obj = Database(
+        "sqlite:///%s/%s?check_same_thread=False" % (database_dir, _db_name)
+    )

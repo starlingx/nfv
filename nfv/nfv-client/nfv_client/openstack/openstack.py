@@ -18,23 +18,26 @@ class OpenStackServices(object):
     """
     OpenStack Services Constants
     """
-    VIM = 'vim'
+
+    VIM = "vim"
 
 
 class OpenStackServiceTypes(object):
     """
     OpenStack Service Types Constants
     """
-    NFV = 'nfv'
+
+    NFV = "nfv"
 
 
 SERVICE = OpenStackServices()
 SERVICE_TYPE = OpenStackServiceTypes()
-CAFILE = os.environ.get('REQUESTS_CA_BUNDLE')
+CAFILE = os.environ.get("REQUESTS_CA_BUNDLE")
 
 
-def get_token(auth_uri, project_name, project_domain_name, username, password,
-              user_domain_name):
+def get_token(
+    auth_uri, project_name, project_domain_name, username, password, user_domain_name
+):
     """
     Ask OpenStack for a token
     """
@@ -42,16 +45,14 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
     ssl_context = None
     try:
         # handle auth_uri re-direct (300)
-        ssl_context = ssl.create_default_context(
-            ssl.Purpose.SERVER_AUTH, cafile=CAFILE
-        )
+        ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=CAFILE)
         with urllib.request.urlopen(auth_uri, context=ssl_context):
             pass
 
     except urllib.error.HTTPError as e:
         if e.code == 300:
-            auth_uri = e.headers['location']
-            if auth_uri.endswith('/'):
+            auth_uri = e.headers["location"]
+            if auth_uri.endswith("/"):
                 auth_uri = auth_uri[:-1]
     except Exception:
         print("An error occurred when retrieving the token")
@@ -64,24 +65,27 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
         request_info.add_header("Accept", "application/json")
         request_info.add_header("User-Agent", "vim/1.0")
         payload = json.dumps(
-            {"auth": {
-                "identity": {
-                    "methods": [
-                        "password"
-                    ],
-                    "password": {
-                        "user": {
-                            "name": username,
-                            "password": password,
-                            "domain": {"name": user_domain_name}
+            {
+                "auth": {
+                    "identity": {
+                        "methods": ["password"],
+                        "password": {
+                            "user": {
+                                "name": username,
+                                "password": password,
+                                "domain": {"name": user_domain_name},
+                            }
+                        },
+                    },
+                    "scope": {
+                        "project": {
+                            "name": project_name,
+                            "domain": {"name": project_domain_name},
                         }
-                    }
-                },
-                "scope": {
-                    "project": {
-                        "name": project_name,
-                        "domain": {"name": project_domain_name}
-                    }}}})
+                    },
+                }
+            }
+        )
 
         request_info.data = payload.encode()
 
@@ -90,7 +94,7 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
         ) as request:
             # Identity API v3 returns token id in X-Subject-Token
             # response header.
-            token_id = request.headers.get('X-Subject-Token')
+            token_id = request.headers.get("X-Subject-Token")
             response = json.loads(request.read())
 
         return Token(response, token_id)

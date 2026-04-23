@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -16,7 +16,8 @@ class Subnet(AsDictMixin, Base):
     """
     Subnet Database Table
     """
-    __tablename__ = 'subnets'
+
+    __tablename__ = "subnets"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)

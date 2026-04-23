@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -37,19 +37,21 @@ from nfv_vim.instance_fsm._instance_task_work import StopTaskWork
 from nfv_vim.instance_fsm._instance_task_work import SuspendTaskWork
 from nfv_vim.instance_fsm._instance_task_work import UnpauseTaskWork
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.instance_task')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance_task")
 
 
 class QueryHypervisorTask(state_machine.StateTask):
     """
     Query-Hypervisor Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
         task_work_list.append(QueryHypervisorTaskWork(self, instance))
         super(QueryHypervisorTask, self).__init__(
-            'query-hypervisor_%s' % instance.name, task_work_list)
+            "query-hypervisor_%s" % instance.name, task_work_list
+        )
         self.nfvi_hypervisor = None
 
     @property
@@ -71,37 +73,46 @@ class QueryHypervisorTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class LiveMigrateTask(state_machine.StateTask):
     """
     Live-Migrate Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE
         task_work_list = list()
-        task_work_list.append(GuestServicesVoteTaskWork(self, instance,
-                                                        self._action_type,
-                                                        force_pass=True))
-        task_work_list.append(GuestServicesPreNotifyTaskWork(self, instance,
-                                                             self._action_type,
-                                                             force_pass=True))
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesVoteTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesPreNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(LiveMigrateTaskWork(self, instance))
         super(LiveMigrateTask, self).__init__(
-            'live-migrate-instance_%s' % instance.name, task_work_list)
+            "live-migrate-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -122,33 +133,40 @@ class LiveMigrateTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class LiveMigrateFinishTask(state_machine.StateTask):
     """
     Live-Migrate-Finish Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE
         task_work_list = list()
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
-        task_work_list.append(GuestServicesPostNotifyTaskWork(self, instance,
-                                                              self._action_type,
-                                                              force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
+        task_work_list.append(
+            GuestServicesPostNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
         super(LiveMigrateFinishTask, self).__init__(
-            'live-migrate-finish-instance_%s' % instance.name, task_work_list)
+            "live-migrate-finish-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -169,37 +187,46 @@ class LiveMigrateFinishTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class ColdMigrateTask(state_machine.StateTask):
     """
     Cold-Migrate Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
         task_work_list = list()
-        task_work_list.append(GuestServicesVoteTaskWork(self, instance,
-                                                        self._action_type,
-                                                        force_pass=True))
-        task_work_list.append(GuestServicesPreNotifyTaskWork(self, instance,
-                                                             self._action_type,
-                                                             force_pass=True))
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesVoteTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesPreNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(ColdMigrateTaskWork(self, instance))
         super(ColdMigrateTask, self).__init__(
-            'cold-migrate-instance_%s' % instance.name, task_work_list)
+            "cold-migrate-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -220,20 +247,23 @@ class ColdMigrateTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class ColdMigrateConfirmTask(state_machine.StateTask):
     """
     Cold-Migrate-Confirm Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
@@ -241,13 +271,17 @@ class ColdMigrateConfirmTask(state_machine.StateTask):
         self._action_type = objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
         task_work_list = list()
         task_work_list.append(ColdMigrateConfirmTaskWork(self, instance))
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
-        task_work_list.append(GuestServicesPostNotifyTaskWork(self, instance,
-                                                              self._action_type,
-                                                              force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
+        task_work_list.append(
+            GuestServicesPostNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
         super(ColdMigrateConfirmTask, self).__init__(
-            'cold-migrate-confirm-instance_%s' % instance.name, task_work_list)
+            "cold-migrate-confirm-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -268,20 +302,23 @@ class ColdMigrateConfirmTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class ColdMigrateRevertTask(state_machine.StateTask):
     """
     Cold-Migrate-Revert Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
@@ -289,13 +326,17 @@ class ColdMigrateRevertTask(state_machine.StateTask):
         self._action_type = objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
         task_work_list = list()
         task_work_list.append(ColdMigrateRevertTaskWork(self, instance))
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
-        task_work_list.append(GuestServicesPostNotifyTaskWork(self, instance,
-                                                              self._action_type,
-                                                              force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
+        task_work_list.append(
+            GuestServicesPostNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
         super(ColdMigrateRevertTask, self).__init__(
-            'cold-migrate-revert-instance_%s' % instance.name, task_work_list)
+            "cold-migrate-revert-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -316,37 +357,46 @@ class ColdMigrateRevertTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class ResizeTask(state_machine.StateTask):
     """
     Resize Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.RESIZE
         task_work_list = list()
-        task_work_list.append(GuestServicesVoteTaskWork(self, instance,
-                                                        self._action_type,
-                                                        force_pass=True))
-        task_work_list.append(GuestServicesPreNotifyTaskWork(self, instance,
-                                                             self._action_type,
-                                                             force_pass=True))
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesVoteTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesPreNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(ResizeTaskWork(self, instance))
         super(ResizeTask, self).__init__(
-            'resize-instance_%s' % instance.name, task_work_list)
+            "resize-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -367,20 +417,23 @@ class ResizeTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class ResizeConfirmTask(state_machine.StateTask):
     """
     Resize-Confirm Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
@@ -388,13 +441,17 @@ class ResizeConfirmTask(state_machine.StateTask):
         self._action_type = objects.INSTANCE_ACTION_TYPE.CONFIRM_RESIZE
         task_work_list = list()
         task_work_list.append(ResizeConfirmTaskWork(self, instance))
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
-        task_work_list.append(GuestServicesPostNotifyTaskWork(self, instance,
-                                                              self._action_type,
-                                                              force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
+        task_work_list.append(
+            GuestServicesPostNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
         super(ResizeConfirmTask, self).__init__(
-            'resize-confirm-instance_%s' % instance.name, task_work_list)
+            "resize-confirm-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -415,20 +472,23 @@ class ResizeConfirmTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class ResizeRevertTask(state_machine.StateTask):
     """
     Resize-Revert Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
@@ -436,13 +496,17 @@ class ResizeRevertTask(state_machine.StateTask):
         self._action_type = objects.INSTANCE_ACTION_TYPE.REVERT_RESIZE
         task_work_list = list()
         task_work_list.append(ResizeRevertTaskWork(self, instance))
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
-        task_work_list.append(GuestServicesPostNotifyTaskWork(self, instance,
-                                                              self._action_type,
-                                                              force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
+        task_work_list.append(
+            GuestServicesPostNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
         super(ResizeRevertTask, self).__init__(
-            'resize-revert-instance_%s' % instance.name, task_work_list)
+            "resize-revert-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -463,28 +527,33 @@ class ResizeRevertTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class EvacuateTask(state_machine.StateTask):
     """
     Evacuate Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(EvacuateTaskWork(self, instance))
         super(EvacuateTask, self).__init__(
-            'evacuate-instance_%s' % instance.name, task_work_list)
+            "evacuate-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -505,26 +574,30 @@ class EvacuateTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class StartTask(state_machine.StateTask):
     """
     Start Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
         task_work_list.append(StartTaskWork(self, instance))
         super(StartTask, self).__init__(
-            'start-instance_%s' % instance.name, task_work_list)
+            "start-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -545,37 +618,46 @@ class StartTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class StopTask(state_machine.StateTask):
     """
     Stop Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.STOP
         task_work_list = list()
-        task_work_list.append(GuestServicesVoteTaskWork(self, instance,
-                                                        self._action_type,
-                                                        force_pass=True))
-        task_work_list.append(GuestServicesPreNotifyTaskWork(self, instance,
-                                                             self._action_type,
-                                                             force_pass=True))
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesVoteTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesPreNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(StopTaskWork(self, instance))
         super(StopTask, self).__init__(
-            'stop-instance_%s' % instance.name, task_work_list)
+            "stop-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -596,37 +678,46 @@ class StopTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class PauseTask(state_machine.StateTask):
     """
     Pause Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.PAUSE
         task_work_list = list()
-        task_work_list.append(GuestServicesVoteTaskWork(self, instance,
-                                                        self._action_type,
-                                                        force_pass=True))
-        task_work_list.append(GuestServicesPreNotifyTaskWork(self, instance,
-                                                             self._action_type,
-                                                             force_pass=True))
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesVoteTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesPreNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(PauseTaskWork(self, instance))
         super(PauseTask, self).__init__(
-            'pause-instance_%s' % instance.name, task_work_list)
+            "pause-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -647,20 +738,23 @@ class PauseTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class UnpauseTask(state_machine.StateTask):
     """
     Unpause Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
@@ -668,13 +762,17 @@ class UnpauseTask(state_machine.StateTask):
         self._action_type = objects.INSTANCE_ACTION_TYPE.UNPAUSE
         task_work_list = list()
         task_work_list.append(UnpauseTaskWork(self, instance))
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
-        task_work_list.append(GuestServicesPostNotifyTaskWork(self, instance,
-                                                              self._action_type,
-                                                              force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
+        task_work_list.append(
+            GuestServicesPostNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
         super(UnpauseTask, self).__init__(
-            'unpause-instance_%s' % instance.name, task_work_list)
+            "unpause-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -695,37 +793,46 @@ class UnpauseTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class SuspendTask(state_machine.StateTask):
     """
     Suspend Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.SUSPEND
         task_work_list = list()
-        task_work_list.append(GuestServicesVoteTaskWork(self, instance,
-                                                        self._action_type,
-                                                        force_pass=True))
-        task_work_list.append(GuestServicesPreNotifyTaskWork(self, instance,
-                                                             self._action_type,
-                                                             force_pass=True))
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesVoteTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesPreNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(SuspendTaskWork(self, instance))
         super(SuspendTask, self).__init__(
-            'suspend-instance_%s' % instance.name, task_work_list)
+            "suspend-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -746,20 +853,23 @@ class SuspendTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class ResumeTask(state_machine.StateTask):
     """
     Resume Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
@@ -767,13 +877,17 @@ class ResumeTask(state_machine.StateTask):
         self._action_type = objects.INSTANCE_ACTION_TYPE.RESUME
         task_work_list = list()
         task_work_list.append(ResumeTaskWork(self, instance))
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
-        task_work_list.append(GuestServicesPostNotifyTaskWork(self, instance,
-                                                              self._action_type,
-                                                              force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
+        task_work_list.append(
+            GuestServicesPostNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
         super(ResumeTask, self).__init__(
-            'resume-instance_%s' % instance.name, task_work_list)
+            "resume-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -794,37 +908,46 @@ class ResumeTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class RebootTask(state_machine.StateTask):
     """
     Reboot Task
     """
+
     def __init__(self, instance):
         from nfv_vim import objects
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.REBOOT
         task_work_list = list()
-        task_work_list.append(GuestServicesVoteTaskWork(self, instance,
-                                                        self._action_type,
-                                                        force_pass=True))
-        task_work_list.append(GuestServicesPreNotifyTaskWork(self, instance,
-                                                             self._action_type,
-                                                             force_pass=True))
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesVoteTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesPreNotifyTaskWork(
+                self, instance, self._action_type, force_pass=True
+            )
+        )
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(RebootTaskWork(self, instance))
         super(RebootTask, self).__init__(
-            'reboot-instance_%s' % instance.name, task_work_list)
+            "reboot-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -845,26 +968,30 @@ class RebootTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class RebuildTask(state_machine.StateTask):
     """
     Rebuild Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
         task_work_list.append(RebuildTaskWork(self, instance))
         super(RebuildTask, self).__init__(
-            'rebuild-instance_%s' % instance.name, task_work_list)
+            "rebuild-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -885,28 +1012,33 @@ class RebuildTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class FailTask(state_machine.StateTask):
     """
     Fail Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         task_work_list.append(FailTaskWork(self, instance))
         super(FailTask, self).__init__(
-            'fail-instance_%s' % instance.name, task_work_list)
+            "fail-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -927,27 +1059,31 @@ class FailTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class DeleteTask(state_machine.StateTask):
     """
     Delete Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
         task_work_list.append(DeleteTaskWork(self, instance))
         task_work_list.append(GuestServicesDeleteTaskWork(self, instance))
         super(DeleteTask, self).__init__(
-            'delete-instance_%s' % instance.name, task_work_list)
+            "delete-instance_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -968,28 +1104,33 @@ class DeleteTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class GuestServicesCreateTask(state_machine.StateTask):
     """
     Guest-Services-Create Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
         task_work_list.append(GuestServicesCreateTaskWork(self, instance))
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
         super(GuestServicesCreateTask, self).__init__(
-            'guest-services-create-_%s' % instance.name, task_work_list)
+            "guest-services-create-_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -1010,27 +1151,32 @@ class GuestServicesCreateTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class GuestServicesEnableTask(state_machine.StateTask):
     """
     Guest-Services-Enable Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
-        task_work_list.append(GuestServicesEnableTaskWork(self, instance,
-                                                          force_pass=True))
+        task_work_list.append(
+            GuestServicesEnableTaskWork(self, instance, force_pass=True)
+        )
         super(GuestServicesEnableTask, self).__init__(
-            'guest-services-enable_%s' % instance.name, task_work_list)
+            "guest-services-enable_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -1051,27 +1197,32 @@ class GuestServicesEnableTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class GuestServicesDisableTask(state_machine.StateTask):
     """
     Guest-Services-Disable Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
-        task_work_list.append(GuestServicesDisableTaskWork(self, instance,
-                                                           force_pass=True))
+        task_work_list.append(
+            GuestServicesDisableTaskWork(self, instance, force_pass=True)
+        )
         super(GuestServicesDisableTask, self).__init__(
-            'guest-services-disable_%s' % instance.name, task_work_list)
+            "guest-services-disable_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -1092,26 +1243,30 @@ class GuestServicesDisableTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class GuestServicesSetTask(state_machine.StateTask):
     """
     Guest-Services-Set Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
         task_work_list.append(GuestServicesSetTaskWork(self, instance))
         super(GuestServicesSetTask, self).__init__(
-            'guest-services-set_%s' % instance.name, task_work_list)
+            "guest-services-set_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -1132,26 +1287,30 @@ class GuestServicesSetTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )
 
 
 class GuestServicesDeleteTask(state_machine.StateTask):
     """
     Guest-Services-Delete Task
     """
+
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
         task_work_list = list()
         task_work_list.append(GuestServicesDeleteTaskWork(self, instance))
         super(GuestServicesDeleteTask, self).__init__(
-            'guest-services-delete_%s' % instance.name, task_work_list)
+            "guest-services-delete_%s" % instance.name, task_work_list
+        )
 
     @property
     def _instance(self):
@@ -1172,11 +1331,13 @@ class GuestServicesDeleteTask(state_machine.StateTask):
             DLOG.debug("Task (%s) complete." % self._name)
 
             event_data = dict()
-            event_data['reason'] = reason
+            event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_COMPLETED, event_data)
+                    INSTANCE_EVENT.TASK_COMPLETED, event_data
+                )
             else:
                 self._instance.action_fsm.handle_event(
-                    INSTANCE_EVENT.TASK_FAILED, event_data)
+                    INSTANCE_EVENT.TASK_FAILED, event_data
+                )

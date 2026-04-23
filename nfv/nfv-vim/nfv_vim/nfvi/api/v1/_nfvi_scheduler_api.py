@@ -10,6 +10,7 @@ class NFVISchedulerAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Scheduler API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):

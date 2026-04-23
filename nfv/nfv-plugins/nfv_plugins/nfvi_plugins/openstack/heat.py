@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -43,8 +43,16 @@ def get_stacks(token, page_limit=None, next_page=None):
     return response
 
 
-def create_stack(token, stack_name, template=None, template_url=None,
-                 files=None, parameters=None, tags=None, disable_rollback=True):
+def create_stack(
+    token,
+    stack_name,
+    template=None,
+    template_url=None,
+    files=None,
+    parameters=None,
+    tags=None,
+    disable_rollback=True,
+):
     """
     Asks OpenStack Heat to create a stack
     """
@@ -55,30 +63,31 @@ def create_stack(token, stack_name, template=None, template_url=None,
     api_cmd = url + "/stacks"
 
     api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
+    api_cmd_headers["Content-Type"] = "application/json"
 
     api_cmd_payload = dict()
-    api_cmd_payload['stack_name'] = stack_name
+    api_cmd_payload["stack_name"] = stack_name
 
     if template is not None:
-        api_cmd_payload['template'] = template
+        api_cmd_payload["template"] = template
 
     elif template_url is not None:
-        api_cmd_payload['template_url'] = template_url
+        api_cmd_payload["template_url"] = template_url
 
     if files is not None:
-        api_cmd_payload['files'] = files
+        api_cmd_payload["files"] = files
 
     if parameters is not None:
-        api_cmd_payload['parameters'] = parameters
+        api_cmd_payload["parameters"] = parameters
 
     if tags is not None:
-        api_cmd_payload['tags'] = tags
+        api_cmd_payload["tags"] = tags
 
-    api_cmd_payload['disable_rollback'] = disable_rollback
+    api_cmd_payload["disable_rollback"] = disable_rollback
 
-    response = rest_api_request(token, "POST", api_cmd, api_cmd_headers,
-                                json.dumps(api_cmd_payload))
+    response = rest_api_request(
+        token, "POST", api_cmd, api_cmd_headers, json.dumps(api_cmd_payload)
+    )
     return response
 
 

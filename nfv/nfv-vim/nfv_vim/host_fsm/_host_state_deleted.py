@@ -1,18 +1,19 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
 from nfv_common import state_machine
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class DeletedState(state_machine.State):
     """
     Host - Deleted State
     """
+
     def __init__(self, name):
         super(DeletedState, self).__init__(name)
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2023 Wind River Systems, Inc.
+# Copyright (c) 2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -33,23 +33,20 @@ class TestPickleableExceptions(testcase.NFVTestCase):
         self._do_pickling_test(ex)
 
     def test_pickling_openstack_exception(self):
-        ex = OpenStackException("method",
-                                "url",
-                                "headers",
-                                "body",
-                                "message",
-                                "reason")
+        ex = OpenStackException("method", "url", "headers", "body", "message", "reason")
         self._do_pickling_test(ex)
 
     def test_pickling_openstack_rest_api_exception(self):
-        ex = OpenStackRestAPIException("method",
-                                       "url",
-                                       "headers",
-                                       "body",
-                                       "status_code",
-                                       "message",
-                                       "reason",
-                                       "response_headers",
-                                       "response_body",
-                                       "response_reason")
+        ex = OpenStackRestAPIException(
+            "method",
+            "url",
+            "headers",
+            "body",
+            "status_code",
+            "message",
+            "reason",
+            "response_headers",
+            "response_body",
+            "response_reason",
+        )
         self._do_pickling_test(ex)

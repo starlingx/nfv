@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,8 @@ class System(AsDictMixin, Base):
     """
     System Database Table Entry
     """
-    __tablename__ = 'systems'
+
+    __tablename__ = "systems"
 
     name = Column(String(64), nullable=False, primary_key=True)
     description = Column(String(255), nullable=False)

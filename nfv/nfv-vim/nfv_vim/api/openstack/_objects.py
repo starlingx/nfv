@@ -12,15 +12,16 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
-DLOG = debug.debug_get_logger('nfv_vim.api.openstack')
+DLOG = debug.debug_get_logger("nfv_vim.api.openstack")
 
 
 class ServiceCategory(Constants, metaclass=Singleton):
     """
     Service Category Constants
     """
-    PLATFORM = Constant('platform')
-    OPENSTACK = Constant('openstack')
+
+    PLATFORM = Constant("platform")
+    OPENSTACK = Constant("openstack")
 
 
 # Service Category Constant
@@ -31,13 +32,14 @@ class PlatformServices(Constants, metaclass=Singleton):
     """
     Platform Services Constants
     """
-    GUEST = Constant('guest')
-    KEYSTONE = Constant('keystone')
-    MTC = Constant('mtc')
-    SYSINV = Constant('sysinv')
-    PATCHING = Constant('patching')
-    FM = Constant('fm')
-    USM = Constant('usm')
+
+    GUEST = Constant("guest")
+    KEYSTONE = Constant("keystone")
+    MTC = Constant("mtc")
+    SYSINV = Constant("sysinv")
+    PATCHING = Constant("patching")
+    FM = Constant("fm")
+    USM = Constant("usm")
 
 
 # Platform Services Constant
@@ -48,14 +50,15 @@ class OpenStackServices(Constants, metaclass=Singleton):
     """
     OpenStack Services Constants
     """
-    CEILOMETER = Constant('ceilometer')
-    CINDER = Constant('cinder')
-    GLANCE = Constant('glance')
-    KEYSTONE = Constant('keystone')
-    NEUTRON = Constant('neutron')
-    NOVA = Constant('nova')
-    HEAT = Constant('heat')
-    FM = Constant('fm')
+
+    CEILOMETER = Constant("ceilometer")
+    CINDER = Constant("cinder")
+    GLANCE = Constant("glance")
+    KEYSTONE = Constant("keystone")
+    NEUTRON = Constant("neutron")
+    NOVA = Constant("nova")
+    HEAT = Constant("heat")
+    FM = Constant("fm")
 
 
 # OpenStack Services Constant
@@ -66,8 +69,10 @@ class Service(object):
     """
     Service
     """
-    def __init__(self, region_name, service_name, service_type,
-                 endpoint_type, endpoint_override):
+
+    def __init__(
+        self, region_name, service_name, service_type, endpoint_type, endpoint_override
+    ):
         self._region_name = region_name
         self._service_name = service_name
         self._service_type = service_type
@@ -114,10 +119,21 @@ class Directory(object):
     """
     Directory
     """
-    def __init__(self, service_category, keyring_service, auth_protocol,
-                 auth_host, auth_port, auth_project,
-                 auth_username, auth_password, auth_user_domain_name,
-                 auth_project_domain_name, auth_uri=None):
+
+    def __init__(
+        self,
+        service_category,
+        keyring_service,
+        auth_protocol,
+        auth_host,
+        auth_port,
+        auth_project,
+        auth_username,
+        auth_password,
+        auth_user_domain_name,
+        auth_project_domain_name,
+        auth_uri=None,
+    ):
         self._service_category = service_category
         self._keyring_service = keyring_service
         self._auth_protocol = auth_protocol
@@ -208,16 +224,24 @@ class Directory(object):
         """
         return self._auth_project_domain_name
 
-    def set_service_info(self, service, region_name, service_name,
-                         service_type, endpoint_type, endpoint_override):
+    def set_service_info(
+        self,
+        service,
+        region_name,
+        service_name,
+        service_type,
+        endpoint_type,
+        endpoint_override,
+    ):
         """
         Set information for a particular service
         """
         if self._entries.get(service, None) is not None:
             del self._entries[service]
 
-        entry = Service(region_name, service_name, service_type,
-                        endpoint_type, endpoint_override)
+        entry = Service(
+            region_name, service_name, service_type, endpoint_type, endpoint_override
+        )
         self._entries[service] = entry
 
     def get_service_info(self, service):
@@ -231,6 +255,7 @@ class Token(object):
     """
     Token
     """
+
     def __init__(self, token_data, directory, token_id):
         self._expired = False
         self._data = token_data
@@ -242,7 +267,7 @@ class Token(object):
 
     def is_expired(self, within_seconds=300):
         if not self._expired:
-            end = iso8601.parse_date(self._data['token']['expires_at'])
+            end = iso8601.parse_date(self._data["token"]["expires_at"])
             now = iso8601.parse_date(datetime.datetime.utcnow().isoformat())
             if end <= now:
                 return True
@@ -254,8 +279,8 @@ class Token(object):
         """
         Check if this token has the admin role.
         """
-        for role in self._data['token']['roles']:
-            if role['name'] == 'admin':
+        for role in self._data["token"]["roles"]:
+            if role["name"] == "admin":
                 return True
         return False
 
@@ -269,19 +294,19 @@ class Token(object):
         """
         Get the project identifier of the token.
         """
-        return self._data['token']['project']['id']
+        return self._data["token"]["project"]["id"]
 
     def get_project_name(self):
         """
         Get the project name of the token.
         """
-        return self._data['token']['project']['name']
+        return self._data["token"]["project"]["name"]
 
     def get_project_domain_name(self):
         """
         Get the project domain name of the token.
         """
-        return self._data['token']['project']['domain']['name']
+        return self._data["token"]["project"]["domain"]["name"]
 
     def _url_strip_version(self, url):
         """
@@ -289,30 +314,31 @@ class Token(object):
         """
         # Get rid of the trailing '/' if present and remove the version
         # information from the URL.
-        url = url.rstrip('/')
-        url_bits = url.split('/')
+        url = url.rstrip("/")
+        url_bits = url.split("/")
         # Regular-Expression to match 'v1' or 'v2.0' etc
         if re.match(r"v\d+\.?\d*", url_bits[-1]):
-            url = '/'.join(url_bits[:-1])
+            url = "/".join(url_bits[:-1])
 
         elif re.match(r"v\d+\.?\d*", url_bits[-2]):
-            url = '/'.join(url_bits[:-2])
+            url = "/".join(url_bits[:-2])
 
         return url
 
-    def _get_service_url(self, region_name, service_name, service_type,
-                         endpoint_type):
+    def _get_service_url(self, region_name, service_name, service_type, endpoint_type):
         """
         Search the catalog of a service in a region for the url
         """
-        for catalog in self._data['token']['catalog']:
-            if catalog['type'] == service_type:
-                if catalog['name'] == service_name:
-                    if 0 != len(catalog['endpoints']):
-                        for endpoint in catalog['endpoints']:
-                            if (endpoint['region'] == region_name and
-                                    endpoint['interface'] == endpoint_type):
-                                return endpoint['url']
+        for catalog in self._data["token"]["catalog"]:
+            if catalog["type"] == service_type:
+                if catalog["name"] == service_name:
+                    if 0 != len(catalog["endpoints"]):
+                        for endpoint in catalog["endpoints"]:
+                            if (
+                                endpoint["region"] == region_name
+                                and endpoint["interface"] == endpoint_type
+                            ):
+                                return endpoint["url"]
         return None
 
     def get_service_url(self, service, strip_version=False):
@@ -327,17 +353,21 @@ class Token(object):
             service_type = service_info.service_type
             endpoint_type = service_info.endpoint_type
 
-            endpoint = self._get_service_url(region_name, service_name,
-                                             service_type, endpoint_type)
+            endpoint = self._get_service_url(
+                region_name, service_name, service_type, endpoint_type
+            )
 
             if service_info.endpoint_override is not None:
                 if endpoint is None:
                     endpoint = service_info.endpoint_override
                 else:
                     import urllib.parse
+
                     # this is necessary to keep tenant_id in place
-                    endpoint = \
-                        service_info.endpoint_override + urllib.parse.urlparse(endpoint).path
+                    endpoint = (
+                        service_info.endpoint_override
+                        + urllib.parse.urlparse(endpoint).path
+                    )
 
             if strip_version:
                 endpoint = self._url_strip_version(endpoint)
@@ -347,7 +377,7 @@ class Token(object):
 
     def get_roles(self):
         # keystone names are unique. shouldn't need to check uuid
-        return [role['name'] for role in self._data['token']['roles']]
+        return [role["name"] for role in self._data["token"]["roles"]]
 
     def get_user(self):
-        return self._data['token']['user']['name']
+        return self._data["token"]["user"]["name"]

@@ -6,8 +6,8 @@
 
 
 class AuthTypes:
-    KEYSTONE = 'Keystone'
-    OIDC = 'oidc'
+    KEYSTONE = "Keystone"
+    OIDC = "oidc"
 
 
 AUTH_TYPES = AuthTypes()

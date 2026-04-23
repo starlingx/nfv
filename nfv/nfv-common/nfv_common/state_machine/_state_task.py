@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,15 +11,15 @@ from nfv_common.state_machine._state_task_result import STATE_TASK_RESULT
 from nfv_common.state_machine._state_task_result import state_task_result_update
 from nfv_common.state_machine._state_task_work_result import STATE_TASK_WORK_RESULT
 
-DLOG = debug.debug_get_logger('nfv_common.state_machine.state_task')
+DLOG = debug.debug_get_logger("nfv_common.state_machine.state_task")
 
 
 RESULT_LOG_LEVELS = {
-   STATE_TASK_RESULT.SUCCESS: DLOG.debug,
-   STATE_TASK_RESULT.FAILED: DLOG.error,
-   STATE_TASK_RESULT.TIMED_OUT: DLOG.error,
-   STATE_TASK_RESULT.ABORTED: DLOG.notice,
-   STATE_TASK_RESULT.DEGRADED: DLOG.warn,
+    STATE_TASK_RESULT.SUCCESS: DLOG.debug,
+    STATE_TASK_RESULT.FAILED: DLOG.error,
+    STATE_TASK_RESULT.TIMED_OUT: DLOG.error,
+    STATE_TASK_RESULT.ABORTED: DLOG.notice,
+    STATE_TASK_RESULT.DEGRADED: DLOG.warn,
 }
 
 
@@ -32,13 +32,14 @@ class StateTask(object):
     """
     State Task
     """
+
     def __init__(self, name, task_work_list):
         self._name = name
         self._current_task_work = 0
         self._task_work_timer_id = None
         self._task_work_list = task_work_list
         self._task_result = STATE_TASK_RESULT.SUCCESS
-        self._task_result_reason = ''
+        self._task_result_reason = ""
         self._timer_id = None
         self._timeout_in_secs = 0
         for task_work in task_work_list:
@@ -79,8 +80,9 @@ class StateTask(object):
             for idx in range(self._current_task_work, -1, -1):
                 task_work = self._task_work_list[idx]
                 task_work.abort()
-                DLOG.debug("Task (%s) aborted work (%s)."
-                           % (self._name, task_work.name))
+                DLOG.debug(
+                    "Task (%s) aborted work (%s)." % (self._name, task_work.name)
+                )
         self._current_task_work = 0
         self._task_inprogress = False
         self._cleanup()
@@ -90,7 +92,7 @@ class StateTask(object):
         State Task Abort
         """
         self._task_result = STATE_TASK_RESULT.ABORTED
-        self._task_result_reason = 'aborted'
+        self._task_result_reason = "aborted"
         self._abort()
 
     def start(self):
@@ -101,11 +103,10 @@ class StateTask(object):
         self._current_task_work = 0
         self._task_inprogress = True
         self._task_result = STATE_TASK_RESULT.SUCCESS
-        self._task_result_reason = 'success'
-        self._timer_id = timers.timers_create_timer(self._name,
-                                                    self._timeout_in_secs,
-                                                    self._timeout_in_secs,
-                                                    self._timeout)
+        self._task_result_reason = "success"
+        self._timer_id = timers.timers_create_timer(
+            self._name, self._timeout_in_secs, self._timeout_in_secs, self._timeout
+        )
         self._run()
 
     def refresh_timeouts(self):
@@ -127,10 +128,9 @@ class StateTask(object):
             self._timeout_in_secs += 1
 
         # Re-start task timer
-        self._timer_id = timers.timers_create_timer(self._name,
-                                                    self._timeout_in_secs,
-                                                    self._timeout_in_secs,
-                                                    self._timeout)
+        self._timer_id = timers.timers_create_timer(
+            self._name, self._timeout_in_secs, self._timeout_in_secs, self._timeout
+        )
 
         if self._task_work_timer_id is None:
             # No need to refresh task work timer, no task work running
@@ -147,8 +147,11 @@ class StateTask(object):
         task_work = self._task_work_list[self._current_task_work]
         if 0 < task_work.timeout_in_secs:
             self._task_work_timer_id = timers.timers_create_timer(
-                task_work.name, task_work.timeout_in_secs,
-                task_work.timeout_in_secs, self._task_work_timeout)
+                task_work.name,
+                task_work.timeout_in_secs,
+                task_work.timeout_in_secs,
+                self._task_work_timeout,
+            )
 
     def _run(self):
         """
@@ -164,8 +167,7 @@ class StateTask(object):
                 timers.timers_delete_timer(self._task_work_timer_id)
                 self._task_work_timer_id = None
 
-            DLOG.debug("Task %s running %s work." % (self._name,
-                                                     task_work.name))
+            DLOG.debug("Task %s running %s work." % (self._name, task_work.name))
 
             task_work_result, task_work_result_reason = task_work.run()
             self._current_task_work = idx
@@ -173,22 +175,31 @@ class StateTask(object):
             if STATE_TASK_WORK_RESULT.WAIT == task_work_result:
                 if 0 < task_work.timeout_in_secs:
                     self._task_work_timer_id = timers.timers_create_timer(
-                        task_work.name, task_work.timeout_in_secs,
-                        task_work.timeout_in_secs, self._task_work_timeout)
+                        task_work.name,
+                        task_work.timeout_in_secs,
+                        task_work.timeout_in_secs,
+                        self._task_work_timeout,
+                    )
 
-                DLOG.debug("Task (%s) is waiting for work (%s) to complete, "
-                           "timeout_in_secs=%s." % (self._name, task_work.name,
-                                                    task_work.timeout_in_secs))
+                DLOG.debug(
+                    "Task (%s) is waiting for work (%s) to complete, "
+                    "timeout_in_secs=%s."
+                    % (self._name, task_work.name, task_work.timeout_in_secs)
+                )
                 break
             else:
-                self._task_result, self._task_result_reason = \
-                    state_task_result_update(
-                        self._task_result, self._task_result_reason,
-                        task_work_result, task_work_result_reason)
+                self._task_result, self._task_result_reason = state_task_result_update(
+                    self._task_result,
+                    self._task_result_reason,
+                    task_work_result,
+                    task_work_result_reason,
+                )
 
-                if STATE_TASK_RESULT.FAILED == self._task_result \
-                        or STATE_TASK_RESULT.ABORTED == self._task_result \
-                        or STATE_TASK_RESULT.TIMED_OUT == self._task_result:
+                if (
+                    STATE_TASK_RESULT.FAILED == self._task_result
+                    or STATE_TASK_RESULT.ABORTED == self._task_result
+                    or STATE_TASK_RESULT.TIMED_OUT == self._task_result
+                ):
                     self._abort()
                     self._complete(self._task_result, self._task_result_reason)
                     break
@@ -228,11 +239,13 @@ class StateTask(object):
         State Task Timeout
         """
         (yield)
-        DLOG.debug("Task (%s) timed out, timeout_in_secs=%s."
-                   % (self._name, self._timeout_in_secs))
+        DLOG.debug(
+            "Task (%s) timed out, timeout_in_secs=%s."
+            % (self._name, self._timeout_in_secs)
+        )
         self._abort()
         self._task_result = STATE_TASK_RESULT.TIMED_OUT
-        self._task_result_reason = 'timeout'
+        self._task_result_reason = "timeout"
         self._complete(self._task_result, self._task_result_reason)
 
     def task_work_complete(self, task_work_result, task_work_result_reason=None):
@@ -240,30 +253,43 @@ class StateTask(object):
         State Task Work Complete
         """
         task_work = self._task_work_list[self._current_task_work]
-        result_log(task_work_result,
-                   "Task (%s) work (%s) complete, result=%s, reason=%s."
-                   % (self._name, task_work.name, task_work_result,
-                      task_work_result_reason))
+        result_log(
+            task_work_result,
+            "Task (%s) work (%s) complete, result=%s, reason=%s."
+            % (self._name, task_work.name, task_work_result, task_work_result_reason),
+        )
 
-        updated_task_work_result, updated_task_work_result_reason = \
-            task_work.complete(task_work_result, task_work_result_reason)
+        updated_task_work_result, updated_task_work_result_reason = task_work.complete(
+            task_work_result, task_work_result_reason
+        )
 
         if task_work_result != updated_task_work_result:
-            result_log(updated_task_work_result,
-                       "Task (%s) work (%s) complete, result updated, "
-                       "was_result=%s, now_result=%s."
-                       % (self._name, task_work.name, task_work_result,
-                          updated_task_work_result))
+            result_log(
+                updated_task_work_result,
+                "Task (%s) work (%s) complete, result updated, "
+                "was_result=%s, now_result=%s."
+                % (
+                    self._name,
+                    task_work.name,
+                    task_work_result,
+                    updated_task_work_result,
+                ),
+            )
             task_work_result = updated_task_work_result
             task_work_result_reason = updated_task_work_result_reason
 
-        self._task_result, self._task_result_reason = \
-            state_task_result_update(self._task_result, self._task_result_reason,
-                                     task_work_result, task_work_result_reason)
+        self._task_result, self._task_result_reason = state_task_result_update(
+            self._task_result,
+            self._task_result_reason,
+            task_work_result,
+            task_work_result_reason,
+        )
 
-        if STATE_TASK_RESULT.FAILED == self._task_result \
-                or STATE_TASK_RESULT.ABORTED == self._task_result \
-                or STATE_TASK_RESULT.TIMED_OUT == self._task_result:
+        if (
+            STATE_TASK_RESULT.FAILED == self._task_result
+            or STATE_TASK_RESULT.ABORTED == self._task_result
+            or STATE_TASK_RESULT.TIMED_OUT == self._task_result
+        ):
             self._abort()
             self._complete(self._task_result, self._task_result_reason)
         else:
@@ -277,14 +303,17 @@ class StateTask(object):
         """
         (yield)
         if len(self._task_work_list) <= self._current_task_work:
-            DLOG.error("Task work timeout timer fired, but current task "
-                       "work is invalid, current_task_work=%i."
-                       % self._current_task_work)
+            DLOG.error(
+                "Task work timeout timer fired, but current task "
+                "work is invalid, current_task_work=%i." % self._current_task_work
+            )
             return
 
         task_work = self._task_work_list[self._current_task_work]
-        DLOG.debug("Task (%s) work (%s) timed out, timeout_in_secs=%s."
-                   % (self._name, task_work.name, task_work.timeout_in_secs))
+        DLOG.debug(
+            "Task (%s) work (%s) timed out, timeout_in_secs=%s."
+            % (self._name, task_work.name, task_work.timeout_in_secs)
+        )
 
         task_work_result, task_work_result_reason = task_work.timeout()
         if STATE_TASK_WORK_RESULT.TIMED_OUT == task_work_result:

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,13 +13,14 @@ from nfv_vim.host_fsm._host_tasks import FailHostTask
 from nfv_vim.host_fsm._host_tasks import NotifyDisabledHostTask
 from nfv_vim.host_fsm._host_tasks import OfflineHostTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class DisabledState(state_machine.State):
     """
     Host - Disabled State
     """
+
     def __init__(self, name):
         super(DisabledState, self).__init__(name)
 
@@ -66,12 +67,10 @@ class DisabledState(state_machine.State):
             host.task.start()
 
         elif HOST_EVENT.TASK_FAILED == event:
-            DLOG.info("Fail-Host or Notify-Disabled-Host failed for %s."
-                      % host.name)
+            DLOG.info("Fail-Host or Notify-Disabled-Host failed for %s." % host.name)
 
         elif HOST_EVENT.TASK_TIMEOUT == event:
-            DLOG.info("Fail-Host or Notify-Disabled-Host timed out for %s."
-                      % host.name)
+            DLOG.info("Fail-Host or Notify-Disabled-Host timed out for %s." % host.name)
 
         elif HOST_EVENT.AUDIT == event:
             if not host.task.inprogress():

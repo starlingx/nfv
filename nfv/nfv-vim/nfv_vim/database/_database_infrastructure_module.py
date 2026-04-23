@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,8 +19,7 @@ def database_system_add(system_obj):
     """
     db = database_get()
     session = db.session()
-    query = session.query(model.System).filter(model.System.name ==
-                                               system_obj.name)
+    query = session.query(model.System).filter(model.System.name == system_obj.name)
     system = query.first()
     if not system:
         system = model.System()
@@ -114,24 +113,32 @@ def database_host_get_list():
     host_objs = list()
     for host in query.all():
         nfvi_host_data = json.loads(host.nfvi_host_data)
-        nfvi_host = nfvi.objects.v1.Host(nfvi_host_data['uuid'],
-                                         nfvi_host_data['name'],
-                                         nfvi_host_data['personality'],
-                                         nfvi_host_data['admin_state'],
-                                         nfvi_host_data['oper_state'],
-                                         nfvi_host_data['avail_status'],
-                                         nfvi_host_data['action'],
-                                         nfvi_host_data['uptime'],
-                                         nfvi_host_data['sw_version'],
-                                         nfvi_host_data['device_image_update'],
-                                         nfvi_host_data['openstack_compute'],
-                                         nfvi_host_data['openstack_control'],
-                                         nfvi_host_data['remote_storage'],
-                                         nfvi_host_data['nfvi_data'])
+        nfvi_host = nfvi.objects.v1.Host(
+            nfvi_host_data["uuid"],
+            nfvi_host_data["name"],
+            nfvi_host_data["personality"],
+            nfvi_host_data["admin_state"],
+            nfvi_host_data["oper_state"],
+            nfvi_host_data["avail_status"],
+            nfvi_host_data["action"],
+            nfvi_host_data["uptime"],
+            nfvi_host_data["sw_version"],
+            nfvi_host_data["device_image_update"],
+            nfvi_host_data["openstack_compute"],
+            nfvi_host_data["openstack_control"],
+            nfvi_host_data["remote_storage"],
+            nfvi_host_data["nfvi_data"],
+        )
 
-        host_obj = objects.Host(nfvi_host, host.state, host.action,
-                                host.elapsed_time_in_state, host.upgrade_inprogress,
-                                host.recover_instances, host.host_services_locked)
+        host_obj = objects.Host(
+            nfvi_host,
+            host.state,
+            host.action,
+            host.elapsed_time_in_state,
+            host.upgrade_inprogress,
+            host.recover_instances,
+            host.host_services_locked,
+        )
         host_objs.append(host_obj)
     return host_objs
 
@@ -142,22 +149,25 @@ def database_host_group_add(host_group_obj):
     """
     db = database_get()
     session = db.session()
-    query = session.query(model.HostGroup).filter(model.HostGroup.name ==
-                                                  host_group_obj.name)
+    query = session.query(model.HostGroup).filter(
+        model.HostGroup.name == host_group_obj.name
+    )
     host_group = query.first()
     if not host_group:
         host_group = model.HostGroup()
         host_group.name = host_group_obj.name
         host_group.member_names = json.dumps(host_group_obj.member_names)
         host_group.policies = json.dumps(host_group_obj.policies)
-        host_group.nfvi_host_group_data = \
-            json.dumps(host_group_obj.nfvi_host_group.as_dict())
+        host_group.nfvi_host_group_data = json.dumps(
+            host_group_obj.nfvi_host_group.as_dict()
+        )
         session.add(host_group)
     else:
         host_group.member_names = json.dumps(host_group_obj.member_names)
         host_group.policies = json.dumps(host_group_obj.policies)
-        host_group.nfvi_host_group_data = \
-            json.dumps(host_group_obj.nfvi_host_group.as_dict())
+        host_group.nfvi_host_group_data = json.dumps(
+            host_group_obj.nfvi_host_group.as_dict()
+        )
     db.commit()
 
 
@@ -184,8 +194,8 @@ def database_host_group_get_list():
     for host_group in query.all():
         nfvi_data = json.loads(host_group.nfvi_host_group_data)
         nfvi_host_group = nfvi.objects.v1.HostGroup(
-            nfvi_data['name'], nfvi_data['member_names'],
-            nfvi_data['policies'])
+            nfvi_data["name"], nfvi_data["member_names"], nfvi_data["policies"]
+        )
         host_group_obj = objects.HostGroup(nfvi_host_group)
         host_group_objs.append(host_group_obj)
     return host_group_objs

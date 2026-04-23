@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -11,13 +11,14 @@ from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import StartTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.instance')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class StartState(state_machine.State):
     """
     Instance - Start State
     """
+
     def __init__(self, name):
         super(StartState, self).__init__(name)
 
@@ -49,66 +50,68 @@ class StartState(state_machine.State):
         Handle event while in the start state
         """
         from nfv_vim import directors
+
         instance_director = directors.get_instance_director()
 
         if event_data is not None:
-            reason = event_data.get('reason', '')
+            reason = event_data.get("reason", "")
         else:
-            reason = ''
+            reason = ""
 
         if instance.task.inprogress():
             if instance.task.handle_event(event, event_data):
                 return self.name
 
         if INSTANCE_EVENT.TASK_STOP == event:
-            instance_director.instance_start_complete(instance, instance.host_name,
-                                                      failed=False, timed_out=False,
-                                                      cancelled=True)
+            instance_director.instance_start_complete(
+                instance,
+                instance.host_name,
+                failed=False,
+                timed_out=False,
+                cancelled=True,
+            )
             return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.TASK_COMPLETED == event:
             DLOG.debug("Start inprogress for %s." % instance.name)
-            instance.action_fsm.wait_time = \
-                timers.get_monotonic_timestamp_in_ms()
+            instance.action_fsm.wait_time = timers.get_monotonic_timestamp_in_ms()
 
         elif INSTANCE_EVENT.TASK_FAILED == event:
             DLOG.info("Start failed for %s." % instance.name)
             instance.fail_action(instance.action_fsm_action_type, reason)
-            instance_director.instance_start_complete(instance, instance.host_name,
-                                                      failed=True)
+            instance_director.instance_start_complete(
+                instance, instance.host_name, failed=True
+            )
             return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.TASK_TIMEOUT == event:
             DLOG.info("Start timed out for %s." % instance.name)
-            instance.fail_action(instance.action_fsm_action_type, 'timeout')
-            instance_director.instance_start_complete(instance, instance.host_name,
-                                                      failed=False, timed_out=True)
+            instance.fail_action(instance.action_fsm_action_type, "timeout")
+            instance_director.instance_start_complete(
+                instance, instance.host_name, failed=False, timed_out=True
+            )
             return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.NFVI_ENABLED == event:
-            instance_director.instance_start_complete(instance,
-                                                      instance.host_name)
+            instance_director.instance_start_complete(instance, instance.host_name)
             return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.AUDIT == event:
             if not instance.task.inprogress():
                 if instance.is_enabled():
                     instance_director.instance_start_complete(
-                        instance, instance.host_name)
+                        instance, instance.host_name
+                    )
                     return INSTANCE_STATE.INITIAL
                 else:
                     now_ms = timers.get_monotonic_timestamp_in_ms()
-                    secs_expired = \
-                        (now_ms - instance.action_fsm.wait_time) // 1000
+                    secs_expired = (now_ms - instance.action_fsm.wait_time) // 1000
                     # Only wait 60 seconds for the instance to start.
                     if 60 <= secs_expired:
-                        instance.fail_action(instance.action_fsm_action_type,
-                                             'timeout')
+                        instance.fail_action(instance.action_fsm_action_type, "timeout")
                         instance_director.instance_start_complete(
-                            instance,
-                            instance.host_name,
-                            failed=False,
-                            timed_out=True)
+                            instance, instance.host_name, failed=False, timed_out=True
+                        )
                         return INSTANCE_STATE.INITIAL
 
         else:

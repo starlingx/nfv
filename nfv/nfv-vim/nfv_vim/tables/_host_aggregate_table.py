@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 Wind River Systems, Inc.
+# Copyright (c) 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,6 +14,7 @@ class HostAggregateTable(Table):
     """
     Host Aggregate Table
     """
+
     def __init__(self):
         super(HostAggregateTable, self).__init__()
 
@@ -29,8 +30,10 @@ class HostAggregateTable(Table):
         for host_aggregate_name in list(_host_aggregate_table.keys()):
             host_aggregate = _host_aggregate_table[host_aggregate_name]
 
-            if host_name in host_aggregate.host_names and \
-                    peer_host_name in host_aggregate.host_names:
+            if (
+                host_name in host_aggregate.host_names
+                and peer_host_name in host_aggregate.host_names
+            ):
                 return True
         return False
 

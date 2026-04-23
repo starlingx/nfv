@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,7 +20,7 @@ def parser_initialize():
     """
     global _parsers
 
-    _parsers['nfv-vim'] = _nfv_vim_parser.parser_initialize()
+    _parsers["nfv-vim"] = _nfv_vim_parser.parser_initialize()
 
 
 def parser_finalize():

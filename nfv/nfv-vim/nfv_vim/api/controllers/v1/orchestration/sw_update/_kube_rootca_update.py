@@ -11,18 +11,20 @@ import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_vim.api._link import Link
-from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy \
-    import KubeRootcaUpdateStrategyAPI
+from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import (
+    KubeRootcaUpdateStrategyAPI
+)
 
-DLOG = debug.debug_get_logger('nfv_vim.api.kube_rootca_update')
+DLOG = debug.debug_get_logger("nfv_vim.api.kube_rootca_update")
 
 
 class KubeRootcaUpdateDescription(wsme_types.Base):
     """
     Kubernetes Update Description
     """
+
     id = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="Plinks")
 
     @classmethod
     def convert(cls):
@@ -31,12 +33,11 @@ class KubeRootcaUpdateDescription(wsme_types.Base):
         description = KubeRootcaUpdateDescription()
         description.id = "kube-rootca-update"
         description.links = [
-            Link.make_link('self',
-                           url,
-                           'orchestration/kube-rootca-update'),
-            Link.make_link('strategy',
-                           url,
-                           'orchestration/kube-rootca-update/strategy')]
+            Link.make_link("self", url, "orchestration/kube-rootca-update"),
+            Link.make_link(
+                "strategy", url, "orchestration/kube-rootca-update/strategy"
+            ),
+        ]
         return description
 
 
@@ -44,9 +45,10 @@ class KubeRootcaUpdateAPI(rest.RestController):
     """
     KubeRootcaUpdateRest API
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'strategy' == key:
+        if "strategy" == key:
             return KubeRootcaUpdateStrategyAPI(), remainder
         else:
             pecan.abort(httplib.NOT_FOUND)

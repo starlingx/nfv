@@ -12,16 +12,17 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.host_group')
+DLOG = debug.debug_get_logger("nfv_vim.objects.host_group")
 
 
 class HostGroupPolicy(Constants, metaclass=Singleton):
     """
     Host Group Policy Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    STORAGE_REPLICATION = Constant('storage-replication')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    STORAGE_REPLICATION = Constant("storage-replication")
 
 
 # Host Group Constant Instantiation
@@ -32,8 +33,9 @@ class HostGroup(ObjectData):
     """
     Host Group Object
     """
+
     def __init__(self, nfvi_host_group):
-        super(HostGroup, self).__init__('1.0.0')
+        super(HostGroup, self).__init__("1.0.0")
         self._nfvi_host_group = nfvi_host_group
 
     @property
@@ -76,6 +78,7 @@ class HostGroup(ObjectData):
         Persist changes to host group object
         """
         from nfv_vim import database
+
         database.database_host_group_add(self)
 
     def as_dict(self):
@@ -83,8 +86,8 @@ class HostGroup(ObjectData):
         Represent host group object as dictionary
         """
         data = dict()
-        data['name'] = self.name
-        data['members'] = self.member_names
-        data['policies'] = self.policies
-        data['nfvi_host_group'] = self._nfvi_host_group.as_dict()
+        data["name"] = self.name
+        data["members"] = self.member_names
+        data["policies"] = self.policies
+        data["nfvi_host_group"] = self._nfvi_host_group.as_dict()
         return data

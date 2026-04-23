@@ -12,7 +12,7 @@ from nfv_common.helpers import coroutine
 from nfv_common.tasks._task_scheduler import TaskScheduler
 from nfv_common.tasks._task_worker_pool import TaskWorkerPool
 
-DLOG = debug.debug_get_logger('unit_test', debug_level=debug.DEBUG_LEVEL.INFO)
+DLOG = debug.debug_get_logger("unit_test", debug_level=debug.DEBUG_LEVEL.INFO)
 
 _test_complete = False
 _test_result = None
@@ -25,49 +25,51 @@ def unit_test(title):
                 global _test_complete, _test_result
                 _test_complete = False
                 _test_result = None
-                print("%-40s: " % title, end='')
+                print("%-40s: " % title, end="")
                 result = func(*args, **kwargs)
                 _test_result = result
                 while not _test_complete:
                     selobj.selobj_dispatch(500)
                     timers.timers_schedule()
                 if _test_result:
-                    print("PASSED", end='\n')
+                    print("PASSED", end="\n")
                 else:
-                    print("%s FAILED", end='\n')
+                    print("%s FAILED", end="\n")
             except Exception as e:
                 DLOG.exception("%s" % e)
-                print("%s FAILED", end='\n')
+                print("%s FAILED", end="\n")
+
         return func_wrapper
+
     return unit_test_wrapper
 
 
 def _task_non_coroutine(arg1):
     global _test_complete
     _test_complete = True
-    assert (arg1 == 'arg1')
+    assert arg1 == "arg1"
     return True
 
 
 def _task_work_func(arg1, arg2):
-    assert (arg1 == 'arg1')
-    assert (arg2 == 'arg2')
+    assert arg1 == "arg1"
+    assert arg2 == "arg2"
     return "FUNCTION PASSED"
 
 
 @coroutine
 def _task_coroutine_callback():
     global _test_complete, _test_result
-    result = (yield)
-    assert (result == "FUNCTION PASSED")
+    result = yield
+    assert result == "FUNCTION PASSED"
     _test_complete = True
     _test_result = True
 
 
 def _task_coroutine(future, arg1, callback):
-    assert (arg1 == 'arg1')
-    future.work(_task_work_func, 'arg1', 'arg2')
-    future.result = (yield)
+    assert arg1 == "arg1"
+    future.work(_task_work_func, "arg1", "arg2")
+    future.result = yield
     if future.result.is_complete():
         callback.send(future.result.data)
     else:
@@ -75,10 +77,10 @@ def _task_coroutine(future, arg1, callback):
 
 
 def _task_coroutine_with_timer(future, arg1, callback):
-    assert (arg1 == 'arg1')
-    timer_id = future.timer('timer-test', 2)
+    assert arg1 == "arg1"
+    timer_id = future.timer("timer-test", 2)
     start_ms = timers.get_monotonic_timestamp_in_ms()
-    future.result = (yield)
+    future.result = yield
     end_ms = timers.get_monotonic_timestamp_in_ms()
     if future.result.is_complete():
         if future.result.is_timer:
@@ -92,37 +94,39 @@ def _task_coroutine_with_timer(future, arg1, callback):
 
 class UnitTest(object):
     def __init__(self):
-        self._task_worker_pool = TaskWorkerPool('test-pool', num_workers=1)
-        self._scheduler = TaskScheduler('test-scheduler', self._task_worker_pool)
+        self._task_worker_pool = TaskWorkerPool("test-pool", num_workers=1)
+        self._scheduler = TaskScheduler("test-scheduler", self._task_worker_pool)
 
-    @unit_test('NORMAL_FUNCTION_CALL')
+    @unit_test("NORMAL_FUNCTION_CALL")
     def test_normal_function_call(self):
-        result = self._scheduler.add_task(_task_non_coroutine, 'arg1')
+        result = self._scheduler.add_task(_task_non_coroutine, "arg1")
         return result
 
-    @unit_test('CO-ROUTINE_FUNCTION_CALL')
+    @unit_test("CO-ROUTINE_FUNCTION_CALL")
     def test_coroutine_function_call(self):
-        self._scheduler.add_task(_task_coroutine, 'arg1',
-                                 callback=_task_coroutine_callback())
+        self._scheduler.add_task(
+            _task_coroutine, "arg1", callback=_task_coroutine_callback()
+        )
         return _test_result
 
-    @unit_test('CO-ROUTINE_FUNCTION_TIMER_CALL')
+    @unit_test("CO-ROUTINE_FUNCTION_TIMER_CALL")
     def test_coroutine_timer_function_call(self):
-        self._scheduler.add_task(_task_coroutine_with_timer, 'arg1',
-                                 callback=_task_coroutine_callback())
+        self._scheduler.add_task(
+            _task_coroutine_with_timer, "arg1", callback=_task_coroutine_callback()
+        )
         return _test_result
 
     def run(self):
-        print("TASKS UNIT TESTS", end='\n')
-        print("================", end='\n')
+        print("TASKS UNIT TESTS", end="\n")
+        print("================", end="\n")
         self.test_normal_function_call()
         self.test_coroutine_function_call()
         self.test_coroutine_timer_function_call()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    debug.debug_initialize(config.CONF['debug'])
+    debug.debug_initialize(config.CONF["debug"])
     selobj.selobj_initialize()
     timers.timers_initialize(500, 1000, 1000)
 

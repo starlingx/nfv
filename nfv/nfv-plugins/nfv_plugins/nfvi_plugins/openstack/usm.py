@@ -18,7 +18,7 @@ REST_API_DEPLOY_START_TIMEOUT = 120
 REST_API_DEPLOY_HOST_TIMEOUT = 240
 REST_API_DEPLOY_DELETE_TIMEOUT = 300
 
-DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.usm')
+DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.usm")
 
 
 def _usm_api_cmd(token, endpoint):
@@ -32,8 +32,8 @@ def _usm_api_cmd(token, endpoint):
 
 def _api_cmd_headers():
     api_cmd_headers = dict()
-    api_cmd_headers['Content-Type'] = "application/json"
-    api_cmd_headers['User-Agent'] = "vim/1.0"
+    api_cmd_headers["Content-Type"] = "application/json"
+    api_cmd_headers["User-Agent"] = "vim/1.0"
     return api_cmd_headers
 
 
@@ -42,26 +42,29 @@ def _api_get(token, url):
     Perform a generic GET for a particular API endpoint
     """
 
-    response = rest_api_request(token,
-                                "GET",
-                                url,
-                                timeout_in_secs=REST_API_REQUEST_TIMEOUT)
+    response = rest_api_request(
+        token, "GET", url, timeout_in_secs=REST_API_REQUEST_TIMEOUT
+    )
     return response
 
 
-def _api_post(token, url, payload, headers=None, timeout_in_secs=REST_API_REQUEST_TIMEOUT):
+def _api_post(
+    token, url, payload, headers=None, timeout_in_secs=REST_API_REQUEST_TIMEOUT
+):
     """
     Generic POST to an endpoint with a payload
     """
     if headers is None:
         headers = _api_cmd_headers()
 
-    response = rest_api_request(token,
-                                "POST",
-                                url,
-                                headers,
-                                json.dumps(payload),
-                                timeout_in_secs=timeout_in_secs)
+    response = rest_api_request(
+        token,
+        "POST",
+        url,
+        headers,
+        json.dumps(payload),
+        timeout_in_secs=timeout_in_secs,
+    )
     return response
 
 
@@ -70,10 +73,7 @@ def _api_delete(token, url, timeout_in_secs=REST_API_REQUEST_TIMEOUT):
     Perform DELETE on a particular endpoint
     """
 
-    response = rest_api_request(token,
-                                "DELETE",
-                                url,
-                                timeout_in_secs=timeout_in_secs)
+    response = rest_api_request(token, "DELETE", url, timeout_in_secs=timeout_in_secs)
     return response
 
 
@@ -139,7 +139,9 @@ def sw_deploy_start(token, release, force=False, snapshot=False):
     if snapshot:
         data["options"] = ["snapshot=true"]
 
-    response = _api_post(token, url, data, timeout_in_secs=REST_API_DEPLOY_START_TIMEOUT)
+    response = _api_post(
+        token, url, data, timeout_in_secs=REST_API_DEPLOY_START_TIMEOUT
+    )
     return response
 
 
@@ -255,8 +257,9 @@ def is_target_release_downgrade(index, release_data):
     if downgrade:
         # Check if downgrade is RR
         for release in release_data[index + 1:]:
-            if ((release["state"] != current_state) and
-                    (release["state"] == usm_states.AVAILABLE)):
+            if (release["state"] != current_state) and (
+                release["state"] == usm_states.AVAILABLE
+            ):
                 break
             vim_rr |= release["reboot_required"]
 
@@ -283,20 +286,26 @@ def sw_deploy_get_upgrade_obj(token, release):
     release_data = sw_deploy_get_releases(token).result_data
     deploy_data = sw_deploy_show(token).result_data
     hosts_info_data = sw_deploy_host_list(token).result_data
-    error_template = "{}, check /var/log/nfv-vim.log or /var/log/software.log for more information."
+    error_template = (
+        "{}, check /var/log/nfv-vim.log or /var/log/software.log for more information."
+    )
 
     # Parse responses
     try:
         for i, rel in enumerate(release_data):
-            if release and rel['release_id'] == release:
+            if release and rel["release_id"] == release:
                 release_info = rel
-                upgrade, downgrade, vim_rr = is_target_release_downgrade(i, release_data)
-                DLOG.debug(f"Detected, {upgrade=}, {downgrade=}, "
-                           f"target={release}, "
-                           f"reboot_required={vim_rr}")
+                upgrade, downgrade, vim_rr = is_target_release_downgrade(
+                    i, release_data
+                )
+                DLOG.debug(
+                    f"Detected, {upgrade=}, {downgrade=}, "
+                    f"target={release}, "
+                    f"reboot_required={vim_rr}"
+                )
                 break
-            elif not release and rel['state'] == usm_states.DEPLOYING:
-                release = rel['release_id']
+            elif not release and rel["state"] == usm_states.DEPLOYING:
+                release = rel["release_id"]
                 release_info = rel
                 break
     except Exception as e:

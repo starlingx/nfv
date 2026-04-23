@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -16,7 +16,8 @@ class InstanceType_v5(AsDictMixin, Base):
     """
     Instance Type Database Table
     """
-    __tablename__ = 'instance_types_v5'
+
+    __tablename__ = "instance_types_v5"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -48,12 +49,19 @@ class InstanceType_v5(AsDictMixin, Base):
 
     def __repr__(self):
         if self.have_details:
-            return ("<Instance Type(%r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r )>"
-                    % (self.uuid, self.name, self.vcpus, self.mem_mb,
-                       self.disk_gb, self.ephemeral_gb, self.swap_gb,
-                       self.guest_services, self.auto_recovery,
-                       self.live_migration_timeout,
-                       self.live_migration_max_downtime))
+            return "<Instance Type(%r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r )>" % (
+                self.uuid,
+                self.name,
+                self.vcpus,
+                self.mem_mb,
+                self.disk_gb,
+                self.ephemeral_gb,
+                self.swap_gb,
+                self.guest_services,
+                self.auto_recovery,
+                self.live_migration_timeout,
+                self.live_migration_max_downtime,
+            )
         return "<Instance Type(%r, %r)>" % (self.uuid, self.name)
 
 
@@ -61,7 +69,8 @@ class InstanceType(AsDictMixin, Base):
     """
     Instance Type Database Table
     """
-    __tablename__ = 'instance_types_v4'
+
+    __tablename__ = "instance_types_v4"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -95,10 +104,17 @@ class InstanceType(AsDictMixin, Base):
 
     def __repr__(self):
         if self.have_details:
-            return ("<Instance Type(%r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r )>"
-                    % (self.uuid, self.name, self.vcpus, self.mem_mb,
-                       self.disk_gb, self.ephemeral_gb, self.swap_gb,
-                       self.guest_services, self.auto_recovery,
-                       self.live_migration_timeout,
-                       self.live_migration_max_downtime))
+            return "<Instance Type(%r, %r, %r, %r, %r, %r, %r, %r, %r, %r, %r )>" % (
+                self.uuid,
+                self.name,
+                self.vcpus,
+                self.mem_mb,
+                self.disk_gb,
+                self.ephemeral_gb,
+                self.swap_gb,
+                self.guest_services,
+                self.auto_recovery,
+                self.live_migration_timeout,
+                self.live_migration_max_downtime,
+            )
         return "<Instance Type(%r, %r)>" % (self.uuid, self.name)

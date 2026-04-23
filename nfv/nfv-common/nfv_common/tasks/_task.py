@@ -12,13 +12,14 @@ from nfv_common.helpers import Singleton
 
 from nfv_common.tasks._task_result import TaskResult
 
-DLOG = debug.debug_get_logger('nfv_common.tasks.task')
+DLOG = debug.debug_get_logger("nfv_common.tasks.task")
 
 
 class TaskPriority(Constants, metaclass=Singleton):
     """
     Task Priority Constants
     """
+
     HIGH = 0
     MED = 1
     LOW = 2
@@ -32,12 +33,13 @@ class Task(object):
     """
     Task
     """
-    _READY = Constant('Ready')
-    _RUNNING = Constant('Running')
-    _TIMEOUT = Constant('Timeout')
-    _COMPLETE = Constant('Complete')
-    _COMPLETED = Constant('Completed')
-    _ABORTED = Constant('Aborted')
+
+    _READY = Constant("Ready")
+    _RUNNING = Constant("Running")
+    _TIMEOUT = Constant("Timeout")
+    _COMPLETE = Constant("Complete")
+    _COMPLETED = Constant("Completed")
+    _ABORTED = Constant("Aborted")
 
     _id = 1
 
@@ -95,9 +97,12 @@ class Task(object):
         Handle timer firing; the timer identifier is sent to
         the task's co-routine target
         """
-        task_result = TaskResult(complete=True, timer_result=True,
-                                 result_data=timer_id,
-                                 ancillary_result_data=None)
+        task_result = TaskResult(
+            complete=True,
+            timer_result=True,
+            result_data=timer_id,
+            ancillary_result_data=None,
+        )
         self._target.send(task_result)
         self._scheduler.schedule_task(self)
 
@@ -131,9 +136,12 @@ class Task(object):
         readable or writeable; the selection object is sent to
         the tasks co-routine target
         """
-        task_result = TaskResult(complete=True, selobj_result=True,
-                                 result_data=select_obj,
-                                 ancillary_result_data=None)
+        task_result = TaskResult(
+            complete=True,
+            selobj_result=True,
+            result_data=select_obj,
+            ancillary_result_data=None,
+        )
         self._target.send(task_result)
         self._scheduler.schedule_task(self)
 
@@ -154,8 +162,10 @@ class Task(object):
 
         state, _ = self._work_list[task_work.id]
         if Task._TIMEOUT == state:
-            DLOG.verbose("TaskWork already marked as timed out, ignoring "
-                         "completed result, name=%s." % task_work.name)
+            DLOG.verbose(
+                "TaskWork already marked as timed out, ignoring "
+                "completed result, name=%s." % task_work.name
+            )
             self._scheduler.schedule_task(self)
             return
 
@@ -179,25 +189,31 @@ class Task(object):
                         self._target.throw(task_work.result)
                     except Exception as e:
                         if e == task_work.result:
-                            DLOG.info("Task (%s) target did not catch "
-                                      "exception, exception=%s."
-                                      % (self._name, e))
+                            DLOG.info(
+                                "Task (%s) target did not catch "
+                                "exception, exception=%s." % (self._name, e)
+                            )
                         else:
                             raise
                 else:
                     task_result = TaskResult(
-                        complete=True, result_data=task_work.result,
-                        ancillary_result_data=task_work.ancillary_result_data)
+                        complete=True,
+                        result_data=task_work.result,
+                        ancillary_result_data=task_work.ancillary_result_data,
+                    )
                     self._target.send(task_result)
 
     def task_work_timeout(self, task_work):
         """
         Work being done by the task has timed out
         """
-        DLOG.error("Task(%s) work (%s) timed out, id=%s."
-                   % (self._name, task_work.name, self._id))
-        task_result = TaskResult(complete=False, result_data=None,
-                                 ancillary_result_data=None)
+        DLOG.error(
+            "Task(%s) work (%s) timed out, id=%s."
+            % (self._name, task_work.name, self._id)
+        )
+        task_result = TaskResult(
+            complete=False, result_data=None, ancillary_result_data=None
+        )
         self._target.send(task_result)
         self._work_list[task_work.id] = [Task._TIMEOUT, task_work]
         self._scheduler.schedule_task(self)
@@ -217,5 +233,4 @@ class Task(object):
                 if Task._READY == state:
                     scheduled = self._scheduler.schedule_task_work(task_work)
                     if scheduled:
-                        self._work_list[task_work.id] = [Task._RUNNING,
-                                                         task_work]
+                        self._work_list[task_work.id] = [Task._RUNNING, task_work]

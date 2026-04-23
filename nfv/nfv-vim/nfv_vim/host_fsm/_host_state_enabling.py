@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import EnableHostTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.host')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class EnablingState(state_machine.State):
     """
     Host - Enabling State
     """
+
     def __init__(self, name):
         super(EnablingState, self).__init__(name)
 
@@ -62,8 +63,11 @@ class EnablingState(state_machine.State):
                 elif host.task.is_failed() or host.task.timed_out():
                     host.task.start()
 
-            elif HOST_EVENT.LOCK == event or HOST_EVENT.DISABLE == event \
-                    or HOST_EVENT.UNLOCK == event:
+            elif (
+                HOST_EVENT.LOCK == event
+                or HOST_EVENT.DISABLE == event
+                or HOST_EVENT.UNLOCK == event
+            ):
                 return HOST_STATE.DISABLING
 
             elif HOST_EVENT.TASK_COMPLETED == event:

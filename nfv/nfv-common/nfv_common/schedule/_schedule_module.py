@@ -13,7 +13,7 @@ _send_socket = None
 _receive_socket = None
 _pending_function_calls = list()
 
-MESSAGE_ONE = b'1'
+MESSAGE_ONE = b"1"
 
 
 def schedule_function_call(func, *args, **kwargs):
@@ -32,7 +32,7 @@ def _schedule_dispatch():
     global _receive_socket, _pending_function_calls
 
     while True:
-        select_obj = (yield)
+        select_obj = yield
         if select_obj == _receive_socket.fileno():
             _receive_socket.recv(1)
 

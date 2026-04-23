@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import DeleteTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.instance')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class DeleteState(state_machine.State):
     """
     Instance - Delete State
     """
+
     def __init__(self, name):
         super(DeleteState, self).__init__(name)
 
@@ -47,6 +48,7 @@ class DeleteState(state_machine.State):
         Handle event while in the delete state
         """
         from nfv_vim import directors
+
         instance_director = directors.get_instance_director()
 
         if INSTANCE_EVENT.TASK_START == event:

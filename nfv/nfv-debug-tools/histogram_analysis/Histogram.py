@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ################################################################################
 #
-# Copyright (c) 2017 Wind River Systems, Inc.
+# Copyright (c) 2017, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -44,8 +44,8 @@ import os
 from subprocess import call
 
 dir = os.path.dirname(__file__)
-csvDir = os.path.join(dir, 'csv/')
-logDir = os.path.join(dir, 'logs/')
+csvDir = os.path.join(dir, "csv/")
+logDir = os.path.join(dir, "logs/")
 
 if not os.path.exists(csvDir):
     os.makedirs(csvDir)
@@ -53,7 +53,10 @@ if not os.path.exists(csvDir):
 if not os.path.exists(logDir):
     os.makedirs(logDir)
 
-call("cp nfv-vim.log nfv-vim.log.[0-9] nfv-vim.log.[0-9][0-9] nfv-vim.log.[0-9].gz nfv-vim.log.[0-9][0-9].gz logs/", shell=True)
+call(
+    "cp nfv-vim.log nfv-vim.log.[0-9] nfv-vim.log.[0-9][0-9] nfv-vim.log.[0-9].gz nfv-vim.log.[0-9][0-9].gz logs/",
+    shell=True,
+)
 call("gunzip logs/nfv-vim.log.[0-9].gz logs/nfv-vim.log.[0-9][0-9].gz", shell=True)
 
 
@@ -65,8 +68,12 @@ class Parser(object):
         self.stored = False  # Flag indicating that there is new data stored
         self.length = 0  # Time duration of process
         self.instanceCount = 0  # Number of hits for the particular duration
-        self.rollingCount = 0  # Sum of the hits for each duration parsed within the sample
-        self.total = 0  # Specific duration multiplied by number of hits for that duration
+        self.rollingCount = (
+            0  # Sum of the hits for each duration parsed within the sample
+        )
+        self.total = (
+            0  # Specific duration multiplied by number of hits for that duration
+        )
         self.avg = 0  # Average execution time of process
         self.unit = ""  # Unit execution time was recorded in
         self.csvs = defaultdict(list)  # Stores unique processes in a dict of lists
@@ -89,7 +96,9 @@ class Parser(object):
             avg = total / float(rollingCount)
         else:
             avg = 0
-        self.csvs[proc].append(timestamp + "," + str(avg) + "," + str(rollingCount) + ",")
+        self.csvs[proc].append(
+            timestamp + "," + str(avg) + "," + str(rollingCount) + ","
+        )
         self.reset()
 
     def main(self):
@@ -102,13 +111,12 @@ class Parser(object):
                 for line in cfgLines:
                     if "Histogram" in line:
                         if self.write or self.stored:
-                            self.add(self.proc,
-                                     self.total,
-                                     self.timestamp,
-                                     self.rollingCount)
+                            self.add(
+                                self.proc, self.total, self.timestamp, self.rollingCount
+                            )
                         self.write = True
                         self.proc = line.partition("Histogram: ")[2]
-                        self.proc = ("".join(self.proc.split())).rstrip(':')
+                        self.proc = ("".join(self.proc.split())).rstrip(":")
                         self.timestamp = line.split()[0]
                     elif "histogram.py" in line:
                         line = line.split()
@@ -127,7 +135,7 @@ class Parser(object):
                 self.add(self.proc, self.total, self.timestamp, self.rollingCount)
 
         for process in self.csvs:
-            with open(os.path.join(csvDir, process + ".csv"), 'w+') as csvOut:
+            with open(os.path.join(csvDir, process + ".csv"), "w+") as csvOut:
                 for line in self.csvs[process]:
                     csvOut.write(line + "\n")
             csvOut.close()

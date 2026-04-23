@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -9,13 +9,14 @@ import math
 
 from nfv_common import debug
 
-DLOG = debug.debug_get_logger('nfv_common.histogram')
+DLOG = debug.debug_get_logger("nfv_common.histogram")
 
 
 class Histogram(object):
     """
     Histogram Object
     """
+
     def __init__(self, name, num_buckets, units):
         self._name = name
         self._units = units
@@ -55,7 +56,7 @@ class Histogram(object):
 
         self._sample_total += sample_as_int
         self._num_samples += 1
-        self._average_sample = (self._sample_total // self._num_samples)
+        self._average_sample = self._sample_total // self._num_samples
 
         self._buckets[bucket_idx] += 1
 
@@ -83,8 +84,10 @@ class Histogram(object):
         if sample_min == sample_max:
             return sample
 
-        return ((((scale_max - scale_min) * (sample - sample_min)) //
-                 (sample_max - sample_min)) + sample_max)
+        return (
+            ((scale_max - scale_min) * (sample - sample_min))
+            // (sample_max - sample_min)
+        ) + sample_max
 
     def display_data(self, pretty_format=True):
         """
@@ -104,10 +107,12 @@ class Histogram(object):
                 values_str += "  avg: %s" % self._average_sample
 
             if self._max_sample_date is not None:
-                values_str += ("  max: %s (%s)" % (self._max_sample,
-                                                   self._max_sample_date))
+                values_str += "  max: %s (%s)" % (
+                    self._max_sample,
+                    self._max_sample_date,
+                )
 
-            DLOG.info("%s" % '-' * 120)
+            DLOG.info("%s" % "-" * 120)
 
         DLOG.info("Histogram: %s" % self._name)
 
@@ -120,19 +125,28 @@ class Histogram(object):
         for idx, bucket_value in enumerate(self._buckets):
             if 0 != bucket_value:
                 if pretty_format:
-                    scaled_bucket_value \
-                        = self._scale_sample(0, 60, 0, self._max_sample,
-                                             bucket_value)
+                    scaled_bucket_value = self._scale_sample(
+                        0, 60, 0, self._max_sample, bucket_value
+                    )
 
-                    DLOG.info("    %03i [up to %03i %s]: %07i %s"
-                              % (idx, math.pow(2, idx), self._units, bucket_value,
-                                 '*' * min(60, scaled_bucket_value)))
+                    DLOG.info(
+                        "    %03i [up to %03i %s]: %07i %s"
+                        % (
+                            idx,
+                            math.pow(2, idx),
+                            self._units,
+                            bucket_value,
+                            "*" * min(60, scaled_bucket_value),
+                        )
+                    )
                 else:
-                    DLOG.info("    %03i [up to %03i %s]: %07i"
-                              % (idx, math.pow(2, idx), self._units, bucket_value))
+                    DLOG.info(
+                        "    %03i [up to %03i %s]: %07i"
+                        % (idx, math.pow(2, idx), self._units, bucket_value)
+                    )
 
         if pretty_format:
-            DLOG.info("%s" % '-' * 120)
+            DLOG.info("%s" % "-" * 120)
 
 
 _histograms = dict()

@@ -13,8 +13,9 @@ class NfviErrorCodes(Constants, metaclass=Singleton):
     """
     NFVI - Error Code Constants
     """
-    TOKEN_EXPIRED = Constant('token-expired')
-    NOT_FOUND = Constant('not-found')
+
+    TOKEN_EXPIRED = Constant("token-expired")
+    NOT_FOUND = Constant("not-found")
 
 
 # Constant Instantiation

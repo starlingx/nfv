@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -16,7 +16,8 @@ class Host_v8(AsDictMixin, Base):
     Host Database Table Entry
     Note: Changes are only in nfvi_host_data to replace software_load and target_load with sw_version.
     """
-    __tablename__ = 'hosts_v8'
+
+    __tablename__ = "hosts_v8"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -31,9 +32,14 @@ class Host_v8(AsDictMixin, Base):
     nfvi_host_data = Column(String(2048), nullable=False)
 
     def __repr__(self):
-        return "<Host(%r, %r, %r, %r, %r %r)>" % (self.uuid, self.name,
-                                                  self.personality, self.state,
-                                                  self.action, self.uptime)
+        return "<Host(%r, %r, %r, %r, %r %r)>" % (
+            self.uuid,
+            self.name,
+            self.personality,
+            self.state,
+            self.action,
+            self.uptime,
+        )
 
 
 class Host_v7(AsDictMixin, Base):
@@ -41,7 +47,8 @@ class Host_v7(AsDictMixin, Base):
     Host Database Table Entry
     Note: Changes are only in nfvi_host_data to add device_image_update string
     """
-    __tablename__ = 'hosts_v7'
+
+    __tablename__ = "hosts_v7"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -56,9 +63,14 @@ class Host_v7(AsDictMixin, Base):
     nfvi_host_data = Column(String(2048), nullable=False)
 
     def __repr__(self):
-        return "<Host(%r, %r, %r, %r, %r %r)>" % (self.uuid, self.name,
-                                                  self.personality, self.state,
-                                                  self.action, self.uptime)
+        return "<Host(%r, %r, %r, %r, %r %r)>" % (
+            self.uuid,
+            self.name,
+            self.personality,
+            self.state,
+            self.action,
+            self.uptime,
+        )
 
 
 class Host_v6(AsDictMixin, Base):
@@ -66,7 +78,8 @@ class Host_v6(AsDictMixin, Base):
     Host Database Table Entry
     Note: Changes are only in nfvi_host_data.
     """
-    __tablename__ = 'hosts_v6'
+
+    __tablename__ = "hosts_v6"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -81,6 +94,11 @@ class Host_v6(AsDictMixin, Base):
     nfvi_host_data = Column(String(2048), nullable=False)
 
     def __repr__(self):
-        return "<Host(%r, %r, %r, %r, %r %r)>" % (self.uuid, self.name,
-                                                  self.personality, self.state,
-                                                  self.action, self.uptime)
+        return "<Host(%r, %r, %r, %r, %r %r)>" % (
+            self.uuid,
+            self.name,
+            self.personality,
+            self.state,
+            self.action,
+            self.uptime,
+        )

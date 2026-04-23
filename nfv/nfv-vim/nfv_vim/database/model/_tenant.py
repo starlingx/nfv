@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,8 @@ class Tenant(AsDictMixin, Base):
     """
     Tenant Database Table
     """
-    __tablename__ = 'tenants'
+
+    __tablename__ = "tenants"
 
     uuid = Column(String(64), nullable=False, primary_key=True)
     name = Column(String(64), nullable=False)
@@ -22,5 +23,9 @@ class Tenant(AsDictMixin, Base):
     enabled = Column(String(64), nullable=False)
 
     def __repr__(self):
-        return "<Tenant(%r, %r, %r, %r)>" % (self.uuid, self.name,
-                                             self.description, self.enabled)
+        return "<Tenant(%r, %r, %r, %r)>" % (
+            self.uuid,
+            self.name,
+            self.description,
+            self.enabled,
+        )

@@ -13,105 +13,123 @@ class _AlarmType(Constants, metaclass=Singleton):
     """
     Alarm Type Constants
     """
-    UNKNOWN = Constant('unknown')
-    MULTI_NODE_RECOVERY_MODE = Constant('multi-node-recovery-mode')
-    HOST_SERVICES_FAILED = Constant('host-services-failed')
-    INSTANCE_FAILED = Constant('instance-failed')
-    INSTANCE_SCHEDULING_FAILED = Constant('instance-scheduling-failed')
-    INSTANCE_STOPPED = Constant('instance-stopped')
-    INSTANCE_REBOOTING = Constant('instance-rebooting')
-    INSTANCE_PAUSED = Constant('instance-paused')
-    INSTANCE_SUSPENDED = Constant('instance-suspended')
-    INSTANCE_EVACUATING = Constant('instance-evacuating')
-    INSTANCE_REBUILDING = Constant('instance-rebuilding')
-    INSTANCE_LIVE_MIGRATING = Constant('instance-live-migrating')
-    INSTANCE_COLD_MIGRATING = Constant('instance-cold-migrating')
-    INSTANCE_COLD_MIGRATED = Constant('instance-cold-migrated')
-    INSTANCE_COLD_MIGRATE_REVERTING = Constant('instance-cold-migrate-reverting')
-    INSTANCE_RESIZING = Constant('instance-resizing')
-    INSTANCE_RESIZED = Constant('instance-resized')
-    INSTANCE_RESIZE_REVERTING = Constant('instance-resize-reverting')
-    INSTANCE_GUEST_HEARTBEAT = Constant('instance-guest-heartbeat')
-    INSTANCE_GROUP_POLICY_CONFLICT = Constant('instance-group-policy-conflict')
-    SW_PATCH_AUTO_APPLY_INPROGRESS = Constant('sw-patch-auto-apply-inprogress')
-    SW_PATCH_AUTO_APPLY_ABORTING = Constant('sw-patch-auto-apply-aborting')
-    SW_PATCH_AUTO_APPLY_FAILED = Constant('sw-patch-auto-apply-failed')
-    SW_UPGRADE_AUTO_APPLY_INPROGRESS = Constant('sw-upgrade-auto-apply-inprogress')
-    SW_UPGRADE_AUTO_APPLY_ABORTING = Constant('sw-upgrade-auto-apply-aborting')
-    SW_UPGRADE_AUTO_APPLY_FAILED = Constant('sw-upgrade-auto-apply-failed')
-    FW_UPDATE_AUTO_APPLY_INPROGRESS = Constant('fw-update-auto-apply-inprogress')
-    FW_UPDATE_AUTO_APPLY_ABORTING = Constant('fw-update-auto-apply-aborting')
-    FW_UPDATE_AUTO_APPLY_FAILED = Constant('fw-update-auto-apply-failed')
-    KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS = Constant('kube-rootca-update-auto-apply-inprogress')
-    KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING = Constant('kube-rootca-update-auto-apply-aborting')
-    KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED = Constant('kube-rootca-update-auto-apply-failed')
-    KUBE_UPGRADE_AUTO_APPLY_INPROGRESS = Constant('kube-upgrade-auto-apply-inprogress')
-    KUBE_UPGRADE_AUTO_APPLY_ABORTING = Constant('kube-upgrade-auto-apply-aborting')
-    KUBE_UPGRADE_AUTO_APPLY_FAILED = Constant('kube-upgrade-auto-apply-failed')
-    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS = Constant('system-config-update-auto-apply-inprogress')
-    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING = Constant('system-config-update-auto-apply-aborting')
-    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED = Constant('system-config-update-auto-apply-failed')
+
+    UNKNOWN = Constant("unknown")
+    MULTI_NODE_RECOVERY_MODE = Constant("multi-node-recovery-mode")
+    HOST_SERVICES_FAILED = Constant("host-services-failed")
+    INSTANCE_FAILED = Constant("instance-failed")
+    INSTANCE_SCHEDULING_FAILED = Constant("instance-scheduling-failed")
+    INSTANCE_STOPPED = Constant("instance-stopped")
+    INSTANCE_REBOOTING = Constant("instance-rebooting")
+    INSTANCE_PAUSED = Constant("instance-paused")
+    INSTANCE_SUSPENDED = Constant("instance-suspended")
+    INSTANCE_EVACUATING = Constant("instance-evacuating")
+    INSTANCE_REBUILDING = Constant("instance-rebuilding")
+    INSTANCE_LIVE_MIGRATING = Constant("instance-live-migrating")
+    INSTANCE_COLD_MIGRATING = Constant("instance-cold-migrating")
+    INSTANCE_COLD_MIGRATED = Constant("instance-cold-migrated")
+    INSTANCE_COLD_MIGRATE_REVERTING = Constant("instance-cold-migrate-reverting")
+    INSTANCE_RESIZING = Constant("instance-resizing")
+    INSTANCE_RESIZED = Constant("instance-resized")
+    INSTANCE_RESIZE_REVERTING = Constant("instance-resize-reverting")
+    INSTANCE_GUEST_HEARTBEAT = Constant("instance-guest-heartbeat")
+    INSTANCE_GROUP_POLICY_CONFLICT = Constant("instance-group-policy-conflict")
+    SW_PATCH_AUTO_APPLY_INPROGRESS = Constant("sw-patch-auto-apply-inprogress")
+    SW_PATCH_AUTO_APPLY_ABORTING = Constant("sw-patch-auto-apply-aborting")
+    SW_PATCH_AUTO_APPLY_FAILED = Constant("sw-patch-auto-apply-failed")
+    SW_UPGRADE_AUTO_APPLY_INPROGRESS = Constant("sw-upgrade-auto-apply-inprogress")
+    SW_UPGRADE_AUTO_APPLY_ABORTING = Constant("sw-upgrade-auto-apply-aborting")
+    SW_UPGRADE_AUTO_APPLY_FAILED = Constant("sw-upgrade-auto-apply-failed")
+    FW_UPDATE_AUTO_APPLY_INPROGRESS = Constant("fw-update-auto-apply-inprogress")
+    FW_UPDATE_AUTO_APPLY_ABORTING = Constant("fw-update-auto-apply-aborting")
+    FW_UPDATE_AUTO_APPLY_FAILED = Constant("fw-update-auto-apply-failed")
+    KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS = Constant(
+        "kube-rootca-update-auto-apply-inprogress"
+    )
+    KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING = Constant(
+        "kube-rootca-update-auto-apply-aborting"
+    )
+    KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED = Constant(
+        "kube-rootca-update-auto-apply-failed"
+    )
+    KUBE_UPGRADE_AUTO_APPLY_INPROGRESS = Constant("kube-upgrade-auto-apply-inprogress")
+    KUBE_UPGRADE_AUTO_APPLY_ABORTING = Constant("kube-upgrade-auto-apply-aborting")
+    KUBE_UPGRADE_AUTO_APPLY_FAILED = Constant("kube-upgrade-auto-apply-failed")
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS = Constant(
+        "system-config-update-auto-apply-inprogress"
+    )
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING = Constant(
+        "system-config-update-auto-apply-aborting"
+    )
+    SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED = Constant(
+        "system-config-update-auto-apply-failed"
+    )
 
 
 class _AlarmContext(Constants, metaclass=Singleton):
     """
     Alarm Context Constants
     """
-    ADMIN = Constant('admin')
-    TENANT = Constant('tenant')
+
+    ADMIN = Constant("admin")
+    TENANT = Constant("tenant")
 
 
 class _AlarmEventType(Constants, metaclass=Singleton):
     """
     Alarm Event Type Constants
     """
-    UNKNOWN = Constant('unknown')
-    COMMUNICATIONS_ALARM = Constant('communications-alarm')
-    PROCESSING_ERROR_ALARM = Constant('processing-error-alarm')
-    ENVIRONMENTAL_ALARM = Constant('environmental-alarm')
-    QUALITY_OF_SERVICE_ALARM = Constant('quality-of-service-alarm')
-    EQUIPMENT_ALARM = Constant('equipment-alarm')
-    INTEGRITY_VIOLATION = Constant('integrity-violation')
-    OPERATIONAL_VIOLATION = Constant('operational-violation')
-    PHYSICAL_VIOLATION = Constant('physical-violation')
-    SECURITY_SERVICE_VIOLATION = Constant('security-service-violation')
-    MECHANISM_VIOLATION = Constant('mechanism-violation')
-    TIME_DOMAIN_VIOLATION = Constant('time-domain-violation')
+
+    UNKNOWN = Constant("unknown")
+    COMMUNICATIONS_ALARM = Constant("communications-alarm")
+    PROCESSING_ERROR_ALARM = Constant("processing-error-alarm")
+    ENVIRONMENTAL_ALARM = Constant("environmental-alarm")
+    QUALITY_OF_SERVICE_ALARM = Constant("quality-of-service-alarm")
+    EQUIPMENT_ALARM = Constant("equipment-alarm")
+    INTEGRITY_VIOLATION = Constant("integrity-violation")
+    OPERATIONAL_VIOLATION = Constant("operational-violation")
+    PHYSICAL_VIOLATION = Constant("physical-violation")
+    SECURITY_SERVICE_VIOLATION = Constant("security-service-violation")
+    MECHANISM_VIOLATION = Constant("mechanism-violation")
+    TIME_DOMAIN_VIOLATION = Constant("time-domain-violation")
 
 
 class _AlarmProbableCause(Constants, metaclass=Singleton):
     """
     Alarm Probable Cause Constants
     """
-    UNKNOWN = Constant('unknown')
-    INDETERMINATE = Constant('indeterminate')
-    SOFTWARE_ERROR = Constant('software-error')
-    SOFTWARE_PROGRAM_ERROR = Constant('software-program-error')
-    UNDERLYING_RESOURCE_UNAVAILABLE = Constant('underlying-resource-unavailable')
-    PROCEDURAL_ERROR = Constant('procedural-error')
+
+    UNKNOWN = Constant("unknown")
+    INDETERMINATE = Constant("indeterminate")
+    SOFTWARE_ERROR = Constant("software-error")
+    SOFTWARE_PROGRAM_ERROR = Constant("software-program-error")
+    UNDERLYING_RESOURCE_UNAVAILABLE = Constant("underlying-resource-unavailable")
+    PROCEDURAL_ERROR = Constant("procedural-error")
 
 
 class _AlarmSeverity(Constants, metaclass=Singleton):
     """
     Alarm Severity Constants
     """
-    UNKNOWN = Constant('unknown')
-    CLEARED = Constant('cleared')
-    INDETERMINATE = Constant('indeterminate')
-    WARNING = Constant('warning')
-    MINOR = Constant('minor')
-    MAJOR = Constant('major')
-    CRITICAL = Constant('critical')
+
+    UNKNOWN = Constant("unknown")
+    CLEARED = Constant("cleared")
+    INDETERMINATE = Constant("indeterminate")
+    WARNING = Constant("warning")
+    MINOR = Constant("minor")
+    MAJOR = Constant("major")
+    CRITICAL = Constant("critical")
 
 
 class _AlarmTrendIndication(Constants, metaclass=Singleton):
     """
     Alarm Trend Indication Constants
     """
-    UNKNOWN = Constant('unknown')
-    LESS_SEVERE = Constant('less-severe')
-    NO_CHANGE = Constant('no-change')
-    MORE_SEVERE = Constant('more-severe')
+
+    UNKNOWN = Constant("unknown")
+    LESS_SEVERE = Constant("less-severe")
+    NO_CHANGE = Constant("no-change")
+    MORE_SEVERE = Constant("more-severe")
 
 
 # Constant Instantiation

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -58,11 +58,16 @@ def database_subnet_get_list():
 
     subnet_objs = list()
     for subnet in query.all():
-        subnet_obj = objects.Subnet(subnet.uuid, subnet.name,
-                                    subnet.ip_version, subnet.subnet_ip,
-                                    subnet.subnet_prefix, subnet.gateway_ip,
-                                    subnet.network_uuid,
-                                    subnet.is_dhcp_enabled)
+        subnet_obj = objects.Subnet(
+            subnet.uuid,
+            subnet.name,
+            subnet.ip_version,
+            subnet.subnet_ip,
+            subnet.subnet_prefix,
+            subnet.gateway_ip,
+            subnet.network_uuid,
+            subnet.is_dhcp_enabled,
+        )
         subnet_objs.append(subnet_obj)
     return subnet_objs
 
@@ -125,17 +130,20 @@ def database_network_get_list():
 
     network_objs = list()
     for network in query.all():
-        provider_data = objects.NetworkProviderData(network.physical_network,
-                                                    network.network_type,
-                                                    network.segmentation_id)
+        provider_data = objects.NetworkProviderData(
+            network.physical_network, network.network_type, network.segmentation_id
+        )
 
-        network_obj = objects.Network(network.uuid, network.name,
-                                      network.admin_state,
-                                      network.oper_state,
-                                      json.loads(network.avail_status),
-                                      network.is_shared,
-                                      network.mtu,
-                                      provider_data)
+        network_obj = objects.Network(
+            network.uuid,
+            network.name,
+            network.admin_state,
+            network.oper_state,
+            json.loads(network.avail_status),
+            network.is_shared,
+            network.mtu,
+            provider_data,
+        )
 
         network_objs.append(network_obj)
     return network_objs

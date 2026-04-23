@@ -10,6 +10,7 @@ class NFVIInfrastructureAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Infrastructure API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):
@@ -78,82 +79,84 @@ class NFVIInfrastructureAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def delete_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def delete_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Delete infrastructure host services using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def enable_host_services(self, future, host_uuid,
-                             host_name, host_personality,
-                             callback):
+    def enable_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Enable infrastructure host services using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def disable_host_services(self, future, host_uuid,
-                              host_name, host_personality, host_offline,
-                              callback):
+    def disable_host_services(
+        self, future, host_uuid, host_name, host_personality, host_offline, callback
+    ):
         """
         Disable infrastructure host services using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_services_enabled(self, future, host_uuid, host_name,
-                                     callback):
+    def notify_host_services_enabled(self, future, host_uuid, host_name, callback):
         """
         Notify host services are now enabled using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_services_disabled(self, future, host_uuid, host_name,
-                                      callback):
+    def notify_host_services_disabled(self, future, host_uuid, host_name, callback):
         """
         Notify host services are now disabled using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_services_disable_extend(self, future, host_uuid, host_name,
-                                            callback):
+    def notify_host_services_disable_extend(
+        self, future, host_uuid, host_name, callback
+    ):
         """
         Notify host services disable timeout needs to be extended using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_services_disable_failed(self, future, host_uuid, host_name,
-                                            reason, callback):
+    def notify_host_services_disable_failed(
+        self, future, host_uuid, host_name, reason, callback
+    ):
         """
         Notify host services disable failed using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_services_deleted(self, future, host_uuid, host_name,
-                                     callback):
+    def notify_host_services_deleted(self, future, host_uuid, host_name, callback):
         """
         Notify host services have been deleted using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_services_delete_failed(self, future, host_uuid, host_name,
-                                           reason, callback):
+    def notify_host_services_delete_failed(
+        self, future, host_uuid, host_name, reason, callback
+    ):
         """
         Notify host services delete failed using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_failed(self, future, host_uuid, host_name, host_personality,
-                           callback):
+    def notify_host_failed(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Notify host failed using the plugin
         """

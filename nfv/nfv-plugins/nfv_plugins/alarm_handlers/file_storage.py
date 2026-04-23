@@ -14,10 +14,11 @@ class FileStorage(alarm_handlers_v1.AlarmHandler):
     """
     File Storage Alarm Handler is used to store alarm data to disk.
     """
-    _name = 'File-Storage'
-    _version = '1.0.0'
-    _provider = 'Wind River'
-    _signature = 'e33d7cf6-f270-4256-893e-16266ee4dd2e'
+
+    _name = "File-Storage"
+    _version = "1.0.0"
+    _provider = "Wind River"
+    _signature = "e33d7cf6-f270-4256-893e-16266ee4dd2e"
 
     @property
     def name(self):
@@ -40,84 +41,111 @@ class FileStorage(alarm_handlers_v1.AlarmHandler):
         Write alarm data to a file
         """
         # Write the file in utf-8 format to support unicode text
-        with codecs.open(config.CONF['File-Storage']['file'], "a", 'utf-8') as f:
-            line_separator_str = "%s" % ('=' * 84)
+        with codecs.open(config.CONF["File-Storage"]["file"], "a", "utf-8") as f:
+            line_separator_str = "%s" % ("=" * 84)
             print(line_separator_str, file=f)
             print(alarm_action, file=f)
             print("%-24s = %s" % ("alarm-uuid", alarm_uuid), file=f)
 
             if alarm_data is not None:
-                print("%-24s = %s"
-                           % ("alarm-type", alarm_data.alarm_type), file=f)
-                print("%-24s = %s"
-                           % ("alarm-context", alarm_data.alarm_context), file=f)
-                print("%-24s = %s"
-                           % ("alarm-entity-type",
-                              alarm_data.entity_type), file=f)
-                print("%-24s = %s"
-                           % ("alarm-entity", alarm_data.entity), file=f)
-                print("%-24s = %s"
-                           % ("event-type", alarm_data.event_type), file=f)
-                print("%-24s = %s"
-                           % ("probable-cause",
-                              alarm_data.probable_cause), file=f)
-                print("%-24s = %s"
-                           % ("specific-problem-text",
-                              alarm_data.specific_problem_text), file=f)
-                print("%-24s = %s"
-                           % ("perceived-severity",
-                              alarm_data.perceived_severity), file=f)
-                print("%-24s = %s"
-                           % ("trend-indication",
-                              alarm_data.trend_indication), file=f)
-                print("%-24s = %s"
-                           % ("proposed-repair-action",
-                              alarm_data.proposed_repair_action), file=f)
-                print("%-24s = %s"
-                           % ("additional-text", alarm_data.additional_text),
-                           file=f)
+                print("%-24s = %s" % ("alarm-type", alarm_data.alarm_type), file=f)
+                print(
+                    "%-24s = %s" % ("alarm-context", alarm_data.alarm_context), file=f
+                )
+                print(
+                    "%-24s = %s" % ("alarm-entity-type", alarm_data.entity_type), file=f
+                )
+                print("%-24s = %s" % ("alarm-entity", alarm_data.entity), file=f)
+                print("%-24s = %s" % ("event-type", alarm_data.event_type), file=f)
+                print(
+                    "%-24s = %s" % ("probable-cause", alarm_data.probable_cause), file=f
+                )
+                print(
+                    "%-24s = %s"
+                    % ("specific-problem-text", alarm_data.specific_problem_text),
+                    file=f,
+                )
+                print(
+                    "%-24s = %s"
+                    % ("perceived-severity", alarm_data.perceived_severity),
+                    file=f,
+                )
+                print(
+                    "%-24s = %s" % ("trend-indication", alarm_data.trend_indication),
+                    file=f,
+                )
+                print(
+                    "%-24s = %s"
+                    % ("proposed-repair-action", alarm_data.proposed_repair_action),
+                    file=f,
+                )
+                print(
+                    "%-24s = %s" % ("additional-text", alarm_data.additional_text),
+                    file=f,
+                )
 
                 if alarm_data.state_data is not None:
-                    print("%-24s = %s"
-                               % ("state-data.state",
-                                  alarm_data.state_data.state), file=f)
+                    print(
+                        "%-24s = %s"
+                        % ("state-data.state", alarm_data.state_data.state),
+                        file=f,
+                    )
 
                 if alarm_data.threshold_data is not None:
-                    print("%-24s = %s"
-                               % ("threshold-data.threshold-value",
-                                  alarm_data.threshold_data.threshold_value),
-                               file=f)
-                    print("%40s = %s"
-                               % ("threshold-data.observed-value",
-                                  alarm_data.threshold_data.observed_value),
-                               file=f)
+                    print(
+                        "%-24s = %s"
+                        % (
+                            "threshold-data.threshold-value",
+                            alarm_data.threshold_data.threshold_value,
+                        ),
+                        file=f,
+                    )
+                    print(
+                        "%40s = %s"
+                        % (
+                            "threshold-data.observed-value",
+                            alarm_data.threshold_data.observed_value,
+                        ),
+                        file=f,
+                    )
 
-                print("%-24s = %s"
-                           % ("service-affecting",
-                              alarm_data.service_affecting), file=f)
-                print("%-24s = %s"
-                           % ("suppression-allowed",
-                              alarm_data.suppression_allowed), file=f)
+                print(
+                    "%-24s = %s" % ("service-affecting", alarm_data.service_affecting),
+                    file=f,
+                )
+                print(
+                    "%-24s = %s"
+                    % ("suppression-allowed", alarm_data.suppression_allowed),
+                    file=f,
+                )
 
                 if alarm_data.created_timestamp is not None:
-                    print("%-24s = %s"
-                               % ("created-timestamp",
-                                  alarm_data.created_timestamp), file=f)
+                    print(
+                        "%-24s = %s"
+                        % ("created-timestamp", alarm_data.created_timestamp),
+                        file=f,
+                    )
 
                 if alarm_data.raised_timestamp is not None:
-                    print("%-24s = %s"
-                               % ("raised-timestamp",
-                                  alarm_data.raised_timestamp), file=f)
+                    print(
+                        "%-24s = %s"
+                        % ("raised-timestamp", alarm_data.raised_timestamp),
+                        file=f,
+                    )
 
                 if alarm_data.changed_timestamp is not None:
-                    print("%-24s = %s"
-                               % ("changed-timestamp",
-                                  alarm_data.changed_timestamp), file=f)
+                    print(
+                        "%-24s = %s"
+                        % ("changed-timestamp", alarm_data.changed_timestamp),
+                        file=f,
+                    )
 
                 if alarm_data.cleared_timestamp is not None:
-                    print("%-24s = %s"
-                               % ("cleared-timestamp",
-                                  alarm_data.cleared_timestamp), file=f)
+                    print(
+                        "%-24s = %s"
+                        % ("cleared-timestamp", alarm_data.cleared_timestamp),
+                        file=f,
+                    )
 
             print(line_separator_str, file=f)
 

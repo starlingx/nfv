@@ -12,19 +12,20 @@ from nfv_common.helpers import Singleton
 from nfv_vim import alarm
 from nfv_vim.objects._object import ObjectData
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.instance_group')
+DLOG = debug.debug_get_logger("nfv_vim.objects.instance_group")
 
 
 class InstanceGroupPolicy(Constants, metaclass=Singleton):
     """
     Instance Group Policy Constants
     """
-    NONE = Constant('')
-    UNKNOWN = Constant('unknown')
-    AFFINITY = Constant('affinity')
-    ANTI_AFFINITY = Constant('anti-affinity')
-    AFFINITY_BEST_EFFORT = Constant('affinity-best-effort')
-    ANTI_AFFINITY_BEST_EFFORT = Constant('anti-affinity-best-effort')
+
+    NONE = Constant("")
+    UNKNOWN = Constant("unknown")
+    AFFINITY = Constant("affinity")
+    ANTI_AFFINITY = Constant("anti-affinity")
+    AFFINITY_BEST_EFFORT = Constant("affinity-best-effort")
+    ANTI_AFFINITY_BEST_EFFORT = Constant("anti-affinity-best-effort")
 
 
 # Instance Group Constant Instantiation
@@ -35,8 +36,9 @@ class InstanceGroup(ObjectData):
     """
     Instance Group Object
     """
+
     def __init__(self, nfvi_instance_group):
-        super(InstanceGroup, self).__init__('1.0.0')
+        super(InstanceGroup, self).__init__("1.0.0")
         self._nfvi_instance_group = nfvi_instance_group
         self._alarms = list()
 
@@ -110,29 +112,25 @@ class InstanceGroup(ObjectData):
                     if peer_member.host_name != member.host_name:
                         if not self._alarms:
                             additional_text = (
-                                ", some instances are not on the same host")
-                            self._alarms = \
-                                alarm.raise_instance_group_policy_alarm(
-                                    self,
-                                    INSTANCE_GROUP_POLICY.AFFINITY_BEST_EFFORT,
-                                    alarm.ALARM_TYPE.
-                                    INSTANCE_GROUP_POLICY_CONFLICT,
-                                    additional_text=additional_text)
+                                ", some instances are not on the same host"
+                            )
+                            self._alarms = alarm.raise_instance_group_policy_alarm(
+                                self,
+                                INSTANCE_GROUP_POLICY.AFFINITY_BEST_EFFORT,
+                                alarm.ALARM_TYPE.INSTANCE_GROUP_POLICY_CONFLICT,
+                                additional_text=additional_text,
+                            )
                         return
-                elif INSTANCE_GROUP_POLICY.ANTI_AFFINITY_BEST_EFFORT in \
-                        self.policies:
+                elif INSTANCE_GROUP_POLICY.ANTI_AFFINITY_BEST_EFFORT in self.policies:
                     if peer_member.host_name == member.host_name:
                         if not self._alarms:
-                            additional_text = (
-                                ", some instances are on the same host")
-                            self._alarms = \
-                                alarm.raise_instance_group_policy_alarm(
-                                    self,
-                                    INSTANCE_GROUP_POLICY.
-                                    ANTI_AFFINITY_BEST_EFFORT,
-                                    alarm.ALARM_TYPE.
-                                    INSTANCE_GROUP_POLICY_CONFLICT,
-                                    additional_text=additional_text)
+                            additional_text = ", some instances are on the same host"
+                            self._alarms = alarm.raise_instance_group_policy_alarm(
+                                self,
+                                INSTANCE_GROUP_POLICY.ANTI_AFFINITY_BEST_EFFORT,
+                                alarm.ALARM_TYPE.INSTANCE_GROUP_POLICY_CONFLICT,
+                                additional_text=additional_text,
+                            )
                         return
 
         # No policy conflicts were detected
@@ -157,6 +155,7 @@ class InstanceGroup(ObjectData):
         Persist changes to instance group object
         """
         from nfv_vim import database
+
         database.database_instance_group_add(self)
 
     def as_dict(self):
@@ -164,9 +163,9 @@ class InstanceGroup(ObjectData):
         Represent instance group object as dictionary
         """
         data = dict()
-        data['uuid'] = self.uuid
-        data['name'] = self.name
-        data['members'] = self.member_uuids
-        data['policies'] = self.policies
-        data['nfvi_instance_group'] = self._nfvi_instance_group.as_dict()
+        data["uuid"] = self.uuid
+        data["name"] = self.name
+        data["members"] = self.member_uuids
+        data["policies"] = self.policies
+        data["nfvi_instance_group"] = self._nfvi_instance_group.as_dict()
         return data

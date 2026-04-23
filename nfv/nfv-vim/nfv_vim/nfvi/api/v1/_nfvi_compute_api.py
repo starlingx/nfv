@@ -10,6 +10,7 @@ class NFVIComputeAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Compute API Class Definition
     """
+
     @property
     @abc.abstractmethod
     def name(self):
@@ -71,9 +72,14 @@ class NFVIComputeAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def create_instance_type(self, future, instance_type_uuid,
-                             instance_type_name, instance_type_attributes,
-                             callback):
+    def create_instance_type(
+        self,
+        future,
+        instance_type_uuid,
+        instance_type_name,
+        instance_type_attributes,
+        callback,
+    ):
         """
         Create an instance type using the plugin
         """
@@ -108,49 +114,64 @@ class NFVIComputeAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def create_instance(self, future, instance_name, instance_type_uuid,
-                        image_uuid, block_devices, networks, context,
-                        callback):
+    def create_instance(
+        self,
+        future,
+        instance_name,
+        instance_type_uuid,
+        image_uuid,
+        block_devices,
+        networks,
+        context,
+        callback,
+    ):
         """
         Create an instance using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def live_migrate_instance(self, future, instance_uuid, to_host_name,
-                              block_storage_migration, context, callback):
+    def live_migrate_instance(
+        self,
+        future,
+        instance_uuid,
+        to_host_name,
+        block_storage_migration,
+        context,
+        callback,
+    ):
         """
         Live migrate an instance using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def cold_migrate_instance(self, future, instance_uuid, to_host_name,
-                              context, callback):
+    def cold_migrate_instance(
+        self, future, instance_uuid, to_host_name, context, callback
+    ):
         """
         Cold migrate an instance using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def cold_migrate_confirm_instance(self, future, instance_uuid, context,
-                                      callback):
+    def cold_migrate_confirm_instance(self, future, instance_uuid, context, callback):
         """
         Cold migrate confirm an instance using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def cold_migrate_revert_instance(self, future, instance_uuid, context,
-                                     callback):
+    def cold_migrate_revert_instance(self, future, instance_uuid, context, callback):
         """
         Cold migrate revert an instance using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def resize_instance(self, future, instance_uuid, instance_type_uuid,
-                        context, callback):
+    def resize_instance(
+        self, future, instance_uuid, instance_type_uuid, context, callback
+    ):
         """
         Resize an instance using the plugin
         """
@@ -171,24 +192,34 @@ class NFVIComputeAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def evacuate_instance(self, future, instance_uuid, admin_password,
-                          to_host_name, context, callback):
+    def evacuate_instance(
+        self, future, instance_uuid, admin_password, to_host_name, context, callback
+    ):
         """
         Evacuate an instance using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def reboot_instance(self, future, instance_uuid, graceful_shutdown,
-                        context, callback):
+    def reboot_instance(
+        self, future, instance_uuid, graceful_shutdown, context, callback
+    ):
         """
         Reboot an instance using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def rebuild_instance(self, future, instance_uuid, instance_name, image_uuid,
-                         admin_password, context, callback):
+    def rebuild_instance(
+        self,
+        future,
+        instance_uuid,
+        instance_name,
+        image_uuid,
+        admin_password,
+        context,
+        callback,
+    ):
         """
         Rebuild an instance using the plugin
         """
@@ -279,48 +310,54 @@ class NFVIComputeAPI(object, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def notify_host_enabled(self, future, host_uuid, host_name,
-                            host_personality, callback):
+    def notify_host_enabled(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Notify compute host enabled using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def notify_host_disabled(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def notify_host_disabled(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Notify compute host disabled using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def disable_host_services(self, future, host_uuid, host_name,
-                              host_personality, callback):
+    def disable_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Disable compute services on a host using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def enable_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def enable_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Enable compute services on a host using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def delete_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def delete_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Delete compute services on a host using the plugin
         """
         pass
 
     @abc.abstractmethod
-    def query_host_services(self, future, host_uuid, host_name,
-                            host_personality, callback):
+    def query_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Query compute services on a host using the plugin
         """

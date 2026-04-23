@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,9 +18,9 @@ def process_main():
     """
     try:
         arg_parser = argparse.ArgumentParser()
-        arg_parser.add_argument('-c', '--config', help='configuration file')
-        arg_parser.add_argument('-s', '--start_date', help='start date')
-        arg_parser.add_argument('-e', '--end_date', help='end date')
+        arg_parser.add_argument("-c", "--config", help="configuration file")
+        arg_parser.add_argument("-s", "--start_date", help="start date")
+        arg_parser.add_argument("-e", "--end_date", help="end date")
 
         args = arg_parser.parse_args()
 
@@ -32,37 +32,44 @@ def process_main():
 
         if args.start_date:
             try:
-                start_date = datetime.datetime.strptime(args.start_date,
-                                                        "%Y-%m-%d %H:%M:%S")
+                start_date = datetime.datetime.strptime(
+                    args.start_date, "%Y-%m-%d %H:%M:%S"
+                )
             except ValueError:
-                print("Start-Date '%s' is invalid, "
-                       "expected=<YYYY-MM-DD HH:MM:SS>" % args.start_date)
+                print(
+                    "Start-Date '%s' is invalid, "
+                    "expected=<YYYY-MM-DD HH:MM:SS>" % args.start_date
+                )
                 sys.exit(1)
         else:
             start_date = datetime.datetime.min
 
         if args.end_date:
             try:
-                end_date = datetime.datetime.strptime(args.start_date,
-                                                      "%Y-%m-%d %H:%M:%S")
+                end_date = datetime.datetime.strptime(
+                    args.start_date, "%Y-%m-%d %H:%M:%S"
+                )
             except ValueError:
-                print("End-Date '%s' is invalid, "
-                       "expected=<YYYY-MM-DD HH:MM:SS>" % args.start_date)
+                print(
+                    "End-Date '%s' is invalid, "
+                    "expected=<YYYY-MM-DD HH:MM:SS>" % args.start_date
+                )
                 sys.exit(1)
         else:
             end_date = datetime.datetime.max
 
         forensic.forensic_initialize()
 
-        utf8_writer = codecs.getwriter('utf8')
+        utf8_writer = codecs.getwriter("utf8")
         sys.stdout = utf8_writer(sys.stdout)
 
         def progress(percentage):
             sys.stdout.write("\r  Complete: {0:.0f}%".format(percentage))
             sys.stdout.flush()
 
-        records = forensic.evidence_from_files(config.CONF.get('files'),
-                                               start_date, end_date, progress)
+        records = forensic.evidence_from_files(
+            config.CONF.get("files"), start_date, end_date, progress
+        )
         forensic.analysis_stdout(records)
 
     except Exception as e:
@@ -73,5 +80,5 @@ def process_main():
         forensic.forensic_finalize()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     process_main()

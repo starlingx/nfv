@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,15 +10,16 @@ from nfv_common import debug
 from nfv_vim import event_log
 from nfv_vim import nfvi
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.hypervisor')
+DLOG = debug.debug_get_logger("nfv_vim.objects.hypervisor")
 
 
 class Hypervisor(ObjectData):
     """
     Hypervisor Object
     """
+
     def __init__(self, nfvi_hypervisor):
-        super(Hypervisor, self).__init__('1.0.0')
+        super(Hypervisor, self).__init__("1.0.0")
         self._nfvi_hypervisor = nfvi_hypervisor
         if nfvi_hypervisor.have_stats():
             self.vcpus_used = nfvi_hypervisor.vcpus_used
@@ -100,11 +101,13 @@ class Hypervisor(ObjectData):
             elif host.is_offline():
                 return False
 
-        return (nfvi.objects.v1.HYPERVISOR_OPER_STATE.ENABLED ==
-                self._nfvi_hypervisor.oper_state)
+        return (
+            nfvi.objects.v1.HYPERVISOR_OPER_STATE.ENABLED
+            == self._nfvi_hypervisor.oper_state
+        )
 
     def have_stats(self):
-        return self.get('vcpus_used', None) is not None
+        return self.get("vcpus_used", None) is not None
 
     def nfvi_hypervisor_update(self, nfvi_hypervisor):
         """
@@ -126,19 +129,27 @@ class Hypervisor(ObjectData):
         self._nfvi_hypervisor = nfvi_hypervisor
         self._persist()
 
-        if (prev_admin_state != self.admin_state or
-                prev_oper_state != self.oper_state):
-            DLOG.info("Hypervisor %s state change was %s-%s now %s-%s "
-                      % (self.host_name, prev_admin_state, prev_oper_state,
-                         self.admin_state, self.oper_state))
+        if prev_admin_state != self.admin_state or prev_oper_state != self.oper_state:
+            DLOG.info(
+                "Hypervisor %s state change was %s-%s now %s-%s "
+                % (
+                    self.host_name,
+                    prev_admin_state,
+                    prev_oper_state,
+                    self.admin_state,
+                    self.oper_state,
+                )
+            )
             event_log.hypervisor_issue_log(
-                self, event_log.EVENT_ID.HYPERVISOR_STATE_CHANGE)
+                self, event_log.EVENT_ID.HYPERVISOR_STATE_CHANGE
+            )
 
     def _persist(self):
         """
         Persist changes to hypervisor object
         """
         from nfv_vim import database
+
         database.database_hypervisor_add(self)
 
     def as_dict(self):
@@ -146,17 +157,17 @@ class Hypervisor(ObjectData):
         Represent hypervisor object as dictionary
         """
         data = dict()
-        data['uuid'] = self.uuid
-        data['admin_state'] = self.admin_state
-        data['oper_state'] = self.oper_state
-        data['host_name'] = self.host_name
-        data['vcpus_used'] = self.vcpus_used
-        data['vcpus_max'] = self.vcpus_max
-        data['mem_used_mb'] = self.mem_used_mb
-        data['mem_free_mb'] = self.mem_free_mb
-        data['mem_max_mb'] = self.mem_max_mb
-        data['disk_used_gb'] = self.disk_used_gb
-        data['disk_max_gb'] = self.disk_max_gb
-        data['running_instances'] = self.running_instances
-        data['nfvi_hypervisor'] = self._nfvi_hypervisor.as_dict()
+        data["uuid"] = self.uuid
+        data["admin_state"] = self.admin_state
+        data["oper_state"] = self.oper_state
+        data["host_name"] = self.host_name
+        data["vcpus_used"] = self.vcpus_used
+        data["vcpus_max"] = self.vcpus_max
+        data["mem_used_mb"] = self.mem_used_mb
+        data["mem_free_mb"] = self.mem_free_mb
+        data["mem_max_mb"] = self.mem_max_mb
+        data["disk_used_gb"] = self.disk_used_gb
+        data["disk_max_gb"] = self.disk_max_gb
+        data["running_instances"] = self.running_instances
+        data["nfvi_hypervisor"] = self._nfvi_hypervisor.as_dict()
         return data

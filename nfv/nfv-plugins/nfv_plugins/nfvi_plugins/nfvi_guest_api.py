@@ -18,7 +18,7 @@ from nfv_plugins.nfvi_plugins.openstack import rest_api
 
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 
-DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.guest_api')
+DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.guest_api")
 
 
 def guest_service_get_name(name):
@@ -171,9 +171,8 @@ def get_services_with_guest_service_state(services):
     services_data = []
     for service in services:
         service_data = dict()
-        service_data['service'] = service['service']
-        service_data['state'] \
-            = guest_service_get_service_state(service['admin_state'])
+        service_data["service"] = service["service"]
+        service_data["state"] = guest_service_get_service_state(service["admin_state"])
         services_data.append(service_data)
     return services_data
 
@@ -182,10 +181,11 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     """
     NFVI Guest API Class Definition
     """
-    _name = 'Guest-API'
-    _version = '1.0.0'
-    _provider = 'Wind River'
-    _signature = '22b3dbf6-e4ba-441b-8797-fb8a51210a43'
+
+    _name = "Guest-API"
+    _version = "1.0.0"
+    _provider = "Wind River"
+    _signature = "22b3dbf6-e4ba-441b-8797-fb8a51210a43"
 
     @property
     def name(self):
@@ -216,90 +216,106 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         self._guest_services_action_notify_callbacks = list()
 
     def _host_supports_nova_compute(self, personality):
-        return (('worker' in personality) and
-                (self._openstack_directory.get_service_info(
-                    OPENSTACK_SERVICE.NOVA) is not None))
+        return ("worker" in personality) and (
+            self._openstack_directory.get_service_info(OPENSTACK_SERVICE.NOVA)
+            is not None
+        )
 
-    def guest_services_create(self, future, instance_uuid, host_name,
-                              services, callback):
+    def guest_services_create(
+        self, future, instance_uuid, host_name, services, callback
+    ):
         """
         Guest Services Create
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._token is None or self._token.is_expired():
                 future.work(openstack.get_token, self._directory)
-                future.result = (yield)
+                future.result = yield
 
-                if not future.result.is_complete() or \
-                        future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete, "
-                               "instance_uuid=%s." % instance_uuid)
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error(
+                        "OpenStack get-token did not complete, "
+                        "instance_uuid=%s." % instance_uuid
+                    )
                     return
 
                 self._token = future.result.data
 
-            future.work(guest.guest_services_create, self._token,
-                        instance_uuid, host_name, services)
-            future.result = (yield)
+            future.work(
+                guest.guest_services_create,
+                self._token,
+                instance_uuid,
+                host_name,
+                services,
+            )
+            future.result = yield
 
             if not future.result.is_complete():
                 return
 
-            response['completed'] = True
+            response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to create "
-                               "guest services, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to create "
+                    "guest services, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to create "
-                           "guest services, instance_uuid=%s, error=%s."
-                           % (instance_uuid, e))
+            DLOG.exception(
+                "Caught exception while trying to create "
+                "guest services, instance_uuid=%s, error=%s." % (instance_uuid, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def guest_services_set(self, future, instance_uuid, host_name,
-                           services, callback):
+    def guest_services_set(self, future, instance_uuid, host_name, services, callback):
         """
         Guest Services Set
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._token is None or self._token.is_expired():
                 future.work(openstack.get_token, self._directory)
-                future.result = (yield)
+                future.result = yield
 
-                if not future.result.is_complete() or \
-                        future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete, "
-                               "instance_uuid=%s." % instance_uuid)
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error(
+                        "OpenStack get-token did not complete, "
+                        "instance_uuid=%s." % instance_uuid
+                    )
                     return
 
                 self._token = future.result.data
 
             services_data = get_services_with_guest_service_state(services)
-            future.work(guest.guest_services_set, self._token,
-                        instance_uuid, host_name, services_data)
-            future.result = (yield)
+            future.work(
+                guest.guest_services_set,
+                self._token,
+                instance_uuid,
+                host_name,
+                services_data,
+            )
+            future.result = yield
 
             if not future.result.is_complete():
                 return
@@ -307,42 +323,46 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
             set_data = future.result.data
 
             result_data = dict()
-            result_data['instance_uuid'] = set_data['uuid']
-            result_data['host_name'] = set_data['hostname']
+            result_data["instance_uuid"] = set_data["uuid"]
+            result_data["host_name"] = set_data["hostname"]
 
             service_objs = list()
-            for service in set_data.get('services', list()):
-                service_name = guest_service_get_name(service['service'])
-                admin_state = guest_service_get_admin_state(service['state'])
-                oper_state = guest_service_get_oper_state(service['status'])
-                restart_timeout = service.get('restart-timeout', None)
+            for service in set_data.get("services", list()):
+                service_name = guest_service_get_name(service["service"])
+                admin_state = guest_service_get_admin_state(service["state"])
+                oper_state = guest_service_get_oper_state(service["status"])
+                restart_timeout = service.get("restart-timeout", None)
                 if restart_timeout is not None:
                     restart_timeout = int(restart_timeout)
 
                 service_obj = nfvi.objects.v1.GuestService(
-                    service_name, admin_state, oper_state, restart_timeout)
+                    service_name, admin_state, oper_state, restart_timeout
+                )
 
                 service_objs.append(service_obj)
 
-            result_data['services'] = service_objs
+            result_data["services"] = service_objs
 
-            response['result-data'] = result_data
-            response['completed'] = True
+            response["result-data"] = result_data
+            response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to set "
-                               "guest services, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to set "
+                    "guest services, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to set "
-                           "guest services, instance_uuid=%s, error=%s."
-                           % (instance_uuid, e))
+            DLOG.exception(
+                "Caught exception while trying to set "
+                "guest services, instance_uuid=%s, error=%s." % (instance_uuid, e)
+            )
 
         finally:
             callback.send(response)
@@ -353,28 +373,28 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         Guest Services Delete
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._token is None or self._token.is_expired():
                 future.work(openstack.get_token, self._directory)
-                future.result = (yield)
+                future.result = yield
 
-                if not future.result.is_complete() or \
-                        future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete, "
-                               "instance_uuid=%s." % instance_uuid)
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error(
+                        "OpenStack get-token did not complete, "
+                        "instance_uuid=%s." % instance_uuid
+                    )
                     return
 
                 self._token = future.result.data
 
-            future.work(guest.guest_services_delete, self._token,
-                        instance_uuid)
+            future.work(guest.guest_services_delete, self._token, instance_uuid)
             try:
-                future.result = (yield)
+                future.result = yield
 
                 if not future.result.is_complete():
                     return
@@ -383,22 +403,25 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                 if httplib.NOT_FOUND != e.http_status_code:
                     raise
 
-            response['completed'] = True
+            response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to delete "
-                               "guest services, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to delete "
+                    "guest services, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to delete "
-                           "guest services, instance_uuid=%s, error=%s."
-                           % (instance_uuid, e))
+            DLOG.exception(
+                "Caught exception while trying to delete "
+                "guest services, instance_uuid=%s, error=%s." % (instance_uuid, e)
+            )
 
         finally:
             callback.send(response)
@@ -409,260 +432,287 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         Guest Services Query
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._token is None or self._token.is_expired():
                 future.work(openstack.get_token, self._directory)
-                future.result = (yield)
+                future.result = yield
 
-                if not future.result.is_complete() or \
-                        future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete, "
-                               "instance_uuid=%s." % instance_uuid)
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error(
+                        "OpenStack get-token did not complete, "
+                        "instance_uuid=%s." % instance_uuid
+                    )
                     return
 
                 self._token = future.result.data
 
             future.work(guest.guest_services_query, self._token, instance_uuid)
-            future.result = (yield)
+            future.result = yield
 
             if not future.result.is_complete():
-                DLOG.error("Guest-Services query failed, operation "
-                           "did not complete, instance_uuid=%s" %
-                           instance_uuid)
+                DLOG.error(
+                    "Guest-Services query failed, operation "
+                    "did not complete, instance_uuid=%s" % instance_uuid
+                )
                 return
 
             query_data = future.result.data
 
             result_data = dict()
-            result_data['instance_uuid'] = query_data['uuid']
-            result_data['host_name'] = query_data['hostname']
+            result_data["instance_uuid"] = query_data["uuid"]
+            result_data["host_name"] = query_data["hostname"]
 
             service_objs = list()
-            for service in query_data.get('services', list()):
-                service_name = guest_service_get_name(service['service'])
-                admin_state = guest_service_get_admin_state(service['state'])
-                oper_state = guest_service_get_oper_state(service['status'])
-                restart_timeout = service.get('restart-timeout', None)
+            for service in query_data.get("services", list()):
+                service_name = guest_service_get_name(service["service"])
+                admin_state = guest_service_get_admin_state(service["state"])
+                oper_state = guest_service_get_oper_state(service["status"])
+                restart_timeout = service.get("restart-timeout", None)
                 if restart_timeout is not None:
                     restart_timeout = int(restart_timeout)
 
                 service_obj = nfvi.objects.v1.GuestService(
-                    service_name, admin_state, oper_state, restart_timeout)
+                    service_name, admin_state, oper_state, restart_timeout
+                )
 
                 service_objs.append(service_obj)
 
-            result_data['services'] = service_objs
+            result_data["services"] = service_objs
 
-            response['result-data'] = result_data
-            response['completed'] = True
+            response["result-data"] = result_data
+            response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to query "
-                               "guest services, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to query "
+                    "guest services, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to query "
-                           "guest services, instance_uuid=%s, error=%s."
-                           % (instance_uuid, e))
+            DLOG.exception(
+                "Caught exception while trying to query "
+                "guest services, instance_uuid=%s, error=%s." % (instance_uuid, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def guest_services_vote(self, future, instance_uuid, host_name,
-                            action_type, callback):
+    def guest_services_vote(
+        self, future, instance_uuid, host_name, action_type, callback
+    ):
         """
         Guest Services Vote
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._token is None or self._token.is_expired():
                 future.work(openstack.get_token, self._directory)
-                future.result = (yield)
+                future.result = yield
 
-                if not future.result.is_complete() or \
-                        future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete, "
-                               "instance_uuid=%s." % instance_uuid)
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error(
+                        "OpenStack get-token did not complete, "
+                        "instance_uuid=%s." % instance_uuid
+                    )
                     return
 
                 self._token = future.result.data
 
-            future.work(guest.guest_services_vote, self._token, instance_uuid,
-                        host_name, instance_get_event(action_type,
-                                                      pre_notification=True))
-            future.result = (yield)
+            future.work(
+                guest.guest_services_vote,
+                self._token,
+                instance_uuid,
+                host_name,
+                instance_get_event(action_type, pre_notification=True),
+            )
+            future.result = yield
             if not future.result.is_complete():
-                DLOG.error("Guest-Services vote failed, action-type %s "
-                           "did not complete, instance_uuid=%s" %
-                           (action_type, instance_uuid))
+                DLOG.error(
+                    "Guest-Services vote failed, action-type %s "
+                    "did not complete, instance_uuid=%s" % (action_type, instance_uuid)
+                )
                 return
 
             vote_data = future.result.data
 
-            response['uuid'] = vote_data.get('uuid', instance_uuid)
-            response['host-name'] = vote_data.get('hostname', host_name)
-            response['action-type'] = vote_data.get('action', action_type)
-            response['timeout'] = int(vote_data.get('timeout', '15'))
-            response['completed'] = True
+            response["uuid"] = vote_data.get("uuid", instance_uuid)
+            response["host-name"] = vote_data.get("hostname", host_name)
+            response["action-type"] = vote_data.get("action", action_type)
+            response["timeout"] = int(vote_data.get("timeout", "15"))
+            response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to vote,"
-                               "action_type=%s error=%s." % (action_type, e))
+                DLOG.exception(
+                    "Caught exception while trying to vote,"
+                    "action_type=%s error=%s." % (action_type, e)
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to vote "
-                           "guest services, instance_uuid=%s, error=%s."
-                           % (instance_uuid, e))
+            DLOG.exception(
+                "Caught exception while trying to vote "
+                "guest services, instance_uuid=%s, error=%s." % (instance_uuid, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def guest_services_notify(self, future, instance_uuid, host_name,
-                              action_type, pre_notification, callback):
+    def guest_services_notify(
+        self, future, instance_uuid, host_name, action_type, pre_notification, callback
+    ):
         """
         Guest Services Notify
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._token is None or self._token.is_expired():
                 future.work(openstack.get_token, self._directory)
-                future.result = (yield)
+                future.result = yield
 
-                if not future.result.is_complete() or \
-                        future.result.data is None:
-                    DLOG.error("OpenStack get-token did not complete, "
-                               "instance_uuid=%s." % instance_uuid)
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error(
+                        "OpenStack get-token did not complete, "
+                        "instance_uuid=%s." % instance_uuid
+                    )
                     return
 
                 self._token = future.result.data
 
-            future.work(guest.guest_services_notify, self._token,
-                        instance_uuid, host_name,
-                        instance_get_event(action_type, pre_notification))
-            future.result = (yield)
+            future.work(
+                guest.guest_services_notify,
+                self._token,
+                instance_uuid,
+                host_name,
+                instance_get_event(action_type, pre_notification),
+            )
+            future.result = yield
 
             if not future.result.is_complete():
-                DLOG.error("Guest-Services_notify failed, action-type %s "
-                           "did not complete, instance_uuid=%s" %
-                           (action_type, instance_uuid))
+                DLOG.error(
+                    "Guest-Services_notify failed, action-type %s "
+                    "did not complete, instance_uuid=%s" % (action_type, instance_uuid)
+                )
                 return
 
             notify_data = future.result.data
 
-            response['uuid'] = notify_data.get('uuid', instance_uuid)
-            response['host-name'] = notify_data.get('hostname', host_name)
-            response['action-type'] = notify_data.get('action', action_type)
-            response['timeout'] = int(notify_data.get('timeout', '15'))
-            response['completed'] = True
+            response["uuid"] = notify_data.get("uuid", instance_uuid)
+            response["host-name"] = notify_data.get("hostname", host_name)
+            response["action-type"] = notify_data.get("action", action_type)
+            response["timeout"] = int(notify_data.get("timeout", "15"))
+            response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to notify,"
-                               "action_type=%s error=%s." % (action_type, e))
+                DLOG.exception(
+                    "Caught exception while trying to notify,"
+                    "action_type=%s error=%s." % (action_type, e)
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to notify "
-                           "guest services, instance_uuid=%s, error=%s."
-                           % (instance_uuid, e))
+            DLOG.exception(
+                "Caught exception while trying to notify "
+                "guest services, instance_uuid=%s, error=%s." % (instance_uuid, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def create_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def create_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Create Host Services, notify Guest to create services for a host
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._host_supports_nova_compute(host_personality):
-                response['reason'] = 'failed to get platform token from ' \
-                                     'keystone'
-                if self._token is None or \
-                        self._token.is_expired():
+                response["reason"] = "failed to get platform token from keystone"
+                if self._token is None or self._token.is_expired():
                     future.work(openstack.get_token, self._directory)
-                    future.result = (yield)
+                    future.result = yield
 
-                    if not future.result.is_complete() or \
-                            future.result.data is None:
-                        DLOG.error("OpenStack get-token did not complete, "
-                                   "host_uuid=%s, host_name=%s." % (host_uuid,
-                                                                    host_name))
+                    if not future.result.is_complete() or future.result.data is None:
+                        DLOG.error(
+                            "OpenStack get-token did not complete, "
+                            "host_uuid=%s, host_name=%s." % (host_uuid, host_name)
+                        )
                         return
 
                     self._token = future.result.data
 
-                response['reason'] = 'failed to create guest services'
+                response["reason"] = "failed to create guest services"
 
                 try:
                     # Send the create request to Guest.
-                    future.work(guest.host_services_create,
-                                self._token,
-                                host_uuid, host_name)
-                    future.result = (yield)
+                    future.work(
+                        guest.host_services_create, self._token, host_uuid, host_name
+                    )
+                    future.result = yield
 
                     if not future.result.is_complete():
-                        DLOG.error("Guest host-services-create failed, "
-                                   "operation did not complete, host_uuid=%s, "
-                                   "host_name=%s."
-                                   % (host_uuid, host_name))
+                        DLOG.error(
+                            "Guest host-services-create failed, "
+                            "operation did not complete, host_uuid=%s, "
+                            "host_name=%s." % (host_uuid, host_name)
+                        )
                         return
 
-                    response['reason'] = 'failed to disable guest services'
+                    response["reason"] = "failed to disable guest services"
 
                     # Send the disable request to Guest
-                    future.work(guest.host_services_disable,
-                                self._token,
-                                host_uuid, host_name)
-                    future.result = (yield)
+                    future.work(
+                        guest.host_services_disable, self._token, host_uuid, host_name
+                    )
+                    future.result = yield
 
                     if not future.result.is_complete():
                         # do not return since the disable will be retried
                         # by audit
-                        DLOG.error("Guest host-services-disable failed, "
-                                   "operation did not complete, host_uuid=%s, "
-                                   "host_name=%s."
-                                   % (host_uuid, host_name))
+                        DLOG.error(
+                            "Guest host-services-disable failed, "
+                            "operation did not complete, host_uuid=%s, "
+                            "host_name=%s." % (host_uuid, host_name)
+                        )
 
                 except exceptions.OpenStackRestAPIException as e:
                     # Guest can send a 404 if it hasn't got the host
@@ -671,293 +721,314 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                     if httplib.NOT_FOUND != e.http_status_code:
                         raise
 
-            response['completed'] = True
-            response['reason'] = ''
+            response["completed"] = True
+            response["reason"] = ""
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to create "
-                               "guest services on host, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to create "
+                    "guest services on host, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to create %s "
-                           "guest services, error=%s." % (host_name, e))
+            DLOG.exception(
+                "Caught exception while trying to create %s "
+                "guest services, error=%s." % (host_name, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def delete_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def delete_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Delete Host Services, notify Guest to delete services for a host
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._host_supports_nova_compute(host_personality):
-                response['reason'] = 'failed to get platform token from ' \
-                                     'keystone'
-                if self._token is None or \
-                        self._token.is_expired():
+                response["reason"] = "failed to get platform token from keystone"
+                if self._token is None or self._token.is_expired():
                     future.work(openstack.get_token, self._directory)
-                    future.result = (yield)
+                    future.result = yield
 
-                    if not future.result.is_complete() or \
-                            future.result.data is None:
-                        DLOG.error("OpenStack get-token did not complete, "
-                                   "host_uuid=%s, host_name=%s." % (host_uuid,
-                                                                    host_name))
+                    if not future.result.is_complete() or future.result.data is None:
+                        DLOG.error(
+                            "OpenStack get-token did not complete, "
+                            "host_uuid=%s, host_name=%s." % (host_uuid, host_name)
+                        )
                         return
 
                     self._token = future.result.data
 
-                response['reason'] = 'failed to delete guest services'
+                response["reason"] = "failed to delete guest services"
 
                 # Send the delete request to Guest.
-                future.work(guest.host_services_delete, self._token,
-                            host_uuid)
+                future.work(guest.host_services_delete, self._token, host_uuid)
                 try:
-                    future.result = (yield)
+                    future.result = yield
 
                     if not future.result.is_complete():
-                        DLOG.error("Guest host-services-delete for host "
-                                   "failed, operation did not complete, "
-                                   "host_uuid=%s, host_name=%s."
-                                   % (host_uuid, host_name))
+                        DLOG.error(
+                            "Guest host-services-delete for host "
+                            "failed, operation did not complete, "
+                            "host_uuid=%s, host_name=%s." % (host_uuid, host_name)
+                        )
                         return
 
                 except exceptions.OpenStackRestAPIException as e:
                     if httplib.NOT_FOUND != e.http_status_code:
                         raise
 
-            response['completed'] = True
-            response['reason'] = ''
+            response["completed"] = True
+            response["reason"] = ""
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to delete "
-                               "host services on host, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to delete "
+                    "host services on host, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to delete %s "
-                           "guest services, error=%s."
-                           % (host_name, e))
+            DLOG.exception(
+                "Caught exception while trying to delete %s "
+                "guest services, error=%s." % (host_name, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def enable_host_services(self, future, host_uuid, host_name,
-                             host_personality, callback):
+    def enable_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Enable Host Services, notify Guest to enable services for a host.
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._host_supports_nova_compute(host_personality):
-                response['reason'] = 'failed to get platform token from ' \
-                                     'keystone'
-                if self._token is None or \
-                        self._token.is_expired():
+                response["reason"] = "failed to get platform token from keystone"
+                if self._token is None or self._token.is_expired():
                     future.work(openstack.get_token, self._directory)
-                    future.result = (yield)
+                    future.result = yield
 
-                    if not future.result.is_complete() or \
-                            future.result.data is None:
-                        DLOG.error("OpenStack get-token did not complete, "
-                                   "host_uuid=%s, host_name=%s." % (host_uuid,
-                                                                    host_name))
+                    if not future.result.is_complete() or future.result.data is None:
+                        DLOG.error(
+                            "OpenStack get-token did not complete, "
+                            "host_uuid=%s, host_name=%s." % (host_uuid, host_name)
+                        )
                         return
 
                     self._token = future.result.data
 
-                response['reason'] = 'failed to enable guest services'
+                response["reason"] = "failed to enable guest services"
 
                 # Send the Enable request to Guest
-                future.work(guest.host_services_enable, self._token,
-                            host_uuid, host_name)
-                future.result = (yield)
+                future.work(
+                    guest.host_services_enable, self._token, host_uuid, host_name
+                )
+                future.result = yield
 
                 if not future.result.is_complete():
-                    DLOG.error("Guest host-services-enable failed, operation "
-                               "did not complete, host_uuid=%s, host_name=%s."
-                               % (host_uuid, host_name))
+                    DLOG.error(
+                        "Guest host-services-enable failed, operation "
+                        "did not complete, host_uuid=%s, host_name=%s."
+                        % (host_uuid, host_name)
+                    )
                     return
 
-            response['completed'] = True
-            response['reason'] = ''
+            response["completed"] = True
+            response["reason"] = ""
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to enable "
-                               "guest services on host, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to enable "
+                    "guest services on host, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to enable %s "
-                           "guest services, error=%s."
-                           % (host_name, e))
+            DLOG.exception(
+                "Caught exception while trying to enable %s "
+                "guest services, error=%s." % (host_name, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def disable_host_services(self, future, host_uuid, host_name,
-                              host_personality, callback):
+    def disable_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Notifies Guest to disable their services for the specified
         host (as applicable)
         """
         response = dict()
-        response['completed'] = False
-        response['reason'] = ''
+        response["completed"] = False
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             # The following only applies to worker hosts
             if self._host_supports_nova_compute(host_personality):
-                response['reason'] = 'failed to get platform token from ' \
-                                     'keystone'
-                if self._token is None or \
-                        self._token.is_expired():
+                response["reason"] = "failed to get platform token from keystone"
+                if self._token is None or self._token.is_expired():
                     future.work(openstack.get_token, self._directory)
-                    future.result = (yield)
+                    future.result = yield
 
-                    if not future.result.is_complete() or \
-                            future.result.data is None:
-                        DLOG.error("OpenStack get-token did not complete, "
-                                   "host_uuid=%s, host_name=%s." % (host_uuid,
-                                                                    host_name))
+                    if not future.result.is_complete() or future.result.data is None:
+                        DLOG.error(
+                            "OpenStack get-token did not complete, "
+                            "host_uuid=%s, host_name=%s." % (host_uuid, host_name)
+                        )
                         return
 
                     self._token = future.result.data
 
-                response['reason'] = 'failed to disable guest services'
+                response["reason"] = "failed to disable guest services"
 
                 # Send the Disable request to Guest.
-                future.work(guest.host_services_disable, self._token,
-                            host_uuid, host_name)
+                future.work(
+                    guest.host_services_disable, self._token, host_uuid, host_name
+                )
 
                 try:
-                    future.result = (yield)
+                    future.result = yield
 
                     if not future.result.is_complete():
                         # Do not return since the disable will be retried
                         # by audit
-                        DLOG.error("Guest host-services-disable failed, "
-                                   "operation did not complete, host_uuid=%s, "
-                                   "host_name=%s."
-                                   % (host_uuid, host_name))
+                        DLOG.error(
+                            "Guest host-services-disable failed, "
+                            "operation did not complete, host_uuid=%s, "
+                            "host_name=%s." % (host_uuid, host_name)
+                        )
 
                 except exceptions.OpenStackRestAPIException as e:
                     if httplib.NOT_FOUND != e.http_status_code:
                         raise
 
-            response['completed'] = True
-            response['reason'] = ''
+            response["completed"] = True
+            response["reason"] = ""
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to disable "
-                               "guest services, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to disable "
+                    "guest services, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to disable %s "
-                           "guest services, error=%s."
-                           % (host_name, e))
+            DLOG.exception(
+                "Caught exception while trying to disable %s "
+                "guest services, error=%s." % (host_name, e)
+            )
 
         finally:
             callback.send(response)
             callback.close()
 
-    def query_host_services(self, future, host_uuid, host_name,
-                            host_personality, callback):
+    def query_host_services(
+        self, future, host_uuid, host_name, host_personality, callback
+    ):
         """
         Query Host Services, return state of Guest services for a host.
         """
         response = dict()
-        response['completed'] = False
-        response['result-data'] = 'enabled'
-        response['reason'] = ''
+        response["completed"] = False
+        response["result-data"] = "enabled"
+        response["reason"] = ""
 
         try:
-            future.set_timeouts(config.CONF.get('nfvi-timeouts', None))
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
 
             if self._host_supports_nova_compute(host_personality):
-                if self._token is None or \
-                        self._token.is_expired():
+                if self._token is None or self._token.is_expired():
                     future.work(openstack.get_token, self._directory)
-                    future.result = (yield)
+                    future.result = yield
 
-                    if not future.result.is_complete() or \
-                            future.result.data is None:
-                        DLOG.error("OpenStack get-token did not complete, "
-                                   "host_uuid=%s, host_name=%s." % (host_uuid,
-                                                                    host_name))
+                    if not future.result.is_complete() or future.result.data is None:
+                        DLOG.error(
+                            "OpenStack get-token did not complete, "
+                            "host_uuid=%s, host_name=%s." % (host_uuid, host_name)
+                        )
                         return
 
                     self._token = future.result.data
 
                 # Send Query request to Guest
-                future.work(guest.host_services_query, self._token,
-                            host_uuid, host_name)
-                future.result = (yield)
+                future.work(
+                    guest.host_services_query, self._token, host_uuid, host_name
+                )
+                future.result = yield
 
                 if not future.result.is_complete():
-                    DLOG.error("Guest query-host-services failed, operation "
-                               "did not complete, host_uuid=%s, host_name=%s."
-                               % (host_uuid, host_name))
+                    DLOG.error(
+                        "Guest query-host-services failed, operation "
+                        "did not complete, host_uuid=%s, host_name=%s."
+                        % (host_uuid, host_name)
+                    )
 
                 else:
                     result_data = future.result.data
-                    response['result-data'] = result_data['state']
+                    response["result-data"] = result_data["state"]
 
-            response['completed'] = True
+            response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
-                response['error-code'] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
                 if self._token is not None:
                     self._token.set_expired()
 
             else:
-                DLOG.exception("Caught exception while trying to query "
-                               "host services, error=%s." % e)
+                DLOG.exception(
+                    "Caught exception while trying to query "
+                    "host services, error=%s." % e
+                )
 
         except Exception as e:
-            DLOG.exception("Caught exception while trying to query %s "
-                           "nova or neutron openstack services, error=%s."
-                           % (host_name, e))
+            DLOG.exception(
+                "Caught exception while trying to query %s "
+                "nova or neutron openstack services, error=%s." % (host_name, e)
+            )
 
         finally:
             callback.send(response)
@@ -967,7 +1038,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         """
         Host-Services Rest-API GET handler
         """
-        content_len = int(request_dispatch.headers.get('content-length', 0))
+        content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
 
         DLOG.info("Content=%s, len=%s" % (content, content_len))
@@ -978,24 +1049,25 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         if content:
             host_data = json.loads(content)
 
-            if host_data['uuid'] is None:
+            if host_data["uuid"] is None:
                 DLOG.error("Invalid host uuid received")
                 http_response = httplib.BAD_REQUEST
 
-            elif host_data['hostname'] is None:
+            elif host_data["hostname"] is None:
                 DLOG.info("Invalid host name received")
                 http_response = httplib.BAD_REQUEST
 
             else:
-                (success, host_state) = \
-                    self._host_services_query_callback(host_data['hostname'])
+                (success, host_state) = self._host_services_query_callback(
+                    host_data["hostname"]
+                )
                 if not success:
                     http_response = httplib.BAD_REQUEST
                 else:
                     http_payload = dict()
-                    http_payload['uuid'] = host_data['uuid']
-                    http_payload['hostname'] = host_data['hostname']
-                    http_payload['state'] = host_state
+                    http_payload["uuid"] = host_data["uuid"]
+                    http_payload["hostname"] = host_data["hostname"]
+                    http_payload["state"] = host_state
         else:
             http_response = httplib.NO_CONTENT
 
@@ -1003,7 +1075,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         request_dispatch.send_response(http_response)
 
         if http_payload is not None:
-            request_dispatch.send_header('Content-Type', 'application/json')
+            request_dispatch.send_header("Content-Type", "application/json")
             request_dispatch.end_headers()
             request_dispatch.wfile.write(json.dumps(http_payload).encode())
         request_dispatch.done()
@@ -1022,34 +1094,36 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
 
         host_prefix = "host_uuid"
         if host_prefix in path:
-            host_uuid = path.split('=')[-1]
+            host_uuid = path.split("=")[-1]
         else:
-            instance_uuid = path.split('/')[-1]
+            instance_uuid = path.split("/")[-1]
 
-        DLOG.debug("Guest-Services rest-api path=%s, host_uuid=%s, "
-                   "instance_uuid=%s" % (path, host_uuid, instance_uuid))
+        DLOG.debug(
+            "Guest-Services rest-api path=%s, host_uuid=%s, "
+            "instance_uuid=%s" % (path, host_uuid, instance_uuid)
+        )
 
         http_response = httplib.OK
-        (success, result) = \
-            self._guest_services_query_callback(host_uuid, instance_uuid)
+        (success, result) = self._guest_services_query_callback(
+            host_uuid, instance_uuid
+        )
         if not success:
             http_response = httplib.BAD_REQUEST
         else:
             if instance_uuid:
-                result['services'] = \
-                    get_services_with_guest_service_state(result['services'])
+                result["services"] = get_services_with_guest_service_state(
+                    result["services"]
+                )
             else:
-                for r in result['instances']:
-                    r['services'] = \
-                        get_services_with_guest_service_state(r['services'])
+                for r in result["instances"]:
+                    r["services"] = get_services_with_guest_service_state(r["services"])
             http_payload = result
 
-        DLOG.debug("Guest-Services rest-api get path: %s." %
-                   request_dispatch.path)
+        DLOG.debug("Guest-Services rest-api get path: %s." % request_dispatch.path)
         request_dispatch.send_response(http_response)
 
         if http_payload is not None:
-            request_dispatch.send_header('Content-Type', 'application/json')
+            request_dispatch.send_header("Content-Type", "application/json")
             request_dispatch.end_headers()
             request_dispatch.wfile.write(json.dumps(http_payload).encode())
         request_dispatch.done()
@@ -1058,17 +1132,17 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         """
         Guest-Services Rest-API PATCH handler callback
         """
-        content_len = int(request_dispatch.headers.get('content-length', 0))
+        content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
         http_payload = None
         http_response = httplib.OK
 
         if content:
             instance_data = json.loads(content)
-            instance_uuid = instance_data.get('uuid', None)
-            host_name = instance_data.get('hostname', None)
-            event_type = instance_data.get('event-type', None)
-            event_data = instance_data.get('event-data', None)
+            instance_uuid = instance_data.get("uuid", None)
+            host_name = instance_data.get("hostname", None)
+            event_type = instance_data.get("event-type", None)
+            event_data = instance_data.get("event-data", None)
             result = None
 
             if instance_uuid is None:
@@ -1081,91 +1155,97 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                 DLOG.info("Invalid event-data received")
                 http_response = httplib.BAD_REQUEST
             else:
-                if 'service' == event_type:
-                    services = event_data.get('services', list())
+                if "service" == event_type:
+                    services = event_data.get("services", list())
 
                     service_objs = list()
                     for service in services:
-                        restart_timeout = service.get('restart-timeout', None)
+                        restart_timeout = service.get("restart-timeout", None)
                         if restart_timeout is not None:
                             restart_timeout = int(restart_timeout)
 
                         service_obj = nfvi.objects.v1.GuestService(
-                            guest_service_get_name(service['service']),
-                            guest_service_get_admin_state(service['state']),
-                            guest_service_get_oper_state(service['status']),
-                            restart_timeout)
+                            guest_service_get_name(service["service"]),
+                            guest_service_get_admin_state(service["state"]),
+                            guest_service_get_oper_state(service["status"]),
+                            restart_timeout,
+                        )
 
                         service_objs.append(service_obj)
 
                     for callback in self._guest_services_state_notify_callbacks:
                         callback(instance_uuid, host_name, service_objs)
 
-                elif 'alarm' == event_type:
-                    services = event_data.get('services', list())
+                elif "alarm" == event_type:
+                    services = event_data.get("services", list())
                     for service_data in services:
-                        if guest.GUEST_SERVICE_NAME.HEARTBEAT == \
-                                service_data['service']:
-                            avail_status = service_data.get('state', None)
-                            recovery_action = \
-                                service_data.get('repair-action', None)
-                            if 'reboot' == recovery_action:
-                                recovery_action = \
+                        if (
+                            guest.GUEST_SERVICE_NAME.HEARTBEAT
+                            == service_data["service"]
+                        ):
+                            avail_status = service_data.get("state", None)
+                            recovery_action = service_data.get("repair-action", None)
+                            if "reboot" == recovery_action:
+                                recovery_action = (
                                     nfvi.objects.v1.INSTANCE_ACTION_TYPE.REBOOT
-                            elif 'stop' == recovery_action:
-                                recovery_action = \
+                                )
+                            elif "stop" == recovery_action:
+                                recovery_action = (
                                     nfvi.objects.v1.INSTANCE_ACTION_TYPE.STOP
-                            elif 'log' == recovery_action:
-                                recovery_action = \
+                                )
+                            elif "log" == recovery_action:
+                                recovery_action = (
                                     nfvi.objects.v1.INSTANCE_ACTION_TYPE.LOG
+                                )
 
-                            if 'failed' == avail_status:
-                                avail_status = \
+                            if "failed" == avail_status:
+                                avail_status = (
                                     nfvi.objects.v1.INSTANCE_AVAIL_STATUS.FAILED
-                            elif 'unhealthy' == avail_status:
-                                avail_status = \
+                                )
+                            elif "unhealthy" == avail_status:
+                                avail_status = (
                                     nfvi.objects.v1.INSTANCE_AVAIL_STATUS.UNHEALTHY
+                                )
 
-                            for callback in \
-                                    self._guest_services_alarm_notify_callbacks:
-                                (success, result) = callback(instance_uuid,
-                                                             avail_status,
-                                                             recovery_action)
+                            for callback in self._guest_services_alarm_notify_callbacks:
+                                (success, result) = callback(
+                                    instance_uuid, avail_status, recovery_action
+                                )
                                 if not success:
-                                    DLOG.error("Callback failed for "
-                                               "instance_uuid=%s" % instance_uuid)
+                                    DLOG.error(
+                                        "Callback failed for "
+                                        "instance_uuid=%s" % instance_uuid
+                                    )
                                     http_response = httplib.BAD_REQUEST
 
-                elif 'action' == event_type:
-                    action_type = \
-                        instance_get_action_type(event_data.get('action'))
+                elif "action" == event_type:
+                    action_type = instance_get_action_type(event_data.get("action"))
 
-                    guest_response = event_data.get('guest-response')
+                    guest_response = event_data.get("guest-response")
                     if guest.GUEST_VOTE_STATE.REJECT == guest_response:
-                        action_state = \
-                            nfvi.objects.v1.INSTANCE_ACTION_STATE.REJECTED
+                        action_state = nfvi.objects.v1.INSTANCE_ACTION_STATE.REJECTED
                     elif guest.GUEST_VOTE_STATE.ALLOW == guest_response:
-                        action_state = \
-                            nfvi.objects.v1.INSTANCE_ACTION_STATE.ALLOWED
+                        action_state = nfvi.objects.v1.INSTANCE_ACTION_STATE.ALLOWED
                     elif guest.GUEST_VOTE_STATE.PROCEED == guest_response:
-                        action_state = \
-                            nfvi.objects.v1.INSTANCE_ACTION_STATE.PROCEED
+                        action_state = nfvi.objects.v1.INSTANCE_ACTION_STATE.PROCEED
                     else:
                         action_state = guest.GUEST_VOTE_STATE.PROCEED
-                        DLOG.info("Invalid guest-response received, "
-                                  "defaulting to proceed, response=%s."
-                                  % guest_response)
+                        DLOG.info(
+                            "Invalid guest-response received, "
+                            "defaulting to proceed, response=%s." % guest_response
+                        )
 
-                    reason = event_data.get('reason')
+                    reason = event_data.get("reason")
 
-                    for callback in \
-                            self._guest_services_action_notify_callbacks:
+                    for callback in self._guest_services_action_notify_callbacks:
                         result = None
-                        success = callback(instance_uuid, action_type,
-                                           action_state, reason)
+                        success = callback(
+                            instance_uuid, action_type, action_state, reason
+                        )
                         if not success:
-                            DLOG.error("callback failed for instance_uuid=%s"
-                                       % instance_uuid)
+                            DLOG.error(
+                                "callback failed for instance_uuid=%s" % instance_uuid
+                            )
                             http_response = httplib.BAD_REQUEST
                 else:
                     DLOG.info("Invalid event-type %s received" % event_type)
@@ -1177,12 +1257,11 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         else:
             http_response = httplib.NO_CONTENT
 
-        DLOG.debug("Guest-Services rest-api patch path: %s."
-                   % request_dispatch.path)
+        DLOG.debug("Guest-Services rest-api patch path: %s." % request_dispatch.path)
         request_dispatch.send_response(http_response)
 
         if http_payload is not None:
-            request_dispatch.send_header('Content-Type', 'application/json')
+            request_dispatch.send_header("Content-Type", "application/json")
             request_dispatch.end_headers()
             request_dispatch.wfile.write(json.dumps(http_payload).encode())
         request_dispatch.done()
@@ -1223,25 +1302,31 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         """
         config.load(config_file)
         self._directory = openstack.get_directory(
-            config, openstack.SERVICE_CATEGORY.PLATFORM)
+            config, openstack.SERVICE_CATEGORY.PLATFORM
+        )
         self._openstack_directory = openstack.get_directory(
-            config, openstack.SERVICE_CATEGORY.OPENSTACK)
+            config, openstack.SERVICE_CATEGORY.OPENSTACK
+        )
 
         self._rest_api_server = rest_api.rest_api_get_server(
-            config.CONF['guest-rest-api']['host'],
-            config.CONF['guest-rest-api']['port'])
+            config.CONF["guest-rest-api"]["host"], config.CONF["guest-rest-api"]["port"]
+        )
 
         self._rest_api_server.add_handler(
-            'GET', '/nfvi-plugins/v1/hosts*',
-            self.host_services_rest_api_get_handler)
+            "GET", "/nfvi-plugins/v1/hosts*", self.host_services_rest_api_get_handler
+        )
 
         self._rest_api_server.add_handler(
-            'GET', '/nfvi-plugins/v1/instances*',
-            self.guest_services_rest_api_get_handler)
+            "GET",
+            "/nfvi-plugins/v1/instances*",
+            self.guest_services_rest_api_get_handler,
+        )
 
         self._rest_api_server.add_handler(
-            'PATCH', '/nfvi-plugins/v1/instances*',
-            self.guest_services_rest_api_patch_handler)
+            "PATCH",
+            "/nfvi-plugins/v1/instances*",
+            self.guest_services_rest_api_patch_handler,
+        )
 
     def finalize(self):
         """

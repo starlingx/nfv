@@ -18,72 +18,78 @@ from nfv_vim import event_log
 
 from nfv_vim.objects._object import ObjectData
 
-DLOG = debug.debug_get_logger('nfv_vim.objects.sw_update')
+DLOG = debug.debug_get_logger("nfv_vim.objects.sw_update")
 
 
 class SwUpdateTypes(Constants, metaclass=Singleton):
     """
     Software Update - Type Constants
     """
-    SW_PATCH = Constant('sw-patch')
-    SW_UPGRADE = Constant('sw-upgrade')
-    SYSTEM_CONFIG_UPDATE = Constant('system-config-update')
-    FW_UPDATE = Constant('fw-update')
-    KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
-    KUBE_UPGRADE = Constant('kube-upgrade')
-    CURRENT_STRATEGY = Constant('current-strategy')
+
+    SW_PATCH = Constant("sw-patch")
+    SW_UPGRADE = Constant("sw-upgrade")
+    SYSTEM_CONFIG_UPDATE = Constant("system-config-update")
+    FW_UPDATE = Constant("fw-update")
+    KUBE_ROOTCA_UPDATE = Constant("kube-rootca-update")
+    KUBE_UPGRADE = Constant("kube-upgrade")
+    CURRENT_STRATEGY = Constant("current-strategy")
 
 
 class SwUpdateApplyTypes(Constants, metaclass=Singleton):
     """
     Software Update - Apply Type Constants
     """
-    SERIAL = Constant('serial')
-    PARALLEL = Constant('parallel')
-    IGNORE = Constant('ignore')
+
+    SERIAL = Constant("serial")
+    PARALLEL = Constant("parallel")
+    IGNORE = Constant("ignore")
 
 
 class SwUpdateInstanceActionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Instance Action Type Constants
     """
-    MIGRATE = Constant('migrate')
-    STOP_START = Constant('stop-start')
+
+    MIGRATE = Constant("migrate")
+    STOP_START = Constant("stop-start")
 
 
 class SwUpdateAlarmRestrictionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Alarm Restriction Type Constants
     """
-    STRICT = Constant('strict')
-    RELAXED = Constant('relaxed')
-    PERMISSIVE = Constant('permissive')
+
+    STRICT = Constant("strict")
+    RELAXED = Constant("relaxed")
+    PERMISSIVE = Constant("permissive")
 
 
 class SwUpdateAlarmTypes(Constants, metaclass=Singleton):
     """
     Software Update - Alarm and Event Type Constants
     """
-    APPLY_INPROGRESS = Constant('apply-inprogress')
-    APPLY_ABORTING = Constant('apply-aborting')
-    APPLY_FAILED = Constant('apply-failed')
+
+    APPLY_INPROGRESS = Constant("apply-inprogress")
+    APPLY_ABORTING = Constant("apply-aborting")
+    APPLY_FAILED = Constant("apply-failed")
 
 
 class SwUpdateEventIds(Constants, metaclass=Singleton):
     """
     Software Update - Alarm and Event Type Constants
     """
-    APPLY_START = Constant('apply-start')
-    APPLY_INPROGRESS = Constant('apply-inprogress')
-    APPLY_REJECTED = Constant('apply-rejected')
-    APPLY_CANCELLED = Constant('apply-cancelled')
-    APPLY_FAILED = Constant('apply-failed')
-    APPLY_COMPLETED = Constant('apply-completed')
-    APPLY_ABORT = Constant('apply-abort')
-    APPLY_ABORTING = Constant('apply-aborting')
-    APPLY_ABORT_REJECTED = Constant('apply-abort-rejected')
-    APPLY_ABORT_FAILED = Constant('apply-abort-failed')
-    APPLY_ABORTED = Constant('apply-aborted')
+
+    APPLY_START = Constant("apply-start")
+    APPLY_INPROGRESS = Constant("apply-inprogress")
+    APPLY_REJECTED = Constant("apply-rejected")
+    APPLY_CANCELLED = Constant("apply-cancelled")
+    APPLY_FAILED = Constant("apply-failed")
+    APPLY_COMPLETED = Constant("apply-completed")
+    APPLY_ABORT = Constant("apply-abort")
+    APPLY_ABORTING = Constant("apply-aborting")
+    APPLY_ABORT_REJECTED = Constant("apply-abort-rejected")
+    APPLY_ABORT_FAILED = Constant("apply-abort-failed")
+    APPLY_ABORTED = Constant("apply-aborted")
 
 
 # Constant Instantiation
@@ -99,10 +105,11 @@ class SwUpdate(ObjectData):
     """
     Software Update Object
     """
+
     def __init__(self, sw_update_type, sw_update_uuid=None, strategy_data=None):
         from nfv_vim import strategy
 
-        super(SwUpdate, self).__init__('1.0.0')
+        super(SwUpdate, self).__init__("1.0.0")
 
         self._sw_update_type = sw_update_type
 
@@ -123,10 +130,10 @@ class SwUpdate(ObjectData):
         self._alarms = list()
         self._nfvi_alarms = list()
 
-        self._nfvi_timer_name = sw_update_type + ' nfvi audit'
-        self._nfvi_timer_id = \
-            timers.timers_create_timer(self._nfvi_timer_name, 30, 30,
-                                       self.nfvi_audit)
+        self._nfvi_timer_name = sw_update_type + " nfvi audit"
+        self._nfvi_timer_id = timers.timers_create_timer(
+            self._nfvi_timer_name, 30, 30, self.nfvi_audit
+        )
         self._nfvi_audit_inprogress = False
 
     @property
@@ -180,31 +187,33 @@ class SwUpdate(ObjectData):
 
         else:
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_START))
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_START)
+            )
             success, reason = self.strategy.apply(stage_id)
 
         if success:
             if self._alarms:
                 alarm.clear_sw_update_alarm(self._alarms)
 
-            self._alarms = \
-                alarm.raise_sw_update_alarm(
-                    self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS))
+            self._alarms = alarm.raise_sw_update_alarm(
+                self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS)
+            )
 
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS))
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS)
+            )
 
             if self._nfvi_timer_id is not None:
                 timers.timers_delete_timer(self._nfvi_timer_id)
                 self._nfvi_timer_id = None
 
-            self._nfvi_timer_id = \
-                timers.timers_create_timer(self._nfvi_timer_name, 30, 30,
-                                           self.nfvi_audit)
+            self._nfvi_timer_id = timers.timers_create_timer(
+                self._nfvi_timer_name, 30, 30, self.nfvi_audit
+            )
         else:
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_REJECTED),
-                reason=reason)
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_REJECTED), reason=reason
+            )
 
         return success, reason
 
@@ -217,15 +226,16 @@ class SwUpdate(ObjectData):
 
         if success:
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_COMPLETED))
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_COMPLETED)
+            )
         else:
-            self._alarms = \
-                alarm.raise_sw_update_alarm(
-                    self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_FAILED))
+            self._alarms = alarm.raise_sw_update_alarm(
+                self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_FAILED)
+            )
 
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_FAILED),
-                reason=reason)
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_FAILED), reason=reason
+            )
 
     def strategy_abort(self, strategy_uuid, stage_id):
         """
@@ -241,23 +251,25 @@ class SwUpdate(ObjectData):
 
         else:
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORT))
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORT)
+            )
             success, reason = self.strategy.abort(stage_id)
 
         if success:
             if self._alarms:
                 alarm.clear_sw_update_alarm(self._alarms)
 
-            self._alarms = \
-                alarm.raise_sw_update_alarm(
-                    self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_ABORTING))
+            self._alarms = alarm.raise_sw_update_alarm(
+                self.alarm_type(SW_UPDATE_ALARM_TYPES.APPLY_ABORTING)
+            )
 
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORTING))
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORTING)
+            )
         else:
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED),
-                reason=reason)
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED), reason=reason
+            )
 
         return success, reason
 
@@ -267,11 +279,12 @@ class SwUpdate(ObjectData):
         """
         if success:
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORTED))
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORTED)
+            )
         else:
             event_log.sw_update_issue_log(
-                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED),
-                reason=reason)
+                self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED), reason=reason
+            )
 
         if self._nfvi_timer_id is not None:
             timers.timers_reschedule_timer(self._nfvi_timer_id, 2)
@@ -312,7 +325,7 @@ class SwUpdate(ObjectData):
         self._strategy = None
         self._persist()
 
-        return True, ''
+        return True, ""
 
     def handle_event(self, event, event_data=None):
         """
@@ -335,15 +348,16 @@ class SwUpdate(ObjectData):
         """
         Audit Alarms Callback
         """
-        response = (yield)
+        response = yield
 
-        if response['completed']:
+        if response["completed"]:
             DLOG.verbose("Audit-Alarms callback, response=%s." % response)
 
-            self._nfvi_alarms.extend(response['result-data'])
+            self._nfvi_alarms.extend(response["result-data"])
         else:
-            DLOG.error("Audit-Alarms callback, not completed, "
-                       "response=%s." % response)
+            DLOG.error(
+                "Audit-Alarms callback, not completed, response=%s." % response
+            )
 
         self._nfvi_audit_inprogress = False
         timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
@@ -360,6 +374,7 @@ class SwUpdate(ObjectData):
         Persist changes to sw-update object
         """
         from nfv_vim import database
+
         database.database_sw_update_add(self)
 
     def _unpersist(self):
@@ -367,6 +382,7 @@ class SwUpdate(ObjectData):
         Unpersist changes to sw-update object
         """
         from nfv_vim import database
+
         database.database_sw_update_delete(self.uuid)
 
     def save(self):

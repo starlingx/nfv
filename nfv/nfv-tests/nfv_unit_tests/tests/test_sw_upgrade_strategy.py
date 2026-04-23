@@ -58,38 +58,43 @@ IGNORE_ALARMS_LIST = [
 # std controllers and storage have 0 retries
 def _unlock_hosts_stage_as_dict(host_names, retry_count=5, retry_delay=120):
     return {
-        'name': 'unlock-hosts',
-        'entity_names': host_names,
+        "name": "unlock-hosts",
+        "entity_names": host_names,
         # 'retry_count': retry_count,
         # 'retry_delay': retry_delay,
         # 'timeout': 1800,
     }
 
 
-@mock.patch('nfv_vim.event_log._instance._event_issue',
-            sw_update_testcase.fake_event_issue)
-@mock.patch('nfv_vim.objects._sw_update.SwUpdate.save',
-            sw_update_testcase.fake_save)
-@mock.patch('nfv_vim.objects._sw_update.timers.timers_create_timer',
-            sw_update_testcase.fake_timer)
-@mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
-            sw_update_testcase.fake_nfvi_compute_plugin_disabled)
-@mock.patch.object(nfvi.objects.v1.upgrade, 'SW_VERSION', INITIAL_RELEASE)
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
+@mock.patch.object(nfvi.objects.v1.upgrade, "SW_VERSION", INITIAL_RELEASE)
 class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
-    def create_sw_upgrade_strategy(self,
-            controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
-            storage_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
-            max_parallel_worker_hosts=10,
-            alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
-            default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
-            release='starlingx-24.03.1',
-            rollback=False,
-            delete=False,
-            snapshot=False,
-            nfvi_upgrade=None,
-            single_controller=False
+    def create_sw_upgrade_strategy(
+        self,
+        controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+        storage_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
+        worker_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
+        max_parallel_worker_hosts=10,
+        alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
+        default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
+        release="starlingx-24.03.1",
+        rollback=False,
+        delete=False,
+        snapshot=False,
+        nfvi_upgrade=None,
+        single_controller=False,
     ):
         """
         Create a software update strategy
@@ -114,9 +119,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             nfvi_upgrade = nfvi.objects.v1.Upgrade(
                 release,
                 {
-                    'state': 'available',
-                    'reboot_required': True,
-                    'sw_version': MAJOR_RELEASE_UPGRADE,
+                    "state": "available",
+                    "reboot_required": True,
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
                 },
                 None,
                 None,
@@ -126,14 +131,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         return strategy
 
     def _gen_aiosx_hosts_and_strategy(
-            self,
-            openstack=True,
-            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
-            rollback=False,
-            **kwargs,
+        self,
+        openstack=True,
+        default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
+        worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+        rollback=False,
+        **kwargs,
     ):
-        self.create_host('controller-0', aio=True, openstack_installed=openstack)
+        self.create_host("controller-0", aio=True, openstack_installed=openstack)
 
         controller_hosts = []
         for host in list(self._host_table.values()):
@@ -151,15 +156,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         return controller_hosts, strategy
 
     def _gen_aiodx_hosts_and_strategy(
-            self,
-            openstack=True,
-            default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
-            rollback=False,
-            **kwargs,
+        self,
+        openstack=True,
+        default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
+        worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+        rollback=False,
+        **kwargs,
     ):
-        self.create_host('controller-0', aio=True, openstack_installed=openstack)
-        self.create_host('controller-1', aio=True, openstack_installed=openstack)
+        self.create_host("controller-0", aio=True, openstack_installed=openstack)
+        self.create_host("controller-1", aio=True, openstack_installed=openstack)
 
         controller_hosts = []
         for host in list(self._host_table.values()):
@@ -175,8 +180,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         return controller_hosts, strategy
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_worker_stages_ignore(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -184,22 +191,19 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - stages not created
         """
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_1", "compute-1")
 
         self.create_instance_group(
-            'instance_group_1',
-            ['test_instance_0', 'test_instance_1'],
-            [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
+            "instance_group_1",
+            ["test_instance_0", "test_instance_1"],
+            [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY],
+        )
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -213,22 +217,22 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         )
 
         success, reason = strategy._add_worker_strategy_stages(
-            worker_hosts=sorted_worker_hosts,
-            reboot=True)
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         assert success is True, f"Strategy creation failed: {reason}"
 
         apply_phase = strategy.apply_phase.as_dict()
 
-        expected_results = {
-            'total_stages': 0
-        }
+        expected_results = {"total_stages": 0}
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_anti_affinity(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -238,21 +242,19 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - hosts with no instances upgraded first
         - anti-affinity policy enforced
         """
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_1", "compute-1")
 
-        self.create_instance_group('instance_group_1',
-                                   ['test_instance_0', 'test_instance_1'],
-                                   [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
+        self.create_instance_group(
+            "instance_group_1",
+            ["test_instance_0", "test_instance_1"],
+            [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY],
+        )
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -262,82 +264,86 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
 
         strategy = self.create_sw_upgrade_strategy(
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
-            max_parallel_worker_hosts=2
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL, max_parallel_worker_hosts=2
         )
 
         strategy._add_worker_strategy_stages(
-            worker_hosts=sorted_worker_hosts,
-            reboot=True)
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 3,
-            'stages': [
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-2', 'compute-3'],
-                      'entity_names': []},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-2', 'compute-3']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-2', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-2', 'compute-3']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
+            "total_stages": 3,
+            "stages": [
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-2", "compute-3"],
+                            "entity_names": [],
+                        },
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["compute-2", "compute-3"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["compute-2", "compute-3"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-2", "compute-3"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'entity_names': ['test_instance_0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-0']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "entity_names": ["test_instance_0"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-0"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'entity_names': ['test_instance_1']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-1']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
-                }
-            ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "entity_names": ["test_instance_1"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-1"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_ten_hosts(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -347,25 +353,25 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - hosts with no instances upgraded first
         - instances migrated
         """
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
-        self.create_host('compute-4')
-        self.create_host('compute-5')
-        self.create_host('compute-6')
-        self.create_host('compute-7')
-        self.create_host('compute-8')
-        self.create_host('compute-9')
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
+        self.create_host("compute-4")
+        self.create_host("compute-5")
+        self.create_host("compute-6")
+        self.create_host("compute-7")
+        self.create_host("compute-8")
+        self.create_host("compute-9")
 
-        self.create_instance('small', "test_instance_0", 'compute-0')
-        self.create_instance('small', "test_instance_2", 'compute-2')
-        self.create_instance('small', "test_instance_3", 'compute-3')
-        self.create_instance('small', "test_instance_4", 'compute-4')
-        self.create_instance('small', "test_instance_6", 'compute-6')
-        self.create_instance('small', "test_instance_7", 'compute-7')
-        self.create_instance('small', "test_instance_8", 'compute-8')
-        self.create_instance('small', "test_instance_9", 'compute-9')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_2", "compute-2")
+        self.create_instance("small", "test_instance_3", "compute-3")
+        self.create_instance("small", "test_instance_4", "compute-4")
+        self.create_instance("small", "test_instance_6", "compute-6")
+        self.create_instance("small", "test_instance_7", "compute-7")
+        self.create_instance("small", "test_instance_8", "compute-8")
+        self.create_instance("small", "test_instance_9", "compute-9")
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -375,108 +381,133 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
 
         strategy = self.create_sw_upgrade_strategy(
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
-            max_parallel_worker_hosts=3
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL, max_parallel_worker_hosts=3
         )
 
         strategy._add_worker_strategy_stages(
-            worker_hosts=sorted_worker_hosts,
-            reboot=True)
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 4,
-            'stages': [
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-1', 'compute-5'],
-                      'entity_names': []},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-1', 'compute-5']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-1', 'compute-5']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-1', 'compute-5']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
+            "total_stages": 4,
+            "stages": [
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-1", "compute-5"],
+                            "entity_names": [],
+                        },
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["compute-1", "compute-5"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["compute-1", "compute-5"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-1", "compute-5"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'entity_names': ['test_instance_0',
-                                       'test_instance_2',
-                                       'test_instance_3']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-0', 'compute-2', 'compute-3']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-0', 'compute-2', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(
-                         ['compute-0', 'compute-2', 'compute-3']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "entity_names": [
+                                "test_instance_0",
+                                "test_instance_2",
+                                "test_instance_3",
+                            ],
+                        },
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["compute-0", "compute-2", "compute-3"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["compute-0", "compute-2", "compute-3"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(
+                            ["compute-0", "compute-2", "compute-3"]
+                        ),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'entity_names': ['test_instance_4',
-                                       'test_instance_6',
-                                       'test_instance_7']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-4', 'compute-6', 'compute-7']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-4', 'compute-6', 'compute-7']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(
-                         ['compute-4', 'compute-6', 'compute-7']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "entity_names": [
+                                "test_instance_4",
+                                "test_instance_6",
+                                "test_instance_7",
+                            ],
+                        },
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["compute-4", "compute-6", "compute-7"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["compute-4", "compute-6", "compute-7"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(
+                            ["compute-4", "compute-6", "compute-7"]
+                        ),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'entity_names': ['test_instance_8',
-                                       'test_instance_9']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-8', 'compute-9']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-8', 'compute-9']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(
-                         ['compute-8', 'compute-9']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
-                 }
-            ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "entity_names": ["test_instance_8", "test_instance_9"],
+                        },
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["compute-8", "compute-9"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["compute-8", "compute-9"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-8", "compute-9"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_for_aio(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -489,20 +520,20 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - for AIO controllers, the last step is wait-data-sync
         - for workers, the last step is wait-alarms-clear (openstack workers)
         """
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
-        self.create_host('compute-4')
-        self.create_host('controller-0', aio=True)
-        self.create_host('controller-1', aio=True)
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
+        self.create_host("compute-4")
+        self.create_host("controller-0", aio=True)
+        self.create_host("controller-1", aio=True)
 
-        self.create_instance('small', "test_instance_0", 'compute-0')
-        self.create_instance('small', "test_instance_2", 'compute-2')
-        self.create_instance('small', "test_instance_3", 'compute-3')
-        self.create_instance('small', "test_instance_4", 'compute-4')
-        self.create_instance('small', "test_instance_6", 'controller-0')
-        self.create_instance('small', "test_instance_7", 'controller-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_2", "compute-2")
+        self.create_instance("small", "test_instance_3", "compute-3")
+        self.create_instance("small", "test_instance_4", "compute-4")
+        self.create_instance("small", "test_instance_6", "controller-0")
+        self.create_instance("small", "test_instance_7", "controller-1")
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -514,128 +545,132 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy = self.create_sw_upgrade_strategy(
             worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
-            max_parallel_worker_hosts=3
+            max_parallel_worker_hosts=3,
         )
 
         strategy._add_worker_strategy_stages(
-            worker_hosts=sorted_worker_hosts,
-            reboot=True)
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 5,
-            'stages': [
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 9,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['controller-0'],
-                      'entity_names': ['test_instance_6']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-0']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
+            "total_stages": 5,
+            "stages": [
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 9,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-0"]},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["controller-0"],
+                            "entity_names": ["test_instance_6"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-0"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 9,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['controller-1'],
-                      'entity_names': ['test_instance_7']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-1']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 9,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["controller-1"],
+                            "entity_names": ["test_instance_7"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["controller-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-1"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-1'],
-                      'entity_names': []},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-1']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-1"],
+                            "entity_names": [],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-1"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-0', 'compute-2', 'compute-3'],
-                      'entity_names': ['test_instance_0',
-                                       'test_instance_2',
-                                       'test_instance_3']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-0', 'compute-2', 'compute-3']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-0', 'compute-2', 'compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(
-                         ['compute-0', 'compute-2', 'compute-3']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-0", "compute-2", "compute-3"],
+                            "entity_names": [
+                                "test_instance_0",
+                                "test_instance_2",
+                                "test_instance_3",
+                            ],
+                        },
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["compute-0", "compute-2", "compute-3"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["compute-0", "compute-2", "compute-3"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(
+                            ["compute-0", "compute-2", "compute-3"]
+                        ),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-4'],
-                      'entity_names': ['test_instance_4']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-4']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-4']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-4']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
-                }
-            ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-4"],
+                            "entity_names": ["test_instance_4"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-4"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-4"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-4"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_fifty_hosts(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -646,17 +681,17 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - host aggregate limits enforced
         """
         for x in range(0, 50):
-            self.create_host('compute-%02d' % x)
+            self.create_host("compute-%02d" % x)
 
         for x in range(2, 47):
-            self.create_instance('small',
-                                 "test_instance_%02d" % x,
-                                 'compute-%02d' % x)
+            self.create_instance("small", "test_instance_%02d" % x, "compute-%02d" % x)
 
-        self.create_host_aggregate('aggregate-1',
-                                   ["compute-%02d" % x for x in range(0, 25)])
-        self.create_host_aggregate('aggregate-2',
-                                   ["compute-%02d" % x for x in range(25, 50)])
+        self.create_host_aggregate(
+            "aggregate-1", ["compute-%02d" % x for x in range(0, 25)]
+        )
+        self.create_host_aggregate(
+            "aggregate-2", ["compute-%02d" % x for x in range(25, 50)]
+        )
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -666,30 +701,30 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
 
         strategy = self.create_sw_upgrade_strategy(
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL,
-            max_parallel_worker_hosts=5
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL, max_parallel_worker_hosts=5
         )
 
         strategy._add_worker_strategy_stages(
-            worker_hosts=sorted_worker_hosts,
-            reboot=True)
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
-        host_sets = [[0, 1, 47, 48, 49],
-                     [2, 3, 25, 26],
-                     [4, 5, 27, 28],
-                     [6, 7, 29, 30],
-                     [8, 9, 31, 32],
-                     [10, 11, 33, 34],
-                     [12, 13, 35, 36],
-                     [14, 15, 37, 38],
-                     [16, 17, 39, 40],
-                     [18, 19, 41, 42],
-                     [20, 21, 43, 44],
-                     [22, 23, 45, 46],
-                     [24]
-                     ]
+        host_sets = [
+            [0, 1, 47, 48, 49],
+            [2, 3, 25, 26],
+            [4, 5, 27, 28],
+            [6, 7, 29, 30],
+            [8, 9, 31, 32],
+            [10, 11, 33, 34],
+            [12, 13, 35, 36],
+            [14, 15, 37, 38],
+            [16, 17, 39, 40],
+            [18, 19, 41, 42],
+            [20, 21, 43, 44],
+            [22, 23, 45, 46],
+            [24],
+        ]
         instance_sets = list(host_sets)
         instance_sets[0] = []
 
@@ -699,61 +734,62 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         for x in range(0, len(host_sets) - 1):
             stage_hosts.append(["compute-%02d" % host_num for host_num in host_sets[x]])
             stage_instances.append(
-                ["test_instance_%02d" % host_num for host_num in instance_sets[x]])
+                ["test_instance_%02d" % host_num for host_num in instance_sets[x]]
+            )
 
         expected_results = {
-            'total_stages': 13,
-            'stages': [
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': stage_hosts[0],
-                      'entity_names': []},
-                     {'name': 'lock-hosts',
-                      'entity_names': stage_hosts[0]},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': stage_hosts[0]},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(stage_hosts[0]),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
+            "total_stages": 13,
+            "stages": [
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": stage_hosts[0],
+                            "entity_names": [],
+                        },
+                        {"name": "lock-hosts", "entity_names": stage_hosts[0]},
+                        {"name": "upgrade-hosts", "entity_names": stage_hosts[0]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(stage_hosts[0]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-            ]
+            ],
         }
 
         for x in range(1, len(stage_hosts)):
-            expected_results['stages'].append(
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 8,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'disable-host-services'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': stage_hosts[x],
-                      'entity_names': stage_instances[x]},
-                     {'name': 'lock-hosts',
-                      'entity_names': stage_hosts[x]},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': stage_hosts[x]},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(stage_hosts[x]),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
-                 }
+            expected_results["stages"].append(
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 8,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "disable-host-services"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": stage_hosts[x],
+                            "entity_names": stage_instances[x],
+                        },
+                        {"name": "lock-hosts", "entity_names": stage_hosts[x]},
+                        {"name": "upgrade-hosts", "entity_names": stage_hosts[x]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(stage_hosts[x]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                }
             )
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_worker_stages_serial_migrate(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -762,21 +798,19 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - hosts with no instances upgraded first
         """
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_1", "compute-1")
 
-        self.create_instance_group('instance_group_1',
-                                   ['test_instance_0', 'test_instance_1'],
-                                   [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
+        self.create_instance_group(
+            "instance_group_1",
+            ["test_instance_0", "test_instance_1"],
+            [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY],
+        )
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -789,92 +823,91 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
         )
 
-        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
-                                              reboot=True)
+        strategy._add_worker_strategy_stages(
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 4,
-            'stages': [
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-2']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-2']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-2']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-2']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
+            "total_stages": 4,
+            "stages": [
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-2"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-2"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-2"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-2"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-3']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-3']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-3']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-3']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-3"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-3"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-3"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-3"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-0'],
-                      'entity_names': ['test_instance_0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-0']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-0"],
+                            "entity_names": ["test_instance_0"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-0"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-1'],
-                      'entity_names': ['test_instance_1']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-1']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-1"],
+                            "entity_names": ["test_instance_1"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-1"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
-            ]
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_non_openstack_worker_stages_serial(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -884,10 +917,10 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - final step is SystemStabilize
         """
-        self.create_host('compute-0', openstack_installed=False)
-        self.create_host('compute-1', openstack_installed=False)
-        self.create_host('compute-2', openstack_installed=False)
-        self.create_host('compute-3', openstack_installed=False)
+        self.create_host("compute-0", openstack_installed=False)
+        self.create_host("compute-1", openstack_installed=False)
+        self.create_host("compute-2", openstack_installed=False)
+        self.create_host("compute-3", openstack_installed=False)
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -900,40 +933,42 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
         )
 
-        strategy._add_worker_strategy_stages(worker_hosts=sorted_worker_hosts,
-                                              reboot=True)
+        strategy._add_worker_strategy_stages(
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 4,
-            'stages': [
+            "total_stages": 4,
+            "stages": [
                 {
-                    'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 6,
-                    'steps': [
-                        {'name': 'query-alarms'},
-                        {'name': 'lock-hosts',
-                         'entity_names': [f'compute-{i}']},
-                        {'name': 'upgrade-hosts',
-                         'entity_names': [f'compute-{i}']},
-                        {'name': 'system-stabilize', 'timeout': 15},
-                        {'name': 'unlock-hosts',
-                         'entity_names': [f'compute-{i}']},
-                        {'name': 'wait-alarms-clear',
-                         'ignore_alarms': IGNORE_ALARMS_LIST,
-                         'timeout': 2400}
-                    ]
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "lock-hosts", "entity_names": [f"compute-{i}"]},
+                        {"name": "upgrade-hosts", "entity_names": [f"compute-{i}"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "unlock-hosts", "entity_names": [f"compute-{i}"]},
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
                 }
                 for i in range(4)
-            ]
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_worker_stages_serial_migrate_locked_instance(self):
         """
         Test the sw_upgrade strategy add worker strategy stages:
@@ -943,22 +978,24 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - stages not created
         """
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0',
-                             admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.LOCKED)
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance(
+            "small",
+            "test_instance_0",
+            "compute-0",
+            admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.LOCKED,
+        )
+        self.create_instance("small", "test_instance_1", "compute-1")
 
-        self.create_instance_group('instance_group_1',
-                                   ['test_instance_0', 'test_instance_1'],
-                                   [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY])
+        self.create_instance_group(
+            "instance_group_1",
+            ["test_instance_0", "test_instance_1"],
+            [nfvi.objects.v1.INSTANCE_GROUP_POLICY.ANTI_AFFINITY],
+        )
 
         worker_hosts = []
         for host in list(self._host_table.values()):
@@ -972,13 +1009,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         )
 
         success, reason = strategy._add_worker_strategy_stages(
-            worker_hosts=sorted_worker_hosts,
-            reboot=True)
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         assert success is False, "Strategy creation did not fail"
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_storage_stages_ignore(self):
         """
         Test the sw_upgrade strategy add storage strategy stages:
@@ -986,17 +1025,21 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - stages not created
         """
-        self.create_host('storage-0')
-        self.create_host('storage-1')
-        self.create_host('storage-2')
-        self.create_host('storage-3')
+        self.create_host("storage-0")
+        self.create_host("storage-1")
+        self.create_host("storage-2")
+        self.create_host("storage-3")
 
-        self.create_host_group('group-0',
-                               ['storage-0', 'storage-1'],
-                               [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
-        self.create_host_group('group-1',
-                               ['storage-2', 'storage-3'],
-                               [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
+        self.create_host_group(
+            "group-0",
+            ["storage-0", "storage-1"],
+            [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION],
+        )
+        self.create_host_group(
+            "group-1",
+            ["storage-2", "storage-3"],
+            [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION],
+        )
 
         storage_hosts = []
         for host in list(self._host_table.values()):
@@ -1010,22 +1053,22 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         )
 
         success, reason = strategy._add_storage_strategy_stages(
-            storage_hosts=sorted_storage_hosts,
-            reboot=True)
+            storage_hosts=sorted_storage_hosts, reboot=True
+        )
 
         assert success is True, "Strategy creation failed"
 
         apply_phase = strategy.apply_phase.as_dict()
 
-        expected_results = {
-            'total_stages': 0
-        }
+        expected_results = {"total_stages": 0}
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_storage_stages_parallel_host_group(self):
         """
         Test the sw_upgrade strategy add storage strategy stages:
@@ -1034,17 +1077,21 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - storage-0 upgraded first
         - host groups enforced
         """
-        self.create_host('storage-0')
-        self.create_host('storage-1')
-        self.create_host('storage-2')
-        self.create_host('storage-3')
+        self.create_host("storage-0")
+        self.create_host("storage-1")
+        self.create_host("storage-2")
+        self.create_host("storage-3")
 
-        self.create_host_group('group-0',
-                               ['storage-0', 'storage-1'],
-                               [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
-        self.create_host_group('group-1',
-                               ['storage-2', 'storage-3'],
-                               [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
+        self.create_host_group(
+            "group-0",
+            ["storage-0", "storage-1"],
+            [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION],
+        )
+        self.create_host_group(
+            "group-1",
+            ["storage-2", "storage-3"],
+            [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION],
+        )
 
         storage_hosts = []
         for host in list(self._host_table.values()):
@@ -1057,66 +1104,81 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             storage_apply_type=SW_UPDATE_APPLY_TYPE.PARALLEL
         )
 
-        strategy._add_storage_strategy_stages(storage_hosts=sorted_storage_hosts,
-                                              reboot=True)
+        strategy._add_storage_strategy_stages(
+            storage_hosts=sorted_storage_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 2,
-            'stages': [
-                {'name': 'sw-upgrade-storage-hosts',
-                 'total_steps': 6,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['storage-0', 'storage-2']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['storage-0', 'storage-2']},
-                     {'name': 'system-stabilize', 'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['storage-0', 'storage-2']),
-                     {'name': 'wait-data-sync',
-                      'timeout': 1800}
-                 ]
+            "total_stages": 2,
+            "stages": [
+                {
+                    "name": "sw-upgrade-storage-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["storage-0", "storage-2"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["storage-0", "storage-2"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["storage-0", "storage-2"]),
+                        {"name": "wait-data-sync", "timeout": 1800},
+                    ],
                 },
-                {'name': 'sw-upgrade-storage-hosts',
-                 'total_steps': 6,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['storage-1', 'storage-3']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['storage-1', 'storage-3']},
-                     {'name': 'system-stabilize', 'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['storage-1', 'storage-3']),
-                     {'name': 'wait-data-sync',
-                      'timeout': 1800}
-                 ]
-                }
-            ]
+                {
+                    "name": "sw-upgrade-storage-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "lock-hosts",
+                            "entity_names": ["storage-1", "storage-3"],
+                        },
+                        {
+                            "name": "upgrade-hosts",
+                            "entity_names": ["storage-1", "storage-3"],
+                        },
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["storage-1", "storage-3"]),
+                        {"name": "wait-data-sync", "timeout": 1800},
+                    ],
+                },
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_storage_stages_serial(self):
         """
         Test the sw_upgrade strategy add storage strategy stages:
         - serial apply
         """
-        self.create_host('storage-0')
-        self.create_host('storage-1')
-        self.create_host('storage-2')
-        self.create_host('storage-3')
+        self.create_host("storage-0")
+        self.create_host("storage-1")
+        self.create_host("storage-2")
+        self.create_host("storage-3")
 
-        self.create_host_group('group-0',
-                               ['storage-0', 'storage-1'],
-                               [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
-        self.create_host_group('group-1',
-                               ['storage-2', 'storage-3'],
-                               [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION])
+        self.create_host_group(
+            "group-0",
+            ["storage-0", "storage-1"],
+            [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION],
+        )
+        self.create_host_group(
+            "group-1",
+            ["storage-2", "storage-3"],
+            [nfvi.objects.v1.HOST_GROUP_POLICY.STORAGE_REPLICATION],
+        )
 
         storage_hosts = []
         for host in list(self._host_table.values()):
@@ -1129,38 +1191,38 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             storage_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
         )
 
-        strategy._add_storage_strategy_stages(storage_hosts=sorted_storage_hosts,
-                                              reboot=True)
+        strategy._add_storage_strategy_stages(
+            storage_hosts=sorted_storage_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 4,
-            'stages': [
+            "total_stages": 4,
+            "stages": [
                 {
-                    'name': 'sw-upgrade-storage-hosts',
-                    'total_steps': 6,
-                    'steps': [
-                        {'name': 'query-alarms'},
-                        {'name': 'lock-hosts',
-                         'entity_names': [f'storage-{i}']},
-                        {'name': 'upgrade-hosts',
-                         'entity_names': [f'storage-{i}']},
-                        {'name': 'system-stabilize', 'timeout': 15},
-                        {'name': 'unlock-hosts',
-                         'entity_names': [f'storage-{i}']},
-                        {'name': 'wait-data-sync', 'timeout': 1800},
-                    ]
+                    "name": "sw-upgrade-storage-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "lock-hosts", "entity_names": [f"storage-{i}"]},
+                        {"name": "upgrade-hosts", "entity_names": [f"storage-{i}"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "unlock-hosts", "entity_names": [f"storage-{i}"]},
+                        {"name": "wait-data-sync", "timeout": 1800},
+                    ],
                 }
                 for i in range(4)
-            ]
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_0)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
     def test_sw_upgrade_strategy_controller_stages_serial(self):
         """
         Test the sw_upgrade strategy add controller strategy stages:
@@ -1168,50 +1230,55 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - controller-0 upgraded
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
+        self.create_host("controller-0")
+        self.create_host("controller-1")
 
         controller_hosts = []
         for host in list(self._host_table.values()):
-            if (HOST_PERSONALITY.CONTROLLER in host.personality and
-                    HOST_NAME.CONTROLLER_0 == host.name):
+            if (
+                HOST_PERSONALITY.CONTROLLER in host.personality
+                and HOST_NAME.CONTROLLER_0 == host.name
+            ):
                 controller_hosts.append(host)
 
         strategy = self.create_sw_upgrade_strategy()
 
-        strategy._add_controller_strategy_stages(controllers=controller_hosts,
-                                                 reboot=True)
+        strategy._add_controller_strategy_stages(
+            controllers=controller_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 1,
-            'stages': [
-                {'name': 'sw-upgrade-controllers',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize', 'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-0']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400}
-                 ]
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-controllers",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-0"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-0"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
                 }
-            ]
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_controller_stages_serial_start_upgrade(self):
         """
         Test the sw_upgrade strategy add controller strategy stages:
@@ -1219,66 +1286,69 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - controller-1 and controller-0 upgraded
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
+        self.create_host("controller-0")
+        self.create_host("controller-1")
 
         controller_hosts = []
         for host in list(self._host_table.values()):
-            if (HOST_PERSONALITY.CONTROLLER in host.personality):
+            if HOST_PERSONALITY.CONTROLLER in host.personality:
                 controller_hosts.append(host)
 
         strategy = self.create_sw_upgrade_strategy()
 
-        strategy._add_controller_strategy_stages(controllers=controller_hosts,
-                                                 reboot=True)
+        strategy._add_controller_strategy_stages(
+            controllers=controller_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 2,
-            'stages': [
-                {'name': 'sw-upgrade-controllers',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize', 'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-0']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400},
-                 ]
+            "total_stages": 2,
+            "stages": [
+                {
+                    "name": "sw-upgrade-controllers",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-0"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-0"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
                 },
-                {'name': 'sw-upgrade-controllers',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize', 'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-1']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400},
-                 ]
-                }
-            ]
+                {
+                    "name": "sw-upgrade-controllers",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-1"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
+                },
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_aio_stages_serial(self):
         """
         Test the sw_upgrade strategy add controller strategy stages:
@@ -1287,13 +1357,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - controller-0 and controller-1 upgraded
         """
-        self.create_host('controller-0', aio=True, openstack_installed=False)
-        self.create_host('controller-1', aio=True, openstack_installed=False)
+        self.create_host("controller-0", aio=True, openstack_installed=False)
+        self.create_host("controller-1", aio=True, openstack_installed=False)
 
         controller_hosts = []
         for host in list(self._host_table.values()):
-            if (HOST_PERSONALITY.CONTROLLER in host.personality and
-                    HOST_NAME.CONTROLLER_0 == host.name):
+            if (
+                HOST_PERSONALITY.CONTROLLER in host.personality
+                and HOST_NAME.CONTROLLER_0 == host.name
+            ):
                 controller_hosts.append(host)
 
         worker_hosts = []
@@ -1303,64 +1375,66 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         # Sort worker hosts so the order of the steps is deterministic
         sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
 
-        strategy = self.create_sw_upgrade_strategy(worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL)
+        strategy = self.create_sw_upgrade_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
+        )
 
         success, reason = strategy._add_controller_strategy_stages(
-            controllers=controller_hosts,
-            reboot=True)
+            controllers=controller_hosts, reboot=True
+        )
 
         assert success is True, ""
         apply_phase = strategy.apply_phase.as_dict()
         expected_results = {
-            'total_stages': 0,
+            "total_stages": 0,
         }
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
         strategy._add_worker_strategy_stages(
-            worker_hosts=sorted_worker_hosts,
-            reboot=True)
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
 
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 2,
-            'stages': [
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize', 'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-0']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400}
-                 ]
+            "total_stages": 2,
+            "stages": [
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-0"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-0"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize', 'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-1']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400}
-                 ]
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-1"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
                 },
-            ]
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
@@ -1381,26 +1455,31 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy()
 
         success, reason = strategy._add_worker_strategy_stages(
-            worker_hosts=controller_hosts,
-            reboot=True)
+            worker_hosts=controller_hosts, reboot=True
+        )
 
         assert success is True, reason
 
         apply_phase = strategy.apply_phase.as_dict()
         expected_results = {
-            'total_stages': 1,
-            'stages': [
+            "total_stages": 1,
+            "stages": [
                 {
-                    'name': 'sw-upgrade-worker-hosts',
-                    'total_steps': 6,
-                    'steps': [
-                        {'name': 'query-alarms'},
-                        {'name': 'lock-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'upgrade-hosts', 'entity_names': ['controller-0']},
-                        {'name': 'system-stabilize', 'timeout': 15},
-                        {'name': 'unlock-hosts', 'entity_names': ['controller-0'], 'retry_count': 0, 'retry_delay': 120},
-                        {'name': 'wait-alarms-clear', 'timeout': 2400},
-                    ]
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        {
+                            "name": "unlock-hosts",
+                            "entity_names": ["controller-0"],
+                            "retry_count": 0,
+                            "retry_delay": 120,
+                        },
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
                 },
             ],
         }
@@ -1417,16 +1496,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - hosts with no instances upgraded first
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
-        self.create_host('storage-0')
-        self.create_host('storage-1')
-        self.create_host('compute-0')
-        self.create_host('compute-1')
+        self.create_host("controller-0")
+        self.create_host("controller-1")
+        self.create_host("storage-0")
+        self.create_host("storage-1")
+        self.create_host("compute-0")
+        self.create_host("compute-1")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
+        self.create_instance("small", "test_instance_0", "compute-0")
 
         strategy = self.create_sw_upgrade_strategy(
             controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -1442,137 +1519,137 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 8,
-            'stages': [
-                {'name': 'sw-upgrade-start',
-                 'total_steps': 3,
-                 'steps': [
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'start-upgrade',
-                      'release': strategy.nfvi_upgrade.release},
-                     {'name': 'query-alarms'},
-                 ]
+            "total_stages": 8,
+            "stages": [
+                {
+                    "name": "sw-upgrade-start",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {
+                            "name": "start-upgrade",
+                            "release": strategy.nfvi_upgrade.release,
+                        },
+                        {"name": "query-alarms"},
+                    ],
                 },
-                {'name': 'sw-upgrade-controllers',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-1']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400}
-                 ]
-                 },
-                {'name': 'sw-upgrade-controllers',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-0']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400}
-                 ]
-                 },
-                {'name': 'sw-upgrade-storage-hosts',
-                 'total_steps': 6,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'lock-hosts',
-                       'entity_names': ['storage-0']},
-                     {'name': 'upgrade-hosts',
-                       'entity_names': ['storage-0']},
-                     {'name': 'system-stabilize',
-                       'timeout': 15},
-                     {'name': 'unlock-hosts',
-                       'entity_names': ['storage-0']},
-                     {'name': 'wait-data-sync',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 1800}
-                 ]
-                 },
-                {'name': 'sw-upgrade-storage-hosts',
-                 'total_steps': 6,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'lock-hosts',
-                       'entity_names': ['storage-1']},
-                     {'name': 'upgrade-hosts',
-                       'entity_names': ['storage-1']},
-                     {'name': 'system-stabilize',
-                       'timeout': 15},
-                     {'name': 'unlock-hosts',
-                       'entity_names': ['storage-1']},
-                     {'name': 'wait-data-sync',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 1800}
-                 ]
-                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-1']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-1']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
-                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'host_names': ['compute-0'],
-                      'entity_names': ['test_instance_0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                       'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-0']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400},
-                 ]
-                 },
-                {'name': 'sw-upgrade-complete',
-                 'total_steps': 5,
-                 'steps': [
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'query-alarms'},
-                     {'name': 'activate-upgrade',
-                      'release': strategy.nfvi_upgrade.release},
-                     {'name': 'complete-upgrade',
-                      'release': strategy.nfvi_upgrade.release},
-                     {'name': 'query-alarms'},
-                  ]
-                }
-            ]
+                {
+                    "name": "sw-upgrade-controllers",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-1"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-controllers",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-0"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-0"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-storage-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "lock-hosts", "entity_names": ["storage-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["storage-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "unlock-hosts", "entity_names": ["storage-0"]},
+                        {
+                            "name": "wait-data-sync",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 1800,
+                        },
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-storage-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "lock-hosts", "entity_names": ["storage-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["storage-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "unlock-hosts", "entity_names": ["storage-1"]},
+                        {
+                            "name": "wait-data-sync",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 1800,
+                        },
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-1"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-1"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "host_names": ["compute-0"],
+                            "entity_names": ["test_instance_0"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-0"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-complete",
+                    "total_steps": 5,
+                    "steps": [
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {"name": "query-alarms"},
+                        {
+                            "name": "activate-upgrade",
+                            "release": strategy.nfvi_upgrade.release,
+                        },
+                        {
+                            "name": "complete-upgrade",
+                            "release": strategy.nfvi_upgrade.release,
+                        },
+                        {"name": "query-alarms"},
+                    ],
+                },
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
@@ -1588,14 +1665,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - hosts with no instances upgraded first
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
-        self.create_host('compute-0')
-        self.create_host('compute-1')
+        self.create_host("controller-0")
+        self.create_host("controller-1")
+        self.create_host("compute-0")
+        self.create_host("compute-1")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
+        self.create_instance("small", "test_instance_0", "compute-0")
 
         strategy = self.create_sw_upgrade_strategy(
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -1609,109 +1684,110 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         apply_phase = strategy.apply_phase.as_dict()
 
         expected_results = {
-            'total_stages': 6,
-            'stages': [
-                {'name': 'sw-upgrade-start',
-                 'total_steps': 3,
-                 'steps': [
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'start-upgrade',
-                      'release': strategy.nfvi_upgrade.release},
-                     {'name': 'query-alarms'},
-                 ]
+            "total_stages": 6,
+            "stages": [
+                {
+                    "name": "sw-upgrade-start",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {
+                            "name": "start-upgrade",
+                            "release": strategy.nfvi_upgrade.release,
+                        },
+                        {"name": "query-alarms"},
+                    ],
                 },
-                {'name': 'sw-upgrade-controllers',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-1']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400}
-                 ]
-                 },
-                {'name': 'sw-upgrade-controllers',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['controller-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['controller-0']),
-                     {'name': 'wait-alarms-clear',
-                      'ignore_alarms': IGNORE_ALARMS_LIST,
-                      'timeout': 2400}
-                 ]
-                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'entity_names': []},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-1']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-1']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
-                 },
-                {'name': 'sw-upgrade-worker-hosts',
-                 'total_steps': 7,
-                 'steps': [
-                     {'name': 'query-alarms'},
-                     {'name': 'migrate-instances-from-host',
-                      'entity_names': ['test_instance_0']},
-                     {'name': 'lock-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'upgrade-hosts',
-                      'entity_names': ['compute-0']},
-                     {'name': 'system-stabilize',
-                      'timeout': 15},
-                     _unlock_hosts_stage_as_dict(['compute-0']),
-                     {'name': 'wait-alarms-clear',
-                      'timeout': 2400}
-                 ]
-                 },
-                {'name': 'sw-upgrade-complete',
-                 'total_steps': 5,
-                 'steps': [
-                     {'name': 'swact-hosts',
-                      'entity_names': ['controller-1']},
-                     {'name': 'query-alarms'},
-                     {'name': 'activate-upgrade',
-                      'release': strategy.nfvi_upgrade.release},
-                     {'name': 'complete-upgrade',
-                      'release': strategy.nfvi_upgrade.release},
-                     {'name': 'query-alarms'},
-                  ]
-                }
-            ]
+                {
+                    "name": "sw-upgrade-controllers",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-1"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-controllers",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "swact-hosts", "entity_names": ["controller-0"]},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["controller-0"]),
+                        {
+                            "name": "wait-alarms-clear",
+                            "ignore_alarms": IGNORE_ALARMS_LIST,
+                            "timeout": 2400,
+                        },
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "migrate-instances-from-host", "entity_names": []},
+                        {"name": "lock-hosts", "entity_names": ["compute-1"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-1"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-1"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 7,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {
+                            "name": "migrate-instances-from-host",
+                            "entity_names": ["test_instance_0"],
+                        },
+                        {"name": "lock-hosts", "entity_names": ["compute-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["compute-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        _unlock_hosts_stage_as_dict(["compute-0"]),
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-complete",
+                    "total_steps": 5,
+                    "steps": [
+                        {"name": "swact-hosts", "entity_names": ["controller-1"]},
+                        {"name": "query-alarms"},
+                        {
+                            "name": "activate-upgrade",
+                            "release": strategy.nfvi_upgrade.release,
+                        },
+                        {
+                            "name": "complete-upgrade",
+                            "release": strategy.nfvi_upgrade.release,
+                        },
+                        {"name": "query-alarms"},
+                    ],
+                },
+            ],
         }
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_build_complete_invalid_state(self):
         """
         Test the sw_upgrade strategy build_complete:
@@ -1719,19 +1795,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - build fails
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
+        self.create_host("controller-0")
+        self.create_host("controller-1")
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_1", "compute-1")
 
         strategy = self.create_sw_upgrade_strategy(
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -1745,14 +1817,16 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         build_phase = strategy.build_phase.as_dict()
 
         expected_results = {
-            'total_stages': 0,
-            'result': 'initial',
+            "total_stages": 0,
+            "result": "initial",
         }
 
         sw_update_testcase.validate_phase(build_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_build_complete_unupgraded_controller_1(self):
         """
         Test the sw_upgrade strategy build_complete:
@@ -1760,19 +1834,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - build fails
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
+        self.create_host("controller-0")
+        self.create_host("controller-1")
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_1", "compute-1")
 
         strategy = self.create_sw_upgrade_strategy(
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -1786,14 +1856,16 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         build_phase = strategy.build_phase.as_dict()
 
         expected_results = {
-            'total_stages': 0,
-            'result': 'initial',
+            "total_stages": 0,
+            "result": "initial",
         }
 
         sw_update_testcase.validate_phase(build_phase, expected_results)
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_build_complete_locked_controller(self):
         """
         Test the sw_upgrade strategy build_complete:
@@ -1801,20 +1873,17 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - build fails
         """
-        self.create_host('controller-0',
-                         admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED)
-        self.create_host('controller-1')
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3')
+        self.create_host(
+            "controller-0", admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED
+        )
+        self.create_host("controller-1")
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host("compute-3")
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_1", "compute-1")
 
         strategy = self.create_sw_upgrade_strategy(
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -1827,11 +1896,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
         bpr = strategy.build_phase
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert (
+            strategy._state == common_strategy.STRATEGY_STATE.INITIAL
+        ), strategy._state
         assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_build_complete_locked_worker(self):
         """
         Test the sw_upgrade strategy build_complete:
@@ -1839,20 +1912,17 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         Verify:
         - build fails
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
-        self.create_host('compute-0')
-        self.create_host('compute-1')
-        self.create_host('compute-2')
-        self.create_host('compute-3',
-                         admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED)
+        self.create_host("controller-0")
+        self.create_host("controller-1")
+        self.create_host("compute-0")
+        self.create_host("compute-1")
+        self.create_host("compute-2")
+        self.create_host(
+            "compute-3", admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED
+        )
 
-        self.create_instance('small',
-                             "test_instance_0",
-                             'compute-0')
-        self.create_instance('small',
-                             "test_instance_1",
-                             'compute-1')
+        self.create_instance("small", "test_instance_0", "compute-0")
+        self.create_instance("small", "test_instance_1", "compute-1")
 
         strategy = self.create_sw_upgrade_strategy(
             worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -1865,12 +1935,16 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
         bpr = strategy.build_phase
 
-        assert strategy._state == common_strategy.STRATEGY_STATE.INITIAL, strategy._state
+        assert (
+            strategy._state == common_strategy.STRATEGY_STATE.INITIAL
+        ), strategy._state
         assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
-    @testtools.skip('Retries not implemented')
-    @mock.patch('nfv_vim.strategy._strategy.get_local_host_name',
-                sw_update_testcase.fake_host_name_controller_1)
+    @testtools.skip("Retries not implemented")
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
     def test_sw_upgrade_strategy_controller_missing_strategy_fields(self):
         """
         Test the sw_upgrade strategy add controller strategy stages:
@@ -1879,17 +1953,20 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - controller-0 upgraded
         - the missing fields do not cause deserialization failures
         """
-        self.create_host('controller-0')
-        self.create_host('controller-1')
+        self.create_host("controller-0")
+        self.create_host("controller-1")
 
         controller_hosts = []
         for host in list(self._host_table.values()):
-            if (HOST_PERSONALITY.CONTROLLER in host.personality and
-                    HOST_NAME.CONTROLLER_0 == host.name):
+            if (
+                HOST_PERSONALITY.CONTROLLER in host.personality
+                and HOST_NAME.CONTROLLER_0 == host.name
+            ):
                 controller_hosts.append(host)
         strategy = self.create_sw_upgrade_strategy()
-        strategy._add_controller_strategy_stages(controllers=controller_hosts,
-                                                 reboot=True)
+        strategy._add_controller_strategy_stages(
+            controllers=controller_hosts, reboot=True
+        )
 
         strategy_dict = strategy.as_dict()
         # remove the fields that do not exist in the previous version
@@ -1900,11 +1977,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         # Ensure the field exists before we remove it
         self.assertEqual(
-            120,
-            strategy_dict['apply_phase']['stages'][0]['steps'][3]['retry_delay'])
+            120, strategy_dict["apply_phase"]["stages"][0]["steps"][3]["retry_delay"]
+        )
         # remove the fields that would not exist in an older version
-        strategy_dict['apply_phase']['stages'][0]['steps'][3].pop('retry_delay')
-        strategy_dict['apply_phase']['stages'][0]['steps'][3].pop('retry_count')
+        strategy_dict["apply_phase"]["stages"][0]["steps"][3].pop("retry_delay")
+        strategy_dict["apply_phase"]["stages"][0]["steps"][3].pop("retry_count")
 
         # rebuild from the dictionary. If the new code is not robust, it would
         # raise an exception
@@ -1913,5 +1990,5 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         # the default value should be re-populated
         strategy_dict = new_strategy.as_dict()
         self.assertEqual(
-            120,
-            strategy_dict['apply_phase']['stages'][0]['steps'][3]['retry_delay'])
+            120, strategy_dict["apply_phase"]["stages"][0]["steps"][3]["retry_delay"]
+        )

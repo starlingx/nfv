@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -31,9 +31,9 @@ PROCESS_TICK_INTERVAL_IN_MS = 500
 PROCESS_TICK_MAX_DELAY_IN_MS = 3000
 PROCESS_TICK_DELAY_DEBOUNCE_IN_MS = 2000
 
-PROCESS_NOT_RUNNING_FILE = '/var/run/.nfv-vim.not_running'
+PROCESS_NOT_RUNNING_FILE = "/var/run/.nfv-vim.not_running"
 
-DLOG = debug.debug_get_logger('nfv_vim')
+DLOG = debug.debug_get_logger("nfv_vim")
 
 stay_on = True
 do_reload = False
@@ -67,19 +67,21 @@ def process_initialize():
     """
     init_complete = True
 
-    debug.debug_initialize(config.CONF['debug'], 'VIM')
+    debug.debug_initialize(config.CONF["debug"], "VIM")
     profiler.profiler_initialize()
     selobj.selobj_initialize()
-    timers.timers_initialize(PROCESS_TICK_INTERVAL_IN_MS,
-                             PROCESS_TICK_MAX_DELAY_IN_MS,
-                             PROCESS_TICK_DELAY_DEBOUNCE_IN_MS)
+    timers.timers_initialize(
+        PROCESS_TICK_INTERVAL_IN_MS,
+        PROCESS_TICK_MAX_DELAY_IN_MS,
+        PROCESS_TICK_DELAY_DEBOUNCE_IN_MS,
+    )
     schedule.schedule_initialize()
-    event_log.event_log_initialize(config.CONF['event-log'])
-    alarm.alarm_initialize(config.CONF['alarm'])
-    if not nfvi.nfvi_initialize(config.CONF['nfvi']):
+    event_log.event_log_initialize(config.CONF["event-log"])
+    alarm.alarm_initialize(config.CONF["alarm"])
+    if not nfvi.nfvi_initialize(config.CONF["nfvi"]):
         DLOG.info("nfvi_initialize failed")
         init_complete = False
-    database.database_initialize(config.CONF['database'])
+    database.database_initialize(config.CONF["database"])
     database.database_migrate_data()
     tables.tables_initialize()
     directors.directors_initialize()
@@ -97,7 +99,7 @@ def process_reinitialize():
     """
     init_complete = True
 
-    if not nfvi.nfvi_reinitialize(config.CONF['nfvi']):
+    if not nfvi.nfvi_reinitialize(config.CONF["nfvi"]):
         DLOG.info("nfvi_reinitialize failed")
         init_complete = False
     else:
@@ -116,7 +118,7 @@ def process_finalize():
     events.events_finalize()
     directors.directors_finalize()
     tables.tables_finalize()
-    database.database_finalize(config.CONF['database'])
+    database.database_finalize(config.CONF["database"])
     nfvi.nfvi_finalize()
     alarm.alarm_finalize()
     event_log.event_log_finalize()
@@ -131,9 +133,10 @@ def process_main():
     """
     Virtual Infrastructure Manager - Main
     """
+
     def _force_exit():
         # Always finalize DB or it can become corrupted
-        database.database_finalize(config.CONF['database'])
+        database.database_finalize(config.CONF["database"])
         os._exit(-1)
 
     global do_reload, dump_data_captured, reset_data_captured
@@ -148,17 +151,18 @@ def process_main():
         signal.signal(signal.SIGUSR2, process_signal_handler)
 
         parser = argparse.ArgumentParser()
-        parser.add_argument('-c', '--config', help='configuration file')
-        parser.add_argument('-t', '--tox', action="store_true",
-                            help='tox test environment')
+        parser.add_argument("-c", "--config", help="configuration file")
+        parser.add_argument(
+            "-t", "--tox", action="store_true", help="tox test environment"
+        )
         args = parser.parse_args()
         config.load(args.config)
 
         if args.tox:
             # Append the tox root directory to the system path to get
             # the config.ini and debug.ini files.
-            debug_ini = sys.prefix + '/' + config.CONF['debug']['config_file']
-            config.CONF['debug']['config_file'] = debug_ini
+            debug_ini = sys.prefix + "/" + config.CONF["debug"]["config_file"]
+            config.CONF["debug"]["config_file"] = debug_ini
 
         init_complete = process_initialize()
         last_init_time = timers.get_monotonic_timestamp_in_ms()
@@ -226,5 +230,5 @@ def process_main():
         # Touching this file after the SIGALRM timer is started. This is to
         # ensure that in cases where we are terminating due to FD exhaustion
         # we still shut down even if the open hangs.
-        open(PROCESS_NOT_RUNNING_FILE, 'w').close()
+        open(PROCESS_NOT_RUNNING_FILE, "w").close()
         process_finalize()

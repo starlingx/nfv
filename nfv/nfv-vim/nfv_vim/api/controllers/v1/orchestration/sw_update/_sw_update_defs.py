@@ -14,48 +14,53 @@ class SwUpdateNames(Constants, metaclass=Singleton):
     """
     Software Update - Name Constants
     """
-    FW_UPDATE = Constant('fw-update')
-    KUBE_ROOTCA_UPDATE = Constant('kube-rootca-update')
-    KUBE_UPGRADE = Constant('kube-upgrade')
-    SW_UPGRADE = Constant('sw-upgrade')
-    SYSTEM_CONFIG_UPDATE = Constant('system-config-update')
-    CURRENT_STRATEGY = Constant('current-strategy')
+
+    FW_UPDATE = Constant("fw-update")
+    KUBE_ROOTCA_UPDATE = Constant("kube-rootca-update")
+    KUBE_UPGRADE = Constant("kube-upgrade")
+    SW_UPGRADE = Constant("sw-upgrade")
+    SYSTEM_CONFIG_UPDATE = Constant("system-config-update")
+    CURRENT_STRATEGY = Constant("current-strategy")
 
 
 class SwUpdateApplyTypes(Constants, metaclass=Singleton):
     """
     Software Update - Apply Type Constants
     """
-    SERIAL = Constant('serial')
-    PARALLEL = Constant('parallel')
-    IGNORE = Constant('ignore')
+
+    SERIAL = Constant("serial")
+    PARALLEL = Constant("parallel")
+    IGNORE = Constant("ignore")
 
 
 class SwUpdateInstanceActionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Instance Action Type Constants
     """
-    MIGRATE = Constant('migrate')
-    STOP_START = Constant('stop-start')
+
+    MIGRATE = Constant("migrate")
+    STOP_START = Constant("stop-start")
 
 
 class SwUpdateActions(Constants, metaclass=Singleton):
     """
     Software Update - Action Constants
     """
-    APPLY_ALL = Constant('apply-all')
-    APPLY_STAGE = Constant('apply-stage')
-    ABORT = Constant('abort')
-    ABORT_STAGE = Constant('abort-stage')
+
+    APPLY_ALL = Constant("apply-all")
+    APPLY_STAGE = Constant("apply-stage")
+    ABORT = Constant("abort")
+    ABORT_STAGE = Constant("abort-stage")
 
 
 class SwUpdateAlarmRestrictionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Alarm Restriction Type Constants
     """
-    STRICT = Constant('strict')
-    RELAXED = Constant('relaxed')
-    PERMISSIVE = Constant('permissive')
+
+    STRICT = Constant("strict")
+    RELAXED = Constant("relaxed")
+    PERMISSIVE = Constant("permissive")
 
 
 # Constant Instantiation
@@ -67,26 +72,34 @@ SW_UPDATE_ALARM_RESTRICTION_TYPES = SwUpdateAlarmRestrictionTypes()
 
 
 # WSME Types
-SwUpdateNames = wsme_types.Enum(str,
-                                SW_UPDATE_NAME.FW_UPDATE,
-                                SW_UPDATE_NAME.KUBE_ROOTCA_UPDATE,
-                                SW_UPDATE_NAME.KUBE_UPGRADE,
-                                SW_UPDATE_NAME.SW_UPGRADE,
-                                SW_UPDATE_NAME.SYSTEM_CONFIG_UPDATE,
-                                SW_UPDATE_NAME.CURRENT_STRATEGY)
-SwUpdateApplyTypes = wsme_types.Enum(str,
-                                     SW_UPDATE_APPLY_TYPE.SERIAL,
-                                     SW_UPDATE_APPLY_TYPE.PARALLEL,
-                                     SW_UPDATE_APPLY_TYPE.IGNORE)
-SwUpdateActions = wsme_types.Enum(str,
-                                  SW_UPDATE_ACTION.APPLY_ALL,
-                                  SW_UPDATE_ACTION.APPLY_STAGE,
-                                  SW_UPDATE_ACTION.ABORT,
-                                  SW_UPDATE_ACTION.ABORT_STAGE)
-SwUpdateInstanceActionTypes = wsme_types.Enum(str,
-                                              SW_UPDATE_INSTANCE_ACTION.MIGRATE,
-                                              SW_UPDATE_INSTANCE_ACTION.STOP_START)
+SwUpdateNames = wsme_types.Enum(
+    str,
+    SW_UPDATE_NAME.FW_UPDATE,
+    SW_UPDATE_NAME.KUBE_ROOTCA_UPDATE,
+    SW_UPDATE_NAME.KUBE_UPGRADE,
+    SW_UPDATE_NAME.SW_UPGRADE,
+    SW_UPDATE_NAME.SYSTEM_CONFIG_UPDATE,
+    SW_UPDATE_NAME.CURRENT_STRATEGY,
+)
+SwUpdateApplyTypes = wsme_types.Enum(
+    str,
+    SW_UPDATE_APPLY_TYPE.SERIAL,
+    SW_UPDATE_APPLY_TYPE.PARALLEL,
+    SW_UPDATE_APPLY_TYPE.IGNORE,
+)
+SwUpdateActions = wsme_types.Enum(
+    str,
+    SW_UPDATE_ACTION.APPLY_ALL,
+    SW_UPDATE_ACTION.APPLY_STAGE,
+    SW_UPDATE_ACTION.ABORT,
+    SW_UPDATE_ACTION.ABORT_STAGE,
+)
+SwUpdateInstanceActionTypes = wsme_types.Enum(
+    str, SW_UPDATE_INSTANCE_ACTION.MIGRATE, SW_UPDATE_INSTANCE_ACTION.STOP_START
+)
 SwUpdateAlarmRestrictionTypes = wsme_types.Enum(
-    str, SW_UPDATE_ALARM_RESTRICTION_TYPES.STRICT,
+    str,
+    SW_UPDATE_ALARM_RESTRICTION_TYPES.STRICT,
     SW_UPDATE_ALARM_RESTRICTION_TYPES.RELAXED,
-    SW_UPDATE_ALARM_RESTRICTION_TYPES.PERMISSIVE)
+    SW_UPDATE_ALARM_RESTRICTION_TYPES.PERMISSIVE,
+)

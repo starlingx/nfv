@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,15 +13,24 @@ from nfv_common.strategy._strategy_phase import StrategyPhase
 from nfv_common.strategy._strategy_result import STRATEGY_RESULT
 from nfv_common.strategy._strategy_result import strategy_result_update
 
-DLOG = debug.debug_get_logger('nfv_common.strategy')
+DLOG = debug.debug_get_logger("nfv_common.strategy")
 
 
 class Strategy(object):
     """
     Strategy
     """
-    def __init__(self, uuid, name, state=None, current_phase=None, build_phase=None,
-                 apply_phase=None, abort_phase=None):
+
+    def __init__(
+        self,
+        uuid,
+        name,
+        state=None,
+        current_phase=None,
+        build_phase=None,
+        apply_phase=None,
+        abort_phase=None,
+    ):
         self._uuid = uuid
         self._name = name
 
@@ -117,15 +126,18 @@ class Strategy(object):
         """
         Returns true if the strategy build failed
         """
-        return (STRATEGY_STATE.BUILD_FAILED == self._state or
-                self.build_phase.is_failed())
+        return (
+            STRATEGY_STATE.BUILD_FAILED == self._state or self.build_phase.is_failed()
+        )
 
     def is_build_timed_out(self):
         """
         Returns true if the strategy build timed out
         """
-        return (STRATEGY_STATE.BUILD_TIMEOUT == self._state or
-                self.build_phase.is_timed_out())
+        return (
+            STRATEGY_STATE.BUILD_TIMEOUT == self._state
+            or self.build_phase.is_timed_out()
+        )
 
     def is_ready_to_apply(self):
         """
@@ -143,15 +155,18 @@ class Strategy(object):
         """
         Returns true if the strategy apply failed
         """
-        return (STRATEGY_STATE.APPLY_FAILED == self._state or
-                self.apply_phase.is_failed())
+        return (
+            STRATEGY_STATE.APPLY_FAILED == self._state or self.apply_phase.is_failed()
+        )
 
     def is_apply_timed_out(self):
         """
         Returns true if the strategy apply timed out
         """
-        return (STRATEGY_STATE.APPLY_TIMEOUT == self._state or
-                self.apply_phase.is_timed_out())
+        return (
+            STRATEGY_STATE.APPLY_TIMEOUT == self._state
+            or self.apply_phase.is_timed_out()
+        )
 
     def is_applied(self):
         """
@@ -169,15 +184,18 @@ class Strategy(object):
         """
         Returns true if the strategy abort failed
         """
-        return (STRATEGY_STATE.ABORT_FAILED == self._state or
-                self.abort_phase.is_failed())
+        return (
+            STRATEGY_STATE.ABORT_FAILED == self._state or self.abort_phase.is_failed()
+        )
 
     def is_abort_timed_out(self):
         """
         Returns true if the strategy abort timed out
         """
-        return (STRATEGY_STATE.ABORT_TIMEOUT == self._state or
-                self.abort_phase.is_timed_out())
+        return (
+            STRATEGY_STATE.ABORT_TIMEOUT == self._state
+            or self.abort_phase.is_timed_out()
+        )
 
     def is_aborted(self):
         """
@@ -200,7 +218,7 @@ class Strategy(object):
         Strategy Apply
         """
         success = True
-        reason = ''
+        reason = ""
 
         if STRATEGY_PHASE.BUILD == self._current_phase:
             if STRATEGY_STATE.READY_TO_APPLY == self._state:
@@ -216,8 +234,10 @@ class Strategy(object):
 
                 else:
                     success = False
-                    reason = ("invalid stage id %s for the apply, total-stages "
-                              "are %s" % (stage_id, self.apply_phase.total_stages))
+                    reason = (
+                        "invalid stage id %s for the apply, total-stages "
+                        "are %s" % (stage_id, self.apply_phase.total_stages)
+                    )
 
             else:
                 if stage_id is None:
@@ -225,20 +245,28 @@ class Strategy(object):
                     reason = self.build_phase.result_reason
                 else:
                     success = False
-                    reason = ("apply of stage id %s failed: %s "
-                              % (stage_id, self.build_phase.result_reason))
+                    reason = "apply of stage id %s failed: %s " % (
+                        stage_id,
+                        self.build_phase.result_reason,
+                    )
 
         elif STRATEGY_PHASE.APPLY == self._current_phase:
-            if self._state in [STRATEGY_STATE.APPLIED, STRATEGY_STATE.APPLY_FAILED,
-                               STRATEGY_STATE.APPLY_TIMEOUT,
-                               STRATEGY_STATE.ABORTED, STRATEGY_STATE.ABORT_FAILED,
-                               STRATEGY_STATE.ABORT_TIMEOUT]:
+            if self._state in [
+                STRATEGY_STATE.APPLIED,
+                STRATEGY_STATE.APPLY_FAILED,
+                STRATEGY_STATE.APPLY_TIMEOUT,
+                STRATEGY_STATE.ABORTED,
+                STRATEGY_STATE.ABORT_FAILED,
+                STRATEGY_STATE.ABORT_TIMEOUT,
+            ]:
                 success = False
                 reason = "apply already completed"
 
             # Allow an apply after a single stage apply has completed
-            elif stage_id is None and self.apply_phase.current_stage == \
-                    self.apply_phase.stop_at_stage:
+            elif (
+                stage_id is None
+                and self.apply_phase.current_stage == self.apply_phase.stop_at_stage
+            ):
                 self.apply_phase.apply()
 
             elif stage_id is None or self.apply_phase.is_inprogress():
@@ -251,14 +279,17 @@ class Strategy(object):
 
             elif stage_id >= self.apply_phase.total_stages:
                 success = False
-                reason = ("invalid stage id %s for the apply, total-stages are %s"
-                          % (stage_id, self.apply_phase.total_stages))
+                reason = "invalid stage id %s for the apply, total-stages are %s" % (
+                    stage_id,
+                    self.apply_phase.total_stages,
+                )
 
             elif self.apply_phase.current_stage != stage_id:
                 success = False
-                reason = ("stage id %s is not the next stage to be applied, "
-                          "next-stage = %s"
-                          % (stage_id, self.apply_phase.current_stage))
+                reason = (
+                    "stage id %s is not the next stage to be applied, "
+                    "next-stage = %s" % (stage_id, self.apply_phase.current_stage)
+                )
 
             else:
                 self.apply_phase.apply(stage_id + 1)
@@ -269,8 +300,7 @@ class Strategy(object):
                 reason = "apply not supported during an abort"
             else:
                 success = False
-                reason = ("apply of stage id %s not supported during an abort"
-                          % stage_id)
+                reason = "apply of stage id %s not supported during an abort" % stage_id
 
         return success, reason
 
@@ -280,13 +310,18 @@ class Strategy(object):
         """
         if STRATEGY_PHASE.APPLY == self._current_phase:
             if stage_id is not None:
-                if not self.apply_phase.is_inprogress() or \
-                        stage_id != self.apply_phase.current_stage:
+                if (
+                    not self.apply_phase.is_inprogress()
+                    or stage_id != self.apply_phase.current_stage
+                ):
                     reason = "apply not inprogress for stage id %s" % stage_id
                     return False, reason
 
-            if self._state in [STRATEGY_STATE.APPLYING, STRATEGY_STATE.APPLY_FAILED,
-                               STRATEGY_STATE.APPLY_TIMEOUT]:
+            if self._state in [
+                STRATEGY_STATE.APPLYING,
+                STRATEGY_STATE.APPLY_FAILED,
+                STRATEGY_STATE.APPLY_TIMEOUT,
+            ]:
                 self._state = STRATEGY_STATE.ABORTING
                 abort_phase = self.apply_phase.abort()
                 if not abort_phase:
@@ -310,7 +345,7 @@ class Strategy(object):
             reason = "apply not inprogress"
             return False, reason
 
-        return True, ''
+        return True, ""
 
     def _handle_event(self, event, event_data=None):
         """
@@ -353,9 +388,9 @@ class Strategy(object):
         """
         self.save()
 
-        result, result_reason = \
-            strategy_result_update(STRATEGY_RESULT.INITIAL, '',
-                                   phase_result, phase_result_reason)
+        result, result_reason = strategy_result_update(
+            STRATEGY_RESULT.INITIAL, "", phase_result, phase_result_reason
+        )
 
         if STRATEGY_STATE.BUILDING == self._state:
             if self._phase[STRATEGY_PHASE.BUILD] == phase:
@@ -491,9 +526,16 @@ class Strategy(object):
         """
         Initializes a strategy object using the given dictionary
         """
-        Strategy.__init__(self, data['uuid'], data['name'], data['state'],
-                          data['current_phase'], build_phase, apply_phase,
-                          abort_phase)
+        Strategy.__init__(
+            self,
+            data["uuid"],
+            data["name"],
+            data["state"],
+            data["current_phase"],
+            build_phase,
+            apply_phase,
+            abort_phase,
+        )
         return self
 
     def as_dict(self):
@@ -501,24 +543,27 @@ class Strategy(object):
         Represent the strategy as a dictionary
         """
         data = dict()
-        data['uuid'] = self.uuid
-        data['name'] = self.name
-        data['state'] = self.state
-        data['current_phase'] = self._current_phase
+        data["uuid"] = self.uuid
+        data["name"] = self.name
+        data["state"] = self.state
+        data["current_phase"] = self._current_phase
         if self.build_phase.name == self._current_phase:
-            data['current_phase_completion_percentage'] \
-                = self.build_phase.completion_percentage
+            data["current_phase_completion_percentage"] = (
+                self.build_phase.completion_percentage
+            )
         elif self.apply_phase.name == self._current_phase:
-            data['current_phase_completion_percentage'] \
-                = self.apply_phase.completion_percentage
+            data["current_phase_completion_percentage"] = (
+                self.apply_phase.completion_percentage
+            )
         elif self.abort_phase.name == self._current_phase:
-            data['current_phase_completion_percentage'] \
-                = self.abort_phase.completion_percentage
+            data["current_phase_completion_percentage"] = (
+                self.abort_phase.completion_percentage
+            )
         else:
-            data['current_phase_completion_percentage'] = 0
-        data['build_phase'] = self.build_phase.as_dict()
-        data['apply_phase'] = self.apply_phase.as_dict()
-        data['abort_phase'] = self.abort_phase.as_dict()
+            data["current_phase_completion_percentage"] = 0
+        data["build_phase"] = self.build_phase.as_dict()
+        data["apply_phase"] = self.apply_phase.as_dict()
+        data["abort_phase"] = self.abort_phase.as_dict()
         return data
 
     def as_json(self):

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import ResizeConfirmTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.instance')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ResizeConfirmState(state_machine.State):
     """
     Instance - Resize Confirm State
     """
+
     def __init__(self, name):
         super(ResizeConfirmState, self).__init__(name)
 
@@ -47,9 +48,9 @@ class ResizeConfirmState(state_machine.State):
         Handle event while in the resize confirm state
         """
         if event_data is not None:
-            reason = event_data.get('reason', '')
+            reason = event_data.get("reason", "")
         else:
-            reason = ''
+            reason = ""
 
         handled = False
 
@@ -71,7 +72,7 @@ class ResizeConfirmState(state_machine.State):
 
             elif INSTANCE_EVENT.TASK_TIMEOUT == event:
                 DLOG.info("Resize-Confirm timed out for %s." % instance.name)
-                instance.fail_action(instance.action_fsm_action_type, 'timeout')
+                instance.fail_action(instance.action_fsm_action_type, "timeout")
                 return INSTANCE_STATE.INITIAL
 
             else:

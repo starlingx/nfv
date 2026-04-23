@@ -19,9 +19,10 @@ class APIVersion(wsme_types.Base):
     """
     API - Version
     """
+
     id = wsme_types.text
     status = wsme_types.text
-    links = wsme_types.wsattr([Link], name='links')
+    links = wsme_types.wsattr([Link], name="links")
 
     @classmethod
     def convert(cls):
@@ -31,11 +32,11 @@ class APIVersion(wsme_types.Base):
         v1.id = "v1"
         v1.status = "stable"
         v1.links = [
-            Link.make_link('self', url, 'api'),
-            Link.make_link('openstack', url, 'api/openstack'),
-            Link.make_link('orchestration', url, 'api/orchestration'),
-            Link.make_link('virtualised_resources', url,
-                           'api/virtualised-resources')]
+            Link.make_link("self", url, "api"),
+            Link.make_link("openstack", url, "api/openstack"),
+            Link.make_link("orchestration", url, "api/orchestration"),
+            Link.make_link("virtualised_resources", url, "api/virtualised-resources"),
+        ]
         return v1
 
 
@@ -43,7 +44,8 @@ class API(wsme_types.Base):
     """
     API
     """
-    versions = wsme_types.wsattr([APIVersion], name='versions')
+
+    versions = wsme_types.wsattr([APIVersion], name="versions")
 
     @classmethod
     def convert(cls):
@@ -56,15 +58,16 @@ class APIController(rest.RestController):
     """
     Virtual Infrastructure Manager API Controller
     """
+
     @pecan.expose()
     def _lookup(self, key, *remainder):
-        if 'openstack' == key:
+        if "openstack" == key:
             return openstack.OpenStackAPI(), remainder
 
-        elif 'orchestration' == key:
+        elif "orchestration" == key:
             return orchestration.OrchestrationAPI(), remainder
 
-        elif 'virtualised-resources' == key:
+        elif "virtualised-resources" == key:
             return virtualised_resources.VirtualisedResourcesAPI(), remainder
 
         else:

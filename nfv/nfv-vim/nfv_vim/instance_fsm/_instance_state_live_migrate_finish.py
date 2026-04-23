@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -10,13 +10,14 @@ from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import LiveMigrateFinishTask
 
-DLOG = debug.debug_get_logger('nfv_vim.state_machine.instance')
+DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class LiveMigrateFinishState(state_machine.State):
     """
     Instance - Live Migrate Finish State
     """
+
     def __init__(self, name):
         super(LiveMigrateFinishState, self).__init__(name)
 
@@ -47,9 +48,9 @@ class LiveMigrateFinishState(state_machine.State):
         Handle event while in the live-migrate finish state
         """
         if event_data is not None:
-            reason = event_data.get('reason', '')
+            reason = event_data.get("reason", "")
         else:
-            reason = ''
+            reason = ""
 
         handled = False
 
@@ -64,30 +65,25 @@ class LiveMigrateFinishState(state_machine.State):
                 return INSTANCE_STATE.INITIAL
 
             elif INSTANCE_EVENT.TASK_COMPLETED == event:
-                DLOG.debug("Live-Migrate-Finish completed for %s."
-                           % instance.name)
+                DLOG.debug("Live-Migrate-Finish completed for %s." % instance.name)
                 return INSTANCE_STATE.INITIAL
 
             elif INSTANCE_EVENT.TASK_FAILED == event:
-                DLOG.info("Live-Migrate-Finish failed for %s."
-                          % instance.name)
+                DLOG.info("Live-Migrate-Finish failed for %s." % instance.name)
                 instance.fail_action(instance.action_fsm_action_type, reason)
                 return INSTANCE_STATE.INITIAL
 
             elif INSTANCE_EVENT.TASK_TIMEOUT == event:
-                DLOG.info("Live-Migrate-Finish timed out for %s."
-                          % instance.name)
-                instance.fail_action(instance.action_fsm_action_type, 'timeout')
+                DLOG.info("Live-Migrate-Finish timed out for %s." % instance.name)
+                instance.fail_action(instance.action_fsm_action_type, "timeout")
                 return INSTANCE_STATE.INITIAL
 
             elif INSTANCE_EVENT.AUDIT == event:
                 if not instance.task.inprogress():
-                    DLOG.info("Live-Migrate-Finish not running for %s."
-                              % instance.name)
+                    DLOG.info("Live-Migrate-Finish not running for %s." % instance.name)
                     return INSTANCE_STATE.INITIAL
 
             else:
-                DLOG.verbose("Ignoring %s event for %s." % (event,
-                                                            instance.name))
+                DLOG.verbose("Ignoring %s event for %s." % (event, instance.name))
 
         return self.name
