@@ -1,29 +1,46 @@
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
 *.a
+*.o
+*.pyc
 *.egg
 *.egg-info
-*.o
-*.py[co]
-*.pyc
-*.so
-*.sqlite
-.*.swp
-.coverage
-.installed.cfg
-.stestr
-.testrepository
-.tox
-.venv
-AUTHORS
-ChangeLog
+dist
 _build
 build
-cover
-develop-eggs
-dist
 eggs
+parts
+var
 sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+*.sqlite
 
-# Sphinx documentation
+# Unit test / coverage reports
+.coverage
+cover
+coverage.xml
+.coverage\.*
+.current.cfg
+.tox
+.stestr
+nosetests.xml
+.testrepository
+.venv
+
+# Editors
+*~
+.*.swp
+.*sw?
+.vscode
+
+# Sphinx
 doc/build
 
 # Release Notes documentation
@@ -31,3 +48,7 @@ releasenotes/build
 
 # Api Ref documentation
 api-ref/build/
+
+# pbr generates these
+AUTHORS
+ChangeLog
