@@ -4,22 +4,29 @@
       - publish-stx-docs
       - stx-api-ref-jobs
       - stx-release-notes-jobs
+      - stx-bandit-jobs
     check:
       jobs:
         - nfv-tox-linters
         - nfv-tox-pep8
-        - nfv-tox-py39
         - nfv-tox-pylint
+        - nfv-tox-black
+        - nfv-tox-py39
+        - nfv-tox-cover
         - nova-api-proxy-tox-pep8
         - nova-api-proxy-tox-pylint
+        - nova-api-proxy-tox-black
     gate:
       jobs:
         - nfv-tox-linters
         - nfv-tox-pep8
-        - nfv-tox-py39
         - nfv-tox-pylint
+        - nfv-tox-black
+        - nfv-tox-py39
+        - nfv-tox-cover
         - nova-api-proxy-tox-pep8
         - nova-api-proxy-tox-pylint
+        - nova-api-proxy-tox-black
     post:
       jobs:
         - stx-nfv-upload-git-mirror
@@ -33,9 +40,8 @@
       tox_envlist: linters
 
 - job:
-    name: nfv-tox-py39
+    name: nfv-tox-base
     parent: tox
-    description: Run py39 for nfv
     nodeset: debian-bullseye
     required-projects:
       - starlingx/config
@@ -43,40 +49,54 @@
       - starlingx/update
       - starlingx/utilities
     vars:
-      tox_envlist: py39
       tox_extra_args: -c nfv/tox.ini
 
 - job:
     name: nfv-tox-pep8
-    parent: tox
+    parent: nfv-tox-base
     description: Run pep8 for nfv
-    nodeset: debian-bullseye
     vars:
       tox_envlist: pep8
-      tox_extra_args: -c nfv/tox.ini
-
-- job:
-    name: nfv-tox-bandit
-    parent: tox
-    description: Run bandit for nfv
-    nodeset: debian-bullseye
-    vars:
-      tox_envlist: bandit
-      tox_extra_args: -c nfv/tox.ini
 
 - job:
     name: nfv-tox-pylint
-    parent: tox
+    parent: nfv-tox-base
     description: Run pylint for nfv
-    nodeset: debian-bullseye
-    required-projects:
-      - starlingx/config
-      - starlingx/fault
-      - starlingx/update
-      - starlingx/utilities
     vars:
       tox_envlist: pylint
-      tox_extra_args: -c nfv/tox.ini
+
+- job:
+    name: nfv-tox-black
+    parent: nfv-tox-base
+    description: Run black for nfv
+    voting: false
+    vars:
+      python_version: 3.9
+      tox_envlist: black
+
+- job:
+    name: nfv-tox-py39
+    parent: nfv-tox-base
+    description: Run py39 for nfv
+    vars:
+      tox_envlist: py39
+
+- job:
+    name: nfv-tox-cover
+    parent: nfv-tox-base
+    description: Run coverage test for nfv
+    post-run: tools/gate/playbooks/fetch-coverage.yaml
+    voting: false
+    vars:
+      python_version: 3.9
+      tox_envlist: cover
+
+- job:
+    name: nfv-tox-bandit
+    parent: nfv-tox-base
+    description: Run bandit for nfv
+    vars:
+      tox_envlist: bandit
 
 - job:
     name: nova-api-proxy-tox-pep8
@@ -95,6 +115,17 @@
     vars:
       tox_envlist: pylint
       tox_extra_args: -c nova-api-proxy/tox.ini
+
+- job:
+    name: nova-api-proxy-tox-black
+    parent: tox
+    description: Run black for nova-api-proxy
+    nodeset: debian-bullseye
+    vars:
+      python_version: 3.9
+      tox_envlist: black
+      tox_extra_args: -c nova-api-proxy/tox.ini
+    voting: false
 
 - job:
     name: stx-nfv-upload-git-mirror
