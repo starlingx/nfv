@@ -938,6 +938,7 @@ class UpdateControllerHostsMixin:
         strategy_stage_name,
         host_action_step,
         extra_args=None,
+        is_abortable=True,
     ):
         """Add controller software stages for a controller list to a strategy."""
 
@@ -997,7 +998,11 @@ class UpdateControllerHostsMixin:
                         local_host = host
                     else:
                         host_list = [host]
-                        stage = strategy.StrategyStage(strategy_stage_name)
+                        # Sw-deploy strategy does not support abort when upgrading
+                        # controller nodes
+                        stage = strategy.StrategyStage(
+                            strategy_stage_name, is_abortable
+                        )
                         stage.add_step(
                             strategy.QueryAlarmsStep(
                                 not isinstance(self, SwUpgradeStrategy),
@@ -1048,7 +1053,9 @@ class UpdateControllerHostsMixin:
 
             if local_host is not None:
                 host_list = [local_host]
-                stage = strategy.StrategyStage(strategy_stage_name)
+                # Sw-deploy strategy does not support abort when upgrading
+                # controller nodes
+                stage = strategy.StrategyStage(strategy_stage_name, is_abortable)
                 stage.add_step(
                     strategy.QueryAlarmsStep(
                         not isinstance(self, SwUpgradeStrategy),
@@ -1122,6 +1129,7 @@ class SwDeployControllerHostsMixin(UpdateControllerHostsMixin):
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
             strategy.UpgradeHostsStep,
+            is_abortable=False,
         )
 
 
@@ -1322,10 +1330,15 @@ class UpdateWorkerHostsMixin:
 
             hosts_to_lock = []
             hosts_to_reboot = []
+            is_abortable = True
             if reboot:
                 if isinstance(self, SwUpgradeStrategy) and any(
                     HOST_PERSONALITY.CONTROLLER in v.personality for v in host_list
                 ):
+                    # When running a sw-upgrade strategy for a system, without worker
+                    # nodes, the controller will also have a worker personality, so the
+                    # abort needs to be blocked in the sw-upgrade-workers stage
+                    is_abortable = False
                     # Always lock/unlock controllers during rollback/upgrade
                     hosts_to_lock = host_list
                     hosts_to_reboot = []
@@ -1333,7 +1346,7 @@ class UpdateWorkerHostsMixin:
                     hosts_to_lock = [x for x in host_list if not x.is_locked()]
                     hosts_to_reboot = [x for x in host_list if x.is_locked()]
 
-            stage = strategy.StrategyStage(strategy_stage_name)
+            stage = strategy.StrategyStage(strategy_stage_name, is_abortable)
 
             stage.add_step(
                 strategy.QueryAlarmsStep(
@@ -3750,6 +3763,17 @@ class KubeUpgradeStrategy(
         self.build_phase.add_stage(stage)
         super().build()
 
+    def is_abortable(self):
+        """Defines whether the strategy supports abort or not.
+
+        For kube-upgrade, duplex systems are not allowed to abort in any step, requiring
+        a backup and restore to go back to the previous version.
+        """
+
+        if self._single_controller:
+            return super().is_abortable()
+        return False
+
     def _get_kube_version_steps(self, target_version, kube_list):
         """Returns an ordered list for a multi-version kubernetes upgrade.
 
@@ -3929,7 +3953,7 @@ class KubeUpgradeStrategy(
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING, False
         )
         stage.add_step(strategy.KubeUpgradeNetworkingStep())
         self.apply_phase.add_stage(stage)
@@ -4405,7 +4429,7 @@ class KubeUpgradeStrategy(
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_COMPLETE
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_COMPLETE, False
         )
         stage.add_step(strategy.KubeUpgradeCompleteStep())
         self.apply_phase.add_stage(stage)
@@ -4421,7 +4445,7 @@ class KubeUpgradeStrategy(
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_POST_APPLICATION_UPDATE
+            strategy.STRATEGY_STAGE_NAME.KUBE_POST_APPLICATION_UPDATE, False
         )
         stage.add_step(strategy.KubePostApplicationUpdateStep())
         self.apply_phase.add_stage(stage)
@@ -4437,7 +4461,7 @@ class KubeUpgradeStrategy(
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_CLEANUP
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_CLEANUP, False
         )
         stage.add_step(strategy.KubeUpgradeCleanupStep())
         self.apply_phase.add_stage(stage)

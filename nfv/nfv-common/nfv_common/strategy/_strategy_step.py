@@ -140,6 +140,19 @@ class StrategyStep:
 
         self._stage_reference = weakref.ref(stage_value)
 
+    def is_abortable(self):
+        """Defines whether the step allows abort or not.
+
+        By default, if the strategy or stage is not abortable, the step itself won't be
+        as well, so it just returns False.
+        """
+
+        if self.strategy and not self.strategy.is_abortable():
+            return False
+        if self.stage and not self.stage.is_abortable():
+            return False
+        return True
+
     def extend_timeout(self, timeout_in_secs):
         """Allow the step timeout to be extended."""
 

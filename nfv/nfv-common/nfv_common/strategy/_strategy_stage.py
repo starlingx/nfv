@@ -19,7 +19,7 @@ DLOG = debug.debug_get_logger("nfv_common.strategy.stage")
 class StrategyStage:
     """Strategy Stage."""
 
-    def __init__(self, name):
+    def __init__(self, name, is_abortable=True):
         self._id = 0
         self._name = name
         self._current_step = 0
@@ -33,6 +33,7 @@ class StrategyStage:
         self._phase_reference = None
         self._start_date_time = ""
         self._end_date_time = ""
+        self._is_abortable = is_abortable
 
     def __del__(self):
         self._cleanup()
@@ -152,6 +153,17 @@ class StrategyStage:
         """Return true if this stage has failed."""
 
         return STRATEGY_STAGE_RESULT.FAILED == self._result
+
+    def is_abortable(self):
+        """Defines whether the stage allows abort or not.
+
+        By default, if the strategy is not abortable, the stage itself won't be as well,
+        so it just returns False.
+        """
+
+        if self.strategy and not self.strategy.is_abortable():
+            return False
+        return self._is_abortable
 
     def timed_out(self):
         """Return true if this stage has timed out."""
@@ -545,6 +557,7 @@ class StrategyStage:
         """Initializes a strategy stage object using the given dictionary."""
 
         StrategyStage.__init__(self, data["name"])
+        self._is_abortable = data.get("is_abortable", True)
         self._inprogress = data["inprogress"]
         self._current_step = data["current_step"]
         self._result = data["result"]
@@ -582,6 +595,7 @@ class StrategyStage:
         data["id"] = self._id
         data["name"] = self._name
         data["timeout"] = self._timeout_in_secs
+        data["is_abortable"] = self._is_abortable
         data["inprogress"] = self._inprogress
         data["current_step"] = self._current_step
         data["total_steps"] = len(self._steps)

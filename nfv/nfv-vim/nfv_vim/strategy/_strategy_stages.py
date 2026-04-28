@@ -71,7 +71,6 @@ class StrategyStageNames(Constants, metaclass=Singleton):
     KUBE_UPGRADE_NETWORKING = Constant("kube-upgrade-networking")
     KUBE_UPGRADE_STORAGE = Constant("kube-upgrade-storage")
     KUBE_UPGRADE_SECOND_CONTROL_PLANE = Constant("kube-upgrade-second-control-plane")
-    KUBE_UPGRADE_PATCH = Constant("kube-upgrade-patch")
     KUBE_UPGRADE_KUBELETS_CONTROLLERS = Constant("kube-upgrade-kubelets-controllers")
     KUBE_UPGRADE_KUBELETS_WORKERS = Constant("kube-upgrade-kubelets-workers")
     KUBE_UPGRADE_UNLOCK_LOCKED_WORKERS = Constant("kube-upgrade-unlock-locked-workers")

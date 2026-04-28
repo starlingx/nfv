@@ -32,7 +32,6 @@ KUBE_CERT_UPDATE_UPDATECERTS = "update-certs"
 class StrategyStepNames(Constants, metaclass=Singleton):
     """Strategy Step Names."""
 
-    QUERY_HOSTS = Constant("query-hosts")
     SYSTEM_STABILIZE = Constant("system-stabilize")
     LOCK_HOSTS = Constant("lock-hosts")
     UNLOCK_HOSTS = Constant("unlock-hosts")

@@ -181,6 +181,14 @@ class Strategy:
 
         return STRATEGY_STATE.ABORTED == self._state
 
+    def is_abortable(self):
+        """Defines whether the strategy allows abort or not.
+
+        It is enabled by default, being allowed only during the strategy's application.
+        """
+
+        return self.is_applying()
+
     def _build(self):
         """Strategy Build."""
 

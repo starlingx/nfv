@@ -7,7 +7,6 @@ from nfv_common import debug
 from nfv_vim import directors
 from nfv_vim import objects
 from nfv_vim import rpc
-from nfv_vim.strategy._strategy_steps import STRATEGY_STEP_NAME
 
 DLOG = debug.debug_get_logger("nfv_vim.vim_sw_update_api_events")
 
@@ -298,23 +297,24 @@ def _send_response(connection, error_message):
     connection.close()
 
 
-def _is_abort_supported(connection, strategy):
-    """Validates if the strategy, in the current stage and step, accepts abort."""
+def _is_abortable(strategy):
+    """Validates if the strategy and its current stage and step, accepts abort.
+
+    :param strategy: The software update strategy object to validate.
+    :return: A tuple containing a boolean indicating if the strategy can be aborted
+    and an error message string if it cannot be aborted.
+    :rtype: tuple(bool, str or None)
+    """
 
     if not strategy.is_applying():
-        abort_rejected_msg = (
-            "Abort rejected: abort can only be executed when strategy is applying"
+        return False, (
+            "Abort rejected: abort can only be executed when the strategy is applying"
         )
-        _send_response(connection, abort_rejected_msg)
-
-        return False
-
-    # Only specific strategies support the abort validation
-    if strategy.name not in [
-        objects.SW_UPDATE_TYPE.KUBE_UPGRADE,
-        objects.SW_UPDATE_TYPE.SW_UPGRADE,
-    ]:
-        return True
+    elif not strategy.is_abortable():
+        return False, (
+            f"Abort rejected: abort is not supported for {strategy.name} in the "
+            "current configuration."
+        )
 
     current_stage_index = strategy.apply_phase.current_stage
 
@@ -326,6 +326,11 @@ def _is_abort_supported(connection, strategy):
         return True
 
     current_stage = strategy.apply_phase.stages[current_stage_index]
+    if not current_stage.is_abortable():
+        return False, (
+            f"Abort rejected: cannot abort during {current_stage.name} stage."
+        )
+
     current_step_index = current_stage.current_step
 
     # If the index is equal to or higher than the amount of steps, the strategy
@@ -333,21 +338,12 @@ def _is_abort_supported(connection, strategy):
     # behavior by allowing the abort to be executed.
     if current_step_index >= len(current_stage.steps):
         DLOG.warn("The current stage is complete, skipping abort check.")
-        return True
+        return True, None
 
     current_step = current_stage.steps[current_step_index]
-
-    if current_step.name in [
-        STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE,
-        STRATEGY_STEP_NAME.LOCK_HOSTS,
-    ]:
-        abort_rejected_msg = (
-            f"Abort rejected: cannot abort during {current_step.name} step."
-        )
-
-        _send_response(connection, abort_rejected_msg)
-        return False
-    return True
+    if not current_step.is_abortable():
+        return False, (f"Abort rejected: cannot abort during {current_step.name} step.")
+    return True, None
 
 
 def vim_sw_update_api_abort_strategy(connection, msg):
@@ -380,7 +376,9 @@ def vim_sw_update_api_abort_strategy(connection, msg):
         connection.close()
         return
 
-    if not _is_abort_supported(connection, strategy):
+    is_abortable, abort_rejected_msg = _is_abortable(strategy)
+    if not is_abortable:
+        _send_response(connection, abort_rejected_msg)
         return
 
     _sw_update_strategy_abort_operations[strategy.uuid] = connection
