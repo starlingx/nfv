@@ -80,7 +80,6 @@ def _unlock_hosts_stage_as_dict(host_names, retry_count=5, retry_delay=120):
 )
 @mock.patch.object(nfvi.objects.v1.upgrade, "SW_VERSION", INITIAL_RELEASE)
 class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
-
     def create_sw_upgrade_strategy(
         self,
         controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
@@ -96,9 +95,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         nfvi_upgrade=None,
         single_controller=False,
     ):
-        """
-        Create a software update strategy
-        """
+        """Create a software update strategy."""
+
         strategy = SwUpgradeStrategy(
             uuid=str(uuid.uuid4()),
             controller_apply_type=controller_apply_type,
@@ -185,11 +183,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_worker_stages_ignore(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - ignore apply
         Verify:
-        - stages not created
+        - stages not created.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -234,13 +232,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_anti_affinity(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances upgraded first
-        - anti-affinity policy enforced
+        - anti-affinity policy enforced.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -345,13 +343,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_ten_hosts(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances upgraded first
-        - instances migrated
+        - instances migrated.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -509,8 +507,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_for_aio(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
@@ -518,7 +516,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - hosts with no instances upgraded next
         - instances migrated
         - for AIO controllers, the last step is wait-data-sync
-        - for workers, the last step is wait-alarms-clear (openstack workers)
+        - for workers, the last step is wait-alarms-clear (openstack workers).
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -672,13 +670,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_worker_stages_parallel_migrate_fifty_hosts(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances upgraded first
-        - host aggregate limits enforced
+        - host aggregate limits enforced.
         """
         for x in range(0, 50):
             self.create_host("compute-%02d" % x)
@@ -791,12 +789,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_worker_stages_serial_migrate(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - serial apply
         - migrate instance action
         Verify:
-        - hosts with no instances upgraded first
+        - hosts with no instances upgraded first.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -909,13 +907,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_non_openstack_worker_stages_serial(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - workers with no openstack installed
         - serial apply
         - no migrate instance action
         Verify:
-        - final step is SystemStabilize
+        - final step is SystemStabilize.
         """
         self.create_host("compute-0", openstack_installed=False)
         self.create_host("compute-1", openstack_installed=False)
@@ -970,13 +968,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_worker_stages_serial_migrate_locked_instance(self):
-        """
-        Test the sw_upgrade strategy add worker strategy stages:
+        """Test the sw_upgrade strategy add worker strategy stages:
+
         - serial apply
         - migrate instance action
         - locked instance in instance group
         Verify:
-        - stages not created
+        - stages not created.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1019,11 +1017,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_storage_stages_ignore(self):
-        """
-        Test the sw_upgrade strategy add storage strategy stages:
+        """Test the sw_upgrade strategy add storage strategy stages:
+
         - ignore apply
         Verify:
-        - stages not created
+        - stages not created.
         """
         self.create_host("storage-0")
         self.create_host("storage-1")
@@ -1070,12 +1068,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_storage_stages_parallel_host_group(self):
-        """
-        Test the sw_upgrade strategy add storage strategy stages:
+        """Test the sw_upgrade strategy add storage strategy stages:
+
         - parallel apply
         Verify:
         - storage-0 upgraded first
-        - host groups enforced
+        - host groups enforced.
         """
         self.create_host("storage-0")
         self.create_host("storage-1")
@@ -1160,9 +1158,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_storage_stages_serial(self):
-        """
-        Test the sw_upgrade strategy add storage strategy stages:
-        - serial apply
+        """Test the sw_upgrade strategy add storage strategy stages:
+
+        - serial apply.
         """
         self.create_host("storage-0")
         self.create_host("storage-1")
@@ -1224,11 +1222,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_0,
     )
     def test_sw_upgrade_strategy_controller_stages_serial(self):
-        """
-        Test the sw_upgrade strategy add controller strategy stages:
+        """Test the sw_upgrade strategy add controller strategy stages:
+
         - serial apply
         Verify:
-        - controller-0 upgraded
+        - controller-0 upgraded.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1280,11 +1278,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_controller_stages_serial_start_upgrade(self):
-        """
-        Test the sw_upgrade strategy add controller strategy stages:
+        """Test the sw_upgrade strategy add controller strategy stages:
+
         - serial apply
         Verify:
-        - controller-1 and controller-0 upgraded
+        - controller-1 and controller-0 upgraded.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1350,12 +1348,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_aio_stages_serial(self):
-        """
-        Test the sw_upgrade strategy add controller strategy stages:
+        """Test the sw_upgrade strategy add controller strategy stages:
+
         - aio hosts
         - serial apply
         Verify:
-        - controller-0 and controller-1 upgraded
+        - controller-0 and controller-1 upgraded.
         """
         self.create_host("controller-0", aio=True, openstack_installed=False)
         self.create_host("controller-1", aio=True, openstack_installed=False)
@@ -1441,15 +1439,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_upgrade_strategy_aiosx_controllers_serial_rr(self):
-        """
-        Test the sw_upgrade strategy add controller strategy stages:
+        """Test the sw_upgrade strategy add controller strategy stages:
+
         - aio-sx host
         - serial apply
         - reboot required
         - stop_start instances
         - no instances
         Verify:
-        - failure
+        - failure.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy()
@@ -1488,13 +1486,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_upgrade_strategy_build_complete_serial_migrate_start_complete(self):
-        """
-        Test the sw_upgrade strategy build_complete:
+        """Test the sw_upgrade strategy build_complete:
+
         - serial apply
         - migrate instance action
         - start and complete upgrade
         Verify:
-        - hosts with no instances upgraded first
+        - hosts with no instances upgraded first.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1657,13 +1655,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     # pylint: disable=no-member
     def test_sw_upgrade_strategy_build_complete_serial_migrate(self):
-        """
-        Test the sw_upgrade strategy build_complete:
+        """Test the sw_upgrade strategy build_complete:
+
         - serial apply
         - migrate instance action
         - start on controller-1
         Verify:
-        - hosts with no instances upgraded first
+        - hosts with no instances upgraded first.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1789,11 +1787,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_build_complete_invalid_state(self):
-        """
-        Test the sw_upgrade strategy build_complete:
+        """Test the sw_upgrade strategy build_complete:
+
         - invalid upgrade state
         Verify:
-        - build fails
+        - build fails.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1828,11 +1826,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_build_complete_unupgraded_controller_1(self):
-        """
-        Test the sw_upgrade strategy build_complete:
+        """Test the sw_upgrade strategy build_complete:
+
         - unupgraded controller host
         Verify:
-        - build fails
+        - build fails.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1867,11 +1865,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_build_complete_locked_controller(self):
-        """
-        Test the sw_upgrade strategy build_complete:
+        """Test the sw_upgrade strategy build_complete:
+
         - locked controller host
         Verify:
-        - build fails
+        - build fails.
         """
         self.create_host(
             "controller-0", admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED
@@ -1906,11 +1904,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_build_complete_locked_worker(self):
-        """
-        Test the sw_upgrade strategy build_complete:
+        """Test the sw_upgrade strategy build_complete:
+
         - locked worker host
         Verify:
-        - build fails
+        - build fails.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1946,12 +1944,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_controller_missing_strategy_fields(self):
-        """
-        Test the sw_upgrade strategy add controller strategy stages:
+        """Test the sw_upgrade strategy add controller strategy stages:
+
         - serial apply
         Verify:
         - controller-0 upgraded
-        - the missing fields do not cause deserialization failures
+        - the missing fields do not cause deserialization failures.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")

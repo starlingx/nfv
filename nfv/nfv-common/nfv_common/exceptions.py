@@ -6,9 +6,9 @@
 
 
 class PickleableException(Exception):
-    """
-    Pickleable Exception
-      Used to mark custom exception classes that can be pickled.
+    """Pickleable Exception.
+
+    Used to mark custom exception classes that can be pickled.
     """
 
     pass

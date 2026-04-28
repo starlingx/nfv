@@ -23,9 +23,7 @@ empty_reason = ""
 
 
 class QueryHypervisorTaskWork(state_machine.StateTaskWork):
-    """
-    Query-Hypervisor Task Work
-    """
+    """Query-Hypervisor Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(QueryHypervisorTaskWork, self).__init__(
@@ -38,17 +36,15 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for query hypervisor
-        """
+        """Callback for query hypervisor."""
+
         from nfv_vim import tables
 
         response = yield
@@ -81,9 +77,8 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run query-hypervisor
-        """
+        """Run query-hypervisor."""
+
         from nfv_vim import tables
 
         DLOG.verbose("Query-Hypervisor for %s." % self._host.name)
@@ -97,9 +92,7 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostEnabledTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Enabled Task Work
-    """
+    """Notify Host Enabled Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
         super(NotifyHostEnabledTaskWork, self).__init__(
@@ -113,17 +106,15 @@ class NotifyHostEnabledTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host enabled
-        """
+        """Callback for notify host enabled."""
+
         response = yield
         if self.task is not None:
             DLOG.verbose(
@@ -149,9 +140,8 @@ class NotifyHostEnabledTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host enabled
-        """
+        """Run notify host enabled."""
+
         from nfv_vim import objects
 
         DLOG.verbose(
@@ -178,9 +168,7 @@ class NotifyHostEnabledTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostDisabledTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Disabled Task Work
-    """
+    """Notify Host Disabled Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
         super(NotifyHostDisabledTaskWork, self).__init__(
@@ -194,17 +182,15 @@ class NotifyHostDisabledTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host disabled
-        """
+        """Callback for notify host disabled."""
+
         from nfv_vim import objects
 
         response = yield
@@ -246,9 +232,8 @@ class NotifyHostDisabledTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host disabled
-        """
+        """Run notify host disabled."""
+
         from nfv_vim import objects
 
         DLOG.verbose(
@@ -282,9 +267,7 @@ class NotifyHostDisabledTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostServicesDisableFailedTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Service Disable Failed Task Work
-    """
+    """Notify Host Service Disable Failed Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(NotifyHostServicesDisableFailedTaskWork, self).__init__(
@@ -297,17 +280,15 @@ class NotifyHostServicesDisableFailedTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host services disable failed
-        """
+        """Callback for notify host services disable failed."""
+
         response = yield
         if self.task is not None:
             DLOG.verbose(
@@ -333,9 +314,8 @@ class NotifyHostServicesDisableFailedTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host disabled
-        """
+        """Run notify host disabled."""
+
         DLOG.verbose("Notify-Host-Disable-Failed for %s." % self._host.name)
 
         nfvi.nfvi_notify_host_services_disable_failed(
@@ -345,9 +325,7 @@ class NotifyHostServicesDisableFailedTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostServicesDeleteFailedTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Service Delete Failed Task Work
-    """
+    """Notify Host Service Delete Failed Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(NotifyHostServicesDeleteFailedTaskWork, self).__init__(
@@ -360,17 +338,15 @@ class NotifyHostServicesDeleteFailedTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host services delete failed
-        """
+        """Callback for notify host services delete failed."""
+
         response = yield
         if self.task is not None:
             DLOG.verbose(
@@ -396,9 +372,8 @@ class NotifyHostServicesDeleteFailedTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host delete
-        """
+        """Run notify host delete."""
+
         DLOG.verbose("Notify-Host-Delete-Failed for %s." % self._host.name)
 
         nfvi.nfvi_notify_host_services_delete_failed(
@@ -408,9 +383,7 @@ class NotifyHostServicesDeleteFailedTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostFailedTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Failed Task Work
-    """
+    """Notify Host Failed Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(NotifyHostFailedTaskWork, self).__init__(
@@ -423,17 +396,15 @@ class NotifyHostFailedTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host failed
-        """
+        """Callback for notify host failed."""
+
         response = yield
         if self.task is not None:
             DLOG.verbose(
@@ -459,9 +430,8 @@ class NotifyHostFailedTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host failed
-        """
+        """Run notify host failed."""
+
         DLOG.info("Notify-Host-Failed for %s." % self._host.name)
         nfvi.nfvi_notify_host_failed(
             self._host.uuid, self._host.name, self._host.personality, self._callback()
@@ -470,9 +440,7 @@ class NotifyHostFailedTaskWork(state_machine.StateTaskWork):
 
 
 class FailHostTaskWork(state_machine.StateTaskWork):
-    """
-    Fail Host Task Work
-    """
+    """Fail Host Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(FailHostTaskWork, self).__init__(
@@ -482,16 +450,14 @@ class FailHostTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def timeout(self):
-        """
-        Handle task work timeout
-        """
+        """Handle task work timeout."""
+
         self._host.fail_notification_required = True
 
         if self.force_pass:
@@ -505,9 +471,8 @@ class FailHostTaskWork(state_machine.StateTaskWork):
 
     @coroutine
     def _callback(self):
-        """
-        Callback for fail host
-        """
+        """Callback for fail host."""
+
         response = yield
         if self.task is not None:
             DLOG.verbose(
@@ -530,9 +495,8 @@ class FailHostTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run fail host
-        """
+        """Run fail host."""
+
         from nfv_vim import directors
 
         if self._host.is_failed() and self._host.is_component_failure():
@@ -564,9 +528,8 @@ class FailHostTaskWork(state_machine.StateTaskWork):
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle host events
-        """
+        """Handle host events."""
+
         handled = False
         if HOST_EVENT.DISABLE == event or HOST_EVENT.AUDIT == event:
             if self._host.is_failed() and not self._host.is_component_failure():
@@ -591,9 +554,7 @@ class FailHostTaskWork(state_machine.StateTaskWork):
 
 
 class CreateHostServicesTaskWork(state_machine.StateTaskWork):
-    """
-    Create Host Services Task Work
-    """
+    """Create Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
         super(CreateHostServicesTaskWork, self).__init__(
@@ -607,17 +568,15 @@ class CreateHostServicesTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for create host services
-        """
+        """Callback for create host services."""
+
         from nfv_vim import objects
 
         response = yield
@@ -652,9 +611,8 @@ class CreateHostServicesTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run create host services
-        """
+        """Run create host services."""
+
         from nfv_vim import objects
 
         DLOG.verbose(
@@ -678,9 +636,7 @@ class CreateHostServicesTaskWork(state_machine.StateTaskWork):
 
 
 class DeleteHostServicesTaskWork(state_machine.StateTaskWork):
-    """
-    Delete Host Services Task Work
-    """
+    """Delete Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
         super(DeleteHostServicesTaskWork, self).__init__(
@@ -694,17 +650,15 @@ class DeleteHostServicesTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for delete host services
-        """
+        """Callback for delete host services."""
+
         from nfv_vim import objects
 
         response = yield
@@ -740,9 +694,8 @@ class DeleteHostServicesTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run delete host services
-        """
+        """Run delete host services."""
+
         from nfv_vim import directors
         from nfv_vim import objects
 
@@ -796,9 +749,7 @@ class DeleteHostServicesTaskWork(state_machine.StateTaskWork):
 
 
 class WaitHostServicesCreatedTaskWork(state_machine.StateTaskWork):
-    """
-    Wait Host Services Created Task Work
-    """
+    """Wait Host Services Created Task Work."""
 
     def __init__(self, task, host, service):
         super(WaitHostServicesCreatedTaskWork, self).__init__(
@@ -812,17 +763,15 @@ class WaitHostServicesCreatedTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for wait host services created
-        """
+        """Callback for wait host services created."""
+
         from nfv_vim import objects
 
         response = yield
@@ -855,9 +804,8 @@ class WaitHostServicesCreatedTaskWork(state_machine.StateTaskWork):
                 )
 
     def run(self):
-        """
-        Run wait host services created
-        """
+        """Run wait host services created."""
+
         from nfv_vim import objects
 
         DLOG.verbose(
@@ -892,9 +840,8 @@ class WaitHostServicesCreatedTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle events while waiting for host services to be created
-        """
+        """Handle events while waiting for host services to be created."""
+
         from nfv_vim import objects
 
         handled = False
@@ -927,9 +874,7 @@ class WaitHostServicesCreatedTaskWork(state_machine.StateTaskWork):
 
 
 class EnableHostServicesTaskWork(state_machine.StateTaskWork):
-    """
-    Enable Host Services Task Work
-    """
+    """Enable Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
         super(EnableHostServicesTaskWork, self).__init__(
@@ -943,17 +888,15 @@ class EnableHostServicesTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for enable host services
-        """
+        """Callback for enable host services."""
+
         from nfv_vim import objects
 
         response = yield
@@ -1002,9 +945,8 @@ class EnableHostServicesTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run enable host services
-        """
+        """Run enable host services."""
+
         from nfv_vim import objects
 
         DLOG.verbose(
@@ -1051,9 +993,7 @@ class EnableHostServicesTaskWork(state_machine.StateTaskWork):
 
 
 class DisableHostServicesTaskWork(state_machine.StateTaskWork):
-    """
-    Disable Host Services Task Work
-    """
+    """Disable Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
         super(DisableHostServicesTaskWork, self).__init__(
@@ -1067,17 +1007,15 @@ class DisableHostServicesTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for disable host services
-        """
+        """Callback for disable host services."""
+
         from nfv_vim import objects
 
         response = yield
@@ -1112,9 +1050,8 @@ class DisableHostServicesTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run disable host services
-        """
+        """Run disable host services."""
+
         from nfv_vim import objects
 
         DLOG.verbose(
@@ -1154,9 +1091,7 @@ class DisableHostServicesTaskWork(state_machine.StateTaskWork):
 
 
 class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
-    """
-    Wait Host Services Disabled Task Work
-    """
+    """Wait Host Services Disabled Task Work."""
 
     def __init__(self, task, host, service):
         super(WaitHostServicesDisabledTaskWork, self).__init__(
@@ -1171,16 +1106,14 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def timeout(self):
-        """
-        Handle task work timeout
-        """
+        """Handle task work timeout."""
+
         if self._host.is_force_lock():
             DLOG.info(
                 "Wait-Host-Services-Disabled timeout for %s, "
@@ -1197,9 +1130,8 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
 
     @coroutine
     def _get_callback(self):
-        """
-        Callback for get terminating pods
-        """
+        """Callback for get terminating pods."""
+
         response = yield
         self._query_inprogress = False
 
@@ -1232,9 +1164,8 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
 
     @coroutine
     def _extend_callback(self):
-        """
-        Callback for host services disable extend
-        """
+        """Callback for host services disable extend."""
+
         response = yield
         if response["completed"]:
             DLOG.info(
@@ -1248,9 +1179,8 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
             )
 
     def run(self):
-        """
-        Run wait host services disabled
-        """
+        """Run wait host services disabled."""
+
         from nfv_vim import objects
 
         DLOG.verbose(
@@ -1273,9 +1203,8 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
             return state_machine.STATE_TASK_WORK_RESULT.FAILED, reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle events while waiting for host services to be disabled
-        """
+        """Handle events while waiting for host services to be disabled."""
+
         from nfv_vim import objects
 
         handled = False
@@ -1309,9 +1238,7 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostServicesEnabledTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Services Enabled Task Work
-    """
+    """Notify Host Services Enabled Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(NotifyHostServicesEnabledTaskWork, self).__init__(
@@ -1324,17 +1251,15 @@ class NotifyHostServicesEnabledTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host services enabled
-        """
+        """Callback for notify host services enabled."""
+
         from nfv_vim import objects
 
         response = yield
@@ -1367,9 +1292,8 @@ class NotifyHostServicesEnabledTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host services enabled
-        """
+        """Run notify host services enabled."""
+
         DLOG.verbose("Notify-Host-Services-Enabled for %s." % self._host.name)
         nfvi.nfvi_notify_host_services_enabled(
             self._host.uuid, self._host.name, self._callback()
@@ -1378,9 +1302,7 @@ class NotifyHostServicesEnabledTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostServicesDisabledTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Services Disabled Task Work
-    """
+    """Notify Host Services Disabled Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(NotifyHostServicesDisabledTaskWork, self).__init__(
@@ -1393,17 +1315,15 @@ class NotifyHostServicesDisabledTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host services disabled
-        """
+        """Callback for notify host services disabled."""
+
         from nfv_vim import objects
 
         response = yield
@@ -1436,9 +1356,8 @@ class NotifyHostServicesDisabledTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host services disabled
-        """
+        """Run notify host services disabled."""
+
         DLOG.verbose("Notify-Host-Services-Disabled for %s." % self._host.name)
 
         nfvi.nfvi_notify_host_services_disabled(
@@ -1448,9 +1367,7 @@ class NotifyHostServicesDisabledTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyHostServicesDeletedTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Host Services Deleted Task Work
-    """
+    """Notify Host Services Deleted Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(NotifyHostServicesDeletedTaskWork, self).__init__(
@@ -1463,17 +1380,15 @@ class NotifyHostServicesDeletedTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for notify host services deleted
-        """
+        """Callback for notify host services deleted."""
+
         response = yield
         if self.task is not None:
             DLOG.verbose(
@@ -1499,9 +1414,8 @@ class NotifyHostServicesDeletedTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run notify host services deleted
-        """
+        """Run notify host services deleted."""
+
         DLOG.verbose("Notify-Host-Services-Deleted for %s." % self._host.name)
         nfvi.nfvi_notify_host_services_deleted(
             self._host.uuid, self._host.name, self._callback()
@@ -1510,9 +1424,7 @@ class NotifyHostServicesDeletedTaskWork(state_machine.StateTaskWork):
 
 
 class AuditHostServicesTaskWork(state_machine.StateTaskWork):
-    """
-    Audit Host Services Task Work
-    """
+    """Audit Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
         super(AuditHostServicesTaskWork, self).__init__(
@@ -1526,17 +1438,15 @@ class AuditHostServicesTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     @coroutine
     def _callback(self):
-        """
-        Callback for audit host services
-        """
+        """Callback for audit host services."""
+
         from nfv_vim import objects
 
         DLOG.verbose("query callback for service: %s" % self._service)
@@ -1594,9 +1504,8 @@ class AuditHostServicesTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run audit host services
-        """
+        """Run audit host services."""
+
         from nfv_vim import objects
 
         DLOG.verbose("Query-Host-Services for %s %s" % (self._host.name, self._service))
@@ -1634,9 +1543,7 @@ class AuditHostServicesTaskWork(state_machine.StateTaskWork):
 
 
 class AuditHostServicesCompleteTaskWork(state_machine.StateTaskWork):
-    """
-    Audit Host Services Complete Task Work
-    """
+    """Audit Host Services Complete Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(AuditHostServicesCompleteTaskWork, self).__init__(
@@ -1649,16 +1556,14 @@ class AuditHostServicesCompleteTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def run(self):
-        """
-        Run audit instances
-        """
+        """Run audit instances."""
+
         from nfv_vim import directors
 
         host_director = directors.get_host_director()
@@ -1668,9 +1573,7 @@ class AuditHostServicesCompleteTaskWork(state_machine.StateTaskWork):
 
 
 class AuditInstancesTaskWork(state_machine.StateTaskWork):
-    """
-    Audit Instances Task Work
-    """
+    """Audit Instances Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         super(AuditInstancesTaskWork, self).__init__(
@@ -1683,16 +1586,14 @@ class AuditInstancesTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def run(self):
-        """
-        Run audit instances
-        """
+        """Run audit instances."""
+
         from nfv_vim import directors
 
         host_director = directors.get_host_director()
@@ -1702,9 +1603,7 @@ class AuditInstancesTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Instances Host Disabling Task Work
-    """
+    """Notify Instances Host Disabling Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         # Calculate the maximum time required to migrate an instance
@@ -1737,25 +1636,22 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def abort(self):
-        """
-        Handle task work abort
-        """
+        """Handle task work abort."""
+
         from nfv_vim import directors
 
         host_director = directors.get_host_director()
         host_director.host_abort(self._host)
 
     def timeout(self):
-        """
-        Handle task work timeout
-        """
+        """Handle task work timeout."""
+
         if self.force_pass:
             DLOG.info(
                 "Notify-Instances-Host-Disabling timeout for %s, "
@@ -1785,17 +1681,15 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
 
         if not self._host.has_reason():
             self._host.update_failure_reason(
-                "Moving instances from disabling "
-                "host %s timed out." % self._host.name
+                "Moving instances from disabling host %s timed out." % self._host.name
             )
 
         return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
 
     @coroutine
     def _callback(self):
-        """
-        Callback for host services disable extend
-        """
+        """Callback for host services disable extend."""
+
         response = yield
         if response["completed"]:
             DLOG.info(
@@ -1810,9 +1704,8 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
             )
 
     def run(self):
-        """
-        Run notify instances host disabling
-        """
+        """Run notify instances host disabling."""
+
         from nfv_vim import directors
 
         DLOG.verbose("Notify-Instances-Host-Disabling for %s." % self._host.name)
@@ -1851,9 +1744,8 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instances move notifications
-        """
+        """Handle instances move notifications."""
+
         handled = False
         if HOST_EVENT.INSTANCE_MOVED == event:
             DLOG.info("Host %s instance moved extending timeout." % self._host.name)
@@ -1937,9 +1829,7 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
 
 
 class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
-    """
-    Notify Instances Host Disabled Task Work
-    """
+    """Notify Instances Host Disabled Task Work."""
 
     def __init__(self, task, host, force_pass=False):
         # Calculate the maximum time required to evacuate an instance
@@ -1963,25 +1853,22 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def abort(self):
-        """
-        Handle task work abort
-        """
+        """Handle task work abort."""
+
         from nfv_vim import directors
 
         host_director = directors.get_host_director()
         host_director.host_abort(self._host)
 
     def timeout(self):
-        """
-        Handle task work timeout
-        """
+        """Handle task work timeout."""
+
         if self.force_pass:
             DLOG.info(
                 "Notify-Instances-Host-Disabled timeout for %s, "
@@ -2005,9 +1892,8 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
 
     @coroutine
     def _callback(self):
-        """
-        Callback for host services disable extend
-        """
+        """Callback for host services disable extend."""
+
         response = yield
         if response["completed"]:
             DLOG.info(
@@ -2022,9 +1908,8 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
             )
 
     def run(self):
-        """
-        Run notify instances host disabled
-        """
+        """Run notify instances host disabled."""
+
         from nfv_vim import directors
 
         DLOG.verbose("Notify-Instances-Host-Disabled for %s." % self._host.name)
@@ -2048,9 +1933,8 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instances move notifications
-        """
+        """Handle instances move notifications."""
+
         handled = False
         if HOST_EVENT.INSTANCE_MOVED == event:
             DLOG.info("Host %s instance moved extending timeout." % self._host.name)
@@ -2111,9 +1995,7 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
 
 
 class WaitHostStabilizeTaskWork(state_machine.StateTaskWork):
-    """
-    Wait Host Stabilize Task Work
-    """
+    """Wait Host Stabilize Task Work."""
 
     def __init__(self, task, host, timeout_in_secs=60):
         super(WaitHostStabilizeTaskWork, self).__init__(
@@ -2123,21 +2005,18 @@ class WaitHostStabilizeTaskWork(state_machine.StateTaskWork):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def timeout(self):
-        """
-        Timeout is expected, so override to pass
-        """
+        """Timeout is expected, so override to pass."""
+
         return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
     def run(self):
-        """
-        Run wait host stabilize
-        """
+        """Run wait host stabilize."""
+
         DLOG.verbose("Wait-Host-Stabilize for %s." % self._host.name)
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason

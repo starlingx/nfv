@@ -15,9 +15,7 @@ DLOG = debug.debug_get_logger("nfv_common.event_log.event_log_thread")
 
 
 class EventLogWorker(thread.ThreadWorker, metaclass=Singleton):
-    """
-    Event Log Worker
-    """
+    """Event Log Worker."""
 
     def __init__(self, name, config):
         super(EventLogWorker, self).__init__(name)
@@ -25,33 +23,28 @@ class EventLogWorker(thread.ThreadWorker, metaclass=Singleton):
         self._handlers = None
 
     def initialize(self):
-        """
-        Initialize the Event Log Worker
-        """
+        """Initialize the Event Log Worker."""
+
         self._handlers = EventLogHandlers(
             self._config["namespace"], self._config["handlers"]
         )
         self._handlers.initialize(self._config["config_file"])
 
     def finalize(self):
-        """
-        Finalize the Event Log Worker
-        """
+        """Finalize the Event Log Worker."""
+
         if self._handlers is not None:
             self._handlers.finalize()
 
     def do_work(self, action, work):
-        """
-        Do work given to the Event Log Worker
-        """
+        """Do work given to the Event Log Worker."""
+
         if EventLogThread.ACTION_LOG_EVENT == action:
             self._handlers.log(work["log-data"])
 
 
 class EventLogThread(thread.Thread, metaclass=Singleton):
-    """
-    Event Log Thread
-    """
+    """Event Log Thread."""
 
     ACTION_LOG_EVENT = "thread-log-event"
 
@@ -60,9 +53,8 @@ class EventLogThread(thread.Thread, metaclass=Singleton):
         super(EventLogThread, self).__init__("Event-Log", self._worker)
 
     def log(self, log_data):
-        """
-        Send log data to the Event Log Thread
-        """
+        """Send log data to the Event Log Thread."""
+
         work = dict()
         work["log-data"] = log_data
         self.send_work(EventLogThread.ACTION_LOG_EVENT, work)

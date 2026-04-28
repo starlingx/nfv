@@ -27,16 +27,16 @@ from nfv_vim.rpc._rpc_message_volume import APIResponseGetVolume  # noqa: F401
 from nfv_vim.rpc._rpc_message_volume import APIResponseUpdateVolume  # noqa: F401
 
 from nfv_vim.rpc._rpc_message_instance import (  # noqa: F401
-    APIRequestColdMigrateInstance
+    APIRequestColdMigrateInstance,
 )
 from nfv_vim.rpc._rpc_message_instance import (  # noqa: F401
-    APIRequestLiveMigrateInstance
+    APIRequestLiveMigrateInstance,
 )
 from nfv_vim.rpc._rpc_message_instance import (  # noqa: F401
-    APIResponseColdMigrateInstance
+    APIResponseColdMigrateInstance,
 )
 from nfv_vim.rpc._rpc_message_instance import (  # noqa: F401
-    APIResponseLiveMigrateInstance
+    APIResponseLiveMigrateInstance,
 )
 from nfv_vim.rpc._rpc_message_instance import APIRequestCreateInstance  # noqa: F401
 from nfv_vim.rpc._rpc_message_instance import APIRequestDeleteInstance  # noqa: F401
@@ -80,44 +80,44 @@ from nfv_vim.rpc._rpc_message_network import APIResponseGetNetwork  # noqa: F401
 from nfv_vim.rpc._rpc_message_network import APIResponseUpdateNetwork  # noqa: F401
 
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestAbortSwUpdateStrategy
+    APIRequestAbortSwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestApplySwUpdateStrategy
+    APIRequestApplySwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestCreateKubeRootcaUpdateStrategy
+    APIRequestCreateKubeRootcaUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestCreateKubeUpgradeStrategy
+    APIRequestCreateKubeUpgradeStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestCreateSwUpdateStrategy
+    APIRequestCreateSwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestCreateSwUpgradeStrategy
+    APIRequestCreateSwUpgradeStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestCreateSystemConfigUpdateStrategy
+    APIRequestCreateSystemConfigUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestDeleteSwUpdateStrategy
+    APIRequestDeleteSwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIRequestGetSwUpdateStrategy
+    APIRequestGetSwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIResponseAbortSwUpdateStrategy
+    APIResponseAbortSwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIResponseApplySwUpdateStrategy
+    APIResponseApplySwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIResponseCreateSwUpdateStrategy
+    APIResponseCreateSwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIResponseDeleteSwUpdateStrategy
+    APIResponseDeleteSwUpdateStrategy,
 )
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
-    APIResponseGetSwUpdateStrategy
+    APIResponseGetSwUpdateStrategy,
 )

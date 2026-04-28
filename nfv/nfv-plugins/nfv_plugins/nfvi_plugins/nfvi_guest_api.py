@@ -22,9 +22,8 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.guest_api")
 
 
 def guest_service_get_name(name):
-    """
-    Convert the nfvi guest service naming
-    """
+    """Convert the nfvi guest service naming."""
+
     if guest.GUEST_SERVICE_NAME.HEARTBEAT == name:
         return nfvi.objects.v1.GUEST_SERVICE_NAME.HEARTBEAT
     else:
@@ -32,9 +31,9 @@ def guest_service_get_name(name):
 
 
 def guest_service_get_admin_state(state):
-    """
-    Convert the nfvi guest service state to a guest service administrative
-    state
+    """Convert the nfvi guest service state to a guest service administrative
+
+    state.
     """
     if guest.GUEST_SERVICE_STATE.ENABLED == state:
         return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.UNLOCKED
@@ -43,9 +42,8 @@ def guest_service_get_admin_state(state):
 
 
 def guest_service_get_service_state(state):
-    """
-    Convert the guest service administrative state to nfvi guest service state
-    """
+    """Convert the guest service administrative state to nfvi guest service state."""
+
     if nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.UNLOCKED == state:
         return guest.GUEST_SERVICE_STATE.ENABLED
     else:
@@ -53,9 +51,9 @@ def guest_service_get_service_state(state):
 
 
 def guest_service_get_oper_state(status):
-    """
-    Convert the nfvi guest service status to a guest service operational
-    state
+    """Convert the nfvi guest service status to a guest service operational
+
+    state.
     """
     if guest.GUEST_SERVICE_STATUS.ENABLED == status:
         return nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.ENABLED
@@ -64,9 +62,8 @@ def guest_service_get_oper_state(status):
 
 
 def instance_get_event(action_type, pre_notification):
-    """
-    Convert the action type to a guest instance event
-    """
+    """Convert the action type to a guest instance event."""
+
     if nfvi.objects.v1.INSTANCE_ACTION_TYPE.PAUSE == action_type:
         event = guest.GUEST_EVENT.PAUSE
 
@@ -117,9 +114,8 @@ def instance_get_event(action_type, pre_notification):
 
 
 def instance_get_action_type(event):
-    """
-    Convert guest instance event to an action type
-    """
+    """Convert guest instance event to an action type."""
+
     if guest.GUEST_EVENT.PAUSE == event:
         action_type = nfvi.objects.v1.INSTANCE_ACTION_TYPE.PAUSE
 
@@ -164,9 +160,9 @@ def instance_get_action_type(event):
 
 
 def get_services_with_guest_service_state(services):
-    """
-    Return guest service data with guest service administrative state
-    converted to nfvi guest service state
+    """Return guest service data with guest service administrative state
+
+    converted to nfvi guest service state.
     """
     services_data = []
     for service in services:
@@ -178,9 +174,7 @@ def get_services_with_guest_service_state(services):
 
 
 class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
-    """
-    NFVI Guest API Class Definition
-    """
+    """NFVI Guest API Class Definition."""
 
     _name = "Guest-API"
     _version = "1.0.0"
@@ -224,9 +218,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def guest_services_create(
         self, future, instance_uuid, host_name, services, callback
     ):
-        """
-        Guest Services Create
-        """
+        """Guest Services Create."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -284,9 +277,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
             callback.close()
 
     def guest_services_set(self, future, instance_uuid, host_name, services, callback):
-        """
-        Guest Services Set
-        """
+        """Guest Services Set."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -354,8 +346,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to set "
-                    "guest services, error=%s." % e
+                    "Caught exception while trying to set guest services, error=%s." % e
                 )
 
         except Exception as e:
@@ -369,9 +360,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
             callback.close()
 
     def guest_services_delete(self, future, instance_uuid, callback):
-        """
-        Guest Services Delete
-        """
+        """Guest Services Delete."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -428,9 +418,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
             callback.close()
 
     def guest_services_query(self, future, instance_uuid, callback):
-        """
-        Guest Services Query
-        """
+        """Guest Services Query."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -512,9 +501,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def guest_services_vote(
         self, future, instance_uuid, host_name, action_type, callback
     ):
-        """
-        Guest Services Vote
-        """
+        """Guest Services Vote."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -583,9 +571,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def guest_services_notify(
         self, future, instance_uuid, host_name, action_type, pre_notification, callback
     ):
-        """
-        Guest Services Notify
-        """
+        """Guest Services Notify."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -655,9 +642,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def create_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Create Host Services, notify Guest to create services for a host
-        """
+        """Create Host Services, notify Guest to create services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -749,9 +735,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def delete_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Delete Host Services, notify Guest to delete services for a host
-        """
+        """Delete Host Services, notify Guest to delete services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -821,9 +806,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def enable_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Enable Host Services, notify Guest to enable services for a host.
-        """
+        """Enable Host Services, notify Guest to enable services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -890,9 +874,9 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def disable_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Notifies Guest to disable their services for the specified
-        host (as applicable)
+        """Notifies Guest to disable their services for the specified
+
+        host (as applicable).
         """
         response = dict()
         response["completed"] = False
@@ -968,9 +952,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def query_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Query Host Services, return state of Guest services for a host.
-        """
+        """Query Host Services, return state of Guest services for a host."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = "enabled"
@@ -1035,9 +1018,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
             callback.close()
 
     def host_services_rest_api_get_handler(self, request_dispatch):
-        """
-        Host-Services Rest-API GET handler
-        """
+        """Host-Services Rest-API GET handler."""
+
         content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
 
@@ -1058,7 +1040,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                 http_response = httplib.BAD_REQUEST
 
             else:
-                (success, host_state) = self._host_services_query_callback(
+                success, host_state = self._host_services_query_callback(
                     host_data["hostname"]
                 )
                 if not success:
@@ -1081,9 +1063,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         request_dispatch.done()
 
     def guest_services_rest_api_get_handler(self, request_dispatch):
-        """
-        Guest-Services Rest-API GET handler
-        """
+        """Guest-Services Rest-API GET handler."""
+
         # /nfvi-plugins/v1/instances/<instance-uuid>
         # /nfvi-plugins/v1/instances/?host_uuid=<host-uuid>
 
@@ -1104,9 +1085,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         )
 
         http_response = httplib.OK
-        (success, result) = self._guest_services_query_callback(
-            host_uuid, instance_uuid
-        )
+        success, result = self._guest_services_query_callback(host_uuid, instance_uuid)
         if not success:
             http_response = httplib.BAD_REQUEST
         else:
@@ -1129,9 +1108,8 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         request_dispatch.done()
 
     def guest_services_rest_api_patch_handler(self, request_dispatch):
-        """
-        Guest-Services Rest-API PATCH handler callback
-        """
+        """Guest-Services Rest-API PATCH handler callback."""
+
         content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
         http_payload = None
@@ -1208,7 +1186,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                                 )
 
                             for callback in self._guest_services_alarm_notify_callbacks:
-                                (success, result) = callback(
+                                success, result = callback(
                                     instance_uuid, avail_status, recovery_action
                                 )
                                 if not success:
@@ -1267,39 +1245,33 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         request_dispatch.done()
 
     def register_host_services_query_callback(self, callback):
-        """
-        Register for Host Services query
-        """
+        """Register for Host Services query."""
+
         self._host_services_query_callback = callback
 
     def register_guest_services_query_callback(self, callback):
-        """
-        Register for Guest Services query
-        """
+        """Register for Guest Services query."""
+
         self._guest_services_query_callback = callback
 
     def register_guest_services_state_notify_callback(self, callback):
-        """
-        Register for Guest Services notify service type event
-        """
+        """Register for Guest Services notify service type event."""
+
         self._guest_services_state_notify_callbacks.append(callback)
 
     def register_guest_services_alarm_notify_callback(self, callback):
-        """
-        Register for Guest Services notify for alarm type event
-        """
+        """Register for Guest Services notify for alarm type event."""
+
         self._guest_services_alarm_notify_callbacks.append(callback)
 
     def register_guest_services_action_notify_callback(self, callback):
-        """
-        Register for Guest Services notify for action type event
-        """
+        """Register for Guest Services notify for action type event."""
+
         self._guest_services_action_notify_callbacks.append(callback)
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.PLATFORM
@@ -1329,7 +1301,6 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         return

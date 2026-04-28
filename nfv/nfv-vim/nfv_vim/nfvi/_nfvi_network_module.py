@@ -13,16 +13,14 @@ _network_plugin = None
 
 
 def nfvi_network_plugin_disabled():
-    """
-    Get network plugin disabled status
-    """
+    """Get network plugin disabled status."""
+
     return _network_plugin is None
 
 
 def nfvi_get_networks(paging, callback):
-    """
-    Get a list of networks
-    """
+    """Get a list of networks."""
+
     cmd_id = _network_plugin.invoke_plugin("get_networks", paging, callback=callback)
     return cmd_id
 
@@ -30,9 +28,8 @@ def nfvi_get_networks(paging, callback):
 def nfvi_create_network(
     network_name, network_type, segmentation_id, physical_network, shared, callback
 ):
-    """
-    Create a network
-    """
+    """Create a network."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "create_network",
         network_name,
@@ -46,9 +43,8 @@ def nfvi_create_network(
 
 
 def nfvi_update_network(network_uuid, shared, callback):
-    """
-    Update a network
-    """
+    """Update a network."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "update_network", network_uuid, shared, callback=callback
     )
@@ -56,9 +52,8 @@ def nfvi_update_network(network_uuid, shared, callback):
 
 
 def nfvi_delete_network(network_id, callback):
-    """
-    Delete a network
-    """
+    """Delete a network."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "delete_network", network_id, callback=callback
     )
@@ -66,17 +61,15 @@ def nfvi_delete_network(network_id, callback):
 
 
 def nfvi_get_network(network_id, callback):
-    """
-    Get a network
-    """
+    """Get a network."""
+
     cmd_id = _network_plugin.invoke_plugin("get_network", network_id, callback=callback)
     return cmd_id
 
 
 def nfvi_get_subnets(paging, callback):
-    """
-    Get a list of subnets
-    """
+    """Get a list of subnets."""
+
     cmd_id = _network_plugin.invoke_plugin("get_subnets", paging, callback=callback)
     return cmd_id
 
@@ -91,9 +84,8 @@ def nfvi_create_subnet(
     dhcp_enabled,
     callback,
 ):
-    """
-    Create a subnet
-    """
+    """Create a subnet."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "create_subnet",
         network_uuid,
@@ -109,9 +101,8 @@ def nfvi_create_subnet(
 
 
 def nfvi_update_subnet(subnet_uuid, gateway_ip, delete_gateway, dhcp_enabled, callback):
-    """
-    Update a subnet
-    """
+    """Update a subnet."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "update_subnet",
         subnet_uuid,
@@ -124,9 +115,8 @@ def nfvi_update_subnet(subnet_uuid, gateway_ip, delete_gateway, dhcp_enabled, ca
 
 
 def nfvi_delete_subnet(subnet_id, callback):
-    """
-    Delete a subnet
-    """
+    """Delete a subnet."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "delete_subnet", subnet_id, callback=callback
     )
@@ -134,17 +124,15 @@ def nfvi_delete_subnet(subnet_id, callback):
 
 
 def nfvi_get_subnet(subnet_id, callback):
-    """
-    Get a subnet
-    """
+    """Get a subnet."""
+
     cmd_id = _network_plugin.invoke_plugin("get_subnet", subnet_id, callback=callback)
     return cmd_id
 
 
 def nfvi_notify_network_host_disabled(host_uuid, host_name, host_personality, callback):
-    """
-    Notify network host is disabled
-    """
+    """Notify network host is disabled."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "notify_host_disabled",
         host_uuid,
@@ -156,9 +144,8 @@ def nfvi_notify_network_host_disabled(host_uuid, host_name, host_personality, ca
 
 
 def nfvi_enable_network_host_services(host_uuid, host_name, host_personality, callback):
-    """
-    Enable network services
-    """
+    """Enable network services."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "enable_host_services",
         host_uuid,
@@ -170,17 +157,15 @@ def nfvi_enable_network_host_services(host_uuid, host_name, host_personality, ca
 
 
 def nfvi_get_network_agents(callback):
-    """
-    Get network agents of all hosts
-    """
+    """Get network agents of all hosts."""
+
     cmd_id = _network_plugin.invoke_plugin("get_network_agents", callback=callback)
     return cmd_id
 
 
 def nfvi_get_dhcp_agent_networks(agent_id, callback):
-    """
-    Get networks hosted on a dhcp agent
-    """
+    """Get networks hosted on a dhcp agent."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "get_dhcp_agent_networks", agent_id, callback=callback
     )
@@ -188,9 +173,8 @@ def nfvi_get_dhcp_agent_networks(agent_id, callback):
 
 
 def nfvi_get_agent_routers(agent_id, callback):
-    """
-    Get routers hosted on a l3 agent
-    """
+    """Get routers hosted on a l3 agent."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "get_agent_routers", agent_id, callback=callback
     )
@@ -198,9 +182,8 @@ def nfvi_get_agent_routers(agent_id, callback):
 
 
 def nfvi_get_router_ports(router_id, callback):
-    """
-    Get router port information
-    """
+    """Get router port information."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "get_router_ports", router_id, callback=callback
     )
@@ -208,9 +191,8 @@ def nfvi_get_router_ports(router_id, callback):
 
 
 def nfvi_add_network_to_dhcp_agent(agent_id, network_id, callback):
-    """
-    Add a network to a DHCP agent
-    """
+    """Add a network to a DHCP agent."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "add_network_to_dhcp_agent", agent_id, network_id, callback=callback
     )
@@ -218,9 +200,8 @@ def nfvi_add_network_to_dhcp_agent(agent_id, network_id, callback):
 
 
 def nfvi_remove_network_from_dhcp_agent(agent_id, network_id, callback):
-    """
-    Remove a network from a DHCP Agent
-    """
+    """Remove a network from a DHCP Agent."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "remove_network_from_dhcp_agent", agent_id, network_id, callback=callback
     )
@@ -228,9 +209,8 @@ def nfvi_remove_network_from_dhcp_agent(agent_id, network_id, callback):
 
 
 def nfvi_add_router_to_agent(agent_id, router_id, callback):
-    """
-    Add a router to an L3 agent
-    """
+    """Add a router to an L3 agent."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "add_router_to_agent", agent_id, router_id, callback=callback
     )
@@ -238,9 +218,8 @@ def nfvi_add_router_to_agent(agent_id, router_id, callback):
 
 
 def nfvi_remove_router_from_agent(agent_id, router_id, callback):
-    """
-    Remove a router from an L3 Agent
-    """
+    """Remove a router from an L3 Agent."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "remove_router_from_agent", agent_id, router_id, callback=callback
     )
@@ -248,9 +227,8 @@ def nfvi_remove_router_from_agent(agent_id, router_id, callback):
 
 
 def nfvi_get_physical_network(network_id, callback):
-    """
-    Get physical network of a network
-    """
+    """Get physical network of a network."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "get_physical_network", network_id, callback=callback
     )
@@ -258,9 +236,8 @@ def nfvi_get_physical_network(network_id, callback):
 
 
 def nfvi_delete_network_host_services(host_uuid, host_name, host_personality, callback):
-    """
-    Delete network services
-    """
+    """Delete network services."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "delete_host_services",
         host_uuid,
@@ -274,9 +251,8 @@ def nfvi_delete_network_host_services(host_uuid, host_name, host_personality, ca
 def nfvi_query_network_host_services(
     host_uuid, host_name, host_personality, check_fully_up, callback
 ):
-    """
-    Query network services
-    """
+    """Query network services."""
+
     cmd_id = _network_plugin.invoke_plugin(
         "query_host_services",
         host_uuid,
@@ -289,9 +265,8 @@ def nfvi_query_network_host_services(
 
 
 def nfvi_network_initialize(config, pool):
-    """
-    Initialize the NFVI network package
-    """
+    """Initialize the NFVI network package."""
+
     global _network_plugin
 
     _network_plugin = NFVINetworkPlugin(config["namespace"], pool)
@@ -299,8 +274,7 @@ def nfvi_network_initialize(config, pool):
 
 
 def nfvi_network_finalize():
-    """
-    Finalize the NFVI network package
-    """
+    """Finalize the NFVI network package."""
+
     if _network_plugin is not None:
         _network_plugin.finalize()

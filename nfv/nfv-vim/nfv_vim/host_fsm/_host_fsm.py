@@ -40,9 +40,7 @@ HOST_STATES = dict(
 
 
 class HostStateMachine(state_machine.StateMachine):
-    """
-    Host State Machine
-    """
+    """Host State Machine."""
 
     def __init__(self, host, initial_state):
         super(HostStateMachine, self).__init__(

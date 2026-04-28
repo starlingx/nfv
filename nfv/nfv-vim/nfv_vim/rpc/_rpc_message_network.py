@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.rpc.network")
 
 
 class APIRequestCreateNetwork(RPCMessage):
-    """
-    RPC API Request Message - Create Network
-    """
+    """RPC API Request Message - Create Network."""
 
     name = None
     network_type = None
@@ -51,9 +49,7 @@ class APIRequestCreateNetwork(RPCMessage):
 
 
 class APIResponseCreateNetwork(RPCMessage):
-    """
-    RPC API Response Message - Create Network
-    """
+    """RPC API Response Message - Create Network."""
 
     uuid = None
     name = None
@@ -105,9 +101,7 @@ class APIResponseCreateNetwork(RPCMessage):
 
 
 class APIRequestUpdateNetwork(RPCMessage):
-    """
-    RPC API Request Message - Update Network
-    """
+    """RPC API Request Message - Update Network."""
 
     name = None
     is_shared = None
@@ -133,9 +127,7 @@ class APIRequestUpdateNetwork(RPCMessage):
 
 
 class APIResponseUpdateNetwork(RPCMessage):
-    """
-    RPC API Response Message - Update Network
-    """
+    """RPC API Response Message - Update Network."""
 
     uuid = None
     name = None
@@ -187,9 +179,7 @@ class APIResponseUpdateNetwork(RPCMessage):
 
 
 class APIRequestDeleteNetwork(RPCMessage):
-    """
-    RPC API Request Message - Delete Network
-    """
+    """RPC API Request Message - Delete Network."""
 
     by_uuid = None
     by_name = None
@@ -218,9 +208,7 @@ class APIRequestDeleteNetwork(RPCMessage):
 
 
 class APIResponseDeleteNetwork(RPCMessage):
-    """
-    RPC API Response Message - Delete Network
-    """
+    """RPC API Response Message - Delete Network."""
 
     def __init__(
         self,
@@ -237,9 +225,7 @@ class APIResponseDeleteNetwork(RPCMessage):
 
 
 class APIRequestGetNetwork(RPCMessage):
-    """
-    RPC API Request Message - Get Network
-    """
+    """RPC API Request Message - Get Network."""
 
     get_all = False
     filter_by_uuid = None
@@ -274,9 +260,7 @@ class APIRequestGetNetwork(RPCMessage):
 
 
 class APIResponseGetNetwork(RPCMessage):
-    """
-    RPC API Response Message - Get Network
-    """
+    """RPC API Response Message - Get Network."""
 
     uuid = None
     name = None

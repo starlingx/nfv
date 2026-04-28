@@ -36,6 +36,7 @@ class Router(Middleware):
 
     def __init__(self, app, _, mapper, forwarder=None):
         """Create a router for the given routes.Mapper."""
+
         self.map = mapper
         self.forwarder = forwarder
         self._router = RoutesMiddleware(self._dispatch, self.map)
@@ -44,11 +45,12 @@ class Router(Middleware):
     @webob.dec.wsgify
     def __call__(self, req):
         """Route the incoming request to a controller based on self.map."""
+
         return self._router
 
     @webob.dec.wsgify
     def _dispatch(self, req):
-        """Called by self._router after matching the incoming request to a route
+        """Called by self._router after matching the incoming request to a route.
 
         and putting the information into req.environ.
         """
@@ -80,6 +82,7 @@ class APIDispatcher(object):
     @webob.dec.wsgify
     def __call__(self, req):
         """Route the incoming request to a remote host ."""
+
         LOG.debug(
             "APIDispatcher dispatch the request to remote host: (%s), "
             "port: (%d)" % (self._remote_host, self._remote_port)

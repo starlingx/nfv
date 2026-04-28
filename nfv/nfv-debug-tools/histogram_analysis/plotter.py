@@ -54,11 +54,18 @@ dir = os.path.dirname(__file__)
 fig = plotly.graph_objs.graph_objs.Figure
 pth = os.path.join(dir, "csv/")
 
-execTime = False  # Indicates if average execution time is to be graphed or not
-default = False  # Indicates no commands were entered and to run with default settings (run config with -t option)
-oneAxis = False  # Causes the generated graph to have two y-axes sharing an x-axis with both avg execution time and hits being graphed
-config = False  # Indicates whether to pull process names from logplot.cfg or not
-hits = False  # Indicates if the delta of hits between samples is to be graphed
+# Indicates if average execution time is to be graphed or not
+execTime = False
+# Indicates no commands were entered and to run with default settings
+# (run config with -t option)
+default = False
+# Causes the generated graph to have two y-axes sharing an x-axis with both avg
+# execution time and hits being graphed
+oneAxis = False
+# Indicates whether to pull process names from logplot.cfg or not
+config = False
+# Indicates if the delta of hits between samples is to be graphed
+hits = False
 markers = False
 lines = False
 timestamp = []
@@ -74,105 +81,153 @@ def helpMessage():
     print("\n" + "-" * 120)
     print("NFV-VIM Histogram Graphing Script\n")
     print(
-        "This script is meant to graph average execution times and the delta of hits between sample periods for processes in nfv-vim logs.\n"
+        "This script is meant to graph average execution times and the delta of hits "
+        "between sample periods for processes in nfv-vim logs.\n"
     )
     print("Usage:\n")
     print(
-        " -c                ... runs from the logplot.cfg (c)onfig file. All processes in the first list with a Y\n"
-        "                       in the far-right column will be included in the generated graph.\n"
+        " -c                ... runs from the logplot.cfg (c)onfig file. All "
+        "processes in the first list with a Y\n"
+        "                       in the far-right column will be included in the "
+        "generated graph.\n"
     )
     print(
-        " -d                ... command used to specify a (d)ate range within which you would like to see log data.\n"
-        "                       The format is YYYY/MM/DD-YYYY/MM/DD with the lower bound on the left, and the upper\n"
-        "                       bound on the right. The range is up to and including the bounds. To have a bound simply\n"
-        "                       cover all datestamps before or after a bound, omit the undefined bound. Only one bound can be\n"
+        " -d                ... command used to specify a (d)ate range within which "
+        "you would like to see log data.\n"
+        "                       The format is YYYY/MM/DD-YYYY/MM/DD with the lower "
+        "bound on the left, and the upper\n"
+        "                       bound on the right. The range is up to and including "
+        "the bounds. To have a bound simply\n"
+        "                       cover all datestamps before or after a bound, omit "
+        "the undefined bound. Only one bound can be\n"
         "                       unspecified in this way.\n"
         "                       e.g. -d 2016/12/01-2016/12/12\n"
-        "                            -d -2016/12/12   To use all logs prior to and including 2016/12/12\n"
-        "                            -d 2016/12/01-   To use all logs after and including 2016/12/01\n"
+        "                            -d -2016/12/12   To use all logs prior to and "
+        "including 2016/12/12\n"
+        "                            -d 2016/12/01-   To use all logs after and "
+        "including 2016/12/01\n"
     )
     print(
-        " -t                ... used to indicate that you would like the graph to display average execution (t)imes\n"
+        " -t                ... used to indicate that you would like the graph to "
+        "display average execution (t)imes\n"
         "                       along the y-axis.\n"
     )
     print(
-        " -h                ... used to indicate that you would like the graph to display the dela of (h)its between\n"
+        " -h                ... used to indicate that you would like the graph to "
+        "display the dela of (h)its between\n"
         "                       sample periods on the y-axis.\n"
     )
     print(
-        " -l                ... used to set the graph to be a line graph. (Can be used with -m as well)\n"
+        " -l                ... used to set the graph to be a line graph. (Can be used "
+        "with -m as well)\n"
     )
     print(
-        " -m                ... used to set the graph to be a scatterplot. (Can be used with -l as well)\n"
+        " -m                ... used to set the graph to be a scatterplot. (Can be "
+        "used with -l as well)\n"
     )
     print(
-        " -lm               ... used to set the graph to be a scatterplot with connecting lines. This same effect can also be\n"
+        " -lm               ... used to set the graph to be a scatterplot with "
+        "connecting lines. This same effect can also be\n"
         "                       achieved by using -l -m\n"
     )
     print(
-        " -n                ... used to (n)ame the file that will be generated by this script. Files can be found in the\n"
-        "                       Graphs/ directory, found inside the directory containing this script. Do not include spaces in\n"
-        "                       the file name. If no name is specified, the name will default to the timestamp from when the\n"
+        " -n                ... used to (n)ame the file that will be generated by this "
+        "script. Files can be found in the\n"
+        "                       Graphs/ directory, found inside the directory "
+        "containing this script. Do not include spaces in\n"
+        "                       the file name. If no name is specified, the name will "
+        "default to the timestamp from when the\n"
         "                       script was run.\n"
         "                       e.g. 01-24-2017.html\n"
     )
     print(
-        " -oneaxis          ... used to generate a graph with two Y-axes sharing an x-axis. Average execution time's y-axis is\n"
-        "                       on the right, and delta Hits per sample's y-axis is on the left. Used to look for correlations. The \n"
-        "                       name of the process being graphed will have _time or _hits appended to it so you can tell which\n"
-        "                       y-axis to relate it to. Only works if both -h and -t flags are used. Can be used for multiple processes.\n"
+        " -oneaxis          ... used to generate a graph with two Y-axes sharing an "
+        "x-axis. Average execution time's y-axis is\n"
+        "                       on the right, and delta Hits per sample's y-axis is on "
+        "the left. Used to look for correlations. The \n"
+        "                       name of the process being graphed will have _time or "
+        "_hits appended to it so you can tell which\n"
+        "                       y-axis to relate it to. Only works if both -h and -t "
+        "flags are used. Can be used for multiple processes.\n"
         "                       e.g. -h -t -oneaxis --p process1 process2\n"
     )
     print(
-        " --g               ... will run the script for processes specified in logplot.cfg under the (G)roups heading.\n"
-        "                       All processes listed under the named group's heading will be included in the graph.\n"
-        "                       Space-delimit the groups to be included. This must be the last command entered.\n"
+        " --g               ... will run the script for processes specified in "
+        "logplot.cfg under the (G)roups heading.\n"
+        "                       All processes listed under the named group's heading "
+        "will be included in the graph.\n"
+        "                       Space-delimit the groups to be included. This must be "
+        "the last command entered.\n"
         "                       e.g. --g group1 group2\n"
     )
     print(
-        " --p               ... follow this with a space-delimited list of (p)rocesses you would like to graph together.\n"
+        " --p               ... follow this with a space-delimited list of (p)rocesses "
+        "you would like to graph together.\n"
         "                       This must be the last command entered.\n"
     )
     print(
-        " --update          ... This will update the master list of process at the beginning of the logplot.cfg file:\n"
-        "                       Processes not currently listed in the master list will be added and their run status set to N.\n\n"
+        " --update          ... This will update the master list of process at the "
+        "beginning of the logplot.cfg file:\n"
+        "                       Processes not currently listed in the master list will "
+        "be added and their run status set to N.\n\n"
     )
     print(
-        "Note: If neither the -t nor -h tag is used, the script will default to display the average execution time on the y-axis.\n\n"
+        "Note: If neither the -t nor -h tag is used, the script will default to "
+        "display the average execution time on the y-axis.\n\n"
     )
     print("Examples:\n")
     print(
-        "./plotter.py -c -d 2016/12/3-2016/12/10 -t -n ConfigOutput_Dec_3-10          ... This will graph all processes with a Y in their\n"
-        "                                                                                 right-most column in the config file, using logs\n"
-        "                                                                                 with a timestamp between Dec 3rd and 10th 2016,\n"
-        "                                                                                 and will display their average execution time in\n"
-        "                                                                                 the y-axis. The file will be called\n"
-        "                                                                                 ConfigOutput_Dec_3-10.html"
+        "./plotter.py -c -d 2016/12/3-2016/12/10 -t -n ConfigOutput_Dec_3-10          "
+        "... This will graph all processes with a Y in their\n"
+        "                                                                              "
+        "   right-most column in the config file, using logs\n"
+        "                                                                              "
+        "   with a timestamp between Dec 3rd and 10th 2016,\n"
+        "                                                                              "
+        "   and will display their average execution time in\n"
+        "                                                                              "
+        "   the y-axis. The file will be called\n"
+        "                                                                              "
+        "   ConfigOutput_Dec_3-10.html"
     )
     print(
-        "./plotter.py -h -t --g group1                                                ... This will generate two graphs, one with the delta of hits\n"
-        "                                                                                 on the y-axis, and the other with the average execution time\n"
-        "                                                                                 in the y-axis, for processes listed under group1 in\n"
-        "                                                                                 logplot.cfg.\n"
-        "                                                                                 period will be displayed on the y-axis.\n"
+        "./plotter.py -h -t --g group1                                                "
+        "... This will generate two graphs, one with the delta of hits\n"
+        "                                                                              "
+        "   on the y-axis, and the other with the average execution time\n"
+        "                                                                              "
+        "   in the y-axis, for processes listed under group1 in\n"
+        "                                                                              "
+        "   logplot.cfg.\n"
+        "                                                                              "
+        "   period will be displayed on the y-axis.\n"
     )
     print(
-        "./plotter.py                                                                 ... This will run the default settings, which are to run\n"
-        "                                                                                 for the processes enabled in the master list in\n"
-        "                                                                                 the config file, to use log information for all dates\n"
-        "                                                                                 available, to show average execution time on the y-axis,\n"
-        "                                                                                 and to name the file with the current day's datestamp."
+        "./plotter.py                                                                 "
+        "... This will run the default settings, which are to run\n"
+        "                                                                              "
+        "   for the processes enabled in the master list in\n"
+        "                                                                              "
+        "   the config file, to use log information for all dates\n"
+        "                                                                              "
+        "   available, to show average execution time on the y-axis,\n"
+        "                                                                              "
+        "   and to name the file with the current day's datestamp."
     )
     print("-" * 120)
 
 
-# Appends new processes found via CSV filenames to the master process list in logplot.cfg if there are not already present.
-# If logplot.cfg has not been generated yet, this will create it and add process names found in filenames in ./csv
+# Appends new processes found via CSV filenames to the master process list in
+# logplot.cfg if there are not already present.
+# If logplot.cfg has not been generated yet, this will create it and add process names
+# found in filenames in ./csv
 def updater(configExists=True):
     procs = []
     existingProcs = []
     newProcs = []
-    position = 0  # Tracks position of the end of the master process list so new processes can be added above it.
+    # Tracks position of the end of the master process list so new
+    # processes can be added above it.
+    position = 0
 
     os.chdir(pth)
     for name in iglob("*.csv"):
@@ -214,7 +269,8 @@ def updater(configExists=True):
             f.close()
 
 
-# Appends process names found in the specified group to the list of processes to be graphed.
+# Appends process names found in the specified group to the list of processes to be
+# graphed.
 def gCommand(groups):
     procs = []
     f = open(os.path.join(dir, "logplot.cfg"), "r")
@@ -241,8 +297,8 @@ def gCommand(groups):
         else:
             if not groupFound:
                 warnings.append(
-                    "WARNING: The following group could not be found: %s\n\t\t Please check your logplot.cfg file for the intended group name."
-                    % (g,)
+                    "WARNING: The following group could not be found: %s\n\t\t Please "
+                    "check your logplot.cfg file for the intended group name." % (g,)
                 )
 
     f.close()
@@ -250,9 +306,12 @@ def gCommand(groups):
 
 
 # Appends processes explicitly named by the user to the list of processes to be run.
-# If the process name specified using the --p command does not match the name of any processes taken from .csv filenames, the user is given
-# a list of known processes containing the name they entered. If they enter one of the provided names, it will be added to the list. If the
-# user enters "s", the process in question will be skipped and the script will continue. If they user enters "q" the script will exit.
+# If the process name specified using the --p command does not match the name of any
+# processes taken from .csv filenames, the user is given
+# a list of known processes containing the name they entered. If they enter one of the
+# provided names, it will be added to the list. If the
+# user enters "s", the process in question will be skipped and the script will continue.
+# If they user enters "q" the script will exit.
 def pCommand(pList):
     procList = []
     for i in range(len(pList)):
@@ -279,7 +338,8 @@ def pCommand(pList):
                     else:
                         procName = str(
                             input(
-                                "\nEnter the corrected process name, q to quit, or s to skip: "
+                                "\nEnter the corrected process name, q to quit, or s "
+                                "to skip: "
                             )
                         ).strip()
                     if procName == "s":
@@ -290,8 +350,10 @@ def pCommand(pList):
     return procList
 
 
-# Stores the average execution time, or delta hit count data into into a plotly graph obj, and restricts sample to be within a certain
-# date range if specified. If plots is 1, one graph will be generated. If plots is 2, two graphs will be generated with one above the other.
+# Stores the average execution time, or delta hit count data into into a plotly graph
+# obj, and restricts sample to be within a certain date range if specified. If plots
+# is 1, one graph will be generated. If plots is 2, two graphs will be generated with
+# one above the other.
 def storeGraphData(procs, dateRange=None, execTime=False, hits=False, plots=1):
     if dateRange is None:
         dateRange = []
@@ -360,7 +422,8 @@ def storeGraphData(procs, dateRange=None, execTime=False, hits=False, plots=1):
                 fig.append_trace(graphData["trace" + str(i)], 2, 1)
 
 
-# Formats the graph by adding axis titles, changing font sizes, setting there to be two separate graphs or two graphs sharing an x-axis etc.
+# Formats the graph by adding axis titles, changing font sizes, setting there to be two
+# separate graphs or two graphs sharing an x-axis etc.
 def formatGraph(two, oneAxis):
     fig["layout"].update(showlegend=True)
     if two:
@@ -441,7 +504,8 @@ plotCheck = subprocess.getstatusoutput("pip list | grep plotly")
 if plotCheck[0] == 0:
     if "plotly" not in plotCheck[1]:
         print(
-            "\n\tWARNING: Plotly is not installed on your system.\n\tPlease install it with: sudo pip install plotly\n"
+            "\n\tWARNING: Plotly is not installed on your system.\n\tPlease install it "
+            "with: sudo pip install plotly\n"
         )
         sys.exit()
 # Checks to see if logplot.cfg already exists, creates it if not.
@@ -451,7 +515,8 @@ if not os.path.isfile(os.path.join(dir, "logplot.cfg")):
     print("logplot.cfg created.")
 if not os.path.isdir("./csv"):
     print(
-        "\n\tWARNING: ./csv directory is missing. Please run Histogram.sh or make sure directory has not been renamed.\n"
+        "\n\tWARNING: ./csv directory is missing. Please run Histogram.sh or make sure "
+        "directory has not been renamed.\n"
     )
     sys.exit()
 
@@ -514,7 +579,8 @@ else:
             print("Update complete.")
             sys.exit()
 
-# If neither average execution time nor delta hit count are specified to be shown, default to showing average execution time.
+# If neither average execution time nor delta hit count are specified to be shown,
+# default to showing average execution time.
 if (not execTime) and (not hits):
     execTime = True
 
@@ -545,7 +611,8 @@ if config:
                 warnings.append("WARNING: %s does not exist." % (csvFile,))
     f.close()
 
-# If both average execution time and delta hits are specified to be shown, generate two graphs if -oneaxis wasn't specified.
+# If both average execution time and delta hits are specified to be shown, generate two
+# graphs if -oneaxis wasn't specified.
 # If only one of execution time and delta hits was specified, generate one graph.
 if procs:
     if execTime and hits:

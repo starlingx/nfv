@@ -25,10 +25,10 @@ from nfv_vim.events._vim_volume_api_events import vim_volume_api_initialize
 from nfv_vim.events._vim_volume_api_events import vim_volume_api_update_volume
 
 from nfv_vim.events._vim_instance_api_events import (
-    vim_instance_api_cold_migrate_instance
+    vim_instance_api_cold_migrate_instance,
 )
 from nfv_vim.events._vim_instance_api_events import (
-    vim_instance_api_live_migrate_instance
+    vim_instance_api_live_migrate_instance,
 )
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_create_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_delete_instance
@@ -72,9 +72,8 @@ _server = None
 
 
 def _vim_api_message_handler(connection, msg):
-    """
-    Handle messages from the vim-api
-    """
+    """Handle messages from the vim-api."""
+
     DLOG.verbose(
         "Received message=%s from vim-api, ip=%s, port=%s."
         % (msg, connection.ip, connection.port)
@@ -223,9 +222,8 @@ def _vim_api_message_handler(connection, msg):
 
 
 def vim_api_events_initialize():
-    """
-    Initialize vim api events
-    """
+    """Initialize vim api events."""
+
     global _server
 
     _server = tcp.TCPServer(
@@ -242,9 +240,8 @@ def vim_api_events_initialize():
 
 
 def vim_api_events_finalize():
-    """
-    Finalize vim api events
-    """
+    """Finalize vim api events."""
+
     vim_volume_api_finalize()
     vim_image_api_finalize()
     vim_instance_api_finalize()

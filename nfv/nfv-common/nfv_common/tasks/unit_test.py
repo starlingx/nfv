@@ -125,7 +125,6 @@ class UnitTest(object):
 
 
 if __name__ == "__main__":
-
     debug.debug_initialize(config.CONF["debug"])
     selobj.selobj_initialize()
     timers.timers_initialize(500, 1000, 1000)

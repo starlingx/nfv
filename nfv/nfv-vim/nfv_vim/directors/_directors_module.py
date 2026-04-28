@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,9 +18,8 @@ from nfv_vim.directors._volume_director import volume_director_initialize
 
 
 def directors_initialize():
-    """
-    Initialize Directors
-    """
+    """Initialize Directors."""
+
     image_director_initialize()
     volume_director_initialize()
     instance_director_initialize()
@@ -30,9 +29,8 @@ def directors_initialize():
 
 
 def directors_finalize():
-    """
-    Finalize Directors
-    """
+    """Finalize Directors."""
+
     image_director_finalize()
     volume_director_finalize()
     instance_director_finalize()

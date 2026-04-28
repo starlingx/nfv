@@ -12,9 +12,7 @@ DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_plugin")
 
 
 class NFVIPlugin(object):
-    """
-    NFVI Plugin
-    """
+    """NFVI Plugin."""
 
     def __init__(self, namespace, version, signature, plugin_type, scheduler):
         self._plugin = None
@@ -47,9 +45,8 @@ class NFVIPlugin(object):
                 break
 
     def _valid_plugin(self, plugin):
-        """
-        Verify signature of the plugin is valid
-        """
+        """Verify signature of the plugin is valid."""
+
         if self._signature == plugin.obj.signature:
             return True
         else:
@@ -61,9 +58,8 @@ class NFVIPlugin(object):
         return False
 
     def _invoke_plugin_method(self, priority, command, *command_args, **command_kwargs):
-        """
-        Invoke a method on the plugin
-        """
+        """Invoke a method on the plugin."""
+
         result = None
         if self._plugin is not None:
             command = getattr(self._plugin.obj, command, None)
@@ -74,42 +70,37 @@ class NFVIPlugin(object):
         return result
 
     def invoke_plugin(self, command, *command_args, **command_kwargs):
-        """
-        Invoke a command on the plugin
-        """
+        """Invoke a command on the plugin."""
+
         command_id = self._invoke_plugin_method(
             tasks.TASK_PRIORITY.LOW, command, *command_args, **command_kwargs
         )
         return command_id
 
     def invoke_plugin_expediate(self, command, *command_args, **command_kwargs):
-        """
-        Invoke a command on the plugin
-        """
+        """Invoke a command on the plugin."""
+
         command_id = self._invoke_plugin_method(
             tasks.TASK_PRIORITY.MED, command, *command_args, **command_kwargs
         )
         return command_id
 
     def ready_to_initialize(self, config_file):
-        """
-        Check if we are ready to initialize plugin
-        """
+        """Check if we are ready to initialize plugin."""
+
         if self._plugin is not None:
             return self._plugin.obj.ready_to_initialize(config_file)
         else:
             return False
 
     def initialize(self, config_file):
-        """
-        Initialize plugin
-        """
+        """Initialize plugin."""
+
         if self._plugin is not None:
             self._plugin.obj.initialize(config_file)
 
     def finalize(self):
-        """
-        Finalize plugin
-        """
+        """Finalize plugin."""
+
         if self._plugin is not None:
             self._plugin.obj.finalize()

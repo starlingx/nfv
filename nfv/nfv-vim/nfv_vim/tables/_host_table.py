@@ -11,9 +11,7 @@ _host_table = None
 
 
 class HostTable(Table):
-    """
-    Host Table
-    """
+    """Host Table."""
 
     def __init__(self):
         super(HostTable, self).__init__()
@@ -47,16 +45,14 @@ class HostTable(Table):
 
 
 def tables_get_host_table():
-    """
-    Get the host table
-    """
+    """Get the host table."""
+
     return _host_table
 
 
 def host_table_initialize():
-    """
-    Initialize the host table
-    """
+    """Initialize the host table."""
+
     global _host_table
 
     _host_table = HostTable()
@@ -69,9 +65,8 @@ def host_table_initialize():
 
 
 def host_table_finalize():
-    """
-    Finalize the host table
-    """
+    """Finalize the host table."""
+
     global _host_table
 
     del _host_table

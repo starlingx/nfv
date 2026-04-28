@@ -19,9 +19,7 @@ DLOG = debug.debug_get_logger("nfv_vim.dhcp_rebalance")
 
 
 class AgentType(Constants, metaclass=Singleton):
-    """
-    AGENT TYPE Constants
-    """
+    """AGENT TYPE Constants."""
 
     L3 = Constant("L3 agent")
     DHCP = Constant("DHCP agent")
@@ -31,9 +29,7 @@ AGENT_TYPE = AgentType()
 
 
 class DHCPRebalanceState(Constants, metaclass=Singleton):
-    """
-    DHCP REBALANCE STATE Constants
-    """
+    """DHCP REBALANCE STATE Constants."""
 
     GET_DHCP_AGENTS = Constant("GET_DHCP_AGENTS")
     GET_NETWORKS_HOSTED_ON_AGENT = Constant("GET_NETWORKS_HOSTED_ON_AGENT")
@@ -408,11 +404,11 @@ _DHCPRebalance = DHCPAgentRebalance()
 
 
 def add_rebalance_work_dhcp(host_name, host_is_going_down):
-    """
-    API for external use to launch a rebalance operation.
+    """API for external use to launch a rebalance operation.
+
     host_is_going_down is boolean indicating if the host is
     coming up (rebalance networks, moving some to newly available host),
-    or going down (move networks off this host, distributing amongst rest)
+    or going down (move networks off this host, distributing amongst rest).
     """
     global _DHCPRebalance
 
@@ -421,18 +417,16 @@ def add_rebalance_work_dhcp(host_name, host_is_going_down):
 
 @coroutine
 def _add_network_to_dhcp_agent_callback():
-    """
-    Add network to dhcp agent callback
-    """
+    """Add network to dhcp agent callback."""
+
     response = yield
 
     _add_network_to_dhcp_agent_callback_body(response)
 
 
 def _add_network_to_dhcp_agent_callback_body(response):
-    """
-    Add network to dhcp agent callback body
-    """
+    """Add network to dhcp agent callback body."""
+
     global _DHCPRebalance
 
     _DHCPRebalance.state_machine_in_progress = False
@@ -445,17 +439,15 @@ def _add_network_to_dhcp_agent_callback_body(response):
 
 @coroutine
 def _remove_network_from_dhcp_agent_callback(to_agent_id, network_id):
-    """
-    Remove network from agent callback
-    """
+    """Remove network from agent callback."""
+
     response = yield
     _remove_network_from_dhcp_agent_callback_body(to_agent_id, network_id, response)
 
 
 def _remove_network_from_dhcp_agent_callback_body(to_agent_id, network_id, response):
-    """
-    Remove network from agent callback body
-    """
+    """Remove network from agent callback body."""
+
     global _DHCPRebalance
 
     DLOG.debug("_remove_network_from_dhcp_agent_callback , response = %s" % response)
@@ -474,17 +466,15 @@ def _remove_network_from_dhcp_agent_callback_body(to_agent_id, network_id, respo
 
 @coroutine
 def _get_datanetworks_callback(host_id):
-    """
-    Get data networks callback
-    """
+    """Get data networks callback."""
+
     response = yield
     _get_datanetworks_callback_body(host_id, response)
 
 
 def _get_datanetworks_callback_body(host_id, response):
-    """
-    Get data networks callback body
-    """
+    """Get data networks callback body."""
+
     global _DHCPRebalance
 
     _DHCPRebalance.state_machine_in_progress = False
@@ -507,9 +497,7 @@ def _get_datanetworks_callback_body(host_id, response):
 
 
 def _get_host_data_networks():
-    """
-    Get the physical networks supported by a host.
-    """
+    """Get the physical networks supported by a host."""
 
     host_id = _DHCPRebalance.get_host_id_of_current_dhcp_agent()
     nfvi.nfvi_get_datanetworks(host_id, _get_datanetworks_callback(host_id))
@@ -517,24 +505,20 @@ def _get_host_data_networks():
 
 @coroutine
 def _get_dhcp_agent_networks_callback(agent_id):
-    """
-    Get DHCP Agent Networks callback
-    """
+    """Get DHCP Agent Networks callback."""
 
     response = yield
     _get_dhcp_agent_networks_callback_body(agent_id, response)
 
 
 def _get_dhcp_agent_networks_callback_body(agent_id, response):
-    """
-    Get DHCP Agent Networks callback body
-    """
+    """Get DHCP Agent Networks callback body."""
+
     global _DHCPRebalance
 
     _DHCPRebalance.state_machine_in_progress = False
     DLOG.debug("_get_dhcp_agent_networks_callback, response = %s" % response)
     if response["completed"]:
-
         result_data = response.get("result-data", None)
         for network in result_data:
             _DHCPRebalance.add_network_to_agent(
@@ -548,7 +532,6 @@ def _get_dhcp_agent_networks_callback_body(agent_id, response):
         )
 
         if _DHCPRebalance.agent_networks_done():
-
             _DHCPRebalance.set_state(DHCP_REBALANCE_STATE.GET_HOST_PHYSICAL_NETWORKS)
 
             # Do this check here to save us from going through the rest
@@ -570,8 +553,8 @@ def _get_dhcp_agent_networks_callback_body(agent_id, response):
 
 
 def _get_networks_on_agents():
-    """
-    Get Networks hosted by an DHCP Agent
+    """Get Networks hosted by an DHCP Agent
+
     Note paging is not supported by the dhcp-agent api.
     """
 
@@ -600,18 +583,15 @@ def _get_networks_on_agents():
 
 @coroutine
 def _get_network_agents_callback():
-    """
-    Get Network Agents callback
-    """
+    """Get Network Agents callback."""
 
     response = yield
     _get_network_agents_callback_body(response)
 
 
 def _get_network_agents_callback_body(response):
-    """
-    Get Network Agents callback
-    """
+    """Get Network Agents callback."""
+
     global _DHCPRebalance
 
     _DHCPRebalance.state_machine_in_progress = False
@@ -634,8 +614,8 @@ def _get_network_agents_callback_body(response):
 
 
 def _get_network_agents():
-    """
-    Get Network Agents
+    """Get Network Agents
+
     Note paging is not supported for getting network agents.
     """
     global _DHCPRebalance
@@ -644,9 +624,7 @@ def _get_network_agents():
 
 
 def _reschedule_down_agent():
-    """
-    Reschedule down agent
-    """
+    """Reschedule down agent."""
 
     # For each network on the down agent, schedule it to the host with the
     # least amount of networks that also hosts the required physical networks.
@@ -665,7 +643,6 @@ def _reschedule_down_agent():
     num_networks_on_agents.pop(0)
 
     while not found_network_to_move:
-
         network_to_move, network_to_move_physical_network = (
             _DHCPRebalance.get_next_network_to_move()
         )
@@ -677,7 +654,6 @@ def _reschedule_down_agent():
         agent_with_least_networks = 0
 
         while len(possible_agent_targets) > 0:
-
             min_networks = min(num_networks_on_agents)
 
             agent_with_least_networks_index = num_networks_on_agents.index(min_networks)
@@ -735,8 +711,8 @@ def _reschedule_down_agent():
 
 
 def _reschedule_new_agent():
-    """
-    Reschedule for a new agent coming up.
+    """Reschedule for a new agent coming up.
+
     Try to achieve a balance of networks hosted by the DHCP agents.
     """
     global _DHCPRebalance
@@ -763,7 +739,6 @@ def _reschedule_new_agent():
     num_networks_on_agents.pop(agent_with_most_networks_index)
 
     while True:
-
         min_networks = min(num_networks_on_agents)
 
         agent_with_least_networks_index = num_networks_on_agents.index(min_networks)
@@ -861,9 +836,8 @@ def _reschedule_new_agent():
 
 @coroutine
 def _dr_timer():
-    """
-    DHCP Network Rebalance timer
-    """
+    """DHCP Network Rebalance timer."""
+
     from nfv_vim import dor
 
     while True:
@@ -873,13 +847,11 @@ def _dr_timer():
 
 
 def _run_state_machine():
-    """
-    DHCP Network Rebalance state machine
-    """
+    """DHCP Network Rebalance state machine."""
+
     global _DHCPRebalance
 
     if not _DHCPRebalance.state_machine_in_progress:
-
         _DHCPRebalance.state_machine_in_progress = True
 
         _DHCPRebalance.check_abort()
@@ -887,28 +859,22 @@ def _run_state_machine():
         my_state = _DHCPRebalance.get_state()
         DLOG.debug("Network Rebalance State %s" % my_state)
         if my_state == DHCP_REBALANCE_STATE.GET_DHCP_AGENTS:
-
             _DHCPRebalance.reinit()
             _get_network_agents()
 
         elif my_state == DHCP_REBALANCE_STATE.GET_NETWORKS_HOSTED_ON_AGENT:
-
             _get_networks_on_agents()
 
         elif my_state == DHCP_REBALANCE_STATE.GET_HOST_PHYSICAL_NETWORKS:
-
             _get_host_data_networks()
 
         elif my_state == DHCP_REBALANCE_STATE.RESCHEDULE_DOWN_AGENT:
-
             _reschedule_down_agent()
 
         elif my_state == DHCP_REBALANCE_STATE.RESCHEDULE_NEW_AGENT:
-
             _reschedule_new_agent()
 
         elif my_state == DHCP_REBALANCE_STATE.DONE:
-
             _DHCPRebalance.state_machine_in_progress = False
 
             # Check for work...
@@ -918,7 +884,6 @@ def _run_state_machine():
                 _DHCPRebalance.set_state(DHCP_REBALANCE_STATE.HOLD_OFF)
 
         elif my_state == DHCP_REBALANCE_STATE.HOLD_OFF:
-
             _DHCPRebalance.state_machine_in_progress = False
             if _DHCPRebalance.hold_off_is_done():
                 if len(_DHCPRebalance.host_down_queue) > 0:
@@ -951,9 +916,8 @@ def _run_state_machine():
 
 
 def dr_initialize():
-    """
-    Initialize DHCP Network Rebalance handling
-    """
+    """Initialize DHCP Network Rebalance handling."""
+
     global _DHCPRebalance
 
     _DHCPRebalance.set_state(DHCP_REBALANCE_STATE.DONE)
@@ -974,7 +938,6 @@ def dr_initialize():
 
 
 def dr_finalize():
-    """
-    Finalize DHCP Network Rebalance handling
-    """
+    """Finalize DHCP Network Rebalance handling."""
+
     pass

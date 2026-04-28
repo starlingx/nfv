@@ -11,8 +11,8 @@ from nfv_vim.database.model._base import Base
 
 
 class SoftwareUpdate(AsDictMixin, Base):
-    """
-    Software Update Database Table
+    """Software Update Database Table
+
     NOTE: This was originally the sw_patches table in release 16.10. Since the
           table name has changed and we do not want to migrate the data from
           15.12 (we do not support upgrading while patch orchestration is in

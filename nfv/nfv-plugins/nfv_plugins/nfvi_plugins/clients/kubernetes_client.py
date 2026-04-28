@@ -42,14 +42,14 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.clients.kubernetes_clien
 # kubernetes client v22
 def names(self, names):
     """Monkey patch V1ContainerImage with this to set the names."""
+
     self._names = names
 
 
 # Replacing address of "names" in V1ContainerImage
 # with the "names" defined above
-V1ContainerImage.names = V1ContainerImage.names.setter(  # pylint: disable=assignment-from-no-return
-    names
-)
+# pylint: disable-next=assignment-from-no-return
+V1ContainerImage.names = V1ContainerImage.names.setter(names)
 
 
 def get_client():
@@ -67,9 +67,8 @@ def get_client():
 
 
 def get_kubertnetes_https_client():
-    """
-    Get Kubernetes client with HTTPS enabled
-    """
+    """Get Kubernetes client with HTTPS enabled."""
+
     kubernetes.config.load_kube_config("/etc/kubernetes/admin.conf")
 
     if K8S_MODULE_MAJOR_VERSION < 12:
@@ -81,9 +80,8 @@ def get_kubertnetes_https_client():
 
 
 def get_customobjects_api_instance():
-    """
-    Get a custom objects API instance
-    """
+    """Get a custom objects API instance."""
+
     client = get_kubertnetes_https_client()
     return client.CustomObjectsApi()
 
@@ -102,7 +100,8 @@ def raise_alarm(node_name):
         probable_cause=fm_constants.ALARM_PROBABLE_CAUSE_8,
         proposed_repair_action=(
             "Execute 'kubectl taint nodes %s services=disabled:NoExecute-'. "
-            "If it fails, Execute 'system host-lock %s' followed by 'system host-unlock %s'. "
+            "If it fails, Execute 'system host-lock %s' followed by "
+            "'system host-unlock %s'. "
             "If issue still persists, contact next level of support."
             % (node_name, node_name, node_name)
         ),
@@ -126,9 +125,8 @@ def clear_alarm(node_name):
 
 
 def taint_node(node_name, effect, key, value):
-    """
-    Apply a taint to a node
-    """
+    """Apply a taint to a node."""
+
     # Get the client.
     kube_client = get_client()
     # Retrieve the node to access any existing taints.
@@ -182,9 +180,8 @@ def taint_node(node_name, effect, key, value):
 
 
 def untaint_node(node_name, effect, key):
-    """
-    Remove a taint from a node
-    """
+    """Remove a taint from a node."""
+
     # Get the client.
     kube_client = get_client()
 
@@ -234,9 +231,8 @@ def untaint_node(node_name, effect, key):
 
 
 def delete_node(node_name):
-    """
-    Delete a node
-    """
+    """Delete a node."""
+
     # Get the client.
     kube_client = get_client()
 
@@ -262,8 +258,8 @@ def delete_node(node_name):
 
 
 def mark_all_pods_not_ready(node_name, reason):
-    """
-    Mark all pods on a node as not ready
+    """Mark all pods on a node as not ready
+
     Note: It would be preferable to mark the node as not ready and have
     kubernetes then mark the pods as not ready, but this is not supported.
     """
@@ -312,9 +308,8 @@ def mark_all_pods_not_ready(node_name, reason):
 
 
 def get_terminating_pods(node_name):
-    """
-    Get all pods on a node that are terminating
-    """
+    """Get all pods on a node that are terminating."""
+
     # Get the client.
     kube_client = get_client()
 
@@ -336,9 +331,8 @@ def get_terminating_pods(node_name):
 
 
 def get_namespaced_custom_object(name, plural, group, version, namespace):
-    """
-    Get a custom resource object in a namespace
-    """
+    """Get a custom resource object in a namespace."""
+
     # Get a CustomObjectsApi instance
     api_instance = get_customobjects_api_instance()
 
@@ -356,9 +350,8 @@ def get_namespaced_custom_object(name, plural, group, version, namespace):
 
 
 def get_deployment_host(name):
-    """
-    Get a host in the deployment namespace
-    """
+    """Get a host in the deployment namespace."""
+
     # Get a CustomObjectsApi instance
     api_instance = get_customobjects_api_instance()
 
@@ -382,9 +375,8 @@ def get_deployment_host(name):
 
 
 def list_namespaced_custom_objects(plural, group, version, namespace):
-    """
-    List custom resource objects in a namespace
-    """
+    """List custom resource objects in a namespace."""
+
     # Get a CustomObjectsApi instance
     api_instance = get_customobjects_api_instance()
 
@@ -402,9 +394,8 @@ def list_namespaced_custom_objects(plural, group, version, namespace):
 
 
 def list_deployment_hosts():
-    """
-    List hosts in a deployment namespace
-    """
+    """List hosts in a deployment namespace."""
+
     # Get a CustomObjectsApi instance
     api_instance = get_customobjects_api_instance()
 
@@ -434,9 +425,8 @@ def list_deployment_hosts():
 
 
 def get_namespaced_running_pods(namespace, name):
-    """
-    Get running pods in a namespace
-    """
+    """Get running pods in a namespace."""
+
     api_instance = get_client()
 
     try:
@@ -446,8 +436,7 @@ def get_namespaced_running_pods(namespace, name):
         )
     except ApiException as e:
         DLOG.exception(
-            "Failed to list pods from namespace %s, "
-            "reason: %s" % (namespace, e.reason)
+            "Failed to list pods from namespace %s, reason: %s" % (namespace, e.reason)
         )
         return None
 
@@ -478,25 +467,29 @@ def drain_node(
     grace_period=None,
     timeout=None,
 ):
-    """
-    Drain a Kubernetes node by marking it unschedulable and evicting all the pods running on it using kubectl drain.
+    """Drain a Kubernetes node by marking it unschedulable and evicting all the pods
+
+    running on it using kubectl drain.
 
     :param kubeconfig_path: Path to the kubeconfig file to use.
     :param host_name: The name of the node to drain (default: None).
-    :param delete_emptydir_data: Delete pods with emptyDir data on the node if set to True.
-                                 Removes pods with emptyDir volumes.
+    :param delete_emptydir_data: Delete pods with emptyDir data on the node if set to
+    True. Removes pods with emptyDir volumes.
     :param ignore_daemonsets: Ignore DaemonSets when draining the node if set to True.
-                              DaemonSet-managed pods won't be evicted.
-    :param force: Force the eviction of pods if set to True.
-                  Continues even if there are pods not managed by a controller.
-    :param pod_selector: Only drain pods matching the specified label selector (e.g., "kubevirt.io=virt-launcher").
-                         Only evict pods that match the specified label selector.
-    :param skip_wait_for_delete_timeout: Skips waiting for pods to be deleted after the specified number of seconds.
-                                         Allows skipping the wait for deletion timeout (takes an integer value in seconds).
-    :param grace_period: Grace period in seconds for pod termination (default is set by the Kubernetes API).
-                         Seconds to wait for pod termination before forcefully killing them.
-    :param timeout: Timeout for the drain operation.
-                    Maximum time to wait for the drain operation to complete.
+    DaemonSet-managed pods won't be evicted.
+    :param force: Force the eviction of pods if set to True. Continues even if there
+    are pods not managed by a controller.
+    :param pod_selector: Only drain pods matching the specified label selector (e.g.,
+    "kubevirt.io=virt-launcher"). Only evict pods that match the specified label
+    selector.
+    :param skip_wait_for_delete_timeout: Skips waiting for pods to be deleted after
+    the specified number of seconds. Allows skipping the wait for deletion timeout
+    (takes an integer value in seconds).
+    :param grace_period: Grace period in seconds for pod termination (default is
+    set by the Kubernetes API). Seconds to wait for pod termination before
+    forcefully killing them.
+    :param timeout: Timeout for the drain operation. Maximum time to wait for the
+    drain operation to complete.
     :return: A boolean indicating if the drain operation was successful.
     """
 
@@ -556,8 +549,7 @@ def drain_node(
 
 
 def uncordon_node(host_name):
-    """
-    Uncordon a Kubernetes node by marking it as schedulable.
+    """Uncordon a Kubernetes node by marking it as schedulable.
 
     :param host_name: The name of the node to uncordon.
     :return: A boolean indicating if the uncordon operation was successful.

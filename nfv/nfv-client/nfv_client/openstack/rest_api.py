@@ -10,7 +10,6 @@ import requests
 from nfv_client.auth_types import AUTH_TYPES
 from nfv_client import sw_update
 
-
 CAFILE = os.environ.get("REQUESTS_CA_BUNDLE")
 STRATEGY_EXISTS = "strategy already exists."
 UNKNOWN_FAILURE = "Check /var/log/nfv-vim-api.log for details."
@@ -34,8 +33,8 @@ def request(
     timeout_in_secs=40,
     auth_type="keystone",
 ):
-    """
-    Make a rest-api request
+    """Make a rest-api request.
+
     Note: Using a default timeout of 40 seconds. The VIM's internal handling
     of these requests times out after 30 seconds - we want that to happen
     first (if possible).

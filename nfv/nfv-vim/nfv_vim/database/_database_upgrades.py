@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,9 +8,8 @@ import types
 
 
 def upgrade_table_row_data(table_name, table_row_data):
-    """
-    Upgrade a database table row data
-    """
+    """Upgrade a database table row data."""
+
     current_module = sys.modules[__name__]
     upgrade_func_name = "_upgrade_" + table_name
     upgrade_func = current_module.__dict__.get(upgrade_func_name, None)

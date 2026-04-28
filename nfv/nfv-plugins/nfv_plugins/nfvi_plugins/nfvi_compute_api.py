@@ -32,9 +32,8 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.compute_api")
 
 
 def hypervisor_get_admin_state(status):
-    """
-    Convert the nfvi hypervisor status to a hypervisor administrative state
-    """
+    """Convert the nfvi hypervisor status to a hypervisor administrative state."""
+
     if nova.HYPERVISOR_STATUS.ENABLED == status:
         return nfvi_objs.HYPERVISOR_ADMIN_STATE.UNLOCKED
     else:
@@ -42,9 +41,8 @@ def hypervisor_get_admin_state(status):
 
 
 def hypervisor_get_oper_state(state):
-    """
-    Convert the nfvi hypervisor state to a hypervisor operational state
-    """
+    """Convert the nfvi hypervisor state to a hypervisor operational state."""
+
     if nova.HYPERVISOR_STATE.UP == state:
         return nfvi_objs.HYPERVISOR_OPER_STATE.ENABLED
     else:
@@ -52,9 +50,8 @@ def hypervisor_get_oper_state(state):
 
 
 def instance_get_admin_state(vm_state, task_state, power_state):
-    """
-    Convert the nfvi vm states to an instance administrative state
-    """
+    """Convert the nfvi vm states to an instance administrative state."""
+
     if nova.VM_STATE.STOPPED == vm_state:
         return nfvi_objs.INSTANCE_ADMIN_STATE.LOCKED
 
@@ -62,9 +59,8 @@ def instance_get_admin_state(vm_state, task_state, power_state):
 
 
 def instance_get_oper_state(vm_state, task_state, power_state):
-    """
-    Convert the nfvi vm states to an instance operational state
-    """
+    """Convert the nfvi vm states to an instance operational state."""
+
     oper_state = nfvi_objs.INSTANCE_OPER_STATE.ENABLED
 
     if nova.VM_STATE.ERROR == vm_state:
@@ -114,9 +110,8 @@ def instance_get_oper_state(vm_state, task_state, power_state):
 
 
 def instance_get_avail_status(vm_state, task_state, power_state):
-    """
-    Convert the nfvi vm states to an instance availability status
-    """
+    """Convert the nfvi vm states to an instance availability status."""
+
     avail_status = list()
 
     if nova.VM_STATE.RESIZED == vm_state:
@@ -161,9 +156,8 @@ def instance_get_avail_status(vm_state, task_state, power_state):
 
 
 def instance_get_action(task_state, vm_state=None, power_state=None):
-    """
-    Convert the nfvi vm states to an instance action
-    """
+    """Convert the nfvi vm states to an instance action."""
+
     action = nfvi_objs.INSTANCE_ACTION.NONE
 
     if nova.VM_STATE.BUILDING == vm_state:
@@ -231,9 +225,8 @@ def instance_get_action(task_state, vm_state=None, power_state=None):
 
 
 def instance_get_action_type(vm_action, vm_data=None):
-    """
-    Convert the nfvi vm actions to an action-type
-    """
+    """Convert the nfvi vm actions to an action-type."""
+
     parameters = None
 
     if nova.VM_ACTION.PAUSE == vm_action:
@@ -310,9 +303,7 @@ def instance_get_action_type(vm_action, vm_data=None):
 
 
 def instance_supports_live_migration(instance_data, ports_data):
-    """
-    Determine if the instance supports live-migration
-    """
+    """Determine if the instance supports live-migration."""
 
     # Live migration is not supported if there is a pci-passthrough or
     # pci-sriov NIC.
@@ -333,9 +324,8 @@ def instance_supports_live_migration(instance_data, ports_data):
 
 
 def flavor_data_extra_get(flavor_data_extra):
-    """
-    Return flavor extra data fields
-    """
+    """Return flavor extra data fields."""
+
     heartbeat = flavor_data_extra.get(
         nfvi_objs.INSTANCE_TYPE_EXTENSION.GUEST_HEARTBEAT, None
     )
@@ -365,9 +355,7 @@ def flavor_data_extra_get(flavor_data_extra):
 
 
 class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
-    """
-    NFVI Compute API Class Definition
-    """
+    """NFVI Compute API Class Definition."""
 
     _name = "Compute-API"
     _version = "1.0.0"
@@ -415,9 +403,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def notify_host_enabled(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Notify host enabled
-        """
+        """Notify host enabled."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -482,9 +469,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def notify_host_disabled(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Notify host disabled
-        """
+        """Notify host disabled."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -550,9 +536,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def delete_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Delete Host Services, Notify Nova to delete services for a host.
-        """
+        """Delete Host Services, Notify Nova to delete services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -617,9 +602,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def enable_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Enable Host Services, Notify Nova to enable services for a host.
-        """
+        """Enable Host Services, Notify Nova to enable services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -697,9 +681,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def disable_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Disable Host Services, notify nova to disable services for a host
-        """
+        """Disable Host Services, notify nova to disable services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -784,9 +767,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def query_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Query Host Services, return state of Nova Services for a host
-        """
+        """Query Host Services, return state of Nova Services for a host."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = "enabled"
@@ -853,9 +835,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def _action_request_complete(
         self, request_uuid, http_status_code, http_headers=None, http_body=None
     ):
-        """
-        An action request has been completed.
-        """
+        """An action request has been completed."""
+
         if request_uuid is not None:
             try:
                 request_dispatch = self._requests.get(request_uuid, None)
@@ -891,9 +872,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             DLOG.error("Request %s no longer exists." % request_uuid)
 
     def _ageout_action_requests(self):
-        """
-        Age out action requests that are stale
-        """
+        """Age out action requests that are stale."""
+
         if self._max_concurrent_action_requests < len(self._request_times):
             oldest_uuid, oldest_timestamp_in_ms = self._request_times.popleft()
             self._action_request_complete(oldest_uuid, httplib.SERVICE_UNAVAILABLE)
@@ -911,7 +891,6 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             elapsed_ms = now_in_ms - oldest_timestamp_in_ms
             if max_wait_in_ms < elapsed_ms:
-
                 self._action_request_complete(oldest_uuid, httplib.ACCEPTED)
                 DLOG.info(
                     "Auto-accepted %s request, max wait exceeded, "
@@ -924,9 +903,9 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
     @coroutine
     def _audit_action_requests(self):
-        """
-        Periodic audit of the action requests looking for expired action
-        requests
+        """Periodic audit of the action requests looking for expired action
+
+        requests.
         """
         while True:
             timer_id = yield
@@ -934,9 +913,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             self._ageout_action_requests()
 
     def get_host_aggregates(self, future, callback):
-        """
-        Get a list of host aggregates
-        """
+        """Get a list of host aggregates."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -998,9 +976,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def get_hypervisors(self, future, callback):
-        """
-        Get a list of hypervisors
-        """
+        """Get a list of hypervisors."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1065,9 +1042,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def get_hypervisor(self, future, hypervisor_uuid, callback):
-        """
-        Get hypervisor details
-        """
+        """Get hypervisor details."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1112,7 +1088,6 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 or hypervisor_data["local_gb"] is None
                 or hypervisor_data["running_vms"] is None
             ):
-
                 DLOG.error(
                     "Invalid hypervisor data given by nova, hypervisor=%s"
                     % hypervisor_data
@@ -1150,8 +1125,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
         except Exception as e:
             DLOG.exception(
-                "Caught exception while trying to get hypervisor "
-                "details, error=%s." % e
+                "Caught exception while trying to get hypervisor details, error=%s." % e
             )
 
         finally:
@@ -1159,9 +1133,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def get_instance_types(self, future, paging, callback):
-        """
-        Get a list of instance types
-        """
+        """Get a list of instance types."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1244,9 +1217,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         instance_type_attributes,
         callback,
     ):
-        """
-        Create an instance type
-        """
+        """Create an instance type."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1378,9 +1350,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def delete_instance_type(self, future, instance_type_uuid, callback):
-        """
-        Delete an instance type
-        """
+        """Delete an instance type."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1429,9 +1400,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def get_instance_type(self, future, instance_type_uuid, callback):
-        """
-        Get an instance type
-        """
+        """Get an instance type."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1481,7 +1451,6 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             if future.result.is_complete():
                 flavor_data_extra = future.result.data.get("extra_specs")
                 if flavor_data_extra is not None:
-
                     (
                         guest_heartbeat,
                         auto_recovery,
@@ -1536,8 +1505,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
         except Exception as e:
             DLOG.exception(
-                "Caught exception while trying to get an "
-                "instance-type, error=%s." % e
+                "Caught exception while trying to get an instance-type, error=%s." % e
             )
 
         finally:
@@ -1545,9 +1513,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def get_instance_groups(self, future, callback):
-        """
-        Get a list of instance groupings
-        """
+        """Get a list of instance groupings."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1637,9 +1604,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def get_instances(self, future, paging, context, callback):
-        """
-        Get a list of instances
-        """
+        """Get a list of instances."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1726,9 +1692,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context,
         callback,
     ):
-        """
-        Create an instance
-        """
+        """Create an instance."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1845,8 +1810,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to create an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to create an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -1868,9 +1832,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context,
         callback,
     ):
-        """
-        Live migrate an instance
-        """
+        """Live migrate an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -1959,9 +1922,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def cold_migrate_instance(
         self, future, instance_uuid, to_host_name, context, callback
     ):
-        """
-        Cold migrate an instance
-        """
+        """Cold migrate an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2047,9 +2009,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def cold_migrate_confirm_instance(self, future, instance_uuid, context, callback):
-        """
-        Cold migrate confirm an instance
-        """
+        """Cold migrate confirm an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2134,9 +2095,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def cold_migrate_revert_instance(self, future, instance_uuid, context, callback):
-        """
-        Cold migrate revert an instance
-        """
+        """Cold migrate revert an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2223,9 +2183,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def resize_instance(
         self, future, instance_uuid, instance_type_uuid, context, callback
     ):
-        """
-        Resize an instance
-        """
+        """Resize an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2280,8 +2239,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to resize an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to resize an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -2310,9 +2268,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def resize_confirm_instance(self, future, instance_uuid, context, callback):
-        """
-        Resize confirm an instance
-        """
+        """Resize confirm an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2394,9 +2351,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def resize_revert_instance(self, future, instance_uuid, context, callback):
-        """
-        Resize revert an instance
-        """
+        """Resize revert an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2480,9 +2436,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def evacuate_instance(
         self, future, instance_uuid, admin_password, to_host_name, context, callback
     ):
-        """
-        Evacuate an instance
-        """
+        """Evacuate an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2546,8 +2501,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         except Exception as e:
             context_response_code = httplib.INTERNAL_SERVER_ERROR
             DLOG.exception(
-                "Caught exception while trying to evacuate "
-                "an instance, error=%s." % e
+                "Caught exception while trying to evacuate an instance, error=%s." % e
             )
 
         finally:
@@ -2571,9 +2525,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def reboot_instance(
         self, future, instance_uuid, graceful_shutdown, context, callback
     ):
-        """
-        Reboot an instance
-        """
+        """Reboot an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2633,8 +2586,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to reboot "
-                    "an instance, error=%s." % e
+                    "Caught exception while trying to reboot an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -2672,9 +2624,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context,
         callback,
     ):
-        """
-        Rebuild an instance
-        """
+        """Rebuild an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2761,9 +2712,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def fail_instance(self, future, instance_uuid, context, callback):
-        """
-        Fail an instance
-        """
+        """Fail an instance."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2802,8 +2752,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to fail an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to fail an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -2817,9 +2766,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def pause_instance(self, future, instance_uuid, context, callback):
-        """
-        Pause an instance
-        """
+        """Pause an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2868,8 +2816,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to pause an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to pause an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -2898,9 +2845,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def unpause_instance(self, future, instance_uuid, context, callback):
-        """
-        Unpause an instance
-        """
+        """Unpause an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -2981,9 +2927,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def suspend_instance(self, future, instance_uuid, context, callback):
-        """
-        Suspend an instance
-        """
+        """Suspend an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -3064,9 +3009,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def resume_instance(self, future, instance_uuid, context, callback):
-        """
-        Resume an instance
-        """
+        """Resume an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -3115,8 +3059,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to resume an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to resume an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -3145,9 +3088,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def start_instance(self, future, instance_uuid, context, callback):
-        """
-        Start an instance
-        """
+        """Start an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -3196,8 +3138,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to start an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to start an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -3225,9 +3166,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def stop_instance(self, future, instance_uuid, context, callback):
-        """
-        Stop an instance
-        """
+        """Stop an instance."""
+
         context_response_code = None
         context_response_headers = None
         context_response_body = None
@@ -3272,8 +3212,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to stop an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to stop an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -3302,9 +3241,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def delete_instance(self, future, instance_uuid, context, callback):
-        """
-        Delete an instance
-        """
+        """Delete an instance."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3343,8 +3281,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to delete an "
-                    "instance, error=%s." % e
+                    "Caught exception while trying to delete an instance, error=%s." % e
                 )
                 response["reason"] = e.http_response_reason
 
@@ -3358,9 +3295,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def get_instance(self, future, instance_uuid, context, callback):
-        """
-        Get an instance
-        """
+        """Get an instance."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3497,9 +3433,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             callback.close()
 
     def reject_instance_action(self, instance_uuid, message, context):
-        """
-        Reject an action against an instance
-        """
+        """Reject an action against an instance."""
+
         if context is not None:
             DLOG.info(
                 "Rejecting request %s, message=%s." % (context.request_uuid, message)
@@ -3527,9 +3462,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 )
 
     def instance_state_change_handler(self, message):
-        """
-        Instance state change handler
-        """
+        """Instance state change handler."""
+
         instance_uuid = message.get("server_uuid", None)
         instance_name = message.get("server_name", None)
         tenant_uuid = message.get("tenant_id", None)
@@ -3587,9 +3521,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 callback(instance_obj)
 
     def instance_action_change_handler(self, message):
-        """
-        Instance action change handler
-        """
+        """Instance action change handler."""
+
         instance_uuid = message.get("server_uuid", None)
         task_state = message.get("task_state", None)
         task_status = message.get("task_status", None)
@@ -3619,9 +3552,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 callback(instance_uuid, action_type, action_state, reason)
 
     def instance_delete_handler(self, message):
-        """
-        Instance delete handler
-        """
+        """Instance delete handler."""
+
         instance_uuid = message.get("server_uuid", None)
 
         if instance_uuid is not None:
@@ -3629,9 +3561,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 callback(instance_uuid)
 
     def instance_action_rest_api_post_handler(self, request_dispatch):
-        """
-        Instance Action Rest-API POST handler callback
-        """
+        """Instance Action Rest-API POST handler callback."""
+
         token_id = request_dispatch.headers.get("X-Auth-Token")
 
         version = request_dispatch.headers.get("X-OpenStack-Nova-API-Version")
@@ -3720,33 +3651,28 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             del self._requests[request_uuid]
 
     def register_instance_state_change_callback(self, callback):
-        """
-        Register for instance state change notifications
-        """
+        """Register for instance state change notifications."""
+
         self._instance_state_change_callbacks.append(callback)
 
     def register_instance_action_change_callback(self, callback):
-        """
-        Register for instance action change notifications
-        """
+        """Register for instance action change notifications."""
+
         self._instance_action_change_callbacks.append(callback)
 
     def register_instance_action_callback(self, callback):
-        """
-        Register for instance action rest api
-        """
+        """Register for instance action rest api."""
+
         self._instance_action_callbacks.append(callback)
 
     def register_instance_delete_callback(self, callback):
-        """
-        Register for instance delete notifications
-        """
+        """Register for instance delete notifications."""
+
         self._instance_delete_callbacks.append(callback)
 
     def ready_to_initialize(self, config_file):
-        """
-        Check if the plugin is ready to initialize
-        """
+        """Check if the plugin is ready to initialize."""
+
         config.load(config_file)
 
         # In order for the compute plugin to initialize successfully, the
@@ -3765,9 +3691,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         )
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.OPENSTACK
@@ -3855,8 +3780,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         if self._rpc_listener is not None:
             self._rpc_listener.stop()

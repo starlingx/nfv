@@ -10,9 +10,8 @@ DLOG = debug.debug_get_logger("forensic-evidence")
 
 
 def evidence_from_files(files, start_date, end_date, progress=None):
-    """
-    Gather evidence
-    """
+    """Gather evidence."""
+
     records = list()
     file_ctrl = dict()
 

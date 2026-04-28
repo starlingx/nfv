@@ -38,9 +38,7 @@ def _api_cmd_headers():
 
 
 def _api_get(token, url):
-    """
-    Perform a generic GET for a particular API endpoint
-    """
+    """Perform a generic GET for a particular API endpoint."""
 
     response = rest_api_request(
         token, "GET", url, timeout_in_secs=REST_API_REQUEST_TIMEOUT
@@ -51,9 +49,8 @@ def _api_get(token, url):
 def _api_post(
     token, url, payload, headers=None, timeout_in_secs=REST_API_REQUEST_TIMEOUT
 ):
-    """
-    Generic POST to an endpoint with a payload
-    """
+    """Generic POST to an endpoint with a payload."""
+
     if headers is None:
         headers = _api_cmd_headers()
 
@@ -69,18 +66,14 @@ def _api_post(
 
 
 def _api_delete(token, url, timeout_in_secs=REST_API_REQUEST_TIMEOUT):
-    """
-    Perform DELETE on a particular endpoint
-    """
+    """Perform DELETE on a particular endpoint."""
 
     response = rest_api_request(token, "DELETE", url, timeout_in_secs=timeout_in_secs)
     return response
 
 
 def sw_deploy_get_releases(token):
-    """
-    Query USM for information about all releases
-    """
+    """Query USM for information about all releases."""
 
     uri = "release"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
@@ -89,9 +82,7 @@ def sw_deploy_get_releases(token):
 
 
 def sw_deploy_show(token):
-    """
-    Query USM for information about a specific upgrade
-    """
+    """Query USM for information about a specific upgrade."""
 
     uri = f"deploy"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
@@ -100,9 +91,7 @@ def sw_deploy_show(token):
 
 
 def sw_deploy_host_list(token):
-    """
-    Query USM for information about a hosts during a deployment
-    """
+    """Query USM for information about a hosts during a deployment."""
 
     uri = "deploy_host"
     url = _usm_api_cmd(token, uri)
@@ -111,9 +100,7 @@ def sw_deploy_host_list(token):
 
 
 def sw_deploy_precheck(token, release, force=False, snapshot=False):
-    """
-    Ask USM to precheck before a deployment
-    """
+    """Ask USM to precheck before a deployment."""
 
     uri = f"deploy/{release}/precheck"
     url = _usm_api_cmd(token, uri)
@@ -127,9 +114,7 @@ def sw_deploy_precheck(token, release, force=False, snapshot=False):
 
 
 def sw_deploy_start(token, release, force=False, snapshot=False):
-    """
-    Ask USM to start a deployment
-    """
+    """Ask USM to start a deployment."""
 
     uri = f"deploy/{release}/start"
     url = _usm_api_cmd(token, uri)
@@ -146,9 +131,7 @@ def sw_deploy_start(token, release, force=False, snapshot=False):
 
 
 def sw_deploy_execute(token, host_name):
-    """
-    Ask USM to execute a deployment on a host
-    """
+    """Ask USM to execute a deployment on a host."""
 
     uri = f"deploy_host/{host_name}"
     url = _usm_api_cmd(token, uri)
@@ -157,9 +140,7 @@ def sw_deploy_execute(token, host_name):
 
 
 def sw_deploy_rollback(token, host_name):
-    """
-    Ask USM to rollback a deployment on a host
-    """
+    """Ask USM to rollback a deployment on a host."""
 
     uri = f"deploy_host/{host_name}/rollback"
     url = _usm_api_cmd(token, uri)
@@ -168,9 +149,7 @@ def sw_deploy_rollback(token, host_name):
 
 
 def sw_deploy_activate(token):
-    """
-    Ask USM activate a deployment
-    """
+    """Ask USM activate a deployment."""
 
     uri = f"deploy/activate"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
@@ -179,9 +158,7 @@ def sw_deploy_activate(token):
 
 
 def sw_deploy_complete(token):
-    """
-    Ask USM complete a deployment
-    """
+    """Ask USM complete a deployment."""
 
     uri = f"deploy/complete"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
@@ -190,9 +167,7 @@ def sw_deploy_complete(token):
 
 
 def sw_deploy_delete(token):
-    """
-    Ask USM delete a deployment
-    """
+    """Ask USM delete a deployment."""
 
     uri = f"deploy"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
@@ -201,9 +176,7 @@ def sw_deploy_delete(token):
 
 
 def sw_deploy_abort(token):
-    """
-    Ask USM abort a deployment
-    """
+    """Ask USM abort a deployment."""
 
     uri = f"deploy/abort"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
@@ -212,9 +185,7 @@ def sw_deploy_abort(token):
 
 
 def sw_deploy_activate_rollback(token):
-    """
-    Ask USM activate rollback a deployment
-    """
+    """Ask USM activate rollback a deployment."""
 
     uri = f"deploy/activate_rollback"  # noqa:F541 pylint: disable=W1309
     url = _usm_api_cmd(token, uri)
@@ -256,7 +227,7 @@ def is_target_release_downgrade(index, release_data):
 
     if downgrade:
         # Check if downgrade is RR
-        for release in release_data[index + 1:]:
+        for release in release_data[index + 1 :]:
             if (release["state"] != current_state) and (
                 release["state"] == usm_states.AVAILABLE
             ):
@@ -274,7 +245,7 @@ def is_target_release_downgrade(index, release_data):
 
 
 def sw_deploy_get_upgrade_obj(token, release):
-    """Quickly gather all information about a software deployment"""
+    """Quickly gather all information about a software deployment."""
 
     # Query USM API
     release_info = None

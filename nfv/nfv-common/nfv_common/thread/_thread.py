@@ -21,9 +21,7 @@ DLOG = debug.debug_get_logger("nfv_common.thread")
 
 
 class ThreadState(object):
-    """
-    Thread State
-    """
+    """Thread State."""
 
     def __init__(self):
         self.stay_on = True
@@ -31,17 +29,14 @@ class ThreadState(object):
 
 
 class Thread(object):
-    """
-    Thread
-    """
+    """Thread."""
 
     ACTION_DEBUG_CONFIG_RELOAD = "thread-debug-config-reload"
     ACTION_STOP = "thread-stop"
 
     def __init__(self, name, thread_worker, check_interval_in_secs=30):
-        """
-        Create thread
-        """
+        """Create thread."""
+
         self._name = name
         self._work_queue = selectable.MultiprocessQueue()
         self._thread_worker = thread_worker
@@ -66,24 +61,22 @@ class Thread(object):
 
     @property
     def name(self):
-        """
-        Return the name of the thread
-        """
+        """Return the name of the thread."""
+
         return self._name
 
     @property
     def selobj(self):
-        """
-        Returns the selection object that signals when thread work
-        is complete
+        """Returns the selection object that signals when thread work
+
+        is complete.
         """
         return self._thread_worker.selobj
 
     @property
     def stall_elapsed_secs(self):
-        """
-        Returns the elapsed time in seconds that the thread has been stalled
-        """
+        """Returns the elapsed time in seconds that the thread has been stalled."""
+
         if self._stall_timestamp_ms is not None:
             now = timers.get_monotonic_timestamp_in_ms()
             return int((now - self._stall_timestamp_ms) // 1000)
@@ -91,9 +84,8 @@ class Thread(object):
 
     @coroutine
     def do_check(self):
-        """
-        Check the Thread for progress
-        """
+        """Check the Thread for progress."""
+
         while True:
             (yield)
             if self._last_marker_value is not None:
@@ -118,9 +110,8 @@ class Thread(object):
             self._last_marker_value = self._progress_marker.value
 
     def start(self):
-        """
-        Start the Thread
-        """
+        """Start the Thread."""
+
         self._process.start()
         if self._check_timer_id is None:
             self._check_timer_id = timers.timers_create_timer(
@@ -131,9 +122,8 @@ class Thread(object):
             )
 
     def stop(self, max_wait_in_seconds):
-        """
-        Stop the Thread
-        """
+        """Stop the Thread."""
+
         self._work_queue.put([Thread.ACTION_STOP, None])
         self._process.join(max_wait_in_seconds)
         if self._process.is_alive():
@@ -146,23 +136,20 @@ class Thread(object):
         self._work_queue.put([Thread.ACTION_DEBUG_CONFIG_RELOAD, None])
 
     def send_work(self, action, work):
-        """
-        Send work to Thread
-        """
+        """Send work to Thread."""
+
         self._work_queue.put([action, work])
 
     def get_result(self):
-        """
-        Get work result
-        """
+        """Get work result."""
+
         return self._thread_worker.get_result()
 
 
 @coroutine
 def _thread_dispatch_work(thread_state, thread_worker, work_queue):
-    """
-    Dispatch thread work
-    """
+    """Dispatch thread work."""
+
     while True:
         select_obj = yield
         if select_obj == work_queue.selobj:
@@ -183,9 +170,8 @@ def _thread_dispatch_work(thread_state, thread_worker, work_queue):
 
 
 def _thread_main(thread_name, progress_marker, debug_config, thread_worker, work_queue):
-    """
-    Main loop for the thread
-    """
+    """Main loop for the thread."""
+
     from ctypes import util
 
     PR_SET_PDEATHSIG = 1

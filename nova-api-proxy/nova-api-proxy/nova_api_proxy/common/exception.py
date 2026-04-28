@@ -23,7 +23,7 @@
 
 
 class ProxyException(Exception):
-    """Base Exception"""
+    """Base Exception."""
 
     code = 500
     headers = {}

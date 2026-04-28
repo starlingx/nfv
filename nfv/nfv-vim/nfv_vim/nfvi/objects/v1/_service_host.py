@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class ServiceHost(ObjectData):
-    """
-    NFVI Service Host Object
-    """
+    """NFVI Service Host Object."""
 
     def __init__(self, name, service, zone):
         super(ServiceHost, self).__init__("1.0.0")

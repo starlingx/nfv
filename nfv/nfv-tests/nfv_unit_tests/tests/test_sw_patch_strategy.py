@@ -29,9 +29,8 @@ def create_sw_patch_strategy(
     alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
     single_controller=False,
 ):
-    """
-    Create a software update strategy
-    """
+    """Create a software update strategy."""
+
     return SwPatchStrategy(
         uuid=str(uuid.uuid4()),
         controller_apply_type=controller_apply_type,
@@ -62,17 +61,15 @@ def create_sw_patch_strategy(
     sw_update_testcase.fake_nfvi_compute_plugin_disabled,
 )
 class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
-    """
-    Software Patch Strategy Unit Tests
-    """
+    """Software Patch Strategy Unit Tests."""
 
     def test_sw_patch_strategy_worker_stages_ignore(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - ignore apply
         - stop start instance action
         Verify:
-        - stages not created
+        - stages not created.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -114,13 +111,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_parallel_migrate_anti_affinity(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances patched first
-        - anti-affinity policy enforced
+        - anti-affinity policy enforced.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -222,13 +219,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_parallel_migrate_ten_hosts(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances patched first
-        - instances migrated
+        - instances migrated.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -406,13 +403,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_parallel_migrate_host_aggregate(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances patched first
-        - host aggregate limits enforced
+        - host aggregate limits enforced.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -601,13 +598,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_patch_strategy_worker_stages_parallel_migrate_overlap_host_aggregate(
         self,
     ):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances patched first
-        - host aggregate limits enforced
+        - host aggregate limits enforced.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -811,13 +808,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_patch_strategy_worker_stages_parallel_migrate_small_host_aggregate(
         self,
     ):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - migrate instance action
         Verify:
         - hosts with no instances patched first
-        - small host aggregate handled
+        - small host aggregate handled.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1009,13 +1006,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_parallel_stop_start_anti_affinity(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         Verify:
         - hosts with no instances patched first
-        - anti-affinity policy enforced
+        - anti-affinity policy enforced.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1113,16 +1110,16 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_patch_strategy_worker_stages_parallel_stop_start_anti_affinity_locked_instance(
+    def test_sw_patch_strategy_worker_stages_parallel_stop_start_anti_affinity_locked(
         self,
     ):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         - locked instance in instance group
         Verify:
-        - stage creation fails
+        - stage creation fails.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1162,14 +1159,14 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert success is False, "Strategy creation did not fail"
 
     def test_sw_patch_strategy_worker_stages_parallel_stop_start_host_aggregate(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         - test both reboot and no reboot cases
         Verify:
         - hosts with no instances patched first
-        - host aggregate limits enforced
+        - host aggregate limits enforced.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1311,14 +1308,14 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_parallel_stop_start_locked_host(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         - locked host
         Verify:
         - hosts with no instances patched first
-        - locked host patched and rebooted
+        - locked host patched and rebooted.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1403,18 +1400,18 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_patch_strategy_worker_stages_parallel_stop_start_host_aggregate_locked_instance(
+    def test_sw_patch_strategy_worker_stages_parallel_stop_start_host_agg_locked(
         self,
     ):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         - locked instance not in an instance group
         Verify:
         - hosts with no instances patched first
         - host aggregate limits enforced
-        - locked instance not stopped or started
+        - locked instance not stopped or started.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1509,15 +1506,15 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_patch_strategy_worker_stages_parallel_stop_start_host_aggregate_single_host(
+    def test_sw_patch_strategy_worker_stages_parallel_stop_start_host_agg_single_host(
         self,
     ):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         Verify:
-        - host aggregates with a single host are patched in parallel
+        - host aggregates with a single host are patched in parallel.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1584,16 +1581,16 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_patch_strategy_worker_stages_parallel_stop_start_anti_affinity_host_aggregate(
+    def test_sw_patch_strategy_worker_stages_parallel_stop_start_anti_affinity_host_agg(
         self,
     ):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         Verify:
         - hosts with no instances patched first
-        - anti-affinity policy and host aggregates enforced at same time
+        - anti-affinity policy and host aggregates enforced at same time.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1695,13 +1692,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_serial_stop_start(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - serial apply
         - stop start instance action
         - test both reboot and no reboot cases
         Verify:
-        - hosts with no instances patched first
+        - hosts with no instances patched first.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -1861,13 +1858,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_serial_no_openstack(self):
-        """
-        Test the sw_patch strategy with no openstack, add worker strategy stages:
+        """Test the sw_patch strategy with no openstack, add worker strategy stages:
+
         - serial apply
         - no stop start instance action
         - test both reboot and no reboot cases
         Verify:
-        - hosts are patched in order and and doesn't wait for alarms to clear
+        - hosts are patched in order and and doesn't wait for alarms to clear.
         """
         self.create_host("compute-0", openstack_installed=False)
         self.create_host("compute-1", openstack_installed=False)
@@ -2008,13 +2005,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_parallel_no_openstack(self):
-        """
-        Test the sw_patch strategy with no openstack add worker strategy stages:
+        """Test the sw_patch strategy with no openstack add worker strategy stages:
+
         - serial apply
         - no migrate instance action
         - test both reboot and no reboot cases
         Verify:
-        - hosts are patched and and doesn't wait for alarms to clear
+        - hosts are patched and and doesn't wait for alarms to clear.
         """
         self.create_host("compute-0", openstack_installed=False)
         self.create_host("compute-1", openstack_installed=False)
@@ -2139,15 +2136,15 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_serial_stop_start_locked_host(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - serial apply
         - stop start instance action
         - locked host
         - test both reboot and no reboot cases
         Verify:
         - hosts with no instances patched first
-        - locked host patched and rebooted
+        - locked host patched and rebooted.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -2314,12 +2311,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_parallel_stop_start_max_hosts(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - parallel apply
         - stop start instance action
         Verify:
-        - maximum host limit enforced
+        - maximum host limit enforced.
         """
         for x in range(0, 13):
             self.create_host("compute-%02d" % x)
@@ -2452,13 +2449,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_serial_migrate(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - serial apply
         - migrate instance action
         - test both reboot and no reboot cases
         Verify:
-        - hosts with no instances patched first
+        - hosts with no instances patched first.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -2618,8 +2615,8 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_worker_stages_serial_migrate_locked_instance(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - serial apply
         - migrate instance action
         - locked instance in instance group
@@ -2628,7 +2625,7 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - stages not created for reboot case
         - for no reboot case:
           - hosts with no instances patched first
-          - locked instance is not migrated
+          - locked instance is not migrated.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")
@@ -2726,11 +2723,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_storage_stages_ignore(self):
-        """
-        Test the sw_patch strategy add storage strategy stages:
+        """Test the sw_patch strategy add storage strategy stages:
+
         - ignore apply
         Verify:
-        - stages not created
+        - stages not created.
         """
         self.create_host("storage-0")
         self.create_host("storage-1")
@@ -2774,12 +2771,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_storage_stages_parallel_host_group(self):
-        """
-        Test the sw_patch strategy add storage strategy stages:
+        """Test the sw_patch strategy add storage strategy stages:
+
         - parallel apply
         - test both reboot and no reboot cases
         Verify:
-        - host groups enforced
+        - host groups enforced.
         """
         self.create_host("storage-0")
         self.create_host("storage-1")
@@ -2937,9 +2934,9 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_storage_stages_serial(self):
-        """
-        Test the sw_patch strategy add storage strategy stages:
-        - serial apply
+        """Test the sw_patch strategy add storage strategy stages:
+
+        - serial apply.
         """
         self.create_host("storage-0")
         self.create_host("storage-1")
@@ -3084,11 +3081,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_controller_stages_ignore(self):
-        """
-        Test the sw_patch strategy add controller strategy stages:
+        """Test the sw_patch strategy add controller strategy stages:
+
         - ignore apply
         Verify:
-        - stages not created
+        - stages not created.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -3116,12 +3113,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_controller_stages_serial(self):
-        """
-        Test the sw_patch strategy add controller strategy stages:
+        """Test the sw_patch strategy add controller strategy stages:
+
         - serial apply
         - test both reboot and no reboot cases
         Verify:
-        - patch mate controller first
+        - patch mate controller first.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -3216,12 +3213,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_controller_stages_serial_openstack_not_installed(self):
-        """
-        Test the sw_patch strategy add controller strategy stages:
+        """Test the sw_patch strategy add controller strategy stages:
+
         - serial apply
         - test both reboot and no reboot cases
         Verify:
-        - patch mate controller first
+        - patch mate controller first.
         """
         self.create_host("controller-0", openstack_installed=False)
         self.create_host("controller-1", openstack_installed=False)
@@ -3316,12 +3313,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_duplex_stages_parallel_stop_start(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - aio hosts
         - parallel apply treated as serial
         - stop start instance action
-        - test both reboot and no reboot cases
+        - test both reboot and no reboot cases.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -3433,11 +3430,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_duplex_stages_serial_stop_start(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - aio hosts
         - serial apply
-        - stop start instance action
+        - stop start instance action.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -3509,12 +3506,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_duplex_stages_serial_stop_start_no_instances(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - aio hosts
         - no instances
         - serial apply
-        - stop start instance action
+        - stop start instance action.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -3573,12 +3570,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_duplex_stages_serial_stop_start_no_openstack(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - aio hosts
         - no instances
         - serial apply
-        - stop start instance action
+        - stop start instance action.
         """
         self.create_host("controller-0", aio=True, openstack_installed=False)
         self.create_host("controller-1", aio=True, openstack_installed=False)
@@ -3637,12 +3634,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_plus_stages_parallel_stop_start(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - aio hosts plus workers
         - parallel apply treated as serial
         - stop start instance action
-        - test both reboot and no reboot cases
+        - test both reboot and no reboot cases.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -3801,11 +3798,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_plus_stages_serial_stop_start(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - aio hosts plus workers
         - serial apply
-        - stop start instance action
+        - stop start instance action.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -3917,12 +3914,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_plus_stages_serial_stop_start_no_instances(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - aio hosts plus workers
         - no instances
         - serial apply
-        - stop start instance action
+        - stop start instance action.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -4007,13 +4004,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_simplex_stages_serial_migrate(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - simplex aio host
         - serial apply
         - migrate instance action
         Verify:
-        - stage creation fails
+        - stage creation fails.
         """
         self.create_host("controller-0", aio=True)
 
@@ -4038,11 +4035,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert success is False, "Strategy creation did not fail"
 
     def test_sw_patch_strategy_aio_simplex_stages_serial_no_openstack(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - simplex aio host (no openstack)
         - serial apply
-        - no migrate instance action
+        - no migrate instance action.
         """
         self.create_host("controller-0", aio=True, openstack_installed=False)
 
@@ -4083,11 +4080,11 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_simplex_stages_serial_stop_start(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - simplex aio host
         - serial apply
-        - stop start instance action
+        - stop start instance action.
         """
         self.create_host("controller-0", aio=True)
 
@@ -4135,12 +4132,12 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_aio_simplex_stages_serial_stop_start_no_instances(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - simplex aio host
         - no instances
         - serial apply
-        - stop start instance action
+        - stop start instance action.
         """
         self.create_host("controller-0", aio=True)
 
@@ -4181,13 +4178,13 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_patch_strategy_build_complete_parallel_stop_start(self):
-        """
-        Test the sw_patch strategy build_complete:
+        """Test the sw_patch strategy build_complete:
+
         - parallel apply
         - stop start instance action
         Verify:
         - hosts with no instances patched first
-        - anti-affinity policy enforced
+        - anti-affinity policy enforced.
         """
         self.create_host("compute-0")
         self.create_host("compute-1")

@@ -21,9 +21,8 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.image_api")
 
 
 def image_get_avail_status(status):
-    """
-    Convert the nfvi image status to an image availability status
-    """
+    """Convert the nfvi image status to an image availability status."""
+
     avail_status = list()
 
     if glance.IMAGE_STATUS.DELETED == status:
@@ -36,9 +35,8 @@ def image_get_avail_status(status):
 
 
 def image_get_action(status):
-    """
-    Convert the nfvi image status to an image action
-    """
+    """Convert the nfvi image status to an image action."""
+
     if glance.IMAGE_STATUS.PENDING_DELETE == status:
         return nfvi_objs.IMAGE_ACTION.DELETING
 
@@ -50,9 +48,7 @@ def image_get_action(status):
 
 
 class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
-    """
-    NFVI Image API Class Definition
-    """
+    """NFVI Image API Class Definition."""
 
     _name = "Image-API"
     _version = "1.0.0"
@@ -81,9 +77,8 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
         return self._signature
 
     def get_images(self, future, paging, callback):
-        """
-        Get a list of images
-        """
+        """Get a list of images."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -220,9 +215,8 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
         image_data_url,
         callback,
     ):
-        """
-        Create an image
-        """
+        """Create an image."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -372,9 +366,8 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
             callback.close()
 
     def delete_image(self, future, image_uuid, callback):
-        """
-        Delete an image
-        """
+        """Delete an image."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -425,9 +418,8 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
     def update_image(
         self, future, image_uuid, image_description, image_attributes, callback
     ):
-        """
-        Update an image
-        """
+        """Update an image."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -539,8 +531,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to update image "
-                    "data, error=%s." % e
+                    "Caught exception while trying to update image data, error=%s." % e
                 )
 
         except Exception as e:
@@ -553,9 +544,8 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
             callback.close()
 
     def get_image(self, future, image_uuid, callback):
-        """
-        Get an image
-        """
+        """Get an image."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -662,16 +652,14 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
             callback.close()
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.OPENSTACK
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         return

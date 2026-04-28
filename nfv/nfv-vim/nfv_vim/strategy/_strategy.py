@@ -28,9 +28,11 @@ DLOG = debug.debug_get_logger("nfv_vim.strategy")
 
 
 def filter_highest_patch_versions(ver_list):
-    """Filter a list of strings with major.minor.patch and return a
-    list containing the highest patch version for each major.minor.
+    """Filter a list of strings with major.minor.patch and return a list containing the
+
+    highest patch version for each major.minor.
     """
+
     if not ver_list:
         return []
     ver_dict = {}
@@ -42,9 +44,7 @@ def filter_highest_patch_versions(ver_list):
 
 
 class StrategyNames(Constants, metaclass=Singleton):
-    """
-    Strategy Names
-    """
+    """Strategy Names."""
 
     SW_PATCH = Constant("sw-patch")
     SW_UPGRADE = Constant("sw-upgrade")
@@ -79,9 +79,7 @@ KUBELET_MINOR_SKEW_TOLERANCE = 3
 #
 ###################################################################
 class SwUpdateStrategy(strategy.Strategy):
-    """
-    Software Update - Strategy
-    """
+    """Software Update - Strategy."""
 
     def __init__(
         self,
@@ -114,49 +112,42 @@ class SwUpdateStrategy(strategy.Strategy):
 
     @property
     def sw_update_obj(self):
-        """
-        Returns the software update object this strategy is a part of
-        """
+        """Returns the software update object this strategy is a part of."""
+
         return self._sw_update_obj_reference()
 
     @sw_update_obj.setter
     def sw_update_obj(self, sw_update_obj_value):
-        """
-        Set the software update object this strategy is a part of
-        """
+        """Set the software update object this strategy is a part of."""
+
         self._sw_update_obj_reference = weakref.ref(sw_update_obj_value)
 
     @property
     def nfvi_alarms(self):
-        """
-        Returns the alarms raised in the NFVI layer
-        """
+        """Returns the alarms raised in the NFVI layer."""
+
         return self._nfvi_alarms
 
     @nfvi_alarms.setter
     def nfvi_alarms(self, nfvi_alarms):
-        """
-        Save the alarms raised in the NFVI Layer
-        """
+        """Save the alarms raised in the NFVI Layer."""
+
         self._nfvi_alarms = nfvi_alarms
 
     def save(self):
-        """
-        Save the software update strategy object information
-        """
+        """Save the software update strategy object information."""
+
         if self.sw_update_obj is not None:
             self.sw_update_obj.save()
 
     def build(self):
-        """
-        Build the strategy (expected to be overridden by child class)
-        """
+        """Build the strategy (expected to be overridden by child class)."""
+
         super(SwUpdateStrategy, self).build()
 
     def _create_storage_host_lists(self, storage_hosts):
-        """
-        Create host lists for updating storage hosts
-        """
+        """Create host lists for updating storage hosts."""
+
         from nfv_vim import tables
 
         if SW_UPDATE_APPLY_TYPE.IGNORE != self._storage_apply_type:
@@ -206,9 +197,8 @@ class SwUpdateStrategy(strategy.Strategy):
         return host_lists, ""
 
     def _create_worker_host_lists(self, worker_hosts, reboot):
-        """
-        Create host lists for updating worker hosts
-        """
+        """Create host lists for updating worker hosts."""
+
         from nfv_vim import tables
 
         def has_policy_conflict(peer_host):
@@ -226,9 +216,8 @@ class SwUpdateStrategy(strategy.Strategy):
             return False
 
         def calculate_host_aggregate_limits():
-            """
-            Calculate limit for each host aggregate
-            """
+            """Calculate limit for each host aggregate."""
+
             # Use the ratio of the max parallel worker hosts to the total
             # number of worker hosts to limit the number of hosts in each
             # aggregate that will be updated at the same time. If there
@@ -254,8 +243,8 @@ class SwUpdateStrategy(strategy.Strategy):
                     )
 
         def aggregate_limit_reached():
-            """
-            Determine whether adding this host to a host_list would exceed
+            """Determine whether adding this host to a host_list would exceed
+
             the number of hosts to be updated in the same aggregate
             Note: This isn't efficient, because we will be calling the
             host_aggregate_table.get_by_host many times, which will traverse
@@ -419,25 +408,22 @@ class SwUpdateStrategy(strategy.Strategy):
         return sized_host_lists, ""
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+        """Strategy Build Complete."""
+
         result, result_reason = super(SwUpdateStrategy, self).build_complete(
             result, result_reason
         )
         return result, result_reason
 
     def apply(self, stage_id):
-        """
-        Apply the strategy
-        """
+        """Apply the strategy."""
+
         success, reason = super(SwUpdateStrategy, self).apply(stage_id)
         return success, reason
 
     def apply_complete(self, result, result_reason):
-        """
-        Strategy Apply Complete
-        """
+        """Strategy Apply Complete."""
+
         result, result_reason = super(SwUpdateStrategy, self).apply_complete(
             result, result_reason
         )
@@ -464,16 +450,14 @@ class SwUpdateStrategy(strategy.Strategy):
             )
 
     def abort(self, stage_id):
-        """
-        Abort the strategy
-        """
+        """Abort the strategy."""
+
         success, reason = super(SwUpdateStrategy, self).abort(stage_id)
         return success, reason
 
     def abort_complete(self, result, result_reason):
-        """
-        Strategy Abort Complete
-        """
+        """Strategy Abort Complete."""
+
         result, result_reason = super(SwUpdateStrategy, self).abort_complete(
             result, result_reason
         )
@@ -500,8 +484,7 @@ class SwUpdateStrategy(strategy.Strategy):
             )
 
     def report_build_failure(self, reason):
-        """
-        Report a build failure for the strategy
+        """Report a build failure for the strategy.
 
         todo(yuxing): report all build failure use this method
         """
@@ -515,9 +498,8 @@ class SwUpdateStrategy(strategy.Strategy):
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Initializes a software update strategy object using the given dictionary
-        """
+        """Initializes a software update strategy object using the given dictionary."""
+
         from nfv_vim import nfvi
 
         super(SwUpdateStrategy, self).from_dict(
@@ -549,9 +531,8 @@ class SwUpdateStrategy(strategy.Strategy):
         return self
 
     def as_dict(self):
-        """
-        Represent the software update strategy as a dictionary
-        """
+        """Represent the software update strategy as a dictionary."""
+
         data = super(SwUpdateStrategy, self).as_dict()
         data["controller_apply_type"] = self._controller_apply_type
         data["storage_apply_type"] = self._storage_apply_type
@@ -576,8 +557,7 @@ class SwUpdateStrategy(strategy.Strategy):
 #
 ###################################################################
 class QueryMixinBase(object):
-    """
-    QueryMixinBase stubs the query mixin classes.
+    """QueryMixinBase stubs the query mixin classes.
 
     Query steps require fields on the strategy to populate and store results
     each query step should have a mixin to simplify using it for a strategy.
@@ -596,7 +576,7 @@ class QueryMixinBase(object):
 
 
 class QuerySwPatchesMixin(QueryMixinBase):
-    """This mixin is used through the QuerySwPatchesStep class"""
+    """This mixin is used through the QuerySwPatchesStep class."""
 
     def initialize_mixin(self):
         super(QuerySwPatchesMixin, self).initialize_mixin()
@@ -604,22 +584,19 @@ class QuerySwPatchesMixin(QueryMixinBase):
 
     @property
     def nfvi_sw_patches(self):
-        """
-        Returns the software patches from the NFVI layer
-        """
+        """Returns the software patches from the NFVI layer."""
+
         return self._nfvi_sw_patches
 
     @nfvi_sw_patches.setter
     def nfvi_sw_patches(self, nfvi_sw_patches):
-        """
-        Save the software patches from the NFVI Layer
-        """
+        """Save the software patches from the NFVI Layer."""
+
         self._nfvi_sw_patches = nfvi_sw_patches
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QuerySwPatchesMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -636,9 +613,8 @@ class QuerySwPatchesMixin(QueryMixinBase):
         self._nfvi_sw_patches = mixin_data
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QuerySwPatchesMixin, self).mixin_as_dict(data)
         mixin_data = list()
         for sw_patch in self._nfvi_sw_patches:
@@ -647,7 +623,7 @@ class QuerySwPatchesMixin(QueryMixinBase):
 
 
 class QuerySwPatchHostsMixin(QueryMixinBase):
-    """This mixin is used through the QuerySwPatchHostsStep class"""
+    """This mixin is used through the QuerySwPatchHostsStep class."""
 
     def initialize_mixin(self):
         super(QuerySwPatchHostsMixin, self).initialize_mixin()
@@ -655,22 +631,19 @@ class QuerySwPatchHostsMixin(QueryMixinBase):
 
     @property
     def nfvi_sw_patch_hosts(self):
-        """
-        Returns the software patch hosts from the NFVI layer
-        """
+        """Returns the software patch hosts from the NFVI layer."""
+
         return self._nfvi_sw_patch_hosts
 
     @nfvi_sw_patch_hosts.setter
     def nfvi_sw_patch_hosts(self, nfvi_sw_patch_hosts):
-        """
-        Save the software patch hosts from the NFVI Layer
-        """
+        """Save the software patch hosts from the NFVI Layer."""
+
         self._nfvi_sw_patch_hosts = nfvi_sw_patch_hosts
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QuerySwPatchHostsMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -691,9 +664,8 @@ class QuerySwPatchHostsMixin(QueryMixinBase):
         self._nfvi_sw_patch_hosts = mixin_data
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QuerySwPatchHostsMixin, self).mixin_as_dict(data)
         mixin_data = list()
         for host in self._nfvi_sw_patch_hosts:
@@ -702,7 +674,7 @@ class QuerySwPatchHostsMixin(QueryMixinBase):
 
 
 class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
-    """This mixin is used through the QueryKubeRootcaHostUpdatesStep class"""
+    """This mixin is used through the QueryKubeRootcaHostUpdatesStep class."""
 
     def initialize_mixin(self):
         super(QueryKubeRootcaHostUpdatesMixin, self).initialize_mixin()
@@ -710,22 +682,19 @@ class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
 
     @property
     def nfvi_kube_rootca_host_update_list(self):
-        """
-        Returns the kube rootca host update list from the NFVI layer
-        """
+        """Returns the kube rootca host update list from the NFVI layer."""
+
         return self._nfvi_kube_rootca_host_update_list
 
     @nfvi_kube_rootca_host_update_list.setter
     def nfvi_kube_rootca_host_update_list(self, new_list):
-        """
-        Save the kube rootca host update list from the NFVI Layer
-        """
+        """Save the kube rootca host update list from the NFVI Layer."""
+
         self._nfvi_kube_rootca_host_update_list = new_list
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QueryKubeRootcaHostUpdatesMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -745,9 +714,8 @@ class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
         self._nfvi_kube_rootca_host_update_list = mixin_data
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QueryKubeRootcaHostUpdatesMixin, self).mixin_as_dict(data)
         mixin_data = list()
         for list_entry in self._nfvi_kube_rootca_host_update_list:
@@ -756,7 +724,7 @@ class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
 
 
 class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
-    """This mixin is used through the QueryKubeRootcaUpdatesStep class"""
+    """This mixin is used through the QueryKubeRootcaUpdatesStep class."""
 
     def initialize_mixin(self):
         super(QueryKubeRootcaUpdatesMixin, self).initialize_mixin()
@@ -764,22 +732,19 @@ class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
 
     @property
     def nfvi_kube_rootca_update(self):
-        """
-        Returns the kube rootca update from the NFVI layer
-        """
+        """Returns the kube rootca update from the NFVI layer."""
+
         return self._nfvi_kube_rootca_update
 
     @nfvi_kube_rootca_update.setter
     def nfvi_kube_rootca_update(self, nfvi_kube_rootca_update):
-        """
-        Save the kube rootca update from the NFVI Layer
-        """
+        """Save the kube rootca update from the NFVI Layer."""
+
         self._nfvi_kube_rootca_update = nfvi_kube_rootca_update
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QueryKubeRootcaUpdatesMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -793,9 +758,8 @@ class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
             self._nfvi_kube_rootca_update = None
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QueryKubeRootcaUpdatesMixin, self).mixin_as_dict(data)
         mixin_data = None
         if self._nfvi_kube_rootca_update:
@@ -804,7 +768,7 @@ class QueryKubeRootcaUpdatesMixin(QueryMixinBase):
 
 
 class QueryKubeUpgradesMixin(QueryMixinBase):
-    """This mixin is used through the QueryKubeUpgradesStep class"""
+    """This mixin is used through the QueryKubeUpgradesStep class."""
 
     def initialize_mixin(self):
         super(QueryKubeUpgradesMixin, self).initialize_mixin()
@@ -812,22 +776,19 @@ class QueryKubeUpgradesMixin(QueryMixinBase):
 
     @property
     def nfvi_kube_upgrade(self):
-        """
-        Returns the kube upgrade from the NFVI layer
-        """
+        """Returns the kube upgrade from the NFVI layer."""
+
         return self._nfvi_kube_upgrade
 
     @nfvi_kube_upgrade.setter
     def nfvi_kube_upgrade(self, nfvi_kube_upgrade):
-        """
-        Save the kube upgrade from the NFVI Layer
-        """
+        """Save the kube upgrade from the NFVI Layer."""
+
         self._nfvi_kube_upgrade = nfvi_kube_upgrade
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QueryKubeUpgradesMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -843,9 +804,8 @@ class QueryKubeUpgradesMixin(QueryMixinBase):
             self._nfvi_kube_upgrade = None
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QueryKubeUpgradesMixin, self).mixin_as_dict(data)
         mixin_data = None
         if self._nfvi_kube_upgrade:
@@ -854,7 +814,7 @@ class QueryKubeUpgradesMixin(QueryMixinBase):
 
 
 class QueryKubeHostUpgradesMixin(QueryMixinBase):
-    """This mixin is used through the QueryKubeHostUpgradesStep class"""
+    """This mixin is used through the QueryKubeHostUpgradesStep class."""
 
     def initialize_mixin(self):
         super(QueryKubeHostUpgradesMixin, self).initialize_mixin()
@@ -862,22 +822,19 @@ class QueryKubeHostUpgradesMixin(QueryMixinBase):
 
     @property
     def nfvi_kube_host_upgrade_list(self):
-        """
-        Returns the kube host upgrade list from the NFVI layer
-        """
+        """Returns the kube host upgrade list from the NFVI layer."""
+
         return self._nfvi_kube_host_upgrade_list
 
     @nfvi_kube_host_upgrade_list.setter
     def nfvi_kube_host_upgrade_list(self, nfvi_kube_host_upgrade_list):
-        """
-        Save the kube host upgrade list from the NFVI Layer
-        """
+        """Save the kube host upgrade list from the NFVI Layer."""
+
         self._nfvi_kube_host_upgrade_list = nfvi_kube_host_upgrade_list
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QueryKubeHostUpgradesMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -896,9 +853,8 @@ class QueryKubeHostUpgradesMixin(QueryMixinBase):
         self._nfvi_kube_host_upgrade_list = mixin_data
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QueryKubeHostUpgradesMixin, self).mixin_as_dict(data)
         mixin_data = list()
         for kube_host_upgrade in self._nfvi_kube_host_upgrade_list:
@@ -907,7 +863,7 @@ class QueryKubeHostUpgradesMixin(QueryMixinBase):
 
 
 class QueryKubeVersionsMixin(QueryMixinBase):
-    """This mixin is used through the QueryKubeVersionsStep class"""
+    """This mixin is used through the QueryKubeVersionsStep class."""
 
     def initialize_mixin(self):
         super(QueryKubeVersionsMixin, self).initialize_mixin()
@@ -915,22 +871,19 @@ class QueryKubeVersionsMixin(QueryMixinBase):
 
     @property
     def nfvi_kube_versions_list(self):
-        """
-        Returns the kube versions list from the NFVI layer
-        """
+        """Returns the kube versions list from the NFVI layer."""
+
         return self._nfvi_kube_versions_list
 
     @nfvi_kube_versions_list.setter
     def nfvi_kube_versions_list(self, nfvi_kube_versions_list):
-        """
-        Save the kube versions list from the NFVI Layer
-        """
+        """Save the kube versions list from the NFVI Layer."""
+
         self._nfvi_kube_versions_list = nfvi_kube_versions_list
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QueryKubeVersionsMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -950,9 +903,8 @@ class QueryKubeVersionsMixin(QueryMixinBase):
         self._nfvi_kube_versions_list = mixin_data
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QueryKubeVersionsMixin, self).mixin_as_dict(data)
         mixin_data = list()
         for mixin_obj in self._nfvi_kube_versions_list:
@@ -961,7 +913,7 @@ class QueryKubeVersionsMixin(QueryMixinBase):
 
 
 class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
-    """This mixin is used through the QuerySystemConfigUpdateHostsMixin class"""
+    """This mixin is used through the QuerySystemConfigUpdateHostsMixin class."""
 
     def initialize_mixin(self):
         super(QuerySystemConfigUpdateHostsMixin, self).initialize_mixin()
@@ -969,22 +921,19 @@ class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
 
     @property
     def nfvi_system_config_update_hosts(self):
-        """
-        Returns the System Config Update hosts from the NFVI layer
-        """
+        """Returns the System Config Update hosts from the NFVI layer."""
+
         return self._nfvi_system_config_update_hosts
 
     @nfvi_system_config_update_hosts.setter
     def nfvi_system_config_update_hosts(self, nfvi_system_config_update_hosts):
-        """
-        Save the System Config Update hosts from the NFVI Layer
-        """
+        """Save the System Config Update hosts from the NFVI Layer."""
+
         self._nfvi_system_config_update_hosts = nfvi_system_config_update_hosts
 
     def mixin_from_dict(self, data):
-        """
-        Extracts this mixin data from a dictionary
-        """
+        """Extracts this mixin data from a dictionary."""
+
         super(QuerySystemConfigUpdateHostsMixin, self).mixin_from_dict(data)
 
         from nfv_vim import nfvi
@@ -998,9 +947,8 @@ class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
         self._nfvi_system_config_update_hosts = mixin_data
 
     def mixin_as_dict(self, data):
-        """
-        Updates the dictionary with this mixin data
-        """
+        """Updates the dictionary with this mixin data."""
+
         super(QuerySystemConfigUpdateHostsMixin, self).mixin_as_dict(data)
         mixin_data = list()
         for host in self._nfvi_system_config_update_hosts:
@@ -1009,7 +957,6 @@ class QuerySystemConfigUpdateHostsMixin(QueryMixinBase):
 
 
 class UpdateControllerHostsMixin(object):
-
     def _add_update_controller_strategy_stages(
         self,
         controllers,
@@ -1018,9 +965,8 @@ class UpdateControllerHostsMixin(object):
         host_action_step,
         extra_args=None,
     ):
-        """
-        Add controller software stages for a controller list to a strategy
-        """
+        """Add controller software stages for a controller list to a strategy."""
+
         from nfv_vim import strategy
         from nfv_vim import tables
 
@@ -1033,9 +979,7 @@ class UpdateControllerHostsMixin(object):
                         "Host inventory personality controller mismatch "
                         "detected for host %s." % host.name
                     )
-                    reason = (
-                        "host inventory personality controller mismatch detected"
-                    )
+                    reason = "host inventory personality controller mismatch detected"
                     return False, reason
 
             if not self._single_controller and 2 > host_table.total_by_personality(
@@ -1049,10 +993,10 @@ class UpdateControllerHostsMixin(object):
             local_host = None
             local_host_name = get_local_host_name()
 
-            # This part of code is used by other orchestrations too, so making these modifications
-            # so that they are not affected. We don't need to check for AIO configuration
-            # because they have worker personality also, so they go to worker strategy
-            # stages.
+            # This part of code is used by other orchestrations too, so making these
+            # modifications so that they are not affected. We don't need to check for
+            # AIO configuration because they have worker personality also, so they go
+            # to worker strategy stages.
             # For software major upgrade, strict controller order needs to be followed
             # Deploy order: [controller-1, controller-0]
             # Rollback order: [controller-0, controller-1]
@@ -1084,7 +1028,9 @@ class UpdateControllerHostsMixin(object):
                             strategy.QueryAlarmsStep(
                                 not isinstance(self, SwUpgradeStrategy),
                                 ignore_alarms=self._ignore_alarms,
-                                ignore_alarms_conditional=self._ignore_alarms_conditional,
+                                ignore_alarms_conditional=(
+                                    self._ignore_alarms_conditional
+                                ),
                             )
                         )
                         if reboot:
@@ -1102,16 +1048,19 @@ class UpdateControllerHostsMixin(object):
                                 strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
                             )
                             stage.add_step(strategy.UnlockHostsStep(host_list))
-                            # After controller node(s) are unlocked, we need extra time to
-                            # allow the OSDs to go back in sync and the storage related
-                            # alarms to clear. Note: not all controller nodes will have
+                            # After controller node(s) are unlocked, we need extra
+                            # time to allow the OSDs to go back in sync and the
+                            # storage related alarms to clear.
+                            # Note: not all controller nodes will have
                             # OSDs configured, but the alarms should clear quickly in
                             # that case so this will not delay the update strategy.
                             stage.add_step(
                                 strategy.WaitAlarmsClearStep(
                                     timeout_in_secs=WAIT_ALARM_TIMEOUT,
                                     ignore_alarms=self._ignore_alarms,
-                                    ignore_alarms_conditional=self._ignore_alarms_conditional,
+                                    ignore_alarms_conditional=(
+                                        self._ignore_alarms_conditional
+                                    ),
                                 )
                             )
                         elif not isinstance(self, SwUpgradeStrategy):
@@ -1204,9 +1153,8 @@ class SwDeployControllerHostsMixin(UpdateControllerHostsMixin):
 
 class UpdateSystemConfigControllerHostsMixin(UpdateControllerHostsMixin):
     def _add_system_config_controller_strategy_stages(self, controllers):
-        """
-        Add controller system config update stages to a strategy
-        """
+        """Add controller system config update stages to a strategy."""
+
         from nfv_vim import strategy
 
         return self._add_update_controller_strategy_stages(
@@ -1233,8 +1181,7 @@ class UpgradeKubeletControllerHostsMixin(UpdateControllerHostsMixin):
 
 
 class UpdateStorageHostsMixin(object):
-    """
-    Adds the ability to add steps for storage hosts to a strategy.
+    """Adds the ability to add steps for storage hosts to a strategy.
 
     This mixin can only be used classes that subclass or mixin with:
     - SwUpdateStrategy: - provides _create_storage_host_lists
@@ -1243,8 +1190,8 @@ class UpdateStorageHostsMixin(object):
     def _add_update_storage_strategy_stages(
         self, storage_hosts, reboot, strategy_stage_name, host_action_step
     ):
-        """
-        Add storage update stages to a strategy
+        """Add storage update stages to a strategy
+
         The strategy_stage_name is the type of stage (patch, kube, etc..)
         The host_action_step is the step to invoke once hosts are locked, etc..
         """
@@ -1289,9 +1236,8 @@ class UpdateStorageHostsMixin(object):
 
 class PatchStorageHostsMixin(UpdateStorageHostsMixin):
     def _add_storage_strategy_stages(self, storage_hosts, reboot):
-        """
-        Add storage software patch stages to a strategy
-        """
+        """Add storage software patch stages to a strategy."""
+
         from nfv_vim import strategy
 
         return self._add_update_storage_strategy_stages(
@@ -1304,9 +1250,8 @@ class PatchStorageHostsMixin(UpdateStorageHostsMixin):
 
 class SwDeployStorageHostsMixin(UpdateStorageHostsMixin):
     def _add_storage_strategy_stages(self, storage_hosts, reboot):
-        """
-        Add storage software patch stages to a strategy
-        """
+        """Add storage software patch stages to a strategy."""
+
         from nfv_vim import strategy
 
         return self._add_update_storage_strategy_stages(
@@ -1319,9 +1264,8 @@ class SwDeployStorageHostsMixin(UpdateStorageHostsMixin):
 
 class UpdateSystemConfigStorageHostsMixin(UpdateStorageHostsMixin):
     def _add_system_config_storage_strategy_stages(self, storage_hosts):
-        """
-        Add storage system config update stages to a strategy
-        """
+        """Add storage system config update stages to a strategy."""
+
         from nfv_vim import strategy
 
         return self._add_update_storage_strategy_stages(
@@ -1333,8 +1277,7 @@ class UpdateSystemConfigStorageHostsMixin(UpdateStorageHostsMixin):
 
 
 class UpdateWorkerHostsMixin(object):
-    """
-    Adds the ability to add update steps for worker hosts to a strategy.
+    """Adds the ability to add update steps for worker hosts to a strategy.
 
     This includes adding swact, lock etc.. if the update step requires reboot.
 
@@ -1355,8 +1298,8 @@ class UpdateWorkerHostsMixin(object):
         host_action_step,
         extra_args=None,
     ):
-        """
-        Add worker update stages to a strategy
+        """Add worker update stages to a strategy
+
         The strategy_stage_name is the type of stage (patch, kube, etc..)
         The host_action_step is the step to invoke once hosts are locked, etc..
         """
@@ -1503,7 +1446,8 @@ class UpdateWorkerHostsMixin(object):
                 # OSDs configured, but the alarms should clear quickly in
                 # that case so this will not delay the update strategy.
                 if isinstance(self, (SwUpgradeStrategy, KubeUpgradeStrategy)):
-                    # TODO(jkraitbe): Workers can now support OSDs but VIM lacks a way to check.
+                    # TODO(jkraitbe): Workers can now support OSDs but
+                    # VIM lacks a way to check.
                     stage.add_step(
                         strategy.WaitAlarmsClearStep(
                             timeout_in_secs=WAIT_ALARM_TIMEOUT,
@@ -1532,7 +1476,8 @@ class UpdateWorkerHostsMixin(object):
                             for host in hosts_to_lock + hosts_to_reboot
                         ]
                     ):
-                        # Hosts with openstack that just need to wait for services to start up:
+                        # Hosts with openstack that just need to wait
+                        # for services to start up:
                         stage.add_step(
                             strategy.WaitAlarmsClearStep(
                                 timeout_in_secs=10 * 60,
@@ -1596,9 +1541,8 @@ class UpgradeKubeletWorkerHostsMixin(UpdateWorkerHostsMixin):
 
 class UpdateSystemConfigWorkerHostsMixin(UpdateWorkerHostsMixin):
     def _add_system_config_worker_strategy_stages(self, worker_hosts):
-        """
-        Add worker system config update stages to a strategy
-        """
+        """Add worker system config update stages to a strategy."""
+
         from nfv_vim import strategy
 
         return self._add_update_worker_strategy_stages(
@@ -1622,9 +1566,7 @@ class SwPatchStrategy(
     PatchStorageHostsMixin,
     PatchWorkerHostsMixin,
 ):
-    """
-    Software Patch - Strategy
-    """
+    """Software Patch - Strategy."""
 
     def __init__(
         self,
@@ -1675,9 +1617,8 @@ class SwPatchStrategy(
         self.initialize_mixin()
 
     def build(self):
-        """
-        Build the strategy
-        """
+        """Build the strategy."""
+
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_PATCH_QUERY)
@@ -1693,9 +1634,9 @@ class SwPatchStrategy(
         super(SwPatchStrategy, self).build()
 
     def _add_swift_strategy_stages(self, swift_hosts, reboot):
-        """
-        Add swift software patch strategy stages
-        todo(abailey): remove this if swift hosts are not supported
+        """Add swift software patch strategy stages
+
+        todo(abailey): remove this if swift hosts are not supported.
         """
         from nfv_vim import strategy
         from nfv_vim import tables
@@ -1750,9 +1691,8 @@ class SwPatchStrategy(
         return True, ""
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+        """Strategy Build Complete."""
+
         from nfv_vim import strategy
         from nfv_vim import tables
 
@@ -1768,7 +1708,6 @@ class SwPatchStrategy(
             strategy.STRATEGY_RESULT.SUCCESS,
             strategy.STRATEGY_RESULT.DEGRADED,
         ]:
-
             host_table = tables.tables_get_host_table()
 
             if not self.nfvi_sw_patches:
@@ -1979,9 +1918,8 @@ class SwPatchStrategy(
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Initializes a software patch strategy object using the given dictionary
-        """
+        """Initializes a software patch strategy object using the given dictionary."""
+
         super(SwPatchStrategy, self).from_dict(
             data, build_phase, apply_phase, abort_phase
         )
@@ -1994,9 +1932,8 @@ class SwPatchStrategy(
         return self
 
     def as_dict(self):
-        """
-        Represent the software patch strategy as a dictionary
-        """
+        """Represent the software patch strategy as a dictionary."""
+
         data = super(SwPatchStrategy, self).as_dict()
 
         data["single_controller"] = self._single_controller
@@ -2018,9 +1955,7 @@ class SwUpgradeStrategy(
     SwDeployStorageHostsMixin,
     SwDeployWorkerHostsMixin,
 ):
-    """
-    Software Upgrade - Strategy
-    """
+    """Software Upgrade - Strategy."""
 
     def __init__(
         self,
@@ -2087,16 +2022,14 @@ class SwUpgradeStrategy(
 
     @property
     def nfvi_upgrade(self):
-        """
-        Returns the upgrade from the NFVI layer
-        """
+        """Returns the upgrade from the NFVI layer."""
+
         return self._nfvi_upgrade
 
     @nfvi_upgrade.setter
     def nfvi_upgrade(self, nfvi_upgrade):
-        """
-        Save the upgrade from the NFVI Layer
-        """
+        """Save the upgrade from the NFVI Layer."""
+
         self._nfvi_upgrade = nfvi_upgrade
 
     def _build_normal(self):
@@ -2124,9 +2057,7 @@ class SwUpgradeStrategy(
         super(SwUpgradeStrategy, self).build()
 
     def build(self):
-        """
-        Build the strategy
-        """
+        """Build the strategy."""
 
         if self._release is None and not self._rollback:
             reason = "Release or rollback must be set"
@@ -2188,7 +2119,7 @@ class SwUpgradeStrategy(
             return self._build_normal()
 
     def _swact_fix(self, stage, controller_name):
-        """Add a SWACT to a stage on DX systems
+        """Add a SWACT to a stage on DX systems.
 
         Currently, certain steps during sw-deploy must be done on a specific controller.
         Here we insert arbitrary SWACTs to meet those requirements.
@@ -2207,9 +2138,7 @@ class SwUpgradeStrategy(
                 break
 
     def _add_upgrade_start_stage(self):
-        """
-        Add upgrade start strategy stage
-        """
+        """Add upgrade start strategy stage."""
 
         from nfv_vim import strategy
 
@@ -2307,9 +2236,8 @@ class SwUpgradeStrategy(
                     return
 
     def _add_upgrade_complete_stage(self):
-        """
-        Add upgrade complete strategy stage
-        """
+        """Add upgrade complete strategy stage."""
+
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_COMPLETE)
@@ -2340,9 +2268,8 @@ class SwUpgradeStrategy(
         self.apply_phase.add_stage(stage)
 
     def _add_deploy_delete_stage(self):
-        """
-        Add deploy delete strategy stage
-        """
+        """Add deploy delete strategy stage."""
+
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_DEPLOY_DELETE)
@@ -2467,9 +2394,7 @@ class SwUpgradeStrategy(
         self.save()
 
     def _add_rollback_start_stage(self):
-        """
-        Add rollback start strategy stage
-        """
+        """Add rollback start strategy stage."""
 
         from nfv_vim import strategy
 
@@ -2483,9 +2408,7 @@ class SwUpgradeStrategy(
         self.apply_phase.add_stage(stage)
 
     def _add_rollback_hosts_stages(self, do_nothing):
-        """
-        Add rollback hosts strategy stage
-        """
+        """Add rollback hosts strategy stage."""
 
         from nfv_vim import strategy
         from nfv_vim import tables
@@ -2587,9 +2510,8 @@ class SwUpgradeStrategy(
                     return
 
     def _add_rollback_complete_stage(self):
-        """
-        Add rollback complete strategy stage
-        """
+        """Add rollback complete strategy stage."""
+
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
@@ -2638,7 +2560,10 @@ class SwUpgradeStrategy(
             )
 
         elif self.nfvi_upgrade.is_starting:
-            reason = "Software rollback cannot be initiated while sw-deploy-start is in progress"
+            reason = (
+                "Software rollback cannot be initiated while "
+                "sw-deploy-start is in progress"
+            )
 
         if reason:
             DLOG.warn(reason)
@@ -2666,18 +2591,15 @@ class SwUpgradeStrategy(
             self._add_rollback_hosts_stages(do_nothing)
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+        """Strategy Build Complete."""
+
         if self._rollback:
             return self._build_complete_rollback(result, result_reason)
 
         return self._build_complete_normal(result, result_reason)
 
     def apply_complete(self, result, result_reason):
-        """
-        Strategy Apply Complete
-        """
+        """Strategy Apply Complete."""
 
         # On success we change the reason
         if result == strategy.STRATEGY_RESULT.SUCCESS:
@@ -2689,9 +2611,8 @@ class SwUpgradeStrategy(
         super(SwUpgradeStrategy, self).apply_complete(result, result_reason)
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Initializes a software upgrade strategy object using the given dictionary
-        """
+        """Initializes a software upgrade strategy object using the given dictionary."""
+
         from nfv_vim import nfvi
 
         super(SwUpgradeStrategy, self).from_dict(
@@ -2714,9 +2635,8 @@ class SwUpgradeStrategy(
         return self
 
     def as_dict(self):
-        """
-        Represent the software upgrade strategy as a dictionary
-        """
+        """Represent the software upgrade strategy as a dictionary."""
+
         data = super(SwUpgradeStrategy, self).as_dict()
         data["single_controller"] = self._single_controller
         data["release"] = self._release
@@ -2742,9 +2662,7 @@ class SystemConfigUpdateStrategy(
     UpdateSystemConfigStorageHostsMixin,
     UpdateSystemConfigWorkerHostsMixin,
 ):
-    """
-    System Config Update - Strategy
-    """
+    """System Config Update - Strategy."""
 
     def __init__(
         self,
@@ -2797,9 +2715,8 @@ class SystemConfigUpdateStrategy(
         self.initialize_mixin()
 
     def build(self):
-        """
-        Build the strategy
-        """
+        """Build the strategy."""
+
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
@@ -2811,9 +2728,8 @@ class SystemConfigUpdateStrategy(
         super(SystemConfigUpdateStrategy, self).build()
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+        """Strategy Build Complete."""
+
         from nfv_vim import strategy
         from nfv_vim import tables
 
@@ -2829,7 +2745,6 @@ class SystemConfigUpdateStrategy(
             strategy.STRATEGY_RESULT.SUCCESS,
             strategy.STRATEGY_RESULT.DEGRADED,
         ]:
-
             if self._nfvi_alarms:
                 alarm_id_set = set()
                 for alarm_data in self._nfvi_alarms:
@@ -2949,15 +2864,15 @@ class SystemConfigUpdateStrategy(
                 False, self.build_phase.result_reason
             )
 
-        self.sw_update_obj.strategy_build_complete(
+        self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
             True, ""
-        )  # pylint: disable=no-member
+        )
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Initializes a system config update strategy object using the given
-        dictionary
+        """Initializes a system config update strategy object using the given
+
+        dictionary.
         """
         super(SystemConfigUpdateStrategy, self).from_dict(
             data, build_phase, apply_phase, abort_phase
@@ -2968,9 +2883,8 @@ class SystemConfigUpdateStrategy(
         return self
 
     def as_dict(self):
-        """
-        Represent the software upgrade strategy as a dictionary
-        """
+        """Represent the software upgrade strategy as a dictionary."""
+
         data = super(SystemConfigUpdateStrategy, self).as_dict()
         data["single_controller"] = self._single_controller
 
@@ -2984,9 +2898,7 @@ class SystemConfigUpdateStrategy(
 #
 ###################################################################
 class FwUpdateStrategy(SwUpdateStrategy):
-    """
-    Firmware Update - Strategy - FPGA
-    """
+    """Firmware Update - Strategy - FPGA."""
 
     def __init__(
         self,
@@ -3034,22 +2946,19 @@ class FwUpdateStrategy(SwUpdateStrategy):
 
     @property
     def fw_update_hosts(self):
-        """
-        Returns a list of hostnames that require firmware update
-        """
+        """Returns a list of hostnames that require firmware update."""
+
         return self._fw_update_hosts
 
     @fw_update_hosts.setter
     def fw_update_hosts(self, fw_update_hosts):
-        """
-        Save a list of hostnames that require firmware update
-        """
+        """Save a list of hostnames that require firmware update."""
+
         self._fw_update_hosts = fw_update_hosts
 
     def build(self):
-        """
-        Build the strategy
-        """
+        """Build the strategy."""
+
         from nfv_vim import strategy
         from nfv_vim import tables
 
@@ -3091,9 +3000,8 @@ class FwUpdateStrategy(SwUpdateStrategy):
         super(FwUpdateStrategy, self).build()
 
     def _add_worker_strategy_stages(self, worker_hosts, reboot):
-        """
-        Add worker firmware update strategy stages
-        """
+        """Add worker firmware update strategy stages."""
+
         from nfv_vim import strategy
         from nfv_vim import tables
 
@@ -3113,12 +3021,10 @@ class FwUpdateStrategy(SwUpdateStrategy):
                     != self._default_instance_action
                 ):
                     DLOG.error(
-                        "Cannot migrate instances in a single "
-                        "controller configuration"
+                        "Cannot migrate instances in a single controller configuration"
                     )
                     reason = (
-                        "cannot migrate instances in a single "
-                        "controller configuration"
+                        "cannot migrate instances in a single controller configuration"
                     )
                     return False, reason
 
@@ -3136,7 +3042,6 @@ class FwUpdateStrategy(SwUpdateStrategy):
         # that will update all the worker hosts in the order dictated
         # by the strategy.
         for host_list in host_lists:
-
             # Start the Update Worker Hosts Stage ; the stage that includes all
             # the steps to update all the worker hosts found to need firmware update.
             stage = strategy.StrategyStage(
@@ -3241,9 +3146,8 @@ class FwUpdateStrategy(SwUpdateStrategy):
         return True, ""
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+        """Strategy Build Complete."""
+
         from nfv_vim import strategy
         from nfv_vim import tables
 
@@ -3259,7 +3163,6 @@ class FwUpdateStrategy(SwUpdateStrategy):
             strategy.STRATEGY_RESULT.SUCCESS,
             strategy.STRATEGY_RESULT.DEGRADED,
         ]:
-
             if self._nfvi_alarms:
                 # Fail create strategy if unignored alarms present
                 DLOG.warn("Active alarms found, can't update firmware.")
@@ -3312,7 +3215,8 @@ class FwUpdateStrategy(SwUpdateStrategy):
                         self._state = strategy.STRATEGY_STATE.BUILD_FAILED
                         self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
                         self.build_phase.result_reason = reason
-                        self.sw_update_obj.strategy_build_complete(  # pylint: disable=no-member
+                        # pylint: disable=no-member
+                        self.sw_update_obj.strategy_build_complete(
                             False, self.build_phase.result_reason
                         )
                         self.save()
@@ -3328,9 +3232,8 @@ class FwUpdateStrategy(SwUpdateStrategy):
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Load firmware update strategy object from dict data.
-        """
+        """Load firmware update strategy object from dict data."""
+
         from nfv_vim import nfvi
 
         super(FwUpdateStrategy, self).from_dict(
@@ -3358,9 +3261,8 @@ class FwUpdateStrategy(SwUpdateStrategy):
         return self
 
     def as_dict(self):
-        """
-        Return firmware update strategy nfvi data object as dictionary.
-        """
+        """Return firmware update strategy nfvi data object as dictionary."""
+
         data = super(FwUpdateStrategy, self).as_dict()
 
         data["single_controller"] = self._single_controller
@@ -3382,9 +3284,7 @@ class FwUpdateStrategy(SwUpdateStrategy):
 class KubeRootcaUpdateStrategy(
     SwUpdateStrategy, QueryKubeRootcaUpdatesMixin, QueryKubeRootcaHostUpdatesMixin
 ):
-    """
-    Kubernetes RootCa Update - Strategy
-    """
+    """Kubernetes RootCa Update - Strategy."""
 
     def __init__(
         self,
@@ -3442,7 +3342,8 @@ class KubeRootcaUpdateStrategy(
         self.initialize_mixin()
 
     def build(self):
-        """Build the strategy"""
+        """Build the strategy."""
+
         from nfv_vim import strategy
 
         # Initial stage is a query of existing kube rootca update
@@ -3457,8 +3358,8 @@ class KubeRootcaUpdateStrategy(
         super(KubeRootcaUpdateStrategy, self).build()
 
     def _add_kube_rootca_update_start_stage(self):
-        """
-        Add kube-rootca-update start strategy stage
+        """Add kube-rootca-update start strategy stage
+
         This stage only occurs when no kube rootca update has been initiated.
         """
         from nfv_vim import strategy
@@ -3472,8 +3373,8 @@ class KubeRootcaUpdateStrategy(
         self._add_kube_rootca_update_cert_stage()
 
     def _add_kube_rootca_update_cert_stage(self):
-        """
-        Add kube-rootca-update cert strategy stage
+        """Add kube-rootca-update cert strategy stage
+
         This stage generates a cert, supporting a expiry_date and subject option.
         This stage is skipped if a previous update has already performed this
         activity.
@@ -3491,9 +3392,9 @@ class KubeRootcaUpdateStrategy(
         self._add_kube_rootca_hosts_trustbothcas_stage()
 
     def _determine_kube_rootca_host_lists(self, success_state):
-        """
-        Utility method to get host lists (list of lists) for a rootca update
-        Storage hosts are excluded
+        """Utility method to get host lists (list of lists) for a rootca update
+
+        Storage hosts are excluded.
         """
         from nfv_vim import tables
 
@@ -3533,9 +3434,9 @@ class KubeRootcaUpdateStrategy(
         return host_lists
 
     def _add_kube_rootca_hosts_trustbothcas_stage(self):
-        """
-        Add kube-rootca-update host trustbothcas strategy stages
-        This stage is performed on the hosts
+        """Add kube-rootca-update host trustbothcas strategy stages
+
+        This stage is performed on the hosts.
         """
         host_lists = self._determine_kube_rootca_host_lists(
             KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS
@@ -3554,8 +3455,8 @@ class KubeRootcaUpdateStrategy(
         self._add_kube_rootca_update_pods_trustbothcas_stage()
 
     def _add_kube_rootca_update_pods_trustbothcas_stage(self):
-        """
-        Add kube-rootca-update 'pods' trustbothcas strategy stage
+        """Add kube-rootca-update 'pods' trustbothcas strategy stage
+
         This stage is performed on the pods.
         """
         from nfv_vim import strategy
@@ -3569,9 +3470,9 @@ class KubeRootcaUpdateStrategy(
         self._add_kube_rootca_hosts_update_certs_stage()
 
     def _add_kube_rootca_hosts_update_certs_stage(self):
-        """
-        Add kube-rootca-update host update certs strategy stages
-        This stage is performed on the hosts
+        """Add kube-rootca-update host update certs strategy stages
+
+        This stage is performed on the hosts.
         """
         host_lists = self._determine_kube_rootca_host_lists(
             KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS
@@ -3589,9 +3490,9 @@ class KubeRootcaUpdateStrategy(
         self._add_kube_rootca_hosts_trustnewca_stage()
 
     def _add_kube_rootca_hosts_trustnewca_stage(self):
-        """
-        Add kube-rootca-update host trustnewca strategy stages
-        This stage is performed on the hosts
+        """Add kube-rootca-update host trustnewca strategy stages
+
+        This stage is performed on the hosts.
         """
         host_lists = self._determine_kube_rootca_host_lists(
             KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA
@@ -3609,8 +3510,8 @@ class KubeRootcaUpdateStrategy(
         self._add_kube_rootca_update_pods_trustnewca_stage()
 
     def _add_kube_rootca_update_pods_trustnewca_stage(self):
-        """
-        Add kube-rootca-update 'pods' trustnewca strategy stage
+        """Add kube-rootca-update 'pods' trustnewca strategy stage
+
         This stage is performed on the pods.
         """
         from nfv_vim import strategy
@@ -3624,9 +3525,9 @@ class KubeRootcaUpdateStrategy(
         self._add_kube_rootca_update_complete_stage()
 
     def _add_kube_rootca_update_complete_stage(self):
-        """
-        Add kube rootca update complete strategy stage
-        This stage occurs after all kube rootca are updated
+        """Add kube rootca update complete strategy stage
+
+        This stage occurs after all kube rootca are updated.
         """
         from nfv_vim import strategy
 
@@ -3638,51 +3539,90 @@ class KubeRootcaUpdateStrategy(
         # There is no next stage. this is the final stage of the strategy
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+        """Strategy Build Complete."""
+
         from nfv_vim import nfvi
         from nfv_vim import strategy
 
+        objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
+
         RESUME_STATE = {
             # update was aborted, this means it needs to be recreated
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_ABORTED: self._add_kube_rootca_update_start_stage,
+            objects_v1.KUBE_ROOTCA_UPDATE_ABORTED: (
+                self._add_kube_rootca_update_start_stage
+            ),
             # after update-started, generate cert stage
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED: self._add_kube_rootca_update_cert_stage,
+            objects_v1.KUBE_ROOTCA_UPDATE_STARTED: (
+                self._add_kube_rootca_update_cert_stage
+            ),
             # after generated, host trustbothcas stage
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED: self._add_kube_rootca_hosts_trustbothcas_stage,
+            objects_v1.KUBE_ROOTCA_UPDATE_CERT_GENERATED: (
+                self._add_kube_rootca_hosts_trustbothcas_stage
+            ),
             # handle interruption updating hosts trustbothcas -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS: self._add_kube_rootca_hosts_trustbothcas_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS: (
+                self._add_kube_rootca_hosts_trustbothcas_stage
+            ),
             # handle failure updating hosts trustbothcas -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED: self._add_kube_rootca_hosts_trustbothcas_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED: (
+                self._add_kube_rootca_hosts_trustbothcas_stage
+            ),
             # handle success updating hosts trustbothcas -> pods trustbothcas
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS: self._add_kube_rootca_update_pods_trustbothcas_stage,
+            objects_v1.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS: (
+                self._add_kube_rootca_update_pods_trustbothcas_stage
+            ),
             # handle interruption updating the pods for trust both ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS: self._add_kube_rootca_update_pods_trustbothcas_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS: (
+                self._add_kube_rootca_update_pods_trustbothcas_stage
+            ),
             # handle failure updating the pods for trust both ca -> retry)
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED: self._add_kube_rootca_update_pods_trustbothcas_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED: (
+                self._add_kube_rootca_update_pods_trustbothcas_stage
+            ),
             # handle success updating pods trust both ca - > update certs
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS: self._add_kube_rootca_hosts_update_certs_stage,
+            objects_v1.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS: (
+                self._add_kube_rootca_hosts_update_certs_stage
+            ),
             # handle interruption updating the certs for hosts -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS: self._add_kube_rootca_hosts_update_certs_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS: (
+                self._add_kube_rootca_hosts_update_certs_stage
+            ),
             # handle failure updating the certs for hosts -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED: self._add_kube_rootca_hosts_update_certs_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED: (
+                self._add_kube_rootca_hosts_update_certs_stage
+            ),
             # handle success updating the certs for hosts -> hosts trust new ca
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS: self._add_kube_rootca_hosts_trustnewca_stage,
+            objects_v1.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS: (
+                self._add_kube_rootca_hosts_trustnewca_stage
+            ),
             # handle interruption updating hosts trust new ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA: self._add_kube_rootca_hosts_trustnewca_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA: (
+                self._add_kube_rootca_hosts_trustnewca_stage
+            ),
             # handle failure updating hosts trust new ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED: self._add_kube_rootca_hosts_trustnewca_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED: (
+                self._add_kube_rootca_hosts_trustnewca_stage
+            ),
             # handle success updating hosts trust new ca -> pods trust new ca
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA: self._add_kube_rootca_update_pods_trustnewca_stage,
+            objects_v1.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA: (
+                self._add_kube_rootca_update_pods_trustnewca_stage
+            ),
             # handle interruption updating the pods for trust new ca -> retry
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA: self._add_kube_rootca_update_pods_trustnewca_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA: (
+                self._add_kube_rootca_update_pods_trustnewca_stage
+            ),
             # handle failure updating the pods for trust new ca -> retry)
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED: self._add_kube_rootca_update_pods_trustnewca_stage,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED: (
+                self._add_kube_rootca_update_pods_trustnewca_stage
+            ),
             # handle success while updating pods trust new ca - > complete
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA: self._add_kube_rootca_update_complete_stage,
+            objects_v1.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA: (
+                self._add_kube_rootca_update_complete_stage
+            ),
             # update is completed, usually this gets deleted.
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED: self._add_kube_rootca_update_complete_stage,
+            objects_v1.KUBE_ROOTCA_UPDATE_COMPLETED: (
+                self._add_kube_rootca_update_complete_stage
+            ),
         }
 
         result, result_reason = super(KubeRootcaUpdateStrategy, self).build_complete(
@@ -3697,7 +3637,6 @@ class KubeRootcaUpdateStrategy(
             strategy.STRATEGY_RESULT.SUCCESS,
             strategy.STRATEGY_RESULT.DEGRADED,
         ]:
-
             if self._nfvi_alarms:
                 # Fail create strategy if unignored alarms present
                 # add the alarm ids to the result reason.
@@ -3741,9 +3680,8 @@ class KubeRootcaUpdateStrategy(
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Initializes a kube rootca update strategy object from a dictionary
-        """
+        """Initializes a kube rootca update strategy object from a dictionary."""
+
         super(KubeRootcaUpdateStrategy, self).from_dict(
             data, build_phase, apply_phase, abort_phase
         )
@@ -3754,9 +3692,8 @@ class KubeRootcaUpdateStrategy(
         return self
 
     def as_dict(self):
-        """
-        Represent the kube rootca update strategy as a dictionary
-        """
+        """Represent the kube rootca update strategy as a dictionary."""
+
         data = super(KubeRootcaUpdateStrategy, self).as_dict()
         data["single_controller"] = self._single_controller
         data["expiry_date"] = self._expiry_date
@@ -3778,9 +3715,7 @@ class KubeUpgradeStrategy(
     UpgradeKubeletControllerHostsMixin,
     UpgradeKubeletWorkerHostsMixin,
 ):
-    """
-    Kubernetes Upgrade - Strategy
-    """
+    """Kubernetes Upgrade - Strategy."""
 
     def __init__(
         self,
@@ -3839,15 +3774,13 @@ class KubeUpgradeStrategy(
 
     @property
     def to_version(self):
-        """
-        Returns the read only kube upgrade 'to_version' for this strategy
-        """
+        """Returns the read only kube upgrade 'to_version' for this strategy."""
+
         return self._to_version
 
     def build(self):
-        """
-        Build the strategy
-        """
+        """Build the strategy."""
+
         from nfv_vim import strategy
 
         # Initial stage is a query of existing kube upgrade
@@ -3867,7 +3800,7 @@ class KubeUpgradeStrategy(
         super(KubeUpgradeStrategy, self).build()
 
     def _get_kube_version_steps(self, target_version, kube_list):
-        """Returns an ordered list for a multi-version kubernetes upgrade
+        """Returns an ordered list for a multi-version kubernetes upgrade.
 
         Returns an ordered list of kubernetes versions to complete the upgrade
          If the target is already the active version, the list will be empty
@@ -3930,9 +3863,10 @@ class KubeUpgradeStrategy(
 
     def _kubelet_map(self):
         """Map the host kubelet versions by the host uuid.
+
         Leave the kubelet version empty, if the status is not None,
         since that means the kubelet may not be running the version
-        indicated.  ie: upgrading-kubelet-failed
+        indicated.  ie: upgrading-kubelet-failed.
         """
         from nfv_vim import nfvi
 
@@ -3952,14 +3886,15 @@ class KubeUpgradeStrategy(
 
     def _kubeadm_map(self):
         """Map the host kubeadm versions by the host uuid."""
+
         kubeadm_map = dict()
         for host in self.nfvi_kube_host_upgrade_list:
             kubeadm_map[host.host_uuid] = host.control_plane_version
         return kubeadm_map
 
     def _add_kube_upgrade_start_stage(self):
-        """
-        Add upgrade start strategy stage
+        """Add upgrade start strategy stage
+
         This stage only occurs when no kube upgrade has been initiated.
         """
         from nfv_vim import strategy
@@ -3971,10 +3906,10 @@ class KubeUpgradeStrategy(
         self._add_kube_upgrade_download_images_stage()
 
     def _add_kube_upgrade_download_images_stage(self):
-        """
-        Add downloading images stage
+        """Add downloading images stage
+
         This stage only occurs when kube upgrade has been started.
-        It then proceeds to the next stage
+        It then proceeds to the next stage.
         """
         from nfv_vim import strategy
 
@@ -3987,10 +3922,10 @@ class KubeUpgradeStrategy(
         self._add_kube_pre_application_update_stage()
 
     def _add_kube_pre_application_update_stage(self):
-        """
-        Add kube pre application update stage.
+        """Add kube pre application update stage.
+
         This stage only occurs after download images
-        It then proceeds to the next stage
+        It then proceeds to the next stage.
         """
         from nfv_vim import strategy
 
@@ -4004,10 +3939,10 @@ class KubeUpgradeStrategy(
         self._add_kube_upgrade_networking_stage()
 
     def _add_kube_upgrade_networking_stage(self):
-        """
-        Add kube upgrade networking stage.
+        """Add kube upgrade networking stage.
+
         This stage only occurs after download images
-        It then proceeds to the next stage
+        It then proceeds to the next stage.
         """
         from nfv_vim import strategy
 
@@ -4021,10 +3956,10 @@ class KubeUpgradeStrategy(
         self._add_kube_upgrade_storage_stage()
 
     def _add_kube_upgrade_storage_stage(self):
-        """
-        Add kube upgrade storage stage.
+        """Add kube upgrade storage stage.
+
         This stage only occurs after upgrade networking
-        It then proceeds to the next stage
+        It then proceeds to the next stage.
         """
         from nfv_vim import strategy
 
@@ -4038,7 +3973,8 @@ class KubeUpgradeStrategy(
         self._add_kube_host_cordon_stage()
 
     def _add_kube_host_cordon_stage(self):
-        """Add host cordon stage for a host"""
+        """Add host cordon stage for a host."""
+
         # simplex only
 
         from nfv_vim import nfvi
@@ -4066,6 +4002,7 @@ class KubeUpgradeStrategy(
 
     def _kubelet_version_skew(self, kubeadm_version, kubelet_version):
         """Calculate integer skew between kubeadm (control-plane) minor
+
         version and kubelet minor version.
 
         Reference: https://kubernetes.io/releases/version-skew-policy/
@@ -4113,7 +4050,8 @@ class KubeUpgradeStrategy(
         return skew
 
     def _add_kube_update_stages(self):
-        """Stages for control plane, kubelet and cordon"""
+        """Stages for control plane, kubelet and cordon."""
+
         # Algorithm
         # -------------------------
         # Simplex:
@@ -4311,7 +4249,8 @@ class KubeUpgradeStrategy(
         return already_upgraded_hosts
 
     def _add_kube_host_uncordon_stage(self):
-        """Add host uncordon stage for a host"""
+        """Add host uncordon stage for a host."""
+
         # simplex only
 
         from nfv_vim import nfvi
@@ -4338,7 +4277,8 @@ class KubeUpgradeStrategy(
         self._add_kube_upgrade_complete_stage()
 
     def _add_kube_upgrade_first_control_plane_stage(self, first_host, kube_ver):
-        """Add first controller control plane kube upgrade stage"""
+        """Add first controller control plane kube upgrade stage."""
+
         from nfv_vim import nfvi
         from nfv_vim import strategy
 
@@ -4363,13 +4303,15 @@ class KubeUpgradeStrategy(
         return True
 
     def _add_kube_upgrade_second_control_plane_stage(self, second_host, kube_ver):
-        """
-        Add second control plane kube upgrade stage
+        """Add second control plane kube upgrade stage
+
         This stage only occurs after networking and if this is a duplex.
-        It then proceeds to the next stage
+        It then proceeds to the next stage.
         """
         from nfv_vim import nfvi
         from nfv_vim import strategy
+
+        objects_v1 = nfvi.objects.v1.KUBE_UPGRADE_STATE
 
         if second_host is not None:
             # force argument is ignored by control plane API
@@ -4384,8 +4326,8 @@ class KubeUpgradeStrategy(
                     second_host,
                     kube_ver,
                     force,
-                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER,
-                    nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED,
+                    objects_v1.KUBE_UPGRADED_SECOND_MASTER,
+                    objects_v1.KUBE_UPGRADING_SECOND_MASTER_FAILED,
                 )
             )
             self.apply_phase.add_stage(stage)
@@ -4479,9 +4421,9 @@ class KubeUpgradeStrategy(
                     return
 
     def _add_kube_upgrade_complete_stage(self):
-        """
-        Add kube upgrade complete strategy stage
-        This stage occurs after all kubelets are upgraded
+        """Add kube upgrade complete strategy stage
+
+        This stage occurs after all kubelets are upgraded.
         """
         from nfv_vim import strategy
 
@@ -4494,10 +4436,10 @@ class KubeUpgradeStrategy(
         self._add_kube_post_application_update_stage()
 
     def _add_kube_post_application_update_stage(self):
-        """
-        Add kube post application update stage.
+        """Add kube post application update stage.
+
         This stage occurs after the upgrade is completed
-        It then proceeds to the next stage
+        It then proceeds to the next stage.
         """
         from nfv_vim import strategy
 
@@ -4511,9 +4453,9 @@ class KubeUpgradeStrategy(
         self._add_kube_upgrade_cleanup_stage()
 
     def _add_kube_upgrade_cleanup_stage(self):
-        """
-        kube upgrade cleanup stage deletes the kube upgrade.
-        This stage occurs after the post application update stage
+        """kube upgrade cleanup stage deletes the kube upgrade.
+
+        This stage occurs after the post application update stage.
         """
         from nfv_vim import strategy
 
@@ -4524,9 +4466,9 @@ class KubeUpgradeStrategy(
         self.apply_phase.add_stage(stage)
 
     def get_first_host(self):
-        """
-        This corresponds to the first host that should be updated.
-        In simplex env, first host: controller-0. In duplex env: controller-1
+        """This corresponds to the first host that should be updated.
+
+        In simplex env, first host: controller-0. In duplex env: controller-1.
         """
         from nfv_vim import tables
 
@@ -4546,9 +4488,9 @@ class KubeUpgradeStrategy(
             return controller_1_host
 
     def get_second_host(self):
-        """
-        This corresponds to the second host that should be updated.
-        In simplex env, second host: None. In duplex env: controller-0
+        """This corresponds to the second host that should be updated.
+
+        In simplex env, second host: None. In duplex env: controller-0.
         """
         from nfv_vim import tables
 
@@ -4568,57 +4510,78 @@ class KubeUpgradeStrategy(
             return controller_0_host
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete
-        """
+        """Strategy Build Complete."""
+
         from nfv_vim import nfvi
         from nfv_vim import strategy
+
+        objects_v1 = nfvi.objects.v1.KUBE_UPGRADE_STATE
 
         # Note: there are no resume states for actions that are still running
         # ie:  KUBE_UPGRADE_DOWNLOADING_IMAGES
         RESUME_STATE = {
             # after upgrade-started -> download images
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED: self._add_kube_upgrade_download_images_stage,
+            objects_v1.KUBE_UPGRADE_STARTED: (
+                self._add_kube_upgrade_download_images_stage
+            ),
             # if downloading images failed, resume at downloading images
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED: self._add_kube_upgrade_download_images_stage,
+            objects_v1.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED: (
+                self._add_kube_upgrade_download_images_stage
+            ),
             # After downloading images -> pre update applications
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES: self._add_kube_pre_application_update_stage,
+            objects_v1.KUBE_UPGRADE_DOWNLOADED_IMAGES: (
+                self._add_kube_pre_application_update_stage
+            ),
             # if pre updating apps failed, resume at pre updating apps
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATING_APPS_FAILED: self._add_kube_pre_application_update_stage,
+            objects_v1.KUBE_PRE_UPDATING_APPS_FAILED: (
+                self._add_kube_pre_application_update_stage
+            ),
             # After pre updating apps -> upgrade networking
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATED_APPS: self._add_kube_upgrade_networking_stage,
+            objects_v1.KUBE_PRE_UPDATED_APPS: (self._add_kube_upgrade_networking_stage),
             # if networking state failed, resync at networking state
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED: self._add_kube_upgrade_networking_stage,
+            objects_v1.KUBE_UPGRADING_NETWORKING_FAILED: (
+                self._add_kube_upgrade_networking_stage
+            ),
             # After networking -> upgrade storage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING: self._add_kube_upgrade_storage_stage,
+            objects_v1.KUBE_UPGRADED_NETWORKING: self._add_kube_upgrade_storage_stage,
             # if storage state failed, resync at storage state
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED: self._add_kube_upgrade_storage_stage,
+            objects_v1.KUBE_UPGRADING_STORAGE_FAILED: (
+                self._add_kube_upgrade_storage_stage
+            ),
             # After storage -> cordon
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE: self._add_kube_host_cordon_stage,
+            objects_v1.KUBE_UPGRADED_STORAGE: self._add_kube_host_cordon_stage,
             # If the state is cordon-failed, resume at cordon stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_FAILED: self._add_kube_host_cordon_stage,
+            objects_v1.KUBE_HOST_CORDON_FAILED: self._add_kube_host_cordon_stage,
             # If the state is cordon-complete, resume at update stages
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_CORDON_COMPLETE: self._add_kube_update_stages,
+            objects_v1.KUBE_HOST_CORDON_COMPLETE: self._add_kube_update_stages,
             # if upgrading first control plane failed, resume there
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED: self._add_kube_update_stages,
+            objects_v1.KUBE_UPGRADING_FIRST_MASTER_FAILED: self._add_kube_update_stages,
             # After first control plane -> upgrade second control plane
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER: self._add_kube_update_stages,
+            objects_v1.KUBE_UPGRADED_FIRST_MASTER: self._add_kube_update_stages,
             # Re-attempt second control plane
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED: self._add_kube_update_stages,
+            objects_v1.KUBE_UPGRADING_SECOND_MASTER_FAILED: (
+                self._add_kube_update_stages
+            ),
             # After second control plane , do kubelets
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_SECOND_MASTER: self._add_kube_update_stages,
+            objects_v1.KUBE_UPGRADED_SECOND_MASTER: self._add_kube_update_stages,
             # kubelets transition to 'uncordon after they are done
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS: self._add_kube_update_stages,
+            objects_v1.KUBE_UPGRADING_KUBELETS: self._add_kube_update_stages,
             # If the state is uncordon-failed, resume at uncordon stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED: self._add_kube_host_uncordon_stage,
+            objects_v1.KUBE_HOST_UNCORDON_FAILED: self._add_kube_host_uncordon_stage,
             # If the state is uncordon-complete, resume at complete stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE: self._add_kube_upgrade_complete_stage,
+            objects_v1.KUBE_HOST_UNCORDON_COMPLETE: (
+                self._add_kube_upgrade_complete_stage
+            ),
             # upgrade is completed, post update apps
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE: self._add_kube_post_application_update_stage,
+            objects_v1.KUBE_UPGRADE_COMPLETE: (
+                self._add_kube_post_application_update_stage
+            ),
             # If post updating apps failed, resume at post application update stage
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED: self._add_kube_post_application_update_stage,
+            objects_v1.KUBE_POST_UPDATING_APPS_FAILED: (
+                self._add_kube_post_application_update_stage
+            ),
             # After post updating apps, delete the upgrade
-            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS: self._add_kube_upgrade_cleanup_stage,
+            objects_v1.KUBE_POST_UPDATED_APPS: self._add_kube_upgrade_cleanup_stage,
         }
 
         result, result_reason = super(KubeUpgradeStrategy, self).build_complete(
@@ -4633,7 +4596,6 @@ class KubeUpgradeStrategy(
             strategy.STRATEGY_RESULT.SUCCESS,
             strategy.STRATEGY_RESULT.DEGRADED,
         ]:
-
             matching_version_upgraded = False
             for kube_version_object in self._nfvi_kube_versions_list:
                 if kube_version_object["kube_version"] == self._to_version:
@@ -4706,9 +4668,8 @@ class KubeUpgradeStrategy(
         self.save()
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Initializes a kube upgrade strategy object using the given dictionary
-        """
+        """Initializes a kube upgrade strategy object using the given dictionary."""
+
         super(KubeUpgradeStrategy, self).from_dict(
             data, build_phase, apply_phase, abort_phase
         )
@@ -4718,9 +4679,8 @@ class KubeUpgradeStrategy(
         return self
 
     def as_dict(self):
-        """
-        Represent the kube upgrade strategy as a dictionary
-        """
+        """Represent the kube upgrade strategy as a dictionary."""
+
         data = super(KubeUpgradeStrategy, self).as_dict()
         data["to_version"] = self._to_version
         data["single_controller"] = self._single_controller
@@ -4729,11 +4689,10 @@ class KubeUpgradeStrategy(
 
 
 def strategy_rebuild_from_dict(data):
-    """
-    Returns the strategy object initialized using the given dictionary
-    """
+    """Returns the strategy object initialized using the given dictionary."""
+
     from nfv_vim.strategy._strategy_phases import (  # noqa: F401
-        strategy_phase_rebuild_from_dict
+        strategy_phase_rebuild_from_dict,
     )
 
     if not data:

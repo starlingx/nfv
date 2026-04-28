@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -36,9 +36,8 @@ from nfv_vim.tables._volume_table import volume_table_initialize
 
 
 def tables_initialize():
-    """
-    Initialize the tables package
-    """
+    """Initialize the tables package."""
+
     image_table_initialize()
     volume_table_initialize()
     volume_snapshot_table_initialize()
@@ -57,9 +56,8 @@ def tables_initialize():
 
 
 def tables_finalize():
-    """
-    Finalize the tables package
-    """
+    """Finalize the tables package."""
+
     image_table_finalize()
     volume_table_finalize()
     volume_snapshot_table_finalize()

@@ -15,11 +15,15 @@ from nfv_unit_tests.tests import testcase
 from unittest import mock
 
 sys.modules["fm_core"] = mock.Mock()
-from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import (  # noqa: H306,E402  pylint: disable=C0413
-    host_state
+
+# pylint: disable-next=C0413
+from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import (  # noqa: H306,E402
+    host_state,
 )
-from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import (  # noqa: H306,E402  pylint: disable=C0413
-    NFVIInfrastructureAPI
+
+# pylint: disable-next=C0413
+from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import (  # noqa: H306,E402
+    NFVIInfrastructureAPI,
 )
 
 # todo(abailey): use already existing constants
@@ -31,17 +35,19 @@ ADMIN_STATE_UNLOCKED = "unlocked"
 
 
 class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
-
     def setUp(self):
         """Setup for testing."""
+
         super(TestNFVIInfrastructureAPI, self).setUp()
 
     def tearDown(self):
         """Cleanup testing setup."""
+
         super(TestNFVIInfrastructureAPI, self).tearDown()
 
     def test_create(self):
-        """Test that the plugin_api can be created"""
+        """Test that the plugin_api can be created."""
+
         plugin_api = NFVIInfrastructureAPI()
         self.assertIsNotNone(plugin_api)
         # test the getter methods
@@ -51,7 +57,8 @@ class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
         self.assertEqual(plugin_api.signature, NFVIInfrastructureAPI._signature)
 
     def test_static_host_supports_kubernetes(self):
-        """Test that the _host_supports_kubernetes static method"""
+        """Test that the _host_supports_kubernetes static method."""
+
         # personality is a string list.
         aio_personality = [
             "controller",
@@ -82,7 +89,7 @@ class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
         )
 
     def test_static_get_host_labels(self):
-        """Test the static _get_host_labels
+        """Test the static _get_host_labels.
 
         Extracts from a list of label_key:label_value
          - openstack_compute
@@ -103,9 +110,15 @@ class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
         # todo(abailey): Fix _get_host_labels KeyError caused by the commented out test
         # ie: 'label_key' without 'label_value'
         # test_data = [{LABEL_KEY: 'junk'}]
-        # self.assertEqual(NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False))
+        # self.assertEqual(
+        #     NFVIInfrastructureAPI._get_host_labels(test_data),
+        #     (False, False, False)
+        # )
         # test_data = [{LABEL_VALUE: 'junk'}]
-        # self.assertEqual(NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False))
+        # self.assertEqual(
+        #     NFVIInfrastructureAPI._get_host_labels(test_data),
+        #     (False, False, False)
+        # )
 
         test_data = [{LABEL_KEY: "junk", LABEL_VALUE: "junk"}]
         self.assertEqual(
@@ -119,7 +132,10 @@ class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
         # test that OS_COMPUTE (first boolean) works when properly populated
         # todo(abailey): Fix _get_host_labels KeyError caused by the commented out test
         # test_data = [{LABEL_KEY: OS_COMPUTE}]
-        # self.assertEqual(NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False))
+        # self.assertEqual(
+        #     NFVIInfrastructureAPI._get_host_labels(test_data),
+        #     (False, False, False)
+        # )
         test_data = [{LABEL_KEY: OS_COMPUTE, LABEL_VALUE: "junk"}]
         self.assertEqual(
             NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False)
@@ -132,7 +148,10 @@ class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
         # test that OS_CONTROL (second boolean) works when properly populated
         # todo(abailey): Fix _get_host_labels KeyError caused by the commented out test
         # test_data = [{LABEL_KEY: OS_CONTROL}]
-        # self.assertEqual(NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False))
+        # self.assertEqual(
+        #     NFVIInfrastructureAPI._get_host_labels(test_data),
+        #     (False, False, False)
+        # )
         test_data = [{LABEL_KEY: OS_CONTROL, LABEL_VALUE: "junk"}]
         self.assertEqual(
             NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False)
@@ -145,7 +164,10 @@ class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
         # test that REMOTE_STORAGE (third boolean) works when properly populated
         # todo(abailey): Fix _get_host_labels KeyError caused by the commented out test
         # test_data = [{LABEL_KEY: REMOTE_STORAGE}]
-        # self.assertEqual(NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False))
+        # self.assertEqual(
+        #     NFVIInfrastructureAPI._get_host_labels(test_data),
+        #     (False, False, False)
+        # )
         test_data = [{LABEL_KEY: REMOTE_STORAGE, LABEL_VALUE: "junk"}]
         self.assertEqual(
             NFVIInfrastructureAPI._get_host_labels(test_data), (False, False, False)
@@ -176,7 +198,6 @@ class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
 
 
 class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
-
     def get_host_state_args(self):
         return {
             "host_uuid": uuid.uuid4,
@@ -197,7 +218,8 @@ class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
         }
 
     def test_host_state_aio_sx(self):
-        """Tests get_host_state defaults"""
+        """Tests get_host_state defaults."""
+
         # unlocked / enabled / available
 
         args = self.get_host_state_args()
@@ -207,7 +229,8 @@ class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
         self.assertEqual(avail_status, HOST_AVAIL_STATUS.AVAILABLE)
 
     def test_host_state_aio_sx_disabled(self):
-        """Tests get_host_state host disabled"""
+        """Tests get_host_state host disabled."""
+
         # unlocked / disabled / available
 
         args = self.get_host_state_args()
@@ -219,7 +242,7 @@ class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
         self.assertEqual(avail_status, HOST_AVAIL_STATUS.AVAILABLE)
 
     def test_host_state_aio_sx_missing_fields(self):
-        """Tests get_host_state host missing some fields
+        """Tests get_host_state host missing some fields.
 
         Set sub function operation state: None
         Set sub function avail status: None
@@ -241,7 +264,8 @@ class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
         self.assertIsNone(avail_status)
 
     def test_host_state_worker(self):
-        """Tests get_host_state for a worker"""
+        """Tests get_host_state for a worker."""
+
         # unlocked / enabled / available
 
         args = self.get_host_state_args()
@@ -258,7 +282,8 @@ class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
         self.assertEqual(avail_status, HOST_AVAIL_STATUS.AVAILABLE)
 
     def test_host_state_worker_unknown(self):
-        """Tests get_host_state for a worker with unknown states"""
+        """Tests get_host_state for a worker with unknown states."""
+
         # unlocked / unknown / unknown
 
         args = self.get_host_state_args()
@@ -276,7 +301,8 @@ class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
         self.assertEqual(avail_status, HOST_AVAIL_STATUS.UNKNOWN)
 
     def test_host_state_worker_failed(self):
-        """Tests get_host_state for a failed worker"""
+        """Tests get_host_state for a failed worker."""
+
         # unlocked / enabled / failed
 
         args = self.get_host_state_args()
@@ -294,7 +320,8 @@ class TestNFVIInfrastructureHostState(testcase.NFVTestCase):
         self.assertEqual(avail_status, HOST_AVAIL_STATUS.FAILED_COMPONENT)
 
     def test_host_state_controller(self):
-        """Tests get_host_state for a std controller"""
+        """Tests get_host_state for a std controller."""
+
         # unlocked / enabled / available
 
         args = self.get_host_state_args()

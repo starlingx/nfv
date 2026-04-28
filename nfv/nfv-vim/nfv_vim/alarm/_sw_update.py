@@ -255,9 +255,8 @@ _alarm_templates = {
 
 
 def _alarm_template_get(alarm_type, alarm_context):
-    """
-    Returns the alarm template associated with the given context
-    """
+    """Returns the alarm template associated with the given context."""
+
     if alarm_type not in _alarm_templates:
         return None
 
@@ -306,9 +305,8 @@ def _alarm_template_get(alarm_type, alarm_context):
 
 
 def _alarm_raise(alarm_type, alarm_context, template, data):
-    """
-    Raises an alarm given the alarm template and data
-    """
+    """Raises an alarm given the alarm template and data."""
+
     alarm_uuid = uuid.uuid4()
     alarm_data = alarm.AlarmData(
         alarm_uuid,
@@ -329,9 +327,8 @@ def _alarm_raise(alarm_type, alarm_context, template, data):
 
 
 def raise_sw_update_alarm(alarm_type, additional_text=None, alarm_context=None):
-    """
-    Raise a software update alarm
-    """
+    """Raise a software update alarm."""
+
     data = dict()
     data["additional_text"] = additional_text
 
@@ -356,8 +353,7 @@ def raise_sw_update_alarm(alarm_type, additional_text=None, alarm_context=None):
 
 
 def clear_sw_update_alarm(alarm_list):
-    """
-    Clear software update alarms
-    """
+    """Clear software update alarms."""
+
     for alarm_data in alarm_list:
         alarm.alarm_clear(alarm_data.alarm_uuid)

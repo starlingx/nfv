@@ -15,9 +15,7 @@ from nfv_common.helpers import Singleton
 
 
 class InstanceAdministrativeState(Constants, metaclass=Singleton):
-    """
-    Instance Administrative State Constants
-    """
+    """Instance Administrative State Constants."""
 
     UNKNOWN = Constant("unknown")
     LOCKED = Constant("locked")
@@ -25,9 +23,7 @@ class InstanceAdministrativeState(Constants, metaclass=Singleton):
 
 
 class InstanceOperationalState(Constants, metaclass=Singleton):
-    """
-    Instance Operational State Constants
-    """
+    """Instance Operational State Constants."""
 
     UNKNOWN = Constant("unknown")
     ENABLED = Constant("enabled")
@@ -35,9 +31,7 @@ class InstanceOperationalState(Constants, metaclass=Singleton):
 
 
 class InstanceAvailabilityStatus(Constants, metaclass=Singleton):
-    """
-    Instance Availability Status Constants
-    """
+    """Instance Availability Status Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant("")
@@ -57,9 +51,7 @@ class InstanceAvailabilityStatus(Constants, metaclass=Singleton):
 
 
 class InstanceAction(Constants, metaclass=Singleton):
-    """
-    Instance Action Constants
-    """
+    """Instance Action Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant("")
@@ -80,9 +72,8 @@ class InstanceAction(Constants, metaclass=Singleton):
 
     @staticmethod
     def get_action_type(action):
-        """
-        Translate action to type of action
-        """
+        """Translate action to type of action."""
+
         if InstanceAction.UNPAUSING == action:
             action_type = InstanceActionType.UNPAUSE
         elif InstanceAction.RESUMING == action:
@@ -100,9 +91,7 @@ class InstanceAction(Constants, metaclass=Singleton):
 
 
 class InstanceActionType(Constants, metaclass=Singleton):
-    """
-    Instance Action Type Constants
-    """
+    """Instance Action Type Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant("")
@@ -126,9 +115,7 @@ class InstanceActionType(Constants, metaclass=Singleton):
 
 
 class InstanceActionState(Constants, metaclass=Singleton):
-    """
-    Instance Action State Constants
-    """
+    """Instance Action State Constants."""
 
     UNKNOWN = Constant("unknown")
     INITIAL = Constant("initial")
@@ -140,43 +127,33 @@ class InstanceActionState(Constants, metaclass=Singleton):
 
 
 class InstanceRebootOption(Constants, metaclass=Singleton):
-    """
-    Instance Reboot Option Constants
-    """
+    """Instance Reboot Option Constants."""
 
     GRACEFUL_SHUTDOWN = Constant("graceful-shutdown")
 
 
 class InstanceLiveMigrateOption(Constants, metaclass=Singleton):
-    """
-    Instance Live Migrate Option Constants
-    """
+    """Instance Live Migrate Option Constants."""
 
     BLOCK_MIGRATION = Constant("block-migration")
     HOST = Constant("host")
 
 
 class InstanceResizeOption(Constants, metaclass=Singleton):
-    """
-    Instance Resize Option Constants
-    """
+    """Instance Resize Option Constants."""
 
     INSTANCE_TYPE_UUID = Constant("instance-type-uuid")
 
 
 class InstanceRebuildOption(Constants, metaclass=Singleton):
-    """
-    Instance Rebuild Option Constants
-    """
+    """Instance Rebuild Option Constants."""
 
     INSTANCE_IMAGE_UUID = Constant("instance-image-uuid")
     INSTANCE_NAME = Constant("instance-name")
 
 
 class InstanceGuestServiceState(Constants, metaclass=Singleton):
-    """
-    Instance Guest Service State Constants
-    """
+    """Instance Guest Service State Constants."""
 
     CONFIGURED = Constant("configured")
     CREATED = Constant("created")
@@ -199,9 +176,7 @@ INSTANCE_GUEST_SERVICE_STATE = InstanceGuestServiceState()
 
 
 class InstanceActionData(ObjectData):
-    """
-    NFVI Instance Action Data Object
-    """
+    """NFVI Instance Action Data Object."""
 
     def __init__(
         self,
@@ -247,128 +222,110 @@ class InstanceActionData(ObjectData):
 
     @property
     def action_uuid(self):
-        """
-        Return the uuid for this action
-        """
+        """Return the uuid for this action."""
+
         return self._action_uuid
 
     @property
     def action_type(self):
-        """
-        Returns the type of action
-        """
+        """Returns the type of action."""
+
         return self._action_type
 
     @action_type.setter
     def action_type(self, value):
-        """
-        Allows setting the  type of action
-        """
+        """Allows setting the  type of action."""
+
         self._action_type = value
 
     @property
     def action_parameters(self):
-        """
-        Returns the parameters associated with the action
-        """
+        """Returns the parameters associated with the action."""
+
         return self._action_parameters
 
     @property
     def action_state(self):
-        """
-        Return the state of the action
-        """
+        """Return the state of the action."""
+
         return self._action_state
 
     @action_state.setter
     def action_state(self, value):
-        """
-        Allow setting the state of the action
-        """
+        """Allow setting the state of the action."""
+
         self._action_state = value
         self._last_updated_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     @property
     def reason(self):
-        """
-        Returns the reason for the action state
-        """
+        """Returns the reason for the action state."""
+
         return self._reason
 
     @reason.setter
     def reason(self, value):
-        """
-        Allows the reason for the action state to be set
-        """
+        """Allows the reason for the action state to be set."""
+
         self._reason = value
         self._last_updated_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     @property
     def created_timestamp(self):
-        """
-        Returns the created timestamp
-        """
+        """Returns the created timestamp."""
+
         return self._created_timestamp
 
     @property
     def last_updated_timestamp(self):
-        """
-        Returns the last_updated timestamp
-        """
+        """Returns the last_updated timestamp."""
+
         return self._last_updated_timestamp
 
     @property
     def skip_guest_vote(self):
-        """
-        Returns true if the guest voting should be skipped for this action
-        """
+        """Returns true if the guest voting should be skipped for this action."""
+
         return self._skip_guest_vote
 
     @skip_guest_vote.setter
     def skip_guest_vote(self, value):
-        """
-        Allows indicating if the guest vote should be skipped for this action
-        """
+        """Allows indicating if the guest vote should be skipped for this action."""
+
         self._skip_guest_vote = value
 
     @property
     def skip_guest_notify(self):
-        """
-        Returns true if the guest notify should be skipped for this action
-        """
+        """Returns true if the guest notify should be skipped for this action."""
+
         return self._skip_guest_notify
 
     @skip_guest_notify.setter
     def skip_guest_notify(self, value):
-        """
-        Allows indicating if the guest notify should be skipped for this action
-        """
+        """Allows indicating if the guest notify should be skipped for this action."""
+
         self._skip_guest_notify = value
 
     @property
     def from_cli(self):
-        """
-        Returns true if this action was initiated from the cli
-        """
+        """Returns true if this action was initiated from the cli."""
+
         return self._from_cli
 
     @property
     def context(self):
-        """
-        Returns the context that the action was issued in
-        """
+        """Returns the context that the action was issued in."""
+
         return self._context
 
     def action_is_completed(self):
-        """
-        Returns true if the action has been completed
-        """
+        """Returns true if the action has been completed."""
+
         return INSTANCE_ACTION_STATE.COMPLETED == self.action_state
 
     def as_dict(self):
-        """
-        Represent instance action data object as dictionary
-        """
+        """Represent instance action data object as dictionary."""
+
         data = dict()
         data["action_uuid"] = str(self.action_uuid)
         data["action_type"] = self.action_type
@@ -410,9 +367,7 @@ class InstanceActionData(ObjectData):
 
 
 class Instance(ObjectData):
-    """
-    NFVI Instance Object
-    """
+    """NFVI Instance Object."""
 
     def __init__(
         self,
@@ -460,51 +415,44 @@ class Instance(ObjectData):
 
     @property
     def instance_type_vcpus(self):
-        """
-        Returns the vcpus from the flavor
-        """
+        """Returns the vcpus from the flavor."""
+
         return self.get("instance_type").get("vcpus")
 
     @property
     def instance_type_mem_mb(self):
-        """
-        Returns the ram from the flavor
-        """
+        """Returns the ram from the flavor."""
+
         return self.get("instance_type").get("ram")
 
     @property
     def instance_type_disk_gb(self):
-        """
-        Returns the disk from the flavor
-        """
+        """Returns the disk from the flavor."""
+
         return self.get("instance_type").get("disk")
 
     @property
     def instance_type_ephemeral_gb(self):
-        """
-        Returns the ephemeral from the flavor
-        """
+        """Returns the ephemeral from the flavor."""
+
         return self.get("instance_type").get("ephemeral")
 
     @property
     def instance_type_swap_gb(self):
-        """
-        Returns the swap from the flavor
-        """
+        """Returns the swap from the flavor."""
+
         return self.get("instance_type").get("swap")
 
     @property
     def instance_type_original_name(self):
-        """
-        Returns the original name from the flavor
-        """
+        """Returns the original name from the flavor."""
+
         return self.get("instance_type").get("original_name")
 
     @property
     def instance_type_guest_services(self):
-        """
-        Returns the guest services from the flavor extra specs
-        """
+        """Returns the guest services from the flavor extra specs."""
+
         guest_services = dict()
         flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
@@ -522,9 +470,8 @@ class Instance(ObjectData):
 
     @property
     def instance_type_auto_recovery(self):
-        """
-        Returns the auto recovery from the flavor extra specs
-        """
+        """Returns the auto recovery from the flavor extra specs."""
+
         auto_recovery = None
         flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
@@ -546,9 +493,8 @@ class Instance(ObjectData):
 
     @property
     def instance_type_live_migration_timeout(self):
-        """
-        Returns the live migration timeout from the flavor extra specs
-        """
+        """Returns the live migration timeout from the flavor extra specs."""
+
         live_migration_timeout = None
         flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
@@ -560,9 +506,8 @@ class Instance(ObjectData):
 
     @property
     def instance_type_live_migration_max_downtime(self):
-        """
-        Returns the live migration max downtime from the flavor extra specs
-        """
+        """Returns the live migration max downtime from the flavor extra specs."""
+
         live_migration_max_downtime = None
         flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:

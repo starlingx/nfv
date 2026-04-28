@@ -11,9 +11,7 @@ _tenant_table = None
 
 
 class TenantTable(Table):
-    """
-    Tenant Table
-    """
+    """Tenant Table."""
 
     def __init__(self):
         super(TenantTable, self).__init__()
@@ -26,16 +24,14 @@ class TenantTable(Table):
 
 
 def tables_get_tenant_table():
-    """
-    Get the tenant table
-    """
+    """Get the tenant table."""
+
     return _tenant_table
 
 
 def tenant_table_initialize():
-    """
-    Initialize the tenant table
-    """
+    """Initialize the tenant table."""
+
     global _tenant_table
 
     _tenant_table = TenantTable()
@@ -48,9 +44,8 @@ def tenant_table_initialize():
 
 
 def tenant_table_finalize():
-    """
-    Finalize the tenant table
-    """
+    """Finalize the tenant table."""
+
     global _tenant_table
 
     del _tenant_table

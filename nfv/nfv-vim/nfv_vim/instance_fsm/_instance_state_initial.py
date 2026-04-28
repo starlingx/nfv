@@ -12,18 +12,15 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class InitialState(state_machine.State):
-    """
-    Instance - Initial State
-    """
+    """Instance - Initial State."""
 
     def __init__(self, name, task_start_state_name):
         super(InitialState, self).__init__(name)
         self._task_start_state_name = task_start_state_name
 
     def enter(self, instance):
-        """
-        Entering initial state
-        """
+        """Entering initial state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         if instance.action_fsm is not None:
             action_data = instance.action_fsm_data
@@ -31,21 +28,18 @@ class InitialState(state_machine.State):
                 action_data.set_action_completed()
 
     def exit(self, instance):
-        """
-        Exiting initial state
-        """
+        """Exiting initial state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the initial state
-        """
+        """Transition from the initial state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the initial state
-        """
+        """Handle event while in the initial state."""
+
         if INSTANCE_EVENT.TASK_START == event:
             return self._task_start_state_name
 

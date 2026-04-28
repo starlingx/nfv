@@ -18,9 +18,8 @@ DLOG = debug.debug_get_logger("nfv_vim.api.openstack")
 
 
 def validate_token(directory, admin_token, token_id):
-    """
-    Ask Keystone if a token is valid
-    """
+    """Ask Keystone if a token is valid."""
+
     try:
         if directory.auth_uri is None:
             url = "%s://%s:%s/v3/auth/tokens" % (
@@ -71,9 +70,8 @@ def validate_token(directory, admin_token, token_id):
 
 
 def get_token(directory):
-    """
-    Ask OpenStack for a token
-    """
+    """Ask OpenStack for a token."""
+
     try:
         if directory.auth_uri is None:
             url = "%s://%s:%s/v3/auth/tokens" % (
@@ -140,8 +138,8 @@ def get_token(directory):
 
 
 def get_directory(config, service_category):
-    """
-    Get directory information from the given configuration for the given
+    """Get directory information from the given configuration for the given
+
     service category.
     """
     if SERVICE_CATEGORY.PLATFORM == service_category:
@@ -205,7 +203,6 @@ def get_directory(config, service_category):
                 )
                 or endpoint_override is not None
             ) and not endpoint_disabled:
-
                 directory.set_service_info(
                     service,
                     region_name,

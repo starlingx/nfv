@@ -23,9 +23,7 @@ DLOG = debug.debug_get_logger("nfv_common.strategy.phase")
 
 
 class StrategyPhase(object):
-    """
-    Strategy Phase
-    """
+    """Strategy Phase."""
 
     def __init__(self, name):
         self._name = name
@@ -48,137 +46,118 @@ class StrategyPhase(object):
 
     @property
     def name(self):
-        """
-        Returns the name of the strategy phase
-        """
+        """Returns the name of the strategy phase."""
+
         return self._name
 
     @property
     def strategy(self):
-        """
-        Returns the strategy this phase is a member of
-        """
+        """Returns the strategy this phase is a member of."""
+
         if self._strategy_reference is not None:
             return self._strategy_reference()
         return None
 
     @strategy.setter
     def strategy(self, strategy_value):
-        """
-        Set the strategy that this phase is a member of
-        """
+        """Set the strategy that this phase is a member of."""
+
         self._strategy_reference = weakref.ref(strategy_value)
 
     @property
     def current_stage(self):
-        """
-        Return the current stage
-        """
+        """Return the current stage."""
+
         return self._current_stage
 
     @property
     def stop_at_stage(self):
-        """
-        Return the stage to stop at
-        """
+        """Return the stage to stop at."""
+
         return self._stop_at_stage
 
     @property
     def total_stages(self):
-        """
-        Returns the number of stages
-        """
+        """Returns the number of stages."""
+
         return len(self._stages)
 
     @property
     def stages(self):
-        """
-        Returns the stages for this phase
-        """
+        """Returns the stages for this phase."""
+
         return self._stages
 
     @property
     def timeout_in_secs(self):
-        """
-        Returns the maximum amount of time to wait for completion
-        """
+        """Returns the maximum amount of time to wait for completion."""
+
         return self._timeout_in_secs
 
     @property
     def result(self):
-        """
-        Returns the result of the strategy phase
-        """
+        """Returns the result of the strategy phase."""
+
         return self._result
 
     @result.setter
     def result(self, result):
-        """
-        Updates the result of the strategy phase
-        """
+        """Updates the result of the strategy phase."""
+
         self._result = result
 
     @property
     def result_reason(self):
-        """
-        Returns the reason for the result of the strategy phase
-        """
+        """Returns the reason for the result of the strategy phase."""
+
         return self._result_reason
 
     @result_reason.setter
     def result_reason(self, reason):
-        """
-        Updates the reason for the result of the strategy phase
-        """
+        """Updates the reason for the result of the strategy phase."""
+
         self._result_reason = reason
 
     @property
     def result_response(self):
-        """
-        Returns the response for the result of the strategy phase
-        """
+        """Returns the response for the result of the strategy phase."""
+
         return self._result_response
 
     @result_response.setter
     def result_response(self, response):
-        """
-        Updates the response for the result of the strategy phase
-        """
+        """Updates the response for the result of the strategy phase."""
+
         self._result_response = response
 
     @property
     def start_date_time(self):
-        """
-        Returns the start date-time of the strategy phase
-        """
+        """Returns the start date-time of the strategy phase."""
+
         return self._start_date_time
 
     @start_date_time.setter
     def start_date_time(self, date_time_str):
-        """
-        Updates the start date-time of the strategy phase
-        """
+        """Updates the start date-time of the strategy phase."""
+
         self._start_date_time = date_time_str
 
     @property
     def end_date_time(self):
-        """
-        Returns the end date-time of the strategy phase
-        """
+        """Returns the end date-time of the strategy phase."""
+
         return self._end_date_time
 
     @end_date_time.setter
     def end_date_time(self, date_time_str):
-        """
-        Updates the end date-time of the strategy phase
-        """
+        """Updates the end date-time of the strategy phase."""
+
         self._end_date_time = date_time_str
 
     @property
     def completion_percentage(self):
-        """
-        Returns the percentage completed
-        """
+        """Returns the percentage completed."""
+
         completed_steps = 0
         total_steps = 0
 
@@ -201,65 +180,56 @@ class StrategyPhase(object):
         return int((completed_steps * 100) // total_steps)
 
     def is_inprogress(self):
-        """
-        Returns true if the phase is inprogress
-        """
+        """Returns true if the phase is inprogress."""
+
         if self._inprogress:
             stage = self._stages[self._current_stage]
             return stage.is_inprogress()
         return False
 
     def is_degraded(self):
-        """
-        Returns true if the phase is degraded
-        """
+        """Returns true if the phase is degraded."""
+
         return STRATEGY_PHASE_RESULT.DEGRADED == self._result
 
     def is_failed(self):
-        """
-        Returns true if the phase has failed
-        """
+        """Returns true if the phase has failed."""
+
         return STRATEGY_PHASE_RESULT.FAILED == self._result
 
     def is_timed_out(self):
-        """
-        Returns true if the phase has timed out
-        """
+        """Returns true if the phase has timed out."""
+
         return STRATEGY_PHASE_RESULT.TIMED_OUT == self._result
 
     def is_aborted(self):
-        """
-        Returns true if the phase is aborted
-        """
+        """Returns true if the phase is aborted."""
+
         return STRATEGY_PHASE_RESULT.ABORTED == self._result
 
     def is_success(self):
-        """
-        Returns true if the phase completed successfully
-        """
+        """Returns true if the phase completed successfully."""
+
         return STRATEGY_PHASE_RESULT.SUCCESS == self._result
 
     def add_stage(self, stage):
-        """
-        Add a stage to this strategy phase
-        """
+        """Add a stage to this strategy phase."""
+
         stage.id = len(self._stages)
         stage.phase = self
         self._stages.append(stage)
 
     def _save(self):
-        """
-        Phase Save
-        """
+        """Phase Save."""
+
         if self.strategy is not None:
             self.strategy.phase_save()  # pylint: disable=no-member
         else:
             DLOG.info("Strategy reference is invalid for phase (%s)." % self._name)
 
     def _cleanup(self):
-        """
-        Phase Cleanup
-        """
+        """Phase Cleanup."""
+
         DLOG.info("Phase (%s) cleanup called" % self._name)
 
         if self._timer_id is not None:
@@ -271,9 +241,8 @@ class StrategyPhase(object):
             self._stage_timer_id = None
 
     def _abort(self):
-        """
-        Phase Abort
-        """
+        """Phase Abort."""
+
         abort_list = list()
 
         if STRATEGY_PHASE_RESULT.INITIAL == self._result:
@@ -299,9 +268,8 @@ class StrategyPhase(object):
 
     @coroutine
     def _timeout(self):
-        """
-        Phase Timeout
-        """
+        """Phase Timeout."""
+
         (yield)
         DLOG.info(
             "Phase (%s) timed out, timeout_in_secs=%s."
@@ -319,9 +287,8 @@ class StrategyPhase(object):
         self._complete(self._result, self._result_reason)
 
     def result_complete_response(self, response):
-        """
-        Sets complete result response
-        """
+        """Sets complete result response."""
+
         # response message is converted to readable display format
         response_format = response.copy()
         if "error-message" in response_format:
@@ -332,9 +299,8 @@ class StrategyPhase(object):
         self._result_response = response_result
 
     def _complete(self, result, reason):
-        """
-        Phase Internal Complete
-        """
+        """Phase Internal Complete."""
+
         self._inprogress = False
         self._cleanup()
         self._save()
@@ -342,9 +308,8 @@ class StrategyPhase(object):
         return self.complete(result, reason)
 
     def _apply(self):
-        """
-        Phase Apply
-        """
+        """Phase Apply."""
+
         if not self._inprogress:
             if 0 == self._current_stage:
                 self._cleanup()
@@ -438,9 +403,8 @@ class StrategyPhase(object):
                 return self._result, self._result_reason
 
     def stage_complete(self, stage_result, stage_result_reason=None):
-        """
-        Strategy Stage Complete
-        """
+        """Strategy Stage Complete."""
+
         stage = self._stages[self._current_stage]
         DLOG.debug(
             "Phase (%s) stage (%s) complete, result=%s, reason=%s."
@@ -469,9 +433,8 @@ class StrategyPhase(object):
 
     @coroutine
     def _stage_timeout(self):
-        """
-        Strategy Stage Timeout
-        """
+        """Strategy Stage Timeout."""
+
         (yield)
         if len(self._stages) <= self._current_stage:
             DLOG.error(
@@ -508,24 +471,21 @@ class StrategyPhase(object):
             self.stage_complete(stage_result, stage_result_reason)
 
     def stage_extend_timeout(self):
-        """
-        Strategy Stage Extend Timeout
-        """
+        """Strategy Stage Extend Timeout."""
+
         if self.strategy is not None:
             self.strategy.phase_extend_timeout(self)  # pylint: disable=no-member
         else:
             self.refresh_timeouts()
 
     def stage_save(self):
-        """
-        Strategy Stage Save
-        """
+        """Strategy Stage Save."""
+
         self._save()
 
     def refresh_timeouts(self):
-        """
-        Phase Refresh Timeouts
-        """
+        """Phase Refresh Timeouts."""
+
         if not self._inprogress:
             # No need to refresh phase timer, phase not started
             return
@@ -583,9 +543,8 @@ class StrategyPhase(object):
         stage.refresh_timeouts()
 
     def abort(self):
-        """
-        Phase Abort (can be overridden by child class)
-        """
+        """Phase Abort (can be overridden by child class)."""
+
         abort_list = self._abort()
         abort_phase = StrategyPhase(STRATEGY_PHASE.ABORT)
         for abort_stage in abort_list:
@@ -593,9 +552,8 @@ class StrategyPhase(object):
         return abort_phase
 
     def apply(self, stop_at_stage=None):
-        """
-        Phase Apply (can be overridden by child class)
-        """
+        """Phase Apply (can be overridden by child class)."""
+
         if stop_at_stage is None:
             self._stop_at_stage = len(self._stages)
         elif 0 <= stop_at_stage <= len(self._stages):
@@ -603,9 +561,8 @@ class StrategyPhase(object):
         return self._apply()
 
     def complete(self, result, reason):
-        """
-        Phase Complete (can be overridden by child class)
-        """
+        """Phase Complete (can be overridden by child class)."""
+
         DLOG.debug("Strategy Phase (%s) complete." % self._name)
         if not self.is_success() and self.result_response:
             DLOG.error(
@@ -620,9 +577,8 @@ class StrategyPhase(object):
         return self._result, self._result_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Phase Handle Event (can be overridden by child class)
-        """
+        """Phase Handle Event (can be overridden by child class)."""
+
         DLOG.debug("Strategy Phase (%s) handle event (%s)." % (self._name, event))
         handled = False
 
@@ -636,9 +592,8 @@ class StrategyPhase(object):
         return handled
 
     def from_dict(self, data, stages=None):
-        """
-        Initializes a strategy phase object using the given dictionary
-        """
+        """Initializes a strategy phase object using the given dictionary."""
+
         StrategyPhase.__init__(self, data["name"])
         self._inprogress = data["inprogress"]
         self._current_stage = data["current_stage"]
@@ -663,9 +618,8 @@ class StrategyPhase(object):
         return self
 
     def as_dict(self):
-        """
-        Represent the strategy phase as a dictionary
-        """
+        """Represent the strategy phase as a dictionary."""
+
         data = dict()
         data["name"] = self.name
         data["timeout"] = self._timeout_in_secs

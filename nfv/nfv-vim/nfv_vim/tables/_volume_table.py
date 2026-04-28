@@ -11,9 +11,7 @@ _volume_table = None
 
 
 class VolumeTable(Table):
-    """
-    Volume Table
-    """
+    """Volume Table."""
 
     def __init__(self):
         super(VolumeTable, self).__init__()
@@ -26,16 +24,14 @@ class VolumeTable(Table):
 
 
 def tables_get_volume_table():
-    """
-    Get the volume table
-    """
+    """Get the volume table."""
+
     return _volume_table
 
 
 def volume_table_initialize():
-    """
-    Initialize the volume table
-    """
+    """Initialize the volume table."""
+
     global _volume_table
 
     _volume_table = VolumeTable()
@@ -48,9 +44,8 @@ def volume_table_initialize():
 
 
 def volume_table_finalize():
-    """
-    Finalize the volume table
-    """
+    """Finalize the volume table."""
+
     global _volume_table
 
     del _volume_table

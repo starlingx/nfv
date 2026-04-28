@@ -20,9 +20,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.identity_api")
 
 
 class NFVIIdentityAPI(nfvi.api.v1.NFVIIdentityAPI):
-    """
-    NFVI Identity API Class Definition
-    """
+    """NFVI Identity API Class Definition."""
 
     _name = "Identity-API"
     _version = "1.0.0"
@@ -51,9 +49,8 @@ class NFVIIdentityAPI(nfvi.api.v1.NFVIIdentityAPI):
         return self._signature
 
     def get_tenants(self, future, callback):
-        """
-        Get a list of tenants
-        """
+        """Get a list of tenants."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -81,7 +78,6 @@ class NFVIIdentityAPI(nfvi.api.v1.NFVIIdentityAPI):
             tenant_objs = list()
 
             for tenant_data in tenant_data_list["projects"]:
-
                 tenant_uuid = uuid.UUID(tenant_data["id"])
 
                 tenant_obj = nfvi.objects.v1.Tenant(
@@ -116,16 +112,14 @@ class NFVIIdentityAPI(nfvi.api.v1.NFVIIdentityAPI):
             callback.close()
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.OPENSTACK
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         return

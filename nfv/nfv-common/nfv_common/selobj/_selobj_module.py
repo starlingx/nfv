@@ -17,9 +17,9 @@ _error_callbacks = dict()
 
 
 def selobj_add_read_obj(selobj, callback, *callback_args, **callback_kwargs):
-    """
-    Add read selection object, callback is a co-routine that is
-    sent the selection object that has become readable
+    """Add read selection object, callback is a co-routine that is
+
+    sent the selection object that has become readable.
     """
     global _read_callbacks
 
@@ -28,9 +28,8 @@ def selobj_add_read_obj(selobj, callback, *callback_args, **callback_kwargs):
 
 
 def selobj_del_read_obj(selobj):
-    """
-    Delete read selection object
-    """
+    """Delete read selection object."""
+
     global _read_callbacks
 
     if selobj in list(_read_callbacks):
@@ -38,9 +37,9 @@ def selobj_del_read_obj(selobj):
 
 
 def selobj_add_write_obj(selobj, callback, *callback_args, **callback_kwargs):
-    """
-    Add write selection object, callback is a co-routine that is
-    sent the selection object that has become writeable
+    """Add write selection object, callback is a co-routine that is
+
+    sent the selection object that has become writeable.
     """
     global _write_callbacks
 
@@ -49,9 +48,8 @@ def selobj_add_write_obj(selobj, callback, *callback_args, **callback_kwargs):
 
 
 def selobj_del_write_obj(selobj):
-    """
-    Delete write selection object
-    """
+    """Delete write selection object."""
+
     global _write_callbacks
 
     if selobj in list(_write_callbacks):
@@ -59,9 +57,9 @@ def selobj_del_write_obj(selobj):
 
 
 def selobj_add_error_callback(selobj, callback, *callback_args, **callback_kwargs):
-    """
-    Add selection object error callback which is a co-routine that is
-    called when the selection object is in error
+    """Add selection object error callback which is a co-routine that is
+
+    called when the selection object is in error.
     """
     global _error_callbacks
 
@@ -70,9 +68,8 @@ def selobj_add_error_callback(selobj, callback, *callback_args, **callback_kwarg
 
 
 def selobj_del_error_callback(selobj):
-    """
-    Delete selection object error callback
-    """
+    """Delete selection object error callback."""
+
     global _error_callbacks
 
     if selobj in list(_error_callbacks):
@@ -80,9 +77,9 @@ def selobj_del_error_callback(selobj):
 
 
 def selobj_dispatch(timeout_in_ms):
-    """
-    Dispatch selection objects that have become readable or writeable
-    within the given time period
+    """Dispatch selection objects that have become readable or writeable
+
+    within the given time period.
     """
     from nfv_common import histogram
     from nfv_common import timers
@@ -152,9 +149,8 @@ def selobj_dispatch(timeout_in_ms):
 
 
 def selobj_initialize():
-    """
-    Initialize the selection object module
-    """
+    """Initialize the selection object module."""
+
     global _read_callbacks, _write_callbacks
 
     del _read_callbacks
@@ -165,9 +161,8 @@ def selobj_initialize():
 
 
 def selobj_finalize():
-    """
-    Finalize the selection object module
-    """
+    """Finalize the selection object module."""
+
     global _read_callbacks, _write_callbacks
 
     del _read_callbacks

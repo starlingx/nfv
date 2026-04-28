@@ -15,17 +15,13 @@ from nfv_client.openstack.objects import Token
 
 
 class OpenStackServices(object):
-    """
-    OpenStack Services Constants
-    """
+    """OpenStack Services Constants."""
 
     VIM = "vim"
 
 
 class OpenStackServiceTypes(object):
-    """
-    OpenStack Service Types Constants
-    """
+    """OpenStack Service Types Constants."""
 
     NFV = "nfv"
 
@@ -38,9 +34,7 @@ CAFILE = os.environ.get("REQUESTS_CA_BUNDLE")
 def get_token(
     auth_uri, project_name, project_domain_name, username, password, user_domain_name
 ):
-    """
-    Ask OpenStack for a token
-    """
+    """Ask OpenStack for a token."""
 
     ssl_context = None
     try:

@@ -11,9 +11,7 @@ _subnet_table = None
 
 
 class SubnetTable(Table):
-    """
-    Subnet Table
-    """
+    """Subnet Table."""
 
     def __init__(self):
         super(SubnetTable, self).__init__()
@@ -46,16 +44,14 @@ class SubnetTable(Table):
 
 
 def tables_get_subnet_table():
-    """
-    Get the subnet table
-    """
+    """Get the subnet table."""
+
     return _subnet_table
 
 
 def subnet_table_initialize():
-    """
-    Initialize the subnet table
-    """
+    """Initialize the subnet table."""
+
     global _subnet_table
 
     _subnet_table = SubnetTable()
@@ -68,9 +64,8 @@ def subnet_table_initialize():
 
 
 def subnet_table_finalize():
-    """
-    Finalize the subnet table
-    """
+    """Finalize the subnet table."""
+
     global _subnet_table
 
     del _subnet_table

@@ -30,7 +30,6 @@ def fake_timer(a, b, c, d):
 
 
 class TestInstanceDirector(testcase.NFVTestCase):
-
     def setUp(self):
         super(TestInstanceDirector, self).setUp()
         self._image_table = ImageTable()
@@ -58,9 +57,8 @@ class TestInstanceDirector(testcase.NFVTestCase):
     def create_instance(
         self, instance_type_name, instance_name, recovery_priority=None
     ):
-        """
-        Create an instance
-        """
+        """Create an instance."""
+
         tenant_uuid = uuid.uuid4()
         image_uuid = uuid.uuid4()
 
@@ -91,9 +89,8 @@ class TestInstanceDirector(testcase.NFVTestCase):
 
     @mock.patch("nfv_common.timers.timers_create_timer", fake_timer)
     def instance_setup_func(self):
-        """
-        Setup for testing.
-        """
+        """Setup for testing."""
+
         instance_type_uuid = uuid.uuid4()
 
         instance_type = objects.InstanceType(instance_type_uuid, "small")
@@ -135,9 +132,8 @@ class TestInstanceDirector(testcase.NFVTestCase):
         tables_get_instance_type_table_mock,
         tables_get_tenant_table_mock,
     ):
-        """
-        Test the instance director recovery list logic
-        """
+        """Test the instance director recovery list logic."""
+
         tables_get_tenant_table_mock.return_value = self._tenant_table
         tables_get_instance_table_mock.return_value = self._instance_table
         tables_get_instance_type_table_mock.return_value = self._instance_type_table
@@ -204,9 +200,8 @@ class TestInstanceDirector(testcase.NFVTestCase):
         tables_get_instance_type_table_mock,
         tables_get_tenant_table_mock,
     ):
-        """
-        Test the instance director recovery list ordering
-        """
+        """Test the instance director recovery list ordering."""
+
         tables_get_tenant_table_mock.return_value = self._tenant_table
         tables_get_instance_table_mock.return_value = self._instance_table
         tables_get_instance_type_table_mock.return_value = self._instance_type_table
@@ -361,9 +356,8 @@ class TestInstanceDirector(testcase.NFVTestCase):
         tables_get_tenant_table_mock,
         tables_get_image_table_mock,
     ):
-        """
-        Test the instance director recover instance logic
-        """
+        """Test the instance director recover instance logic."""
+
         tables_get_tenant_table_mock.return_value = self._tenant_table
         tables_get_instance_table_mock.return_value = self._instance_table
         tables_get_instance_type_table_mock.return_value = self._instance_type_table

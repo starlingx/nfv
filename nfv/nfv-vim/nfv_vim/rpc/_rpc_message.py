@@ -15,9 +15,7 @@ DLOG = debug.debug_get_logger("nfv_vim.rpc")
 
 
 class RPCMessage(object):
-    """
-    RPC Message
-    """
+    """RPC Message."""
 
     version = RPC_MSG_VERSION.UNKNOWN
     type = RPC_MSG_TYPE.UNKNOWN
@@ -29,15 +27,13 @@ class RPCMessage(object):
         self.result = msg_result
 
     def serialize_payload(self, msg):
-        """
-        Serialize RPC Message payload
-        """
+        """Serialize RPC Message payload."""
+
         pass
 
     def serialize(self):
-        """
-        Serialize RPC Message
-        """
+        """Serialize RPC Message."""
+
         msg = dict()
         msg["version"] = self.version
         msg["type"] = self.type
@@ -47,16 +43,14 @@ class RPCMessage(object):
         return serialized_msg
 
     def deserialize_payload(self, msg):
-        """
-        Deserialize RPC Message payload
-        """
+        """Deserialize RPC Message payload."""
+
         pass
 
     @staticmethod
     def deserialize(msg):
-        """
-        Deserialize RPC Message
-        """
+        """Deserialize RPC Message."""
+
         msg = json.loads(msg)
         msg_version = msg.get("version", RPC_MSG_VERSION.UNKNOWN)
         msg_type = msg.get("type", RPC_MSG_TYPE.UNKNOWN)
@@ -76,9 +70,7 @@ class RPCMessage(object):
 
 
 class RPCMessageFactory(object):
-    """
-    RPC Message Factory
-    """
+    """RPC Message Factory."""
 
     from nfv_vim.rpc._rpc_message_image import APIRequestCreateImage
     from nfv_vim.rpc._rpc_message_image import APIRequestDeleteImage
@@ -144,10 +136,10 @@ class RPCMessageFactory(object):
     from nfv_vim.rpc._rpc_message_network import APIResponseUpdateNetwork
 
     from nfv_vim.rpc._rpc_message_sw_update import (
-        APIRequestCreateKubeRootcaUpdateStrategy
+        APIRequestCreateKubeRootcaUpdateStrategy,
     )
     from nfv_vim.rpc._rpc_message_sw_update import (
-        APIRequestCreateSystemConfigUpdateStrategy
+        APIRequestCreateSystemConfigUpdateStrategy,
     )
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestAbortSwUpdateStrategy
     from nfv_vim.rpc._rpc_message_sw_update import APIRequestApplySwUpdateStrategy
@@ -227,27 +219,50 @@ class RPCMessageFactory(object):
         RPC_MSG_TYPE.GET_NETWORK_REQUEST: APIRequestGetNetwork,
         RPC_MSG_TYPE.GET_NETWORK_RESPONSE: APIResponseGetNetwork,
         # Software Update Mapping
-        RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_REQUEST: APIRequestCreateSwUpdateStrategy,
-        RPC_MSG_TYPE.CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST: APIRequestCreateKubeRootcaUpdateStrategy,
-        RPC_MSG_TYPE.CREATE_KUBE_UPGRADE_STRATEGY_REQUEST: APIRequestCreateKubeUpgradeStrategy,
-        RPC_MSG_TYPE.CREATE_SW_UPGRADE_STRATEGY_REQUEST: APIRequestCreateSwUpgradeStrategy,
-        RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_RESPONSE: APIResponseCreateSwUpdateStrategy,
-        RPC_MSG_TYPE.CREATE_SYSTEM_CONFIG_UPDATE_STRATEGY_REQUEST: APIRequestCreateSystemConfigUpdateStrategy,
-        RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_REQUEST: APIRequestApplySwUpdateStrategy,
-        RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_RESPONSE: APIResponseApplySwUpdateStrategy,
-        RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_REQUEST: APIRequestAbortSwUpdateStrategy,
-        RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_RESPONSE: APIResponseAbortSwUpdateStrategy,
-        RPC_MSG_TYPE.DELETE_SW_UPDATE_STRATEGY_REQUEST: APIRequestDeleteSwUpdateStrategy,
-        RPC_MSG_TYPE.DELETE_SW_UPDATE_STRATEGY_RESPONSE: APIResponseDeleteSwUpdateStrategy,
+        RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_REQUEST: (
+            APIRequestCreateSwUpdateStrategy
+        ),
+        RPC_MSG_TYPE.CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST: (
+            APIRequestCreateKubeRootcaUpdateStrategy
+        ),
+        RPC_MSG_TYPE.CREATE_KUBE_UPGRADE_STRATEGY_REQUEST: (
+            APIRequestCreateKubeUpgradeStrategy
+        ),
+        RPC_MSG_TYPE.CREATE_SW_UPGRADE_STRATEGY_REQUEST: (
+            APIRequestCreateSwUpgradeStrategy
+        ),
+        RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_RESPONSE: (
+            APIResponseCreateSwUpdateStrategy
+        ),
+        RPC_MSG_TYPE.CREATE_SYSTEM_CONFIG_UPDATE_STRATEGY_REQUEST: (
+            APIRequestCreateSystemConfigUpdateStrategy
+        ),
+        RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_REQUEST: (
+            APIRequestApplySwUpdateStrategy
+        ),
+        RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_RESPONSE: (
+            APIResponseApplySwUpdateStrategy
+        ),
+        RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_REQUEST: (
+            APIRequestAbortSwUpdateStrategy
+        ),
+        RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_RESPONSE: (
+            APIResponseAbortSwUpdateStrategy
+        ),
+        RPC_MSG_TYPE.DELETE_SW_UPDATE_STRATEGY_REQUEST: (
+            APIRequestDeleteSwUpdateStrategy
+        ),
+        RPC_MSG_TYPE.DELETE_SW_UPDATE_STRATEGY_RESPONSE: (
+            APIResponseDeleteSwUpdateStrategy
+        ),
         RPC_MSG_TYPE.GET_SW_UPDATE_STRATEGY_REQUEST: APIRequestGetSwUpdateStrategy,
         RPC_MSG_TYPE.GET_SW_UPDATE_STRATEGY_RESPONSE: APIResponseGetSwUpdateStrategy,
     }
 
     @classmethod
     def get(cls, msg_version, msg_type, msg_result, msg):
-        """
-        Get RPC message instance
-        """
+        """Get RPC message instance."""
+
         rpc_class = cls._rpc_msg_class_map.get(msg_type, None)
         if rpc_class is not None:
             rpc_msg = rpc_class(msg_version, msg_type, msg_result)

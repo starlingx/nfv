@@ -17,17 +17,14 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class DisabledState(state_machine.State):
-    """
-    Host - Disabled State
-    """
+    """Host - Disabled State."""
 
     def __init__(self, name):
         super(DisabledState, self).__init__(name)
 
     def enter(self, host):
-        """
-        Entering disabled state
-        """
+        """Entering disabled state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, host.name))
         if host.fail_notification_required:
             DLOG.info("Fail notification required for %s." % host.name)
@@ -37,23 +34,20 @@ class DisabledState(state_machine.State):
         host.clear_reason()
 
     def exit(self, host):
-        """
-        Exiting disabled state
-        """
+        """Exiting disabled state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, host.name))
         host.task.abort()
         host.fail_notification_required = False
 
     def transition(self, host, event, event_data, to_state):
-        """
-        Transition from the disabled state
-        """
+        """Transition from the disabled state."""
+
         pass
 
     def handle_event(self, host, event, event_data=None):
-        """
-        Handle event while in the disabled state
-        """
+        """Handle event while in the disabled state."""
+
         if HOST_EVENT.DELETE == event:
             return HOST_STATE.DELETING
 

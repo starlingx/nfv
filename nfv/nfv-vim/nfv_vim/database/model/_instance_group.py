@@ -11,9 +11,7 @@ from nfv_vim.database.model._base import Base
 
 
 class InstanceGroup(AsDictMixin, Base):
-    """
-    Instance Group Database Table
-    """
+    """Instance Group Database Table."""
 
     __tablename__ = "instance_groups"
 

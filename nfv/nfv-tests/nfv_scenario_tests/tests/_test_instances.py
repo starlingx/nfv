@@ -22,9 +22,7 @@ DLOG = debug.debug_get_logger("nfv_tests.test_instances")
 
 
 class TestInstance(_test_base.Test):
-    """
-    Test Instance Base Class
-    """
+    """Test Instance Base Class."""
 
     LOG_FILES = {"nfv-vim": "/var/log/nfv-vim.log"}
 
@@ -55,32 +53,28 @@ class TestInstance(_test_base.Test):
 
     @property
     def instance_name(self):
-        """
-        Returns the instance name
-        """
+        """Returns the instance name."""
+
         return self._instance_name
 
     @property
     def instance_uuid(self):
-        """
-        Returns the instance id
-        """
+        """Returns the instance id."""
+
         return _instances.instance_get_uuid(self._instance_data)
 
     @property
     def host(self):
-        """
-        Returns the host the instance is located
-        """
+        """Returns the host the instance is located."""
+
         if self._instance_data is not None:
             return self._instance_data["OS-EXT-SRV-ATTR:host"]
         return None
 
     @property
     def platform_token(self):
-        """
-        Returns the platform token
-        """
+        """Returns the platform token."""
+
         if self._platform_token is None:
             self._platform_token = openstack.get_token(self._platform_directory)
 
@@ -91,9 +85,8 @@ class TestInstance(_test_base.Test):
 
     @property
     def openstack_token(self):
-        """
-        Returns the openstack token
-        """
+        """Returns the openstack token."""
+
         if self._openstack_token is None:
             self._openstack_token = openstack.get_token(self._openstack_directory)
 
@@ -103,9 +96,8 @@ class TestInstance(_test_base.Test):
         return self._openstack_token
 
     def _save_debug(self, test_success, test_reason):
-        """
-        Save debug information
-        """
+        """Save debug information."""
+
         with open(self._output_dir + "/test_result", "w") as f:
             f.write("success=%s, reason=%s\n" % (test_success, test_reason))
 
@@ -136,9 +128,8 @@ class TestInstance(_test_base.Test):
 
     @staticmethod
     def save_customer_alarms(filename, wipe=False):
-        """
-        Save the customer alarms
-        """
+        """Save the customer alarms."""
+
         if wipe:
             open(filename, "w").close()
 
@@ -149,9 +140,8 @@ class TestInstance(_test_base.Test):
         )
 
     def save_customer_logs(self, filename, wipe=False):
-        """
-        Save the customer logs
-        """
+        """Save the customer logs."""
+
         if wipe:
             open(filename, "w").close()
 
@@ -163,9 +153,8 @@ class TestInstance(_test_base.Test):
         )
 
     def save_customer_alarm_history(self, filename, wipe=False):
-        """
-        Save the customer alarm history
-        """
+        """Save the customer alarm history."""
+
         if wipe:
             open(filename, "w").close()
 
@@ -178,9 +167,8 @@ class TestInstance(_test_base.Test):
         )
 
     def _refresh_instance_data(self):
-        """
-        Fetch the latest instance data
-        """
+        """Fetch the latest instance data."""
+
         if self._instance_data is None:
             instance_data = _instances.instance_get_by_name(self._instance_name)
         else:
@@ -188,60 +176,51 @@ class TestInstance(_test_base.Test):
         self._instance_data = instance_data
 
     def _refresh_customer_alarms(self):
-        """
-        Fetch the customer alarms raised
-        """
+        """Fetch the customer alarms raised."""
+
         self._customer_alarms = fm.get_alarms(self.platform_token).result_data
 
     def _refresh_customer_logs(self):
-        """
-        Fetch the customer logs
-        """
+        """Fetch the customer logs."""
+
         self._customer_logs = fm.get_logs(
             self.platform_token, self.start_datetime, self.end_datetime
         ).result_data
 
     def _refresh_customer_alarm_history(self):
-        """
-        Fetch the customer alarm history
-        """
+        """Fetch the customer alarm history."""
+
         self._customer_alarm_history = fm.get_alarm_history(
             self.platform_token, self.start_datetime, self.end_datetime
         ).result_data
 
 
 class TestInstanceStart(TestInstance):
-    """
-    Test - Start Instance
-    """
+    """Test - Start Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceStart, self).__init__(
             "Instance-Start", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         return _instances.instance_is_stopped(self._instance_data)
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.start_server(self.openstack_token, self.instance_uuid)
         return True, "instance is starting"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -262,37 +241,31 @@ class TestInstanceStart(TestInstance):
 
 
 class TestInstanceStop(TestInstance):
-    """
-    Test - Stop Instance
-    """
+    """Test - Stop Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceStop, self).__init__(
             "Instance-Stop", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         return _instances.instance_is_running(self._instance_data)
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.stop_server(self.openstack_token, self.instance_uuid)
         return True, "instance is stopping"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -313,23 +286,19 @@ class TestInstanceStop(TestInstance):
 
 
 class TestInstancePause(TestInstance):
-    """
-    Test - Pause Instance
-    """
+    """Test - Pause Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstancePause, self).__init__(
             "Instance-Pause", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
 
         success, reason = _instances.instance_is_running(self._instance_data)
@@ -343,16 +312,14 @@ class TestInstancePause(TestInstance):
         return True, "instance is setup of pause testing"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.pause_server(self.openstack_token, self.instance_uuid)
         return True, "instance is pausing"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -373,37 +340,31 @@ class TestInstancePause(TestInstance):
 
 
 class TestInstanceUnpause(TestInstance):
-    """
-    Test - Unpause Instance
-    """
+    """Test - Unpause Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceUnpause, self).__init__(
             "Instance-Unpause", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         return _instances.instance_is_paused(self._instance_data)
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.unpause_server(self.openstack_token, self.instance_uuid)
         return True, "instance is unpausing"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -424,37 +385,31 @@ class TestInstanceUnpause(TestInstance):
 
 
 class TestInstanceSuspend(TestInstance):
-    """
-    Test - Suspend Instance
-    """
+    """Test - Suspend Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceSuspend, self).__init__(
             "Instance-Suspend", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         return _instances.instance_is_running(self._instance_data)
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.suspend_server(self.openstack_token, self.instance_uuid)
         return True, "instance is suspending"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -475,37 +430,31 @@ class TestInstanceSuspend(TestInstance):
 
 
 class TestInstanceResume(TestInstance):
-    """
-    Test - Resume Instance
-    """
+    """Test - Resume Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceResume, self).__init__(
             "Instance-Resume", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         return _instances.instance_is_suspended(self._instance_data)
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.resume_server(self.openstack_token, self.instance_uuid)
         return True, "instance is resuming"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -526,14 +475,11 @@ class TestInstanceResume(TestInstance):
 
 
 class TestInstanceReboot(TestInstance):
-    """
-    Test - Reboot Instance
-    """
+    """Test - Reboot Instance."""
 
     def __init__(self, instance_name, timeout_secs, hard=False, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         if hard:
             test_name = "Instance-Reboot (hard)"
         else:
@@ -544,9 +490,8 @@ class TestInstanceReboot(TestInstance):
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
 
         success, reason = _instances.instance_is_running(self._instance_data)
@@ -560,9 +505,8 @@ class TestInstanceReboot(TestInstance):
         return False, "instance is not running or failed"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         if self._hard:
             nova.reboot_server(
                 self.openstack_token, self.instance_uuid, nova.VM_REBOOT_TYPE.HARD
@@ -574,9 +518,8 @@ class TestInstanceReboot(TestInstance):
         return True, "instance is rebooting"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -597,23 +540,19 @@ class TestInstanceReboot(TestInstance):
 
 
 class TestInstanceRebuild(TestInstance):
-    """
-    Test - Rebuild Instance
-    """
+    """Test - Rebuild Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceRebuild, self).__init__(
             "Instance-Rebuild", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         image_data = self._instance_data.get("image", None)
         if image_data is None:
@@ -630,9 +569,8 @@ class TestInstanceRebuild(TestInstance):
         return False, "instance is not running"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         # try block added to work around nova bug for now
         try:
             nova.rebuild_server(
@@ -647,9 +585,8 @@ class TestInstanceRebuild(TestInstance):
         return True, "instance is rebuilding"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -670,14 +607,11 @@ class TestInstanceRebuild(TestInstance):
 
 
 class TestInstanceLiveMigrate(TestInstance):
-    """
-    Test - Live-Migrate Instance
-    """
+    """Test - Live-Migrate Instance."""
 
     def __init__(self, instance_name, timeout_secs, to_host=None, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceLiveMigrate, self).__init__(
             "Instance-Live-Migrate", instance_name, timeout_secs
         )
@@ -686,26 +620,23 @@ class TestInstanceLiveMigrate(TestInstance):
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         self._original_host = self.host
         return _instances.instance_is_running(self._instance_data)
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.live_migrate_server(
             self.openstack_token, self.instance_uuid, self._to_host
         )
         return True, "instance is live-migrating"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -728,14 +659,11 @@ class TestInstanceLiveMigrate(TestInstance):
 
 
 class TestInstanceColdMigrate(TestInstance):
-    """
-    Test - Cold-Migrate Instance
-    """
+    """Test - Cold-Migrate Instance."""
 
     def __init__(self, instance_name, timeout_secs, to_host=None, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceColdMigrate, self).__init__(
             "Instance-Cold-Migrate", instance_name, timeout_secs
         )
@@ -744,26 +672,23 @@ class TestInstanceColdMigrate(TestInstance):
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         self._original_host = self.host
         return _instances.instance_is_running(self._instance_data)
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.cold_migrate_server(
             self.openstack_token, self.instance_uuid, self._to_host
         )
         return True, "instance is cold-migrating"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -786,23 +711,19 @@ class TestInstanceColdMigrate(TestInstance):
 
 
 class TestInstanceColdMigrateConfirm(TestInstance):
-    """
-    Test - Cold-Migrate Confirm Instance
-    """
+    """Test - Cold-Migrate Confirm Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceColdMigrateConfirm, self).__init__(
             "Instance-Cold-Migrate-Confirm", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
 
         success, reason = _instances.instance_is_resized(self._instance_data)
@@ -841,16 +762,14 @@ class TestInstanceColdMigrateConfirm(TestInstance):
         return True, "instance setup complete"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.cold_migrate_server_confirm(self.openstack_token, self.instance_uuid)
         return True, "confirming instance cold-migrate"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -871,23 +790,19 @@ class TestInstanceColdMigrateConfirm(TestInstance):
 
 
 class TestInstanceColdMigrateRevert(TestInstance):
-    """
-    Test - Cold-Migrate Revert Instance
-    """
+    """Test - Cold-Migrate Revert Instance."""
 
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceColdMigrateRevert, self).__init__(
             "Instance-Cold-Migrate-Revert", instance_name, timeout_secs
         )
         self._guest_hb = guest_hb
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
 
         success, reason = _instances.instance_is_resized(self._instance_data)
@@ -926,16 +841,14 @@ class TestInstanceColdMigrateRevert(TestInstance):
         return True, "instance setup complete"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.cold_migrate_server_revert(self.openstack_token, self.instance_uuid)
         return True, "reverting instance cold-migrate"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -956,14 +869,11 @@ class TestInstanceColdMigrateRevert(TestInstance):
 
 
 class TestInstanceResize(TestInstance):
-    """
-    Test - Resize Instance
-    """
+    """Test - Resize Instance."""
 
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceResize, self).__init__(
             "Instance-Resize", instance_name, timeout_secs
         )
@@ -972,9 +882,8 @@ class TestInstanceResize(TestInstance):
         self._guest_hb = guest_hb
 
     def _get_flavor_id(self, flavor_name):
-        """
-        Returns the flavor id associated with the given flavor name
-        """
+        """Returns the flavor id associated with the given flavor name."""
+
         flavor_id = None
         flavors = nova.get_flavors(self.openstack_token).result_data
         for flavor in flavors["flavors"]:
@@ -984,9 +893,8 @@ class TestInstanceResize(TestInstance):
         return flavor_id
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
@@ -1013,16 +921,14 @@ class TestInstanceResize(TestInstance):
         return True, "instance setup complete"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.resize_server(self.openstack_token, self.instance_uuid, self._flavor_id)
         return True, "instance is resizing"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -1043,14 +949,11 @@ class TestInstanceResize(TestInstance):
 
 
 class TestInstanceResizeConfirm(TestInstance):
-    """
-    Test - Resize Confirm Instance
-    """
+    """Test - Resize Confirm Instance."""
 
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceResizeConfirm, self).__init__(
             "Instance-Resize-Confirm", instance_name, timeout_secs
         )
@@ -1058,9 +961,8 @@ class TestInstanceResizeConfirm(TestInstance):
         self._guest_hb = guest_hb
 
     def _get_flavor_id(self, flavor_name):
-        """
-        Returns the flavor id associated with the given flavor name
-        """
+        """Returns the flavor id associated with the given flavor name."""
+
         flavor_id = None
         flavors = nova.get_flavors(self.openstack_token).result_data
         for flavor in flavors["flavors"]:
@@ -1070,9 +972,8 @@ class TestInstanceResizeConfirm(TestInstance):
         return flavor_id
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
 
         success, reason = _instances.instance_is_resized(self._instance_data)
@@ -1082,8 +983,7 @@ class TestInstanceResizeConfirm(TestInstance):
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
             return False, (
-                "instance needs to be resized for test, but is not in "
-                "the running state"
+                "instance needs to be resized for test, but is not in the running state"
             )
 
         flavor_id = None
@@ -1124,16 +1024,14 @@ class TestInstanceResizeConfirm(TestInstance):
         return True, "instance setup complete"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.resize_server_confirm(self.openstack_token, self.instance_uuid)
         return True, "confirming instance resize"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()
@@ -1154,14 +1052,11 @@ class TestInstanceResizeConfirm(TestInstance):
 
 
 class TestInstanceResizeRevert(TestInstance):
-    """
-    Test - Resize Revert Instance
-    """
+    """Test - Resize Revert Instance."""
 
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
-        """
-        Initialize test
-        """
+        """Initialize test."""
+
         super(TestInstanceResizeRevert, self).__init__(
             "Instance-Resize-Revert", instance_name, timeout_secs
         )
@@ -1169,9 +1064,8 @@ class TestInstanceResizeRevert(TestInstance):
         self._guest_hb = guest_hb
 
     def _get_flavor_id(self, flavor_name):
-        """
-        Returns the flavor id associated with the given flavor name
-        """
+        """Returns the flavor id associated with the given flavor name."""
+
         flavor_id = None
         flavors = nova.get_flavors(self.openstack_token).result_data
         for flavor in flavors["flavors"]:
@@ -1181,9 +1075,8 @@ class TestInstanceResizeRevert(TestInstance):
         return flavor_id
 
     def _do_setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         self._refresh_instance_data()
 
         success, reason = _instances.instance_is_resized(self._instance_data)
@@ -1193,8 +1086,7 @@ class TestInstanceResizeRevert(TestInstance):
         success, reason = _instances.instance_is_running(self._instance_data)
         if not success:
             return False, (
-                "instance needs to be resized for test, but is not in "
-                "the running state"
+                "instance needs to be resized for test, but is not in the running state"
             )
 
         flavor_id = None
@@ -1235,16 +1127,14 @@ class TestInstanceResizeRevert(TestInstance):
         return True, "instance setup complete"
 
     def _do_test(self):
-        """
-        Perform test
-        """
+        """Perform test."""
+
         nova.resize_server_revert(self.openstack_token, self.instance_uuid)
         return True, "reverting instance resize"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_instance_data()
         self._refresh_customer_alarms()
         self._refresh_customer_logs()

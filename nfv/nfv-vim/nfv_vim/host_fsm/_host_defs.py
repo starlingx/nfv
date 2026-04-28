@@ -10,9 +10,7 @@ from nfv_common.helpers import Singleton
 
 
 class StateNames(Constants, metaclass=Singleton):
-    """
-    Host - State Name Constants
-    """
+    """Host - State Name Constants."""
 
     INITIAL = Constant("initial")
     CONFIGURE = Constant("configure")
@@ -27,9 +25,7 @@ class StateNames(Constants, metaclass=Singleton):
 
 
 class EventNames(Constants, metaclass=Singleton):
-    """
-    Host - Event Name Constants
-    """
+    """Host - Event Name Constants."""
 
     ADD = Constant("add")
     DELETE = Constant("delete")
@@ -49,9 +45,7 @@ class EventNames(Constants, metaclass=Singleton):
 
 
 class TaskNames(Constants, metaclass=Singleton):
-    """
-    Host - Task Name Constants
-    """
+    """Host - Task Name Constants."""
 
     ADD_HOST = Constant("add-host")
     DELETE_HOST = Constant("delete-host")

@@ -18,9 +18,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.glance")
 
 
 class ImageStatus(Constants, metaclass=Singleton):
-    """
-    IMAGE STATUS Constants
-    """
+    """IMAGE STATUS Constants."""
 
     QUEUED = Constant("queued")
     SAVING = Constant("saving")
@@ -34,9 +32,8 @@ IMAGE_STATUS = ImageStatus()
 
 
 def get_images(token, page_limit=1, next_page=None):
-    """
-    Ask OpenStack Glance for a list of images
-    """
+    """Ask OpenStack Glance for a list of images."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.GLANCE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Glance URL is invalid")
@@ -67,9 +64,8 @@ def create_image(
     protected,
     properties,
 ):
-    """
-    Ask OpenStack Glance to create an image
-    """
+    """Ask OpenStack Glance to create an image."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.GLANCE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Glance URL is invalid")
@@ -109,9 +105,8 @@ def update_image(
     protected,
     properties,
 ):
-    """
-    Ask OpenStack Glance to update an image
-    """
+    """Ask OpenStack Glance to update an image."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.GLANCE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Glance URL is invalid")
@@ -173,9 +168,8 @@ def update_image(
 
 
 def delete_image(token, image_id):
-    """
-    Ask OpenStack Glance to delete an image
-    """
+    """Ask OpenStack Glance to delete an image."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.GLANCE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Glance URL is invalid")
@@ -187,9 +181,8 @@ def delete_image(token, image_id):
 
 
 def get_image(token, image_id):
-    """
-    Ask OpenStack Glance for image details
-    """
+    """Ask OpenStack Glance for image details."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.GLANCE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Glance URL is invalid")
@@ -201,9 +194,8 @@ def get_image(token, image_id):
 
 
 def upload_image_data_by_url(token, image_id, image_data_url):
-    """
-    Ask OpenStack Glance to upload image data using a url
-    """
+    """Ask OpenStack Glance to upload image data using a url."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.GLANCE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Glance URL is invalid")
@@ -238,9 +230,8 @@ def upload_image_data_by_url(token, image_id, image_data_url):
 
 
 def upload_image_data_by_file(token, image_id, image_file):
-    """
-    Ask OpenStack Glance to upload image data using a file
-    """
+    """Ask OpenStack Glance to upload image data using a file."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.GLANCE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Glance URL is invalid")

@@ -12,9 +12,8 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.keystone")
 
 
 def get_tenants(token):
-    """
-    Ask OpenStack Keystone for a list of tenants
-    """
+    """Ask OpenStack Keystone for a list of tenants."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.KEYSTONE, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Keystone URL is invalid")

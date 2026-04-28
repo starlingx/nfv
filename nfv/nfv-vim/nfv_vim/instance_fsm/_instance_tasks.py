@@ -41,9 +41,7 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance_task")
 
 
 class QueryHypervisorTask(state_machine.StateTask):
-    """
-    Query-Hypervisor Task
-    """
+    """Query-Hypervisor Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -56,16 +54,14 @@ class QueryHypervisorTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Query-Hypervisor Task Complete
-        """
+        """Query-Hypervisor Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -86,9 +82,7 @@ class QueryHypervisorTask(state_machine.StateTask):
 
 
 class LiveMigrateTask(state_machine.StateTask):
-    """
-    Live-Migrate Task
-    """
+    """Live-Migrate Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -116,16 +110,14 @@ class LiveMigrateTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Live-Migrate Task Complete
-        """
+        """Live-Migrate Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -146,9 +138,7 @@ class LiveMigrateTask(state_machine.StateTask):
 
 
 class LiveMigrateFinishTask(state_machine.StateTask):
-    """
-    Live-Migrate-Finish Task
-    """
+    """Live-Migrate-Finish Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -170,16 +160,14 @@ class LiveMigrateFinishTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Live-Migrate-Finish Task Complete
-        """
+        """Live-Migrate-Finish Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -200,9 +188,7 @@ class LiveMigrateFinishTask(state_machine.StateTask):
 
 
 class ColdMigrateTask(state_machine.StateTask):
-    """
-    Cold-Migrate Task
-    """
+    """Cold-Migrate Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -230,16 +216,14 @@ class ColdMigrateTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Cold-Migrate Task Complete
-        """
+        """Cold-Migrate Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -260,9 +244,7 @@ class ColdMigrateTask(state_machine.StateTask):
 
 
 class ColdMigrateConfirmTask(state_machine.StateTask):
-    """
-    Cold-Migrate-Confirm Task
-    """
+    """Cold-Migrate-Confirm Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -285,16 +267,14 @@ class ColdMigrateConfirmTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Cold-Migrate-Confirm Task Complete
-        """
+        """Cold-Migrate-Confirm Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -315,9 +295,7 @@ class ColdMigrateConfirmTask(state_machine.StateTask):
 
 
 class ColdMigrateRevertTask(state_machine.StateTask):
-    """
-    Cold-Migrate-Revert Task
-    """
+    """Cold-Migrate-Revert Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -340,16 +318,14 @@ class ColdMigrateRevertTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Cold-Migrate-Revert Task Complete
-        """
+        """Cold-Migrate-Revert Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -370,9 +346,7 @@ class ColdMigrateRevertTask(state_machine.StateTask):
 
 
 class ResizeTask(state_machine.StateTask):
-    """
-    Resize Task
-    """
+    """Resize Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -400,16 +374,14 @@ class ResizeTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Resize Task Complete
-        """
+        """Resize Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -430,9 +402,7 @@ class ResizeTask(state_machine.StateTask):
 
 
 class ResizeConfirmTask(state_machine.StateTask):
-    """
-    Resize-Confirm Task
-    """
+    """Resize-Confirm Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -455,16 +425,14 @@ class ResizeConfirmTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Resize-Confirm Task Complete
-        """
+        """Resize-Confirm Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -485,9 +453,7 @@ class ResizeConfirmTask(state_machine.StateTask):
 
 
 class ResizeRevertTask(state_machine.StateTask):
-    """
-    Resize-Revert Task
-    """
+    """Resize-Revert Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -510,16 +476,14 @@ class ResizeRevertTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Resize-Revert Task Complete
-        """
+        """Resize-Revert Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -540,9 +504,7 @@ class ResizeRevertTask(state_machine.StateTask):
 
 
 class EvacuateTask(state_machine.StateTask):
-    """
-    Evacuate Task
-    """
+    """Evacuate Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -557,16 +519,14 @@ class EvacuateTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Evacuate Task Complete
-        """
+        """Evacuate Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -587,9 +547,7 @@ class EvacuateTask(state_machine.StateTask):
 
 
 class StartTask(state_machine.StateTask):
-    """
-    Start Task
-    """
+    """Start Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -601,16 +559,14 @@ class StartTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Start Task Complete
-        """
+        """Start Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -631,9 +587,7 @@ class StartTask(state_machine.StateTask):
 
 
 class StopTask(state_machine.StateTask):
-    """
-    Stop Task
-    """
+    """Stop Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -661,16 +615,14 @@ class StopTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Stop Task Complete
-        """
+        """Stop Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -691,9 +643,7 @@ class StopTask(state_machine.StateTask):
 
 
 class PauseTask(state_machine.StateTask):
-    """
-    Pause Task
-    """
+    """Pause Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -721,16 +671,14 @@ class PauseTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Pause Task Complete
-        """
+        """Pause Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -751,9 +699,7 @@ class PauseTask(state_machine.StateTask):
 
 
 class UnpauseTask(state_machine.StateTask):
-    """
-    Unpause Task
-    """
+    """Unpause Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -776,16 +722,14 @@ class UnpauseTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Unpause Task Complete
-        """
+        """Unpause Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -806,9 +750,7 @@ class UnpauseTask(state_machine.StateTask):
 
 
 class SuspendTask(state_machine.StateTask):
-    """
-    Suspend Task
-    """
+    """Suspend Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -836,16 +778,14 @@ class SuspendTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Suspend Task Complete
-        """
+        """Suspend Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -866,9 +806,7 @@ class SuspendTask(state_machine.StateTask):
 
 
 class ResumeTask(state_machine.StateTask):
-    """
-    Resume Task
-    """
+    """Resume Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -891,16 +829,14 @@ class ResumeTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Resume Task Complete
-        """
+        """Resume Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -921,9 +857,7 @@ class ResumeTask(state_machine.StateTask):
 
 
 class RebootTask(state_machine.StateTask):
-    """
-    Reboot Task
-    """
+    """Reboot Task."""
 
     def __init__(self, instance):
         from nfv_vim import objects
@@ -951,16 +885,14 @@ class RebootTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Reboot Task Complete
-        """
+        """Reboot Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -981,9 +913,7 @@ class RebootTask(state_machine.StateTask):
 
 
 class RebuildTask(state_machine.StateTask):
-    """
-    Rebuild Task
-    """
+    """Rebuild Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -995,16 +925,14 @@ class RebuildTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Rebuild Task Complete
-        """
+        """Rebuild Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -1025,9 +953,7 @@ class RebuildTask(state_machine.StateTask):
 
 
 class FailTask(state_machine.StateTask):
-    """
-    Fail Task
-    """
+    """Fail Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -1042,16 +968,14 @@ class FailTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Fail Task Complete
-        """
+        """Fail Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -1072,9 +996,7 @@ class FailTask(state_machine.StateTask):
 
 
 class DeleteTask(state_machine.StateTask):
-    """
-    Delete Task
-    """
+    """Delete Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -1087,16 +1009,14 @@ class DeleteTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Delete Task Complete
-        """
+        """Delete Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -1117,9 +1037,7 @@ class DeleteTask(state_machine.StateTask):
 
 
 class GuestServicesCreateTask(state_machine.StateTask):
-    """
-    Guest-Services-Create Task
-    """
+    """Guest-Services-Create Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -1134,16 +1052,14 @@ class GuestServicesCreateTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Guest-Services-Create Task Complete
-        """
+        """Guest-Services-Create Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -1164,9 +1080,7 @@ class GuestServicesCreateTask(state_machine.StateTask):
 
 
 class GuestServicesEnableTask(state_machine.StateTask):
-    """
-    Guest-Services-Enable Task
-    """
+    """Guest-Services-Enable Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -1180,16 +1094,14 @@ class GuestServicesEnableTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Guest-Services-Enable Task Complete
-        """
+        """Guest-Services-Enable Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -1210,9 +1122,7 @@ class GuestServicesEnableTask(state_machine.StateTask):
 
 
 class GuestServicesDisableTask(state_machine.StateTask):
-    """
-    Guest-Services-Disable Task
-    """
+    """Guest-Services-Disable Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -1226,16 +1136,14 @@ class GuestServicesDisableTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Guest-Services-Disable Task Complete
-        """
+        """Guest-Services-Disable Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -1256,9 +1164,7 @@ class GuestServicesDisableTask(state_machine.StateTask):
 
 
 class GuestServicesSetTask(state_machine.StateTask):
-    """
-    Guest-Services-Set Task
-    """
+    """Guest-Services-Set Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -1270,16 +1176,14 @@ class GuestServicesSetTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Guest-Services-Set Task Complete
-        """
+        """Guest-Services-Set Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 
@@ -1300,9 +1204,7 @@ class GuestServicesSetTask(state_machine.StateTask):
 
 
 class GuestServicesDeleteTask(state_machine.StateTask):
-    """
-    Guest-Services-Delete Task
-    """
+    """Guest-Services-Delete Task."""
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
@@ -1314,16 +1216,14 @@ class GuestServicesDeleteTask(state_machine.StateTask):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def complete(self, result, reason):
-        """
-        Guest-Services-Delete Task Complete
-        """
+        """Guest-Services-Delete Task Complete."""
+
         if self.aborted():
             DLOG.info("Task (%s) complete, but has been aborted." % self._name)
 

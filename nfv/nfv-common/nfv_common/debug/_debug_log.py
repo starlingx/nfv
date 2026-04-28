@@ -19,9 +19,7 @@ _debug_loggers = {}
 
 
 class DebugLogFormatter(logging.Formatter):
-    """
-    Debug Log Formatter
-    """
+    """Debug Log Formatter."""
 
     def formatTime(self, record, date_format=None):
         dt = datetime.datetime.fromtimestamp(record.created)
@@ -33,9 +31,7 @@ class DebugLogFormatter(logging.Formatter):
 
 
 class DebugLogHandler(logging.Handler):
-    """
-    Debug Log Handler
-    """
+    """Debug Log Handler."""
 
     def __init__(self):
         super(DebugLogHandler, self).__init__()
@@ -59,29 +55,28 @@ class DebugLogHandler(logging.Handler):
         self.setFormatter(formatter)
 
     def set_process_name(self, process_name):
-        """
-        Set the process name
-        """
+        """Set the process name."""
+
         self.process_name = process_name
 
     def set_thread_name(self, thread_name):
-        """
-        Set the thread name
-        """
+        """Set the thread name."""
+
         self.thread_name = thread_name
 
     @staticmethod
     def send(log_record):
-        """
-        Send log record to debug logging thread
-        """
+        """Send log record to debug logging thread."""
+
         DebugLoggingThread().send_log_record(log_record)
 
     def _format_record(self, log_record):
+        """Format the record.
+
+        It is formatted in a way that it can be pickled and sent to the debug logging
+        thread.
         """
-        Format the record so that it can be pickled and sent
-        to the debug logging thread
-        """
+
         if log_record.args:
             # Not all arguments can be pickled.
             log_record.msg %= log_record.args
@@ -105,9 +100,8 @@ class DebugLogHandler(logging.Handler):
         return log_record
 
     def emit(self, record):
-        """
-        Send record to debug logging thread
-        """
+        """Send record to debug logging thread."""
+
         try:
             log_record = self._format_record(record)
             DebugLoggingThread().send_log_record(log_record)
@@ -120,9 +114,7 @@ class DebugLogHandler(logging.Handler):
 
 
 class DebugLogger(object):
-    """
-    Debug Logger
-    """
+    """Debug Logger."""
 
     log_level_mapping = {
         DEBUG_LEVEL.NONE: logging.NOTSET,
@@ -138,9 +130,8 @@ class DebugLogger(object):
     def __init__(
         self, name, debug_level=DEBUG_LEVEL.NONE, process_name=None, thread_name=None
     ):
-        """
-        Create debug logger
-        """
+        """Create debug logger."""
+
         self.name = name
         self.process_name = process_name
         self.thread_name = thread_name
@@ -153,110 +144,96 @@ class DebugLogger(object):
         self.logger.addHandler(DebugLogHandler())
 
     def set_level(self, debug_level):
-        """
-        Set the debug level for the logger
-        """
+        """Set the debug level for the logger."""
+
         log_level = self.log_level_mapping.get(debug_level, logging.NOTSET)
         self.debug_level = debug_level
         self.logger.setLevel(log_level)
 
     def set_process_name(self, process_name):
-        """
-        Set the process name
-        """
+        """Set the process name."""
+
         for handler in self.logger.handlers:
             handler.set_process_name(process_name)
 
     def set_thread_name(self, thread_name):
-        """
-        Set the thread name
-        """
+        """Set the thread name."""
+
         for handler in self.logger.handlers:
             handler.set_thread_name(thread_name)
 
     @staticmethod
     def get_caller():
-        """
-        Get the calling function and line number
-        """
+        """Get the calling function and line number."""
+
         caller = inspect.currentframe().f_back.f_back
         _, filename = os.path.split(caller.f_code.co_filename)
         return "%42s.%-4s  " % (filename, caller.f_lineno)
 
     def verbose(self, msg, *args, **kwargs):
-        """
-        Debug log with severity of VERBOSE
-        """
+        """Debug log with severity of VERBOSE."""
+
         if DEBUG_LEVEL.VERBOSE >= Debug().debug_level:
             if DEBUG_LEVEL.VERBOSE >= self.debug_level:
                 caller = self.get_caller()
                 self.logger.debug(caller + msg, *args, **kwargs)
 
     def debug(self, msg, *args, **kwargs):
-        """
-        Debug log with severity of DEBUG
-        """
+        """Debug log with severity of DEBUG."""
+
         if DEBUG_LEVEL.DEBUG >= Debug().debug_level:
             if DEBUG_LEVEL.DEBUG >= self.debug_level:
                 caller = self.get_caller()
                 self.logger.debug(caller + msg, *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
-        """
-        Debug log with severity of INFO
-        """
+        """Debug log with severity of INFO."""
+
         if DEBUG_LEVEL.INFO >= Debug().debug_level:
             if DEBUG_LEVEL.INFO >= self.debug_level:
                 caller = self.get_caller()
                 self.logger.info(caller + msg, *args, **kwargs)
 
     def notice(self, msg, *args, **kwargs):
-        """
-        Debug log with severity of NOTICE
-        """
+        """Debug log with severity of NOTICE."""
+
         if DEBUG_LEVEL.NOTICE >= Debug().debug_level:
             if DEBUG_LEVEL.NOTICE >= self.debug_level:
                 caller = self.get_caller()
                 self.logger.info(caller + msg, *args, **kwargs)
 
     def warn(self, msg, *args, **kwargs):
-        """
-        Debug log with severity of WARNING
-        """
+        """Debug log with severity of WARNING."""
+
         if DEBUG_LEVEL.WARN >= Debug().debug_level:
             if DEBUG_LEVEL.WARN >= self.debug_level:
                 caller = self.get_caller()
                 self.logger.warning(caller + msg, *args, **kwargs)
 
     def error(self, msg, *args, **kwargs):
-        """
-        Debug log with severity of ERROR
-        """
+        """Debug log with severity of ERROR."""
+
         if DEBUG_LEVEL.ERROR >= Debug().debug_level:
             if DEBUG_LEVEL.ERROR >= self.debug_level:
                 caller = self.get_caller()
                 self.logger.error(caller + msg, *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
-        """
-        Debug log with severity of CRITICAL
-        """
+        """Debug log with severity of CRITICAL."""
+
         if DEBUG_LEVEL.CRITICAL >= Debug().debug_level:
             if DEBUG_LEVEL.CRITICAL >= self.debug_level:
                 caller = self.get_caller()
                 self.logger.critical(caller + msg, *args, **kwargs)
 
     def exception(self, msg, *args):
-        """
-        Debug exception log
-        """
+        """Debug exception log."""
+
         self.logger.exception(msg, *args)
 
 
 def debug_trace(trace_level):
-    """
-    Decorator function used to trace entering and exiting functions
-    """
+    """Decorator function used to trace entering and exiting functions."""
 
     def trace_wrap(func):
         def trace_wrapper(*args, **kwargs):
@@ -307,9 +284,8 @@ def debug_trace(trace_level):
 
 
 def debug_dump_loggers(directory):
-    """
-    Dump all available loggers
-    """
+    """Dump all available loggers."""
+
     if os.path.exists(directory):
         program_name = os.path.basename(sys.argv[0])
 
@@ -319,9 +295,8 @@ def debug_dump_loggers(directory):
 
 
 def debug_get_logger(name, debug_level=None, process_name=None, thread_name=None):
-    """
-    Create a logger if it does not already exist
-    """
+    """Create a logger if it does not already exist."""
+
     global _debug_loggers
 
     logger = _debug_loggers.get(name, None)
@@ -346,9 +321,8 @@ def debug_get_logger(name, debug_level=None, process_name=None, thread_name=None
 
 
 def debug_set_loggers_level(debug_level=None):
-    """
-    Set the level of all loggers
-    """
+    """Set the level of all loggers."""
+
     global _debug_loggers
 
     for name in _debug_loggers:

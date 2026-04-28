@@ -11,9 +11,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.service_host")
 
 
 class ServiceHost(ObjectData):
-    """
-    Service Host Object
-    """
+    """Service Host Object."""
 
     def __init__(self, name, service, zone):
         super(ServiceHost, self).__init__("1.0.0")

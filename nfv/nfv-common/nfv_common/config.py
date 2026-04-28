@@ -15,9 +15,7 @@ CONF = dict()
 
 
 class Config(configparser.ConfigParser):
-    """
-    Override ConfigParser class to add dictionary functionality.
-    """
+    """Override ConfigParser class to add dictionary functionality."""
 
     def as_dict(self):
         d = dict(self._sections)
@@ -28,17 +26,15 @@ class Config(configparser.ConfigParser):
 
 
 def section_exists(section):
-    """
-    Returns true if configuration section exists
-    """
+    """Returns true if configuration section exists."""
+
     section = CONF.get(section, None)
     return section is not None
 
 
 def load(config_file):
-    """
-    Load the configuration file into a global CONF variable.
-    """
+    """Load the configuration file into a global CONF variable."""
+
     global CONF
 
     config = Config()

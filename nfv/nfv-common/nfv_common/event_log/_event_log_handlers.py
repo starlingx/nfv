@@ -12,9 +12,7 @@ DLOG = debug.debug_get_logger("nfv_common.event_log.event_log_handlers")
 
 
 class EventLogHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Singleton):
-    """
-    Event Log Handlers
-    """
+    """Event Log Handlers."""
 
     _version = "1.0.0"
     _signature = "e33d7cf6-f270-4256-893e-16266ee4dd2e"
@@ -43,9 +41,8 @@ class EventLogHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Sing
 
     @staticmethod
     def valid_handler(handler):
-        """
-        Verify signature of the handler is valid
-        """
+        """Verify signature of the handler is valid."""
+
         if EventLogHandlers._signature == handler.obj.signature:
             return True
         else:
@@ -57,22 +54,19 @@ class EventLogHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Sing
         return False
 
     def log(self, log_data):
-        """
-        Log a particular event using the handlers
-        """
+        """Log a particular event using the handlers."""
+
         for handler_type, handler in list(self._handlers.items()):
             handler.obj.log(log_data)
 
     def initialize(self, config_file):
-        """
-        Initialize handlers
-        """
+        """Initialize handlers."""
+
         for handler_id, handler in list(self._handlers.items()):
             handler.obj.initialize(config_file)
 
     def finalize(self):
-        """
-        Finalize handlers
-        """
+        """Finalize handlers."""
+
         for handler_id, handler in list(self._handlers.items()):
             handler.obj.finalize()

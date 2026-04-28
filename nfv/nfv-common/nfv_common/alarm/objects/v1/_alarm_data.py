@@ -7,9 +7,7 @@ from datetime import datetime
 
 
 class AlarmStateData(object):
-    """
-    Alarm State Data
-    """
+    """Alarm State Data."""
 
     def __init__(self, state):
         self.state = state
@@ -19,9 +17,7 @@ class AlarmStateData(object):
 
 
 class AlarmThresholdData(object):
-    """
-    Alarm Threshold Data
-    """
+    """Alarm Threshold Data."""
 
     def __init__(self, threshold_value, observed_value):
         self.threshold_value = threshold_value
@@ -32,9 +28,7 @@ class AlarmThresholdData(object):
 
 
 class AlarmData(object):
-    """
-    Alarm Data
-    """
+    """Alarm Data."""
 
     def __init__(
         self,

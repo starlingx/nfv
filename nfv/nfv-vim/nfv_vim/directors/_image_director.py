@@ -21,9 +21,7 @@ _image_director = None
 
 
 class OperationTypes(Constants, metaclass=Singleton):
-    """
-    Operation - Type Constants
-    """
+    """Operation - Type Constants."""
 
     IMAGE_CREATE = Constant("image-create")
     IMAGE_UPDATE = Constant("image-update")
@@ -31,9 +29,7 @@ class OperationTypes(Constants, metaclass=Singleton):
 
 
 class OperationStates(Constants, metaclass=Singleton):
-    """
-    Operation - State Constants
-    """
+    """Operation - State Constants."""
 
     READY = Constant("ready")
     INPROGRESS = Constant("inprogress")
@@ -48,15 +44,12 @@ OPERATION_STATE = OperationStates()
 
 
 class ImageDirector(object, metaclass=Singleton):
-    """
-    Image Director
-    """
+    """Image Director."""
 
     @coroutine
     def _image_create_callback(self, image_name, callback):
-        """
-        Image Create Callback
-        """
+        """Image Create Callback."""
+
         response = yield
         DLOG.verbose("Image-Create callback response=%s." % response)
         if response["completed"]:
@@ -114,9 +107,8 @@ class ImageDirector(object, metaclass=Singleton):
         image_data_ref,
         callback,
     ):
-        """
-        Image Create
-        """
+        """Image Create."""
+
         image_attributes = nfvi.objects.v1.ImageAttributes(
             container_format,
             disk_format,
@@ -137,9 +129,8 @@ class ImageDirector(object, metaclass=Singleton):
 
     @coroutine
     def _image_update_callback(self, image_uuid, callback):
-        """
-        Image Update Callback
-        """
+        """Image Update Callback."""
+
         response = yield
         DLOG.verbose("Image-Update callback response=%s." % response)
         if response["completed"]:
@@ -194,9 +185,8 @@ class ImageDirector(object, metaclass=Singleton):
         properties,
         callback,
     ):
-        """
-        Image Update
-        """
+        """Image Update."""
+
         image_attributes = nfvi.objects.v1.ImageAttributes(
             None,
             None,
@@ -215,9 +205,8 @@ class ImageDirector(object, metaclass=Singleton):
 
     @coroutine
     def _image_delete_callback(self, image_uuid, callback):
-        """
-        Image Delete Callback
-        """
+        """Image Delete Callback."""
+
         response = yield
         DLOG.verbose("Image-Delete callback response=%s." % response)
         if response["completed"]:
@@ -229,32 +218,28 @@ class ImageDirector(object, metaclass=Singleton):
         callback(response["completed"], image_uuid)
 
     def image_delete(self, image_uuid, callback):
-        """
-        Image Delete
-        """
+        """Image Delete."""
+
         nfvi.nfvi_delete_image(
             image_uuid, self._image_delete_callback(image_uuid, callback)
         )
 
 
 def get_image_director():
-    """
-    Returns the Image Director
-    """
+    """Returns the Image Director."""
+
     return _image_director
 
 
 def image_director_initialize():
-    """
-    Initialize Image Director
-    """
+    """Initialize Image Director."""
+
     global _image_director
 
     _image_director = ImageDirector()
 
 
 def image_director_finalize():
-    """
-    Finalize Image Director
-    """
+    """Finalize Image Director."""
+
     pass

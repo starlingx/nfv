@@ -14,9 +14,8 @@ from nfv_vim.database._database import database_get
 
 
 def database_image_add(image_obj):
-    """
-    Add an image object to the database
-    """
+    """Add an image object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Image)
@@ -52,9 +51,8 @@ def database_image_add(image_obj):
 
 
 def database_image_delete(image_uuid):
-    """
-    Delete an image object from the database
-    """
+    """Delete an image object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Image)
@@ -63,9 +61,8 @@ def database_image_delete(image_uuid):
 
 
 def database_image_get_list():
-    """
-    Fetch all the image objects from the database
-    """
+    """Fetch all the image objects from the database."""
+
     db = database_get()
 
     session = db.session()

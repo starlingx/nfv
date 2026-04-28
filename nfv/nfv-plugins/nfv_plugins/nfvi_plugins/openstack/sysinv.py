@@ -44,9 +44,8 @@ def _api_cmd_headers():
 
 
 def _api_delete(token, endpoint):
-    """
-    Generic DELETE for a sysinv endpoint
-    """
+    """Generic DELETE for a sysinv endpoint."""
+
     api_cmd = _api_cmd(token, endpoint)
     api_cmd_headers = _api_cmd_headers()
     response = rest_api_request(
@@ -60,9 +59,8 @@ def _api_delete(token, endpoint):
 
 
 def _api_get(token, endpoint):
-    """
-    Perform a generic GET for a particular sysinv API endpoint
-    """
+    """Perform a generic GET for a particular sysinv API endpoint."""
+
     api_cmd = _api_cmd(token, endpoint)
     response = rest_api_request(
         token, "GET", api_cmd, timeout_in_secs=REST_API_REQUEST_TIMEOUT
@@ -71,9 +69,9 @@ def _api_get(token, endpoint):
 
 
 def _api_patch_dict(token, endpoint, patch_dict):
-    """
-    Generic PATCH for a sysinv endpoint that passes a json dict
-    Some endpoints expect a dict, while others expect a list
+    """Generic PATCH for a sysinv endpoint that passes a json dict
+
+    Some endpoints expect a dict, while others expect a list.
     """
     api_cmd = _api_cmd(token, endpoint)
     api_cmd_headers = _api_cmd_headers()
@@ -88,9 +86,8 @@ def _api_patch_dict(token, endpoint, patch_dict):
 
 
 def _api_post(token, endpoint, api_cmd_payload):
-    """
-    Generic POST to a sysinv endpoint with a payload
-    """
+    """Generic POST to a sysinv endpoint with a payload."""
+
     api_cmd = _api_cmd(token, endpoint)
     api_cmd_headers = _api_cmd_headers()
     response = rest_api_request(
@@ -110,9 +107,8 @@ def _api_data_patch(path, value, op="replace"):
 
 
 def get_datanetworks(token, host_uuid):
-    """
-    Get all data networks on a host.
-    """
+    """Get all data networks on a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -131,9 +127,9 @@ def get_datanetworks(token, host_uuid):
 
 
 def get_system_info(token):
-    """
-    Asks System Inventory for information about the system, such as
-    the name of the system
+    """Asks System Inventory for information about the system, such as
+
+    the name of the system.
     """
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
@@ -148,9 +144,8 @@ def get_system_info(token):
 
 
 def get_hosts(token):
-    """
-    Asks System Inventory for a list of hosts
-    """
+    """Asks System Inventory for a list of hosts."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -164,9 +159,8 @@ def get_hosts(token):
 
 
 def get_host(token, host_uuid):
-    """
-    Asks System Inventory for a host details
-    """
+    """Asks System Inventory for a host details."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -180,9 +174,8 @@ def get_host(token, host_uuid):
 
 
 def get_host_labels(token, host_uuid):
-    """
-    Asks System Inventory for host label details
-    """
+    """Asks System Inventory for host label details."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -196,9 +189,8 @@ def get_host_labels(token, host_uuid):
 
 
 def get_kube_host_upgrades(token):
-    """
-    Asks System Inventory for information about the kube host upgrades
-    """
+    """Asks System Inventory for information about the kube host upgrades."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -212,23 +204,20 @@ def get_kube_host_upgrades(token):
 
 
 def get_kube_rootca_update(token):
-    """
-    Asks System Inventory for information about the kube rootca update
-    """
+    """Asks System Inventory for information about the kube rootca update."""
+
     return _api_get(token, KUBE_ROOTCA_UPDATE_ENDPOINT)
 
 
 def get_kube_rootca_host_update_list(token):
-    """
-    Asks System Inventory for information about the kube rootca host updates
-    """
+    """Asks System Inventory for information about the kube rootca host updates."""
+
     return _api_get(token, KUBE_ROOTCA_UPDATE_HOSTS_ENDPOINT)
 
 
 def get_kube_upgrade(token):
-    """
-    Asks System Inventory for information about the kube upgrade
-    """
+    """Asks System Inventory for information about the kube upgrade."""
+
     # todo(abailey): refactor using _api_get
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
@@ -243,9 +232,8 @@ def get_kube_upgrade(token):
 
 
 def get_kube_version(token, kube_version):
-    """
-    Asks System Inventory for information a kube version
-    """
+    """Asks System Inventory for information a kube version."""
+
     # todo(abailey): refactor using _api_get
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
@@ -260,9 +248,8 @@ def get_kube_version(token, kube_version):
 
 
 def get_kube_versions(token):
-    """
-    Asks System Inventory for information about the kube versions
-    """
+    """Asks System Inventory for information about the kube versions."""
+
     # todo(abailey): refactor using _api_get
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
@@ -277,9 +264,8 @@ def get_kube_versions(token):
 
 
 def kube_rootca_update_start(token, force=False, alarm_ignore_list=None):
-    """
-    Ask System Inventory to start a kube rootca update
-    """
+    """Ask System Inventory to start a kube rootca update."""
+
     api_cmd_payload = dict()
     api_cmd_payload["force"] = force
     if alarm_ignore_list is not None:
@@ -288,9 +274,8 @@ def kube_rootca_update_start(token, force=False, alarm_ignore_list=None):
 
 
 def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
-    """
-    Ask System Inventory to kube rootca update generate a cert
-    """
+    """Ask System Inventory to kube rootca update generate a cert."""
+
     api_cmd_payload = dict()
     # even if these values are None, they need to be passed to sysinv API
     api_cmd_payload["expiry_date"] = expiry_date
@@ -299,9 +284,8 @@ def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
 
 
 def kube_rootca_update_abort(token):
-    """
-    Ask System Inventory to kube rootca update abort
-    """
+    """Ask System Inventory to kube rootca update abort."""
+
     api_cmd_payload = list()
     state_data = dict()
     state_data["path"] = "/state"
@@ -312,9 +296,8 @@ def kube_rootca_update_abort(token):
 
 
 def kube_rootca_update_complete(token):
-    """
-    Ask System Inventory to kube rootca update complete
-    """
+    """Ask System Inventory to kube rootca update complete."""
+
     api_cmd_payload = list()
     state_data = dict()
     state_data["path"] = "/state"
@@ -325,9 +308,9 @@ def kube_rootca_update_complete(token):
 
 
 def kube_rootca_update_host(token, host_uuid, phase):
-    """
-    Utility method to post to kube rootca update pods endpoint phase
-    Valid phase values are:  [trust-both-cas, trust-new-ca, update-certs]
+    """Utility method to post to kube rootca update pods endpoint phase
+
+    Valid phase values are:  [trust-both-cas, trust-new-ca, update-certs].
     """
     api_cmd = "/ihosts/%s/kube_update_ca " % host_uuid
 
@@ -337,9 +320,9 @@ def kube_rootca_update_host(token, host_uuid, phase):
 
 
 def kube_rootca_update_pods(token, phase):
-    """
-    Utility method to post to kube rootca update pods endpoint phase
-    Valid phase values are:  [trust-both-cas, trust-new-ca]
+    """Utility method to post to kube rootca update pods endpoint phase
+
+    Valid phase values are:  [trust-both-cas, trust-new-ca].
     """
     api_cmd_payload = dict()
     api_cmd_payload["phase"] = phase
@@ -347,9 +330,8 @@ def kube_rootca_update_pods(token, phase):
 
 
 def kube_upgrade_start(token, to_version, force=False, alarm_ignore_list=None):
-    """
-    Ask System Inventory to start a kube upgrade
-    """
+    """Ask System Inventory to start a kube upgrade."""
+
     api_cmd_payload = dict()
     api_cmd_payload["to_version"] = to_version
     api_cmd_payload["force"] = force
@@ -386,16 +368,14 @@ def _patch_kube_upgrade_state(token, new_value, hostname=None):
 
 
 def kube_upgrade_abort(token):
-    """
-    Ask System Inventory to kube upgrade abort
-    """
+    """Ask System Inventory to kube upgrade abort."""
+
     return _patch_kube_upgrade_state(token, "upgrade-aborting")
 
 
 def kube_upgrade_cleanup(token):
-    """
-    Ask System Inventory to delete the kube upgrade
-    """
+    """Ask System Inventory to delete the kube upgrade."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -417,60 +397,54 @@ def kube_upgrade_cleanup(token):
 
 
 def kube_upgrade_complete(token):
-    """
-    Ask System Inventory to kube upgrade complete
-    """
+    """Ask System Inventory to kube upgrade complete."""
+
     return _patch_kube_upgrade_state(token, "upgrade-complete")
 
 
 def kube_upgrade_download_images(token):
-    """
-    Ask System Inventory to kube upgrade download images
-    """
+    """Ask System Inventory to kube upgrade download images."""
+
     return _patch_kube_upgrade_state(token, "downloading-images")
 
 
 def kube_pre_application_update(token):
-    """
-    Ask System Inventory to kube pre application update
-    """
+    """Ask System Inventory to kube pre application update."""
+
     return _patch_kube_upgrade_state(token, "pre-updating-apps")
 
 
 def kube_upgrade_networking(token):
-    """
-    Ask System Inventory to kube upgrade networking
-    """
+    """Ask System Inventory to kube upgrade networking."""
+
     return _patch_kube_upgrade_state(token, "upgrading-networking")
 
 
 def kube_upgrade_storage(token):
-    """
-    Ask System Inventory to kube upgrade storage
-    """
+    """Ask System Inventory to kube upgrade storage."""
+
     return _patch_kube_upgrade_state(token, "upgrading-storage")
 
 
 def kube_host_cordon(token, hostname, force):
-    """
-    system kube-host-cordon <host>
-    force is a 'string' but is currently unused
+    """system kube-host-cordon <host>
+
+    force is a 'string' but is currently unused.
     """
     # cordon needs a 'hostname'
     return _patch_kube_upgrade_state(token, "cordon-started", hostname=hostname)
 
 
 def kube_host_uncordon(token, hostname, force):
-    """
-    system kube-host-uncordon <host>
-    force is a 'string' but is currently unused
+    """system kube-host-uncordon <host>
+
+    force is a 'string' but is currently unused.
     """
     return _patch_kube_upgrade_state(token, "uncordon-started", hostname=hostname)
 
 
 def _kube_host_upgrade(token, host_uuid, target_operation, force):
-    """
-    Invoke a POST for a host kube-upgrade operation
+    """Invoke a POST for a host kube-upgrade operation.
 
     target_operation one of: kube_upgrade_control_plane, kube_upgrade_kubelet
     force is a 'string'
@@ -501,23 +475,20 @@ def _kube_host_upgrade(token, host_uuid, target_operation, force):
 
 
 def kube_host_upgrade_control_plane(token, host_uuid, force="true"):
-    """
-    Ask System Inventory to kube HOST upgrade control plane
-    """
+    """Ask System Inventory to kube HOST upgrade control plane."""
+
     return _kube_host_upgrade(token, host_uuid, "kube_upgrade_control_plane", force)
 
 
 def kube_host_upgrade_kubelet(token, host_uuid, force="true"):
-    """
-    Ask System Inventory to kube HOST upgrade kubelet
-    """
+    """Ask System Inventory to kube HOST upgrade kubelet."""
+
     return _kube_host_upgrade(token, host_uuid, "kube_upgrade_kubelet", force)
 
 
 def get_upgrade(token):
-    """
-    Asks System Inventory for information about the upgrade
-    """
+    """Asks System Inventory for information about the upgrade."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -531,9 +502,8 @@ def get_upgrade(token):
 
 
 def upgrade_start(token):
-    """
-    Ask System Inventory to start an upgrade
-    """
+    """Ask System Inventory to start an upgrade."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -559,9 +529,8 @@ def upgrade_start(token):
 
 
 def upgrade_activate(token):
-    """
-    Ask System Inventory to activate an upgrade
-    """
+    """Ask System Inventory to activate an upgrade."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -592,16 +561,14 @@ def upgrade_activate(token):
 
 
 def kube_post_application_update(token):
-    """
-    Ask System Inventory to kube post application update
-    """
+    """Ask System Inventory to kube post application update."""
+
     return _patch_kube_upgrade_state(token, "post-updating-apps")
 
 
 def upgrade_complete(token):
-    """
-    Ask System Inventory to complete an upgrade
-    """
+    """Ask System Inventory to complete an upgrade."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -623,9 +590,8 @@ def upgrade_complete(token):
 
 
 def get_host_lvgs(token, host_uuid):
-    """
-    Asks System Inventory for a list logical volume groups for a host
-    """
+    """Asks System Inventory for a list logical volume groups for a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -639,9 +605,8 @@ def get_host_lvgs(token, host_uuid):
 
 
 def notify_host_services_enabled(token, host_uuid):
-    """
-    Notify System Inventory that host services are enabled
-    """
+    """Notify System Inventory that host services are enabled."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -672,9 +637,8 @@ def notify_host_services_enabled(token, host_uuid):
 
 
 def notify_host_services_disabled(token, host_uuid):
-    """
-    Notify System Inventory that host services are disabled
-    """
+    """Notify System Inventory that host services are disabled."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -705,9 +669,8 @@ def notify_host_services_disabled(token, host_uuid):
 
 
 def notify_host_services_disable_extend(token, host_uuid):
-    """
-    Notify System Inventory that host services disable needs to be extended
-    """
+    """Notify System Inventory that host services disable needs to be extended."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -738,9 +701,8 @@ def notify_host_services_disable_extend(token, host_uuid):
 
 
 def notify_host_services_disable_failed(token, host_uuid, reason):
-    """
-    Notify System Inventory that host services disable failed
-    """
+    """Notify System Inventory that host services disable failed."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -777,9 +739,8 @@ def notify_host_services_disable_failed(token, host_uuid, reason):
 
 
 def notify_host_services_deleted(token, host_uuid):
-    """
-    Notify System Inventory that host services have been deleted
-    """
+    """Notify System Inventory that host services have been deleted."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -801,9 +762,8 @@ def notify_host_services_deleted(token, host_uuid):
 
 
 def notify_host_services_delete_failed(token, host_uuid, reason):
-    """
-    Notify System Inventory that host services delete failed
-    """
+    """Notify System Inventory that host services delete failed."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -840,9 +800,8 @@ def notify_host_services_delete_failed(token, host_uuid, reason):
 
 
 def lock_host(token, host_uuid):
-    """
-    Ask System Inventory to lock a host
-    """
+    """Ask System Inventory to lock a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -873,9 +832,8 @@ def lock_host(token, host_uuid):
 
 
 def unlock_host(token, host_uuid):
-    """
-    Ask System Inventory to unlock a host
-    """
+    """Ask System Inventory to unlock a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -906,9 +864,8 @@ def unlock_host(token, host_uuid):
 
 
 def reboot_host(token, host_uuid):
-    """
-    Ask System Inventory to reboot a host
-    """
+    """Ask System Inventory to reboot a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -939,9 +896,8 @@ def reboot_host(token, host_uuid):
 
 
 def upgrade_host(token, host_uuid):
-    """
-    Ask System Inventory to upgrade a host
-    """
+    """Ask System Inventory to upgrade a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -967,9 +923,8 @@ def upgrade_host(token, host_uuid):
 
 
 def swact_from_host(token, host_uuid):
-    """
-    Ask System Inventory to swact from a host
-    """
+    """Ask System Inventory to swact from a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -1000,9 +955,8 @@ def swact_from_host(token, host_uuid):
 
 
 def get_host_devices(token, host_uuid):
-    """
-    Asks System Inventory for host device details
-    """
+    """Asks System Inventory for host device details."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -1020,9 +974,8 @@ def get_host_devices(token, host_uuid):
 
 
 def get_host_device(token, device_uuid):
-    """
-    Asks System Inventory for host details for specific device
-    """
+    """Asks System Inventory for host details for specific device."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -1040,9 +993,8 @@ def get_host_device(token, device_uuid):
 
 
 def host_device_image_update(token, host_uuid):
-    """
-    Asks System Inventory to start a host device image update
-    """
+    """Asks System Inventory to start a host device image update."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")
@@ -1067,9 +1019,8 @@ def host_device_image_update(token, host_uuid):
 
 
 def host_device_image_update_abort(token, host_uuid):
-    """
-    Asks System Inventory to abort a host device image update
-    """
+    """Asks System Inventory to abort a host device image update."""
+
     url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
     if url is None:
         raise ValueError("OpenStack SysInv URL is invalid")

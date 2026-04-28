@@ -11,9 +11,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.system")
 
 
 class System(ObjectData):
-    """
-    System Object
-    """
+    """System Object."""
 
     def __init__(self, name, description):
         super(System, self).__init__("1.0.0")

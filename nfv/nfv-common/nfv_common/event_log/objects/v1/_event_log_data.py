@@ -7,18 +7,14 @@ from datetime import datetime
 
 
 class EventLogStateData(object):
-    """
-    Event Log State Data
-    """
+    """Event Log State Data."""
 
     def __init__(self, state):
         self.state = state
 
 
 class EventLogThresholdData(object):
-    """
-    Event Log Threshold Data
-    """
+    """Event Log Threshold Data."""
 
     def __init__(self, threshold_value, observed_value):
         self.threshold_value = threshold_value
@@ -26,9 +22,7 @@ class EventLogThresholdData(object):
 
 
 class EventLogData(object):
-    """
-    Event Log Data
-    """
+    """Event Log Data."""
 
     _id = 1
 
@@ -62,7 +56,6 @@ class EventLogData(object):
         EventLogData._id += 1
 
     def as_dict(self):
-        """
-        Render this object as a dictionary of its fields
-        """
+        """Render this object as a dictionary of its fields."""
+
         return dict.copy(self.__dict__)

@@ -12,9 +12,9 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class KubeHostUpgradeState(Constants, metaclass=Singleton):
-    """
-    Kube Host Upgrade State Constants
-    These values are copied from sysinv/common/kubernetes.py
+    """Kube Host Upgrade State Constants
+
+    These values are copied from sysinv/common/kubernetes.py.
     """
 
     KUBE_HOST_UPGRADING_CONTROL_PLANE = Constant("upgrading-control-plane")
@@ -31,10 +31,10 @@ KUBE_HOST_UPGRADE_STATE = KubeHostUpgradeState()
 
 
 class KubeUpgradeState(Constants, metaclass=Singleton):
-    """
-    Kube Upgrade State Constants
+    """Kube Upgrade State Constants
+
     These values are copied from sysinv/common/kubernetes.py
-    Maintaining the same order as defined in kubernetes.py
+    Maintaining the same order as defined in kubernetes.py.
     """
 
     KUBE_UPGRADE_STARTED = Constant("upgrade-started")
@@ -77,9 +77,7 @@ KUBE_UPGRADE_STATE = KubeUpgradeState()
 
 
 class KubeHostUpgrade(ObjectData):
-    """
-    NFVI Kube Host Upgrade Object
-    """
+    """NFVI Kube Host Upgrade Object."""
 
     def __init__(
         self,
@@ -104,9 +102,7 @@ class KubeHostUpgrade(ObjectData):
 
 
 class KubeUpgrade(ObjectData):
-    """
-    NFVI Kube Upgrade Object
-    """
+    """NFVI Kube Upgrade Object."""
 
     def __init__(self, state, from_version, to_version):
         super(KubeUpgrade, self).__init__("1.0.0")
@@ -114,9 +110,7 @@ class KubeUpgrade(ObjectData):
 
 
 class KubeVersion(ObjectData):
-    """
-    NFVI Kube Version Object
-    """
+    """NFVI Kube Version Object."""
 
     def __init__(
         self,

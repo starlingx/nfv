@@ -18,9 +18,7 @@ def _analysis_instances_success(
     action_types=None,
     callback=None,
 ):
-    """
-    Analyze records and determine if instance success
-    """
+    """Analyze records and determine if instance success."""
 
     def default_callback(idx, record):
         return True
@@ -195,9 +193,8 @@ def _analysis_instances_success(
 def analysis_instance_start_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance is started
-    """
+    """Analyze records and determine if instance is started."""
+
     always = True
 
     possible_records = [
@@ -221,9 +218,8 @@ def analysis_instance_start_success(
 def analysis_instance_stop_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance is stopped
-    """
+    """Analyze records and determine if instance is stopped."""
+
     always = True
 
     possible_records = [
@@ -254,9 +250,8 @@ def analysis_instance_stop_success(
 def analysis_instance_pause_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance is paused
-    """
+    """Analyze records and determine if instance is paused."""
+
     always = True
 
     possible_records = [
@@ -287,9 +282,8 @@ def analysis_instance_pause_success(
 def analysis_instance_unpause_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance is unpaused
-    """
+    """Analyze records and determine if instance is unpaused."""
+
     always = True
 
     possible_records = [
@@ -322,9 +316,8 @@ def analysis_instance_unpause_success(
 def analysis_instance_suspend_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance is suspended
-    """
+    """Analyze records and determine if instance is suspended."""
+
     always = True
 
     possible_records = [
@@ -359,9 +352,8 @@ def analysis_instance_suspend_success(
 def analysis_instance_resume_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance is resumed
-    """
+    """Analyze records and determine if instance is resumed."""
+
     always = True
 
     possible_records = [
@@ -390,9 +382,7 @@ def analysis_instance_resume_success(
 def analysis_instance_reboot_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance rebooted
-    """
+    """Analyze records and determine if instance rebooted."""
 
     def callback(idx, record):
         record_data = record["data"]
@@ -437,9 +427,8 @@ def analysis_instance_reboot_success(
 def analysis_instance_rebuild_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance was rebuilt
-    """
+    """Analyze records and determine if instance was rebuilt."""
+
     always = True
 
     possible_records = [
@@ -463,9 +452,8 @@ def analysis_instance_rebuild_success(
 def analysis_instance_live_migrate_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance live-migrated
-    """
+    """Analyze records and determine if instance live-migrated."""
+
     always = True
 
     possible_records = [
@@ -510,9 +498,8 @@ def analysis_instance_live_migrate_success(
 def analysis_instance_cold_migrate_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance cold-migrated
-    """
+    """Analyze records and determine if instance cold-migrated."""
+
     always = True
     guest_hb_only = not action and guest_hb
 
@@ -559,9 +546,8 @@ def analysis_instance_cold_migrate_success(
 def analysis_instance_cold_migrate_confirm_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance cold-migrate confirmed
-    """
+    """Analyze records and determine if instance cold-migrate confirmed."""
+
     possible_records = [
         (action, NFV_VIM.INSTANCE_NFVI_ACTION_START),
         (action, NFV_VIM.INSTANCE_COLD_MIGRATE_CONFIRM_STATE),
@@ -596,9 +582,8 @@ def analysis_instance_cold_migrate_confirm_success(
 def analysis_instance_cold_migrate_revert_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance cold-migrate reverted
-    """
+    """Analyze records and determine if instance cold-migrate reverted."""
+
     possible_records = [
         (action, NFV_VIM.INSTANCE_NFVI_ACTION_START),
         (action, NFV_VIM.INSTANCE_COLD_MIGRATE_REVERT_STATE),
@@ -633,9 +618,8 @@ def analysis_instance_cold_migrate_revert_success(
 def analysis_instance_resize_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance resized
-    """
+    """Analyze records and determine if instance resized."""
+
     possible_records = [
         (action, NFV_VIM.INSTANCE_NFVI_ACTION_START),
         (action, NFV_VIM.INSTANCE_RESIZE_STATE),
@@ -667,9 +651,8 @@ def analysis_instance_resize_success(
 def analysis_instance_resize_confirm_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance resize confirmed
-    """
+    """Analyze records and determine if instance resize confirmed."""
+
     possible_records = [
         (action, NFV_VIM.INSTANCE_NFVI_ACTION_START),
         (action, NFV_VIM.INSTANCE_RESIZE_CONFIRM_STATE),
@@ -699,9 +682,8 @@ def analysis_instance_resize_confirm_success(
 def analysis_instance_resize_revert_success(
     instance_uuid, instance_name, records, action=False, guest_hb=False
 ):
-    """
-    Analyze records and determine if instance resize reverted
-    """
+    """Analyze records and determine if instance resize reverted."""
+
     possible_records = [
         (action, NFV_VIM.INSTANCE_NFVI_ACTION_START),
         (action, NFV_VIM.INSTANCE_RESIZE_REVERT_STATE),
@@ -729,9 +711,7 @@ def analysis_instance_resize_revert_success(
 
 
 def analysis_stdout(records):
-    """
-    Analyze records and display results to stdout
-    """
+    """Analyze records and display results to stdout."""
 
     def timestamp_str(timestamp_data):
         return timestamp_data.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
@@ -756,7 +736,6 @@ def analysis_stdout(records):
             NFV_VIM.HOST_DELETING_STATE,
             NFV_VIM.HOST_DELETED_STATE,
         ]:
-
             if data["host_name"] in hosts:
                 prev_record = hosts[data["host_name"]]
                 elapsed_time = record["timestamp"] - prev_record["timestamp"]

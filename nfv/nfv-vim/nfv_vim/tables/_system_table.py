@@ -11,9 +11,7 @@ _system_table = None
 
 
 class SystemTable(Table):
-    """
-    System Table
-    """
+    """System Table."""
 
     def __init__(self):
         super(SystemTable, self).__init__()
@@ -26,16 +24,14 @@ class SystemTable(Table):
 
 
 def tables_get_system_table():
-    """
-    Get the system table
-    """
+    """Get the system table."""
+
     return _system_table
 
 
 def system_table_initialize():
-    """
-    Initialize the system table
-    """
+    """Initialize the system table."""
+
     global _system_table
 
     _system_table = SystemTable()
@@ -48,9 +44,8 @@ def system_table_initialize():
 
 
 def system_table_finalize():
-    """
-    Finalize the system table
-    """
+    """Finalize the system table."""
+
     global _system_table
 
     del _system_table

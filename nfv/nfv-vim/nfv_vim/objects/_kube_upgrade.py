@@ -22,9 +22,7 @@ DEFAULT_KUBE_AUDIT_RATE = 5
 
 
 class KubeUpgrade(SwUpdate):
-    """
-    Kubernetes Upgrade Object
-    """
+    """Kubernetes Upgrade Object."""
 
     def __init__(self, sw_update_uuid=None, strategy_data=None):
         super(KubeUpgrade, self).__init__(
@@ -49,9 +47,8 @@ class KubeUpgrade(SwUpdate):
         to_version,
         single_controller,
     ):
-        """
-        Create a kubernetes upgrade strategy
-        """
+        """Create a kubernetes upgrade strategy."""
+
         from nfv_vim import strategy
 
         if self._strategy:
@@ -76,48 +73,72 @@ class KubeUpgrade(SwUpdate):
         return True, ""
 
     def strategy_build_complete(self, success, reason):
-        """
-        Creation of a kubernetes upgrade strategy complete
-        """
+        """Creation of a kubernetes upgrade strategy complete."""
+
         DLOG.info("Kubernetes upgrade strategy build complete.")
         pass
 
     @staticmethod
     def alarm_type(alarm_type):
-        """
-        Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_TYPES
-        """
+        """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_TYPES."""
+
         ALARM_TYPE_MAPPING = {
-            SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS: alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS,
-            SW_UPDATE_ALARM_TYPES.APPLY_ABORTING: alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_ABORTING,
-            SW_UPDATE_ALARM_TYPES.APPLY_FAILED: alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_FAILED,
+            SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS: (
+                alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS
+            ),
+            SW_UPDATE_ALARM_TYPES.APPLY_ABORTING: (
+                alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_ABORTING
+            ),
+            SW_UPDATE_ALARM_TYPES.APPLY_FAILED: (
+                alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_FAILED
+            ),
         }
         return ALARM_TYPE_MAPPING[alarm_type]
 
     @staticmethod
     def event_id(event_id):
-        """
-        Returns EVENT_ID corresponding to SW_UPDATE_EVENT_IDS
-        """
+        """Returns EVENT_ID corresponding to SW_UPDATE_EVENT_IDS."""
+
         EVENT_ID_MAPPING = {
-            SW_UPDATE_EVENT_IDS.APPLY_START: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_START,
-            SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS,
-            SW_UPDATE_EVENT_IDS.APPLY_REJECTED: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_REJECTED,
-            SW_UPDATE_EVENT_IDS.APPLY_CANCELLED: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_CANCELLED,
-            SW_UPDATE_EVENT_IDS.APPLY_FAILED: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_FAILED,
-            SW_UPDATE_EVENT_IDS.APPLY_COMPLETED: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_COMPLETED,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORTING: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTING,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORTED: event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTED,
+            SW_UPDATE_EVENT_IDS.APPLY_START: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_START
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_REJECTED: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_REJECTED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_CANCELLED: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_CANCELLED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_FAILED: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_FAILED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_COMPLETED: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_COMPLETED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORT: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORTING: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTING
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORTED: (
+                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTED
+            ),
         }
         return EVENT_ID_MAPPING[event_id]
 
     def nfvi_update(self):
-        """
-        NFVI Update
-        """
+        """NFVI Update."""
+
         if self._strategy is None:
             if self._alarms:
                 alarm.clear_sw_update_alarm(self._alarms)
@@ -156,9 +177,8 @@ class KubeUpgrade(SwUpdate):
 
     @coroutine
     def nfvi_kube_upgrade_callback(self, timer_id):
-        """
-        Audit Kube Upgrade Callback
-        """
+        """Audit Kube Upgrade Callback."""
+
         from nfv_vim import strategy
 
         response = yield
@@ -181,9 +201,8 @@ class KubeUpgrade(SwUpdate):
 
     @coroutine
     def nfvi_kube_host_upgrade_list_callback(self, timer_id):
-        """
-        Audit Kube Host Upgrade Callback
-        """
+        """Audit Kube Host Upgrade Callback."""
+
         from nfv_vim import strategy
 
         response = yield
@@ -204,9 +223,8 @@ class KubeUpgrade(SwUpdate):
 
     @coroutine
     def nfvi_audit(self):
-        """
-        Audit NFVI layer
-        """
+        """Audit NFVI layer."""
+
         while True:
             timer_id = yield
 

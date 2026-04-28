@@ -17,9 +17,7 @@ DLOG = debug.debug_get_logger("nfv_common.strategy")
 
 
 class Strategy(object):
-    """
-    Strategy
-    """
+    """Strategy."""
 
     def __init__(
         self,
@@ -69,144 +67,124 @@ class Strategy(object):
 
     @property
     def uuid(self):
-        """
-        Returns the uuid of the strategy
-        """
+        """Returns the uuid of the strategy."""
+
         return self._uuid
 
     @property
     def name(self):
-        """
-        Returns the name of the strategy
-        """
+        """Returns the name of the strategy."""
+
         return self._name
 
     @property
     def state(self):
-        """
-        Returns the state of the strategy
-        """
+        """Returns the state of the strategy."""
+
         return self._state
 
     @property
     def current_phase(self):
-        """
-        Returns the current phase being executed for the strategy
-        """
+        """Returns the current phase being executed for the strategy."""
+
         return self._current_phase
 
     @property
     def build_phase(self):
-        """
-        Returns the build phase of the strategy
-        """
+        """Returns the build phase of the strategy."""
+
         return self._phase[STRATEGY_PHASE.BUILD]
 
     @property
     def apply_phase(self):
-        """
-        Returns the apply phase of the strategy
-        """
+        """Returns the apply phase of the strategy."""
+
         return self._phase[STRATEGY_PHASE.APPLY]
 
     @property
     def abort_phase(self):
-        """
-        Returns the abort phase of the strategy
-        """
+        """Returns the abort phase of the strategy."""
+
         return self._phase[STRATEGY_PHASE.ABORT]
 
     def is_building(self):
-        """
-        Returns true if the strategy is building
-        """
+        """Returns true if the strategy is building."""
+
         return STRATEGY_STATE.BUILDING == self._state
 
     def is_build_failed(self):
-        """
-        Returns true if the strategy build failed
-        """
+        """Returns true if the strategy build failed."""
+
         return (
             STRATEGY_STATE.BUILD_FAILED == self._state or self.build_phase.is_failed()
         )
 
     def is_build_timed_out(self):
-        """
-        Returns true if the strategy build timed out
-        """
+        """Returns true if the strategy build timed out."""
+
         return (
             STRATEGY_STATE.BUILD_TIMEOUT == self._state
             or self.build_phase.is_timed_out()
         )
 
     def is_ready_to_apply(self):
-        """
-        Returns true if the strategy is ready to apply
-        """
+        """Returns true if the strategy is ready to apply."""
+
         return STRATEGY_STATE.READY_TO_APPLY == self._state
 
     def is_applying(self):
-        """
-        Returns true if the strategy is applying
-        """
+        """Returns true if the strategy is applying."""
+
         return STRATEGY_STATE.APPLYING == self._state
 
     def is_apply_failed(self):
-        """
-        Returns true if the strategy apply failed
-        """
+        """Returns true if the strategy apply failed."""
+
         return (
             STRATEGY_STATE.APPLY_FAILED == self._state or self.apply_phase.is_failed()
         )
 
     def is_apply_timed_out(self):
-        """
-        Returns true if the strategy apply timed out
-        """
+        """Returns true if the strategy apply timed out."""
+
         return (
             STRATEGY_STATE.APPLY_TIMEOUT == self._state
             or self.apply_phase.is_timed_out()
         )
 
     def is_applied(self):
-        """
-        Returns true if the strategy is applied
-        """
+        """Returns true if the strategy is applied."""
+
         return STRATEGY_STATE.APPLIED == self._state
 
     def is_aborting(self):
-        """
-        Returns true if the strategy is aborting
-        """
+        """Returns true if the strategy is aborting."""
+
         return STRATEGY_STATE.ABORTING == self._state
 
     def is_abort_failed(self):
-        """
-        Returns true if the strategy abort failed
-        """
+        """Returns true if the strategy abort failed."""
+
         return (
             STRATEGY_STATE.ABORT_FAILED == self._state or self.abort_phase.is_failed()
         )
 
     def is_abort_timed_out(self):
-        """
-        Returns true if the strategy abort timed out
-        """
+        """Returns true if the strategy abort timed out."""
+
         return (
             STRATEGY_STATE.ABORT_TIMEOUT == self._state
             or self.abort_phase.is_timed_out()
         )
 
     def is_aborted(self):
-        """
-        Returns true if the strategy is aborted
-        """
+        """Returns true if the strategy is aborted."""
+
         return STRATEGY_STATE.ABORTED == self._state
 
     def _build(self):
-        """
-        Strategy Build
-        """
+        """Strategy Build."""
+
         if STRATEGY_PHASE.INITIAL == self._current_phase:
             if STRATEGY_STATE.INITIAL == self._state:
                 self._state = STRATEGY_STATE.BUILDING
@@ -214,9 +192,8 @@ class Strategy(object):
                 self.build_phase.apply()
 
     def _apply(self, stage_id=None):
-        """
-        Strategy Apply
-        """
+        """Strategy Apply."""
+
         success = True
         reason = ""
 
@@ -305,9 +282,8 @@ class Strategy(object):
         return success, reason
 
     def _abort(self, stage_id=None):
-        """
-        Strategy Abort
-        """
+        """Strategy Abort."""
+
         if STRATEGY_PHASE.APPLY == self._current_phase:
             if stage_id is not None:
                 if (
@@ -348,9 +324,8 @@ class Strategy(object):
         return True, ""
 
     def _handle_event(self, event, event_data=None):
-        """
-        Strategy Handle Event
-        """
+        """Strategy Handle Event."""
+
         handled = False
 
         if STRATEGY_STATE.BUILDING == self._state:
@@ -371,21 +346,18 @@ class Strategy(object):
         return handled
 
     def phase_save(self):
-        """
-        Strategy Phase Save
-        """
+        """Strategy Phase Save."""
+
         self.save()
 
     def phase_extend_timeout(self, phase):
-        """
-        Strategy Phase Extend Timeout
-        """
+        """Strategy Phase Extend Timeout."""
+
         phase.refresh_timeouts()
 
     def phase_complete(self, phase, phase_result, phase_result_reason=None):
-        """
-        Strategy Phase Complete
-        """
+        """Strategy Phase Complete."""
+
         self.save()
 
         result, result_reason = strategy_result_update(
@@ -459,73 +431,63 @@ class Strategy(object):
         self.save()
 
     def refresh_timeouts(self):
-        """
-        Strategy Refresh Timeouts
-        """
+        """Strategy Refresh Timeouts."""
+
         self.build_phase.refresh_timeouts()
         self.apply_phase.refresh_timeouts()
         self.abort_phase.refresh_timeouts()
 
     def save(self):
-        """
-        Strategy Save (can be overridden by child class)
-        """
+        """Strategy Save (can be overridden by child class)."""
+
         pass
 
     def build(self):
-        """
-        Strategy Build (can be overridden by child class)
-        """
+        """Strategy Build (can be overridden by child class)."""
+
         self._build()
         self.save()
 
     def build_complete(self, result, result_reason):
-        """
-        Strategy Build Complete (can be overridden by child class)
-        """
+        """Strategy Build Complete (can be overridden by child class)."""
+
         self.save()
         return result, result_reason
 
     def apply(self, stage_id):
-        """
-        Strategy Apply (can be overridden by child class)
-        """
+        """Strategy Apply (can be overridden by child class)."""
+
         success, reason = self._apply(stage_id)
         self.save()
         return success, reason
 
     def apply_complete(self, result, result_reason):
-        """
-        Strategy Apply Complete (can be overridden by child class)
-        """
+        """Strategy Apply Complete (can be overridden by child class)."""
+
         self.save()
         return result, result_reason
 
     def abort(self, stage_id):
-        """
-        Strategy Abort (can be overridden by child class)
-        """
+        """Strategy Abort (can be overridden by child class)."""
+
         success, reason = self._abort(stage_id)
         self.save()
         return success, reason
 
     def abort_complete(self, result, result_reason):
-        """
-        Strategy Abort Complete (can be overridden by child class)
-        """
+        """Strategy Abort Complete (can be overridden by child class)."""
+
         self.save()
         return result, result_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Strategy Handle Event (can be overridden by child class)
-        """
+        """Strategy Handle Event (can be overridden by child class)."""
+
         return self._handle_event(event, event_data)
 
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """
-        Initializes a strategy object using the given dictionary
-        """
+        """Initializes a strategy object using the given dictionary."""
+
         Strategy.__init__(
             self,
             data["uuid"],
@@ -539,9 +501,8 @@ class Strategy(object):
         return self
 
     def as_dict(self):
-        """
-        Represent the strategy as a dictionary
-        """
+        """Represent the strategy as a dictionary."""
+
         data = dict()
         data["uuid"] = self.uuid
         data["name"] = self.name
@@ -567,7 +528,6 @@ class Strategy(object):
         return data
 
     def as_json(self):
-        """
-        Represent the strategy as json
-        """
+        """Represent the strategy as json."""
+
         return json.dumps(self.as_dict())

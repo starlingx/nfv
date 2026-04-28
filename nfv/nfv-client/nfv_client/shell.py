@@ -12,7 +12,6 @@ import urllib.request
 
 from nfv_client import sw_update
 
-
 REGISTERED_STRATEGIES = {}
 
 
@@ -22,8 +21,7 @@ def _process_exit(error):
 
 
 def register_strategy(cmd_area, strategy_name):
-    """
-    Registers a parser command with an update strategy name
+    """Registers a parser command with an update strategy name.
 
     :param cmd_area: the parser command to register
     :param strategy_name: the strategy to associate with this parser
@@ -32,8 +30,7 @@ def register_strategy(cmd_area, strategy_name):
 
 
 def get_strategy_name(cmd_area):
-    """
-    Determines the strategy name for a parser command
+    """Determines the strategy name for a parser command.
 
     :param cmd_area: the parser command to lookup
     :returns: the strategy name associated with the parser
@@ -46,8 +43,7 @@ def get_strategy_name(cmd_area):
 
 
 def get_extra_create_args(cmd_area, args):
-    """
-    Return the extra create arguments supported by a strategy type
+    """Return the extra create arguments supported by a strategy type.
 
     :param cmd_area: the strategy that supports additional create arguments
     :param args: the parsed arguments to extract the additional fields from
@@ -88,8 +84,7 @@ def get_extra_create_args(cmd_area, args):
 
 
 def add_list_arg(some_cmd, some_arg, some_list):
-    """
-    Adds an argument to a command accepting a list of valid values.
+    """Adds an argument to a command accepting a list of valid values.
 
     :param some_cmd: a command parser object that is adding a new argument
     :param some_arg: a string indicating the new argument. ex: --foo
@@ -104,8 +99,7 @@ def add_list_arg(some_cmd, some_arg, some_list):
 
 
 def setup_abort_cmd(parser):
-    """
-    Sets up an 'abort' command for a strategy command parser.
+    """Sets up an 'abort' command for a strategy command parser.
 
     ex: sw-manager sw-deploy-strategy abort <some args>
 
@@ -121,8 +115,7 @@ def setup_abort_cmd(parser):
 
 
 def setup_apply_cmd(parser):
-    """
-    Sets up an 'apply' command for a strategy command parser.
+    """Sets up an 'apply' command for a strategy command parser.
 
     ex: sw-manager sw-deploy-strategy apply <some args>
 
@@ -147,8 +140,7 @@ def setup_create_cmd(
     min_parallel=1,
     max_parallel=5,
 ):
-    """
-    Sets up a 'create' command for a strategy command parser.
+    """Sets up a 'create' command for a strategy command parser.
 
     ex: sw-manager sw-deploy-strategy create <some args>
 
@@ -182,8 +174,7 @@ def setup_create_cmd(
 
 
 def setup_delete_cmd(parser):
-    """
-    Sets up a 'delete' command for a strategy command parser.
+    """Sets up a 'delete' command for a strategy command parser.
 
     ex: sw-manager sw-deploy-strategy delete <some args>
 
@@ -196,8 +187,7 @@ def setup_delete_cmd(parser):
 
 
 def setup_show_cmd(parser):
-    """
-    Sets up a 'show' command for a strategy command parser.
+    """Sets up a 'show' command for a strategy command parser.
 
     ex: sw-manager sw-deploy-strategy show <some args>
 
@@ -220,7 +210,7 @@ def setup_show_cmd(parser):
 
 
 def setup_fw_update_parser(commands):
-    """Firmware Update Strategy Commands"""
+    """Firmware Update Strategy Commands."""
 
     cmd_area = sw_update.CMD_NAME_FW_UPDATE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_FW_UPDATE)
@@ -265,7 +255,7 @@ def setup_fw_update_parser(commands):
 
 
 def setup_kube_rootca_update_parser(commands):
-    """Kubernetes RootCA Update Strategy Commands"""
+    """Kubernetes RootCA Update Strategy Commands."""
 
     cmd_area = sw_update.CMD_NAME_KUBE_ROOTCA_UPDATE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_KUBE_ROOTCA_UPDATE)
@@ -326,7 +316,7 @@ def setup_kube_rootca_update_parser(commands):
 
 
 def setup_kube_upgrade_parser(commands):
-    """Kubernetes Upgrade Strategy Commands"""
+    """Kubernetes Upgrade Strategy Commands."""
 
     cmd_area = sw_update.CMD_NAME_KUBE_UPGRADE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_KUBE_UPGRADE)
@@ -384,7 +374,7 @@ def setup_kube_upgrade_parser(commands):
 
 
 def setup_system_config_update_parser(commands):
-    """System config update Strategy Commands"""
+    """System config update Strategy Commands."""
 
     cmd_area = sw_update.CMD_NAME_SYSTEM_CONFIG_UPDATE
     register_strategy(cmd_area, sw_update.STRATEGY_NAME_SYSTEM_CONFIG_UPDATE)
@@ -436,7 +426,7 @@ def setup_system_config_update_parser(commands):
 
 
 def setup_sw_deploy_parser(commands):
-    """Software Deploy Strategy Commands"""
+    """Software Deploy Strategy Commands."""
 
     cmd_area = sw_update.CMD_NAME_SW_DEPLOY
     # TODO(jkraitbe): Backend for sw-deploy will continue as old sw-upgrade for now
@@ -587,9 +577,8 @@ def confirm_if_required(args, command, cli_conf_enabled):
 
 
 def process_main(argv=sys.argv[1:]):  # pylint: disable=dangerous-default-value
-    """
-    Client - Main
-    """
+    """Client - Main."""
+
     try:
         parser = argparse.ArgumentParser()
         parser.add_argument("--debug", action="store_true")

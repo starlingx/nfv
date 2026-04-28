@@ -39,9 +39,7 @@ from nfv_common.helpers import Singleton
 
 
 class DebugConfig(object, metaclass=Singleton):
-    """
-    Debug Configuration
-    """
+    """Debug Configuration."""
 
     debug_level_mapping = {
         "debug.level.none": DEBUG_LEVEL.NONE,
@@ -55,32 +53,28 @@ class DebugConfig(object, metaclass=Singleton):
     }
 
     def __init__(self, filename):
-        """
-        Create debug configuration
-        """
+        """Create debug configuration."""
+
         self._filename = filename
         self._config = None
 
     def load(self):
-        """
-        Load debug configuration
-        """
+        """Load debug configuration."""
+
         if self._config is None:
             self._config = configparser.ConfigParser()
         self._config.read(self._filename)
 
     @property
     def filename(self):
-        """
-        Returns the debug configuration file name
-        """
+        """Returns the debug configuration file name."""
+
         return self._filename
 
     @property
     def debug_level_overall(self):
-        """
-        Returns the overall debug level
-        """
+        """Returns the overall debug level."""
+
         debug_level = DEBUG_LEVEL.NONE
 
         if self._config is not None:
@@ -101,9 +95,8 @@ class DebugConfig(object, metaclass=Singleton):
 
     @property
     def trace_level_overall(self):
-        """
-        Returns the overall trace level
-        """
+        """Returns the overall trace level."""
+
         trace_level = DEBUG_LEVEL.NONE
 
         if self._config is not None:
@@ -124,9 +117,8 @@ class DebugConfig(object, metaclass=Singleton):
 
     @property
     def debug_loggers(self):
-        """
-        Returns a list of debug loggers
-        """
+        """Returns a list of debug loggers."""
+
         debug_list = []
 
         if self._config is not None:

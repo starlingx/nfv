@@ -8,23 +8,20 @@ _parsers = dict()
 
 
 def parser_get(parser_name):
-    """
-    Returns the associated parser
-    """
+    """Returns the associated parser."""
+
     return _parsers.get(parser_name, None)
 
 
 def parser_initialize():
-    """
-    Initialize module
-    """
+    """Initialize module."""
+
     global _parsers
 
     _parsers["nfv-vim"] = _nfv_vim_parser.parser_initialize()
 
 
 def parser_finalize():
-    """
-    Finalize module
-    """
+    """Finalize module."""
+
     _nfv_vim_parser.parser_finalize()

@@ -13,16 +13,14 @@ _block_storage_plugin = None
 
 
 def nfvi_block_storage_plugin_disabled():
-    """
-    Get block storage plugin disabled status
-    """
+    """Get block storage plugin disabled status."""
+
     return _block_storage_plugin is None
 
 
 def nfvi_get_volumes(paging, callback):
-    """
-    Get a list of volumes
-    """
+    """Get a list of volumes."""
+
     cmd_id = _block_storage_plugin.invoke_plugin(
         "get_volumes", paging, callback=callback
     )
@@ -32,9 +30,8 @@ def nfvi_get_volumes(paging, callback):
 def nfvi_create_volume(
     volume_name, volume_description, size_gb, callback, image_uuid=None
 ):
-    """
-    Create a volume in the NFVI
-    """
+    """Create a volume in the NFVI."""
+
     cmd_id = _block_storage_plugin.invoke_plugin(
         "create_volume",
         volume_name,
@@ -47,9 +44,8 @@ def nfvi_create_volume(
 
 
 def nfvi_delete_volume(volume_uuid, callback):
-    """
-    Delete a volume from the NFVI
-    """
+    """Delete a volume from the NFVI."""
+
     cmd_id = _block_storage_plugin.invoke_plugin(
         "delete_volume", volume_uuid, callback=callback
     )
@@ -57,9 +53,8 @@ def nfvi_delete_volume(volume_uuid, callback):
 
 
 def nfvi_update_volume(volume_uuid, volume_description, callback):
-    """
-    Update a volume in the NFVI
-    """
+    """Update a volume in the NFVI."""
+
     cmd_id = _block_storage_plugin.invoke_plugin(
         "update_volume", volume_uuid, volume_description, callback=callback
     )
@@ -67,9 +62,8 @@ def nfvi_update_volume(volume_uuid, volume_description, callback):
 
 
 def nfvi_get_volume(volume_uuid, callback):
-    """
-    Get volume details from the NFVI
-    """
+    """Get volume details from the NFVI."""
+
     cmd_id = _block_storage_plugin.invoke_plugin(
         "get_volume", volume_uuid, callback=callback
     )
@@ -77,9 +71,8 @@ def nfvi_get_volume(volume_uuid, callback):
 
 
 def nfvi_get_volume_snapshots(callback):
-    """
-    Get a list of volume snapshots
-    """
+    """Get a list of volume snapshots."""
+
     cmd_id = _block_storage_plugin.invoke_plugin(
         "get_volume_snapshots", callback=callback
     )
@@ -87,9 +80,8 @@ def nfvi_get_volume_snapshots(callback):
 
 
 def nfvi_block_storage_initialize(config, pool):
-    """
-    Initialize the NFVI block storage package
-    """
+    """Initialize the NFVI block storage package."""
+
     global _block_storage_plugin
 
     _block_storage_plugin = NFVIBlockStoragePlugin(config["namespace"], pool)
@@ -97,8 +89,7 @@ def nfvi_block_storage_initialize(config, pool):
 
 
 def nfvi_block_storage_finalize():
-    """
-    Finalize the NFVI block storage package
-    """
+    """Finalize the NFVI block storage package."""
+
     if _block_storage_plugin is not None:
         _block_storage_plugin.finalize()

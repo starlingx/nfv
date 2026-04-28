@@ -11,9 +11,7 @@ from nfv_common.helpers import Singleton
 
 
 class SwUpdateNames(Constants, metaclass=Singleton):
-    """
-    Software Update - Name Constants
-    """
+    """Software Update - Name Constants."""
 
     FW_UPDATE = Constant("fw-update")
     KUBE_ROOTCA_UPDATE = Constant("kube-rootca-update")
@@ -24,9 +22,7 @@ class SwUpdateNames(Constants, metaclass=Singleton):
 
 
 class SwUpdateApplyTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Apply Type Constants
-    """
+    """Software Update - Apply Type Constants."""
 
     SERIAL = Constant("serial")
     PARALLEL = Constant("parallel")
@@ -34,18 +30,14 @@ class SwUpdateApplyTypes(Constants, metaclass=Singleton):
 
 
 class SwUpdateInstanceActionTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Instance Action Type Constants
-    """
+    """Software Update - Instance Action Type Constants."""
 
     MIGRATE = Constant("migrate")
     STOP_START = Constant("stop-start")
 
 
 class SwUpdateActions(Constants, metaclass=Singleton):
-    """
-    Software Update - Action Constants
-    """
+    """Software Update - Action Constants."""
 
     APPLY_ALL = Constant("apply-all")
     APPLY_STAGE = Constant("apply-stage")
@@ -54,9 +46,7 @@ class SwUpdateActions(Constants, metaclass=Singleton):
 
 
 class SwUpdateAlarmRestrictionTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Alarm Restriction Type Constants
-    """
+    """Software Update - Alarm Restriction Type Constants."""
 
     STRICT = Constant("strict")
     RELAXED = Constant("relaxed")

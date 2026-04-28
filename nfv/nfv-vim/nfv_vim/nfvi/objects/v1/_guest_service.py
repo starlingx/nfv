@@ -12,18 +12,14 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class GuestServiceNames(Constants, metaclass=Singleton):
-    """
-    Guest Service Name Constants
-    """
+    """Guest Service Name Constants."""
 
     UNKNOWN = Constant("unknown")
     HEARTBEAT = Constant("heartbeat")
 
 
 class GuestServiceAdministrativeState(Constants, metaclass=Singleton):
-    """
-    Guest Service Administrative State Constants
-    """
+    """Guest Service Administrative State Constants."""
 
     UNKNOWN = Constant("unknown")
     LOCKED = Constant("locked")
@@ -31,9 +27,7 @@ class GuestServiceAdministrativeState(Constants, metaclass=Singleton):
 
 
 class GuestServiceOperationalState(Constants, metaclass=Singleton):
-    """
-    Guest Service Operational State Constants
-    """
+    """Guest Service Operational State Constants."""
 
     UNKNOWN = Constant("unknown")
     ENABLED = Constant("enabled")
@@ -47,9 +41,7 @@ GUEST_SERVICE_OPER_STATE = GuestServiceOperationalState()
 
 
 class GuestService(ObjectData):
-    """
-    NFVI Guest Service Object
-    """
+    """NFVI Guest Service Object."""
 
     def __init__(self, name, admin_state, oper_state, restart_timeout=None):
         super(GuestService, self).__init__("1.0.0")
@@ -63,9 +55,8 @@ class GuestService(ObjectData):
         )
 
     def as_dict(self):
-        """
-        Represent Guest Service data object as dictionary
-        """
+        """Represent Guest Service data object as dictionary."""
+
         data = dict()
         data["name"] = self.name
         data["admin_state"] = self.admin_state

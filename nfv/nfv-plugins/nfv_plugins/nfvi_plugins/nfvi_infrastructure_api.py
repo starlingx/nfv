@@ -47,8 +47,8 @@ def host_state(
     data_port_avail_status,
     data_port_fault_handling_enabled,
 ):
-    """
-    Takes as input the host state info received from maintenance.
+    """Takes as input the host state info received from maintenance.
+
     Returns a tuple of administrative state, operational state, availability
     status and nfvi-data for a host from the perspective of being able to
     host services and instances.
@@ -124,9 +124,7 @@ def host_state(
 
 
 class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
-    """
-    NFVI Infrastructure API Class Definition
-    """
+    """NFVI Infrastructure API Class Definition."""
 
     _name = "Infrastructure-API"
     _version = "1.0.0"
@@ -166,7 +164,6 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         LABEL_ENABLED = nfvi.objects.v1.HOST_LABEL_VALUES.ENABLED
 
         for host_label in host_label_list:
-
             if host_label["label_key"] == OS_COMPUTE:
                 if host_label["label_value"] == LABEL_ENABLED:
                     openstack_compute = True
@@ -205,7 +202,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         )
 
     def set_response_error(self, response, activity, issue="did not complete"):
-        """Utility method to consistently log and report an API error activity
+        """Utility method to consistently log and report an API error activity.
 
         :param str activity: the API action that failed
         :param dict response: The response dict to store the error 'reason'
@@ -215,9 +212,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         response["reason"] = error_string
 
     def get_datanetworks(self, future, host_uuid, callback):
-        """
-        Get host data networks from the plugin
-        """
+        """Get host data networks from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -268,9 +264,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_system_info(self, future, callback):
-        """
-        Get information about the system from the plugin
-        """
+        """Get information about the system from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -336,9 +331,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_system_state(self, future, callback):
-        """
-        Get the state of the system from the plugin
-        """
+        """Get the state of the system from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -394,9 +388,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_hosts(self, future, callback):
-        """
-        Get a list of hosts
-        """
+        """Get a list of hosts."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -564,9 +557,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_host(self, future, host_uuid, host_name, callback):
-        """
-        Get host details
-        """
+        """Get host details."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -698,9 +690,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_host_devices(self, future, host_uuid, host_name, callback):
-        """
-        Get host device list details
-        """
+        """Get host device list details."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -757,9 +748,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def get_host_device(
         self, future, host_uuid, host_name, device_uuid, device_name, callback
     ):
-        """
-        Get host device details
-        """
+        """Get host device details."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -815,9 +805,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def host_device_image_update(self, future, host_uuid, host_name, callback):
-        """
-        Update a host device image
-        """
+        """Update a host device image."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -874,9 +863,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def host_device_image_update_abort(self, future, host_uuid, host_name, callback):
-        """
-        Abort a host device image update
-        """
+        """Abort a host device image update."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -933,7 +921,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_rootca_update_abort(self, future, callback):
-        """Invokes sysinv kube-rootca-update-abort"""
+        """Invokes sysinv kube-rootca-update-abort."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -976,7 +965,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_rootca_update_complete(self, future, callback):
-        """Invokes sysinv kube-rootca-update-complete"""
+        """Invokes sysinv kube-rootca-update-complete."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1019,7 +1009,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_rootca_update_generate_cert(self, future, expiry_date, subject, callback):
-        """Invokes sysinv kube-rootca-update-generate-cert"""
+        """Invokes sysinv kube-rootca-update-generate-cert."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1077,9 +1068,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         failed_state,
         callback,
     ):
-        """
-        Kube Root CA Update a host for a particular update_type (phase)
-        """
+        """Kube Root CA Update a host for a particular update_type (phase)."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -1183,7 +1173,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_rootca_update_pods(self, future, phase, callback):
-        """Invokes sysinv kube-rootca-update-pods for a certain phase"""
+        """Invokes sysinv kube-rootca-update-pods for a certain phase."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1226,7 +1217,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_rootca_update_start(self, future, force, alarm_ignore_list, callback):
-        """Invokes sysinv kube-rootca-update-start"""
+        """Invokes sysinv kube-rootca-update-start."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1274,9 +1266,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def _extract_kube_rootca_host_updates(self, kube_rootca_update_host_list):
-        """
-        Return a list of KubeRootcaHostUpdate objects from sysinv api results.
-        """
+        """Return a list of KubeRootcaHostUpdate objects from sysinv api results."""
+
         result_list = []
         for host_data in kube_rootca_update_host_list:
             result_list.append(
@@ -1293,9 +1284,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         return result_list
 
     def get_kube_rootca_host_update_list(self, future, callback):
-        """
-        Get information about the kube rootca host update list from the plugin
-        """
+        """Get information about the kube rootca host update list from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1347,9 +1337,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def _extract_kube_host_upgrade_list(self, kube_host_upgrade_list, host_list):
-        """
-        Return a list of KubeHostUpgrade objects from sysinv api results.
-        """
+        """Return a list of KubeHostUpgrade objects from sysinv api results."""
 
         # Map the ID to the uuid from host_list
         host_map = dict()
@@ -1371,9 +1359,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         return result_list
 
     def get_kube_host_upgrade_list(self, future, callback):
-        """
-        Get information about the kube host upgrade list from the plugin
-        """
+        """Get information about the kube host upgrade list from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1432,8 +1419,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def _extract_kube_upgrade(self, kube_upgrade_data_list):
-        """
-        Return a KubeUpgrade object from sysinv api results.
+        """Return a KubeUpgrade object from sysinv api results.
 
         Returns None if there are no items in the list.
         Returns first kube upgrade object, but the API should never return
@@ -1459,8 +1445,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         return kube_upgrade_obj
 
     def _extract_kube_rootca_update(self, data_list):
-        """
-        Return a KubeRootCaUpdate object from sysinv api results.
+        """Return a KubeRootCaUpdate object from sysinv api results.
 
         Returns None if there are no items in the list.
         Returns first object, but the API should never return
@@ -1483,9 +1468,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         return result_obj
 
     def get_kube_rootca_update(self, future, callback):
-        """
-        Get information about the kube rootca update from the plugin
-        """
+        """Get information about the kube rootca update from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1545,9 +1529,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_kube_upgrade(self, future, callback):
-        """
-        Get information about the kube upgrade from the plugin
-        """
+        """Get information about the kube upgrade from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1600,9 +1583,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def _extract_kube_version(self, kube_data):
-        """
-        Return a KubeVersion from sysinv API results.
-        """
+        """Return a KubeVersion from sysinv API results."""
+
         # sysinv api returns a field called 'version' which is a reserved field
         # in vim object data structure.  It is stored as kube_version
         return nfvi.objects.v1.KubeVersion(
@@ -1616,9 +1598,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         )
 
     def get_kube_version_list(self, future, callback):
-        """
-        Get information about the kube versions list from the plugin
-        """
+        """Get information about the kube versions list from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1682,9 +1663,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def kube_host_upgrade_control_plane(
         self, future, host_uuid, host_name, force, callback
     ):
-        """
-        Start kube host upgrade 'control plane' for a particular controller
-        """
+        """Start kube host upgrade 'control plane' for a particular controller."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -1748,9 +1728,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_host_upgrade_kubelet(self, future, host_uuid, host_name, force, callback):
-        """
-        Start kube host upgrade 'kubelet' for a particular host
-        """
+        """Start kube host upgrade 'kubelet' for a particular host."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -1814,7 +1793,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_upgrade_abort(self, future, callback):
-        """Invokes sysinv kube-upgrade-abort"""
+        """Invokes sysinv kube-upgrade-abort."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1859,9 +1839,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_upgrade_cleanup(self, future, callback):
-        """
-        kube upgrade cleanup
-        """
+        """kube upgrade cleanup."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1912,9 +1891,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_upgrade_complete(self, future, callback):
-        """
-        kube upgrade complete
-        """
+        """kube upgrade complete."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1972,9 +1950,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_upgrade_download_images(self, future, callback):
-        """
-        Start kube upgrade download images
-        """
+        """Start kube upgrade download images."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2031,9 +2008,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_pre_application_update(self, future, callback):
-        """
-        Start kube pre application update
-        """
+        """Start kube pre application update."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2090,9 +2066,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_post_application_update(self, future, callback):
-        """
-        Start kube post application update
-        """
+        """Start kube post application update."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2149,9 +2124,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_upgrade_networking(self, future, callback):
-        """
-        Start kube upgrade networking
-        """
+        """Start kube upgrade networking."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2208,9 +2182,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_upgrade_storage(self, future, callback):
-        """
-        Start kube upgrade storage
-        """
+        """Start kube upgrade storage."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2269,9 +2242,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def kube_upgrade_start(
         self, future, to_version, force, alarm_ignore_list, callback
     ):
-        """
-        Start a kube upgrade
-        """
+        """Start a kube upgrade."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2339,9 +2311,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_upgrade(self, future, release, callback):
-        """
-        Get information about the software deploy from the plugin
-        """
+        """Get information about the software deploy from the plugin."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2365,7 +2336,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             if not future.result.is_complete():
                 error_msg = (
                     "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
                 )
                 response["error-message"] = error_msg
                 return
@@ -2400,9 +2372,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_precheck(self, future, release, force, snapshot, callback):
-        """
-        Precheck a USM software deploy
-        """
+        """Precheck a USM software deploy."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2447,7 +2418,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if not error_msg:
                     error_msg = (
                         "Unknown error while trying software deploy precheck, "
-                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
                     )
                 else:
                     error_msg = f"Software deploy precheck was rejected: {error_msg}"
@@ -2480,9 +2452,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_start(self, future, release, force, snapshot, callback):
-        """
-        Start a USM software deploy
-        """
+        """Start a USM software deploy."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2516,7 +2487,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             if not future.result.is_complete():
                 error_msg = (
                     "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
                 )
                 response["error-message"] = error_msg
                 return
@@ -2536,7 +2508,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if not error_msg:
                     error_msg = (
                         "Unknown error while trying software deploy start, "
-                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
                     )
                 else:
                     error_msg = f"Software deploy start was rejected: {error_msg}"
@@ -2562,9 +2535,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_activate(self, future, release, callback):
-        """
-        Activate a USM software deployement
-        """
+        """Activate a USM software deployement."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2598,7 +2570,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             if not future.result.is_complete():
                 error_msg = (
                     "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
                 )
                 response["error-message"] = error_msg
                 return
@@ -2618,7 +2591,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if not error_msg:
                     error_msg = (
                         "Unknown error while trying software deploy activate, "
-                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
                     )
                 else:
                     error_msg = f"Software deploy activate was rejected: {error_msg}"
@@ -2644,9 +2618,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_complete(self, future, release, callback):
-        """
-        Complete a USM software deployement
-        """
+        """Complete a USM software deployement."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2679,7 +2652,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             if not future.result.is_complete():
                 error_msg = (
                     "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
                 )
                 response["error-message"] = error_msg
                 return
@@ -2699,7 +2673,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if not error_msg:
                     error_msg = (
                         "Unknown error while trying software deploy complete, "
-                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
                     )
                 else:
                     error_msg = f"Software deploy complete was rejected: {error_msg}"
@@ -2725,9 +2700,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_delete(self, future, release, callback):
-        """
-        Delete USM software deployement
-        """
+        """Delete USM software deployement."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2760,7 +2734,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             if not future.result.is_complete():
                 error_msg = (
                     "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
                 )
                 response["error-message"] = error_msg
                 return
@@ -2780,7 +2755,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if not error_msg:
                     error_msg = (
                         "Unknown error while trying software deploy delete, "
-                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
                     )
                 else:
                     error_msg = f"Software deploy delete was rejected: {error_msg}"
@@ -2806,9 +2782,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_abort(self, future, callback):
-        """
-        Abort a USM software deployement
-        """
+        """Abort a USM software deployement."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2842,7 +2817,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             if not future.result.is_complete():
                 error_msg = (
                     "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
                 )
                 response["error-message"] = error_msg
                 return
@@ -2862,7 +2838,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if not error_msg:
                     error_msg = (
                         "Unknown error while trying software deploy abort, "
-                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
                     )
                 else:
                     error_msg = f"Software deploy abort was rejected: {error_msg}"
@@ -2888,9 +2865,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_activate_rollback(self, future, callback):
-        """
-        Activate rollback a USM software deployement
-        """
+        """Activate rollback a USM software deployement."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -2924,7 +2900,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             if not future.result.is_complete():
                 error_msg = (
                     "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
                 )
                 response["error-message"] = error_msg
                 return
@@ -2944,20 +2921,27 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 if not error_msg:
                     error_msg = (
                         "Unknown error while trying software deploy activate-rollback, "
-                        "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
                     )
                 else:
                     error_msg = f"Software deploy activate was rejected: {error_msg}"
 
             elif not error_msg:
-                error_msg = f"Caught exception while trying software deploy activate-rollback, error={e}"
+                error_msg = (
+                    "Caught exception while trying software deploy "
+                    f"activate-rollback, error={e}"
+                )
 
             if error_msg:
                 response["error-message"] = error_msg.strip()
                 DLOG.exception(error_msg)
 
         except Exception as e:
-            error_msg = f"Caught exception while trying software deploy activate-rollback, error={e}"
+            error_msg = (
+                "Caught exception while trying software deploy "
+                f"activate-rollback, error={e}"
+            )
             response["error-message"] = error_msg
             DLOG.exception(error_msg)
 
@@ -2968,8 +2952,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def delete_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Delete Host Services, notifies kubernetes client to delete services
+        """Delete Host Services, notifies kubernetes client to delete services
+
         for a host.
         """
         response = dict()
@@ -3010,8 +2994,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def enable_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Enable Host Services, notify kubernetes client to enable services
+        """Enable Host Services, notify kubernetes client to enable services
+
         for a host.
         """
         response = dict()
@@ -3022,7 +3006,6 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         try:
             future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
             if self._host_supports_kubernetes(host_personality):
-
                 # To enable kubernetes we uncordon the node, allowing
                 # new pods to be scheduled on the node.
                 future.work(kubernetes_client.uncordon_node, host_name)
@@ -3043,11 +3026,11 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
         except Exception as e:
             DLOG.exception(
-                f"Caught exception while trying to uncordon {host_name}, error: {str(e)}"
+                f"Caught exception while trying to uncordon "
+                f"{host_name}, error: {str(e)}"
             )
 
         try:
-
             kubernetes_supported = self._host_supports_kubernetes(host_personality)
 
             if kubernetes_supported:
@@ -3094,8 +3077,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def disable_host_services(
         self, future, host_uuid, host_name, host_personality, host_offline, callback
     ):
-        """
-        Disable Host Services, notifies kubernetes client to disable services
+        """Disable Host Services, notifies kubernetes client to disable services
+
         for a host.
         """
         response = dict()
@@ -3119,20 +3102,24 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 if drain_success:
                     DLOG.info(
-                        f"Successfully drained virt-launcher pods on host, host_uuid={host_uuid}, host_name={host_name}."
+                        f"Successfully drained virt-launcher pods on host, "
+                        f"host_uuid={host_uuid}, host_name={host_name}."
                     )
                 else:
                     DLOG.error(
-                        f"Kubernetes drain_node failed to drain virt-launcher pods on host, host_uuid={host_uuid}, host_name={host_name}."
+                        f"Kubernetes drain_node failed to drain virt-launcher "
+                        f"pods on host, host_uuid={host_uuid}, "
+                        f"host_name={host_name}."
                     )
         except Exception as e:
             # Handle any exceptions that occurred while draining the node
             DLOG.error(
-                f"Exception calling drain_node for host_uuid={host_uuid}, host_name={host_name}, pod_selector='kubevirt.io=virt-launcher': {e}"
+                f"Exception calling drain_node for host_uuid={host_uuid}, "
+                f"host_name={host_name}, "
+                f"pod_selector='kubevirt.io=virt-launcher': {e}"
             )
 
         try:
-
             kubernetes_supported = self._host_supports_kubernetes(host_personality)
 
             if kubernetes_supported:
@@ -3205,9 +3192,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def notify_host_services_enabled(self, future, host_uuid, host_name, callback):
-        """
-        Notify host services are now enabled
-        """
+        """Notify host services are now enabled."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3341,9 +3327,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def notify_host_services_disabled(self, future, host_uuid, host_name, callback):
-        """
-        Notify host services are now disabled
-        """
+        """Notify host services are now disabled."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3479,9 +3464,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def notify_host_services_disable_extend(
         self, future, host_uuid, host_name, callback
     ):
-        """
-        Notify host services disable timeout needs to be extended
-        """
+        """Notify host services disable timeout needs to be extended."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3618,9 +3602,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def notify_host_services_disable_failed(
         self, future, host_uuid, host_name, reason, callback
     ):
-        """
-        Notify host services disable failed
-        """
+        """Notify host services disable failed."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3756,9 +3739,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def notify_host_services_deleted(self, future, host_uuid, host_name, callback):
-        """
-        Notify host services have been deleted
-        """
+        """Notify host services have been deleted."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3814,9 +3796,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def notify_host_services_delete_failed(
         self, future, host_uuid, host_name, reason, callback
     ):
-        """
-        Notify host services delete failed
-        """
+        """Notify host services delete failed."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -3954,9 +3935,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
     def notify_host_failed(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Notify host failed
-        """
+        """Notify host failed."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4009,8 +3989,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to notify "
-                    "host failed, error=%s." % e
+                    "Caught exception while trying to notify host failed, error=%s." % e
                 )
 
         except Exception as e:
@@ -4024,9 +4003,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_host_cordon(self, future, host_uuid, host_name, force, callback):
-        """
-        Cordon a host
-        """
+        """Cordon a host."""
 
         # ignoring the force argument for now
         response = dict()
@@ -4086,9 +4063,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def kube_host_uncordon(self, future, host_uuid, host_name, force, callback):
-        """
-        Uncordon a host
-        """
+        """Uncordon a host."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -4146,9 +4122,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def lock_host(self, future, host_uuid, host_name, callback):
-        """
-        Lock a host
-        """
+        """Lock a host."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -4203,9 +4178,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def unlock_host(self, future, host_uuid, host_name, callback):
-        """
-        Unlock a host
-        """
+        """Unlock a host."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -4260,9 +4234,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def reboot_host(self, future, host_uuid, host_name, callback):
-        """
-        Reboot a host
-        """
+        """Reboot a host."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -4317,9 +4290,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def upgrade_host(self, future, host_uuid, host_name, rollback, callback):
-        """
-        Upgrade a host
-        """
+        """Upgrade a host."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -4363,14 +4335,20 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     self._platform_token.set_expired()
 
             elif not error_msg:
-                error_msg = f"Caught exception while trying software deploy host {host_name}, error={e}"
+                error_msg = (
+                    f"Caught exception while trying software deploy "
+                    f"host {host_name}, error={e}"
+                )
 
             if error_msg:
                 response["error-message"] = error_msg.strip()
                 DLOG.exception(error_msg)
 
         except Exception as e:
-            error_msg = f"Caught exception while trying software deploy host {host_name}, error={e}"
+            error_msg = (
+                f"Caught exception while trying software deploy "
+                f"host {host_name}, error={e}"
+            )
             response["error-message"] = error_msg
             DLOG.exception(error_msg)
 
@@ -4379,9 +4357,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def swact_from_host(self, future, host_uuid, host_name, callback):
-        """
-        Swact from a host
-        """
+        """Swact from a host."""
+
         response = dict()
         response["completed"] = False
         response["host_uuid"] = host_uuid
@@ -4436,9 +4413,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_alarms(self, future, callback):
-        """
-        Get alarms
-        """
+        """Get alarms."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4499,9 +4475,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_logs(self, future, start_period, end_period, callback):
-        """
-        Get logs
-        """
+        """Get logs."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4546,9 +4521,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_alarm_history(self, future, start_period, end_period, callback):
-        """
-        Get alarm history
-        """
+        """Get alarm history."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4584,8 +4558,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to get alarm "
-                    "history, error=%s." % e
+                    "Caught exception while trying to get alarm history, error=%s." % e
                 )
 
         except Exception as e:
@@ -4598,9 +4571,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_terminating_pods(self, future, host_name, callback):
-        """
-        Get list of terminating pods on a host
-        """
+        """Get list of terminating pods on a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4632,9 +4604,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_deployment_host(self, future, host_name, callback):
-        """
-        Get a host resource from the deployment namespace space
-        """
+        """Get a host resource from the deployment namespace space."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4667,9 +4638,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def list_deployment_hosts(self, future, callback):
-        """
-        List a hosts resource from the deployment namespace space
-        """
+        """List a hosts resource from the deployment namespace space."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4709,9 +4679,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def get_system_config_unlock_request(self, future, host_names, callback):
-        """
-        Get unlock request from host resource status
-        """
+        """Get unlock request from host resource status."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -4756,9 +4725,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_update_rest_api_get_handler(self, request_dispatch):
-        """
-        Software update Rest-API GET handler callback
-        """
+        """Software update Rest-API GET handler callback."""
 
         DLOG.verbose("Sw-update rest-api get path: %s." % request_dispatch.path)
 
@@ -4782,9 +4749,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         request_dispatch.done()
 
     def host_rest_api_get_handler(self, request_dispatch):
-        """
-        Host Rest-API GET handler callback
-        """
+        """Host Rest-API GET handler callback."""
+
         content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
         http_payload = None
@@ -4827,9 +4793,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         request_dispatch.done()
 
     def host_rest_api_patch_handler(self, request_dispatch):
-        """
-        Host Rest-API PATCH handler callback
-        """
+        """Host Rest-API PATCH handler callback."""
+
         content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
         http_payload = None
@@ -4874,7 +4839,6 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             elif state_change is not None:
                 # State change notification from maintenance
                 if host_uuid is not None and host_name is not None:
-
                     host_personality = host_data["personality"]
                     host_sub_functions = host_data.get("subfunctions", [])
                     host_admin_state = state_change["administrative"]
@@ -4927,9 +4891,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     http_response = httplib.BAD_REQUEST
 
             elif upgrade is not None:
-
                 if host_uuid is not None and host_name is not None:
-
                     upgrade_inprogress = upgrade["inprogress"]
                     recover_instances = upgrade["recover-instances"]
 
@@ -4953,7 +4915,6 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     http_response = httplib.BAD_REQUEST
 
             elif host_uuid is not None and host_name is not None:
-
                 for callback in self._host_update_callbacks:
                     success = callback(host_uuid, host_name)
                     if not success:
@@ -4981,9 +4942,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         request_dispatch.done()
 
     def host_rest_api_post_handler(self, request_dispatch):
-        """
-        Host Rest-API POST handler callback
-        """
+        """Host Rest-API POST handler callback."""
+
         content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
         http_response = httplib.OK
@@ -5016,9 +4976,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         request_dispatch.done()
 
     def host_rest_api_delete_handler(self, request_dispatch):
-        """
-        Host Rest-API DELETE handler callback
-        """
+        """Host Rest-API DELETE handler callback."""
+
         content_len = int(request_dispatch.headers.get("content-length", 0))
         content = request_dispatch.rfile.read(content_len)
         http_response = httplib.OK
@@ -5059,9 +5018,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         request_dispatch.done()
 
     def host_notification_handler(self, connection, msg):
-        """
-        Handle notifications from a host
-        """
+        """Handle notifications from a host."""
+
         if msg is not None:
             try:
                 notification = json.loads(msg)
@@ -5090,57 +5048,48 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 connection.close()
 
     def register_host_add_callback(self, callback):
-        """
-        Register for host add notifications
-        """
+        """Register for host add notifications."""
+
         self._host_add_callbacks.append(callback)
 
     def register_host_action_callback(self, callback):
-        """
-        Register for host action notifications
-        """
+        """Register for host action notifications."""
+
         self._host_action_callbacks.append(callback)
 
     def register_host_state_change_callback(self, callback):
-        """
-        Register for host state change notifications
-        """
+        """Register for host state change notifications."""
+
         self._host_state_change_callbacks.append(callback)
 
     def register_sw_update_get_callback(self, callback):
-        """
-        Register for software update get notifications
-        """
+        """Register for software update get notifications."""
+
         self._sw_update_get_callbacks.append(callback)
 
     def register_host_get_callback(self, callback):
-        """
-        Register for host get notifications
-        """
+        """Register for host get notifications."""
+
         self._host_get_callbacks.append(callback)
 
     def register_host_upgrade_callback(self, callback):
-        """
-        Register for host upgrade notifications
-        """
+        """Register for host upgrade notifications."""
+
         self._host_upgrade_callbacks.append(callback)
 
     def register_host_update_callback(self, callback):
-        """
-        Register for host update notifications
-        """
+        """Register for host update notifications."""
+
         self._host_update_callbacks.append(callback)
 
     def register_host_notification_callback(self, callback):
-        """
-        Register for host notifications
-        """
+        """Register for host notifications."""
+
         self._host_notification_callbacks.append(callback)
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._platform_directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.PLATFORM
@@ -5206,8 +5155,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         if self._host_listener is not None:
             self._host_listener.shutdown()

@@ -23,9 +23,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'StarlingX NFV'
-copyright = u'2018, StarlingX'
-author = u'StarlingX'
+project = "StarlingX NFV"
+copyright = "2018, StarlingX"
+author = "StarlingX"
 
 # -- General configuration ---------------------------------------------------
 
@@ -37,23 +37,23 @@ author = u'StarlingX'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'openstackdocstheme',
+    "openstackdocstheme",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # openstackdocstheme options
-openstackdocs_repo_name = 'starlingx/nfv'
+openstackdocs_repo_name = "starlingx/nfv"
 openstackdocs_use_storyboard = True
 openstackdocs_auto_name = False
 
@@ -62,7 +62,7 @@ openstackdocs_auto_name = False
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = 'en'
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -70,7 +70,7 @@ language = 'en'
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'native'
+pygments_style = "native"
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -78,7 +78,7 @@ pygments_style = 'native'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'starlingxdocs'
+html_theme = "starlingxdocs"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -105,7 +105,7 @@ html_theme = 'starlingxdocs'
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'stx-nfvdoc'
+htmlhelp_basename = "stx-nfvdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -114,15 +114,15 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
+    #
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
+    #
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
+    #
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -132,8 +132,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'stx-nfv.tex', u'stx-nfv Documentation',
-     u'StarlingX', 'manual'),
+    (master_doc, "stx-nfv.tex", "stx-nfv Documentation", "StarlingX", "manual"),
 ]
 
 
@@ -141,10 +140,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'stx-nfv', u'stx-nfv Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "stx-nfv", "stx-nfv Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -153,7 +149,13 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'stx-nfv', u'stx-nfv Documentation',
-     author, 'stx-nfv', 'StarlingX NFVI Orchestration.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "stx-nfv",
+        "stx-nfv Documentation",
+        author,
+        "stx-nfv",
+        "StarlingX NFVI Orchestration.",
+        "Miscellaneous",
+    ),
 ]

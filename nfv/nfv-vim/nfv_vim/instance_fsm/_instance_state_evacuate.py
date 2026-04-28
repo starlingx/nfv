@@ -15,17 +15,14 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class EvacuateState(state_machine.State):
-    """
-    Instance - Evacuate State
-    """
+    """Instance - Evacuate State."""
 
     def __init__(self, name):
         super(EvacuateState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering evacuate state
-        """
+        """Entering evacuate state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance._evacuate_started = False
         instance.action_fsm.start_time = timers.get_monotonic_timestamp_in_ms()
@@ -35,24 +32,21 @@ class EvacuateState(state_machine.State):
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting evacuate state
-        """
+        """Exiting evacuate state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         instance._evacuate_started = False
         if isinstance(instance.task, EvacuateTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the evacuate state
-        """
+        """Transition from the evacuate state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the evacuate state
-        """
+        """Handle event while in the evacuate state."""
+
         from nfv_vim import directors
 
         instance_director = directors.get_instance_director()

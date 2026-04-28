@@ -11,7 +11,7 @@ from nfv_vim.alarm._instance import instance_clear_alarm  # noqa: F401
 from nfv_vim.alarm._instance import instance_manage_alarms  # noqa: F401
 from nfv_vim.alarm._instance import instance_raise_alarm  # noqa: F401
 from nfv_vim.alarm._instance_group import (  # noqa: F401
-    raise_instance_group_policy_alarm
+    raise_instance_group_policy_alarm,
 )
 from nfv_vim.alarm._instance_group import clear_instance_group_alarm  # noqa: F401
 from nfv_vim.alarm._sw_update import clear_sw_update_alarm  # noqa: F401

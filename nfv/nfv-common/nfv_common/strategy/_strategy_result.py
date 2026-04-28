@@ -9,9 +9,7 @@ from nfv_common.helpers import Singleton
 
 
 class StrategyResult(object, metaclass=Singleton):
-    """
-    Strategy Result - Constants
-    """
+    """Strategy Result - Constants."""
 
     INITIAL = Constant("initial")
     INPROGRESS = Constant("inprogress")
@@ -25,9 +23,7 @@ class StrategyResult(object, metaclass=Singleton):
 
 
 class StrategyPhaseResult(object, metaclass=Singleton):
-    """
-    Strategy Phase Result - Constants
-    """
+    """Strategy Phase Result - Constants."""
 
     INITIAL = Constant("initial")
     INPROGRESS = Constant("inprogress")
@@ -41,9 +37,7 @@ class StrategyPhaseResult(object, metaclass=Singleton):
 
 
 class StrategyStageResult(object, metaclass=Singleton):
-    """
-    Strategy Stage Result - Constants
-    """
+    """Strategy Stage Result - Constants."""
 
     INITIAL = Constant("initial")
     INPROGRESS = Constant("inprogress")
@@ -57,9 +51,7 @@ class StrategyStageResult(object, metaclass=Singleton):
 
 
 class StrategyStepResult(object, metaclass=Singleton):
-    """
-    Strategy Step Result - Constants
-    """
+    """Strategy Step Result - Constants."""
 
     INITIAL = Constant("initial")
     INPROGRESS = Constant("inprogress")
@@ -75,15 +67,13 @@ class StrategyStepResult(object, metaclass=Singleton):
 def strategy_result_update(
     strategy_result, strategy_result_reason, phase_result, phase_result_reason
 ):
-    """
-    Update Strategy Stage Result given a strategy phase result
-    """
+    """Update Strategy Stage Result given a strategy phase result."""
+
     if STRATEGY_RESULT.WAIT == strategy_result:
         # Nothing to update
         return strategy_result, strategy_result_reason
 
     if STRATEGY_RESULT.INITIAL == strategy_result:
-
         if STRATEGY_PHASE_RESULT.ABORTING == phase_result:
             return STRATEGY_RESULT.ABORTING, phase_result_reason
 
@@ -106,7 +96,6 @@ def strategy_result_update(
             return STRATEGY_RESULT.INPROGRESS, phase_result_reason
 
     elif STRATEGY_RESULT.INPROGRESS == strategy_result:
-
         if STRATEGY_PHASE_RESULT.ABORTING == phase_result:
             return STRATEGY_RESULT.ABORTING, phase_result_reason
 
@@ -126,7 +115,6 @@ def strategy_result_update(
             return STRATEGY_RESULT.SUCCESS, phase_result_reason
 
     elif STRATEGY_RESULT.SUCCESS == strategy_result:
-
         if STRATEGY_PHASE_RESULT.ABORTING == phase_result:
             return STRATEGY_RESULT.ABORTING, phase_result_reason
 
@@ -143,7 +131,6 @@ def strategy_result_update(
             return STRATEGY_RESULT.DEGRADED, phase_result_reason
 
     elif STRATEGY_STAGE_RESULT.DEGRADED == strategy_result:
-
         if STRATEGY_PHASE_RESULT.ABORTING == phase_result:
             return STRATEGY_RESULT.ABORTING, phase_result_reason
 
@@ -162,15 +149,13 @@ def strategy_result_update(
 def strategy_phase_result_update(
     phase_result, phase_result_reason, stage_result, stage_result_reason
 ):
-    """
-    Update Strategy Phase Result given a strategy stage result
-    """
+    """Update Strategy Phase Result given a strategy stage result."""
+
     if STRATEGY_PHASE_RESULT.WAIT == phase_result:
         # Nothing to update
         return phase_result, phase_result_reason
 
     if STRATEGY_PHASE_RESULT.INITIAL == phase_result:
-
         if STRATEGY_STAGE_RESULT.ABORTING == stage_result:
             return STRATEGY_PHASE_RESULT.ABORTING, stage_result_reason
 
@@ -193,7 +178,6 @@ def strategy_phase_result_update(
             return STRATEGY_PHASE_RESULT.INPROGRESS, stage_result_reason
 
     elif STRATEGY_PHASE_RESULT.INPROGRESS == phase_result:
-
         if STRATEGY_STAGE_RESULT.ABORTING == stage_result:
             return STRATEGY_PHASE_RESULT.ABORTING, stage_result_reason
 
@@ -213,7 +197,6 @@ def strategy_phase_result_update(
             return STRATEGY_PHASE_RESULT.SUCCESS, stage_result_reason
 
     elif STRATEGY_PHASE_RESULT.SUCCESS == phase_result:
-
         if STRATEGY_STAGE_RESULT.ABORTING == stage_result:
             return STRATEGY_PHASE_RESULT.ABORTING, stage_result_reason
 
@@ -230,7 +213,6 @@ def strategy_phase_result_update(
             return STRATEGY_PHASE_RESULT.DEGRADED, stage_result_reason
 
     elif STRATEGY_PHASE_RESULT.DEGRADED == phase_result:
-
         if STRATEGY_STAGE_RESULT.ABORTING == stage_result:
             return STRATEGY_PHASE_RESULT.ABORTING, stage_result_reason
 
@@ -249,15 +231,13 @@ def strategy_phase_result_update(
 def strategy_stage_result_update(
     stage_result, stage_result_reason, step_result, step_result_reason
 ):
-    """
-    Update Strategy Stage Result given a strategy step result
-    """
+    """Update Strategy Stage Result given a strategy step result."""
+
     if STRATEGY_STAGE_RESULT.WAIT == stage_result:
         # Nothing to update
         return stage_result, stage_result_reason
 
     if STRATEGY_STAGE_RESULT.INITIAL == stage_result:
-
         if STRATEGY_STEP_RESULT.ABORTING == step_result:
             return STRATEGY_STAGE_RESULT.ABORTING, step_result_reason
 
@@ -280,7 +260,6 @@ def strategy_stage_result_update(
             return STRATEGY_STAGE_RESULT.INPROGRESS, step_result_reason
 
     elif STRATEGY_STAGE_RESULT.INPROGRESS == stage_result:
-
         if STRATEGY_STEP_RESULT.ABORTING == step_result:
             return STRATEGY_STAGE_RESULT.ABORTING, step_result_reason
 
@@ -300,7 +279,6 @@ def strategy_stage_result_update(
             return STRATEGY_STAGE_RESULT.SUCCESS, step_result_reason
 
     elif STRATEGY_STAGE_RESULT.SUCCESS == stage_result:
-
         if STRATEGY_STEP_RESULT.ABORTING == step_result:
             return STRATEGY_STAGE_RESULT.ABORTING, step_result_reason
 
@@ -317,7 +295,6 @@ def strategy_stage_result_update(
             return STRATEGY_STAGE_RESULT.DEGRADED, step_result_reason
 
     elif STRATEGY_STAGE_RESULT.DEGRADED == stage_result:
-
         if STRATEGY_STEP_RESULT.ABORTING == step_result:
             return STRATEGY_STAGE_RESULT.ABORTING, step_result_reason
 

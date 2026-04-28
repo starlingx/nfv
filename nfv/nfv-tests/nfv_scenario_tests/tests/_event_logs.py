@@ -20,9 +20,8 @@ def _instance_logs_created(logs, expected_logs, instance, guest_hb=False):
 
 
 def are_enabled_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if enabled logs have been created
-    """
+    """Check if enabled logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_ENABLED,
@@ -34,9 +33,8 @@ def are_enabled_logs_created(logs, instance, guest_hb=False):
 
 
 def are_start_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if start logs have been created
-    """
+    """Check if start logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_START,
@@ -60,9 +58,8 @@ def are_start_logs_created(logs, instance, guest_hb=False):
 
 
 def are_stop_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if stop logs have been created
-    """
+    """Check if stop logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_STOP,
@@ -78,9 +75,8 @@ def are_stop_logs_created(logs, instance, guest_hb=False):
 
 
 def are_pause_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if pause logs have been created
-    """
+    """Check if pause logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_PAUSE,
@@ -96,9 +92,8 @@ def are_pause_logs_created(logs, instance, guest_hb=False):
 
 
 def are_unpause_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if unpause logs have been created
-    """
+    """Check if unpause logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_UNPAUSE,
@@ -114,9 +109,8 @@ def are_unpause_logs_created(logs, instance, guest_hb=False):
 
 
 def are_suspend_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if suspend logs have been created
-    """
+    """Check if suspend logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_SUSPEND,
@@ -132,9 +126,8 @@ def are_suspend_logs_created(logs, instance, guest_hb=False):
 
 
 def are_resume_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if resume logs have been created
-    """
+    """Check if resume logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_RESUME,
@@ -150,9 +143,8 @@ def are_resume_logs_created(logs, instance, guest_hb=False):
 
 
 def are_reboot_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if reboot logs have been created
-    """
+    """Check if reboot logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_REBOOT,
@@ -176,9 +168,8 @@ def are_reboot_logs_created(logs, instance, guest_hb=False):
 
 
 def are_rebuild_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if rebuild logs have been created
-    """
+    """Check if rebuild logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_REBUILD,
@@ -206,9 +197,8 @@ def are_rebuild_logs_created(logs, instance, guest_hb=False):
 
 
 def are_live_migrate_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if live-migrate logs have been created
-    """
+    """Check if live-migrate logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_LIVE_MIGRATE,
@@ -228,9 +218,8 @@ def are_live_migrate_logs_created(logs, instance, guest_hb=False):
 
 
 def are_cold_migrate_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if cold-migrate logs have been created
-    """
+    """Check if cold-migrate logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_COLD_MIGRATE,
@@ -250,9 +239,8 @@ def are_cold_migrate_logs_created(logs, instance, guest_hb=False):
 
 
 def are_cold_migrate_confirm_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if cold-migrate-confirm logs have been created
-    """
+    """Check if cold-migrate-confirm logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_COLD_MIGRATE_CONFIRM,
@@ -268,9 +256,8 @@ def are_cold_migrate_confirm_logs_created(logs, instance, guest_hb=False):
 
 
 def are_cold_migrate_revert_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if cold-migrate-revert logs have been created
-    """
+    """Check if cold-migrate-revert logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_COLD_MIGRATE_REVERT,
@@ -290,9 +277,8 @@ def are_cold_migrate_revert_logs_created(logs, instance, guest_hb=False):
 
 
 def are_resize_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if resize logs have been created
-    """
+    """Check if resize logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_RESIZE,
@@ -312,9 +298,8 @@ def are_resize_logs_created(logs, instance, guest_hb=False):
 
 
 def are_resize_confirm_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if resize-confirm logs have been created
-    """
+    """Check if resize-confirm logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_RESIZE_CONFIRM,
@@ -330,9 +315,8 @@ def are_resize_confirm_logs_created(logs, instance, guest_hb=False):
 
 
 def are_resize_revert_logs_created(logs, instance, guest_hb=False):
-    """
-    Check if resize-revert logs have been created
-    """
+    """Check if resize-revert logs have been created."""
+
     expected_logs = [
         {
             "event_log_id": fm_constants.FM_LOG_ID_VM_RESIZE_REVERT,

@@ -9,9 +9,7 @@ from nfv_common.helpers import Singleton
 
 
 class _DebugLevel(object, metaclass=Singleton):
-    """
-    Debug Level Constants
-    """
+    """Debug Level Constants."""
 
     NONE = Constant(8000)
     CRITICAL = Constant(7000)

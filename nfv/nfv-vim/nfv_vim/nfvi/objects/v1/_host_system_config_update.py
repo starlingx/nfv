@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class HostSystemConfigUpdate(ObjectData):
-    """
-    NFVI Host System Config Update Object
-    """
+    """NFVI Host System Config Update Object."""
 
     def __init__(self, name, unlock_request):
         super(HostSystemConfigUpdate, self).__init__("1.0.0")

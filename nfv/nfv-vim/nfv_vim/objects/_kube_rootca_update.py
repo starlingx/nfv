@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020-2021,2025-2026 Wind River Systems, Inc.
+# Copyright (c) 2020-2021, 2025-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -21,9 +21,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.kube_rootca_update")
 
 
 class KubeRootcaUpdate(SwUpdate):
-    """
-    Kubernetes RootCA Update Object
-    """
+    """Kubernetes RootCA Update Object."""
 
     def __init__(self, sw_update_uuid=None, strategy_data=None):
         super(KubeRootcaUpdate, self).__init__(
@@ -46,9 +44,8 @@ class KubeRootcaUpdate(SwUpdate):
         expiry_date,
         subject,
     ):
-        """
-        Create a kubernetes root ca update strategy
-        """
+        """Create a kubernetes root ca update strategy."""
+
         from nfv_vim import strategy
 
         if self._strategy:
@@ -74,48 +71,72 @@ class KubeRootcaUpdate(SwUpdate):
         return True, ""
 
     def strategy_build_complete(self, success, reason):
-        """
-        Creation of a kubernetes root ca update strategy complete
-        """
+        """Creation of a kubernetes root ca update strategy complete."""
+
         DLOG.info("Kubernetes root ca update strategy build complete.")
         pass
 
     @staticmethod
     def alarm_type(alarm_type):
-        """
-        Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_TYPES
-        """
+        """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_TYPES."""
+
         ALARM_TYPE_MAPPING = {
-            SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS: alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS,
-            SW_UPDATE_ALARM_TYPES.APPLY_ABORTING: alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING,
-            SW_UPDATE_ALARM_TYPES.APPLY_FAILED: alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED,
+            SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS: (
+                alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS
+            ),
+            SW_UPDATE_ALARM_TYPES.APPLY_ABORTING: (
+                alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING
+            ),
+            SW_UPDATE_ALARM_TYPES.APPLY_FAILED: (
+                alarm.ALARM_TYPE.KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED
+            ),
         }
         return ALARM_TYPE_MAPPING[alarm_type]
 
     @staticmethod
     def event_id(event_id):
-        """
-        Returns EVENT_ID corresponding to SW_UPDATE_EVENT_IDS
-        """
+        """Returns EVENT_ID corresponding to SW_UPDATE_EVENT_IDS."""
+
         EVENT_ID_MAPPING = {
-            SW_UPDATE_EVENT_IDS.APPLY_START: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_START,
-            SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS,
-            SW_UPDATE_EVENT_IDS.APPLY_REJECTED: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_REJECTED,
-            SW_UPDATE_EVENT_IDS.APPLY_CANCELLED: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_CANCELLED,
-            SW_UPDATE_EVENT_IDS.APPLY_FAILED: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED,
-            SW_UPDATE_EVENT_IDS.APPLY_COMPLETED: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_COMPLETED,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORTING: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_REJECTED,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_FAILED,
-            SW_UPDATE_EVENT_IDS.APPLY_ABORTED: event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTED,
+            SW_UPDATE_EVENT_IDS.APPLY_START: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_START
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_INPROGRESS
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_REJECTED: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_REJECTED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_CANCELLED: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_CANCELLED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_FAILED: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_FAILED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_COMPLETED: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_COMPLETED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORT: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORTING: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTING
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_REJECTED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORT_FAILED
+            ),
+            SW_UPDATE_EVENT_IDS.APPLY_ABORTED: (
+                event_log.EVENT_ID.KUBE_ROOTCA_UPDATE_AUTO_APPLY_ABORTED
+            ),
         }
         return EVENT_ID_MAPPING[event_id]
 
     def nfvi_update(self):
-        """
-        NFVI Update
-        """
+        """NFVI Update."""
+
         if self._strategy is None:
             if self._alarms:
                 alarm.clear_sw_update_alarm(self._alarms)
@@ -153,9 +174,8 @@ class KubeRootcaUpdate(SwUpdate):
 
     @coroutine
     def nfvi_audit(self):
-        """
-        Audit NFVI layer
-        """
+        """Audit NFVI layer."""
+
         while True:
             timer_id = yield
 

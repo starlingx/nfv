@@ -29,9 +29,7 @@ NFV_VIM_UNLOCK_COMPLETE_FILE = "/var/run/.nfv-vim.unlock_complete"
 
 
 class InstanceDirector(object, metaclass=Singleton):
-    """
-    Instance Director
-    """
+    """Instance Director."""
 
     def __init__(
         self,
@@ -87,9 +85,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def _is_host_enabled(host_name):
-        """
-        Returns true if the hypervisor is enabled
-        """
+        """Returns true if the hypervisor is enabled."""
+
         host_table = tables.tables_get_host_table()
         host = host_table.get(host_name, None)
         if host is not None:
@@ -99,9 +96,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def _is_hypervisor_enabled(host_name):
-        """
-        Returns true if the hypervisor is enabled
-        """
+        """Returns true if the hypervisor is enabled."""
+
         hypervisor_table = tables.tables_get_hypervisor_table()
         hypervisor = hypervisor_table.get_by_host_name(host_name)
         if hypervisor is not None:
@@ -111,9 +107,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def _hypervisors_available(min_count=1, excluded_hosts=None):
-        """
-        Returns true if at least given count of hosts and hypervisors are enabled
-        """
+        """Returns true if at least given count of hosts and hypervisors are enabled."""
+
         if excluded_hosts is None:
             excluded_hosts = list()
 
@@ -136,9 +131,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def upgrade_inprogress():
-        """
-        Returns true if the system is going through an upgrade
-        """
+        """Returns true if the system is going through an upgrade."""
+
         host_table = tables.tables_get_host_table()
 
         for host_name in list(host_table.keys()):
@@ -151,9 +145,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def instance_action_allowed(instance, action_type):
-        """
-        Returns true if instance action is allowed
-        """
+        """Returns true if instance action is allowed."""
+
         DLOG.info(
             "Instance action allowed for %s, action_type=%s"
             % (instance.name, action_type)
@@ -161,9 +154,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return not InstanceDirector.upgrade_inprogress()
 
     def _instance_recovery_allowed(self, instance):
-        """
-        Returns true if instance recovery is allowed
-        """
+        """Returns true if instance recovery is allowed."""
+
         recovery_allowed = False
 
         if instance.is_rebuilding():
@@ -187,9 +179,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return recovery_allowed
 
     def _get_instance_recovery_list(self):
-        """
-        Get instance recovery list after the previous list is exhausted
-        """
+        """Get instance recovery list after the previous list is exhausted."""
+
         next_audit_interval = self._recovery_audit_interval
 
         # Get all instances that are to be considered for recovery.
@@ -273,9 +264,8 @@ class InstanceDirector(object, metaclass=Singleton):
         )
 
     def _host_migrate_instances(self, host, host_operation):
-        """
-        Host Migrate Instances
-        """
+        """Host Migrate Instances."""
+
         if host_operation.operation_type not in [
             OPERATION_TYPE.HOST_LOCK_FORCE,
             OPERATION_TYPE.HOST_LOCK,
@@ -306,8 +296,7 @@ class InstanceDirector(object, metaclass=Singleton):
 
         if OPERATION_TYPE.HOST_LOCK_FORCE == host_operation.operation_type:
             DLOG.info(
-                "Force-Lock issued, can't migrate instances off of "
-                "host %s." % host.name
+                "Force-Lock issued, can't migrate instances off of host %s." % host.name
             )
             self.reschedule_audit_instances(self._recovery_audit_cooldown)
             return
@@ -520,8 +509,7 @@ class InstanceDirector(object, metaclass=Singleton):
                                 "instance." % (instance.name, host.name)
                             )
                             instance.fail(
-                                reason + " and the system can't "
-                                "live-migrate instance"
+                                reason + " and the system can't live-migrate instance"
                             )
                             continue
                     else:
@@ -532,8 +520,7 @@ class InstanceDirector(object, metaclass=Singleton):
                                 "instance." % (instance.name, host.name)
                             )
                             instance.fail(
-                                reason + " and the system can't "
-                                "cold-migrate instance"
+                                reason + " and the system can't cold-migrate instance"
                             )
                             continue
 
@@ -547,9 +534,8 @@ class InstanceDirector(object, metaclass=Singleton):
                 break
 
     def _host_evacuate_instances(self, host, host_operation):
-        """
-        Host Evacuate Instances
-        """
+        """Host Evacuate Instances."""
+
         do_evacuates = True
 
         if host_operation.operation_type not in [
@@ -627,9 +613,9 @@ class InstanceDirector(object, metaclass=Singleton):
 
             if OPERATION_TYPE.HOST_LOCK == host_operation.operation_type:
                 if instance.is_paused():
-                    reason = (
-                        "Lock of host %s failed because instance %s "
-                        "is paused." % (host.name, instance.name)
+                    reason = "Lock of host %s failed because instance %s is paused." % (
+                        host.name,
+                        instance.name,
                     )
                     DLOG.info(reason)
                     host_operation.add_instance(instance.uuid, OPERATION_STATE.FAILED)
@@ -730,9 +716,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def _host_stop_instances(host, host_operation, instance_uuids):
-        """
-        Host Stop Instances
-        """
+        """Host Stop Instances."""
+
         initiated_by = objects.INSTANCE_ACTION_INITIATED_BY.DIRECTOR
         if OPERATION_TYPE.STOP_INSTANCES == host_operation.operation_type:
             reason = "stop instances issued"
@@ -894,9 +879,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def _host_start_instances(host, host_operation, instance_uuids):
-        """
-        Host Start Instances
-        """
+        """Host Start Instances."""
+
         if host_operation.operation_type not in [
             OPERATION_TYPE.START_INSTANCES,
             OPERATION_TYPE.START_INSTANCES_SERIAL,
@@ -1023,9 +1007,8 @@ class InstanceDirector(object, metaclass=Singleton):
     def instance_migrate_complete(
         self, instance, from_host_name, failed=False, timed_out=False, cancelled=False
     ):
-        """
-        Instance Migrate Complete
-        """
+        """Instance Migrate Complete."""
+
         from nfv_vim import directors
 
         host_director = directors.get_host_director()
@@ -1124,9 +1107,8 @@ class InstanceDirector(object, metaclass=Singleton):
     def instance_evacuate_complete(
         self, instance, from_host_name, failed=False, timed_out=False, cancelled=False
     ):
-        """
-        Instance Evacuate Complete
-        """
+        """Instance Evacuate Complete."""
+
         from nfv_vim import directors
 
         host_director = directors.get_host_director()
@@ -1215,9 +1197,8 @@ class InstanceDirector(object, metaclass=Singleton):
     def instance_stop_complete(
         self, instance, on_host_name, failed=False, timed_out=False, cancelled=False
     ):
-        """
-        Instance Stop Complete
-        """
+        """Instance Stop Complete."""
+
         from nfv_vim import directors
 
         host_director = directors.get_host_director()
@@ -1312,9 +1293,8 @@ class InstanceDirector(object, metaclass=Singleton):
     def instance_start_complete(
         self, instance, on_host_name, failed=False, timed_out=False, cancelled=False
     ):
-        """
-        Instance Start Complete
-        """
+        """Instance Start Complete."""
+
         host_operation = self._host_operations.get(on_host_name, None)
         if host_operation is None:
             DLOG.verbose("No host %s operation inprogress." % on_host_name)
@@ -1397,9 +1377,8 @@ class InstanceDirector(object, metaclass=Singleton):
                 del self._host_operations[host.name]
 
     def _host_disabling_okay(self, host, host_operation):
-        """
-        Host Disabling Semantic checks
-        """
+        """Host Disabling Semantic checks."""
+
         if OPERATION_TYPE.HOST_LOCK != host_operation.operation_type:
             return True
 
@@ -1432,9 +1411,9 @@ class InstanceDirector(object, metaclass=Singleton):
                 instance.is_paused()
                 and objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE != operation
             ):
-                reason = (
-                    "Lock of host %s rejected because instance %s "
-                    "is paused." % (host.name, instance.name)
+                reason = "Lock of host %s rejected because instance %s is paused." % (
+                    host.name,
+                    instance.name,
                 )
                 DLOG.info(reason)
                 host_operation.add_instance(instance.uuid, OPERATION_STATE.FAILED)
@@ -1481,9 +1460,9 @@ class InstanceDirector(object, metaclass=Singleton):
             elif instance.is_resized():
                 # Nova will not migrate or evacuate an instance if is resized
                 # and waiting for confirmation.
-                reason = (
-                    "Lock of host %s rejected because instance %s "
-                    "is resizing." % (host.name, instance.name)
+                reason = "Lock of host %s rejected because instance %s is resizing." % (
+                    host.name,
+                    instance.name,
                 )
                 DLOG.info(reason)
                 host_operation.add_instance(instance.uuid, OPERATION_STATE.FAILED)
@@ -1547,9 +1526,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return True
 
     def host_operation_cancel(self, host_name):
-        """
-        Host Operation Cancel
-        """
+        """Host Operation Cancel."""
+
         host_operation = self._host_operations.get(host_name, None)
         if host_operation is not None:
             DLOG.info(
@@ -1559,9 +1537,8 @@ class InstanceDirector(object, metaclass=Singleton):
             del self._host_operations[host_name]
 
     def host_services_disabling(self, host):
-        """
-        Host Services Disabling
-        """
+        """Host Services Disabling."""
+
         DLOG.info("Host %s services disabling." % host.name)
 
         if host.is_force_lock():
@@ -1614,9 +1591,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return host_operation
 
     def host_services_disabled(self, host):
-        """
-        Host Services Disabled
-        """
+        """Host Services Disabled."""
+
         DLOG.info("Host %s services disabled." % host.name)
 
         if host.is_force_lock():
@@ -1651,9 +1627,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return host_operation
 
     def host_disabled(self, host):
-        """
-        Host Disabled
-        """
+        """Host Disabled."""
+
         DLOG.info("Host %s disabled." % host.name)
 
         host_operation = self._host_operations.get(host.name, None)
@@ -1666,9 +1641,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_offline(host):
-        """
-        Host Offline
-        """
+        """Host Offline."""
+
         instance_table = tables.tables_get_instance_table()
         for instance in instance_table.on_host(host.name):
             if instance.is_deleting() or instance.is_deleted():
@@ -1681,9 +1655,8 @@ class InstanceDirector(object, metaclass=Singleton):
             instance.host_offline()
 
     def host_audit(self, host):
-        """
-        Host Audit
-        """
+        """Host Audit."""
+
         if not dor.system_is_stabilized():
             DLOG.info(
                 "DOR system stabilization is not complete, can't audit "
@@ -1724,9 +1697,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_has_instances(host, skip_stopped=False):
-        """
-        Returns true if the given host has instances
-        """
+        """Returns true if the given host has instances."""
+
         count = 0
         instance_table = tables.tables_get_instance_table()
         for instance in instance_table.on_host(host.name):
@@ -1743,9 +1715,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @coroutine
     def _instance_create_callback(self, instance_name, callback):
-        """
-        Instance Create Callback
-        """
+        """Instance Create Callback."""
+
         response = yield
         DLOG.verbose("Instance-Create callback response=%s." % response)
         if response["completed"]:
@@ -1770,9 +1741,8 @@ class InstanceDirector(object, metaclass=Singleton):
         networks,
         callback,
     ):
-        """
-        Instance-Type Create Callback
-        """
+        """Instance-Type Create Callback."""
+
         response = yield
         DLOG.verbose("Instance-Type-Create callback response=%s." % response)
         if response["completed"]:
@@ -1812,9 +1782,8 @@ class InstanceDirector(object, metaclass=Singleton):
         live_migration_max_downtime,
         callback,
     ):
-        """
-        Create an instance
-        """
+        """Create an instance."""
+
         instance_type_create_callback = self._instance_type_create_callback(
             instance_name,
             instance_type_uuid,
@@ -1845,17 +1814,15 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def delete_instance(instance):
-        """
-        Delete an instance
-        """
+        """Delete an instance."""
+
         DLOG.info("Instance %s delete requested." % instance.uuid)
         instance.do_action(objects.INSTANCE_ACTION_TYPE.DELETE)
 
     @staticmethod
     def instance_audit(instance):
-        """
-        Notifies the instance director that an instance audit is inprogress
-        """
+        """Notifies the instance director that an instance audit is inprogress."""
+
         from nfv_vim import directors
 
         DLOG.verbose(
@@ -1868,9 +1835,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @staticmethod
     def instance_state_change_notify(instance):
-        """
-        Notifies the instance director that a instance has changed state
-        """
+        """Notifies the instance director that a instance has changed state."""
+
         from nfv_vim import directors
 
         DLOG.info("Instance %s state change notification." % instance.name)
@@ -1879,9 +1845,8 @@ class InstanceDirector(object, metaclass=Singleton):
         sw_mgmt_director.instance_state_change(instance)
 
     def instance_recovered(self, instance):
-        """
-        Instance has signalled that it has recovered
-        """
+        """Instance has signalled that it has recovered."""
+
         DLOG.info(
             "Instance %s has recovered on host %s."
             % (instance.name, instance.host_name)
@@ -1891,9 +1856,8 @@ class InstanceDirector(object, metaclass=Singleton):
     def recover_instance(
         self, instance, recovery_method=None, force_fail=False, fail_reason=None
     ):
-        """
-        Recover an instance
-        """
+        """Recover an instance."""
+
         if not dor.system_is_stabilized():
             DLOG.info(
                 "DOR system stabilization is not complete, can't "
@@ -2027,9 +1991,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return method is not None
 
     def reschedule_audit_instances(self, interval=None):
-        """
-        Reschedule audit instances
-        """
+        """Reschedule audit instances."""
+
         if interval is None:
             interval = self._next_audit_interval
 
@@ -2040,9 +2003,9 @@ class InstanceDirector(object, metaclass=Singleton):
             )
 
     def recover_instances(self, audit=False):
-        """
-        Recover instances that were previously launched but are currently
-        failed or executing an action for a very long time
+        """Recover instances that were previously launched but are currently
+
+        failed or executing an action for a very long time.
         """
         if not dor.system_is_stabilized():
             DLOG.info(
@@ -2144,8 +2107,8 @@ class InstanceDirector(object, metaclass=Singleton):
             DLOG.info("Completed recovery audit batch.")
 
     def unlock_instances(self):
-        """
-        Unlock (start) instances that were locked (stopped) when a single
+        """Unlock (start) instances that were locked (stopped) when a single
+
         hypervisor configuration had its hypervisor disabled. This should only
         be done after all unlocked instances have been recovered.
         """
@@ -2168,17 +2131,15 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @coroutine
     def audit_instances(self):
-        """
-        Audit Instances
-        """
+        """Audit Instances."""
+
         while True:
             (yield)
             self.recover_instances(audit=True)
 
     def cleanup_instance(self, instance_uuid):
-        """
-        Cleanup an instance
-        """
+        """Cleanup an instance."""
+
         if instance_uuid not in self._instance_cleanup_list:
             self._instance_cleanup_list.append(instance_uuid)
 
@@ -2189,9 +2150,8 @@ class InstanceDirector(object, metaclass=Singleton):
 
     @coroutine
     def cleanup_instances(self):
-        """
-        Cleanup Instances
-        """
+        """Cleanup Instances."""
+
         (yield)
         trigger_recovery = False
         instance_table = tables.tables_get_instance_table()
@@ -2212,9 +2172,8 @@ class InstanceDirector(object, metaclass=Singleton):
             self.recover_instances()
 
     def migrate_instances_from_hosts(self, hosts):
-        """
-        Migrate Instances out of specific hosts
-        """
+        """Migrate Instances out of specific hosts."""
+
         host_table = tables.tables_get_host_table()
         instance_table = tables.tables_get_instance_table()
 
@@ -2284,9 +2243,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return overall_operation
 
     def migrate_instances(self, instance_uuids):
-        """
-        Migrate Instances
-        """
+        """Migrate Instances."""
+
         DLOG.info("Migrate instances uuids=%s." % instance_uuids)
 
         host_table = tables.tables_get_host_table()
@@ -2348,9 +2306,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return overall_operation
 
     def stop_instances(self, instance_uuids):
-        """
-        Stop Instances
-        """
+        """Stop Instances."""
+
         DLOG.info("Stop instances uuids=%s." % instance_uuids)
 
         host_table = tables.tables_get_host_table()
@@ -2414,9 +2371,8 @@ class InstanceDirector(object, metaclass=Singleton):
         return overall_operation
 
     def start_instances(self, instance_uuids, serial=False):
-        """
-        Start Instances
-        """
+        """Start Instances."""
+
         DLOG.info("Start instances uuids=%s." % instance_uuids)
 
         host_table = tables.tables_get_host_table()
@@ -2486,16 +2442,14 @@ class InstanceDirector(object, metaclass=Singleton):
 
 
 def get_instance_director():
-    """
-    Returns the Instance Director
-    """
+    """Returns the Instance Director."""
+
     return _instance_director
 
 
 def instance_director_initialize():
-    """
-    Initialize Instance Director
-    """
+    """Initialize Instance Director."""
+
     global _instance_director
 
     if config.section_exists("instance-configuration"):
@@ -2557,7 +2511,6 @@ def instance_director_initialize():
 
 
 def instance_director_finalize():
-    """
-    Finalize Instance Director
-    """
+    """Finalize Instance Director."""
+
     pass

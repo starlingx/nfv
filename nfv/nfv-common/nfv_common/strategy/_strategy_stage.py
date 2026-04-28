@@ -19,9 +19,7 @@ DLOG = debug.debug_get_logger("nfv_common.strategy.stage")
 
 
 class StrategyStage(object):
-    """
-    Strategy Stage
-    """
+    """Strategy Stage."""
 
     def __init__(self, name):
         self._id = 0
@@ -43,155 +41,133 @@ class StrategyStage(object):
 
     @property
     def name(self):
-        """
-        Returns the name of the stage
-        """
+        """Returns the name of the stage."""
+
         return self._name
 
     @property
     def id(self):
-        """
-        Returns the id of the stage
-        """
+        """Returns the id of the stage."""
+
         return self._id
 
     @id.setter
     def id(self, value):
-        """
-        Sets the id of the step
-        """
+        """Sets the id of the step."""
+
         self._id = value
 
     @property
     def current_step(self):
-        """
-        Returns the current step of the stage
-        """
+        """Returns the current step of the stage."""
+
         return self._current_step
 
     @property
     def timeout_in_secs(self):
-        """
-        Returns the maximum amount of time to wait for completion
-        """
+        """Returns the maximum amount of time to wait for completion."""
+
         return self._timeout_in_secs
 
     @property
     def result(self):
-        """
-        Returns the result of the stage
-        """
+        """Returns the result of the stage."""
+
         return self._result
 
     @result.setter
     def result(self, result):
-        """
-        Updates the result of the stage
-        """
+        """Updates the result of the stage."""
+
         self._result = result
 
     @property
     def result_reason(self):
-        """
-        Returns the reason for the result of the stage
-        """
+        """Returns the reason for the result of the stage."""
+
         return self._result_reason
 
     @result_reason.setter
     def result_reason(self, reason):
-        """
-        Updates the reason for the result of the stage
-        """
+        """Updates the reason for the result of the stage."""
+
         self._result_reason = reason
 
     @property
     def start_date_time(self):
-        """
-        Returns the start date-time of the stage
-        """
+        """Returns the start date-time of the stage."""
+
         return self._start_date_time
 
     @start_date_time.setter
     def start_date_time(self, date_time_str):
-        """
-        Updates the start date-time of the stage
-        """
+        """Updates the start date-time of the stage."""
+
         self._start_date_time = date_time_str
 
     @property
     def end_date_time(self):
-        """
-        Returns the end date-time of the stage
-        """
+        """Returns the end date-time of the stage."""
+
         return self._end_date_time
 
     @end_date_time.setter
     def end_date_time(self, date_time_str):
-        """
-        Updates the end date-time of the stage
-        """
+        """Updates the end date-time of the stage."""
+
         self._end_date_time = date_time_str
 
     @property
     def strategy(self):
-        """
-        Returns the strategy this stage is a member of
-        """
+        """Returns the strategy this stage is a member of."""
+
         if self.phase is not None:
             return self.phase.strategy
         return None
 
     @property
     def phase(self):
-        """
-        Returns the phase this stage is a member of
-        """
+        """Returns the phase this stage is a member of."""
+
         if self._phase_reference is not None:
             return self._phase_reference()
         return None
 
     @phase.setter
     def phase(self, phase_value):
-        """
-        Set the phase that this stage is a member of
-        """
+        """Set the phase that this stage is a member of."""
+
         self._phase_reference = weakref.ref(phase_value)
 
     @property
     def steps(self):
-        """
-        Returns the steps for this stage
-        """
+        """Returns the steps for this stage."""
+
         return self._steps
 
     def is_inprogress(self):
-        """
-        Returns if the stage is inprogress or not
-        """
+        """Returns if the stage is inprogress or not."""
+
         return self._inprogress
 
     def is_failed(self):
-        """
-        Return true if this stage has failed
-        """
+        """Return true if this stage has failed."""
+
         return STRATEGY_STAGE_RESULT.FAILED == self._result
 
     def timed_out(self):
-        """
-        Return true if this stage has timed out
-        """
+        """Return true if this stage has timed out."""
+
         return STRATEGY_STAGE_RESULT.TIMED_OUT == self._result
 
     def aborted(self):
-        """
-        Return true if this stage was aborted
-        """
+        """Return true if this stage was aborted."""
+
         return STRATEGY_STAGE_RESULT.ABORTED == self._result
 
     def add_step(self, step):
-        """
-        Add a step to this stage
-        """
+        """Add a step to this stage."""
+
         step.id = len(self._steps)
         step.stage = self
         self._steps.append(step)
@@ -204,9 +180,8 @@ class StrategyStage(object):
             self._timeout_in_secs += 1
 
     def _save(self):
-        """
-        Stage Save
-        """
+        """Stage Save."""
+
         import inspect
         import os
 
@@ -238,9 +213,8 @@ class StrategyStage(object):
             )
 
     def _cleanup(self):
-        """
-        Stage Cleanup
-        """
+        """Stage Cleanup."""
+
         DLOG.info("Stage (%s) cleanup called" % self._name)
 
         if self._timer_id is not None:
@@ -252,9 +226,8 @@ class StrategyStage(object):
             self._step_timer_id = None
 
     def _abort(self):
-        """
-        Stage Abort
-        """
+        """Stage Abort."""
+
         abort_list = list()
 
         if STRATEGY_STAGE_RESULT.INITIAL == self._result:
@@ -280,9 +253,8 @@ class StrategyStage(object):
 
     @coroutine
     def _timeout(self):
-        """
-        Stage Timeout
-        """
+        """Stage Timeout."""
+
         (yield)
         DLOG.info(
             "Stage (%s) timed out, timeout_in_secs=%s."
@@ -300,9 +272,8 @@ class StrategyStage(object):
         self._complete(self._result, self._result_reason)
 
     def _complete(self, result, reason):
-        """
-        Stage Internal Complete
-        """
+        """Stage Internal Complete."""
+
         self._inprogress = False
         self._cleanup()
         self._save()
@@ -310,9 +281,8 @@ class StrategyStage(object):
         return self.complete(result, reason)
 
     def _apply(self):
-        """
-        Stage Apply
-        """
+        """Stage Apply."""
+
         if not self._inprogress:
             if 0 == self._current_step:
                 self._cleanup()
@@ -393,9 +363,8 @@ class StrategyStage(object):
             return self._complete(self._result, self._result_reason)
 
     def step_complete(self, step_result, step_result_reason=None):
-        """
-        Stage Step Complete
-        """
+        """Stage Step Complete."""
+
         step = self._steps[self._current_step]
 
         DLOG.debug(
@@ -436,9 +405,8 @@ class StrategyStage(object):
 
     @coroutine
     def _step_timeout(self):
-        """
-        Stage Step Timeout
-        """
+        """Stage Step Timeout."""
+
         (yield)
         if len(self._steps) <= self._current_step:
             DLOG.error(
@@ -477,18 +445,16 @@ class StrategyStage(object):
             self.step_complete(step.result, step.result_reason)
 
     def step_extend_timeout(self):
-        """
-        Stage Step Extend Timeout
-        """
+        """Stage Step Extend Timeout."""
+
         if self.phase is not None:
             self.phase.stage_extend_timeout()
         else:
             self.refresh_timeouts()
 
     def refresh_timeouts(self):
-        """
-        Stage Refresh Timeouts
-        """
+        """Stage Refresh Timeouts."""
+
         if not self.is_inprogress():
             # No need to refresh stage timer, stage not started
             return
@@ -538,9 +504,8 @@ class StrategyStage(object):
             )
 
     def abort(self):
-        """
-        Stage Abort (can be overridden by child class)
-        """
+        """Stage Abort (can be overridden by child class)."""
+
         abort_list = self._abort()
         if abort_list:
             abort_stage = StrategyStage(self.name)
@@ -550,15 +515,13 @@ class StrategyStage(object):
         return []
 
     def apply(self):
-        """
-        Stage Apply (can be overridden by child class)
-        """
+        """Stage Apply (can be overridden by child class)."""
+
         return self._apply()
 
     def complete(self, result, result_reason):
-        """
-        Stage Complete (can be overridden by child class)
-        """
+        """Stage Complete (can be overridden by child class)."""
+
         DLOG.debug("Strategy Stage (%s) complete." % self._name)
         if self.phase is not None:
             self.phase.stage_complete(result, result_reason)
@@ -569,9 +532,8 @@ class StrategyStage(object):
         return self._result, self._result_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Stage Handle Event (can be overridden by child class)
-        """
+        """Stage Handle Event (can be overridden by child class)."""
+
         DLOG.debug("Stage (%s) handle event (%s)." % (self._name, event))
         handled = False
 
@@ -582,9 +544,8 @@ class StrategyStage(object):
         return handled
 
     def from_dict(self, data, steps=None):
-        """
-        Initializes a strategy stage object using the given dictionary
-        """
+        """Initializes a strategy stage object using the given dictionary."""
+
         StrategyStage.__init__(self, data["name"])
         self._inprogress = data["inprogress"]
         self._current_step = data["current_step"]
@@ -617,9 +578,8 @@ class StrategyStage(object):
         return self
 
     def as_dict(self):
-        """
-        Represent the strategy stage as a dictionary
-        """
+        """Represent the strategy stage as a dictionary."""
+
         data = dict()
         data["id"] = self._id
         data["name"] = self._name

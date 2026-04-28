@@ -16,9 +16,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.host_group")
 
 
 class HostGroupPolicy(Constants, metaclass=Singleton):
-    """
-    Host Group Policy Constants
-    """
+    """Host Group Policy Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -30,9 +28,7 @@ HOST_GROUP_POLICY = HostGroupPolicy()
 
 
 class HostGroup(ObjectData):
-    """
-    Host Group Object
-    """
+    """Host Group Object."""
 
     def __init__(self, nfvi_host_group):
         super(HostGroup, self).__init__("1.0.0")
@@ -40,51 +36,44 @@ class HostGroup(ObjectData):
 
     @property
     def name(self):
-        """
-        Returns the name of the host group
-        """
+        """Returns the name of the host group."""
+
         return self._nfvi_host_group.name
 
     @property
     def member_names(self):
-        """
-        Returns the member names of the host group
-        """
+        """Returns the member names of the host group."""
+
         return self._nfvi_host_group.member_names
 
     @property
     def policies(self):
-        """
-        Returns the policies for the host group
-        """
+        """Returns the policies for the host group."""
+
         return self._nfvi_host_group.policies
 
     @property
     def nfvi_host_group(self):
-        """
-        Returns the nfvi host group
-        """
+        """Returns the nfvi host group."""
+
         return self._nfvi_host_group
 
     def nfvi_host_group_update(self, nfvi_host_group):
-        """
-        NFVI Host Group Update
-        """
+        """NFVI Host Group Update."""
+
         self._nfvi_host_group = nfvi_host_group
         self._persist()
 
     def _persist(self):
-        """
-        Persist changes to host group object
-        """
+        """Persist changes to host group object."""
+
         from nfv_vim import database
 
         database.database_host_group_add(self)
 
     def as_dict(self):
-        """
-        Represent host group object as dictionary
-        """
+        """Represent host group object as dictionary."""
+
         data = dict()
         data["name"] = self.name
         data["members"] = self.member_names

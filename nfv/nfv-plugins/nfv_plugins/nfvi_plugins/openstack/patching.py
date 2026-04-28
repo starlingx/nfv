@@ -16,9 +16,8 @@ REST_API_PATCH_APPLY_TIMEOUT = 180
 
 
 def query_patches(token):
-    """
-    Asks Patch Controller for information about the patches in the system
-    """
+    """Asks Patch Controller for information about the patches in the system."""
+
     url = token.get_service_url(PLATFORM_SERVICE.PATCHING, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Patching URL is invalid")
@@ -30,9 +29,8 @@ def query_patches(token):
 
 
 def query_hosts(token):
-    """
-    Asks Patch Controller for information about the hosts in the system
-    """
+    """Asks Patch Controller for information about the hosts in the system."""
+
     url = token.get_service_url(PLATFORM_SERVICE.PATCHING, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Patching URL is invalid")
@@ -44,9 +42,8 @@ def query_hosts(token):
 
 
 def apply_patch(token, patch_name):
-    """
-    Asks Patch Controller to apply a patch that is already uploaded
-    """
+    """Asks Patch Controller to apply a patch that is already uploaded."""
+
     url = token.get_service_url(PLATFORM_SERVICE.PATCHING, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Patching URL is invalid")
@@ -60,9 +57,8 @@ def apply_patch(token, patch_name):
 
 
 def host_install_async(token, host_name):
-    """
-    Asks Patch Controller to perform a software upgrade on a host
-    """
+    """Asks Patch Controller to perform a software upgrade on a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.PATCHING, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Patching URL is invalid")

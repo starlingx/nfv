@@ -11,9 +11,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.network")
 
 
 class Subnet(ObjectData):
-    """
-    Subnet Object
-    """
+    """Subnet Object."""
 
     def __init__(
         self,

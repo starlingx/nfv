@@ -31,7 +31,6 @@ from nfv_unit_tests.tests import sw_update_testcase
     sw_update_testcase.fake_nfvi_compute_plugin_disabled,
 )
 class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
-
     def _create_system_config_update_strategy(
         self,
         sw_update_obj,
@@ -44,9 +43,8 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         single_controller=False,
         nfvi_system_config_update_hosts=None,
     ):
-        """
-        Create a system config update strategy
-        """
+        """Create a system config update strategy."""
+
         strategy = SystemConfigUpdateStrategy(
             uuid=str(uuid.uuid4()),
             controller_apply_type=controller_apply_type,
@@ -65,9 +63,8 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
 
     @mock.patch("nfv_common.strategy._strategy.Strategy._build")
     def test_system_config_update_strategy_build_steps(self, fake_build):
-        """
-        Verify build phases, etc.. for system config update strategy creation.
-        """
+        """Verify build phases, etc.. for system config update strategy creation."""
+
         # setup a minimal host environment
         self.create_host("controller-0", aio=True)
 

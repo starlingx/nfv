@@ -24,15 +24,19 @@ setup(
             "tis_log = nfv_plugins.event_log_handlers.fm:EventLogManagement",
         ],
         "nfv_vim.nfvi.plugins.v1": [
-            "identity_plugin = nfv_plugins.nfvi_plugins.nfvi_identity_api:NFVIIdentityAPI",
-            "infrastructure_plugin = nfv_plugins.nfvi_plugins.nfvi_infrastructure_api:NFVIInfrastructureAPI",
+            "identity_plugin = nfv_plugins.nfvi_plugins.nfvi_identity_api"
+            ":NFVIIdentityAPI",
+            "infrastructure_plugin = nfv_plugins.nfvi_plugins"
+            ".nfvi_infrastructure_api:NFVIInfrastructureAPI",
             "image_plugin = nfv_plugins.nfvi_plugins.nfvi_image_api:NFVIImageAPI",
-            "block_storage_plugin = nfv_plugins.nfvi_plugins.nfvi_block_storage_api:NFVIBlockStorageAPI",
+            "block_storage_plugin = nfv_plugins.nfvi_plugins"
+            ".nfvi_block_storage_api:NFVIBlockStorageAPI",
             "network_plugin = nfv_plugins.nfvi_plugins.nfvi_network_api:NFVINetworkAPI",
             "compute_plugin = nfv_plugins.nfvi_plugins.nfvi_compute_api:NFVIComputeAPI",
             "guest_plugin = nfv_plugins.nfvi_plugins.nfvi_guest_api:NFVIGuestAPI",
             "sw_mgmt_plugin = nfv_plugins.nfvi_plugins.nfvi_sw_mgmt_api:NFVISwMgmtAPI",
-            "fault_mgmt_plugin = nfv_plugins.nfvi_plugins.nfvi_fault_mgmt_api:NFVIFaultMgmtAPI",
+            "fault_mgmt_plugin = nfv_plugins.nfvi_plugins"
+            ".nfvi_fault_mgmt_api:NFVIFaultMgmtAPI",
         ],
     },
 )

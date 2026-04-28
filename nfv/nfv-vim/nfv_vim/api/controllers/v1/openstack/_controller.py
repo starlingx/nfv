@@ -14,9 +14,7 @@ from nfv_vim.api.controllers.v1.openstack._heat_api import HeatAPI
 
 
 class OpenStackDescription(wsme_types.Base):
-    """
-    OpenStack Description
-    """
+    """OpenStack Description."""
 
     id = wsme_types.text
     links = wsme_types.wsattr([Link], name="links")
@@ -35,9 +33,7 @@ class OpenStackDescription(wsme_types.Base):
 
 
 class OpenStackAPI(rest.RestController):
-    """
-    OpenStack API
-    """
+    """OpenStack API."""
 
     @pecan.expose()
     def _lookup(self, key, *remainder):

@@ -24,9 +24,7 @@ DLOG = debug.debug_get_logger("nfv_tests.test_hosts")
 
 
 class TestHost(_test_base.Test):
-    """
-    Test Host Base Class
-    """
+    """Test Host Base Class."""
 
     LOG_FILES = {"nfv-vim": "/var/log/nfv-vim.log"}
 
@@ -59,30 +57,26 @@ class TestHost(_test_base.Test):
 
     @property
     def host_name(self):
-        """
-        Returns the host name
-        """
+        """Returns the host name."""
+
         return self._host_name
 
     @property
     def host_uuid(self):
-        """
-        Returns the host uuid
-        """
+        """Returns the host uuid."""
+
         return _hosts.host_get_uuid(self._host_data)
 
     @property
     def host_id(self):
-        """
-        Returns the host id
-        """
+        """Returns the host id."""
+
         return _hosts.host_get_id(self._host_data)
 
     @property
     def platform_token(self):
-        """
-        Returns the platform token
-        """
+        """Returns the platform token."""
+
         if self._platform_token is None:
             self._platform_token = openstack.get_token(self._platform_directory)
 
@@ -93,9 +87,8 @@ class TestHost(_test_base.Test):
 
     @property
     def openstack_token(self):
-        """
-        Returns the openstack token
-        """
+        """Returns the openstack token."""
+
         if self._openstack_token is None:
             self._openstack_token = openstack.get_token(self._openstack_directory)
 
@@ -105,9 +98,8 @@ class TestHost(_test_base.Test):
         return self._openstack_token
 
     def _save_debug(self, test_success, test_reason):
-        """
-        Save debug information
-        """
+        """Save debug information."""
+
         with open(self._output_dir + "/test_result", "w") as f:
             f.write("success=%s, reason=%s\n" % (test_success, test_reason))
 
@@ -138,9 +130,8 @@ class TestHost(_test_base.Test):
 
     @staticmethod
     def save_customer_alarms(filename, wipe=False):
-        """
-        Save the customer alarms
-        """
+        """Save the customer alarms."""
+
         if wipe:
             open(filename, "w").close()
 
@@ -151,9 +142,8 @@ class TestHost(_test_base.Test):
         )
 
     def save_customer_logs(self, filename, wipe=False):
-        """
-        Save the customer logs
-        """
+        """Save the customer logs."""
+
         if wipe:
             open(filename, "w").close()
 
@@ -165,9 +155,8 @@ class TestHost(_test_base.Test):
         )
 
     def save_customer_alarm_history(self, filename, wipe=False):
-        """
-        Save the customer alarm history
-        """
+        """Save the customer alarm history."""
+
         if wipe:
             open(filename, "w").close()
 
@@ -180,9 +169,8 @@ class TestHost(_test_base.Test):
         )
 
     def _refresh_host_data(self):
-        """
-        Fetch the latest host data
-        """
+        """Fetch the latest host data."""
+
         if self._host_data is None:
             host_data = _hosts.host_get_by_name(self._host_name)
         else:
@@ -190,9 +178,8 @@ class TestHost(_test_base.Test):
         self._host_data = host_data
 
     def _refresh_instance_data(self, instance_name=None):
-        """
-        Fetch the latest instance data
-        """
+        """Fetch the latest instance data."""
+
         if instance_name is None:
             for instance_name in self._instance_names:
                 instance_data = _instances.instance_get_by_name(instance_name)
@@ -202,33 +189,28 @@ class TestHost(_test_base.Test):
             self._instances[instance_name] = instance_data
 
     def _refresh_customer_alarms(self):
-        """
-        Fetch the customer alarms raised
-        """
+        """Fetch the customer alarms raised."""
+
         self._customer_alarms = fm.get_alarms(self.platform_token).result_data
         return
 
     def _refresh_customer_logs(self):
-        """
-        Fetch the customer logs
-        """
+        """Fetch the customer logs."""
+
         self._customer_logs = fm.get_logs(
             self.platform_token, self.start_datetime, self.end_datetime
         ).result_data
 
     def _refresh_customer_alarm_history(self):
-        """
-        Fetch the customer alarm history
-        """
+        """Fetch the customer alarm history."""
+
         self._customer_alarm_history = fm.get_alarm_history(
             self.platform_token, self.start_datetime, self.end_datetime
         ).result_data
 
 
 class TestHostLock(TestHost):
-    """
-    Test - Host Lock
-    """
+    """Test - Host Lock."""
 
     def __init__(self, host_name, instance_names, timeout_secs):
         super(TestHostLock, self).__init__(
@@ -236,9 +218,8 @@ class TestHostLock(TestHost):
         )
 
     def _do_setup(self):
-        """
-        Setup the test
-        """
+        """Setup the test."""
+
         self._refresh_host_data()
         self._refresh_instance_data()
         self._refresh_customer_alarms()
@@ -296,8 +277,7 @@ class TestHostLock(TestHost):
                             % (self._name, self.host_name)
                         )
                         return False, (
-                            "instance %s failed to live-migrate to "
-                            "host" % instance_name
+                            "instance %s failed to live-migrate to host" % instance_name
                         )
 
                     time.sleep(5)
@@ -305,16 +285,14 @@ class TestHostLock(TestHost):
         return True, "host setup complete"
 
     def _do_test(self):
-        """
-        Perform the test
-        """
+        """Perform the test."""
+
         sysinv.lock_host(self.platform_token, self.host_id)
         return True, "host locking"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_host_data()
         self._refresh_instance_data()
         self._refresh_customer_alarms()
@@ -355,17 +333,14 @@ class TestHostLock(TestHost):
 
 
 class TestHostUnlock(TestHost):
-    """
-    Test - Host Unlock
-    """
+    """Test - Host Unlock."""
 
     def __init__(self, host_name, timeout_secs):
         super(TestHostUnlock, self).__init__("Host-Unlock", host_name, [], timeout_secs)
 
     def _do_setup(self):
-        """
-        Setup the test
-        """
+        """Setup the test."""
+
         self._refresh_host_data()
 
         success, reason = _hosts.host_is_locked(self._host_data)
@@ -379,16 +354,14 @@ class TestHostUnlock(TestHost):
         return True, "host setup complete"
 
     def _do_test(self):
-        """
-        Perform the test
-        """
+        """Perform the test."""
+
         sysinv.unlock_host(self.platform_token, self.host_id)
         return True, "host unlocking"
 
     def _test_passed(self):
-        """
-        Determine if test passed
-        """
+        """Determine if test passed."""
+
         self._refresh_host_data()
         self._refresh_instance_data()
         self._refresh_customer_alarms()

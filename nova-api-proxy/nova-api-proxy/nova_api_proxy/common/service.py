@@ -29,7 +29,6 @@ import webob.exc
 
 from nova_api_proxy.common.exception import ProxyException
 
-
 LOG = logging.getLogger(__name__)
 
 URL_LENGTH_LIMIT = 50000
@@ -47,7 +46,7 @@ server_opts = [
         ", body_length, wall_seconds.",
     ),
     cfg.StrOpt(
-        "ssl_ca_file", help="CA certificate file to use to verify " "connecting clients"
+        "ssl_ca_file", help="CA certificate file to use to verify connecting clients"
     ),
     cfg.StrOpt("ssl_cert_file", help="SSL certificate of API server"),
     cfg.StrOpt("ssl_key_file", help="SSL private key of API server"),
@@ -145,7 +144,7 @@ class Server(object):
             family = socket.AF_INET
 
         self._socket = eventlet.listen(bind_addr, family, backlog=backlog)
-        (self.host, self.port) = self._socket.getsockname()[0:2]
+        self.host, self.port = self._socket.getsockname()[0:2]
         LOG.info(
             "%(name)s listening on %(host)s:%(port)s" % self.__dict__  # noqa: H501
         )
@@ -239,10 +238,10 @@ class Server(object):
 
 
 class Application(object):
-
     @classmethod
     def factory(cls, global_config, **local_config):  # pylint: disable=unused-argument
         """Used for paste app factories in paste.deploy config files."""
+
         return cls(**local_config)
 
     def __call__(self, environ, start_response):
@@ -250,11 +249,11 @@ class Application(object):
 
 
 class Middleware(Application):
-    """Base WSGI middleware wrapper. These classes require an application to be
+    """Base WSGI middleware wrapper.
 
-    initialized that will be called next.  By default the middleware will
-    simply call its wrapped app, or you can override __call__ to customize its
-    behavior.
+    These classes require an application to be initialized that will be called next.
+    By default the middleware will simply call its wrapped app, or you can override
+    __call__ to customize its behavior.
     """
 
     @classmethod
@@ -288,6 +287,7 @@ class Middleware(Application):
 
     def process_response(self, response):
         """Do whatever you'd like to the response."""
+
         return response
 
     @webob.dec.wsgify

@@ -19,7 +19,6 @@ def message_handler(client_connection, msg):
 
 
 if __name__ == "__main__":
-
     CONF = dict()
     CONF["debug"] = dict()
     CONF["debug"]["config_file"] = "/etc/nfv/vim/debug.ini"

@@ -13,9 +13,7 @@ from nfv_vim.database.model._base import Base
 
 
 class Subnet(AsDictMixin, Base):
-    """
-    Subnet Database Table
-    """
+    """Subnet Database Table."""
 
     __tablename__ = "subnets"
 

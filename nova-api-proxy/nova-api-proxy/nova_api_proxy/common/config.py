@@ -51,10 +51,7 @@ def paste_deploy_app(paste_config_file, app_name, _):
 
 
 def _get_paste_config_file():
-    """Retrieve the paste_config_file config item, formatted as an
-
-    absolute pathname.
-    """
+    """Retrieve the paste_config_file config item, formatted as an absolute pathname"""
     config_path = CONF.find_file(CONF.api_paste_config)
     if config_path is None:
         return None
@@ -64,6 +61,7 @@ def _get_paste_config_file():
 
 def load_paste_app(app_name=None):
     """Loads a WSGI app from a paste config file."""
+
     if app_name is None:
         app_name = CONF.prog
 

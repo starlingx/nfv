@@ -10,9 +10,8 @@ DLOG = debug.debug_get_logger("nfv_vim.strategy.phase")
 
 
 def strategy_phase_rebuild_from_dict(data):
-    """
-    Returns the strategy phase object initialized using the given dictionary
-    """
+    """Returns the strategy phase object initialized using the given dictionary."""
+
     from nfv_vim.strategy._strategy_stages import strategy_stage_rebuild_from_dict
 
     if not data:

@@ -18,9 +18,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.fault_mgmt_api")
 
 
 class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
-    """
-    NFV Fault Management API Class Definition
-    """
+    """NFV Fault Management API Class Definition."""
 
     _name = "Fault-Management-API"
     _version = "1.0.0"
@@ -49,9 +47,8 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
         self._openstack_directory = None
 
     def get_openstack_alarms(self, future, callback):
-        """
-        Get alarms
-        """
+        """Get alarms."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -104,18 +101,15 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
                 )
 
         except Exception as e:
-            DLOG.exception(
-                "Caught exception while trying to get alarms, error=%s." % e
-            )
+            DLOG.exception("Caught exception while trying to get alarms, error=%s." % e)
 
         finally:
             callback.send(response)
             callback.close()
 
     def get_openstack_logs(self, future, start_period, end_period, callback):
-        """
-        Get logs
-        """
+        """Get logs."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -153,18 +147,15 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
                 )
 
         except Exception as e:
-            DLOG.exception(
-                "Caught exception while trying to get logs, error=%s." % e
-            )
+            DLOG.exception("Caught exception while trying to get logs, error=%s." % e)
 
         finally:
             callback.send(response)
             callback.close()
 
     def get_openstack_alarm_history(self, future, start_period, end_period, callback):
-        """
-        Get alarm history
-        """
+        """Get alarm history."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -200,8 +191,7 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to get alarm "
-                    "history, error=%s." % e
+                    "Caught exception while trying to get alarm history, error=%s." % e
                 )
 
         except Exception as e:
@@ -214,16 +204,14 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
             callback.close()
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._openstack_directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.OPENSTACK
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         pass

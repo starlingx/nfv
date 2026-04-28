@@ -20,9 +20,7 @@ _sw_mgmt_director = None
 
 
 class SwMgmtDirector(object, metaclass=Singleton):
-    """
-    Software Management Director
-    """
+    """Software Management Director."""
 
     def __init__(self, sw_update, ignore_alarms, single_controller):
         self._sw_update = sw_update
@@ -31,16 +29,14 @@ class SwMgmtDirector(object, metaclass=Singleton):
 
     @property
     def sw_update(self):
-        """
-        Returns the current software update
-        """
+        """Returns the current software update."""
+
         return self._sw_update
 
     @property
     def single_controller(self):
-        """
-        Returns whether this is a single controller configuration
-        """
+        """Returns whether this is a single controller configuration."""
+
         return self._single_controller
 
     def create_sw_patch_strategy(
@@ -54,9 +50,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         alarm_restrictions,
         callback,
     ):
-        """
-        Create Software Patch Strategy
-        """
+        """Create Software Patch Strategy."""
+
         strategy_uuid = str(uuid.uuid4())
 
         if self._sw_update is not None:
@@ -101,9 +96,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         snapshot,
         callback,
     ):
-        """
-        Create Software Upgrade Strategy
-        """
+        """Create Software Upgrade Strategy."""
+
         strategy_uuid = str(uuid.uuid4())
 
         if self._sw_update is not None:
@@ -155,9 +149,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         alarm_restrictions,
         callback,
     ):
-        """
-        Create System Config Update Strategy
-        """
+        """Create System Config Update Strategy."""
+
         strategy_uuid = str(uuid.uuid4())
 
         if self._sw_update is not None:
@@ -197,9 +190,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         alarm_restrictions,
         callback,
     ):
-        """
-        Create Firmware Update Strategy
-        """
+        """Create Firmware Update Strategy."""
+
         strategy_uuid = str(uuid.uuid4())
 
         if self._sw_update is not None:
@@ -241,9 +233,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         subject,
         callback,
     ):
-        """
-        Create Kubernetes Root CA Update Strategy
-        """
+        """Create Kubernetes Root CA Update Strategy."""
+
         strategy_uuid = str(uuid.uuid4())
 
         if self._sw_update is not None:
@@ -286,9 +277,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         to_version,
         callback,
     ):
-        """
-        Create Kubernetes Upgrade Strategy
-        """
+        """Create Kubernetes Upgrade Strategy."""
+
         strategy_uuid = str(uuid.uuid4())
 
         if self._sw_update is not None:
@@ -320,9 +310,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         return strategy_uuid, ""
 
     def apply_sw_update_strategy(self, strategy_uuid, stage_id, callback):
-        """
-        Apply Software Update Strategy
-        """
+        """Apply Software Update Strategy."""
+
         success, reason = self._sw_update.strategy_apply(strategy_uuid, stage_id)
         schedule.schedule_function_call(
             callback, success, reason, self._sw_update.strategy
@@ -330,9 +319,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         return
 
     def abort_sw_update_strategy(self, strategy_uuid, stage_id, callback):
-        """
-        Abort Software Update Strategy
-        """
+        """Abort Software Update Strategy."""
+
         success, reason = self._sw_update.strategy_abort(strategy_uuid, stage_id)
         schedule.schedule_function_call(
             callback, success, reason, self._sw_update.strategy
@@ -340,9 +328,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         return
 
     def delete_sw_update_strategy(self, strategy_uuid, force, callback):
-        """
-        Delete Software Update Strategy
-        """
+        """Delete Software Update Strategy."""
+
         success, reason = self._sw_update.strategy_delete(strategy_uuid, force)
         if success:
             self._sw_update.remove()
@@ -352,9 +339,8 @@ class SwMgmtDirector(object, metaclass=Singleton):
         return
 
     def get_sw_update_strategy(self, sw_update_type):
-        """
-        Get Software Update Strategy
-        """
+        """Get Software Update Strategy."""
+
         if self._sw_update is not None:
             if self._sw_update.sw_update_type == sw_update_type:
                 return self._sw_update.strategy
@@ -363,70 +349,62 @@ class SwMgmtDirector(object, metaclass=Singleton):
         return None
 
     def host_lock_failed(self, host):
-        """
-        Called when a lock of a host failed
-        """
+        """Called when a lock of a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(strategy.STRATEGY_EVENT.HOST_LOCK_FAILED, host)
 
     def disable_host_services_failed(self, host):
-        """
-        Called when disabling services on a host failed
-        """
+        """Called when disabling services on a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.DISABLE_HOST_SERVICES_FAILED, host
             )
 
     def enable_host_services_failed(self, host):
-        """
-        Called when enabling services on a host failed
-        """
+        """Called when enabling services on a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.ENABLE_HOST_SERVICES_FAILED, host
             )
 
     def kube_host_cordon_failed(self, host):
-        """
-        Called when a kube host cordon fails
-        """
+        """Called when a kube host cordon fails."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.KUBE_HOST_CORDON_FAILED, host
             )
 
     def kube_host_uncordon_failed(self, host):
-        """
-        Called when a kube host uncordon fails
-        """
+        """Called when a kube host uncordon fails."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.KUBE_HOST_UNCORDON_FAILED, host
             )
 
     def host_unlock_failed(self, host):
-        """
-        Called when a unlock of a host failed
-        """
+        """Called when a unlock of a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_UNLOCK_FAILED, host
             )
 
     def host_reboot_failed(self, host):
-        """
-        Called when a reboot of a host failed
-        """
+        """Called when a reboot of a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_REBOOT_FAILED, host
             )
 
     def host_swact_failed(self, host, reason=None):
-        """
-        Called when a swact of a host failed
-        """
+        """Called when a swact of a host failed."""
+
         if self._sw_update is not None:
             event_data = {"host": host, "reason": reason}
             self._sw_update.handle_event(
@@ -434,124 +412,110 @@ class SwMgmtDirector(object, metaclass=Singleton):
             )
 
     def host_upgrade_failed(self, result):
-        """
-        Called when an upgrade of a host failed
-        """
+        """Called when an upgrade of a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_UPGRADE_FAILED, result
             )
 
     def host_upgrade_changed(self, result):
-        """
-        Called when an upgrade of a host succeeded
-        """
+        """Called when an upgrade of a host succeeded."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_UPGRADE_CHANGED, result
             )
 
     def host_fw_update_abort_failed(self, host):
-        """
-        Called when firmware update abort for a host failed
-        """
+        """Called when firmware update abort for a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_FW_UPDATE_ABORT_FAILED, host
             )
 
     def host_fw_update_failed(self, host):
-        """
-        Called when a firmware update of a host failed
-        """
+        """Called when a firmware update of a host failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_FW_UPDATE_FAILED, host
             )
 
     def system_config_update_failed(self, host):
-        """
-        Called when a system config update for a host phase fails
-        """
+        """Called when a system config update for a host phase fails."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.SYSTEM_CONFIG_UPDATE_HOST_FAILED, host
             )
 
     def kube_host_rootca_update_failed(self, host):
-        """
-        Called when a kube footca update for a host phase fails
-        """
+        """Called when a kube footca update for a host phase fails."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.KUBE_ROOTCA_UPDATE_HOST_FAILED, host
             )
 
     def kube_host_upgrade_control_plane_failed(self, host):
-        """
-        Called when a kube host upgrade for control plane fails
-        """
+        """Called when a kube host upgrade for control plane fails."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.KUBE_HOST_UPGRADE_CONTROL_PLANE_FAILED, host
             )
 
     def kube_host_upgrade_kubelet_failed(self, host):
-        """
-        Called when a kube host upgrade for kubelet fails
-        """
+        """Called when a kube host upgrade for kubelet fails."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.KUBE_HOST_UPGRADE_KUBELET_FAILED, host
             )
 
     def host_audit(self, host):
-        """
-        Called when a host audit is to be performed
-        """
+        """Called when a host audit is to be performed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(strategy.STRATEGY_EVENT.HOST_AUDIT, host)
 
     def host_state_change(self, host):
-        """
-        Called when a host has changed state
-        """
+        """Called when a host has changed state."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.HOST_STATE_CHANGED, host
             )
 
     def instance_audit(self, instance):
-        """
-        Called when an instance audit is to be performed
-        """
+        """Called when an instance audit is to be performed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.INSTANCE_AUDIT, instance
             )
 
     def instance_state_change(self, instance):
-        """
-        Called when an instance has changed state
-        """
+        """Called when an instance has changed state."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.INSTANCE_STATE_CHANGED, instance
             )
 
     def migrate_instances_failed(self, reason):
-        """
-        Called when a migrate instances operation has failed
-        """
+        """Called when a migrate instances operation has failed."""
+
         if self._sw_update is not None:
             self._sw_update.handle_event(
                 strategy.STRATEGY_EVENT.MIGRATE_INSTANCES_FAILED, reason
             )
 
     def kube_host_upgrade_list(self, event_data):
-        """
-        Kubernetes host upgrade list handle_event called
-        """
+        """Kubernetes host upgrade list handle_event called."""
+
         if event_data["completed"]:
             event = strategy.STRATEGY_EVENT.QUERY_KUBE_HOST_UPGRADE_COMPLETED
         else:
@@ -561,16 +525,14 @@ class SwMgmtDirector(object, metaclass=Singleton):
 
 
 def get_sw_mgmt_director():
-    """
-    Returns the Software Management Director
-    """
+    """Returns the Software Management Director."""
+
     return _sw_mgmt_director
 
 
 def sw_mgmt_director_initialize():
-    """
-    Initialize Software Management Director
-    """
+    """Initialize Software Management Director."""
+
     from nfv_vim import database
 
     global _sw_mgmt_director
@@ -602,7 +564,6 @@ def sw_mgmt_director_initialize():
 
 
 def sw_mgmt_director_finalize():
-    """
-    Finalize Software Management Director
-    """
+    """Finalize Software Management Director."""
+
     pass

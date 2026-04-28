@@ -28,9 +28,9 @@ _vim_api_ip = ""
 
 
 def _bare_address_string(self):
-    """
-    Workaround to bypass the hostname resolution mechanism, so that
-    the server can respond faster.
+    """Workaround to bypass the hostname resolution mechanism.
+
+    Allows the server to respond faster.
     """
     host, port = self.client_address[:2]
     return "%s" % host
@@ -40,9 +40,7 @@ BaseHTTPServer.BaseHTTPRequestHandler.address_string = _bare_address_string
 
 
 class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    """
-    HTTP Request Handler
-    """
+    """HTTP Request Handler."""
 
     def do_GET(self):
         global _lock, _token
@@ -630,9 +628,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 class ThreadedHTTPServer(socketserver.ThreadingMixIn, BaseHTTPServer.HTTPServer):
-    """
-    Threaded HTTP Server
-    """
+    """Threaded HTTP Server."""
 
     allow_reuse_address = True
 
@@ -642,9 +638,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, BaseHTTPServer.HTTPServer)
 
 
 class SimpleHttpServer(object):
-    """
-    Simple HTTP Server
-    """
+    """Simple HTTP Server."""
 
     def __init__(self, webserver_config, nfvi_config, vim_api_config):
         global _webserver_src_dir, _directory, _vim_api_ip

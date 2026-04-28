@@ -34,9 +34,7 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host_task")
 
 
 class AddHostTask(state_machine.StateTask):
-    """
-    Add Host Task
-    """
+    """Add Host Task."""
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
@@ -45,16 +43,14 @@ class AddHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Add Host Task Complete
-        """
+        """Add Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -70,9 +66,7 @@ class AddHostTask(state_machine.StateTask):
 
 
 class DeleteHostTask(state_machine.StateTask):
-    """
-    Delete Host Task
-    """
+    """Delete Host Task."""
 
     def __init__(self, host):
         from nfv_vim import objects
@@ -100,16 +94,14 @@ class DeleteHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Delete Host Task Complete
-        """
+        """Delete Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -125,9 +117,7 @@ class DeleteHostTask(state_machine.StateTask):
 
 
 class EnableHostTask(state_machine.StateTask):
-    """
-    Enable Host Task
-    """
+    """Enable Host Task."""
 
     def __init__(self, host):
         from nfv_vim import objects
@@ -174,16 +164,14 @@ class EnableHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Enable Host Task Complete
-        """
+        """Enable Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -204,9 +192,7 @@ class EnableHostTask(state_machine.StateTask):
 
 
 class DisableHostTask(state_machine.StateTask):
-    """
-    Disable Host Task
-    """
+    """Disable Host Task."""
 
     def __init__(self, host):
         from nfv_vim import objects
@@ -276,16 +262,14 @@ class DisableHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Disable Host Task Complete
-        """
+        """Disable Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -306,9 +290,7 @@ class DisableHostTask(state_machine.StateTask):
 
 
 class OfflineHostTask(state_machine.StateTask):
-    """
-    Offline Host Task
-    """
+    """Offline Host Task."""
 
     def __init__(self, host):
         from nfv_vim import objects
@@ -336,16 +318,14 @@ class OfflineHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Disable Host Task Complete
-        """
+        """Disable Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -361,9 +341,7 @@ class OfflineHostTask(state_machine.StateTask):
 
 
 class FailHostTask(state_machine.StateTask):
-    """
-    Fail Host Task
-    """
+    """Fail Host Task."""
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
@@ -373,16 +351,14 @@ class FailHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Fail Host Task Complete
-        """
+        """Fail Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -398,9 +374,7 @@ class FailHostTask(state_machine.StateTask):
 
 
 class NotifyDeleteFailedTask(state_machine.StateTask):
-    """
-    Notify Delete Failed Host Task
-    """
+    """Notify Delete Failed Host Task."""
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
@@ -414,16 +388,14 @@ class NotifyDeleteFailedTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Delete Failed Host Task Complete
-        """
+        """Delete Failed Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -439,9 +411,7 @@ class NotifyDeleteFailedTask(state_machine.StateTask):
 
 
 class NotifyDisableFailedTask(state_machine.StateTask):
-    """
-    Notify Disable Failed Host Task
-    """
+    """Notify Disable Failed Host Task."""
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
@@ -455,16 +425,14 @@ class NotifyDisableFailedTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Disable Failed Host Task Complete
-        """
+        """Disable Failed Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -480,9 +448,7 @@ class NotifyDisableFailedTask(state_machine.StateTask):
 
 
 class NotifyEnabledHostTask(state_machine.StateTask):
-    """
-    Notify Enabled Host Task
-    """
+    """Notify Enabled Host Task."""
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
@@ -496,16 +462,14 @@ class NotifyEnabledHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Notify Enabled Host Task Complete
-        """
+        """Notify Enabled Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -521,9 +485,7 @@ class NotifyEnabledHostTask(state_machine.StateTask):
 
 
 class NotifyDisabledHostTask(state_machine.StateTask):
-    """
-    Notify Disabled Host Task
-    """
+    """Notify Disabled Host Task."""
 
     def __init__(self, host):
         from nfv_vim import objects
@@ -554,16 +516,14 @@ class NotifyDisabledHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Notify Disabled Host Task Complete
-        """
+        """Notify Disabled Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -579,9 +539,7 @@ class NotifyDisabledHostTask(state_machine.StateTask):
 
 
 class AuditEnabledHostTask(state_machine.StateTask):
-    """
-    Audit Enabled Host Task
-    """
+    """Audit Enabled Host Task."""
 
     def __init__(self, host):
         from nfv_vim import objects
@@ -607,16 +565,14 @@ class AuditEnabledHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Audit Enabled Host Task Complete
-        """
+        """Audit Enabled Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:
@@ -632,9 +588,7 @@ class AuditEnabledHostTask(state_machine.StateTask):
 
 
 class AuditDisabledHostTask(state_machine.StateTask):
-    """
-    Audit Disabled Host Task
-    """
+    """Audit Disabled Host Task."""
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
@@ -646,16 +600,14 @@ class AuditDisabledHostTask(state_machine.StateTask):
 
     @property
     def _host(self):
-        """
-        Returns the host
-        """
+        """Returns the host."""
+
         host = self._host_reference()
         return host
 
     def complete(self, result, reason):
-        """
-        Audit Disabled Host Task Complete
-        """
+        """Audit Disabled Host Task Complete."""
+
         if self.aborted():
             DLOG.debug("Task (%s) complete, but has been aborted." % self._name)
         else:

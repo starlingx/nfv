@@ -13,9 +13,8 @@ from nfv_vim.database._database import database_get
 
 
 def database_subnet_add(subnet_obj):
-    """
-    Add a subnet object to the database
-    """
+    """Add a subnet object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Subnet)
@@ -38,9 +37,8 @@ def database_subnet_add(subnet_obj):
 
 
 def database_subnet_delete(subnet_uuid):
-    """
-    Delete a subnet object from the database
-    """
+    """Delete a subnet object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Subnet)
@@ -49,9 +47,8 @@ def database_subnet_delete(subnet_uuid):
 
 
 def database_subnet_get_list():
-    """
-    Fetch all the subnet objects from the database
-    """
+    """Fetch all the subnet objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Subnet)
@@ -73,9 +70,8 @@ def database_subnet_get_list():
 
 
 def database_network_add(network_obj):
-    """
-    Add a network object to the database
-    """
+    """Add a network object to the database."""
+
     provider_data = network_obj.provider_data
 
     db = database_get()
@@ -97,7 +93,6 @@ def database_network_add(network_obj):
         network.segmentation_id = provider_data.segmentation_id
         session.add(network)
     else:
-
         network.admin_state = network_obj.admin_state
         network.oper_state = network_obj.oper_state
         network.avail_status = json.dumps(network_obj.avail_status)
@@ -110,9 +105,8 @@ def database_network_add(network_obj):
 
 
 def database_network_delete(network_uuid):
-    """
-    Delete a network object from the database
-    """
+    """Delete a network object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Network)
@@ -121,9 +115,8 @@ def database_network_delete(network_uuid):
 
 
 def database_network_get_list():
-    """
-    Fetch all the network objects from the database
-    """
+    """Fetch all the network objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Network)

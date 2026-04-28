@@ -11,9 +11,7 @@ from nfv_vim.database.model._base import Base
 
 
 class ServiceHost(AsDictMixin, Base):
-    """
-    Service-Host Database Table
-    """
+    """Service-Host Database Table."""
 
     __tablename__ = "service_hosts"
 

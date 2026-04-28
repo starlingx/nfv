@@ -20,9 +20,8 @@ _directory = None
 
 
 def _get_token():
-    """
-    Returns a valid token
-    """
+    """Returns a valid token."""
+
     global _directory, _token
 
     if _directory is None:
@@ -40,9 +39,8 @@ def _get_token():
 
 
 def instance_get(instance_uuid):
-    """
-    Fetch instance data by the uuid of the instance
-    """
+    """Fetch instance data by the uuid of the instance."""
+
     token = _get_token()
 
     server_data = nova.get_server(token, instance_uuid).result_data
@@ -50,9 +48,8 @@ def instance_get(instance_uuid):
 
 
 def instance_get_by_name(instance_name):
-    """
-    Fetch instance data by the name of the instance
-    """
+    """Fetch instance data by the name of the instance."""
+
     token = _get_token()
 
     servers = nova.get_servers(token).result_data
@@ -63,23 +60,20 @@ def instance_get_by_name(instance_name):
 
 
 def instance_get_uuid(instance):
-    """
-    Retrieve the instance uuid
-    """
+    """Retrieve the instance uuid."""
+
     return instance["id"]
 
 
 def instance_get_host(instance):
-    """
-    Retrieve the host the instance is located on
-    """
+    """Retrieve the host the instance is located on."""
+
     return instance["OS-EXT-SRV-ATTR:host"]
 
 
 def instance_on_host(instance, host_name):
-    """
-    Returns true if the instance is located on the host
-    """
+    """Returns true if the instance is located on the host."""
+
     if host_name != instance["OS-EXT-SRV-ATTR:host"]:
         return False, "instance is not on host"
 
@@ -87,9 +81,8 @@ def instance_on_host(instance, host_name):
 
 
 def instance_is_running(instance):
-    """
-    Returns true if the instance is running
-    """
+    """Returns true if the instance is running."""
+
     if nova.VM_STATE.ACTIVE == instance["OS-EXT-STS:vm_state"]:
         if nova.VM_POWER_STATE.RUNNING == instance["OS-EXT-STS:power_state"]:
             if instance["OS-EXT-STS:task_state"] is None:
@@ -99,9 +92,8 @@ def instance_is_running(instance):
 
 
 def instance_is_rebooting(instance):
-    """
-    Returns true if the instance is rebooting
-    """
+    """Returns true if the instance is rebooting."""
+
     is_rebooting = False
 
     if instance["OS-EXT-STS:task_state"] is not None:
@@ -122,9 +114,8 @@ def instance_is_rebooting(instance):
 
 
 def instance_is_rebuilding(instance):
-    """
-    Returns true if the instance is rebuilding
-    """
+    """Returns true if the instance is rebuilding."""
+
     is_rebuilding = False
 
     if instance["OS-EXT-STS:task_state"] is not None:
@@ -142,9 +133,8 @@ def instance_is_rebuilding(instance):
 
 
 def instance_is_resized(instance):
-    """
-    Returns true if the instance is resized
-    """
+    """Returns true if the instance is resized."""
+
     is_resized = False
 
     if nova.VM_STATE.RESIZED == instance["OS-EXT-STS:vm_state"]:
@@ -159,9 +149,8 @@ def instance_is_resized(instance):
 
 
 def instance_is_stopped(instance):
-    """
-    Returns true if the instance is stopped
-    """
+    """Returns true if the instance is stopped."""
+
     in_stopped_state = False
 
     if nova.VM_STATE.STOPPED == instance["OS-EXT-STS:vm_state"]:
@@ -176,9 +165,8 @@ def instance_is_stopped(instance):
 
 
 def instance_is_paused(instance):
-    """
-    Returns true if the instance is paused
-    """
+    """Returns true if the instance is paused."""
+
     in_paused_state = False
 
     if nova.VM_STATE.PAUSED == instance["OS-EXT-STS:vm_state"]:
@@ -193,9 +181,8 @@ def instance_is_paused(instance):
 
 
 def instance_is_suspended(instance):
-    """
-    Returns true if the instance is suspended
-    """
+    """Returns true if the instance is suspended."""
+
     in_suspended_state = False
 
     if nova.VM_STATE.SUSPENDED == instance["OS-EXT-STS:vm_state"]:
@@ -210,9 +197,8 @@ def instance_is_suspended(instance):
 
 
 def instance_is_failed(instance):
-    """
-    Returns true if the instance is failed
-    """
+    """Returns true if the instance is failed."""
+
     in_failed_state = False
 
     if nova.VM_STATE.ERROR == instance["OS-EXT-STS:vm_state"]:
@@ -235,9 +221,8 @@ def instance_has_started(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has started
-    """
+    """Returns true if the instance has started."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, reason
@@ -269,9 +254,8 @@ def instance_has_stopped(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has stopped
-    """
+    """Returns true if the instance has stopped."""
+
     success, reason = instance_is_stopped(instance)
     if not success:
         return False, reason
@@ -303,9 +287,8 @@ def instance_has_paused(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has paused
-    """
+    """Returns true if the instance has paused."""
+
     success, reason = instance_is_paused(instance)
     if not success:
         return False, reason
@@ -337,9 +320,8 @@ def instance_has_unpaused(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has unpaused
-    """
+    """Returns true if the instance has unpaused."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, reason
@@ -371,9 +353,8 @@ def instance_has_suspended(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has suspended
-    """
+    """Returns true if the instance has suspended."""
+
     success, reason = instance_is_suspended(instance)
     if not success:
         return False, reason
@@ -405,9 +386,8 @@ def instance_has_resumed(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has resumed
-    """
+    """Returns true if the instance has resumed."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, "instance is not running"
@@ -439,9 +419,8 @@ def instance_has_rebooted(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has rebooted
-    """
+    """Returns true if the instance has rebooted."""
+
     success, reason = instance_is_rebooting(instance)
     if success:
         return False, reason
@@ -474,9 +453,8 @@ def instance_was_rebuilt(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has been rebuilt
-    """
+    """Returns true if the instance has been rebuilt."""
+
     success, reason = instance_is_rebuilding(instance)
     if success:
         return False, reason
@@ -511,9 +489,8 @@ def instance_has_live_migrated(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has live-migrated
-    """
+    """Returns true if the instance has live-migrated."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, reason
@@ -554,9 +531,8 @@ def instance_has_cold_migrated(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has cold-migrated
-    """
+    """Returns true if the instance has cold-migrated."""
+
     if action:
         success, reason = instance_is_resized(instance)
         if not success:
@@ -603,9 +579,8 @@ def instance_has_cold_migrate_confirmed(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance cold-migrate has been confirmed
-    """
+    """Returns true if the instance cold-migrate has been confirmed."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, reason
@@ -636,9 +611,8 @@ def instance_has_cold_migrate_reverted(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance cold-migrate has been reverted
-    """
+    """Returns true if the instance cold-migrate has been reverted."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, reason
@@ -674,9 +648,8 @@ def instance_has_resized(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance has resized
-    """
+    """Returns true if the instance has resized."""
+
     if action:
         success, reason = instance_is_resized(instance)
         if not success:
@@ -716,9 +689,8 @@ def instance_has_resize_confirmed(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance resize has been confirmed
-    """
+    """Returns true if the instance resize has been confirmed."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, reason
@@ -747,9 +719,8 @@ def instance_has_resize_reverted(
     action=False,
     guest_hb=False,
 ):
-    """
-    Returns true if the instance resize has been reverted
-    """
+    """Returns true if the instance resize has been reverted."""
+
     success, reason = instance_is_running(instance)
     if not success:
         return False, reason

@@ -17,9 +17,9 @@ _interval_timers = dict()
 
 
 def interval_timer(name, initial_delay_secs, interval_secs):
-    """
-    Decorator function used to create an interval timer, note decorators
-    are called at load time
+    """Decorator function used to create an interval timer, note decorators
+
+    are called at load time.
     """
 
     def timer_wrap(func):
@@ -44,9 +44,8 @@ def interval_timer(name, initial_delay_secs, interval_secs):
 def timers_create_timer(
     name, initial_delay_secs, interval_secs, callback, *callback_args, **callback_kwargs
 ):
-    """
-    Create a timer
-    """
+    """Create a timer."""
+
     global _scheduler
 
     timer = Timer(
@@ -55,7 +54,7 @@ def timers_create_timer(
         interval_secs,
         callback,
         *callback_args,
-        **callback_kwargs
+        **callback_kwargs,
     )
     _scheduler.add_timer(timer)
     DLOG.debug("Timer %s created, name=%s." % (timer.timer_id, name))
@@ -63,9 +62,8 @@ def timers_create_timer(
 
 
 def timers_delete_timer(timer_id):
-    """
-    Delete a timer
-    """
+    """Delete a timer."""
+
     global _scheduler
 
     _scheduler.delete_timer(timer_id)
@@ -73,9 +71,8 @@ def timers_delete_timer(timer_id):
 
 
 def timers_reschedule_timer(timer_id, interval_secs):
-    """
-    Reschedule a timer at a different interval
-    """
+    """Reschedule a timer at a different interval."""
+
     global _scheduler
 
     _scheduler.reschedule_timer(timer_id, interval_secs)
@@ -83,27 +80,24 @@ def timers_reschedule_timer(timer_id, interval_secs):
 
 
 def timers_scheduling_on_time():
-    """
-    Determine if we are scheduling timers on time
-    """
+    """Determine if we are scheduling timers on time."""
+
     global _scheduler
 
     return _scheduler.scheduling_on_time
 
 
 def timers_schedule():
-    """
-    Schedule timers
-    """
+    """Schedule timers."""
+
     global _scheduler
 
     _scheduler.schedule()
 
 
 def timers_register_interval_timers(interval_timers):
-    """
-    Register the given interval timers
-    """
+    """Register the given interval timers."""
+
     for timer_func in interval_timers:
         name, initial_delay_secs, interval_secs, func = _interval_timers[timer_func]
 
@@ -113,9 +107,8 @@ def timers_register_interval_timers(interval_timers):
 def timers_initialize(
     scheduler_interval_ms, scheduler_max_delay_ms, scheduler_delay_debounce_ms
 ):
-    """
-    Initializes the timer package
-    """
+    """Initializes the timer package."""
+
     global _scheduler
 
     if _scheduler is not None:
@@ -127,9 +120,8 @@ def timers_initialize(
 
 
 def timers_finalize():
-    """
-    Finalizes the timer package
-    """
+    """Finalizes the timer package."""
+
     global _scheduler
 
     if _scheduler is not None:

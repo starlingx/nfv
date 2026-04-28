@@ -26,9 +26,8 @@ def _create_volume_callback(
     avail_status,
     action,
 ):
-    """
-    Handle Create-Volume callback
-    """
+    """Handle Create-Volume callback."""
+
     DLOG.verbose("Create volume callback, name=%s." % volume_name)
 
     connection = _volume_create_operations.get(volume_name, None)
@@ -53,9 +52,8 @@ def _create_volume_callback(
 
 
 def vim_volume_api_create_volume(connection, msg):
-    """
-    Handle Create-Volume API request
-    """
+    """Handle Create-Volume API request."""
+
     global _volume_create_operations
 
     DLOG.verbose("Create volume, name=%s." % msg.name)
@@ -77,9 +75,8 @@ def _update_volume_callback(
     avail_status,
     action,
 ):
-    """
-    Handle Update-Volume callback
-    """
+    """Handle Update-Volume callback."""
+
     DLOG.verbose("Update volume callback, uuid=%s." % volume_uuid)
 
     connection = _volume_update_operations.get(volume_uuid, None)
@@ -104,9 +101,8 @@ def _update_volume_callback(
 
 
 def vim_volume_api_update_volume(connection, msg):
-    """
-    Handle Update-Volume API request
-    """
+    """Handle Update-Volume API request."""
+
     global _volume_update_operations
 
     DLOG.verbose("Update volume, uuid=%s." % msg.uuid)
@@ -116,9 +112,8 @@ def vim_volume_api_update_volume(connection, msg):
 
 
 def _delete_volume_callback(success, volume_uuid):
-    """
-    Handle Delete-Volume callback
-    """
+    """Handle Delete-Volume callback."""
+
     DLOG.verbose("Delete volume callback, uuid=%s." % volume_uuid)
 
     connection = _volume_delete_operations.get(volume_uuid, None)
@@ -136,9 +131,8 @@ def _delete_volume_callback(success, volume_uuid):
 
 
 def vim_volume_api_delete_volume(connection, msg):
-    """
-    Handle Delete-Volume API request
-    """
+    """Handle Delete-Volume API request."""
+
     global _volume_delete_operations
 
     DLOG.verbose("Delete volume, uuid=%s." % msg.uuid)
@@ -148,9 +142,8 @@ def vim_volume_api_delete_volume(connection, msg):
 
 
 def vim_volume_api_get_volume(connection, msg):
-    """
-    Handle Get-Volume API request
-    """
+    """Handle Get-Volume API request."""
+
     DLOG.verbose("Get volume, filter_by_uuid=%s." % msg.filter_by_uuid)
     volume_table = tables.tables_get_volume_table()
     response = rpc.APIResponseGetVolume()
@@ -172,9 +165,8 @@ def vim_volume_api_get_volume(connection, msg):
 
 
 def vim_volume_api_get_volumes(connection, msg):
-    """
-    Handle Get-Volumes API request
-    """
+    """Handle Get-Volumes API request."""
+
     DLOG.verbose("Get volume, all=%s." % msg.get_all)
     volume_table = tables.tables_get_volume_table()
     for volume in list(volume_table.values()):
@@ -193,14 +185,12 @@ def vim_volume_api_get_volumes(connection, msg):
 
 
 def vim_volume_api_initialize():
-    """
-    Initialize VIM Volume API Handling
-    """
+    """Initialize VIM Volume API Handling."""
+
     pass
 
 
 def vim_volume_api_finalize():
-    """
-    Finalize VIM Volume API Handling
-    """
+    """Finalize VIM Volume API Handling."""
+
     pass

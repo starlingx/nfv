@@ -30,9 +30,7 @@ KUBE_CERT_UPDATE_UPDATECERTS = "update-certs"
 
 
 class StrategyStepNames(Constants, metaclass=Singleton):
-    """
-    Strategy Step Names
-    """
+    """Strategy Step Names."""
 
     QUERY_HOSTS = Constant("query-hosts")
     SYSTEM_STABILIZE = Constant("system-stabilize")
@@ -125,7 +123,7 @@ def validate_operation(operation):
 
 
 class AbstractStrategyStep(strategy.StrategyStep):
-    """An abstract base class for strategy steps"""
+    """An abstract base class for strategy steps."""
 
     def __init__(self, step_name, timeout_in_secs):
         super(AbstractStrategyStep, self).__init__(
@@ -133,16 +131,14 @@ class AbstractStrategyStep(strategy.StrategyStep):
         )
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractStrategyStep, self).from_dict(data)
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(AbstractStrategyStep, self).as_dict()
         # Next 3 lines are required for all strategy steps and may be
         # overridden by subclass in some cases
@@ -153,7 +149,7 @@ class AbstractStrategyStep(strategy.StrategyStep):
 
 
 class AbstractHostsStrategyStep(AbstractStrategyStep):
-    """An abstract base class for strategy steps performed on list of hosts"""
+    """An abstract base class for strategy steps performed on list of hosts."""
 
     def __init__(self, step_name, hosts, timeout_in_secs=1800):
         super(AbstractHostsStrategyStep, self).__init__(
@@ -167,9 +163,8 @@ class AbstractHostsStrategyStep(AbstractStrategyStep):
             self._host_uuids.append(host.uuid)
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractHostsStrategyStep, self).from_dict(data)
         self._hosts = list()
         self._host_uuids = list()
@@ -183,9 +178,8 @@ class AbstractHostsStrategyStep(AbstractStrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(AbstractHostsStrategyStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -194,9 +188,7 @@ class AbstractHostsStrategyStep(AbstractStrategyStep):
 
 
 class UnlockHostsStep(AbstractHostsStrategyStep):
-    """
-    Unlock Hosts - Strategy Step
-    """
+    """Unlock Hosts - Strategy Step."""
 
     # During an upgrade, an unlock may need to be retried several times
     # https://bugs.launchpad.net/starlingx/+bug/1914836
@@ -204,10 +196,10 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
     RETRY_DELAY = 120
 
     def __init__(self, hosts, retry_count=0, retry_delay=RETRY_DELAY):
-        """
-        hosts - the list of hosts to be unlocked
+        """hosts - the list of hosts to be unlocked
+
         retry_count - the number of times to retry per host if unlock fails
-        retry_delay - the amount of time to delay before retrying unlock
+        retry_delay - the amount of time to delay before retrying unlock.
         """
         super(UnlockHostsStep, self).__init__(
             STRATEGY_STEP_NAME.UNLOCK_HOSTS, hosts, timeout_in_secs=1800
@@ -224,9 +216,8 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         self._retry_requested = False
 
     def from_dict(self, data):
-        """
-        Returns unlock hosts step object initialized using the given dictionary
-        """
+        """Returns unlock hosts step object initialized using the given dictionary."""
+
         super(UnlockHostsStep, self).from_dict(data)
         # deserialize retry_delay and retry_count
         # 'retry_delay' and 'retry_count' were added to this step since last
@@ -248,9 +239,8 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the unlock hosts step as a dictionary
-        """
+        """Represent the unlock hosts step as a dictionary."""
+
         data = super(UnlockHostsStep, self).as_dict()
         # serialize retries
         data["retry_count"] = self._retry_count
@@ -272,9 +262,8 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         return hosts
 
     def _total_hosts_unlocked_enabled(self):
-        """
-        Returns the number of hosts that are unlocked and enabled
-        """
+        """Returns the number of hosts that are unlocked and enabled."""
+
         total_hosts_enabled = 0
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -297,9 +286,8 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         self._retries[host_name] = self._retries[host_name] - 1
 
     def apply(self):
-        """
-        Unlock all hosts
-        """
+        """Unlock all hosts."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -316,9 +304,8 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import directors
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -368,9 +355,7 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
 
 
 class LockHostsStep(strategy.StrategyStep):
-    """
-    Lock Hosts - Strategy Step
-    """
+    """Lock Hosts - Strategy Step."""
 
     def __init__(self, hosts, wait_until_disabled=True):
         super(LockHostsStep, self).__init__(
@@ -386,15 +371,13 @@ class LockHostsStep(strategy.StrategyStep):
         self._wait_time = 0
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return [UnlockHostsStep(self._hosts)]
 
     def _total_hosts_locked(self):
-        """
-        Returns the number of hosts that are locked
-        """
+        """Returns the number of hosts that are locked."""
+
         total_hosts_locked = 0
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -410,9 +393,8 @@ class LockHostsStep(strategy.StrategyStep):
         return total_hosts_locked
 
     def _instances_not_locked_disabled(self):
-        """
-        Returns the instances that are not locked and disabled
-        """
+        """Returns the instances that are not locked and disabled."""
+
         instances_not_locked_disabled = []
         instance_table = tables.tables_get_instance_table()
         for host_name in self._host_names:
@@ -423,9 +405,8 @@ class LockHostsStep(strategy.StrategyStep):
         return instances_not_locked_disabled
 
     def apply(self):
-        """
-        Lock all hosts
-        """
+        """Lock all hosts."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -453,9 +434,8 @@ class LockHostsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [STRATEGY_EVENT.HOST_STATE_CHANGED, STRATEGY_EVENT.HOST_AUDIT]:
@@ -492,9 +472,8 @@ class LockHostsStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the lock hosts step object initialized using the given dictionary
-        """
+        """Returns the lock hosts step object initialized using the given dictionary."""
+
         super(LockHostsStep, self).from_dict(data)
         self._hosts = list()
         self._wait_until_disabled = data["wait_until_disabled"]
@@ -510,9 +489,8 @@ class LockHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the lock hosts step as a dictionary
-        """
+        """Represent the lock hosts step as a dictionary."""
+
         data = super(LockHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -522,9 +500,7 @@ class LockHostsStep(strategy.StrategyStep):
 
 
 class RebootHostsStep(strategy.StrategyStep):
-    """
-    Reboot Hosts - Strategy Step
-    """
+    """Reboot Hosts - Strategy Step."""
 
     def __init__(self, hosts):
         super(RebootHostsStep, self).__init__(
@@ -539,9 +515,8 @@ class RebootHostsStep(strategy.StrategyStep):
         self._wait_time = 0
 
     def apply(self):
-        """
-        Reboot all hosts
-        """
+        """Reboot all hosts."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -555,9 +530,8 @@ class RebootHostsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event == STRATEGY_EVENT.HOST_REBOOT_FAILED:
@@ -584,9 +558,8 @@ class RebootHostsStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the reboot hosts step object initialized using the given dictionary
-        """
+        """Returns the reboot hosts step object initialized using the dictionary."""
+
         super(RebootHostsStep, self).from_dict(data)
         self._hosts = list()
         self._host_uuids = list()
@@ -601,9 +574,8 @@ class RebootHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the reboot hosts step as a dictionary
-        """
+        """Represent the reboot hosts step as a dictionary."""
+
         data = super(RebootHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -612,9 +584,7 @@ class RebootHostsStep(strategy.StrategyStep):
 
 
 class SwactHostsStep(strategy.StrategyStep):
-    """
-    Swact Hosts - Strategy Step
-    """
+    """Swact Hosts - Strategy Step."""
 
     def __init__(self, hosts):
         super(SwactHostsStep, self).__init__(
@@ -637,9 +607,8 @@ class SwactHostsStep(strategy.StrategyStep):
         self._retry_interval_secs = 5
 
     def classify_swact_failure_reason(self, reason):
-        """
-        Classify a swact failure reason into retryable categories.
-        """
+        """Classify a swact failure reason into retryable categories."""
+
         if not reason:
             return None
 
@@ -671,9 +640,8 @@ class SwactHostsStep(strategy.StrategyStep):
         )
 
     def apply(self):
-        """
-        Swact hosts
-        """
+        """Swact hosts."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -707,9 +675,8 @@ class SwactHostsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event == STRATEGY_EVENT.HOST_SWACT_FAILED:
@@ -784,9 +751,8 @@ class SwactHostsStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the swact hosts step object initialized using the given dictionary
-        """
+        """Returns the swact hosts step object initialized using the dictionary."""
+
         super(SwactHostsStep, self).from_dict(data)
         self._hosts = list()
         self._host_uuids = list()
@@ -813,9 +779,8 @@ class SwactHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the swact hosts step as a dictionary
-        """
+        """Represent the swact hosts step as a dictionary."""
+
         data = super(SwactHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -837,9 +802,7 @@ class SwactHostsStep(strategy.StrategyStep):
 
 
 class SwPatchHostsStep(strategy.StrategyStep):
-    """
-    Software Patch Hosts - Strategy Step
-    """
+    """Software Patch Hosts - Strategy Step."""
 
     def __init__(self, hosts):
         super(SwPatchHostsStep, self).__init__(
@@ -858,9 +821,8 @@ class SwPatchHostsStep(strategy.StrategyStep):
 
     @coroutine
     def _query_hosts_callback(self):
-        """
-        Query Software Patch Hosts Callback
-        """
+        """Query Software Patch Hosts Callback."""
+
         response = yield
         DLOG.debug("Query-Hosts callback response=%s." % response)
 
@@ -903,9 +865,8 @@ class SwPatchHostsStep(strategy.StrategyStep):
 
     @coroutine
     def _sw_patch_hosts_callback(self):
-        """
-        Software Patch Hosts Callback
-        """
+        """Software Patch Hosts Callback."""
+
         response = yield
         DLOG.debug("Software-Update-Hosts callback response=%s." % response)
 
@@ -914,9 +875,8 @@ class SwPatchHostsStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        Software Patch Hosts
-        """
+        """Software Patch Hosts."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -926,9 +886,8 @@ class SwPatchHostsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -942,9 +901,9 @@ class SwPatchHostsStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the software patch hosts step object initialized using the given
-        dictionary
+        """Returns the software patch hosts step object initialized using the given
+
+        dictionary.
         """
         super(SwPatchHostsStep, self).from_dict(data)
         self._hosts = list()
@@ -963,9 +922,8 @@ class SwPatchHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the software patch hosts step as a dictionary
-        """
+        """Represent the software patch hosts step as a dictionary."""
+
         data = super(SwPatchHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -975,9 +933,7 @@ class SwPatchHostsStep(strategy.StrategyStep):
 
 
 class SystemConfigUpdateHostsStep(strategy.StrategyStep):
-    """
-    System Config Update Hosts - Strategy Step
-    """
+    """System Config Update Hosts - Strategy Step."""
 
     def __init__(self, hosts):
         super(SystemConfigUpdateHostsStep, self).__init__(
@@ -995,9 +951,8 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
 
     @coroutine
     def _query_hosts_callback(self):
-        """
-        Query System Config Update Hosts Callback
-        """
+        """Query System Config Update Hosts Callback."""
+
         response = yield
         DLOG.debug("Query-Hosts callback response=%s." % response)
 
@@ -1015,17 +970,15 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        System Config Update Hosts
-        """
+        """System Config Update Hosts."""
+
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
         # Do nothing, wait for the callback to check the unlock request status
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -1048,9 +1001,9 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the system config update hosts step object initialized using
-        the given dictionary
+        """Returns the system config update hosts step object initialized using
+
+        the given dictionary.
         """
         super(SystemConfigUpdateHostsStep, self).from_dict(data)
         self._hosts = list()
@@ -1068,9 +1021,8 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the system config update hosts step as a dictionary
-        """
+        """Represent the system config update hosts step as a dictionary."""
+
         data = super(SystemConfigUpdateHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -1079,9 +1031,7 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
 
 
 class SwDeployPrecheckStep(strategy.StrategyStep):
-    """
-    Software Deploy Precheck - Strategy Step
-    """
+    """Software Deploy Precheck - Strategy Step."""
 
     def __init__(self, release, snapshot=False):
         super(SwDeployPrecheckStep, self).__init__(
@@ -1092,9 +1042,8 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
 
     @coroutine
     def _sw_deploy_precheck_callback(self):
-        """
-        Software deploy precheck callback
-        """
+        """Software deploy precheck callback."""
+
         response = yield
         DLOG.debug("sw-deploy precheck callback response=%s." % response)
 
@@ -1109,16 +1058,16 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying software deploy precheck, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     def apply(self):
-        """
-        Software deploy precheck
-        """
+        """Software deploy precheck."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -1141,18 +1090,17 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
             return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Returns the sw-deploy precheck step object initialized using the given
-        dictionary
+        """Returns the sw-deploy precheck step object initialized using the given
+
+        dictionary.
         """
         super(SwDeployPrecheckStep, self).from_dict(data)
         self._release = data["release"]
         return self
 
     def as_dict(self):
-        """
-        Represent the sw-deploy precheck step as a dictionary
-        """
+        """Represent the sw-deploy precheck step as a dictionary."""
+
         data = super(SwDeployPrecheckStep, self).as_dict()
         data["release"] = self._release
         data["entity_type"] = ""
@@ -1162,7 +1110,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
 
 
 class SwDeployDoNothingStep(strategy.StrategyStep):
-    """Do nothing, be happy"""
+    """Do nothing, be happy."""
 
     def __init__(self, hosts):
         super(SwDeployDoNothingStep, self).__init__(
@@ -1174,16 +1122,15 @@ class SwDeployDoNothingStep(strategy.StrategyStep):
             self._host_names.append(host.name)
 
     def apply(self):
-        """
-        Do nothing
-        """
+        """Do nothing."""
+
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def from_dict(self, data):
-        """
-        Returns the upgrade hosts step object initialized using the given
-        dictionary
+        """Returns the upgrade hosts step object initialized using the given
+
+        dictionary.
         """
         super(SwDeployDoNothingStep, self).from_dict(data)
         self._host_uuids = list()
@@ -1191,9 +1138,8 @@ class SwDeployDoNothingStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the upgrade hosts step as a dictionary
-        """
+        """Represent the upgrade hosts step as a dictionary."""
+
         data = super(SwDeployDoNothingStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -1202,9 +1148,7 @@ class SwDeployDoNothingStep(strategy.StrategyStep):
 
 
 class UpgradeHostsStep(strategy.StrategyStep):
-    """
-    Upgrade Hosts - Strategy Step
-    """
+    """Upgrade Hosts - Strategy Step."""
 
     def __init__(self, hosts):
         super(UpgradeHostsStep, self).__init__(
@@ -1254,9 +1198,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
         return result, msg
 
     def _get_upgrade_callback_inner(self, response):
-        """
-        Get Upgrade Callback
-        """
+        """Get Upgrade Callback."""
 
         if not response["completed"]:
             return False
@@ -1270,7 +1212,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
         missing_hosts = set(self._host_names) - completed_hosts
 
         if len(missing_hosts) - self._unknown_hosts > 0:
-            # TODO(jkraitbe): Allow reason to be updated during STRATEGY_STEP_RESULT.WAIT
+            # TODO(jkraitbe): Allow reason to be updated during
+            # STRATEGY_STEP_RESULT.WAIT
             reason = f"Deploy hosts still in progress, waiting for: {missing_hosts}"
             DLOG.error(reason)
             return False
@@ -1278,7 +1221,6 @@ class UpgradeHostsStep(strategy.StrategyStep):
         # Determine if any hosts failed and why
         failed_hosts = {}
         for v in self._host_names:
-
             fail_reason = None
             if v not in hosts_states:
                 fail_reason = self._failed_hosts.get(
@@ -1308,7 +1250,10 @@ class UpgradeHostsStep(strategy.StrategyStep):
         # # Wait for all hosts to be done transitioning before declaring pass/fail
         if failed_hosts:
             response["failed-hosts"] = failed_hosts
-            reason = f"Deploy hosts failed for some hosts: {json.dumps(failed_hosts, indent=2)}"
+            reason = (
+                f"Deploy hosts failed for some hosts: "
+                f"{json.dumps(failed_hosts, indent=2)}"
+            )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
 
             # Check if retry limit exceeded
@@ -1317,7 +1262,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
                 self._retry_sleep = time.perf_counter() + self._retry_delay
                 DLOG.notice(
                     "Handle Host-Upgrade failure, "
-                    f"retry={self._retry_count+1} queued, "
+                    f"retry={self._retry_count + 1} queued, "
                     f"delay>={self._retry_delay} seconds"
                 )
                 self.strategy.save()
@@ -1335,9 +1280,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
 
     @coroutine
     def _get_upgrade_callback(self):
-        """
-        Get Upgrade Callback
-        """
+        """Get Upgrade Callback."""
 
         response = yield
         DLOG.debug("Query-Upgrade callback response=%s." % response)
@@ -1348,9 +1291,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
             self._query_inprogress = False
 
     def apply(self):
-        """
-        Upgrade all hosts
-        """
+        """Upgrade all hosts."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -1367,18 +1309,16 @@ class UpgradeHostsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def _set_skiploop_val(self):
-        """
-        Skip loop value to avoid infinite loop
-        """
+        """Skip loop value to avoid infinite loop."""
+
         DLOG.warn("VIM restart detected. Set value to disable infinite loop")
         # Value to be set to False to avoid infinite loop
         self._skip_loop = False
         return
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import directors
         from nfv_vim import nfvi
 
@@ -1401,7 +1341,10 @@ class UpgradeHostsStep(strategy.StrategyStep):
         if event == STRATEGY_EVENT.HOST_UPGRADE_FAILED:
             host = event_data["host"]
             if host and host.name in self._host_names:
-                error = f"Failed software deploy host {host.name}: {event_data['error-message']}"
+                error = (
+                    f"Failed software deploy host {host.name}: "
+                    f"{event_data['error-message']}"
+                )
                 self._failed_hosts[host.name] = error
                 DLOG.error(error)
             else:
@@ -1454,9 +1397,9 @@ class UpgradeHostsStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the upgrade hosts step object initialized using the given
-        dictionary
+        """Returns the upgrade hosts step object initialized using the given
+
+        dictionary.
         """
         super(UpgradeHostsStep, self).from_dict(data)
         self._host_uuids = list()
@@ -1476,9 +1419,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the upgrade hosts step as a dictionary
-        """
+        """Represent the upgrade hosts step as a dictionary."""
+
         data = super(UpgradeHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -1495,9 +1437,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
 
 
 class UpgradeStartStep(strategy.StrategyStep):
-    """
-    Upgrade Start - Strategy Step
-    """
+    """Upgrade Start - Strategy Step."""
 
     def __init__(self, release, snapshot=False, timeout=None):
         super(UpgradeStartStep, self).__init__(
@@ -1516,9 +1456,8 @@ class UpgradeStartStep(strategy.StrategyStep):
 
     @coroutine
     def _start_upgrade_callback(self):
-        """
-        Start Upgrade Callback
-        """
+        """Start Upgrade Callback."""
+
         response = yield
         DLOG.debug("Start-Upgrade callback response=%s." % response)
 
@@ -1526,7 +1465,8 @@ class UpgradeStartStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying software deploy start, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
@@ -1534,9 +1474,8 @@ class UpgradeStartStep(strategy.StrategyStep):
 
     @coroutine
     def _handle_start_upgrade_callback(self):
-        """
-        Handle Start Upgrade Callback
-        """
+        """Handle Start Upgrade Callback."""
+
         response = yield
         DLOG.debug("Handle Start-Upgrade callback response=%s." % response)
 
@@ -1557,7 +1496,8 @@ class UpgradeStartStep(strategy.StrategyStep):
         elif self.strategy.nfvi_upgrade.is_start_failed:
             reason = (
                 "Failed during software deploy start, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
@@ -1566,7 +1506,8 @@ class UpgradeStartStep(strategy.StrategyStep):
         elif not self.strategy.nfvi_upgrade.is_starting:
             reason = (
                 "Unknown error while doing software deploy start, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
@@ -1576,9 +1517,8 @@ class UpgradeStartStep(strategy.StrategyStep):
             DLOG.debug("Handle Start-Upgrade callback, deploy start in progress...")
 
     def apply(self):
-        """
-        Upgrade Start
-        """
+        """Upgrade Start."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -1604,9 +1544,8 @@ class UpgradeStartStep(strategy.StrategyStep):
         return result, reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -1622,9 +1561,9 @@ class UpgradeStartStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the upgrade start step object initialized using the given
-        dictionary
+        """Returns the upgrade start step object initialized using the given
+
+        dictionary.
         """
         super(UpgradeStartStep, self).from_dict(data)
         self._release = data["release"]
@@ -1632,9 +1571,8 @@ class UpgradeStartStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the upgrade start step as a dictionary
-        """
+        """Represent the upgrade start step as a dictionary."""
+
         data = super(UpgradeStartStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -1644,9 +1582,7 @@ class UpgradeStartStep(strategy.StrategyStep):
 
 
 class UpgradeActivateStep(strategy.StrategyStep):
-    """
-    Upgrade Activate - Strategy Step
-    """
+    """Upgrade Activate - Strategy Step."""
 
     def __init__(self, release):
         super(UpgradeActivateStep, self).__init__(
@@ -1689,9 +1625,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
     @coroutine
     def _activate_upgrade_callback(self):
-        """
-        Activate Upgrade Callback
-        """
+        """Activate Upgrade Callback."""
 
         response = yield
         DLOG.debug("Activate-Upgrade callback response=%s." % response)
@@ -1700,7 +1634,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying software deploy activate, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
@@ -1708,9 +1643,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
     @coroutine
     def _handle_activate_upgrade_callback(self):
-        """
-        Handle Activate Upgrade Callback
-        """
+        """Handle Activate Upgrade Callback."""
 
         response = yield
         DLOG.debug("Handle Activate-Upgrade callback response=%s." % response)
@@ -1733,13 +1666,16 @@ class UpgradeActivateStep(strategy.StrategyStep):
         elif self.strategy.nfvi_upgrade.is_activate_failed:
             reason = (
                 f"Failed software deploy activate, retries={self._retry_count}, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
         elif not self.strategy.nfvi_upgrade.is_activating:
             reason = (
-                f"Unknown error while doing software deploy activate, retries={self._retry_count}, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                f"Unknown error while doing software deploy activate, "
+                f"retries={self._retry_count}, "
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
         else:
@@ -1765,7 +1701,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
             self._retry_sleep = time.perf_counter() + _sleep_duration
             DLOG.notice(
                 "Handle Activate-Upgrade failure, "
-                f"retry={self._retry_count+1} queued, "
+                f"retry={self._retry_count + 1} queued, "
                 f"delay>={_sleep_duration} seconds"
             )
             self.strategy.save()
@@ -1778,9 +1714,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
         self.stage.step_complete(result, reason)
 
     def apply(self):
-        """
-        Upgrade Activate
-        """
+        """Upgrade Activate."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -1799,9 +1734,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
         return result, reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -1825,9 +1759,9 @@ class UpgradeActivateStep(strategy.StrategyStep):
         return True
 
     def from_dict(self, data):
-        """
-        Returns the upgrade activate step object initialized using the given
-        dictionary
+        """Returns the upgrade activate step object initialized using the given
+
+        dictionary.
         """
         super(UpgradeActivateStep, self).from_dict(data)
         self._release = data["release"]
@@ -1840,9 +1774,8 @@ class UpgradeActivateStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the upgrade activate step as a dictionary
-        """
+        """Represent the upgrade activate step as a dictionary."""
+
         data = super(UpgradeActivateStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -1857,9 +1790,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
 
 class UpgradeCompleteStep(strategy.StrategyStep):
-    """
-    Upgrade Complete - Strategy Step
-    """
+    """Upgrade Complete - Strategy Step."""
 
     def __init__(self, release):
         super(UpgradeCompleteStep, self).__init__(
@@ -1870,9 +1801,8 @@ class UpgradeCompleteStep(strategy.StrategyStep):
 
     @coroutine
     def _complete_upgrade_callback(self):
-        """
-        Complete Upgrade Callback
-        """
+        """Complete Upgrade Callback."""
+
         response = yield
         DLOG.debug("Complete-Upgrade callback response=%s." % response)
 
@@ -1890,16 +1820,16 @@ class UpgradeCompleteStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying software deploy complete, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             self.phase.result_complete_response(response)
 
         self.stage.step_complete(result, reason)
 
     def apply(self):
-        """
-        Upgrade Complete
-        """
+        """Upgrade Complete."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -1907,18 +1837,17 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Returns the upgrade complete step object initialized using the given
-        dictionary
+        """Returns the upgrade complete step object initialized using the given
+
+        dictionary.
         """
         super(UpgradeCompleteStep, self).from_dict(data)
         self._release = data["release"]
         return self
 
     def as_dict(self):
-        """
-        Represent the upgrade complete step as a dictionary
-        """
+        """Represent the upgrade complete step as a dictionary."""
+
         data = super(UpgradeCompleteStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -1928,9 +1857,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
 
 
 class SwDeployDeleteStep(strategy.StrategyStep):
-    """
-    Upgrade Complete - Strategy Step
-    """
+    """Upgrade Complete - Strategy Step."""
 
     def __init__(self, release):
         super(SwDeployDeleteStep, self).__init__(
@@ -1941,9 +1868,8 @@ class SwDeployDeleteStep(strategy.StrategyStep):
 
     @coroutine
     def _deploy_delete_callback(self):
-        """
-        Deploy Delete Callback
-        """
+        """Deploy Delete Callback."""
+
         response = yield
         DLOG.debug("Deploy-delete callback response=%s." % response)
 
@@ -1966,16 +1892,16 @@ class SwDeployDeleteStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying software deploy delete, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             self.phase.result_complete_response(response)
 
         self.stage.step_complete(result, reason)
 
     def apply(self):
-        """
-        Deploy Delete
-        """
+        """Deploy Delete."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -1984,18 +1910,17 @@ class SwDeployDeleteStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Returns the deploy delete step object initialized using the given
-        dictionary
+        """Returns the deploy delete step object initialized using the given
+
+        dictionary.
         """
         super(SwDeployDeleteStep, self).from_dict(data)
         self._release = data["release"]
         return self
 
     def as_dict(self):
-        """
-        Represent the deploy delete step as a dictionary
-        """
+        """Represent the deploy delete step as a dictionary."""
+
         data = super(SwDeployDeleteStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -2005,9 +1930,7 @@ class SwDeployDeleteStep(strategy.StrategyStep):
 
 
 class SwDeployAbortStep(strategy.StrategyStep):
-    """
-    Software Deploy Abort - Strategy Step
-    """
+    """Software Deploy Abort - Strategy Step."""
 
     def __init__(self):
         super(SwDeployAbortStep, self).__init__(
@@ -2016,9 +1939,7 @@ class SwDeployAbortStep(strategy.StrategyStep):
 
     @coroutine
     def _sw_deploy_abort_callback(self):
-        """
-        Handle Activate Upgrade Callback
-        """
+        """Handle Activate Upgrade Callback."""
 
         response = yield
         DLOG.debug("Handle SW-Deploy-Abort callback: response=%s." % response)
@@ -2033,16 +1954,16 @@ class SwDeployAbortStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying software deploy abort, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     def apply(self):
-        """
-        Upgrade Activate
-        """
+        """Upgrade Activate."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -2057,7 +1978,10 @@ class SwDeployAbortStep(strategy.StrategyStep):
             self.strategy.nfvi_upgrade.is_start_done
             or self.strategy.nfvi_upgrade.is_start_failed
         ):
-            reason = f"Software deploy abort not required from {self.strategy.nfvi_upgrade.deploy_state}"
+            reason = (
+                f"Software deploy abort not required from "
+                f"{self.strategy.nfvi_upgrade.deploy_state}"
+            )
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             DLOG.info(reason)
             return result, reason
@@ -2066,17 +1990,16 @@ class SwDeployAbortStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Returns the upgrade activate step object initialized using the given
-        dictionary
+        """Returns the upgrade activate step object initialized using the given
+
+        dictionary.
         """
         super(SwDeployAbortStep, self).from_dict(data)
         return self
 
     def as_dict(self):
-        """
-        Represent the upgrade activate step as a dictionary
-        """
+        """Represent the upgrade activate step as a dictionary."""
+
         data = super(SwDeployAbortStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -2085,9 +2008,7 @@ class SwDeployAbortStep(strategy.StrategyStep):
 
 
 class SwDeployActivateRollbackStep(strategy.StrategyStep):
-    """
-    Software Deploy Activate-Rollback - Strategy Step
-    """
+    """Software Deploy Activate-Rollback - Strategy Step."""
 
     def __init__(self):
         super(SwDeployActivateRollbackStep, self).__init__(
@@ -2098,9 +2019,7 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
 
     @coroutine
     def _activate_rollback_callback(self):
-        """
-        Activate-Rollback Callback
-        """
+        """Activate-Rollback Callback."""
 
         response = yield
         DLOG.debug("Activate-Rollback callback response=%s." % response)
@@ -2109,7 +2028,8 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying software deploy activate-rollback, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
@@ -2117,9 +2037,7 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
 
     @coroutine
     def _handle_activate_rollback_callback(self):
-        """
-        Handle Activate Upgrade Callback
-        """
+        """Handle Activate Upgrade Callback."""
 
         response = yield
         DLOG.debug("Handle Activate-Rollback callback response=%s." % response)
@@ -2141,7 +2059,8 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
         elif self.strategy.nfvi_upgrade.is_activate_rollback_failed:
             reason = (
                 "Failed software deploy activate-rollback, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
@@ -2150,7 +2069,8 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
         elif not self.strategy.nfvi_upgrade.is_activate_rollback:
             reason = (
                 "Unknown error while doing software deploy activate-rollback, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information."
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information."
             )
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.phase.result_complete_response(response)
@@ -2162,9 +2082,8 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
             )
 
     def apply(self):
-        """
-        Upgrade Activate
-        """
+        """Upgrade Activate."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -2189,9 +2108,8 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
         return result, reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -2205,18 +2123,17 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the activate-rollback step object initialized using the given
-        dictionary
+        """Returns the activate-rollback step object initialized using the given
+
+        dictionary.
         """
         super(SwDeployActivateRollbackStep, self).from_dict(data)
         self._query_inprogress = False
         return self
 
     def as_dict(self):
-        """
-        Represent the activate-rollback step as a dictionary
-        """
+        """Represent the activate-rollback step as a dictionary."""
+
         data = super(SwDeployActivateRollbackStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -2225,9 +2142,7 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
 
 
 class MigrateInstancesFromHostStep(strategy.StrategyStep):
-    """
-    Migrate Instances From Host - Strategy Step
-    """
+    """Migrate Instances From Host - Strategy Step."""
 
     def __init__(self, hosts, instances):
         super(MigrateInstancesFromHostStep, self).__init__(
@@ -2247,9 +2162,8 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
             self._instance_host_names[instance.uuid] = instance.host_name
 
     def _all_instances_migrated(self):
-        """
-        Returns true if all instances have migrated from the source hosts
-        """
+        """Returns true if all instances have migrated from the source hosts."""
+
         instance_table = tables.tables_get_instance_table()
         for host_name in self._host_names:
             if instance_table.exist_on_host(host_name):
@@ -2258,9 +2172,8 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         return True, ""
 
     def apply(self):
-        """
-        Migrate all instances
-        """
+        """Migrate all instances."""
+
         from nfv_vim import directors
 
         if self._instance_names:
@@ -2313,9 +2226,8 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Instance events
-        """
+        """Handle Instance events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [
@@ -2343,10 +2255,11 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
+        """Returns the migrate instances from hosts step object initialized using the
+
+        dictionary.
         """
-        Returns the migrate instances from hosts step object initialized using the given
-        dictionary
-        """
+
         super(MigrateInstancesFromHostStep, self).from_dict(data)
         self._hosts = list()
         self._host_names = data["host_names"]
@@ -2375,9 +2288,8 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the migrate instances from hosts step as a dictionary
-        """
+        """Represent the migrate instances from hosts step as a dictionary."""
+
         data = super(MigrateInstancesFromHostStep, self).as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
@@ -2388,9 +2300,7 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
 
 
 class MigrateInstancesStep(strategy.StrategyStep):
-    """
-    Migrate Instances - Strategy Step
-    """
+    """Migrate Instances - Strategy Step."""
 
     def __init__(self, instances):
         super(MigrateInstancesStep, self).__init__(
@@ -2406,9 +2316,8 @@ class MigrateInstancesStep(strategy.StrategyStep):
             self._instance_host_names[instance.uuid] = instance.host_name
 
     def _all_instances_migrated(self):
-        """
-        Returns true if all instances have migrated from the source hosts
-        """
+        """Returns true if all instances have migrated from the source hosts."""
+
         source_host_names = []
         for host_name in list(self._instance_host_names.values()):
             if host_name not in source_host_names:
@@ -2422,9 +2331,8 @@ class MigrateInstancesStep(strategy.StrategyStep):
         return True, ""
 
     def apply(self):
-        """
-        Migrate all instances
-        """
+        """Migrate all instances."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -2462,9 +2370,8 @@ class MigrateInstancesStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Instance events
-        """
+        """Handle Instance events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [
@@ -2491,9 +2398,9 @@ class MigrateInstancesStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the migrate instances step object initialized using the given
-        dictionary
+        """Returns the migrate instances step object initialized using the given
+
+        dictionary.
         """
         super(MigrateInstancesStep, self).from_dict(data)
         self._instance_uuids = data["entity_uuids"]
@@ -2515,9 +2422,8 @@ class MigrateInstancesStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the migrate instances step as a dictionary
-        """
+        """Represent the migrate instances step as a dictionary."""
+
         data = super(MigrateInstancesStep, self).as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
@@ -2527,9 +2433,7 @@ class MigrateInstancesStep(strategy.StrategyStep):
 
 
 class StartInstancesStep(strategy.StrategyStep):
-    """
-    Start Instances - Strategy Step
-    """
+    """Start Instances - Strategy Step."""
 
     def __init__(self, instances):
         super(StartInstancesStep, self).__init__(
@@ -2543,9 +2447,8 @@ class StartInstancesStep(strategy.StrategyStep):
             self._instance_uuids.append(instance.uuid)
 
     def _total_instances_unlocked_enabled(self):
-        """
-        Returns the number of instances that are unlocked and enabled
-        """
+        """Returns the number of instances that are unlocked and enabled."""
+
         total_instances_enabled = 0
         instance_table = tables.tables_get_instance_table()
         for instance_uuid in self._instance_uuids:
@@ -2559,9 +2462,8 @@ class StartInstancesStep(strategy.StrategyStep):
         return total_instances_enabled
 
     def apply(self):
-        """
-        Start all instances
-        """
+        """Start all instances."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -2580,9 +2482,8 @@ class StartInstancesStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Instance events
-        """
+        """Handle Instance events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [
@@ -2604,9 +2505,9 @@ class StartInstancesStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the start instances step object initialized using the given
-        dictionary
+        """Returns the start instances step object initialized using the given
+
+        dictionary.
         """
         super(StartInstancesStep, self).from_dict(data)
         self._instance_uuids = data["entity_uuids"]
@@ -2622,9 +2523,8 @@ class StartInstancesStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the start instances step as a dictionary
-        """
+        """Represent the start instances step as a dictionary."""
+
         data = super(StartInstancesStep, self).as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
@@ -2633,9 +2533,7 @@ class StartInstancesStep(strategy.StrategyStep):
 
 
 class StopInstancesStep(strategy.StrategyStep):
-    """
-    Stop Instances - Strategy Step
-    """
+    """Stop Instances - Strategy Step."""
 
     def __init__(self, instances):
         super(StopInstancesStep, self).__init__(
@@ -2651,15 +2549,13 @@ class StopInstancesStep(strategy.StrategyStep):
             self._instance_host_names[instance.uuid] = instance.host_name
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return [StartInstancesStep(self._instances)]
 
     def _total_instances_locked_disabled(self):
-        """
-        Returns the number of instances that are locked and disabled
-        """
+        """Returns the number of instances that are locked and disabled."""
+
         total_instances_locked = 0
         instance_table = tables.tables_get_instance_table()
         for instance_uuid in self._instance_uuids:
@@ -2673,9 +2569,8 @@ class StopInstancesStep(strategy.StrategyStep):
         return total_instances_locked
 
     def apply(self):
-        """
-        Stop all instances
-        """
+        """Stop all instances."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -2710,9 +2605,8 @@ class StopInstancesStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Instance events
-        """
+        """Handle Instance events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [
@@ -2734,9 +2628,9 @@ class StopInstancesStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the stop instances step object initialized using the given
-        dictionary
+        """Returns the stop instances step object initialized using the given
+
+        dictionary.
         """
         super(StopInstancesStep, self).from_dict(data)
         self._instance_uuids = data["entity_uuids"]
@@ -2759,9 +2653,8 @@ class StopInstancesStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the stop instances step as a dictionary
-        """
+        """Represent the stop instances step as a dictionary."""
+
         data = super(StopInstancesStep, self).as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
@@ -2771,9 +2664,7 @@ class StopInstancesStep(strategy.StrategyStep):
 
 
 class SystemStabilizeStep(strategy.StrategyStep):
-    """
-    System Stabilize - Strategy Step
-    """
+    """System Stabilize - Strategy Step."""
 
     def __init__(self, timeout_in_secs=60):
         super(SystemStabilizeStep, self).__init__(
@@ -2781,22 +2672,19 @@ class SystemStabilizeStep(strategy.StrategyStep):
         )
 
     def timeout(self):
-        """
-        Timeout is expected, so override to pass
-        """
+        """Timeout is expected, so override to pass."""
+
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def apply(self):
-        """
-        Wait for a period of time
-        """
+        """Wait for a period of time."""
+
         DLOG.info("Step (%s) apply." % self._name)
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host and Instance events
-        """
+        """Handle Host and Instance events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if STRATEGY_EVENT.HOST_STATE_CHANGED == event:
@@ -2818,9 +2706,8 @@ class SystemStabilizeStep(strategy.StrategyStep):
         return False
 
     def as_dict(self):
-        """
-        Represent the system stabilize step as a dictionary
-        """
+        """Represent the system stabilize step as a dictionary."""
+
         data = super(SystemStabilizeStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -2829,9 +2716,7 @@ class SystemStabilizeStep(strategy.StrategyStep):
 
 
 class QueryAlarmsStep(strategy.StrategyStep):
-    """
-    Query Alarms - Strategy Step
-    """
+    """Query Alarms - Strategy Step."""
 
     def __init__(
         self, fail_on_alarms=False, ignore_alarms=None, ignore_alarms_conditional=None
@@ -2851,9 +2736,8 @@ class QueryAlarmsStep(strategy.StrategyStep):
 
     @coroutine
     def _query_alarms_callback(self, fm_service):
-        """
-        Query Alarms Callback
-        """
+        """Query Alarms Callback."""
+
         response = yield
 
         DLOG.debug("Query-Alarms callback response=%s." % response)
@@ -2900,10 +2784,10 @@ class QueryAlarmsStep(strategy.StrategyStep):
                     if self._fail_on_alarms
                     else strategy.STRATEGY_STEP_RESULT.SUCCESS
                 )
-                reason = (
-                    f"Unignored {fm_service} alarms are present: "
-                    f"{json.dumps([v.as_dict() for v in self.strategy.nfvi_alarms], indent=2)}"
+                alarms = json.dumps(
+                    [v.as_dict() for v in self.strategy.nfvi_alarms], indent=2
                 )
+                reason = f"Unignored {fm_service} alarms are present: {alarms}"
             else:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 reason = "No unignored alarms present"
@@ -2914,9 +2798,8 @@ class QueryAlarmsStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        Query Alarms
-        """
+        """Query Alarms."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -2927,9 +2810,9 @@ class QueryAlarmsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Returns the query alarms step object initialized using the given
-        dictionary
+        """Returns the query alarms step object initialized using the given
+
+        dictionary.
         """
         super(QueryAlarmsStep, self).from_dict(data)
         self._fail_on_alarms = data["fail_on_alarms"]
@@ -2938,9 +2821,8 @@ class QueryAlarmsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the query alarms step as a dictionary
-        """
+        """Represent the query alarms step as a dictionary."""
+
         data = super(QueryAlarmsStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -2952,9 +2834,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
 
 
 class WaitDataSyncStep(strategy.StrategyStep):
-    """
-    Alarm Wait - Strategy Step
-    """
+    """Alarm Wait - Strategy Step."""
 
     def __init__(self, timeout_in_secs=300, ignore_alarms=None):
         super(WaitDataSyncStep, self).__init__(
@@ -2968,9 +2848,8 @@ class WaitDataSyncStep(strategy.StrategyStep):
 
     @coroutine
     def _query_alarms_callback(self):
-        """
-        Query Alarms Callback
-        """
+        """Query Alarms Callback."""
+
         response = yield
         DLOG.debug("Query-Alarms callback response=%s." % response)
 
@@ -3021,16 +2900,14 @@ class WaitDataSyncStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        Alarm Wait
-        """
+        """Alarm Wait."""
+
         DLOG.info("Step (%s) apply." % self._name)
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -3050,9 +2927,9 @@ class WaitDataSyncStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the alarm wait step object initialized using the given
-        dictionary
+        """Returns the alarm wait step object initialized using the given
+
+        dictionary.
         """
         super(WaitDataSyncStep, self).from_dict(data)
         self._ignore_alarms = data["ignore_alarms"]
@@ -3061,9 +2938,8 @@ class WaitDataSyncStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the alarm wait step as a dictionary
-        """
+        """Represent the alarm wait step as a dictionary."""
+
         data = super(WaitDataSyncStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -3073,9 +2949,7 @@ class WaitDataSyncStep(strategy.StrategyStep):
 
 
 class WaitAlarmsClearStep(strategy.StrategyStep):
-    """
-    Alarm Wait - Strategy Step
-    """
+    """Alarm Wait - Strategy Step."""
 
     def __init__(
         self,
@@ -3099,9 +2973,8 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
 
     @coroutine
     def _query_alarms_callback(self):
-        """
-        Query Alarms Callback
-        """
+        """Query Alarms Callback."""
+
         from datetime import datetime
 
         response = yield
@@ -3149,7 +3022,8 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
                             time_in_sec = (
                                 current_time - alarm_timestamp_obj
                             ).total_seconds()
-                            # Ignoring stale alarm if present after specified amount of time
+                            # Ignoring stale alarm if present after
+                            # specified amount of time
                             if self._ignore_alarms_conditional[
                                 nfvi_alarm.alarm_id
                             ] < int(time_in_sec):
@@ -3191,16 +3065,14 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        Alarm Wait
-        """
+        """Alarm Wait."""
+
         DLOG.info("Step (%s) apply." % self._name)
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -3223,9 +3095,9 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the alarm wait step object initialized using the given
-        dictionary
+        """Returns the alarm wait step object initialized using the given
+
+        dictionary.
         """
         super(WaitAlarmsClearStep, self).from_dict(data)
         self._first_query_delay_in_secs = data["first_query_delay_in_secs"]
@@ -3236,9 +3108,8 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the alarm wait step as a dictionary
-        """
+        """Represent the alarm wait step as a dictionary."""
+
         data = super(WaitAlarmsClearStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -3249,9 +3120,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         return data
 
     def timeout(self):
-        """
-        Strategy Step Timeout Override
-        """
+        """Strategy Step Timeout Override."""
 
         result, _ = super(WaitAlarmsClearStep, self).timeout()
         reason = (
@@ -3262,9 +3131,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
 
 
 class QuerySwPatchesStep(strategy.StrategyStep):
-    """
-    Query Software Patches - Strategy Step
-    """
+    """Query Software Patches - Strategy Step."""
 
     def __init__(self):
         super(QuerySwPatchesStep, self).__init__(
@@ -3273,9 +3140,8 @@ class QuerySwPatchesStep(strategy.StrategyStep):
 
     @coroutine
     def _query_sw_patches_callback(self):
-        """
-        Query Software Patches Callback
-        """
+        """Query Software Patches Callback."""
+
         response = yield
         DLOG.debug("Query-Sw-Updates callback response=%s." % response)
 
@@ -3290,9 +3156,8 @@ class QuerySwPatchesStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        Query Software Patches
-        """
+        """Query Software Patches."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -3300,9 +3165,8 @@ class QuerySwPatchesStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def as_dict(self):
-        """
-        Represent the query software update step as a dictionary
-        """
+        """Represent the query software update step as a dictionary."""
+
         data = super(QuerySwPatchesStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -3311,9 +3175,7 @@ class QuerySwPatchesStep(strategy.StrategyStep):
 
 
 class QuerySwPatchHostsStep(strategy.StrategyStep):
-    """
-    Query Software Patch Hosts - Strategy Step
-    """
+    """Query Software Patch Hosts - Strategy Step."""
 
     def __init__(self):
         super(QuerySwPatchHostsStep, self).__init__(
@@ -3322,9 +3184,8 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
 
     @coroutine
     def _query_hosts_callback(self):
-        """
-        Query Software Patch Hosts Callback
-        """
+        """Query Software Patch Hosts Callback."""
+
         response = yield
         DLOG.debug("Query-Hosts callback response=%s." % response)
 
@@ -3339,9 +3200,8 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        Query Software Patch Hosts
-        """
+        """Query Software Patch Hosts."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -3349,9 +3209,8 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def as_dict(self):
-        """
-        Represent the query software patches hosts step as a dictionary
-        """
+        """Represent the query software patches hosts step as a dictionary."""
+
         data = super(QuerySwPatchHostsStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -3360,9 +3219,7 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
 
 
 class QuerySystemConfigUpdateHostsStep(AbstractStrategyStep):
-    """
-    Query System Config Update Hosts - Strategy Step
-    """
+    """Query System Config Update Hosts - Strategy Step."""
 
     def __init__(self):
         super(QuerySystemConfigUpdateHostsStep, self).__init__(
@@ -3371,9 +3228,8 @@ class QuerySystemConfigUpdateHostsStep(AbstractStrategyStep):
 
     @coroutine
     def _query_hosts_callback(self):
-        """
-        Query System Config Update Hosts Callback
-        """
+        """Query System Config Update Hosts Callback."""
+
         response = yield
         DLOG.debug("Query-Hosts callback response=%s." % response)
 
@@ -3388,9 +3244,8 @@ class QuerySystemConfigUpdateHostsStep(AbstractStrategyStep):
             self.stage.step_complete(result, "")
 
     def apply(self):
-        """
-        Query System Config Update Hosts
-        """
+        """Query System Config Update Hosts."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -3399,9 +3254,7 @@ class QuerySystemConfigUpdateHostsStep(AbstractStrategyStep):
 
 
 class QueryFwUpdateHostStep(strategy.StrategyStep):
-    """
-    Query Host
-    """
+    """Query Host."""
 
     # This step queries system inventory for the host in self._host_names
     # If the host's 'device_image_update' field shows 'pending' then its
@@ -3419,9 +3272,7 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
 
     @coroutine
     def _get_host_callback(self):
-        """
-        Query Host callback
-        """
+        """Query Host callback."""
 
         response = yield
 
@@ -3479,9 +3330,8 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
             self.stage.step_complete(result, "firmware update query failed")
 
     def apply(self):
-        """
-        Query Host Apply
-        """
+        """Query Host Apply."""
+
         from nfv_vim import nfvi
 
         DLOG.info("%s %s step apply" % (self._host_names[0], self._name))
@@ -3493,18 +3343,16 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Load the firmware update host device list step
-        """
+        """Load the firmware update host device list step."""
+
         super(QueryFwUpdateHostStep, self).from_dict(data)
         self._host_names = data["entity_names"]
         self._host_uuids = data["entity_uuids"]
         return self
 
     def as_dict(self):
-        """
-        Represent the object as a dictionary for the strategy
-        """
+        """Represent the object as a dictionary for the strategy."""
+
         data = super(QueryFwUpdateHostStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = self._host_names
@@ -3513,9 +3361,7 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
 
 
 class FwUpdateHostsStep(strategy.StrategyStep):
-    """
-    Firmware Update Hosts - Strategy Step
-    """
+    """Firmware Update Hosts - Strategy Step."""
 
     # This step starts the firmware update process for the passed in hosts
     def __init__(self, hosts):
@@ -3536,9 +3382,8 @@ class FwUpdateHostsStep(strategy.StrategyStep):
 
     @coroutine
     def _get_host_callback(self):
-        """
-        Query Host callback used for monitoring update process
-        """
+        """Query Host callback used for monitoring update process."""
+
         response = yield
         DLOG.debug("Get-Host callback response=%s." % response)
         try:
@@ -3557,8 +3402,8 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                         ):
                             if self._host_completed[hostname][0] is False:
                                 DLOG.warn(
-                                    "%s firmware update status went pending during update"
-                                    % hostname
+                                    "%s firmware update status went pending during "
+                                    "update" % hostname
                                 )
                                 failed_msg = (
                                     hostname + " firmware update failed ; needs retry"
@@ -3643,9 +3488,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         self.stage.step_complete(result, fail_msg)
 
     def _check_step_complete(self):
-        """
-        Check for firmware upgrade step complete
-        """
+        """Check for firmware upgrade step complete."""
 
         failed_hosts = ""
         done = True
@@ -3667,9 +3510,8 @@ class FwUpdateHostsStep(strategy.StrategyStep):
                 self.stage.step_complete(result, failed_msg)
 
     def apply(self):
-        """
-        Firmware Update Hosts Apply
-        """
+        """Firmware Update Hosts Apply."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -3690,9 +3532,8 @@ class FwUpdateHostsStep(strategy.StrategyStep):
             return strategy.STRATEGY_STEP_RESULT.FAILED, reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Firmware Image Update events
-        """
+        """Handle Firmware Image Update events."""
+
         from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -3736,9 +3577,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         return False
 
     def abort(self):
-        """
-        Returns the abort step with applicable host list
-        """
+        """Returns the abort step with applicable host list."""
 
         # abort all hosts that are not in the completed state
         hosts = list()
@@ -3748,9 +3587,9 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         return [FwUpdateAbortHostsStep(hosts)]
 
     def from_dict(self, data):
-        """
-        Returns the firmware update hosts step object
-        initialized using the given dictionary
+        """Returns the firmware update hosts step object
+
+        initialized using the given dictionary.
         """
         super(FwUpdateHostsStep, self).from_dict(data)
         self._hosts = list()
@@ -3770,9 +3609,8 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the firmware update hosts step as a dictionary
-        """
+        """Represent the firmware update hosts step as a dictionary."""
+
         data = super(FwUpdateHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -3782,9 +3620,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
 
 
 class FwUpdateAbortHostsStep(strategy.StrategyStep):
-    """
-    Firmware Update Abort Hosts Step
-    """
+    """Firmware Update Abort Hosts Step."""
 
     def __init__(self, hosts):
         super(FwUpdateAbortHostsStep, self).__init__(
@@ -3804,9 +3640,8 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
             self._host_completed[host.name] = (False, False, "")
 
     def apply(self):
-        """
-        Monitor Firmware Update Abort Hosts Apply
-        """
+        """Monitor Firmware Update Abort Hosts Apply."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
@@ -3821,9 +3656,8 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Firmware Image Update Abort events
-        """
+        """Handle Firmware Image Update Abort events."""
+
         # from nfv_vim import nfvi
 
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -3845,9 +3679,8 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Load the firmware update abort hosts step object
-        """
+        """Load the firmware update abort hosts step object."""
+
         super(FwUpdateAbortHostsStep, self).from_dict(data)
         self._hosts = list()
         self._host_uuids = list()
@@ -3864,9 +3697,8 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Save the firmware update abort hosts step as a dictionary
-        """
+        """Save the firmware update abort hosts step as a dictionary."""
+
         data = super(FwUpdateAbortHostsStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -3876,9 +3708,7 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
 
 
 class QueryUpgradeStep(strategy.StrategyStep):
-    """
-    Query Upgrade - Strategy Step
-    """
+    """Query Upgrade - Strategy Step."""
 
     def __init__(self, release):
         super(QueryUpgradeStep, self).__init__(
@@ -3889,9 +3719,7 @@ class QueryUpgradeStep(strategy.StrategyStep):
 
     @coroutine
     def _get_upgrade_callback(self):
-        """
-        Get Upgrade Callback
-        """
+        """Get Upgrade Callback."""
 
         response = yield
         DLOG.debug("Query-Upgrade callback response=%s." % response)
@@ -3907,15 +3735,15 @@ class QueryUpgradeStep(strategy.StrategyStep):
             reason = response.get(
                 "error-message",
                 "Unknown error while trying to query the software deployment, "
-                "check /var/log/nfv-vim.log or /var/log/software.log for more information.",
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
             )
             self.phase.result_complete_response(response)
             self.stage.step_complete(result, reason)
 
     def apply(self):
-        """
-        Query Software Upgrade
-        """
+        """Query Software Upgrade."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -3923,9 +3751,8 @@ class QueryUpgradeStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def as_dict(self):
-        """
-        Represent the query upgrade step as a dictionary
-        """
+        """Represent the query upgrade step as a dictionary."""
+
         data = super(QueryUpgradeStep, self).as_dict()
         data["entity_type"] = ""
         data["entity_names"] = list()
@@ -3935,9 +3762,7 @@ class QueryUpgradeStep(strategy.StrategyStep):
 
 
 class DisableHostServicesStep(strategy.StrategyStep):
-    """
-    Disable Host Services - Strategy Step
-    """
+    """Disable Host Services - Strategy Step."""
 
     def __init__(self, hosts, service):
         super(DisableHostServicesStep, self).__init__(
@@ -3952,15 +3777,13 @@ class DisableHostServicesStep(strategy.StrategyStep):
             self._host_uuids.append(host.uuid)
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return [EnableHostServicesStep(self._hosts, self._service)]
 
     def _total_hosts_services_disabled(self):
-        """
-        Returns the number of hosts with services disabled
-        """
+        """Returns the number of hosts with services disabled."""
+
         total_hosts_services_disabled = 0
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -3976,9 +3799,8 @@ class DisableHostServicesStep(strategy.StrategyStep):
         return total_hosts_services_disabled
 
     def apply(self):
-        """
-        Disable host services on specified hosts
-        """
+        """Disable host services on specified hosts."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -3995,9 +3817,8 @@ class DisableHostServicesStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [STRATEGY_EVENT.HOST_STATE_CHANGED, STRATEGY_EVENT.HOST_AUDIT]:
@@ -4023,9 +3844,8 @@ class DisableHostServicesStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the object initialized using the given dictionary
-        """
+        """Returns the object initialized using the given dictionary."""
+
         super(DisableHostServicesStep, self).from_dict(data)
         self._hosts = list()
         self._host_uuids = list()
@@ -4040,9 +3860,8 @@ class DisableHostServicesStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the object as a dictionary
-        """
+        """Represent the object as a dictionary."""
+
         data = super(DisableHostServicesStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -4052,9 +3871,7 @@ class DisableHostServicesStep(strategy.StrategyStep):
 
 
 class EnableHostServicesStep(strategy.StrategyStep):
-    """
-    Enable Host Services - Strategy Step
-    """
+    """Enable Host Services - Strategy Step."""
 
     def __init__(self, hosts, service):
         super(EnableHostServicesStep, self).__init__(
@@ -4069,9 +3886,8 @@ class EnableHostServicesStep(strategy.StrategyStep):
             self._host_uuids.append(host.uuid)
 
     def _total_hosts_services_enabled(self):
-        """
-        Returns the number of hosts with services enabled
-        """
+        """Returns the number of hosts with services enabled."""
+
         total_hosts_services_enabled = 0
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -4087,9 +3903,8 @@ class EnableHostServicesStep(strategy.StrategyStep):
         return total_hosts_services_enabled
 
     def apply(self):
-        """
-        Enable host services on specified hosts
-        """
+        """Enable host services on specified hosts."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -4106,9 +3921,8 @@ class EnableHostServicesStep(strategy.StrategyStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events
-        """
+        """Handle Host events."""
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [STRATEGY_EVENT.HOST_STATE_CHANGED, STRATEGY_EVENT.HOST_AUDIT]:
@@ -4134,9 +3948,8 @@ class EnableHostServicesStep(strategy.StrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the object initialized using the given dictionary
-        """
+        """Returns the object initialized using the given dictionary."""
+
         super(EnableHostServicesStep, self).from_dict(data)
         self._hosts = list()
         self._host_uuids = list()
@@ -4151,9 +3964,8 @@ class EnableHostServicesStep(strategy.StrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the object as a dictionary
-        """
+        """Represent the object as a dictionary."""
+
         data = super(EnableHostServicesStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -4163,9 +3975,7 @@ class EnableHostServicesStep(strategy.StrategyStep):
 
 
 class ApplySwPatchesStep(AbstractStrategyStep):
-    """
-    Apply Patches using patch API
-    """
+    """Apply Patches using patch API."""
 
     def __init__(self, patches_to_apply):
         super(ApplySwPatchesStep, self).__init__(
@@ -4175,9 +3985,8 @@ class ApplySwPatchesStep(AbstractStrategyStep):
 
     @coroutine
     def _api_callback(self):
-        """
-        Callback for the API method invoked in apply
-        """
+        """Callback for the API method invoked in apply."""
+
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
@@ -4192,27 +4001,24 @@ class ApplySwPatchesStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """
-        Apply patches
-        """
+        """Apply patches."""
+
         from nfv_vim import nfvi
 
         nfvi.nfvi_sw_mgmt_apply_updates(self._patches_to_apply, self._api_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(ApplySwPatchesStep, self).from_dict(data)
         # only the names are serialized
         self._patches_to_apply = data["entity_names"]
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(ApplySwPatchesStep, self).as_dict()
         data["entity_type"] = "patches"
         data["entity_names"] = self._patches_to_apply
@@ -4224,9 +4030,7 @@ class ApplySwPatchesStep(AbstractStrategyStep):
 # Kube RootCA Update Steps
 ##########################################################
 class QueryKubeRootcaUpdateStep(AbstractStrategyStep):
-    """
-    Query Kube RootCA Update
-    """
+    """Query Kube RootCA Update."""
 
     def __init__(self):
         super(QueryKubeRootcaUpdateStep, self).__init__(
@@ -4235,9 +4039,8 @@ class QueryKubeRootcaUpdateStep(AbstractStrategyStep):
 
     @coroutine
     def _response_callback(self):
-        """
-        Get Kube Root CA Update Callback
-        """
+        """Get Kube Root CA Update Callback."""
+
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
@@ -4252,9 +4055,8 @@ class QueryKubeRootcaUpdateStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """
-        Query Kube Root CA Update
-        """
+        """Query Kube Root CA Update."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -4263,9 +4065,7 @@ class QueryKubeRootcaUpdateStep(AbstractStrategyStep):
 
 
 class QueryKubeRootcaHostUpdatesStep(AbstractStrategyStep):
-    """
-    Query Kube Rootca Host Update list
-    """
+    """Query Kube Rootca Host Update list."""
 
     def __init__(self):
         super(QueryKubeRootcaHostUpdatesStep, self).__init__(
@@ -4274,9 +4074,8 @@ class QueryKubeRootcaHostUpdatesStep(AbstractStrategyStep):
 
     @coroutine
     def _get_kube_rootca_host_update_list_callback(self):
-        """
-        Get Kube RootCA Host Update List Callback
-        """
+        """Get Kube RootCA Host Update List Callback."""
+
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
@@ -4293,9 +4092,8 @@ class QueryKubeRootcaHostUpdatesStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """
-        Query Kube Host Upgrade List
-        """
+        """Query Kube Host Upgrade List."""
+
         # todo(abailey): The API raises an exception if the kube rootca hosts
         # are queried when there is no active update in progress
         # therefore there are additional checks here
@@ -4313,9 +4111,7 @@ class QueryKubeRootcaHostUpdatesStep(AbstractStrategyStep):
 
 
 class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
-    """
-    Abstract Step class for processing changes to kube root ca update
-    """
+    """Abstract Step class for processing changes to kube root ca update."""
 
     # todo(abailey):  The hosts and pod steps have in_progress_state and
     # fail_state but the majority of the transition steps do not so there
@@ -4340,9 +4136,8 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
 
     @coroutine
     def _get_kube_rootca_update_callback(self):
-        """
-        Get Kube RootCA Update - Callback
-        """
+        """Get Kube RootCA Update - Callback."""
+
         response = yield
         DLOG.debug("(%s) callback response=%s." % (self._name, response))
 
@@ -4400,7 +4195,7 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def handle_event(self, event, event_data=None):
-        """Handle Host events"""
+        """Handle Host events."""
 
         from nfv_vim import nfvi
 
@@ -4421,9 +4216,8 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractKubeRootcaUpdateStep, self).from_dict(data)
         # these two attributes are not persisted
         self._wait_time = 0
@@ -4435,9 +4229,8 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(AbstractKubeRootcaUpdateStep, self).as_dict()
         data["success_state"] = self._success_state
         data["in_progress_state"] = self._in_progress_state
@@ -4472,9 +4265,8 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
         self._update_type = update_type
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractKubeRootcaUpdateHostStep, self).from_dict(data)
         self._hosts = list()
         self._host_uuids = list()
@@ -4489,9 +4281,8 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(AbstractKubeRootcaUpdateHostStep, self).as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
@@ -4501,7 +4292,7 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
 
     @coroutine
     def _get_kube_rootca_host_update_list_callback(self):
-        """Get Kube RootCa Update Host List Callback"""
+        """Get Kube RootCa Update Host List Callback."""
 
         response = yield
         DLOG.debug("(%s) callback response=%s." % (self._name, response))
@@ -4543,8 +4334,8 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
             self.stage.step_complete(result, response["reason"])
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events  - check for a host failure event
+        """Handle Host events  - check for a host failure event
+
         Override to bypass checking for kube rootca update state.
         """
         from nfv_vim import nfvi
@@ -4575,7 +4366,7 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
         return False
 
     def apply(self):
-        """Kube RootCA Update Hosts"""
+        """Kube RootCA Update Hosts."""
 
         from nfv_vim import directors
 
@@ -4598,75 +4389,76 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
 
 
 class KubeRootcaUpdateHostTrustBothcasStep(AbstractKubeRootcaUpdateHostStep):
-    """Kube RootCA Update - Host - trustBothCAs"""
+    """Kube RootCA Update - Host - trustBothCAs."""
 
     def __init__(self, hosts):
         from nfv_vim import nfvi
+
+        objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
         super(KubeRootcaUpdateHostTrustBothcasStep, self).__init__(
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED,
+            objects_v1.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTBOTHCAS_FAILED,
             KUBE_CERT_UPDATE_TRUSTBOTHCAS,
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return [KubeRootcaUpdateAbortStep()]
 
 
 class KubeRootcaUpdateHostUpdateCertsStep(AbstractKubeRootcaUpdateHostStep):
-    """Kube RootCA Update - Host - updateCerts"""
+    """Kube RootCA Update - Host - updateCerts."""
 
     def __init__(self, hosts):
         from nfv_vim import nfvi
+
+        objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
         super(KubeRootcaUpdateHostUpdateCertsStep, self).__init__(
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED,
+            objects_v1.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_UPDATECERTS_FAILED,
             KUBE_CERT_UPDATE_UPDATECERTS,
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return [KubeRootcaUpdateAbortStep()]
 
 
 class KubeRootcaUpdateHostTrustNewcaStep(AbstractKubeRootcaUpdateHostStep):
-    """Kube RootCA Update - Host - trustNewCA"""
+    """Kube RootCA Update - Host - trustNewCA."""
 
     def __init__(self, hosts):
         from nfv_vim import nfvi
 
+        objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
+
         super(KubeRootcaUpdateHostTrustNewcaStep, self).__init__(
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED,
+            objects_v1.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA,
+            objects_v1.KUBE_ROOTCA_UPDATING_HOST_TRUSTNEWCA_FAILED,
             KUBE_CERT_UPDATE_TRUSTNEWCA,
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return [KubeRootcaUpdateAbortStep()]
 
 
 class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
-    """
-    Abstract Step class for processing changes to kube rootca update for pods
-    """
+    """Abstract Step class for processing changes to kube rootca update for pods."""
 
     def __init__(
         self,
@@ -4687,24 +4479,22 @@ class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
         self._phase = phase
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractKubeRootcaUpdatePodsStep, self).from_dict(data)
         self._phase = data["phase"]
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(AbstractKubeRootcaUpdatePodsStep, self).as_dict()
         data["phase"] = self._phase
         return data
 
     @coroutine
     def _pods_update_response_callback(self):
-        """Kube RootCA Update - Pods - Callback"""
+        """Kube RootCA Update - Pods - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -4718,7 +4508,8 @@ class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube RootCA Update - Pods"""
+        """Kube RootCA Update - Pods."""
+
         from nfv_vim import nfvi
 
         nfvi.nfvi_kube_rootca_update_pods(
@@ -4728,51 +4519,57 @@ class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
 
 
 class KubeRootcaUpdatePodsTrustBothcasStep(AbstractKubeRootcaUpdatePodsStep):
-    """Kube RootCA Update - Pods - trustBothCAs - Strategy Step"""
+    """Kube RootCA Update - Pods - trustBothCAs - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
 
+        objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
+
         super(KubeRootcaUpdatePodsTrustBothcasStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED,
+            objects_v1.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS_FAILED,
             KUBE_CERT_UPDATE_TRUSTBOTHCAS,
         )  # phase
 
 
 class KubeRootcaUpdatePodsTrustNewcaStep(AbstractKubeRootcaUpdatePodsStep):
-    """Kube RootCA Update - Pods - trustNewCA - Strategy Step"""
+    """Kube RootCA Update - Pods - trustNewCA - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
 
+        objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
+
         super(KubeRootcaUpdatePodsTrustNewcaStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED,
+            objects_v1.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA,
+            objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA_FAILED,
             KUBE_CERT_UPDATE_TRUSTNEWCA,
         )  # phase
 
 
 class KubeRootcaUpdateStartStep(AbstractKubeRootcaUpdateStep):
-    """Kube RootCA Update - Start - Strategy Step"""
+    """Kube RootCA Update - Start - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
 
+        objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
+
         super(KubeRootcaUpdateStartStep, self).__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_START,
-            nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED,
+            objects_v1.KUBE_ROOTCA_UPDATE_STARTED,
             None,  # sysinv API does not have in-progress state for this action
             None,
         )  # there is no failure state if 'start' fails
 
     @coroutine
     def _response_callback(self):
-        """Kube RootCA Update - Start - Callback"""
+        """Kube RootCA Update - Start - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -4786,7 +4583,7 @@ class KubeRootcaUpdateStartStep(AbstractKubeRootcaUpdateStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube RootCA Update - Start"""
+        """Kube RootCA Update - Start."""
 
         from nfv_vim import nfvi
 
@@ -4801,7 +4598,7 @@ class KubeRootcaUpdateStartStep(AbstractKubeRootcaUpdateStep):
 
 
 class KubeRootcaUpdateAbortStep(AbstractKubeRootcaUpdateStep):
-    """Kube RootCA Update - Abort - Strategy Step"""
+    """Kube RootCA Update - Abort - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -4815,7 +4612,7 @@ class KubeRootcaUpdateAbortStep(AbstractKubeRootcaUpdateStep):
 
     @coroutine
     def _response_callback(self):
-        """Kube RootCA Update - Abort - Callback"""
+        """Kube RootCA Update - Abort - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -4845,7 +4642,7 @@ class KubeRootcaUpdateAbortStep(AbstractKubeRootcaUpdateStep):
             )
 
     def apply(self):
-        """Kube RootCA Update - Abort"""
+        """Kube RootCA Update - Abort."""
 
         from nfv_vim import nfvi
 
@@ -4854,7 +4651,7 @@ class KubeRootcaUpdateAbortStep(AbstractKubeRootcaUpdateStep):
 
 
 class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
-    """Kube RootCA Update - Complete - Strategy Step"""
+    """Kube RootCA Update - Complete - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -4867,12 +4664,13 @@ class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
         )  # there is no failure state if 'complete' fails
 
     def handle_event(self, event, event_data=None):
-        """Override parent class and do not handle any events"""
+        """Override parent class and do not handle any events."""
+
         return False
 
     @coroutine
     def _response_callback(self):
-        """Kube RootCA Update - Complete - Callback"""
+        """Kube RootCA Update - Complete - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -4906,7 +4704,7 @@ class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube RootCA Update - Complete"""
+        """Kube RootCA Update - Complete."""
 
         from nfv_vim import nfvi
 
@@ -4915,7 +4713,7 @@ class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
 
 
 class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
-    """Kube RootCA Update - Generate Cert - Strategy Step"""
+    """Kube RootCA Update - Generate Cert - Strategy Step."""
 
     def __init__(self, expiry_date, subject):
         from nfv_vim import nfvi
@@ -4933,7 +4731,8 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
     @coroutine
     def _response_callback(self):
         """Generate Cert is a blocking call that returns an identifier
-        Polling the update is how we proceed to next state
+
+        Polling the update is how we proceed to next state.
         """
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -4946,7 +4745,7 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube RootCA Update - Generate Cert"""
+        """Kube RootCA Update - Generate Cert."""
 
         from nfv_vim import nfvi
 
@@ -4957,18 +4756,16 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(KubeRootcaUpdateGenerateCertStep, self).from_dict(data)
         self._expiry_date = data["expiry_date"]
         self._subject = data["subject"]
         return self
 
     def as_dict(self):
-        """
-        Represent the kube upgrade step as a dictionary
-        """
+        """Represent the kube upgrade step as a dictionary."""
+
         data = super(KubeRootcaUpdateGenerateCertStep, self).as_dict()
         data["expiry_date"] = self._expiry_date
         data["subject"] = self._subject
@@ -4979,9 +4776,7 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
 # Kube Upgrade Steps
 ##########################################################
 class QueryKubeUpgradeStep(AbstractStrategyStep):
-    """
-    Query Kube Upgrade
-    """
+    """Query Kube Upgrade."""
 
     def __init__(self):
         super(QueryKubeUpgradeStep, self).__init__(
@@ -4990,9 +4785,8 @@ class QueryKubeUpgradeStep(AbstractStrategyStep):
 
     @coroutine
     def _get_kube_upgrade_callback(self):
-        """
-        Get Kube Upgrade Callback
-        """
+        """Get Kube Upgrade Callback."""
+
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
@@ -5007,9 +4801,8 @@ class QueryKubeUpgradeStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """
-        Query Kube Upgrade
-        """
+        """Query Kube Upgrade."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -5018,9 +4811,9 @@ class QueryKubeUpgradeStep(AbstractStrategyStep):
 
 
 class QueryKubeVersionsStep(AbstractStrategyStep):
-    """
-    Query Kube Versions
-    This step should be used with its matching QueryKubeVersionsMixin
+    """Query Kube Versions
+
+    This step should be used with its matching QueryKubeVersionsMixin.
     """
 
     def __init__(self):
@@ -5030,9 +4823,8 @@ class QueryKubeVersionsStep(AbstractStrategyStep):
 
     @coroutine
     def _query_callback(self):
-        """
-        Get Kube Versions List Callback
-        """
+        """Get Kube Versions List Callback."""
+
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
@@ -5047,9 +4839,8 @@ class QueryKubeVersionsStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """
-        Query Kube Versions List
-        """
+        """Query Kube Versions List."""
+
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -5058,9 +4849,7 @@ class QueryKubeVersionsStep(AbstractStrategyStep):
 
 
 class QueryKubeHostUpgradeStep(AbstractStrategyStep):
-    """
-    Query Kube Host Upgrade list
-    """
+    """Query Kube Host Upgrade list."""
 
     MAX_RETRIES = 3
 
@@ -5072,9 +4861,8 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
 
     @coroutine
     def _get_kube_host_upgrade_list_callback(self):
-        """
-        Get Kube Host Upgrade List Callback
-        """
+        """Get Kube Host Upgrade List Callback."""
+
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
 
@@ -5089,9 +4877,8 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """
-        Query Kube Host Upgrade List
-        """
+        """Query Kube Host Upgrade List."""
+
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply." % self._name)
@@ -5101,9 +4888,8 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Query Kube Host upgrade event
-        """
+        """Handle Query Kube Host upgrade event."""
+
         from nfv_vim import directors
 
         if event == STRATEGY_EVENT.QUERY_KUBE_HOST_UPGRADE_FAILED:
@@ -5135,7 +4921,6 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
 
 
 class AbstractKubeUpgradeStep(AbstractStrategyStep):
-
     def __init__(self, step_name, success_state, fail_state, timeout_in_secs=600):
         super(AbstractKubeUpgradeStep, self).__init__(step_name, timeout_in_secs)
         # These two attributes are not persisted
@@ -5147,7 +4932,8 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
 
     @coroutine
     def _get_kube_upgrade_callback(self):
-        """Get Upgrade Callback"""
+        """Get Upgrade Callback."""
+
         response = yield
         DLOG.debug("(%s) callback response=%s." % (self._name, response))
 
@@ -5204,13 +4990,12 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
             self.stage.step_complete(result, response["reason"])
 
     def _abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return [KubeUpgradeAbortStep()] if self.strategy._single_controller else []
 
     def handle_event(self, event, event_data=None):
-        """Handle Host events"""
+        """Handle Host events."""
 
         from nfv_vim import nfvi
 
@@ -5233,9 +5018,8 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
         return False
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractKubeUpgradeStep, self).from_dict(data)
         # these two attributes are not persisted
         self._wait_time = 0
@@ -5246,9 +5030,8 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the kube upgrade step as a dictionary
-        """
+        """Represent the kube upgrade step as a dictionary."""
+
         data = super(AbstractKubeUpgradeStep, self).as_dict()
         data["success_state"] = self._success_state
         data["fail_state"] = self._fail_state
@@ -5256,7 +5039,7 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
 
 
 class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade - Abort - Strategy Step"""
+    """Kube Upgrade - Abort - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -5269,7 +5052,8 @@ class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade - Abort - Callback"""
+        """Kube Upgrade - Abort - Callback."""
+
         from nfv_vim import nfvi
 
         response = yield
@@ -5305,7 +5089,7 @@ class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
             )
 
     def apply(self):
-        """Kube Upgrade - Abort"""
+        """Kube Upgrade - Abort."""
 
         from nfv_vim import nfvi
 
@@ -5315,7 +5099,7 @@ class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
 
 
 class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Start - Strategy Step"""
+    """Kube Upgrade Start - Strategy Step."""
 
     def __init__(self, to_version, force=False):
 
@@ -5331,24 +5115,21 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         self._force = force
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return self._abort()
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(KubeUpgradeStartStep, self).from_dict(data)
         self._to_version = data["to_version"]
         self._force = data["force"]
         return self
 
     def as_dict(self):
-        """
-        Represent the kube upgrade step as a dictionary
-        """
+        """Represent the kube upgrade step as a dictionary."""
+
         data = super(KubeUpgradeStartStep, self).as_dict()
         data["to_version"] = self._to_version
         data["force"] = self._force
@@ -5356,7 +5137,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade Start - Callback"""
+        """Kube Upgrade Start - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5373,7 +5154,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Upgrade Start"""
+        """Kube Upgrade Start."""
 
         from nfv_vim import nfvi
 
@@ -5389,7 +5170,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
 
 
 class KubeUpgradeCleanupAbortedStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Cleanup Aborted - Strategy Step"""
+    """Kube Upgrade Cleanup Aborted - Strategy Step."""
 
     # todo(abailey): this class could be replaced by KubeUpgradeCleanupStep
     # if it was enhanced to take an optional 'filter'
@@ -5402,7 +5183,7 @@ class KubeUpgradeCleanupAbortedStep(AbstractKubeUpgradeStep):
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade Cleanup Aborted - Callback"""
+        """Kube Upgrade Cleanup Aborted - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5420,7 +5201,8 @@ class KubeUpgradeCleanupAbortedStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Upgrade Cleanup Aborted"""
+        """Kube Upgrade Cleanup Aborted."""
+
         DLOG.info("Step (%s) apply." % self._name)
 
         from nfv_vim import nfvi
@@ -5442,7 +5224,7 @@ class KubeUpgradeCleanupAbortedStep(AbstractKubeUpgradeStep):
 
 
 class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Cleanup - Strategy Step"""
+    """Kube Upgrade Cleanup - Strategy Step."""
 
     def __init__(self):
         super(KubeUpgradeCleanupStep, self).__init__(
@@ -5453,7 +5235,7 @@ class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade Cleanup - Callback"""
+        """Kube Upgrade Cleanup - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5471,7 +5253,7 @@ class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Upgrade Cleanup"""
+        """Kube Upgrade Cleanup."""
 
         from nfv_vim import nfvi
 
@@ -5482,7 +5264,7 @@ class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
 
 
 class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Complete - Strategy Step"""
+    """Kube Upgrade Complete - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -5494,14 +5276,13 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
         )  # there is no failure state for upgrade-complete
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return self._abort()
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade Complete - Callback"""
+        """Kube Upgrade Complete - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5518,7 +5299,7 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Upgrade Complete"""
+        """Kube Upgrade Complete."""
 
         from nfv_vim import nfvi
 
@@ -5529,7 +5310,7 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
 
 
 class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Download Images - Strategy Step"""
+    """Kube Upgrade Download Images - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -5542,14 +5323,13 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return self._abort()
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade Download Images - Callback"""
+        """Kube Upgrade Download Images - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5562,7 +5342,7 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Upgrade Download Images"""
+        """Kube Upgrade Download Images."""
 
         from nfv_vim import nfvi
 
@@ -5573,7 +5353,7 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
 
 
 class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
-    """Kube Pre Application Update - Strategy Step"""
+    """Kube Pre Application Update - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -5586,14 +5366,13 @@ class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return self._abort()
 
     @coroutine
     def _response_callback(self):
-        """Kube Pre Application Update - Callback"""
+        """Kube Pre Application Update - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5606,7 +5385,7 @@ class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Pre Application Update"""
+        """Kube Pre Application Update."""
 
         from nfv_vim import nfvi
 
@@ -5617,7 +5396,7 @@ class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
 
 
 class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
-    """Kube Post Application Update - Strategy Step"""
+    """Kube Post Application Update - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -5630,14 +5409,13 @@ class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return self._abort()
 
     @coroutine
     def _response_callback(self):
-        """Kube Post Application Update - Callback"""
+        """Kube Post Application Update - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5650,7 +5428,7 @@ class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Post Application Update"""
+        """Kube Post Application Update."""
 
         from nfv_vim import nfvi
 
@@ -5661,7 +5439,7 @@ class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
 
 
 class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Networking - Strategy Step"""
+    """Kube Upgrade Networking - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -5674,14 +5452,13 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return self._abort()
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade Networking - Callback"""
+        """Kube Upgrade Networking - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5694,7 +5471,7 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Upgrade Networking"""
+        """Kube Upgrade Networking."""
 
         from nfv_vim import nfvi
 
@@ -5705,7 +5482,7 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
 
 
 class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Storage - Strategy Step"""
+    """Kube Upgrade Storage - Strategy Step."""
 
     def __init__(self):
         from nfv_vim import nfvi
@@ -5718,14 +5495,13 @@ class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         return self._abort()
 
     @coroutine
     def _response_callback(self):
-        """Kube Upgrade Storage - Callback"""
+        """Kube Upgrade Storage - Callback."""
 
         response = yield
         DLOG.debug("%s callback response=%s." % (self._name, response))
@@ -5738,7 +5514,7 @@ class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def apply(self):
-        """Kube Upgrade Storage"""
+        """Kube Upgrade Storage."""
 
         from nfv_vim import nfvi
 
@@ -5747,7 +5523,7 @@ class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
 
 
 class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Host - Abstract Strategy Step
+    """Kube Upgrade Host - Abstract Strategy Step.
 
     This operation issues a host command, which updates the kube upgrade object
     """
@@ -5777,9 +5553,8 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
         self._host_uuids.append(host.uuid)
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractKubeHostUpgradeStep, self).from_dict(data)
         self._to_version = data["to_version"]
         self._force = data["force"]
@@ -5795,9 +5570,8 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(AbstractKubeHostUpgradeStep, self).as_dict()
         data["to_version"] = self._to_version
         data["force"] = self._force
@@ -5808,7 +5582,7 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
 
 
 class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
-    """Kube Upgrade Host List - Abstract Strategy Step
+    """Kube Upgrade Host List - Abstract Strategy Step.
 
     This operation issues a host command, which updates the kube upgrade object
     It operates on a list of hosts
@@ -5838,9 +5612,8 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
             self._host_uuids.append(host.uuid)
 
     def from_dict(self, data):
-        """
-        Returns the step object initialized using the given dictionary
-        """
+        """Returns the step object initialized using the given dictionary."""
+
         super(AbstractKubeHostListUpgradeStep, self).from_dict(data)
         self._to_version = data["to_version"]
         self._force = data["force"]
@@ -5856,9 +5629,8 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
         return self
 
     def as_dict(self):
-        """
-        Represent the step as a dictionary
-        """
+        """Represent the step as a dictionary."""
+
         data = super(AbstractKubeHostListUpgradeStep, self).as_dict()
         data["to_version"] = self._to_version
         data["force"] = self._force
@@ -5869,7 +5641,7 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
 
 
 class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
-    """Kube Host Cordon - Strategy Step"""
+    """Kube Host Cordon - Strategy Step."""
 
     def __init__(
         self,
@@ -5891,15 +5663,14 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         # todo(abailey): Unknown if this should include an uncordon if it fails
         return self._abort()
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events  - does not query kube host upgrade list but
+        """Handle Host events  - does not query kube host upgrade list but
+
         instead queries kube host upgrade directly.
         """
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -5918,7 +5689,7 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
         )
 
     def apply(self):
-        """Kube Host Cordon"""
+        """Kube Host Cordon."""
 
         from nfv_vim import directors
 
@@ -5929,7 +5700,7 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
 
 
 class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
-    """Kube Host Uncordon - Strategy Step"""
+    """Kube Host Uncordon - Strategy Step."""
 
     def __init__(
         self,
@@ -5951,15 +5722,14 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         # todo(abailey): Unknown if this should include a cordon if it fails
         return self._abort()
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events  - does not query kube host upgrade list but
+        """Handle Host events  - does not query kube host upgrade list but
+
         instead queries kube host upgrade directly.
         """
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -5978,7 +5748,7 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
         )
 
     def apply(self):
-        """Kube Host Uncordon"""
+        """Kube Host Uncordon."""
 
         from nfv_vim import directors
 
@@ -5989,7 +5759,7 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
 
 
 class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
-    """Kube Host Upgrade Control Plane - Strategy Step
+    """Kube Host Upgrade Control Plane - Strategy Step.
 
     This operation issues a host command, which updates the kube upgrade object
     """
@@ -6014,15 +5784,14 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         )
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         # todo(abailey): Unknown if this should include an uncordon if it fails
         return self._abort()
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events  - does not query kube host upgrade list but
+        """Handle Host events  - does not query kube host upgrade list but
+
         instead queries kube host upgrade directly.
         """
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
@@ -6041,7 +5810,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         )
 
     def apply(self):
-        """Kube Host Upgrade Control Plane"""
+        """Kube Host Upgrade Control Plane."""
 
         from nfv_vim import directors
 
@@ -6054,7 +5823,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
 
 
 class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
-    """Kube Host Upgrade Kubelet - Strategy Step
+    """Kube Host Upgrade Kubelet - Strategy Step.
 
     This operation issues a host command, which indirectly updates the kube
     upgrade object, however additional calls to other hosts do not change it.
@@ -6072,17 +5841,18 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
         )  # kubelet takes longer than control plane
 
     def abort(self):
-        """
-        Returns the abort step related to this step
-        """
+        """Returns the abort step related to this step."""
+
         # todo(abailey): Unknown if this should include an uncordon if it fails
         return self._abort()
 
     @coroutine
     def _get_kube_host_upgrade_list_callback(self):
-        """Get Kube Host Upgrade List Callback"""
+        """Get Kube Host Upgrade List Callback."""
 
         from nfv_vim import nfvi
+
+        objects_v1 = nfvi.objects.v1.KUBE_HOST_UPGRADE_STATE
 
         response = yield
         DLOG.debug("(%s) callback response=%s." % (self._name, response))
@@ -6098,8 +5868,7 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
                     if k_host.host_uuid == host_uuid:
                         if (
                             k_host.kubelet_version == self._to_version
-                            and k_host.status
-                            == nfvi.objects.v1.KUBE_HOST_UPGRADE_STATE.KUBE_HOST_UPGRADED_KUBELET
+                            and k_host.status == objects_v1.KUBE_HOST_UPGRADED_KUBELET
                         ):
                             DLOG.info(
                                 "Kubelet upgraded to version %s for host %s"
@@ -6125,8 +5894,8 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
             self.stage.step_complete(result, response["reason"])
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle Host events  - queries kube host upgrade list
+        """Handle Host events  - queries kube host upgrade list
+
         Override to bypass checking for kube upgrade state.
         """
         from nfv_vim import nfvi
@@ -6163,7 +5932,7 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
         return False
 
     def apply(self):
-        """Kube Upgrade Kubelet"""
+        """Kube Upgrade Kubelet."""
 
         from nfv_vim import directors
 
@@ -6181,9 +5950,8 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
 
 
 def strategy_step_rebuild_from_dict(data):
-    """
-    Returns the strategy step object initialized using the given dictionary
-    """
+    """Returns the strategy step object initialized using the given dictionary."""
+
     rebuild_map = {
         STRATEGY_STEP_NAME.APPLY_PATCHES: ApplySwPatchesStep,
         #
@@ -6191,21 +5959,37 @@ def strategy_step_rebuild_from_dict(data):
         #
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_ABORT: KubeRootcaUpdateAbortStep,
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_COMPLETE: KubeRootcaUpdateCompleteStep,
-        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_GENERATE_CERT: KubeRootcaUpdateGenerateCertStep,
-        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS: KubeRootcaUpdateHostTrustBothcasStep,
-        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA: KubeRootcaUpdateHostTrustNewcaStep,
-        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS: KubeRootcaUpdateHostUpdateCertsStep,
-        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS: KubeRootcaUpdatePodsTrustBothcasStep,
-        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA: KubeRootcaUpdatePodsTrustNewcaStep,
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_GENERATE_CERT: (
+            KubeRootcaUpdateGenerateCertStep
+        ),
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS: (
+            KubeRootcaUpdateHostTrustBothcasStep
+        ),
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA: (
+            KubeRootcaUpdateHostTrustNewcaStep
+        ),
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS: (
+            KubeRootcaUpdateHostUpdateCertsStep
+        ),
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS: (
+            KubeRootcaUpdatePodsTrustBothcasStep
+        ),
+        STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA: (
+            KubeRootcaUpdatePodsTrustNewcaStep
+        ),
         STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_START: KubeRootcaUpdateStartStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_UPDATE: QueryKubeRootcaUpdateStep,
-        STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_HOST_UPDATES: QueryKubeRootcaHostUpdatesStep,
+        STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_HOST_UPDATES: (
+            QueryKubeRootcaHostUpdatesStep
+        ),
         #
         # kube upgrade steps
         #
         STRATEGY_STEP_NAME.KUBE_HOST_CORDON: KubeHostCordonStep,
         STRATEGY_STEP_NAME.KUBE_HOST_UNCORDON: KubeHostUncordonStep,
-        STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE: KubeHostUpgradeControlPlaneStep,
+        STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_CONTROL_PLANE: (
+            KubeHostUpgradeControlPlaneStep
+        ),
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET: KubeHostUpgradeKubeletStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_ABORT: KubeUpgradeAbortStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP: KubeUpgradeCleanupStep,
@@ -6223,7 +6007,9 @@ def strategy_step_rebuild_from_dict(data):
         #
         # system config update steps
         #
-        STRATEGY_STEP_NAME.QUERY_SYSTEM_CONFIG_UPDATE_HOSTS: QuerySystemConfigUpdateHostsStep,
+        STRATEGY_STEP_NAME.QUERY_SYSTEM_CONFIG_UPDATE_HOSTS: (
+            QuerySystemConfigUpdateHostsStep
+        ),
         STRATEGY_STEP_NAME.SYSTEM_CONFIG_UPDATE_HOSTS: SystemConfigUpdateHostsStep,
     }
     obj_type = rebuild_map.get(data["name"])

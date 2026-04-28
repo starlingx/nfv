@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.rpc.volume")
 
 
 class APIRequestCreateVolume(RPCMessage):
-    """
-    RPC API Request Message - Create Volume
-    """
+    """RPC API Request Message - Create Volume."""
 
     name = None
     description = None
@@ -53,9 +51,7 @@ class APIRequestCreateVolume(RPCMessage):
 
 
 class APIResponseCreateVolume(RPCMessage):
-    """
-    RPC API Response Message - Create Volume
-    """
+    """RPC API Response Message - Create Volume."""
 
     uuid = None
     name = None
@@ -103,9 +99,7 @@ class APIResponseCreateVolume(RPCMessage):
 
 
 class APIRequestUpdateVolume(RPCMessage):
-    """
-    RPC API Request Message - Update Volume
-    """
+    """RPC API Request Message - Update Volume."""
 
     uuid = None
     description = None
@@ -131,9 +125,7 @@ class APIRequestUpdateVolume(RPCMessage):
 
 
 class APIResponseUpdateVolume(RPCMessage):
-    """
-    RPC API Response Message - Update Volume
-    """
+    """RPC API Response Message - Update Volume."""
 
     uuid = None
     name = None
@@ -181,9 +173,7 @@ class APIResponseUpdateVolume(RPCMessage):
 
 
 class APIRequestDeleteVolume(RPCMessage):
-    """
-    RPC API Request Message - Delete Volume
-    """
+    """RPC API Request Message - Delete Volume."""
 
     uuid = None
 
@@ -206,9 +196,7 @@ class APIRequestDeleteVolume(RPCMessage):
 
 
 class APIResponseDeleteVolume(RPCMessage):
-    """
-    RPC API Response Message - Delete Volume
-    """
+    """RPC API Response Message - Delete Volume."""
 
     uuid = None
 
@@ -231,9 +219,7 @@ class APIResponseDeleteVolume(RPCMessage):
 
 
 class APIRequestGetVolume(RPCMessage):
-    """
-    RPC API Request Message - Get Volume
-    """
+    """RPC API Request Message - Get Volume."""
 
     get_all = False
     filter_by_uuid = None
@@ -262,9 +248,7 @@ class APIRequestGetVolume(RPCMessage):
 
 
 class APIResponseGetVolume(RPCMessage):
-    """
-    RPC API Response Message - Get Volume
-    """
+    """RPC API Response Message - Get Volume."""
 
     uuid = None
     name = None

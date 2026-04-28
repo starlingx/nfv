@@ -19,9 +19,7 @@ from nfv_vim.api.controllers.v1.orchestration.sw_update import SystemConfigUpdat
 
 
 class OrchestrationDescription(wsme_types.Base):
-    """
-    Orchestration Description
-    """
+    """Orchestration Description."""
 
     id = wsme_types.text
     links = wsme_types.wsattr([Link], name="links")
@@ -51,9 +49,7 @@ class OrchestrationDescription(wsme_types.Base):
 
 
 class OrchestrationAPI(rest.RestController):
-    """
-    Orchestration API
-    """
+    """Orchestration API."""
 
     @pecan.expose()
     def _lookup(self, key, *remainder):

@@ -28,9 +28,8 @@ def create_fw_update_strategy(
     alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
     single_controller=False,
 ):
-    """
-    Create a firmware update strategy
-    """
+    """Create a firmware update strategy."""
+
     return FwUpdateStrategy(
         uuid=str(uuid.uuid4()),
         controller_apply_type=controller_apply_type,
@@ -49,16 +48,14 @@ def create_fw_update_strategy(
     sw_update_testcase.fake_nfvi_compute_plugin_disabled,
 )
 class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
-    """
-    Firmware Update Strategy Unit Tests
-    """
+    """Firmware Update Strategy Unit Tests."""
 
     def test_fw_update_strategy_worker_stages_ignore(self):
-        """
-        Test the fw_update strategy add worker strategy stages:
+        """Test the fw_update strategy add worker strategy stages:
+
         - ignore worker apply
         Verify:
-        - stages not created ; fw update is only supported for worker nodes
+        - stages not created ; fw update is only supported for worker nodes.
         """
 
         self.create_host("controller-0")
@@ -91,14 +88,14 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_storage_serial_no_instances(self):
-        """
-        Test the fw_update strategy on a storage system:
+        """Test the fw_update strategy on a storage system:
+
         - 2 controllers
         - 2 storage hosts
         - 4 worker hosts
         options
         - serial apply
-        - no instances
+        - no instances.
         """
 
         self.create_host("controller-0")
@@ -183,14 +180,14 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_storage_parallel_no_instances(self):
-        """
-        Test the fw_update strategy on a storage system:
+        """Test the fw_update strategy on a storage system:
+
         - 2 controllers
         - 2 storage hosts
         - 4 worker hosts
         options
         - parallel apply ; max 3
-        - no instances
+        - no instances.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -259,14 +256,14 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_storage_serial_migrate(self):
-        """
-        Test the fw_update strategy on a storage system:
+        """Test the fw_update strategy on a storage system:
+
         - 2 controllers
         - 2 storage hosts
         - 4 worker hosts
         options
         - serial apply
-        - migrate 3 instances
+        - migrate 3 instances.
         """
 
         self.create_host("controller-0")
@@ -368,14 +365,14 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_storage_parallel_migrate(self):
-        """
-        Test the fw_update strategy on a storage system:
+        """Test the fw_update strategy on a storage system:
+
         - 2 controllers
         - 2 storage hosts
         - 4 worker hosts
         options
         - parallel apply ; max 4
-        - migrate 4 instances
+        - migrate 4 instances.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -487,14 +484,14 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_standard_serial_stop_start(self):
-        """
-        Test the fw_update strategy on a storage system:
+        """Test the fw_update strategy on a storage system:
+
         - 2 controllers
         - 2 storage hosts
         - 4 worker hosts
         options
         - serial apply
-        - stop start 4 instances
+        - stop start 4 instances.
         """
 
         self.create_host("controller-0")
@@ -655,13 +652,13 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_standard_parallel_stop_start(self):
-        """
-        Test the fw_update strategy on a standard system:
+        """Test the fw_update strategy on a standard system:
+
         - 2 controllers
         - 8 worker hosts
         options
         - parallel apply ; max 10
-        - stop start 8 instances
+        - stop start 8 instances.
         """
 
         self.create_host("controller-0")
@@ -785,15 +782,15 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_standard_parallel_migrate_host_aggregate(self):
-        """
-        Test the fw_update strategy on a storage system:
+        """Test the fw_update strategy on a storage system:
+
         - 2 controllers
         - 10 worker hosts
         options
         - parallel apply ; max 10
         - migrate instances ; 1 per host ; 1 locked
         - hosts with no instances updated first
-        - host aggregate limits enforced
+        - host aggregate limits enforced.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -985,8 +982,8 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_standard_parallel_stop_start_host_aggregate(self):
-        """
-        Test the fw_update strategy on a standard system:
+        """Test the fw_update strategy on a standard system:
+
         -  2 controllers
         - 10 worker hosts
         options
@@ -994,7 +991,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - stop start instances ; 1 per host ; 1 locked
         - locked instances or hosts with no instances updated first
         - 2x4 host aggregate groups
-        - hosts with locked instances or none at all are grouped
+        - hosts with locked instances or none at all are grouped.
         """
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1196,8 +1193,8 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_standard_parallel_migrate_overlap_host_aggregate(self):
-        """
-        Test the fw_update strategy on a standard system:
+        """Test the fw_update strategy on a standard system:
+
         -  2 controllers
         - 10 worker hosts
         options
@@ -1205,7 +1202,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - migrate 10 instances ; 1 per worker host
         - locked instances or hosts with no instances updated first
         - 3 host aggregate groups with overlap ; 4, 3, 10
-        - hosts with locked instances or none at all are grouped
+        - hosts with locked instances or none at all are grouped.
         """
 
         self.create_host("controller-0")
@@ -1406,12 +1403,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_sx(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 1 all-in-one controller
         options
         - serial apply
-        - no instances
+        - no instances.
         """
 
         self.create_host("controller-0", aio=True)
@@ -1453,12 +1450,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_sx_stop_start(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 1 all-in-one controller
         options
         - serial apply
-        - stop start 1 instance
+        - stop start 1 instance.
         """
         self.create_host("controller-0", aio=True)
 
@@ -1508,12 +1505,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_sx_migrate_reject(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 1 all-in-one controller
         options
         - serial apply
-        - migrate instances ; not possible in sx
+        - migrate instances ; not possible in sx.
         """
         self.create_host("controller-0", aio=True)
 
@@ -1545,12 +1542,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_sx_serial_migrate_no_openstack(self):
-        """
-        Test the sw_patch strategy add worker strategy stages:
+        """Test the sw_patch strategy add worker strategy stages:
+
         - 1 all-in-one controller host
         - no openstack
         - serial apply
-        - migrate instance action with no instance
+        - migrate instance action with no instance.
         """
         self.create_host("controller-0", aio=True, openstack_installed=False)
 
@@ -1593,12 +1590,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_dx_no_instances(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 2 all-in-one controllers
         options
         - serial apply
-        - no instances
+        - no instances.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -1654,12 +1651,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_dx_migrate_instance(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 2 all-in-one controllers
         options
         - serial apply
-        - migrate 1 instance
+        - migrate 1 instance.
         """
 
         self.create_host("controller-0", aio=True)
@@ -1724,12 +1721,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_dx_migrate_instances(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 2 all-in-one controllers
         options
         - serial apply
-        - migrate 2 instances which switches the controller update order
+        - migrate 2 instances which switches the controller update order.
         """
 
         self.create_host("controller-0", aio=True)
@@ -1799,12 +1796,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_dx_stop_start_instance(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 2 all-in-one controllers
         options
         - serial
-        - stop start 1 instance
+        - stop start 1 instance.
         """
 
         self.create_host("controller-0", aio=True)
@@ -1871,12 +1868,12 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_dx_stop_start_instances(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 2 all-in-one controllers
         options
         - serial
-        - stop start instances
+        - stop start instances.
         """
 
         self.create_host("controller-0", aio=True)
@@ -1948,13 +1945,13 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_dx_plus_parallel_locked_hosts(self):
-        """
-        Test the fw_update strategy on an All-In-One system:
+        """Test the fw_update strategy on an All-In-One system:
+
         - 2 all-in-one controllers
         - 6 computes ; 2 are locked
         options
         - parallel apply ; max 2
-        - no instances
+        - no instances.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
@@ -2070,13 +2067,13 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_plus_parallel_migrate_anti_affinity(self):
-        """
-        Test the fw_update strategy on an All-In-One Plus system:
+        """Test the fw_update strategy on an All-In-One Plus system:
+
         - 2 all-in-one controllers
         - 6 worker hosts
         options
         - parallel apply ; max 2
-        - migrate instances with 2 anti affinity groups
+        - migrate instances with 2 anti affinity groups.
         """
 
         self.create_host("controller-0", aio=True)
@@ -2239,13 +2236,13 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_plus_parallel_stop_start(self):
-        """
-        Test the fw_update strategy on an All-In-One Plus system:
+        """Test the fw_update strategy on an All-In-One Plus system:
+
         - 2 all-in-one controllers
         - 8 worker hosts
         options
         - parallel apply ; max 10
-        - stop start 8 instances
+        - stop start 8 instances.
         """
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)

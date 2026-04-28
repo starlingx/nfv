@@ -15,40 +15,34 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class StartState(state_machine.State):
-    """
-    Instance - Start State
-    """
+    """Instance - Start State."""
 
     def __init__(self, name):
         super(StartState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering start state
-        """
+        """Entering start state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.action_fsm.wait_time = 0
         instance.task = StartTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting start state
-        """
+        """Exiting start state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, StartTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the start state
-        """
+        """Transition from the start state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the start state
-        """
+        """Handle event while in the start state."""
+
         from nfv_vim import directors
 
         instance_director = directors.get_instance_director()

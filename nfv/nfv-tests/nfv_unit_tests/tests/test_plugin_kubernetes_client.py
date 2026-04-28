@@ -15,7 +15,7 @@ from unittest import mock
 
 sys.modules["fm_core"] = mock.Mock()
 from nfv_plugins.nfvi_plugins.clients import (  # noqa: H306,E402  pylint: disable=C0413
-    kubernetes_client
+    kubernetes_client,
 )
 
 
@@ -51,7 +51,6 @@ def exchange_json_to_V1Node(body):
 
 @mock.patch("kubernetes.config.load_kube_config", mock_load_kube_config)
 class TestNFVPluginsK8SNodeTaint(testcase.NFVTestCase):
-
     test_node_name = "testNode"
     test_key1 = "testKey1"
     test_value1 = "testValue1"
@@ -227,7 +226,6 @@ class TestNFVPluginsK8SNodeTaint(testcase.NFVTestCase):
 
 @mock.patch("kubernetes.config.load_kube_config", mock_load_kube_config)
 class TestNFVPluginsK8SMarkAllPodsNotReady(testcase.NFVTestCase):
-
     list_namespaced_pod_result = kubernetes.client.V1PodList(
         api_version="v1",
         items=[
@@ -332,7 +330,6 @@ class TestNFVPluginsK8SMarkAllPodsNotReady(testcase.NFVTestCase):
 
 @mock.patch("kubernetes.config.load_kube_config", mock_load_kube_config)
 class TestNFVPluginsK8SGetTerminatingPods(testcase.NFVTestCase):
-
     list_namespaced_pod_result = {
         "test-node-1": kubernetes.client.V1PodList(
             api_version="v1",
@@ -461,7 +458,6 @@ class TestNFVPluginsK8SGetTerminatingPods(testcase.NFVTestCase):
 
 @mock.patch("kubernetes.config.load_kube_config", mock_load_kube_config)
 class TestNFVPluginsK8SGetNamespacedRunningPods(testcase.NFVTestCase):
-
     list_namespaced_pod_result = kubernetes.client.V1PodList(
         api_version="v1",
         items=[

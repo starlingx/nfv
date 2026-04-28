@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class UnpauseState(state_machine.State):
-    """
-    Instance - Unpause State
-    """
+    """Instance - Unpause State."""
 
     def __init__(self, name):
         super(UnpauseState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering unpause state
-        """
+        """Entering unpause state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = UnpauseTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting unpause state
-        """
+        """Exiting unpause state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, UnpauseTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the unpause state
-        """
+        """Transition from the unpause state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the unpause state
-        """
+        """Handle event while in the unpause state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

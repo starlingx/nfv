@@ -21,24 +21,19 @@ ComputeOperationType = wsme_types.Enum(
 
 
 class ComputeOperateRequestData(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Operate Request Data
-    """
+    """Virtualised Resources - Compute Operate Request Data."""
 
     compute_operation = wsme_types.wsattr(ComputeOperationType, mandatory=True)
     compute_operation_data = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class ComputeOperateAPI(pecan.rest.RestController):
-    """
-    Virtualised Resources - Computes Operate API
-    """
+    """Virtualised Resources - Computes Operate API."""
 
     @staticmethod
     def _do_operation(rpc_request):
-        """
-        Return an image details
-        """
+        """Return an image details."""
+
         vim_connection = pecan.request.vim.open_connection()
         vim_connection.send(rpc_request.serialize())
         msg = vim_connection.receive()
@@ -64,9 +59,8 @@ class ComputeOperateAPI(pecan.rest.RestController):
         None, str, body=ComputeOperateRequestData, status_code=httplib.ACCEPTED
     )
     def post(self, compute_id, request_data):
-        """
-        Perform an operation against a virtual compute resource
-        """
+        """Perform an operation against a virtual compute resource."""
+
         DLOG.verbose(
             "Compute-API operate called for compute %s, "
             "operation=%s." % (compute_id, request_data.compute_operation)
@@ -125,23 +119,18 @@ ComputeMigrateType = wsme_types.Enum(str, "live", "cold", "evacuate")
 
 
 class ComputeMigrateRequestData(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Migrate Request Data
-    """
+    """Virtualised Resources - Compute Migrate Request Data."""
 
     migrate_type = wsme_types.wsattr(ComputeMigrateType, mandatory=True)
 
 
 class ComputeMigrateAPI(pecan.rest.RestController):
-    """
-    Virtualised Resources - Computes Migrate API
-    """
+    """Virtualised Resources - Computes Migrate API."""
 
     @staticmethod
     def _do_migrate(rpc_request):
-        """
-        Return an image details
-        """
+        """Return an image details."""
+
         vim_connection = pecan.request.vim.open_connection()
         vim_connection.send(rpc_request.serialize())
         msg = vim_connection.receive()
@@ -167,9 +156,8 @@ class ComputeMigrateAPI(pecan.rest.RestController):
         None, str, body=ComputeMigrateRequestData, status_code=httplib.ACCEPTED
     )
     def post(self, compute_id, request_data):
-        """
-        Perform a migrate against a virtual compute resource
-        """
+        """Perform a migrate against a virtual compute resource."""
+
         DLOG.verbose(
             "Compute-API migrate called for compute %s, "
             "migrate_type=%s." % (compute_id, request_data.migrate_type)
@@ -210,18 +198,14 @@ StorageType = wsme_types.Enum(str, "volume")
 
 
 class ComputeCreateVirtualCpuPinningType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Create Virtual CPU Pinning Type
-    """
+    """Virtualised Resources - Compute Create Virtual CPU Pinning Type."""
 
     cpu_pinning_policy = wsme_types.wsattr(CpuPinningPolicy, mandatory=False)
     cpu_pinning_map = wsme_types.wsattr(str, mandatory=False)
 
 
 class ComputeCreateVirtualCpuType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Create Virtual CPU Type
-    """
+    """Virtualised Resources - Compute Create Virtual CPU Type."""
 
     cpu_architecture = wsme_types.wsattr(str, mandatory=False)
     num_virtual_cpu = wsme_types.wsattr(int, mandatory=True)
@@ -233,9 +217,7 @@ class ComputeCreateVirtualCpuType(wsme_types.Base):
 
 
 class ComputeCreateVirtualMemoryType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Create Virtual Memory Type
-    """
+    """Virtualised Resources - Compute Create Virtual Memory Type."""
 
     virtual_mem_size = wsme_types.wsattr(int, mandatory=True)
     virtual_mem_oversubscription_policy = wsme_types.wsattr(str, mandatory=False)
@@ -243,18 +225,14 @@ class ComputeCreateVirtualMemoryType(wsme_types.Base):
 
 
 class ComputeCreateVirtualStorageType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Create Virtual Storage Type
-    """
+    """Virtualised Resources - Compute Create Virtual Storage Type."""
 
     type_of_storage = wsme_types.wsattr(StorageType, mandatory=True)
     size_of_storage = wsme_types.wsattr(int, mandatory=True)
 
 
 class ComputeCreateFlavourType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Create Flavour Type
-    """
+    """Virtualised Resources - Compute Create Flavour Type."""
 
     flavour_id = wsme_types.wsattr(str, mandatory=True)
     virtual_cpu = wsme_types.wsattr(ComputeCreateVirtualCpuType, mandatory=True)
@@ -263,9 +241,7 @@ class ComputeCreateFlavourType(wsme_types.Base):
 
 
 class ComputeCreateData(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Create Data
-    """
+    """Virtualised Resources - Compute Create Data."""
 
     compute_id = wsme_types.wsattr(str, mandatory=True)
     reservation_id = wsme_types.wsattr(str, mandatory=False)
@@ -275,18 +251,14 @@ class ComputeCreateData(wsme_types.Base):
 
 
 class ComputeQueryVirtualCpuPinningType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Virtual CPU Pinning Type
-    """
+    """Virtualised Resources - Compute Query Virtual CPU Pinning Type."""
 
     cpu_pinning_policy = CpuPinningPolicy
     cpu_pinning_map = [str]
 
 
 class ComputeQueryVirtualCpuType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Virtual CPU Type
-    """
+    """Virtualised Resources - Compute Query Virtual CPU Type."""
 
     cpu_architecture = str
     num_virtual_cpu = int
@@ -296,9 +268,7 @@ class ComputeQueryVirtualCpuType(wsme_types.Base):
 
 
 class ComputeQueryVirtualMemoryType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Virtual Memory Type
-    """
+    """Virtualised Resources - Compute Query Virtual Memory Type."""
 
     virtual_mem_size = int
     virtual_mem_oversubscription_policy = str
@@ -306,18 +276,14 @@ class ComputeQueryVirtualMemoryType(wsme_types.Base):
 
 
 class ComputeQueryVirtualStorageType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Virtual Storage Type
-    """
+    """Virtualised Resources - Compute Query Virtual Storage Type."""
 
     type_of_storage = StorageType
     size_of_storage = int
 
 
 class ComputeQueryStorageResourceType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Storage Resource Type
-    """
+    """Virtualised Resources - Compute Query Storage Resource Type."""
 
     resource_id = str
     storage_attributes = ComputeQueryVirtualStorageType
@@ -328,9 +294,7 @@ class ComputeQueryStorageResourceType(wsme_types.Base):
 
 
 class ComputeQueryAttributesResourceType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Attributes Resource Type
-    """
+    """Virtualised Resources - Compute Query Attributes Resource Type."""
 
     flavour_id = str
     acceleration_capabilities = str
@@ -340,9 +304,7 @@ class ComputeQueryAttributesResourceType(wsme_types.Base):
 
 
 class ComputeQueryResourceType(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Resource Type
-    """
+    """Virtualised Resources - Compute Query Resource Type."""
 
     compute_id = str
     compute_attributes = ComputeQueryAttributesResourceType
@@ -354,26 +316,21 @@ class ComputeQueryResourceType(wsme_types.Base):
 
 
 class ComputeQueryData(wsme_types.Base):
-    """
-    Virtualised Resources - Compute Query Data
-    """
+    """Virtualised Resources - Compute Query Data."""
 
     query_result = ComputeQueryResourceType
 
 
 class ComputesAPI(pecan.rest.RestController):
-    """
-    Virtualised Resources - Computes API
-    """
+    """Virtualised Resources - Computes API."""
 
     operate = ComputeOperateAPI()
     migrate = ComputeMigrateAPI()
 
     @staticmethod
     def _get_compute_details(compute_id, compute):
-        """
-        Return compute details
-        """
+        """Return compute details."""
+
         vim_connection = pecan.request.vim.open_connection()
         rpc_request = rpc.APIRequestGetInstance()
         rpc_request.filter_by_uuid = compute_id

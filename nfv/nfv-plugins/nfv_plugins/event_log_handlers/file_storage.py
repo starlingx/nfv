@@ -11,9 +11,7 @@ from nfv_plugins.event_log_handlers import config
 
 
 class FileStorage(event_log_handlers_v1.EventLogHandler):
-    """
-    File Storage Event Log Handler is used to store event-log data to disk.
-    """
+    """File Storage Event Log Handler is used to store event-log data to disk."""
 
     _name = "File-Storage"
     _version = "1.0.0"
@@ -37,9 +35,8 @@ class FileStorage(event_log_handlers_v1.EventLogHandler):
         return self._signature
 
     def _write_log_data(self, log_data):
-        """
-        Write the fact that an event has occurred to a file
-        """
+        """Write the fact that an event has occurred to a file."""
+
         # Write the file in utf-8 format to support unicode text
         with codecs.open(config.CONF["File-Storage"]["file"], "a", "utf-8") as f:
             line_separator_str = "%s" % ("=" * 84)
@@ -83,19 +80,16 @@ class FileStorage(event_log_handlers_v1.EventLogHandler):
             print(line_separator_str, file=f)
 
     def log(self, log_data):
-        """
-        Write the fact that a log is being generated to a file
-        """
+        """Write the fact that a log is being generated to a file."""
+
         self._write_log_data(log_data)
 
     def initialize(self, config_file):
-        """
-        Initialize
-        """
+        """Initialize."""
+
         config.load(config_file)
 
     def finalize(self):
-        """
-        Finalize
-        """
+        """Finalize."""
+
         return

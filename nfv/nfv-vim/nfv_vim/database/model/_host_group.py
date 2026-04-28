@@ -11,9 +11,7 @@ from nfv_vim.database.model._base import Base
 
 
 class HostGroup(AsDictMixin, Base):
-    """
-    Host Group Database Table
-    """
+    """Host Group Database Table."""
 
     __tablename__ = "host_groups"
 

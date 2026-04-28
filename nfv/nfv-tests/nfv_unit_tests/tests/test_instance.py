@@ -28,8 +28,8 @@ from nfv_unit_tests.tests import utils
 
 
 def fake_event_issue(a, b, c, d):
-    """
-    Mock out the _event_issue function because it is being called when instance
+    """Mock out the _event_issue function because it is being called when instance
+
     objects are created. It ends up trying to communicate with another thread
     (that doesn't exist) and this eventually leads to unit tests hanging if
     enough events are issued.
@@ -40,11 +40,9 @@ def fake_event_issue(a, b, c, d):
 # NOTE: The following testcases test the same scenarios as the testcases in
 # nova/tests/unit/virt/libvirt/test_driver.py
 class TestInstance(testcase.NFVTestCase):
-
     def setUp(self):
-        """
-        Setup for testing.
-        """
+        """Setup for testing."""
+
         super(TestInstance, self).setUp()
         self._tenant_table = Table()
         self._instance_type_table = InstanceTypeTable()
@@ -116,9 +114,8 @@ class TestInstance(testcase.NFVTestCase):
         )
 
     def tearDown(self):
-        """
-        Cleanup testing setup.
-        """
+        """Cleanup testing setup."""
+
         super(TestInstance, self).tearDown()
         self._tenant_table.clear()
         self._instance_type_table.clear()
@@ -138,9 +135,8 @@ class TestInstance(testcase.NFVTestCase):
         admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.UNLOCKED,
         live_migration_timeout=None,
     ):
-        """
-        Create an instance
-        """
+        """Create an instance."""
+
         tenant_uuid = str(uuid.uuid4())
 
         tenant = objects.Tenant(tenant_uuid, "%s_name" % tenant_uuid, "", True)
@@ -175,9 +171,8 @@ class TestInstance(testcase.NFVTestCase):
         assert 0, "Unknown instance_type_name: %s" % instance_type_name
 
     def create_instance_type(self, instance_type_name, live_migration_timeout=None):
-        """
-        Create an instance type
-        """
+        """Create an instance type."""
+
         instance_type_uuid = str(uuid.uuid4())
         instance_type = objects.InstanceType(instance_type_uuid, instance_type_name)
         instance_type.update_details(
@@ -194,9 +189,8 @@ class TestInstance(testcase.NFVTestCase):
         self._instance_type_table[instance_type_uuid] = instance_type
 
     def create_image(self, image_name, properties=None):
-        """
-        Create an image
-        """
+        """Create an image."""
+
         image_uuid = str(uuid.uuid4())
         nfvi_image = nfvi_objects.Image(
             image_uuid,
@@ -216,9 +210,8 @@ class TestInstance(testcase.NFVTestCase):
         self._image_table[image_uuid] = image
 
     def create_instance_group(self, name, members, policies):
-        """
-        Create an instance group
-        """
+        """Create an instance group."""
+
         member_uuids = []
         for instance_uuid, instance in list(self._instance_table.items()):
             if instance.name in members:
@@ -241,9 +234,8 @@ class TestInstance(testcase.NFVTestCase):
         admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED,
         sw_version="12.01",
     ):
-        """
-        Create a host
-        """
+        """Create a host."""
+
         personality = ""
         if host_name.startswith("controller"):
             personality = HOST_PERSONALITY.CONTROLLER
@@ -275,9 +267,8 @@ class TestInstance(testcase.NFVTestCase):
         self._host_table[host.name] = host
 
     def create_host_group(self, name, members, policies):
-        """
-        Create a host group
-        """
+        """Create a host group."""
+
         member_uuids = []
         for instance_uuid, instance in list(self._instance_table.items()):
             if instance.name in members:
@@ -291,9 +282,8 @@ class TestInstance(testcase.NFVTestCase):
         self._host_group_table[host_group.name] = host_group
 
     def create_host_aggregate(self, name, host_names):
-        """
-        Create a host aggregate
-        """
+        """Create a host aggregate."""
+
         nfvi_host_aggregate = nfvi.objects.v1.HostAggregate(
             name=name, host_names=host_names, availability_zone=""
         )

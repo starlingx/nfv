@@ -12,9 +12,7 @@ from nfv_vim.database.model._base import Base
 
 
 class Image(AsDictMixin, Base):
-    """
-    Image Database Table Entry
-    """
+    """Image Database Table Entry."""
 
     __tablename__ = "images"
 

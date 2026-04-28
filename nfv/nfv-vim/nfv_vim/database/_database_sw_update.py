@@ -13,9 +13,8 @@ from nfv_vim.database._database import database_get
 
 
 def database_sw_update_add(sw_update_obj):
-    """
-    Add a software update object to the database
-    """
+    """Add a software update object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.SoftwareUpdate)
@@ -38,9 +37,8 @@ def database_sw_update_add(sw_update_obj):
 
 
 def database_sw_update_delete(sw_update_uuid):
-    """
-    Delete a software update object from the database
-    """
+    """Delete a software update object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.SoftwareUpdate)
@@ -49,9 +47,8 @@ def database_sw_update_delete(sw_update_uuid):
 
 
 def database_sw_update_get_list():
-    """
-    Fetch all the software update objects from the database
-    """
+    """Fetch all the software update objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.SoftwareUpdate)
@@ -83,9 +80,8 @@ def database_sw_update_get_list():
 
 
 def database_sw_update_exists():
-    """
-    Check if any software update strategy exists in the database
-    """
+    """Check if any software update strategy exists in the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.SoftwareUpdate)

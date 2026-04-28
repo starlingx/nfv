@@ -17,35 +17,27 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.guest")
 
 
 class GuestServiceNames(Constants, metaclass=Singleton):
-    """
-    GUEST SERVICE NAMES Constants
-    """
+    """GUEST SERVICE NAMES Constants."""
 
     HEARTBEAT = Constant("heartbeat")
 
 
 class GuestServiceState(Constants, metaclass=Singleton):
-    """
-    GUEST SERVICE STATE Constants
-    """
+    """GUEST SERVICE STATE Constants."""
 
     ENABLED = Constant("enabled")
     DISABLED = Constant("disabled")
 
 
 class GuestServiceStatus(Constants, metaclass=Singleton):
-    """
-    GUEST SERVICE STATUS Constants
-    """
+    """GUEST SERVICE STATUS Constants."""
 
     ENABLED = Constant("enabled")
     DISABLED = Constant("disabled")
 
 
 class GuestEvent(Constants, metaclass=Singleton):
-    """
-    GUEST EVENT Constants
-    """
+    """GUEST EVENT Constants."""
 
     UNKNOWN = Constant("unknown")
     STOP = Constant("stop")
@@ -64,9 +56,7 @@ class GuestEvent(Constants, metaclass=Singleton):
 
 
 class GuestVoteState(Constants, metaclass=Singleton):
-    """
-    GUEST VOTE STATE Constants
-    """
+    """GUEST VOTE STATE Constants."""
 
     REJECT = Constant("reject")
     ALLOW = Constant("allow")
@@ -82,9 +72,8 @@ GUEST_VOTE_STATE = GuestVoteState()
 
 
 def host_services_create(token, host_uuid, host_name):
-    """
-    Create host services
-    """
+    """Create host services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -106,9 +95,8 @@ def host_services_create(token, host_uuid, host_name):
 
 
 def host_services_enable(token, host_uuid, host_name):
-    """
-    Enable host services
-    """
+    """Enable host services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -130,9 +118,8 @@ def host_services_enable(token, host_uuid, host_name):
 
 
 def host_services_disable(token, host_uuid, host_name):
-    """
-    Disable host services
-    """
+    """Disable host services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -154,9 +141,8 @@ def host_services_disable(token, host_uuid, host_name):
 
 
 def host_services_delete(token, host_uuid):
-    """
-    Delete host services
-    """
+    """Delete host services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -172,9 +158,8 @@ def host_services_delete(token, host_uuid):
 
 
 def host_services_query(token, host_uuid, host_name):
-    """
-    Query host services
-    """
+    """Query host services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -196,9 +181,8 @@ def host_services_query(token, host_uuid, host_name):
 
 
 def guest_services_create(token, instance_uuid, host_name, services):
-    """
-    Create guest services
-    """
+    """Create guest services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -221,9 +205,8 @@ def guest_services_create(token, instance_uuid, host_name, services):
 
 
 def guest_services_set(token, instance_uuid, host_name, services):
-    """
-    Set guest services
-    """
+    """Set guest services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -246,9 +229,8 @@ def guest_services_set(token, instance_uuid, host_name, services):
 
 
 def guest_services_delete(token, instance_uuid):
-    """
-    Delete guest services
-    """
+    """Delete guest services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -264,9 +246,8 @@ def guest_services_delete(token, instance_uuid):
 
 
 def guest_services_query(token, instance_uuid):
-    """
-    Query guest services
-    """
+    """Query guest services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -282,9 +263,8 @@ def guest_services_query(token, instance_uuid):
 
 
 def guest_services_vote(token, instance_uuid, host_name, action):
-    """
-    Ask guest services to vote
-    """
+    """Ask guest services to vote."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")
@@ -307,9 +287,8 @@ def guest_services_vote(token, instance_uuid, host_name, action):
 
 
 def guest_services_notify(token, instance_uuid, host_name, action):
-    """
-    Notify guest services
-    """
+    """Notify guest services."""
+
     url = token.get_service_url(PLATFORM_SERVICE.GUEST)
     if url is None:
         raise ValueError("OpenStack Guest URL is invalid")

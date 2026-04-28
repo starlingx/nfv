@@ -11,9 +11,7 @@ _instance_table = None
 
 
 class InstanceTable(Table):
-    """
-    Instance Table
-    """
+    """Instance Table."""
 
     def __init__(self):
         super(InstanceTable, self).__init__()
@@ -37,16 +35,14 @@ class InstanceTable(Table):
 
 
 def tables_get_instance_table():
-    """
-    Get the instance table
-    """
+    """Get the instance table."""
+
     return _instance_table
 
 
 def instance_table_initialize():
-    """
-    Initialize the instance table
-    """
+    """Initialize the instance table."""
+
     global _instance_table
 
     _instance_table = InstanceTable()
@@ -59,9 +55,8 @@ def instance_table_initialize():
 
 
 def instance_table_finalize():
-    """
-    Finalize the instance table
-    """
+    """Finalize the instance table."""
+
     global _instance_table
 
     del _instance_table

@@ -13,9 +13,8 @@ DLOG = debug.debug_get_logger("nfv_vim.database")
 
 
 def _migrate_hosts_v7_to_v8(session, hosts_v7, hosts_v8):
-    """
-    Replace software_load, target_load with sw_version
-    """
+    """Replace software_load, target_load with sw_version."""
+
     if 0 == len(hosts_v8):
         for host_v7 in hosts_v7:
             host_v8 = model.Host_v8()
@@ -29,9 +28,8 @@ def _migrate_hosts_v7_to_v8(session, hosts_v7, hosts_v8):
 
 
 def _migrate_hosts_v6_to_v7(session, hosts_v6, hosts_v7):
-    """
-    Migrate host_v6 table to host_v7 table
-    """
+    """Migrate host_v6 table to host_v7 table."""
+
     if 0 == len(hosts_v7):
         for host_v6 in hosts_v6:
             host_v7 = model.Host_v7()
@@ -43,9 +41,8 @@ def _migrate_hosts_v6_to_v7(session, hosts_v6, hosts_v7):
 
 
 def migrate_tables(session, table_names):
-    """
-    Migrate database tables
-    """
+    """Migrate database tables."""
+
     if "hosts_v6" in table_names and "hosts_v7" in table_names:
         hosts_v6_query = session.query(model.Host_v6)
         hosts_v6 = hosts_v6_query.all()

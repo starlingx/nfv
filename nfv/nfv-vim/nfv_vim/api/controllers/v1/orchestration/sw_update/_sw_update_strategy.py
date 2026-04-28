@@ -22,31 +22,31 @@ from nfv_vim.api.acl import policy
 from nfv_vim import rpc
 
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SW_UPDATE_ACTION
+    SW_UPDATE_ACTION,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SW_UPDATE_ALARM_RESTRICTION_TYPES
+    SW_UPDATE_ALARM_RESTRICTION_TYPES,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SW_UPDATE_APPLY_TYPE
+    SW_UPDATE_APPLY_TYPE,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SW_UPDATE_NAME
+    SW_UPDATE_NAME,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SwUpdateActions
+    SwUpdateActions,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SwUpdateAlarmRestrictionTypes
+    SwUpdateAlarmRestrictionTypes,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SwUpdateApplyTypes
+    SwUpdateApplyTypes,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SwUpdateInstanceActionTypes
+    SwUpdateInstanceActionTypes,
 )
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
-    SwUpdateNames
+    SwUpdateNames,
 )
 
 DLOG = debug.debug_get_logger("nfv_vim.api.sw_update.strategy")
@@ -80,9 +80,7 @@ def _get_sw_update_type_from_path(path):
 
 
 class SwUpdateStrategyStageStepData(wsme_types.Base):
-    """
-    Software Update Strategy - Stage Step Data
-    """
+    """Software Update Strategy - Stage Step Data."""
 
     step_id = wsme_types.wsattr(int, name="step-id")
     step_name = wsme_types.wsattr(str, name="step-name")
@@ -97,9 +95,7 @@ class SwUpdateStrategyStageStepData(wsme_types.Base):
 
 
 class SwUpdateStrategyStageData(wsme_types.Base):
-    """
-    Software Update Strategy - Stage Data
-    """
+    """Software Update Strategy - Stage Data."""
 
     stage_id = wsme_types.wsattr(int, name="stage-id")
     stage_name = wsme_types.wsattr(str, name="stage-name")
@@ -115,9 +111,7 @@ class SwUpdateStrategyStageData(wsme_types.Base):
 
 
 class SwUpdateStrategyPhaseData(wsme_types.Base):
-    """
-    Software Update Strategy - Phase Data
-    """
+    """Software Update Strategy - Phase Data."""
 
     phase_name = wsme_types.wsattr(str, name="phase-name")
     timeout = wsme_types.wsattr(int, name="timeout")
@@ -135,9 +129,7 @@ class SwUpdateStrategyPhaseData(wsme_types.Base):
 
 
 class SwUpdateStrategyData(wsme_types.Base):
-    """
-    Software Update Strategy - Data
-    """
+    """Software Update Strategy - Data."""
 
     uuid = wsme_types.wsattr(str, name="uuid")
     name = wsme_types.wsattr(SwUpdateNames, name="name")
@@ -168,9 +160,7 @@ class SwUpdateStrategyData(wsme_types.Base):
 
 
 class SwUpgradeStrategyCreateData(wsme_types.Base):
-    """
-    Software Upgrade Strategy - Create Data
-    """
+    """Software Upgrade Strategy - Create Data."""
 
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="controller-apply-type"
@@ -200,17 +190,13 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
 
 
 class SwUpdateStrategyDeleteData(wsme_types.Base):
-    """
-    Software Update Strategy - Delete Data
-    """
+    """Software Update Strategy - Delete Data."""
 
     force = wsme_types.wsattr(bool, mandatory=False, name="force", default=False)
 
 
 class SystemConfigUpdateStrategyCreateData(wsme_types.Base):
-    """
-    System Config Update Strategy - Create Data
-    """
+    """System Config Update Strategy - Create Data."""
 
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="controller-apply-type"
@@ -236,9 +222,7 @@ class SystemConfigUpdateStrategyCreateData(wsme_types.Base):
 
 
 class FwUpdateStrategyCreateData(wsme_types.Base):
-    """
-    Firmware Update Strategy - Create Data
-    """
+    """Firmware Update Strategy - Create Data."""
 
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="controller-apply-type"
@@ -264,9 +248,7 @@ class FwUpdateStrategyCreateData(wsme_types.Base):
 
 
 class KubeRootcaUpdateStrategyCreateData(wsme_types.Base):
-    """
-    Kubernetes Root CA Update Strategy - Create Data
-    """
+    """Kubernetes Root CA Update Strategy - Create Data."""
 
     expiry_date = wsme_types.wsattr(str, mandatory=False, name="expiry-date")
     subject = wsme_types.wsattr(str, mandatory=False, name="subject")
@@ -291,9 +273,7 @@ class KubeRootcaUpdateStrategyCreateData(wsme_types.Base):
 
 
 class KubeUpgradeStrategyCreateData(wsme_types.Base):
-    """
-    Kubernetes Upgrade Strategy - Create Data
-    """
+    """Kubernetes Upgrade Strategy - Create Data."""
 
     to_version = wsme_types.wsattr(str, mandatory=True, name="to-version")
     storage_apply_type = wsme_types.wsattr(
@@ -317,18 +297,14 @@ class KubeUpgradeStrategyCreateData(wsme_types.Base):
 
 
 class SwUpdateStrategyActionData(wsme_types.Base):
-    """
-    Software Update Strategy - Action Data
-    """
+    """Software Update Strategy - Action Data."""
 
     action = wsme_types.wsattr(SwUpdateActions, mandatory=True, name="action")
     stage_id = wsme_types.wsattr(int, mandatory=False, name="stage-id")
 
 
 class SwUpdateStrategyQueryData(wsme_types.Base):
-    """
-    Software Update Strategy - Query Data
-    """
+    """Software Update Strategy - Query Data."""
 
     strategy = wsme_types.wsattr(SwUpdateStrategyData, default=None, name="strategy")
 
@@ -408,9 +384,7 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
 
 
 class SwUpdateStrategyActionAPI(rest.RestController):
-    """
-    Software Update Strategy Action Rest API
-    """
+    """Software Update Strategy Action Rest API."""
 
     @wsme_pecan.wsexpose(
         SwUpdateStrategyQueryData,
@@ -511,6 +485,7 @@ class SwUpdateStrategyActionAPI(rest.RestController):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
+
         # this handles the apply and abort requests
         if method_name == "post":
             policy.check(
@@ -524,9 +499,7 @@ class SwUpdateStrategyActionAPI(rest.RestController):
 
 
 class SwUpdateStrategyAPI(rest.RestController):
-    """
-    Software Update Strategy Rest API
-    """
+    """Software Update Strategy Rest API."""
 
     actions = SwUpdateStrategyActionAPI()
 
@@ -632,9 +605,7 @@ class SwUpdateStrategyAPI(rest.RestController):
 
 
 class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
-    """
-    Software Upgrade Strategy Rest API
-    """
+    """Software Upgrade Strategy Rest API."""
 
     @wsme_pecan.wsexpose(
         SwUpdateStrategyQueryData,
@@ -692,6 +663,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
+
         if method_name == "delete":
             policy.check(
                 sw_upgrade_strategy_policy.POLICY_ROOT % "delete",
@@ -718,9 +690,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
 
 
 class SystemConfigUpdateStrategyAPI(SwUpdateStrategyAPI):
-    """
-    System Config Update Strategy Rest API
-    """
+    """System Config Update Strategy Rest API."""
 
     @wsme_pecan.wsexpose(
         SwUpdateStrategyQueryData,
@@ -774,6 +744,7 @@ class SystemConfigUpdateStrategyAPI(SwUpdateStrategyAPI):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
+
         if method_name == "delete":
             policy.check(
                 system_config_update_strategy_policy.POLICY_ROOT % "delete",
@@ -800,9 +771,7 @@ class SystemConfigUpdateStrategyAPI(SwUpdateStrategyAPI):
 
 
 class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
-    """
-    Firmware Update Strategy Rest API
-    """
+    """Firmware Update Strategy Rest API."""
 
     @wsme_pecan.wsexpose(
         SwUpdateStrategyQueryData,
@@ -855,6 +824,7 @@ class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
+
         if method_name == "delete":
             policy.check(
                 fw_update_strategy_policy.POLICY_ROOT % "delete",
@@ -881,9 +851,7 @@ class FwUpdateStrategyAPI(SwUpdateStrategyAPI):
 
 
 class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
-    """
-    Kubernetes Root CA Update Strategy Rest API
-    """
+    """Kubernetes Root CA Update Strategy Rest API."""
 
     @wsme_pecan.wsexpose(
         SwUpdateStrategyQueryData,
@@ -961,6 +929,7 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
+
         if method_name == "delete":
             policy.check(
                 kube_rootca_update_strategy_policy.POLICY_ROOT % "delete",
@@ -987,9 +956,7 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
 
 
 class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
-    """
-    Kubernetes Upgrade Strategy Rest API
-    """
+    """Kubernetes Upgrade Strategy Rest API."""
 
     @wsme_pecan.wsexpose(
         SwUpdateStrategyQueryData,
@@ -1055,6 +1022,7 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
 
     def enforce_policy(self, method_name, auth_context_dict):
         """Check policy rules for each action of this controller."""
+
         if method_name == "delete":
             policy.check(
                 kube_upgrade_strategy_policy.POLICY_ROOT % "delete",
@@ -1081,9 +1049,7 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
 
 
 class CurrentStrategyAPI(SwUpdateStrategyAPI):
-    """
-    Current Strategy Rest API
-    """
+    """Current Strategy Rest API."""
 
     @wsme_pecan.wsexpose(SwUpdateStrategyQueryData, status_code=httplib.OK)
     def get_all(self):

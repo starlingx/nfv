@@ -18,27 +18,21 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.neutron")
 
 
 class NeutronExtensionNames(Constants, metaclass=Singleton):
-    """
-    Neutron Extension Name Constants
-    """
+    """Neutron Extension Name Constants."""
 
     HOST = Constant("host")
     AGENT = Constant("agent")
 
 
 class NetworkAdministrativeState(Constants, metaclass=Singleton):
-    """
-    NETWORK ADMINISTRATIVE STATE Constants
-    """
+    """NETWORK ADMINISTRATIVE STATE Constants."""
 
     UP = Constant(True)
     DOWN = Constant(False)
 
 
 class NetworkStatus(Constants, metaclass=Singleton):
-    """
-    NETWORK STATUS Constants
-    """
+    """NETWORK STATUS Constants."""
 
     ACTIVE = Constant("ACTIVE")
     BUILD = Constant("BUILD")
@@ -47,18 +41,14 @@ class NetworkStatus(Constants, metaclass=Singleton):
 
 
 class AgentType(Constants, metaclass=Singleton):
-    """
-    AGENT TYPE Constants
-    """
+    """AGENT TYPE Constants."""
 
     L3 = Constant("L3 agent")
     DHCP = Constant("DHCP agent")
 
 
 class VnicType(Constants, metaclass=Singleton):
-    """
-    VNIC TYPE constants
-    """
+    """VNIC TYPE constants."""
 
     NORMAL = Constant("normal")
     DIRECT = Constant("direct")
@@ -77,17 +67,16 @@ VNIC_TYPE = VnicType()
 
 
 def get_network_agents(token):
-    """
-    Get Network Agent information for all agents.
-    """
+    """Get Network Agent information for all agents."""
+
     url, api_cmd, api_cmd_headers, result_data = _get_network_agents(token, None)
 
     return result_data
 
 
 def get_dhcp_agent_networks(token, agent_id):
-    """
-    Get all networks hosted by a particular dhcp agent
+    """Get all networks hosted by a particular dhcp agent
+
     Paging not supported by API.
     """
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
@@ -111,9 +100,8 @@ def get_dhcp_agent_networks(token, agent_id):
 
 
 def add_network_to_dhcp_agent(token, agent_id, network_id):
-    """
-    Schedule a network on a DHCP agent
-    """
+    """Schedule a network on a DHCP agent."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -133,9 +121,8 @@ def add_network_to_dhcp_agent(token, agent_id, network_id):
 
 
 def remove_network_from_dhcp_agent(token, agent_id, network_id):
-    """
-    Unschedule a network from a DHCP agent
-    """
+    """Unschedule a network from a DHCP agent."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -150,9 +137,8 @@ def remove_network_from_dhcp_agent(token, agent_id, network_id):
 
 
 def get_agent_routers(token, agent_id):
-    """
-    Get all routers hosted by a particular agent
-    """
+    """Get all routers hosted by a particular agent."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -169,9 +155,8 @@ def get_agent_routers(token, agent_id):
 
 
 def add_router_to_agent(token, agent_id, router_id):
-    """
-    Schedule a router on an L3 agent
-    """
+    """Schedule a router on an L3 agent."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -191,9 +176,8 @@ def add_router_to_agent(token, agent_id, router_id):
 
 
 def remove_router_from_agent(token, agent_id, router_id):
-    """
-    Unschedule a router from an L3 agent
-    """
+    """Unschedule a router from an L3 agent."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -208,9 +192,8 @@ def remove_router_from_agent(token, agent_id, router_id):
 
 
 def get_router_ports(token, router_id):
-    """
-    Get port information for particular router
-    """
+    """Get port information for particular router."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -225,9 +208,8 @@ def get_router_ports(token, router_id):
 
 
 def get_physical_network(token, network_id):
-    """
-    Get the physical network of a network
-    """
+    """Get the physical network of a network."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -245,9 +227,8 @@ def get_physical_network(token, network_id):
 
 
 def _get_network_agents(token, host_name):
-    """
-    Get network agents of a host
-    """
+    """Get network agents of a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -258,7 +239,10 @@ def _get_network_agents(token, host_name):
     else:
         # if host_name is None, we are to retrieve information
         # on all agents on all hosts.
-        fields_qualifier = "?fields=id&fields=host&fields=agent_type&fields=alive&fields=admin_state_up"
+        fields_qualifier = (
+            "?fields=id&fields=host&fields=agent_type"
+            "&fields=alive&fields=admin_state_up"
+        )
         api_cmd = api_cmd + fields_qualifier
 
     api_cmd_headers = dict()
@@ -271,9 +255,8 @@ def _get_network_agents(token, host_name):
 
 
 def lookup_extension(extension_name, extensions):
-    """
-    Lookup an extension for OpenStack Neutron
-    """
+    """Lookup an extension for OpenStack Neutron."""
+
     if extensions is None:
         return None
 
@@ -291,9 +274,8 @@ def lookup_extension(extension_name, extensions):
 
 
 def get_extensions(token):
-    """
-    Asks OpenStack Neutron for a list of extensions
-    """
+    """Asks OpenStack Neutron for a list of extensions."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         return dict()
@@ -308,9 +290,8 @@ def get_extensions(token):
 
 
 def get_networks(token, page_limit=None, next_page=None):
-    """
-    Asks OpenStack Neutron for a list of networks
-    """
+    """Asks OpenStack Neutron for a list of networks."""
+
     if next_page is None:
         url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
         if url is None:
@@ -332,9 +313,8 @@ def get_networks(token, page_limit=None, next_page=None):
 def create_network(
     token, network_name, network_type, segmentation_id, physical_network, shared
 ):
-    """
-    Asks OpenStack Neutron to create a network
-    """
+    """Asks OpenStack Neutron to create a network."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -366,9 +346,8 @@ def create_network(
 
 
 def update_network(token, network_id, admin_state=None, shared=None):
-    """
-    Asks OpenStack Neutron to update a network
-    """
+    """Asks OpenStack Neutron to update a network."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -399,9 +378,8 @@ def update_network(token, network_id, admin_state=None, shared=None):
 
 
 def delete_network(token, network_id):
-    """
-    Asks OpenStack Neutron to delete a network
-    """
+    """Asks OpenStack Neutron to delete a network."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -415,9 +393,8 @@ def delete_network(token, network_id):
 
 
 def get_network(token, network_id):
-    """
-    Asks OpenStack Neutron for network details
-    """
+    """Asks OpenStack Neutron for network details."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -431,9 +408,8 @@ def get_network(token, network_id):
 
 
 def get_subnets(token, page_limit=None, next_page=None):
-    """
-    Ask OpenStack Neutron for a list of subnets
-    """
+    """Ask OpenStack Neutron for a list of subnets."""
+
     if next_page is None:
         url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
         if url is None:
@@ -455,9 +431,8 @@ def get_subnets(token, page_limit=None, next_page=None):
 def create_subnet(
     token, network_id, subnet_name, ip_version, cidr, gateway_ip, dhcp_enabled
 ):
-    """
-    Ask OpenStack Neutron to create a subnet
-    """
+    """Ask OpenStack Neutron to create a subnet."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -491,9 +466,8 @@ def create_subnet(
 def update_subnet(
     token, subnet_id, gateway_ip=None, delete_gateway=False, dhcp_enabled=None
 ):
-    """
-    Ask OpenStack Neutron to update a subnet
-    """
+    """Ask OpenStack Neutron to update a subnet."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -524,9 +498,8 @@ def update_subnet(
 
 
 def delete_subnet(token, subnet_id):
-    """
-    Asks OpenStack Neutron to delete a subnet
-    """
+    """Asks OpenStack Neutron to delete a subnet."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -540,9 +513,8 @@ def delete_subnet(token, subnet_id):
 
 
 def get_subnet(token, subnet_id):
-    """
-    Asks OpenStack Neutron for subnet details
-    """
+    """Asks OpenStack Neutron for subnet details."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -556,9 +528,8 @@ def get_subnet(token, subnet_id):
 
 
 def get_ports_for_instance(token, instance_uuid):
-    """
-    Ask OpenStack Neutron for a list of ports attached to an instance
-    """
+    """Ask OpenStack Neutron for a list of ports attached to an instance."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -572,9 +543,8 @@ def get_ports_for_instance(token, instance_uuid):
 
 
 def delete_host_services(token, host_uuid):
-    """
-    Asks OpenStack Neutron to delete a host
-    """
+    """Asks OpenStack Neutron to delete a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -592,9 +562,8 @@ def delete_host_services(token, host_uuid):
 
 
 def delete_network_agents(token, host_name):
-    """
-    Asks OpenStack Neutron to delete agents for a host
-    """
+    """Asks OpenStack Neutron to delete agents for a host."""
+
     try:
         url, api_cmd, api_cmd_headers, result_data = _get_network_agents(
             token, host_name
@@ -621,9 +590,8 @@ def delete_network_agents(token, host_name):
 
 
 def delete_host_services_by_name(token, host_name, host_uuid, only_if_changed=False):
-    """
-    Asks OpenStack Neutron to delete a host by name
-    """
+    """Asks OpenStack Neutron to delete a host by name."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -646,9 +614,8 @@ def delete_host_services_by_name(token, host_name, host_uuid, only_if_changed=Fa
 
 
 def enable_host_services(token, host_uuid):
-    """
-    Asks OpenStack Neutron to enable a host
-    """
+    """Asks OpenStack Neutron to enable a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -671,8 +638,8 @@ def enable_host_services(token, host_uuid):
 
 
 def enable_network_agents(token, host_name):
-    """
-    Asks OpenStack Neutron to enable agents on a host.
+    """Asks OpenStack Neutron to enable agents on a host.
+
     Set admin_state_up to True for all agents found for a host, but
     ensure that the set of supported agents that are managed
     are all alive and admin_state_up is successfully set to True
@@ -729,9 +696,8 @@ def enable_network_agents(token, host_name):
 
 
 def disable_host_services(token, host_uuid):
-    """
-    Asks OpenStack Neutron to disable a host
-    """
+    """Asks OpenStack Neutron to disable a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -761,8 +727,8 @@ def disable_host_services(token, host_uuid):
 
 
 def disable_network_agents(token, host_name):
-    """
-    Asks OpenStack Neutron to disable the set of supported agents
+    """Asks OpenStack Neutron to disable the set of supported agents
+
     that are managed on a host by setting the admin_state_up parameter
     to False.  Other agents are left alone.
     """
@@ -804,9 +770,8 @@ def disable_network_agents(token, host_name):
 
 
 def query_host_services(token, host_name):
-    """
-    Asks OpenStack Neutron for the state of services on a host
-    """
+    """Asks OpenStack Neutron for the state of services on a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
         raise ValueError("OpenStack Neutron URL is invalid")
@@ -829,8 +794,7 @@ def query_host_services(token, host_name):
 
     except (TypeError, ValueError, AttributeError):
         DLOG.error(
-            "Neutron host query failed for %s, defaulting return "
-            "to down." % host_name
+            "Neutron host query failed for %s, defaulting return to down." % host_name
         )
         return "down"
 
@@ -852,8 +816,8 @@ def query_host_services(token, host_name):
 
 
 def query_network_agents(token, host_name, check_fully_up):
-    """
-    Asks OpenStack Neutron for the state of the supported agents
+    """Asks OpenStack Neutron for the state of the supported agents
+
     that are managed on a host.
     Input parameter check_fully_up set to True will check for
     both alive and admin_state_up, otherwise only alive is checked.

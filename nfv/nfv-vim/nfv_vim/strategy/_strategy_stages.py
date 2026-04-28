@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.strategy.stage")
 
 
 class StrategyStageNames(Constants, metaclass=Singleton):
-    """
-    Strategy Stage Names
-    """
+    """Strategy Stage Names."""
 
     # patch stages
     SW_PATCH_QUERY = Constant("sw-patch-query")
@@ -87,9 +85,8 @@ STRATEGY_STAGE_NAME = StrategyStageNames()
 
 
 def strategy_stage_rebuild_from_dict(data):
-    """
-    Returns the strategy stage object initialized using the given dictionary
-    """
+    """Returns the strategy stage object initialized using the given dictionary."""
+
     from nfv_vim.strategy._strategy_steps import strategy_step_rebuild_from_dict
 
     steps = list()

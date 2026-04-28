@@ -17,9 +17,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.cinder")
 
 
 class VolumeStatus(Constants, metaclass=Singleton):
-    """
-    VOLUME STATUS Constants
-    """
+    """VOLUME STATUS Constants."""
 
     CREATING = Constant("creating")
     AVAILABLE = Constant("available")
@@ -40,9 +38,8 @@ VOLUME_STATUS = VolumeStatus()
 
 
 def get_volumes(token, page_limit=None, next_page=None, all_tenants=True):
-    """
-    Asks OpenStack Cinder for a list of volumes
-    """
+    """Asks OpenStack Cinder for a list of volumes."""
+
     if next_page is None:
         url = token.get_service_url(OPENSTACK_SERVICE.CINDER)
         if url is None:
@@ -68,9 +65,8 @@ def get_volumes(token, page_limit=None, next_page=None, all_tenants=True):
 def create_volume(
     token, volume_name, volume_description, size_gb, image_id=None, bootable=None
 ):
-    """
-    Asks OpenStack Cinder to create a volume
-    """
+    """Asks OpenStack Cinder to create a volume."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CINDER)
     if url is None:
         raise ValueError("OpenStack Cinder URL is invalid")
@@ -101,9 +97,8 @@ def create_volume(
 
 
 def update_volume(token, volume_id, volume_description):
-    """
-    Asks OpenStack Cinder to update a volume
-    """
+    """Asks OpenStack Cinder to update a volume."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CINDER)
     if url is None:
         raise ValueError("OpenStack Cinder URL is invalid")
@@ -126,9 +121,8 @@ def update_volume(token, volume_id, volume_description):
 
 
 def delete_volume(token, volume_id):
-    """
-    Asks OpenStack Cinder to delete a volume
-    """
+    """Asks OpenStack Cinder to delete a volume."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CINDER)
     if url is None:
         raise ValueError("OpenStack Cinder URL is invalid")
@@ -142,9 +136,8 @@ def delete_volume(token, volume_id):
 
 
 def get_volume(token, volume_id):
-    """
-    Asks OpenStack Cinder for volume details
-    """
+    """Asks OpenStack Cinder for volume details."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CINDER)
     if url is None:
         raise ValueError("OpenStack Cinder URL is invalid")
@@ -158,9 +151,8 @@ def get_volume(token, volume_id):
 
 
 def get_volume_snapshots(token, all_tenants=True):
-    """
-    Asks OpenStack Cinder for a list of volume snapshots
-    """
+    """Asks OpenStack Cinder for a list of volume snapshots."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CINDER)
     if url is None:
         raise ValueError("OpenStack Cinder URL is invalid")

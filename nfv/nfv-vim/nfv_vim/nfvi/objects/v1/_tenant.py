@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class Tenant(ObjectData):
-    """
-    NFVI Tenant Object
-    """
+    """NFVI Tenant Object."""
 
     def __init__(self, uuid, name, description, enabled):
         super(Tenant, self).__init__("1.0.0")

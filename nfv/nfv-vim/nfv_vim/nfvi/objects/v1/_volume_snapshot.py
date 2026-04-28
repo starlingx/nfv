@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class VolumeSnapshot(ObjectData):
-    """
-    NFVI Volume Snapshot Object
-    """
+    """NFVI Volume Snapshot Object."""
 
     def __init__(self, uuid, name, description, size_gb, volume_uuid):
         super(VolumeSnapshot, self).__init__("1.0.0")

@@ -13,7 +13,6 @@ from nfv_unit_tests.tests import testcase
 
 
 class TestNFVClientShell(testcase.NFVTestCase):
-
     def setUp(self):
         super(TestNFVClientShell, self).setUp()
 
@@ -57,7 +56,6 @@ class TestNFVClientShellRobustness(TestNFVClientShell):
 
 
 class StrategyMixin(object):
-
     MOCK_ENV = {
         "OS_AUTH_URL": "FAKE_OS_AUTH_URL",
         "OS_PROJECT_NAME": "FAKE_OS_PROJECT_NAME",
@@ -72,7 +70,8 @@ class StrategyMixin(object):
     MOCK_ENV_OVERRIDES = {
         "OS_AUTH_URL": "--os-auth-url=FAKE_OS_AUTH_URL",
         "OS_PROJECT_NAME": "--os-project-name=FAKE_OS_PROJECT_NAME",
-        "OS_PROJECT_DOMAIN_NAME": "--os-project-domain-name=FAKE_OS_PROJECT_DOMAIN_NAME",
+        "OS_PROJECT_DOMAIN_NAME": "--os-project-domain-name="
+        "FAKE_OS_PROJECT_DOMAIN_NAME",
         "OS_USERNAME": "--os-username=FAKE_OS_USERNAME",
         "OS_PASSWORD": "--os-password=FAKE_OS_PASSWORD",
         "OS_USER_DOMAIN_NAME": "--os-user-domain-name=FAKE_OS_USER_DOMAIN_NAME",
@@ -81,15 +80,18 @@ class StrategyMixin(object):
     }
 
     def set_strategy(self, strategy):
-        """Invoked by the child class setupmethod to set the strategy"""
+        """Invoked by the child class setupmethod to set the strategy."""
+
         self.strategy = strategy
 
     def required_create_fields(self):
-        """Override in the child class if create has required fields"""
+        """Override in the child class if create has required fields."""
+
         return []
 
     def optional_create_fields(self):
-        """Override in the child class if create has optional fields"""
+        """Override in the child class if create has optional fields."""
+
         return []
 
     # -- Show commands --
@@ -123,19 +125,22 @@ class StrategyMixin(object):
                 mock_show.assert_called_once()
 
     def test_shell_strategy_missing_subcommand(self):
-        """Test the strategy fails with a missing subcommand"""
+        """Test the strategy fails with a missing subcommand."""
+
         shell_args = [
             self.strategy,
         ]
         self._test_shell_bad_or_empty_args(shell_args=shell_args)
 
     def test_shell_strategy_invalid_subcommand(self):
-        """Test the strategy fails with an invalid subcommand"""
+        """Test the strategy fails with an invalid subcommand."""
+
         shell_args = [self.strategy, "foo"]
         self._test_shell_bad_or_empty_args(shell_args=shell_args)
 
     def test_shell_strategy_help(self):
-        """Test the strategy supports the help subcommand"""
+        """Test the strategy supports the help subcommand."""
+
         shell_args = [
             self.strategy,
             "-h",
@@ -143,7 +148,8 @@ class StrategyMixin(object):
         self._test_shell_help(shell_args=shell_args)
 
     def test_shell_strategy_show_incomplete_env(self):
-        """Test that if any required env variable is missing, it fails"""
+        """Test that if any required env variable is missing, it fails."""
+
         shell_args = [
             self.strategy,
             "show",
@@ -156,9 +162,9 @@ class StrategyMixin(object):
             self._test_shell_show_incomplete_env(shell_args=shell_args, pop_env=pop_env)
 
     def test_shell_strategy_show_env_overrides(self):
-        """
-        Tests that passing certain values to the CLI override the env and
-        that removing that value from the env will not cause failure
+        """Tests that passing certain values to the CLI override the env and
+
+        that removing that value from the env will not cause failure.
         """
         for env_val, override_val in self.MOCK_ENV_OVERRIDES.items():
             shell_args = [
@@ -271,7 +277,8 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
         self.set_strategy("sw-deploy-strategy")
 
     def required_create_fields(self):
-        """Software deploy requires a release for create"""
+        """Software deploy requires a release for create."""
+
         return ["starlingx-24.03.1"]
 
     def test_create_missing_both(self):
@@ -316,7 +323,8 @@ class TestCLIKubeUpgradeStrategy(TestNFVClientShell, StrategyMixin):
         self.set_strategy("kube-upgrade-strategy")
 
     def required_create_fields(self):
-        """Kube Upgrade requires a to-version for create"""
+        """Kube Upgrade requires a to-version for create."""
+
         return ["--to-version=1.2.3"]
 
 

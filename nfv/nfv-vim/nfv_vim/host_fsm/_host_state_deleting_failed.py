@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class DeletingFailedState(state_machine.State):
-    """
-    Host - Deleting Failed State
-    """
+    """Host - Deleting Failed State."""
 
     def __init__(self, name):
         super(DeletingFailedState, self).__init__(name)
 
     def enter(self, host):
-        """
-        Entering deleting failed state
-        """
+        """Entering deleting failed state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, host.name))
         host.task = NotifyDeleteFailedTask(host)
         host.task.start()
 
     def exit(self, host):
-        """
-        Exiting deleting failed state
-        """
+        """Exiting deleting failed state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, host.name))
         host.task.abort()
         host.clear_reason()
 
     def transition(self, host, event, event_data, to_state):
-        """
-        Transition from the deleting failed state
-        """
+        """Transition from the deleting failed state."""
+
         pass
 
     def handle_event(self, host, event, event_data=None):
-        """
-        Handle event while in the deleting failed state
-        """
+        """Handle event while in the deleting failed state."""
+
         handled = False
 
         if host.task.inprogress():

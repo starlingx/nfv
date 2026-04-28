@@ -14,9 +14,8 @@ DLOG = debug.debug_get_logger("nfv_vim.manage")
 
 
 def process_main():
-    """
-    Virtual Infrastructure Manager Manage - Main
-    """
+    """Virtual Infrastructure Manager Manage - Main."""
+
     try:
         parser = argparse.ArgumentParser(
             usage=(

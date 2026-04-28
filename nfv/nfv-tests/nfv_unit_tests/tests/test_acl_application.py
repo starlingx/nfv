@@ -11,12 +11,13 @@ from unittest import mock
 
 
 class TestAuthenticationApplication(testtools.TestCase):
-
     def setUp(self):
         super(TestAuthenticationApplication, self).setUp()
-        with mock.patch("nfv_vim.api.openstack.config_load"), mock.patch(
-            "nfv_vim.api.openstack.get_directory"
-        ), mock.patch("nfv_vim.api.acl.policy.set_rules"):
+        with (
+            mock.patch("nfv_vim.api.openstack.config_load"),
+            mock.patch("nfv_vim.api.openstack.get_directory"),
+            mock.patch("nfv_vim.api.acl.policy.set_rules"),
+        ):
             self.app = AuthenticationApplication(mock.Mock())
 
     @mock.patch("nfv_vim.api.openstack.get_token")

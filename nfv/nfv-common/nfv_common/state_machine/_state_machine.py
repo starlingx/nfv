@@ -13,14 +13,11 @@ DLOG = debug.debug_get_logger("nfv_common.state_machine.state_machine")
 
 
 class StateMachine(object):
-    """
-    State Machine Object
-    """
+    """State Machine Object."""
 
     def __init__(self, context, context_args, context_kwargs, initial_state, states):
-        """
-        Create State Machine
-        """
+        """Create State Machine."""
+
         if context_args is None:
             context_args = tuple()
 
@@ -39,30 +36,26 @@ class StateMachine(object):
 
     @property
     def _context(self):
-        """
-        Returns the context
-        """
+        """Returns the context."""
+
         context = self._context_reference()
         return context
 
     @property
     def current_state(self):
-        """
-        Returns the current state
-        """
+        """Returns the current state."""
+
         return self._current_state
 
     def register_state_change_callback(self, callback):
-        """
-        Register state change callback
-        """
+        """Register state change callback."""
+
         if callback not in self._state_change_callbacks:
             self._state_change_callbacks.append(callback)
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle event
-        """
+        """Handle event."""
+
         if self._transitioning:
             self._event_backlog.append((self._event_backlog_state, event, event_data))
             return

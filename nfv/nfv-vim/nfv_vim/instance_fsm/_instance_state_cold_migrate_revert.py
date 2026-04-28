@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ColdMigrateRevertState(state_machine.State):
-    """
-    Instance - Cold Migrate Revert State
-    """
+    """Instance - Cold Migrate Revert State."""
 
     def __init__(self, name):
         super(ColdMigrateRevertState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering cold migrate revert state
-        """
+        """Entering cold migrate revert state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = ColdMigrateRevertTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting cold migrate revert state
-        """
+        """Exiting cold migrate revert state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, ColdMigrateRevertTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the cold migrate revert state
-        """
+        """Transition from the cold migrate revert state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the cold migrate revert state
-        """
+        """Handle event while in the cold migrate revert state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.rpc.subnet")
 
 
 class APIRequestCreateSubnet(RPCMessage):
-    """
-    RPC API Request Message - Create Subnet
-    """
+    """RPC API Request Message - Create Subnet."""
 
     network_uuid = None
     network_name = None
@@ -57,9 +55,7 @@ class APIRequestCreateSubnet(RPCMessage):
 
 
 class APIResponseCreateSubnet(RPCMessage):
-    """
-    RPC API Response Message - Create Subnet
-    """
+    """RPC API Response Message - Create Subnet."""
 
     uuid = None
     name = None
@@ -106,9 +102,7 @@ class APIResponseCreateSubnet(RPCMessage):
 
 
 class APIRequestUpdateSubnet(RPCMessage):
-    """
-    RPC API Request Message - Update Subnet
-    """
+    """RPC API Request Message - Update Subnet."""
 
     network_name = None
     subnet_ip = None
@@ -146,9 +140,7 @@ class APIRequestUpdateSubnet(RPCMessage):
 
 
 class APIResponseUpdateSubnet(RPCMessage):
-    """
-    RPC API Response Message - Update Subnet
-    """
+    """RPC API Response Message - Update Subnet."""
 
     uuid = None
     name = None
@@ -195,9 +187,7 @@ class APIResponseUpdateSubnet(RPCMessage):
 
 
 class APIRequestDeleteSubnet(RPCMessage):
-    """
-    RPC API Request Message - Delete Subnet
-    """
+    """RPC API Request Message - Delete Subnet."""
 
     network_name = None
     subnet_ip = None
@@ -226,9 +216,7 @@ class APIRequestDeleteSubnet(RPCMessage):
 
 
 class APIResponseDeleteSubnet(RPCMessage):
-    """
-    RPC API Response Message - Delete subnet
-    """
+    """RPC API Response Message - Delete subnet."""
 
     network_name = None
     subnet_ip = None
@@ -257,9 +245,7 @@ class APIResponseDeleteSubnet(RPCMessage):
 
 
 class APIRequestGetSubnet(RPCMessage):
-    """
-    RPC API Request Message - Get Subnet
-    """
+    """RPC API Request Message - Get Subnet."""
 
     get_all = False
     filter_by_uuid = None
@@ -302,9 +288,7 @@ class APIRequestGetSubnet(RPCMessage):
 
 
 class APIResponseGetSubnet(RPCMessage):
-    """
-    RPC API Response Message - Get Subnet
-    """
+    """RPC API Response Message - Get Subnet."""
 
     uuid = None
     name = None

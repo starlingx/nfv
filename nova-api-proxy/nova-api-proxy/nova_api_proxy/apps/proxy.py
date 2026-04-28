@@ -27,9 +27,9 @@ LOG = logging.getLogger(__name__)
 
 
 class Proxy(Application):
-    """A proxy that sends the request just as it was given, including
+    """A proxy that sends the request as it was given.
 
-    respecting HTTP_HOST, wsgi.url_scheme, etc.
+    Respects HTTP_HOST, wsgi.url_scheme, etc.
     """
 
     def __init__(self):

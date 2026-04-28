@@ -22,9 +22,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.sw_update")
 
 
 class SwUpdateTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Type Constants
-    """
+    """Software Update - Type Constants."""
 
     SW_PATCH = Constant("sw-patch")
     SW_UPGRADE = Constant("sw-upgrade")
@@ -36,9 +34,7 @@ class SwUpdateTypes(Constants, metaclass=Singleton):
 
 
 class SwUpdateApplyTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Apply Type Constants
-    """
+    """Software Update - Apply Type Constants."""
 
     SERIAL = Constant("serial")
     PARALLEL = Constant("parallel")
@@ -46,18 +42,14 @@ class SwUpdateApplyTypes(Constants, metaclass=Singleton):
 
 
 class SwUpdateInstanceActionTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Instance Action Type Constants
-    """
+    """Software Update - Instance Action Type Constants."""
 
     MIGRATE = Constant("migrate")
     STOP_START = Constant("stop-start")
 
 
 class SwUpdateAlarmRestrictionTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Alarm Restriction Type Constants
-    """
+    """Software Update - Alarm Restriction Type Constants."""
 
     STRICT = Constant("strict")
     RELAXED = Constant("relaxed")
@@ -65,9 +57,7 @@ class SwUpdateAlarmRestrictionTypes(Constants, metaclass=Singleton):
 
 
 class SwUpdateAlarmTypes(Constants, metaclass=Singleton):
-    """
-    Software Update - Alarm and Event Type Constants
-    """
+    """Software Update - Alarm and Event Type Constants."""
 
     APPLY_INPROGRESS = Constant("apply-inprogress")
     APPLY_ABORTING = Constant("apply-aborting")
@@ -75,9 +65,7 @@ class SwUpdateAlarmTypes(Constants, metaclass=Singleton):
 
 
 class SwUpdateEventIds(Constants, metaclass=Singleton):
-    """
-    Software Update - Alarm and Event Type Constants
-    """
+    """Software Update - Alarm and Event Type Constants."""
 
     APPLY_START = Constant("apply-start")
     APPLY_INPROGRESS = Constant("apply-inprogress")
@@ -102,9 +90,7 @@ SW_UPDATE_EVENT_IDS = SwUpdateEventIds()
 
 
 class SwUpdate(ObjectData):
-    """
-    Software Update Object
-    """
+    """Software Update Object."""
 
     def __init__(self, sw_update_type, sw_update_uuid=None, strategy_data=None):
         from nfv_vim import strategy
@@ -138,45 +124,41 @@ class SwUpdate(ObjectData):
 
     @property
     def sw_update_type(self):
-        """
-        Returns the type of the software update
-        """
+        """Returns the type of the software update."""
+
         return self._sw_update_type
 
     @property
     def uuid(self):
-        """
-        Returns the uuid of the software update
-        """
+        """Returns the uuid of the software update."""
+
         return self._uuid
 
     @property
     def strategy(self):
-        """
-        Returns the strategy for applying the software update
-        """
+        """Returns the strategy for applying the software update."""
+
         return self._strategy
 
     @staticmethod
     def alarm_type(alarm_type):
-        """
-        Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_EVENT_TYPES
-        (expected to be overridden by child class)
+        """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_EVENT_TYPES
+
+        (expected to be overridden by child class).
         """
         raise NotImplementedError()
 
     @staticmethod
     def event_id(event_id):
-        """
-        Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_EVENT_TYPES
-        (expected to be overridden by child class)
+        """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_EVENT_TYPES
+
+        (expected to be overridden by child class).
         """
         raise NotImplementedError()
 
     def strategy_apply(self, strategy_uuid, stage_id):
-        """
-        Apply a software update strategy
-        """
+        """Apply a software update strategy."""
+
         success = False
 
         if self.strategy is None:
@@ -218,9 +200,8 @@ class SwUpdate(ObjectData):
         return success, reason
 
     def strategy_apply_complete(self, success, reason):
-        """
-        Apply of a software update strategy complete
-        """
+        """Apply of a software update strategy complete."""
+
         if self._alarms:
             alarm.clear_sw_update_alarm(self._alarms)
 
@@ -238,9 +219,8 @@ class SwUpdate(ObjectData):
             )
 
     def strategy_abort(self, strategy_uuid, stage_id):
-        """
-        Abort a software update strategy
-        """
+        """Abort a software update strategy."""
+
         success = False
 
         if self.strategy is None:
@@ -274,9 +254,8 @@ class SwUpdate(ObjectData):
         return success, reason
 
     def strategy_abort_complete(self, success, reason):
-        """
-        Abort of a software update strategy complete
-        """
+        """Abort of a software update strategy complete."""
+
         if success:
             event_log.sw_update_issue_log(
                 self.event_id(SW_UPDATE_EVENT_IDS.APPLY_ABORTED)
@@ -290,9 +269,8 @@ class SwUpdate(ObjectData):
             timers.timers_reschedule_timer(self._nfvi_timer_id, 2)
 
     def strategy_delete(self, strategy_uuid, force):
-        """
-        Delete a software update strategy
-        """
+        """Delete a software update strategy."""
+
         if self.strategy is None:
             reason = "strategy not created"
             return False, reason
@@ -328,16 +306,14 @@ class SwUpdate(ObjectData):
         return True, ""
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle an external event
-        """
+        """Handle an external event."""
+
         if self._strategy is not None:
             self._strategy.handle_event(event, event_data)
 
     def nfvi_update(self):
-        """
-        NFVI Update (expected to be overridden by child class)
-        """
+        """NFVI Update (expected to be overridden by child class)."""
+
         raise NotImplementedError()
 
     def nfvi_alarms_clear(self):
@@ -345,9 +321,8 @@ class SwUpdate(ObjectData):
 
     @coroutine
     def nfvi_alarms_callback(self, timer_id):
-        """
-        Audit Alarms Callback
-        """
+        """Audit Alarms Callback."""
+
         response = yield
 
         if response["completed"]:
@@ -355,32 +330,27 @@ class SwUpdate(ObjectData):
 
             self._nfvi_alarms.extend(response["result-data"])
         else:
-            DLOG.error(
-                "Audit-Alarms callback, not completed, response=%s." % response
-            )
+            DLOG.error("Audit-Alarms callback, not completed, response=%s." % response)
 
         self._nfvi_audit_inprogress = False
         timers.timers_reschedule_timer(timer_id, 2)  # 2 seconds later
 
     @coroutine
     def nfvi_audit(self):
-        """
-        Audit NFVI layer (expected to be overridden by child class)
-        """
+        """Audit NFVI layer (expected to be overridden by child class)."""
+
         raise NotImplementedError()
 
     def _persist(self):
-        """
-        Persist changes to sw-update object
-        """
+        """Persist changes to sw-update object."""
+
         from nfv_vim import database
 
         database.database_sw_update_add(self)
 
     def _unpersist(self):
-        """
-        Unpersist changes to sw-update object
-        """
+        """Unpersist changes to sw-update object."""
+
         from nfv_vim import database
 
         database.database_sw_update_delete(self.uuid)

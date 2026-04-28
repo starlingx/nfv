@@ -16,7 +16,6 @@ from nova_api_proxy.common import config
 from nova_api_proxy.common import histogram
 from nova_api_proxy.common.service import Server
 
-
 LOG = logging.getLogger(__name__)
 
 eventlet.patcher.monkey_patch(

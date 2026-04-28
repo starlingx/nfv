@@ -14,14 +14,11 @@ DLOG = debug.debug_get_logger("nfv_common.tcp")
 
 
 class TCPServer(object):
-    """
-    TCP Server
-    """
+    """TCP Server."""
 
     def __init__(self, ip, port, msg_handler, max_connections=5, auth_key=None):
-        """
-        Create a TCP Server
-        """
+        """Create a TCP Server."""
+
         self._auth_key = auth_key
         self._connection = TCPConnection(ip, port)
         self._socket = self._connection.sock
@@ -95,9 +92,8 @@ class TCPServer(object):
                     selobj.selobj_del_error_callback(select_obj)
 
     def closing_connection(self, select_obj):
-        """
-        Connection is about to be closed
-        """
+        """Connection is about to be closed."""
+
         client_connection = self._client_connections.get(select_obj, None)
         if client_connection is not None:
             selobj.selobj_del_read_obj(select_obj)
@@ -110,9 +106,8 @@ class TCPServer(object):
             )
 
     def shutdown(self):
-        """
-        Shutdown the TCP Server
-        """
+        """Shutdown the TCP Server."""
+
         connections = self._client_connections.copy()
         for client_connection in list(connections.values()):
             selobj.selobj_del_read_obj(client_connection.selobj)

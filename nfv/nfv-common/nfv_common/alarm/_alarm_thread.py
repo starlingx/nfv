@@ -18,9 +18,7 @@ DLOG = debug.debug_get_logger("nfv_common.alarm.alarm_thread")
 
 
 class AlarmWorker(thread.ThreadWorker, metaclass=Singleton):
-    """
-    Alarm Worker
-    """
+    """Alarm Worker."""
 
     def __init__(self, name, config):
         super(AlarmWorker, self).__init__(name)
@@ -30,17 +28,15 @@ class AlarmWorker(thread.ThreadWorker, metaclass=Singleton):
 
     @coroutine
     def _alarm_audit(self):
-        """
-        Called periodically to audit alarms
-        """
+        """Called periodically to audit alarms."""
+
         while True:
             (yield)
             self._handlers.audit_alarms()
 
     def initialize(self):
-        """
-        Initialize the Alarm Worker
-        """
+        """Initialize the Alarm Worker."""
+
         self._handlers = AlarmHandlers(
             self._config["namespace"], self._config["handlers"]
         )
@@ -54,9 +50,8 @@ class AlarmWorker(thread.ThreadWorker, metaclass=Singleton):
         )
 
     def finalize(self):
-        """
-        Finalize the Alarm Worker
-        """
+        """Finalize the Alarm Worker."""
+
         if self._handlers is not None:
             self._handlers.finalize()
 
@@ -64,9 +59,8 @@ class AlarmWorker(thread.ThreadWorker, metaclass=Singleton):
             timers.timers_delete_timer(self._alarm_audit_timer_id)
 
     def do_work(self, action, work):
-        """
-        Do work given to the Alarm Worker
-        """
+        """Do work given to the Alarm Worker."""
+
         if AlarmThread.ACTION_RAISE_ALARM == action:
             DLOG.verbose("Raise alarm with uuid=%s" % work["alarm-uuid"])
             self._handlers.raise_alarm(work["alarm-uuid"], work["alarm-data"])
@@ -80,9 +74,7 @@ class AlarmWorker(thread.ThreadWorker, metaclass=Singleton):
 
 
 class AlarmThread(thread.Thread, metaclass=Singleton):
-    """
-    Alarm Thread
-    """
+    """Alarm Thread."""
 
     ACTION_RAISE_ALARM = "thread-raise-alarm"
     ACTION_CLEAR_ALARM = "thread-clear-alarm"
@@ -92,9 +84,8 @@ class AlarmThread(thread.Thread, metaclass=Singleton):
         super(AlarmThread, self).__init__("Alarm", self._worker)
 
     def alarm_raise(self, alarm_uuid, alarm_data):
-        """
-        Send raise alarm to the Alarm Thread Worker
-        """
+        """Send raise alarm to the Alarm Thread Worker."""
+
         work = dict()
         work["alarm-uuid"] = alarm_uuid
         work["alarm-data"] = alarm_data
@@ -102,9 +93,8 @@ class AlarmThread(thread.Thread, metaclass=Singleton):
         self.send_work(AlarmThread.ACTION_RAISE_ALARM, work)
 
     def alarm_clear(self, alarm_uuid):
-        """
-        Send clear alarm to the Alarm Thread Worker
-        """
+        """Send clear alarm to the Alarm Thread Worker."""
+
         work = dict()
         work["alarm-uuid"] = alarm_uuid
         work["alarm-data"] = None

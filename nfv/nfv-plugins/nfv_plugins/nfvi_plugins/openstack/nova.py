@@ -23,27 +23,21 @@ NOVA_API_VERSION_NEWTON = "2.38"
 
 
 class HypervisorState(Constants, metaclass=Singleton):
-    """
-    HYPERVISOR STATE Constants
-    """
+    """HYPERVISOR STATE Constants."""
 
     UP = Constant("up")
     DOWN = Constant("down")
 
 
 class HypervisorStatus(Constants, metaclass=Singleton):
-    """
-    HYPERVISOR STATUS Constants
-    """
+    """HYPERVISOR STATUS Constants."""
 
     ENABLED = Constant("enabled")
     DISABLED = Constant("disabled")
 
 
 class VmState(Constants, metaclass=Singleton):
-    """
-    VM STATE Constants
-    """
+    """VM STATE Constants."""
 
     ACTIVE = Constant("active")
     BUILDING = Constant("building")
@@ -56,9 +50,7 @@ class VmState(Constants, metaclass=Singleton):
 
 
 class VmTaskState(Constants, metaclass=Singleton):
-    """
-    VM TASK-STATE Constants
-    """
+    """VM TASK-STATE Constants."""
 
     NONE = Constant("none")
     MIGRATING = Constant("migrating")
@@ -89,9 +81,7 @@ class VmTaskState(Constants, metaclass=Singleton):
 
 
 class VmTaskStatus(Constants, metaclass=Singleton):
-    """
-    VM TASK-STATUS Constants
-    """
+    """VM TASK-STATUS Constants."""
 
     NONE = Constant("none")
     START = Constant("start")
@@ -99,9 +89,7 @@ class VmTaskStatus(Constants, metaclass=Singleton):
 
 
 class VmPowerState(Constants, metaclass=Singleton):
-    """
-    VM POWER-STATE Constants
-    """
+    """VM POWER-STATE Constants."""
 
     NO_STATE = Constant(0)
     RUNNING = Constant(1)
@@ -113,9 +101,7 @@ class VmPowerState(Constants, metaclass=Singleton):
 
 
 class VmPowerStateStr(Constants, metaclass=Singleton):
-    """
-    VM POWER-STATE String Constants
-    """
+    """VM POWER-STATE String Constants."""
 
     NO_STATE = Constant("pending")
     RUNNING = Constant("running")
@@ -127,9 +113,7 @@ class VmPowerStateStr(Constants, metaclass=Singleton):
 
 
 class VmAction(Constants, metaclass=Singleton):
-    """
-    VM ACTION Constants
-    """
+    """VM ACTION Constants."""
 
     PAUSE = Constant("pause")
     UNPAUSE = Constant("unpause")
@@ -147,18 +131,14 @@ class VmAction(Constants, metaclass=Singleton):
 
 
 class VmRebootType(Constants, metaclass=Singleton):
-    """
-    VM REBOOT TYPE Constants
-    """
+    """VM REBOOT TYPE Constants."""
 
     SOFT = Constant("SOFT")
     HARD = Constant("HARD")
 
 
 class RPCMessageTypes(Constants, metaclass=Singleton):
-    """
-    RPC Message Type Constants
-    """
+    """RPC Message Type Constants."""
 
     NOVA_SERVER_STATE_CHANGE = Constant("nova-server-state-change")
     NOVA_SERVER_ACTION_CHANGE = Constant("nova-server-action-change")
@@ -180,9 +160,8 @@ RPC_MESSAGE_TYPE = RPCMessageTypes()
 
 
 def vm_power_state_str(power_state):
-    """
-    Convert the VM POWER-STATE to a string
-    """
+    """Convert the VM POWER-STATE to a string."""
+
     if VM_POWER_STATE.NO_STATE == power_state:
         return "no-state"
     elif VM_POWER_STATE.RUNNING == power_state:
@@ -202,9 +181,8 @@ def vm_power_state_str(power_state):
 
 
 def get_host_aggregates(token):
-    """
-    Asks OpenStack Nova for a list of host aggregates
-    """
+    """Asks OpenStack Nova for a list of host aggregates."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -219,9 +197,8 @@ def get_host_aggregates(token):
 
 
 def get_hypervisor(token, hypervisor_uuid):
-    """
-    Asks OpenStack Nova for a hypervisor details
-    """
+    """Asks OpenStack Nova for a hypervisor details."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -239,9 +216,8 @@ def get_hypervisor(token, hypervisor_uuid):
 
 
 def get_hypervisors(token):
-    """
-    Asks OpenStack Nova for a list of hypervisors
-    """
+    """Asks OpenStack Nova for a list of hypervisors."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -256,9 +232,8 @@ def get_hypervisors(token):
 
 
 def get_flavors(token, page_limit=None, next_page=None):
-    """
-    Asks OpenStack Nova for a list of flavors
-    """
+    """Asks OpenStack Nova for a list of flavors."""
+
     if next_page is None:
         url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
         if url is None:
@@ -288,9 +263,8 @@ def create_flavor(
     ephemeral_gb=None,
     swap_mb=None,
 ):
-    """
-    Asks OpenStack Nova to create a flavor
-    """
+    """Asks OpenStack Nova to create a flavor."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -321,9 +295,8 @@ def create_flavor(
 
 
 def delete_flavor(token, flavor_id):
-    """
-    Asks OpenStack Nova to delete a flavor
-    """
+    """Asks OpenStack Nova to delete a flavor."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -338,9 +311,8 @@ def delete_flavor(token, flavor_id):
 
 
 def get_flavor(token, flavor_id):
-    """
-    Asks OpenStack Nova to get a flavor
-    """
+    """Asks OpenStack Nova to get a flavor."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -355,9 +327,8 @@ def get_flavor(token, flavor_id):
 
 
 def set_flavor_extra_specs(token, flavor_id, extra_specs):
-    """
-    Asks OpenStack Nova to set a flavor with extra specs
-    """
+    """Asks OpenStack Nova to set a flavor with extra specs."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -380,9 +351,8 @@ def set_flavor_extra_specs(token, flavor_id, extra_specs):
 
 
 def get_flavor_extra_specs(token, flavor_id):
-    """
-    Asks OpenStack Nova to get a flavor
-    """
+    """Asks OpenStack Nova to get a flavor."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -400,9 +370,8 @@ def get_flavor_extra_specs(token, flavor_id):
 
 
 def get_server_groups(token, all_projects=True):
-    """
-    Asks OpenStack Nova for a list of servers
-    """
+    """Asks OpenStack Nova for a list of servers."""
+
     tenant_id = token.get_tenant_id()
 
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
@@ -422,9 +391,8 @@ def get_server_groups(token, all_projects=True):
 
 
 def get_servers(token, page_limit=None, next_page=None, all_tenants=True, context=None):
-    """
-    Asks OpenStack Nova for a list of servers
-    """
+    """Asks OpenStack Nova for a list of servers."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -469,9 +437,8 @@ def create_server(
     networks=None,
     context=None,
 ):
-    """
-    Asks OpenStack Nova to create a server
-    """
+    """Asks OpenStack Nova to create a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -523,9 +490,8 @@ def create_server(
 
 
 def delete_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to delete a server
-    """
+    """Asks OpenStack Nova to delete a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -553,9 +519,8 @@ def delete_server(token, server_id, context=None):
 
 
 def get_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to get server details
-    """
+    """Asks OpenStack Nova to get server details."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -585,9 +550,8 @@ def get_server(token, server_id, context=None):
 def live_migrate_server(
     token, server_id, to_host_name=None, block_storage_migration="auto", context=None
 ):
-    """
-    Asks OpenStack Nova to live migrate a server
-    """
+    """Asks OpenStack Nova to live migrate a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -631,9 +595,8 @@ def live_migrate_server(
 def cold_migrate_server(
     token, server_id, to_host_name=None, migrate=None, context=None
 ):
-    """
-    Asks OpenStack Nova to cold migrate a server
-    """
+    """Asks OpenStack Nova to cold migrate a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -673,9 +636,8 @@ def cold_migrate_server(
 
 
 def resize_server(token, server_id, flavor_id, context=None):
-    """
-    Asks OpenStack Nova to resize a server
-    """
+    """Asks OpenStack Nova to resize a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -712,9 +674,8 @@ def resize_server(token, server_id, flavor_id, context=None):
 
 
 def resize_server_confirm(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to confirm resize of a server
-    """
+    """Asks OpenStack Nova to confirm resize of a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -748,9 +709,8 @@ def resize_server_confirm(token, server_id, context=None):
 
 
 def resize_server_revert(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to revert resize of a server
-    """
+    """Asks OpenStack Nova to revert resize of a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -784,25 +744,22 @@ def resize_server_revert(token, server_id, context=None):
 
 
 def cold_migrate_server_confirm(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to confirm cold migrate of a server
-    """
+    """Asks OpenStack Nova to confirm cold migrate of a server."""
+
     return resize_server_confirm(token, server_id, context)
 
 
 def cold_migrate_server_revert(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to revert cold migrate of a server
-    """
+    """Asks OpenStack Nova to revert cold migrate of a server."""
+
     return resize_server_revert(token, server_id, context)
 
 
 def evacuate_server(
     token, server_id, admin_password=None, to_host_name=None, context=None
 ):
-    """
-    Asks OpenStack Nova to evacuate a server
-    """
+    """Asks OpenStack Nova to evacuate a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -844,9 +801,8 @@ def evacuate_server(
 
 
 def reboot_server(token, server_id, reboot_type, context=None):
-    """
-    Asks OpenStack Nova to reboot a server
-    """
+    """Asks OpenStack Nova to reboot a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -885,9 +841,8 @@ def reboot_server(token, server_id, reboot_type, context=None):
 def rebuild_server(
     token, server_id, server_name, image_id, admin_password=None, context=None
 ):
-    """
-    Asks OpenStack Nova to rebuild a server
-    """
+    """Asks OpenStack Nova to rebuild a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -928,9 +883,8 @@ def rebuild_server(
 
 
 def pause_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to pause a server
-    """
+    """Asks OpenStack Nova to pause a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -964,9 +918,8 @@ def pause_server(token, server_id, context=None):
 
 
 def unpause_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to unpause a server
-    """
+    """Asks OpenStack Nova to unpause a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -1000,9 +953,8 @@ def unpause_server(token, server_id, context=None):
 
 
 def suspend_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to suspend a server
-    """
+    """Asks OpenStack Nova to suspend a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -1036,9 +988,8 @@ def suspend_server(token, server_id, context=None):
 
 
 def resume_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to resume a server
-    """
+    """Asks OpenStack Nova to resume a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -1072,9 +1023,8 @@ def resume_server(token, server_id, context=None):
 
 
 def start_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to start a server
-    """
+    """Asks OpenStack Nova to start a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -1108,9 +1058,8 @@ def start_server(token, server_id, context=None):
 
 
 def stop_server(token, server_id, context=None):
-    """
-    Asks OpenStack Nova to stop a server
-    """
+    """Asks OpenStack Nova to stop a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -1144,9 +1093,8 @@ def stop_server(token, server_id, context=None):
 
 
 def reset_server_state(token, server_id, state, context=None):
-    """
-    Asks OpenStack Nova to reset a server to the given state
-    """
+    """Asks OpenStack Nova to reset a server to the given state."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -1183,9 +1131,8 @@ def reset_server_state(token, server_id, state, context=None):
 
 
 def attach_volume(token, server_id, volume_id, device_name, context=None):
-    """
-    Asks OpenStack Nova to attach a volume to a server
-    """
+    """Asks OpenStack Nova to attach a volume to a server."""
+
     if context is None:
         tenant_id = token.get_tenant_id()
     else:
@@ -1284,9 +1231,8 @@ _rpc_message_service_action_event_types = {
 
 
 def rpc_message_server_action_change_filter(message):
-    """
-    Filter OpenStack Nova RPC messages for server action changes
-    """
+    """Filter OpenStack Nova RPC messages for server action changes."""
+
     for event_type in _rpc_message_service_action_event_types:
         payload = None
 
@@ -1318,9 +1264,8 @@ def rpc_message_server_action_change_filter(message):
 
 
 def rpc_message_server_state_change_filter(message):
-    """
-    Filter OpenStack Nova RPC messages for server state changes
-    """
+    """Filter OpenStack Nova RPC messages for server state changes."""
+
     payload = None
 
     event_type = message.get("event_type", "")
@@ -1393,9 +1338,8 @@ def rpc_message_server_state_change_filter(message):
 
 
 def rpc_message_server_delete_filter(message):
-    """
-    Filter OpenStack Nova RPC messages for server delete
-    """
+    """Filter OpenStack Nova RPC messages for server delete."""
+
     payload = None
 
     event_type = message.get("event_type", "")
@@ -1424,9 +1368,8 @@ def rpc_message_server_delete_filter(message):
 
 
 def get_host_service_id(token, host_name, service_name):
-    """
-    Asks OpenStack Nova for the service id of a service on a host
-    """
+    """Asks OpenStack Nova for the service id of a service on a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -1450,9 +1393,8 @@ def get_host_service_id(token, host_name, service_name):
 
 
 def delete_host_services(token, host_name):
-    """
-    Asks OpenStack Nova to delete services on a host
-    """
+    """Asks OpenStack Nova to delete services on a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -1481,9 +1423,8 @@ def delete_host_services(token, host_name):
 
 
 def enable_host_services(token, host_name):
-    """
-    Asks OpenStack Nova to enable services on a host
-    """
+    """Asks OpenStack Nova to enable services on a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -1510,9 +1451,8 @@ def enable_host_services(token, host_name):
 
 
 def disable_host_services(token, host_name):
-    """
-    Asks OpenStack Nova to disable services on a host
-    """
+    """Asks OpenStack Nova to disable services on a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -1540,9 +1480,8 @@ def disable_host_services(token, host_name):
 
 
 def query_host_services(token, host_name):
-    """
-    Asks OpenStack Nova for the administrative state of services on a host
-    """
+    """Asks OpenStack Nova for the administrative state of services on a host."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -1575,9 +1514,8 @@ def query_host_services(token, host_name):
 
 
 def notify_host_enabled(token, host_name):
-    """
-    Notify OpenStack Nova that a host is enabled
-    """
+    """Notify OpenStack Nova that a host is enabled."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -1604,9 +1542,8 @@ def notify_host_enabled(token, host_name):
 
 
 def notify_host_disabled(token, host_name):
-    """
-    Notify OpenStack Nova that a host is disabled
-    """
+    """Notify OpenStack Nova that a host is disabled."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
@@ -1633,9 +1570,8 @@ def notify_host_disabled(token, host_name):
 
 
 def query_host_aggregates(token):
-    """
-    Asks OpenStack Nova for the host aggregates
-    """
+    """Asks OpenStack Nova for the host aggregates."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.NOVA, strip_version=True)
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")

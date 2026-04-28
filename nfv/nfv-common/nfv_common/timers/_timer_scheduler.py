@@ -12,16 +12,13 @@ DLOG = debug.debug_get_logger("nfv_common.timers.timer_scheduler")
 
 
 class TimerScheduler(object):
-    """
-    Timer Scheduler
-    """
+    """Timer Scheduler."""
 
     def __init__(
         self, scheduler_interval_ms, scheduler_max_delay_ms, scheduler_delay_debounce_ms
     ):
-        """
-        Create a timer scheduler
-        """
+        """Create a timer scheduler."""
+
         self._scheduler_interval_ms = scheduler_interval_ms
         self._scheduler_max_delay_ms = scheduler_max_delay_ms
         self._scheduler_delay_debounce_ms = scheduler_delay_debounce_ms
@@ -34,15 +31,13 @@ class TimerScheduler(object):
 
     @property
     def scheduling_on_time(self):
-        """
-        Determine if timers are being scheduled on time
-        """
+        """Determine if timers are being scheduled on time."""
+
         return self._scheduling_on_time
 
     def schedule(self):
-        """
-        Schedule timers
-        """
+        """Schedule timers."""
+
         now_ms = get_monotonic_timestamp_in_ms()
         ms_expired = now_ms - self._scheduler_timestamp_ms
 
@@ -101,15 +96,13 @@ class TimerScheduler(object):
             )
 
     def add_timer(self, timer):
-        """
-        Add a timer
-        """
+        """Add a timer."""
+
         self._timers.append(timer)
 
     def delete_timer(self, timer_id):
-        """
-        Delete a timer
-        """
+        """Delete a timer."""
+
         if self._scheduling_timers:
             self._timers_to_delete.append(timer_id)
         else:
@@ -118,9 +111,8 @@ class TimerScheduler(object):
             ]
 
     def reschedule_timer(self, timer_id, interval_secs):
-        """
-        Reschedule a timer
-        """
+        """Reschedule a timer."""
+
         existing_timer = next(
             (timer for timer in self._timers if timer_id == timer.timer_id), None
         )

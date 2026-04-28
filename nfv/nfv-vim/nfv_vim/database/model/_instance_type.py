@@ -13,9 +13,7 @@ from nfv_vim.database.model._base import Base
 
 
 class InstanceType_v5(AsDictMixin, Base):
-    """
-    Instance Type Database Table
-    """
+    """Instance Type Database Table."""
 
     __tablename__ = "instance_types_v5"
 
@@ -33,9 +31,8 @@ class InstanceType_v5(AsDictMixin, Base):
     live_migration_max_downtime = Column(Integer, nullable=True)
 
     def __init__(self):
-        """
-        Default some of the settings of the flavor
-        """
+        """Default some of the settings of the flavor."""
+
         self.have_details = False
         self.vcpus = 0
         self.mem_mb = 0
@@ -66,9 +63,7 @@ class InstanceType_v5(AsDictMixin, Base):
 
 
 class InstanceType(AsDictMixin, Base):
-    """
-    Instance Type Database Table
-    """
+    """Instance Type Database Table."""
 
     __tablename__ = "instance_types_v4"
 
@@ -87,9 +82,8 @@ class InstanceType(AsDictMixin, Base):
     storage_type = Column(String(128), nullable=True)
 
     def __init__(self):
-        """
-        Default some of the settings of the flavor
-        """
+        """Default some of the settings of the flavor."""
+
         self.have_details = False
         self.vcpus = 0
         self.mem_mb = 0

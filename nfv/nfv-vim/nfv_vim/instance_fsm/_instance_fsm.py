@@ -9,33 +9,33 @@ from nfv_common import state_machine
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_state_cold_migrate import ColdMigrateState
 from nfv_vim.instance_fsm._instance_state_cold_migrate_confirm import (
-    ColdMigrateConfirmState
+    ColdMigrateConfirmState,
 )
 from nfv_vim.instance_fsm._instance_state_cold_migrate_revert import (
-    ColdMigrateRevertState
+    ColdMigrateRevertState,
 )
 from nfv_vim.instance_fsm._instance_state_delete import DeleteState
 from nfv_vim.instance_fsm._instance_state_evacuate import EvacuateState
 from nfv_vim.instance_fsm._instance_state_fail import FailState
 from nfv_vim.instance_fsm._instance_state_guest_services_create import (
-    GuestServicesCreateState
+    GuestServicesCreateState,
 )
 from nfv_vim.instance_fsm._instance_state_guest_services_delete import (
-    GuestServicesDeleteState
+    GuestServicesDeleteState,
 )
 from nfv_vim.instance_fsm._instance_state_guest_services_disable import (
-    GuestServicesDisableState
+    GuestServicesDisableState,
 )
 from nfv_vim.instance_fsm._instance_state_guest_services_enable import (
-    GuestServicesEnableState
+    GuestServicesEnableState,
 )
 from nfv_vim.instance_fsm._instance_state_guest_services_set import (
-    GuestServicesSetState
+    GuestServicesSetState,
 )
 from nfv_vim.instance_fsm._instance_state_initial import InitialState
 from nfv_vim.instance_fsm._instance_state_live_migrate import LiveMigrateState
 from nfv_vim.instance_fsm._instance_state_live_migrate_finish import (
-    LiveMigrateFinishState
+    LiveMigrateFinishState,
 )
 from nfv_vim.instance_fsm._instance_state_pause import PauseState
 from nfv_vim.instance_fsm._instance_state_reboot import RebootState
@@ -315,9 +315,7 @@ INSTANCE_GUEST_SERVICES_DELETE_STATES = dict(
 
 
 class LiveMigrateStateMachine(state_machine.StateMachine):
-    """
-    Instance Live Migrate State Machine
-    """
+    """Instance Live Migrate State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(LiveMigrateStateMachine, self).__init__(
@@ -330,9 +328,7 @@ class LiveMigrateStateMachine(state_machine.StateMachine):
 
 
 class ColdMigrateStateMachine(state_machine.StateMachine):
-    """
-    Instance Cold Migrate State Machine
-    """
+    """Instance Cold Migrate State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(ColdMigrateStateMachine, self).__init__(
@@ -345,9 +341,7 @@ class ColdMigrateStateMachine(state_machine.StateMachine):
 
 
 class ColdMigrateConfirmStateMachine(state_machine.StateMachine):
-    """
-    Instance Cold Migrate Confirm State Machine
-    """
+    """Instance Cold Migrate Confirm State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(ColdMigrateConfirmStateMachine, self).__init__(
@@ -360,9 +354,7 @@ class ColdMigrateConfirmStateMachine(state_machine.StateMachine):
 
 
 class ColdMigrateRevertStateMachine(state_machine.StateMachine):
-    """
-    Instance ColdMigrate Revert State Machine
-    """
+    """Instance ColdMigrate Revert State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(ColdMigrateRevertStateMachine, self).__init__(
@@ -375,9 +367,7 @@ class ColdMigrateRevertStateMachine(state_machine.StateMachine):
 
 
 class EvacuateStateMachine(state_machine.StateMachine):
-    """
-    Instance Evacuate State Machine
-    """
+    """Instance Evacuate State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(EvacuateStateMachine, self).__init__(
@@ -390,9 +380,7 @@ class EvacuateStateMachine(state_machine.StateMachine):
 
 
 class StartStateMachine(state_machine.StateMachine):
-    """
-    Instance Start State Machine
-    """
+    """Instance Start State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(StartStateMachine, self).__init__(
@@ -405,9 +393,7 @@ class StartStateMachine(state_machine.StateMachine):
 
 
 class StopStateMachine(state_machine.StateMachine):
-    """
-    Instance Stop State Machine
-    """
+    """Instance Stop State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(StopStateMachine, self).__init__(
@@ -420,9 +406,7 @@ class StopStateMachine(state_machine.StateMachine):
 
 
 class PauseStateMachine(state_machine.StateMachine):
-    """
-    Instance Pause State Machine
-    """
+    """Instance Pause State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(PauseStateMachine, self).__init__(
@@ -435,9 +419,7 @@ class PauseStateMachine(state_machine.StateMachine):
 
 
 class UnpauseStateMachine(state_machine.StateMachine):
-    """
-    Instance Unpause State Machine
-    """
+    """Instance Unpause State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(UnpauseStateMachine, self).__init__(
@@ -450,9 +432,7 @@ class UnpauseStateMachine(state_machine.StateMachine):
 
 
 class SuspendStateMachine(state_machine.StateMachine):
-    """
-    Instance Suspend State Machine
-    """
+    """Instance Suspend State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(SuspendStateMachine, self).__init__(
@@ -465,9 +445,7 @@ class SuspendStateMachine(state_machine.StateMachine):
 
 
 class ResumeStateMachine(state_machine.StateMachine):
-    """
-    Instance Resume State Machine
-    """
+    """Instance Resume State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(ResumeStateMachine, self).__init__(
@@ -480,9 +458,7 @@ class ResumeStateMachine(state_machine.StateMachine):
 
 
 class RebootStateMachine(state_machine.StateMachine):
-    """
-    Instance Reboot State Machine
-    """
+    """Instance Reboot State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(RebootStateMachine, self).__init__(
@@ -495,9 +471,7 @@ class RebootStateMachine(state_machine.StateMachine):
 
 
 class RebuildStateMachine(state_machine.StateMachine):
-    """
-    Instance Rebuild State Machine
-    """
+    """Instance Rebuild State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(RebuildStateMachine, self).__init__(
@@ -510,9 +484,7 @@ class RebuildStateMachine(state_machine.StateMachine):
 
 
 class DeleteStateMachine(state_machine.StateMachine):
-    """
-    Instance Delete State Machine
-    """
+    """Instance Delete State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(DeleteStateMachine, self).__init__(
@@ -525,9 +497,7 @@ class DeleteStateMachine(state_machine.StateMachine):
 
 
 class ResizeStateMachine(state_machine.StateMachine):
-    """
-    Instance Resize State Machine
-    """
+    """Instance Resize State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(ResizeStateMachine, self).__init__(
@@ -540,9 +510,7 @@ class ResizeStateMachine(state_machine.StateMachine):
 
 
 class ResizeConfirmStateMachine(state_machine.StateMachine):
-    """
-    Instance Resize Confirm State Machine
-    """
+    """Instance Resize Confirm State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(ResizeConfirmStateMachine, self).__init__(
@@ -555,9 +523,7 @@ class ResizeConfirmStateMachine(state_machine.StateMachine):
 
 
 class ResizeRevertStateMachine(state_machine.StateMachine):
-    """
-    Instance Resize Revert State Machine
-    """
+    """Instance Resize Revert State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(ResizeRevertStateMachine, self).__init__(
@@ -570,9 +536,7 @@ class ResizeRevertStateMachine(state_machine.StateMachine):
 
 
 class FailStateMachine(state_machine.StateMachine):
-    """
-    Instance Fail State Machine
-    """
+    """Instance Fail State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(FailStateMachine, self).__init__(
@@ -585,9 +549,7 @@ class FailStateMachine(state_machine.StateMachine):
 
 
 class GuestServicesCreateStateMachine(state_machine.StateMachine):
-    """
-    Instance Guest Services Create State Machine
-    """
+    """Instance Guest Services Create State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(GuestServicesCreateStateMachine, self).__init__(
@@ -600,9 +562,7 @@ class GuestServicesCreateStateMachine(state_machine.StateMachine):
 
 
 class GuestServicesEnableStateMachine(state_machine.StateMachine):
-    """
-    Instance Guest Services Enable State Machine
-    """
+    """Instance Guest Services Enable State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(GuestServicesEnableStateMachine, self).__init__(
@@ -615,9 +575,7 @@ class GuestServicesEnableStateMachine(state_machine.StateMachine):
 
 
 class GuestServicesDisableStateMachine(state_machine.StateMachine):
-    """
-    Instance Guest Services Disable State Machine
-    """
+    """Instance Guest Services Disable State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(GuestServicesDisableStateMachine, self).__init__(
@@ -630,9 +588,7 @@ class GuestServicesDisableStateMachine(state_machine.StateMachine):
 
 
 class GuestServicesSetStateMachine(state_machine.StateMachine):
-    """
-    Instance Guest Services Set State Machine
-    """
+    """Instance Guest Services Set State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(GuestServicesSetStateMachine, self).__init__(
@@ -645,9 +601,7 @@ class GuestServicesSetStateMachine(state_machine.StateMachine):
 
 
 class GuestServicesDeleteStateMachine(state_machine.StateMachine):
-    """
-    Instance Guest Services Delete State Machine
-    """
+    """Instance Guest Services Delete State Machine."""
 
     def __init__(self, instance, initial_state=INSTANCE_STATE.INITIAL):
         super(GuestServicesDeleteStateMachine, self).__init__(

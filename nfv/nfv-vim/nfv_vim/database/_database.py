@@ -29,9 +29,7 @@ _db_obj = None
 
 
 class Database(object):
-    """
-    Database
-    """
+    """Database."""
 
     def __init__(self, database_url):
         self._engine = create_engine(database_url)
@@ -125,16 +123,14 @@ def database_set_sqlite_pragma(db_connection, connection_record):
 
 
 def database_get():
-    """
-    Get database object
-    """
+    """Get database object."""
+
     return _db_obj
 
 
 def database_create(database_dir):
-    """
-    Create the database
-    """
+    """Create the database."""
+
     global _db_obj
 
     if not os.path.exists(database_dir):

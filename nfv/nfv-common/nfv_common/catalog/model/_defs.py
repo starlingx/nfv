@@ -9,9 +9,7 @@ from nfv_common.helpers import Singleton
 
 
 class ConnectionType(object, metaclass=Singleton):
-    """
-    Connection Type Constants
-    """
+    """Connection Type Constants."""
 
     UNKNOWN = Constant("unknown")
     VIRTUAL_PORT = Constant("virtual-port")
@@ -21,9 +19,7 @@ class ConnectionType(object, metaclass=Singleton):
 
 
 class ConnectivityType(object, metaclass=Singleton):
-    """
-    Connectivity Type Constants
-    """
+    """Connectivity Type Constants."""
 
     UNKNOWN = Constant("unknown")
     E_LINE = Constant("E-Line")

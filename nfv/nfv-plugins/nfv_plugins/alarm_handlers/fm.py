@@ -279,9 +279,7 @@ _fm_alarm_severity_mapping = dict(
 
 
 class FaultManagement(alarm_handlers_v1.AlarmHandler):
-    """
-    Fault Management Alarm Handler
-    """
+    """Fault Management Alarm Handler."""
 
     _name = "Fault-Management"
     _version = "1.0.0"
@@ -378,8 +376,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
                 )
         except Exception as e:
             DLOG.exception(
-                "Caught exception while trying to raise openstack alarm, "
-                "error=%s." % e
+                "Caught exception while trying to raise openstack alarm, error=%s." % e
             )
 
     def raise_alarm(self, alarm_uuid, alarm_data):
@@ -388,7 +385,8 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
         fault = self._format_alarm(alarm_data)
         if fault is not None:
             # conditional statement 'self._fault_management_pod_disabled' is used
-            # to disable raising alarm to containerized fm and will be removed in future.
+            # to disable raising alarm to containerized fm and will be
+            # removed in future.
             if "instance" in alarm_data.entity_type and (
                 not self._fault_management_pod_disabled
             ):
@@ -478,8 +476,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
                 )
         except Exception as e:
             DLOG.exception(
-                "Caught exception while trying to audit openstack alarms, "
-                "error=%s." % e
+                "Caught exception while trying to audit openstack alarms, error=%s." % e
             )
 
         # Check for missing alarms needing to be raised

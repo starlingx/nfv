@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class SuspendState(state_machine.State):
-    """
-    Instance - Suspend State
-    """
+    """Instance - Suspend State."""
 
     def __init__(self, name):
         super(SuspendState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering suspend state
-        """
+        """Entering suspend state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = SuspendTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting suspend state
-        """
+        """Exiting suspend state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, SuspendTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the suspend state
-        """
+        """Transition from the suspend state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the suspend state
-        """
+        """Handle event while in the suspend state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

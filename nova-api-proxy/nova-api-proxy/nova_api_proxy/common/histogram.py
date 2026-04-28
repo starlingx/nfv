@@ -13,7 +13,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Histogram(object):
-    """Histogram Object"""
+    """Histogram Object."""
 
     def __init__(self, name, num_buckets):
         self._name = name
@@ -29,11 +29,13 @@ class Histogram(object):
 
     @property
     def name(self):
-        """Returns the name of the histogram"""
+        """Returns the name of the histogram."""
+
         return self._name
 
     def add_data(self, sample):
         """Convert data given to the nearest power of two."""
+
         sample_as_int = int(sample)
         if 0 == sample_as_int:
             bucket_idx = sample_as_int.bit_length()
@@ -55,6 +57,7 @@ class Histogram(object):
 
     def reset_data(self):
         """Clear out the collected samples."""
+
         self._reset_date = datetime.datetime.now()
         self._sample_total = 0
         self._num_samples = 0
@@ -66,6 +69,7 @@ class Histogram(object):
 
     def display_data(self):
         """Output the histogram to a log."""
+
         date_str = ""
         values_str = ""
 
@@ -102,6 +106,7 @@ _histograms = list()
 
 def _find_histogram(name):
     """Lookup a histogram with a particular name."""
+
     for histogram in _histograms:
         if name == histogram.name:
             return histogram
@@ -110,6 +115,7 @@ def _find_histogram(name):
 
 def add_histogram_data(name, sample):
     """Add a sample to a histogram."""
+
     # pylint: disable-next=global-variable-undefined,global-variable-not-assigned
     global _histograms
 
@@ -123,6 +129,7 @@ def add_histogram_data(name, sample):
 
 def reset_histogram_data(name=None):
     """Reset histogram data."""
+
     if name is None:
         for histogram in _histograms:
             histogram.reset_data()
@@ -134,6 +141,7 @@ def reset_histogram_data(name=None):
 
 def display_histogram_data(name=None):
     """Display histogram data captured."""
+
     if name is None:
         for histogram in _histograms:
             histogram.display_data()

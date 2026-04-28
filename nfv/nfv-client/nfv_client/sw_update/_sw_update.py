@@ -66,9 +66,8 @@ def _print(indent_by, field, value, remains=""):
 
 
 def _display_strategy_step(strategy_step, active=False):
-    """
-    Software Update - Display Strategy Step Information
-    """
+    """Software Update - Display Strategy Step Information."""
+
     # If active flag is passed
     # skip steps that are not started:'initial' or completed cleanly: 'success'
     # this leaves failed and in-progress states
@@ -94,9 +93,7 @@ def _display_strategy_step(strategy_step, active=False):
 
 
 def _get_current_stage_and_step(strategy):
-    """
-    Get the current stage and step
-    """
+    """Get the current stage and step."""
 
     current_phase = None
     current_stage, current_step = None, None
@@ -125,9 +122,8 @@ def _get_current_stage_and_step(strategy):
 
 
 def _display_strategy_stage(strategy_stage, details=False, active=False):
-    """
-    Software Update - Display Strategy Stage Information
-    """
+    """Software Update - Display Strategy Stage Information."""
+
     # If active flag is passed, only display a stage that is in progress
     if active:
         if not strategy_stage.inprogress:
@@ -154,9 +150,8 @@ def _display_strategy_stage(strategy_stage, details=False, active=False):
 
 
 def _display_strategy_phase(strategy_phase, details=False, active=False):
-    """
-    Software Update - Display Strategy Phase Information
-    """
+    """Software Update - Display Strategy Phase Information."""
+
     # If active flag is passed, only display a phase that is in progress
     if active:
         if not strategy_phase.inprogress:
@@ -183,9 +178,8 @@ def _display_strategy_phase(strategy_phase, details=False, active=False):
 
 
 def _display_strategy(strategy, details=False, active=False, error_details=False):
-    """
-    Software Update - Display Strategy Information
-    """
+    """Software Update - Display Strategy Information."""
+
     # TODO(jkraitbe): Backend for sw-deploy will continue as old sw-upgrade for now
     if strategy.name == STRATEGY_NAME_SW_UPGRADE:
         print("Strategy Software Deploy Strategy:")
@@ -280,7 +274,7 @@ def _get_auth_token_and_url(
     os_interface,
     stx_auth_type,
 ):
-    """Get authentication context for OIDC or Keystone"""
+    """Get authentication context for OIDC or Keystone."""
 
     if stx_auth_type == AUTH_TYPES.OIDC:
         # OIDC authentication path
@@ -354,14 +348,13 @@ def create_strategy(
     stx_auth_type,
     **kwargs,
 ):
-    """
-    Software Update - Create Strategy
-    """
+    """Software Update - Create Strategy."""
 
     if alarm_restrictions == ALARM_RESTRICTIONS_PERMISSIVE:
         response = input(
             "Using --alarm-restrictions permissive is unsafe.\n"
-            "Ensure you have contacted support and understand the possible complications.\n"
+            "Ensure you have contacted support and understand the possible "
+            "complications.\n"
             "Enter 'yes' to continue or anything else to abort: "
         )
         if response != "yes":
@@ -415,9 +408,8 @@ def delete_strategy(
     stx_auth_type,
     force=False,
 ):
-    """
-    Software Update - Delete Strategy
-    """
+    """Software Update - Delete Strategy."""
+
     token_id, url = _get_auth_token_and_url(
         os_auth_uri,
         os_project_name,
@@ -460,9 +452,8 @@ def apply_strategy(
     stx_auth_type,
     stage_id=None,
 ):
-    """
-    Software Update - Apply Strategy
-    """
+    """Software Update - Apply Strategy."""
+
     token_id, url = _get_auth_token_and_url(
         os_auth_uri,
         os_project_name,
@@ -528,9 +519,8 @@ def abort_strategy(
     stx_auth_type,
     stage_id=None,
 ):
-    """
-    Software Update - Abort Strategy
-    """
+    """Software Update - Abort Strategy."""
+
     token_id, url = _get_auth_token_and_url(
         os_auth_uri,
         os_project_name,
@@ -577,9 +567,8 @@ def show_strategy(
     active=False,
     error_details=False,
 ):
-    """
-    Software Update - Show Strategy
-    """
+    """Software Update - Show Strategy."""
+
     token_id, url = _get_auth_token_and_url(
         os_auth_uri,
         os_project_name,

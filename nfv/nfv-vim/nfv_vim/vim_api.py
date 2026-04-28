@@ -31,9 +31,8 @@ do_reload = False
 
 
 def get_address_family(ip_string):
-    """
-    Get the family for the given ip address string.
-    """
+    """Get the family for the given ip address string."""
+
     ip_address = IPAddress(ip_string)
     if ip_address.version == 6:
         return socket.AF_INET6
@@ -42,9 +41,8 @@ def get_address_family(ip_string):
 
 
 def process_signal_handler(signum, frame):
-    """
-    Virtual Infrastructure Manager API - Process Signal Handler
-    """
+    """Virtual Infrastructure Manager API - Process Signal Handler."""
+
     global stay_on, do_reload
 
     if signal.SIGTERM == signum:
@@ -59,9 +57,8 @@ def process_signal_handler(signum, frame):
 
 @coroutine
 def process_event_handler(wsgi):
-    """
-    Virtual Infrastructure Manager API - Event Handler
-    """
+    """Virtual Infrastructure Manager API - Event Handler."""
+
     while True:
         select_obj = yield
         if select_obj == wsgi:
@@ -93,9 +90,8 @@ def get_handler_cls():
 
 
 def process_initialize():
-    """
-    Virtual Infrastructure Manager API - Initialize
-    """
+    """Virtual Infrastructure Manager API - Initialize."""
+
     debug.debug_initialize(config.CONF["debug"], "VIM-API")
     selobj.selobj_initialize()
     timers.timers_initialize(
@@ -115,18 +111,16 @@ def process_initialize():
 
 
 def process_finalize():
-    """
-    Virtual Infrastructure Manager API - Finalize
-    """
+    """Virtual Infrastructure Manager API - Finalize."""
+
     timers.timers_finalize()
     selobj.selobj_finalize()
     debug.debug_finalize()
 
 
 def process_main():
-    """
-    Virtual Infrastructure Manager API - Main
-    """
+    """Virtual Infrastructure Manager API - Main."""
+
     global do_reload
 
     try:

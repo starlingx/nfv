@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.hypervisor")
 
 
 class Hypervisor(ObjectData):
-    """
-    Hypervisor Object
-    """
+    """Hypervisor Object."""
 
     def __init__(self, nfvi_hypervisor):
         super(Hypervisor, self).__init__("1.0.0")
@@ -42,23 +40,20 @@ class Hypervisor(ObjectData):
 
     @property
     def uuid(self):
-        """
-        Returns the uuid of the instance
-        """
+        """Returns the uuid of the instance."""
+
         return self._nfvi_hypervisor.uuid
 
     @property
     def admin_state(self):
-        """
-        Returns the current administrative state of the hypervisor
-        """
+        """Returns the current administrative state of the hypervisor."""
+
         return self._nfvi_hypervisor.admin_state  # assume one-to-one mapping
 
     @property
     def oper_state(self):
-        """
-        Returns the current operational state of the hypervisor
-        """
+        """Returns the current operational state of the hypervisor."""
+
         from nfv_vim import tables
 
         host_table = tables.tables_get_host_table()
@@ -74,22 +69,19 @@ class Hypervisor(ObjectData):
 
     @property
     def host_name(self):
-        """
-        Returns the host name the instance resides on
-        """
+        """Returns the host name the instance resides on."""
+
         return self._nfvi_hypervisor.host_name
 
     @property
     def nfvi_hypervisor(self):
-        """
-        Returns the nfvi hypervisor data
-        """
+        """Returns the nfvi hypervisor data."""
+
         return self._nfvi_hypervisor
 
     def is_enabled(self):
-        """
-        Returns true if this hypervisor is enabled
-        """
+        """Returns true if this hypervisor is enabled."""
+
         from nfv_vim import tables
 
         host_table = tables.tables_get_host_table()
@@ -110,9 +102,8 @@ class Hypervisor(ObjectData):
         return self.get("vcpus_used", None) is not None
 
     def nfvi_hypervisor_update(self, nfvi_hypervisor):
-        """
-        NFVI Hypervisor Update
-        """
+        """NFVI Hypervisor Update."""
+
         prev_admin_state = self.admin_state
         prev_oper_state = self.oper_state
 
@@ -145,17 +136,15 @@ class Hypervisor(ObjectData):
             )
 
     def _persist(self):
-        """
-        Persist changes to hypervisor object
-        """
+        """Persist changes to hypervisor object."""
+
         from nfv_vim import database
 
         database.database_hypervisor_add(self)
 
     def as_dict(self):
-        """
-        Represent hypervisor object as dictionary
-        """
+        """Represent hypervisor object as dictionary."""
+
         data = dict()
         data["uuid"] = self.uuid
         data["admin_state"] = self.admin_state

@@ -14,9 +14,7 @@ from nfv_vim.api.controllers.v1 import APIController
 
 
 class Root(wsme_types.Base):
-    """
-    Root
-    """
+    """Root."""
 
     name = wsme_types.text
     description = wsme_types.text
@@ -34,9 +32,7 @@ class Root(wsme_types.Base):
 
 
 class RootController(rest.RestController):
-    """
-    Root Controller
-    """
+    """Root Controller."""
 
     @pecan.expose()
     def _lookup(self, key, *remainder):

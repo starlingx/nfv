@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ResizeState(state_machine.State):
-    """
-    Instance - Resize State
-    """
+    """Instance - Resize State."""
 
     def __init__(self, name):
         super(ResizeState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering resize state
-        """
+        """Entering resize state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = ResizeTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting resize state
-        """
+        """Exiting resize state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, ResizeTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the resize state
-        """
+        """Transition from the resize state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the resize state
-        """
+        """Handle event while in the resize state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

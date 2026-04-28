@@ -23,18 +23,16 @@ from nfv_plugins.nfvi_plugins.openstack import sysinv
 
 
 def keystone_unit_tests(token, test_config):
-    """
-    Run through the unit tests for keystone
-    """
+    """Run through the unit tests for keystone."""
+
     print("[KEYSTONE UNIT TESTS]")
     tenants = keystone.get_tenants(token)
     print("List of tenants: %s" % tenants)
 
 
 def ceilometer_unit_tests(token, test_config):
-    """
-    Run through the unit tests for ceilometer
-    """
+    """Run through the unit tests for ceilometer."""
+
     print("[CEILOMETER UNIT TESTS]")
     meters = ceilometer.get_meters(token)
     print("List of meters: %s" % meters)
@@ -44,9 +42,8 @@ def ceilometer_unit_tests(token, test_config):
 
 
 def sysinv_unit_tests(token, test_config):
-    """
-    Run through the unit tests for system inventory
-    """
+    """Run through the unit tests for system inventory."""
+
     print("[SYSINV UNIT TESTS]")
     system_info = sysinv.get_system_info(token)
     print("System information: %s" % system_info)
@@ -56,9 +53,8 @@ def sysinv_unit_tests(token, test_config):
 
 
 def glance_unit_tests(token, test_config):
-    """
-    Run through the unit tests for glance
-    """
+    """Run through the unit tests for glance."""
+
     print("[GLANCE UNIT TESTS]")
 
     images = glance.get_images(token)
@@ -103,9 +99,8 @@ def glance_unit_tests(token, test_config):
 
 
 def cinder_unit_tests(token, test_config):
-    """
-    Run through the unit tests for cinder
-    """
+    """Run through the unit tests for cinder."""
+
     print("[CINDER UNIT TESTS]")
 
     servers = nova.get_servers(token)
@@ -131,9 +126,8 @@ def cinder_unit_tests(token, test_config):
 
 
 def neutron_unit_tests(token, test_config):
-    """
-    Run through the unit tests for neutron
-    """
+    """Run through the unit tests for neutron."""
+
     print("[NEUTRON UNIT TESTS]")
 
     response = neutron.disable_host_services(token, test_config["host_uuid"])
@@ -204,9 +198,8 @@ def neutron_unit_tests(token, test_config):
 
 
 def nova_unit_tests(token, test_config):
-    """
-    Run through the unit tests for nova
-    """
+    """Run through the unit tests for nova."""
+
     print("[NOVA UNIT TESTS]")
 
     response = nova.disable_host_services(token, test_config["host_name"])
@@ -345,9 +338,8 @@ def nova_unit_tests(token, test_config):
 
 
 def heat_unit_tests(token, test_config):
-    """
-    Run through the unit tests for heat
-    """
+    """Run through the unit tests for heat."""
+
     print("[HEAT UNIT TESTS]")
 
     versions = heat.get_versions(token)
@@ -380,9 +372,8 @@ def heat_unit_tests(token, test_config):
 
 
 def guest_unit_tests(token, test_config):
-    """
-    Run through the unit tests for Host and Guest Service
-    """
+    """Run through the unit tests for Host and Guest Service."""
+
     print("[GUEST UNIT TESTS]")
 
     response = guest.host_services_create(
@@ -428,9 +419,8 @@ def guest_unit_tests(token, test_config):
 
 
 def rest_api_unit_tests(token, test_config):
-    """
-    Run through the unit tests for Host and Guest Service
-    """
+    """Run through the unit tests for Host and Guest Service."""
+
     print("[REST-API UNIT TESTS]")
 
     # This will hang the rest-api request as no message body is ever written.
@@ -461,9 +451,8 @@ def rest_api_unit_tests(token, test_config):
 
 
 def do_unit_tests(test_set=None, rest_api_debug=False, test_config=None):
-    """
-    NFVI Plugins Unit Tests
-    """
+    """NFVI Plugins Unit Tests."""
+
     if rest_api_debug:
         # Enable debugging of request and response headers for rest-api calls
         import urllib.request
@@ -537,7 +526,6 @@ def do_unit_tests(test_set=None, rest_api_debug=False, test_config=None):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="configuration file")
     parser.add_argument("-t", "--test_set", help="test set")

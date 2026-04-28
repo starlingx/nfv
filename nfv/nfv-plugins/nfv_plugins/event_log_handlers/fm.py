@@ -19,7 +19,6 @@ from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import fm
 from nfv_plugins.nfvi_plugins.openstack import openstack
 
-
 DLOG = debug.debug_get_logger("nfv_plugins.event_log_handlers.fm")
 
 _fm_event_id_mapping = dict(
@@ -742,50 +741,51 @@ _fm_kube_rootca_update_event_id_mapping = dict(
 _fm_event_id_mapping.update(_fm_kube_rootca_update_event_id_mapping)
 
 # define system config update event mapping
+_event_id = event_log_objects_v1.EVENT_ID
 _fm_system_config_update_event_id_mapping = dict(
     [
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_START,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_START,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_START,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_INPROGRESS,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_REJECTED,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_REJECTED,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_REJECTED,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_CANCELLED,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_CANCELLED,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_CANCELLED,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_FAILED,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_COMPLETED,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_COMPLETED,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_COMPLETED,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTING,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_REJECTED,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_REJECTED,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_REJECTED,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_FAILED,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_FAILED,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORT_FAILED,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTED,
+            _event_id.SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTED,
             fm_constants.FM_LOG_ID_SYSTEM_CONFIG_UPDATE_AUTO_APPLY_ABORTED,
         ),
     ]
@@ -824,9 +824,7 @@ _fm_event_importance_mapping = dict(
 
 
 class EventLogManagement(event_log_handlers_v1.EventLogHandler):
-    """
-    Fault Management Customer Log Handler
-    """
+    """Fault Management Customer Log Handler."""
 
     _name = "Event-Log-Management"
     _version = "1.0.0"
@@ -918,9 +916,7 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
                     "Caught exception while trying to get token, error=%s." % e
                 )
         except Exception as e:
-            DLOG.exception(
-                "Caught exception while trying to get token, error=%s." % e
-            )
+            DLOG.exception("Caught exception while trying to get token, error=%s." % e)
 
     def log(self, log_data):
         DLOG.debug("Generating Customer Log")

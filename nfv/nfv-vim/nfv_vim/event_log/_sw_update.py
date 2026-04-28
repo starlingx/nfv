@@ -304,8 +304,7 @@ _event_templates = {
             event_log.EVENT_CONTEXT.ADMIN: {
                 "entity_type": "orchestration",
                 "entity": "orchestration=sw-upgrade",
-                "reason_text": "Software upgrade auto-apply abort "
-                "rejected%(reason)s",
+                "reason_text": "Software upgrade auto-apply abort rejected%(reason)s",
             }
         },
     },
@@ -486,8 +485,7 @@ _event_templates = {
             event_log.EVENT_CONTEXT.ADMIN: {
                 "entity_type": "orchestration",
                 "entity": "orchestration=system-config-update",
-                "reason_text": "System config update auto-apply abort "
-                "failed%(reason)s",
+                "reason_text": "System config update auto-apply abort failed%(reason)s",
             }
         },
     },
@@ -562,7 +560,8 @@ _event_templates = {
             event_log.EVENT_CONTEXT.ADMIN: {
                 "entity_type": "orchestration",
                 "entity": "orchestration=kube-rootca update",
-                "reason_text": "Kubernetes rootca update auto-apply cancelled%(reason)s",
+                "reason_text": "Kubernetes rootca update auto-apply "
+                "cancelled%(reason)s",
             }
         },
     },
@@ -653,7 +652,8 @@ _event_templates = {
             event_log.EVENT_CONTEXT.ADMIN: {
                 "entity_type": "orchestration",
                 "entity": "orchestration=kube-rootca update",
-                "reason_text": "Kubernetes rootca update auto-apply abort failed%(reason)s",
+                "reason_text": "Kubernetes rootca update auto-apply "
+                "abort failed%(reason)s",
             }
         },
     },
@@ -803,8 +803,7 @@ _event_templates = {
             event_log.EVENT_CONTEXT.ADMIN: {
                 "entity_type": "orchestration",
                 "entity": "orchestration=kube-upgrade",
-                "reason_text": "Kubernetes upgrade auto-apply abort "
-                "rejected%(reason)s",
+                "reason_text": "Kubernetes upgrade auto-apply abort rejected%(reason)s",
             }
         },
     },
@@ -842,9 +841,8 @@ _event_templates = {
 
 
 def _event_template_get(event_id, event_context):
-    """
-    Returns the event template associated with the given context
-    """
+    """Returns the event template associated with the given context."""
+
     if event_id not in _event_templates:
         return None
 
@@ -885,9 +883,8 @@ def _event_template_get(event_id, event_context):
 
 
 def _event_issue(event_id, event_context, template, data):
-    """
-    Issue an event given the event template and data
-    """
+    """Issue an event given the event template and data."""
+
     event_data = event_log.EventLogData(
         event_id,
         template["event_type"],
@@ -905,9 +902,8 @@ def _event_issue(event_id, event_context, template, data):
 def sw_update_issue_log(
     event_id, additional_text=None, event_context=None, reason=None
 ):
-    """
-    Issue an event log for software update
-    """
+    """Issue an event log for software update."""
+
     data = dict()
 
     if additional_text is None:

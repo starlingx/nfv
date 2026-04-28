@@ -5,16 +5,13 @@
 #
 import configparser
 
-
 # Configuration Global used by other modules to get access to the configuration
 # specified in the ini file.
 CONF = dict()
 
 
 class Config(configparser.ConfigParser):
-    """
-    Override ConfigParser class to add dictionary functionality.
-    """
+    """Override ConfigParser class to add dictionary functionality."""
 
     def as_dict(self):
         d = dict(self._sections)
@@ -25,9 +22,8 @@ class Config(configparser.ConfigParser):
 
 
 def load(config_file):
-    """
-    Load the configuration file into a global CONF variable.
-    """
+    """Load the configuration file into a global CONF variable."""
+
     global CONF
 
     if not CONF:

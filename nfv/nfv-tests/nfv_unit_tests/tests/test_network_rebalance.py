@@ -13,7 +13,6 @@ from nfv_vim.network_rebalance._network_rebalance import L3_REBALANCE_STATE
 
 from nfv_unit_tests.tests import testcase
 
-
 DEBUG_PRINTING = False
 
 
@@ -25,7 +24,6 @@ def fake_nfvi_remove_router_from_agent(a, b, c):
     "nfv_vim.nfvi.nfvi_remove_router_from_agent", fake_nfvi_remove_router_from_agent
 )
 class TestNeutronRebalance(testcase.NFVTestCase):
-
     def setUp(self):
         super(TestNeutronRebalance, self).setUp()
 

@@ -14,9 +14,8 @@ from nfv_vim.database._database import database_get
 
 
 def database_volume_add(volume_obj):
-    """
-    Add a volume object to the database
-    """
+    """Add a volume object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Volume)
@@ -49,9 +48,8 @@ def database_volume_add(volume_obj):
 
 
 def database_volume_delete(volume_uuid):
-    """
-    Delete a volume object from the database
-    """
+    """Delete a volume object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Volume)
@@ -60,9 +58,8 @@ def database_volume_delete(volume_uuid):
 
 
 def database_volume_get_list():
-    """
-    Fetch all the volume objects from the database
-    """
+    """Fetch all the volume objects from the database."""
+
     db = database_get()
 
     session = db.session()
@@ -88,9 +85,8 @@ def database_volume_get_list():
 
 
 def database_volume_snapshot_add(volume_snapshot_obj):
-    """
-    Add a volume snapshot object to the database
-    """
+    """Add a volume snapshot object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.VolumeSnapshot)
@@ -119,9 +115,8 @@ def database_volume_snapshot_add(volume_snapshot_obj):
 
 
 def database_volume_snapshot_delete(volume_snapshot_uuid):
-    """
-    Delete a volume snapshot object from the database
-    """
+    """Delete a volume snapshot object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.VolumeSnapshot)
@@ -130,9 +125,8 @@ def database_volume_snapshot_delete(volume_snapshot_uuid):
 
 
 def database_volume_snapshot_get_list():
-    """
-    Fetch all the volume snapshot objects from the database
-    """
+    """Fetch all the volume snapshot objects from the database."""
+
     db = database_get()
 
     session = db.session()

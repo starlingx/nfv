@@ -11,7 +11,8 @@ import socket
 
 
 def syscall_retry_on_interrupt(func, *args):
-    """Attempt system call again if interrupted by EINTR"""
+    """Attempt system call again if interrupted by EINTR."""
+
     for _ in range(0, 5):
         try:
             return func(*args)
@@ -37,9 +38,7 @@ def process_uptime_in_secs():
 
 
 class Object(object):
-    """
-    Class Object Type Definition
-    """
+    """Class Object Type Definition."""
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -49,9 +48,7 @@ class Object(object):
 
 
 class Result(object):
-    """
-    Generic Result Object Type Definition
-    """
+    """Generic Result Object Type Definition."""
 
     def __init__(self, result_data, ancillary_data=None):
         self.result_data = result_data
@@ -73,9 +70,7 @@ class Constants(object):
 
 
 class Constant(object):
-    """
-    Constant Type Definition
-    """
+    """Constant Type Definition."""
 
     def __init__(self, value):
         self.value = value
@@ -91,9 +86,7 @@ class Constant(object):
 
 
 class Singleton(type):
-    """
-    Singleton Type Definition
-    """
+    """Singleton Type Definition."""
 
     _instances = {}
 
@@ -104,9 +97,7 @@ class Singleton(type):
 
 
 def coroutine(func):
-    """
-    Co-Routine decorator that wraps a function and starts the co-routine
-    """
+    """Co-Routine decorator that wraps a function and starts the co-routine."""
 
     def start(*args, **kwargs):
         target = func(*args, **kwargs)
@@ -118,14 +109,14 @@ def coroutine(func):
 
 
 def get_local_host_name():
-    """
-    Returns the name of the local host
-    """
+    """Returns the name of the local host."""
+
     return socket.gethostname()
 
 
 def get_system_ca_file():
     """Return path to system default CA file."""
+
     # Standard CA file locations for Debian/Ubuntu, RedHat/Fedora,
     # Suse, FreeBSD/OpenBSD
     ca_path = [

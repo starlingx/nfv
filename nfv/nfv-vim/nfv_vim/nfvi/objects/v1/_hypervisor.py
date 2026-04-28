@@ -11,9 +11,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class HypervisorAdministrativeState(Constants, metaclass=Singleton):
-    """
-    Hypervisor Administrative State Constants
-    """
+    """Hypervisor Administrative State Constants."""
 
     UNKNOWN = Constant("unknown")
     LOCKED = Constant("locked")
@@ -21,9 +19,7 @@ class HypervisorAdministrativeState(Constants, metaclass=Singleton):
 
 
 class HypervisorOperationalState(Constants, metaclass=Singleton):
-    """
-    Hypervisor Operational State Constants
-    """
+    """Hypervisor Operational State Constants."""
 
     UNKNOWN = Constant("unknown")
     ENABLED = Constant("enabled")
@@ -36,9 +32,7 @@ HYPERVISOR_OPER_STATE = HypervisorOperationalState()
 
 
 class Hypervisor(ObjectData):
-    """
-    NFVI Hypervisor Object
-    """
+    """NFVI Hypervisor Object."""
 
     def __init__(self, uuid, admin_state, oper_state, host_name):
         super(Hypervisor, self).__init__("1.0.0")

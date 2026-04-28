@@ -31,9 +31,7 @@ MAX_EVENT_REASON_LENGTH = 255
 
 
 class InstanceActionType(Constants, metaclass=Singleton):
-    """
-    Instance Action Type Constants
-    """
+    """Instance Action Type Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant("")
@@ -56,9 +54,8 @@ class InstanceActionType(Constants, metaclass=Singleton):
 
     @staticmethod
     def get_nfvi_action_type(action_type):
-        """
-        Returns the nfvi instance action type that maps to instance_action_type
-        """
+        """Returns the nfvi instance action type that maps to instance_action_type."""
+
         if InstanceActionType.UNKNOWN == action_type:
             return nfvi.objects.v1.INSTANCE_ACTION_TYPE.UNKNOWN
 
@@ -118,9 +115,8 @@ class InstanceActionType(Constants, metaclass=Singleton):
 
     @staticmethod
     def get_action_type(nfvi_action_type):
-        """
-        Returns the instance action type that maps to nfvi_action_type
-        """
+        """Returns the instance action type that maps to nfvi_action_type."""
+
         if nfvi.objects.v1.INSTANCE_ACTION_TYPE.UNKNOWN == nfvi_action_type:
             return InstanceActionType.UNKNOWN
 
@@ -183,9 +179,7 @@ class InstanceActionType(Constants, metaclass=Singleton):
 
 
 class InstanceActionState(Constants, metaclass=Singleton):
-    """
-    Instance Action State Constants
-    """
+    """Instance Action State Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant("none")
@@ -203,9 +197,7 @@ class InstanceActionState(Constants, metaclass=Singleton):
 
 
 class InstanceActionInitiatedBy(Constants, metaclass=Singleton):
-    """
-    Instance Action Initiated-By Constants
-    """
+    """Instance Action Initiated-By Constants."""
 
     UNKNOWN = Constant("unknown")
     TENANT = Constant("tenant")
@@ -220,9 +212,7 @@ INSTANCE_ACTION_INITIATED_BY = InstanceActionInitiatedBy
 
 
 class InstanceActionData(object):
-    """
-    Instance Action Data
-    """
+    """Instance Action Data."""
 
     _seqnum = 1
 
@@ -240,9 +230,8 @@ class InstanceActionData(object):
 
     @staticmethod
     def _get_action_state(nfvi_action_state):
-        """
-        Returns the instance action state that maps to nfvi_action_state
-        """
+        """Returns the instance action state that maps to nfvi_action_state."""
+
         if nfvi.objects.v1.INSTANCE_ACTION_STATE.UNKNOWN == nfvi_action_state:
             return INSTANCE_ACTION_STATE.UNKNOWN
 
@@ -269,16 +258,14 @@ class InstanceActionData(object):
 
     @property
     def seqnum(self):
-        """
-        Returns the sequence number assigned to this action
-        """
+        """Returns the sequence number assigned to this action."""
+
         return self._seqnum
 
     @property
     def uuid(self):
-        """
-        Returns the uuid of the action, otherwise None
-        """
+        """Returns the uuid of the action, otherwise None."""
+
         if self._nfvi_action_data is None:
             return None
 
@@ -286,9 +273,8 @@ class InstanceActionData(object):
 
     @property
     def action_type(self):
-        """
-        Returns the action type
-        """
+        """Returns the action type."""
+
         if self._nfvi_action_data is None:
             return INSTANCE_ACTION_TYPE.NONE
 
@@ -297,16 +283,14 @@ class InstanceActionData(object):
 
     @property
     def action_state(self):
-        """
-        Returns the action state
-        """
+        """Returns the action state."""
+
         return self._action_state
 
     @property
     def reason(self):
-        """
-        Returns the reason
-        """
+        """Returns the reason."""
+
         if self._nfvi_action_data is None:
             return ""
 
@@ -314,24 +298,21 @@ class InstanceActionData(object):
 
     @property
     def context(self):
-        """
-        Returns the context the action was issued in
-        """
+        """Returns the context the action was issued in."""
+
         if self._nfvi_action_data is None:
             return None
 
         return self._nfvi_action_data.context
 
     def is_initial(self):
-        """
-        Returns true if an action is in the initial phase
-        """
+        """Returns true if an action is in the initial phase."""
+
         return INSTANCE_ACTION_STATE.INITIAL == self._action_state
 
     def is_inprogress(self):
-        """
-        Returns true if an action is inprogress
-        """
+        """Returns true if an action is inprogress."""
+
         if self._nfvi_action_data is None:
             return False
 
@@ -341,92 +322,78 @@ class InstanceActionData(object):
         return True
 
     def is_allowed(self):
-        """
-        Returns true if an action is allowed
-        """
+        """Returns true if an action is allowed."""
+
         return INSTANCE_ACTION_STATE.ALLOWED == self._action_state
 
     def is_rejected(self):
-        """
-        Returns true if an action is rejected
-        """
+        """Returns true if an action is rejected."""
+
         return INSTANCE_ACTION_STATE.REJECTED == self._action_state
 
     def is_proceed(self):
-        """
-        Returns true if an action can proceed
-        """
+        """Returns true if an action can proceed."""
+
         return INSTANCE_ACTION_STATE.PROCEED == self._action_state
 
     def is_cancelled(self):
-        """
-        Returns true if an action has been cancelled
-        """
+        """Returns true if an action has been cancelled."""
+
         return INSTANCE_ACTION_STATE.CANCELLED == self._action_state
 
     def is_completed(self):
-        """
-        Returns true if an action has been completed
-        """
+        """Returns true if an action has been completed."""
+
         return INSTANCE_ACTION_STATE.COMPLETED == self._action_state
 
     def just_completed(self, nfvi_action_state):
-        """
-        Returns true if an action has just transition to completed
-        """
+        """Returns true if an action has just transition to completed."""
+
         if not self.is_completed():
             if nfvi.objects.v1.INSTANCE_ACTION_STATE.COMPLETED == nfvi_action_state:
                 return True
         return False
 
     def initiated_from_cli(self):
-        """
-        Returns true if action was initiated from cli
-        """
+        """Returns true if action was initiated from cli."""
+
         if self._nfvi_action_data is not None:
             return self._nfvi_action_data.from_cli
         return False
 
     def set_action_initiated(self):
-        """
-        Allows setting the action state to the initiated state
-        """
+        """Allows setting the action state to the initiated state."""
+
         self._action_state = INSTANCE_ACTION_STATE.INITIATED
 
     def set_action_voting(self):
-        """
-        Allows setting the action state to the voting state
-        """
+        """Allows setting the action state to the voting state."""
+
         self._action_state = INSTANCE_ACTION_STATE.VOTING
 
     def set_action_pre_notify(self):
-        """
-        Allows setting the action state to the pre-notify state
-        """
+        """Allows setting the action state to the pre-notify state."""
+
         self._action_state = INSTANCE_ACTION_STATE.PRE_NOTIFY
 
     def set_action_post_notify(self):
-        """
-        Allows setting the action state to the post notify state
-        """
+        """Allows setting the action state to the post notify state."""
+
         self._action_state = INSTANCE_ACTION_STATE.POST_NOTIFY
 
     def set_action_completed(self):
-        """
-        Allows setting the action state to the completed state
-        """
+        """Allows setting the action state to the completed state."""
+
         self._action_state = INSTANCE_ACTION_STATE.COMPLETED
 
     def get_nfvi_action_data(self):
-        """
-        Returns the NFVI Action Data
-        """
+        """Returns the NFVI Action Data."""
+
         return self._nfvi_action_data
 
     def nfvi_action_data_change(self, nfvi_action_type, nfvi_action_state, reason):
-        """
-        NFVI Action Data Change
-        """
+        """NFVI Action Data Change."""
+
         if nfvi_action_type is None:
             return
 
@@ -436,9 +403,8 @@ class InstanceActionData(object):
         self._nfvi_action_data.reason = reason
 
     def nfvi_action_data_update(self, nfvi_action_data):
-        """
-        NFVI Action Data Update
-        """
+        """NFVI Action Data Update."""
+
         if self._nfvi_action_data is not None:
             del self._nfvi_action_data
 
@@ -448,9 +414,8 @@ class InstanceActionData(object):
         self._nfvi_action_data = nfvi_action_data
 
     def as_dict(self):
-        """
-        Represent instance action data object as dictionary
-        """
+        """Represent instance action data object as dictionary."""
+
         data = dict()
         data["action_seqnum"] = self.seqnum
         data["action_uuid"] = self.uuid
@@ -465,9 +430,7 @@ class InstanceActionData(object):
 
 
 class InstanceActionFsm(object):
-    """
-    Instance Action FSM
-    """
+    """Instance Action FSM."""
 
     START = "start-action"
     STOP = "stop-action"
@@ -547,24 +510,21 @@ class InstanceActionFsm(object):
 
     @property
     def _instance(self):
-        """
-        Returns access to an instance
-        """
+        """Returns access to an instance."""
+
         instance = self._instance_reference()
         return instance
 
     @property
     def action_fsm(self):
-        """
-        Returns access to the current action fsm
-        """
+        """Returns access to the current action fsm."""
+
         return self._action_fsm
 
     @property
     def action_name(self):
-        """
-        Returns the name of the action in progress
-        """
+        """Returns the name of the action in progress."""
+
         action_name = ""
         if self._action_fsm is not None:
             action_name = next(
@@ -574,9 +534,8 @@ class InstanceActionFsm(object):
 
     @property
     def action_data(self):
-        """
-        Returns access to the current action data
-        """
+        """Returns access to the current action data."""
+
         if self._action_data is not None:
             if self._action_data.is_inprogress():
                 return self._action_data
@@ -584,9 +543,8 @@ class InstanceActionFsm(object):
 
     @property
     def action_type(self):
-        """
-        Returns the associated action type
-        """
+        """Returns the associated action type."""
+
         if self.START == self.action_name:
             return INSTANCE_ACTION_TYPE.START
 
@@ -643,9 +601,8 @@ class InstanceActionFsm(object):
     def _action_start(
         self, action_fsm, action_data=None, initiated_by=None, reason=None
     ):
-        """
-        Start an action
-        """
+        """Start an action."""
+
         if self._action_fsm is None:
             DLOG.verbose(
                 "Starting action %r, action_data=%s." % (action_fsm, action_data)
@@ -713,9 +670,8 @@ class InstanceActionFsm(object):
                 action_fsm.handle_event(instance_fsm.INSTANCE_EVENT.TASK_START)
 
     def _action_stop(self, action_fsm, action_data=None):
-        """
-        Stop an action
-        """
+        """Stop an action."""
+
         pending_action_entry = None
         for entry_fsm, entry_data, initiated_by, reason in self._pending_actions:
             if entry_fsm == action_fsm:
@@ -738,9 +694,8 @@ class InstanceActionFsm(object):
             self._action_data = None
 
     def _action_finished(self, prev_state, state, event):
-        """
-        Action finished, run next action if needed
-        """
+        """Action finished, run next action if needed."""
+
         DLOG.verbose(
             "Action state change, from_state=%s, to_state=%s." % (prev_state, state)
         )
@@ -767,18 +722,16 @@ class InstanceActionFsm(object):
                 self._action_data = None
 
     def handle_event(self, event):
-        """
-        Handle event into action
-        """
+        """Handle event into action."""
+
         if self._action_fsm is not None:
             self._action_fsm.handle_event(event)
             return True
         return False
 
     def do(self, do_action_name, action_data=None, initiated_by=None, reason=None):
-        """
-        Perform the given action
-        """
+        """Perform the given action."""
+
         if self._instance.is_deleted():
             # Can't run another action once the instance has been deleted
             if not self.DELETE == do_action_name:
@@ -807,9 +760,7 @@ class InstanceActionFsm(object):
 
 
 class Instance(ObjectData):
-    """
-    Instance Object
-    """
+    """Instance Object."""
 
     _ACTION_NONE = Constant("")
 
@@ -888,30 +839,26 @@ class Instance(ObjectData):
 
     @property
     def uuid(self):
-        """
-        Returns the uuid of the instance
-        """
+        """Returns the uuid of the instance."""
+
         return self._nfvi_instance.uuid
 
     @property
     def name(self):
-        """
-        Returns the name of the instance
-        """
+        """Returns the name of the instance."""
+
         return self._nfvi_instance.name
 
     @property
     def tenant_uuid(self):
-        """
-        Returns the tenant uuid owning this instance
-        """
+        """Returns the tenant uuid owning this instance."""
+
         return self._nfvi_instance.tenant_id
 
     @property
     def tenant_name(self):
-        """
-        Returns the tenant name owning this instance
-        """
+        """Returns the tenant name owning this instance."""
+
         from nfv_vim import tables
 
         tenant_table = tables.tables_get_tenant_table()
@@ -923,59 +870,52 @@ class Instance(ObjectData):
 
     @property
     def admin_state(self):
-        """
-        Returns the current administrative state of the instance
-        """
+        """Returns the current administrative state of the instance."""
+
         return self._nfvi_instance.admin_state  # assume one-to-one mapping
 
     @property
     def oper_state(self):
-        """
-        Returns the current operational state of the instance
-        """
+        """Returns the current operational state of the instance."""
+
         return self._nfvi_instance.oper_state  # assume one-to-one mapping
 
     @property
     def avail_status(self):
-        """
-        Returns the current availability status of the instance
-        """
+        """Returns the current availability status of the instance."""
+
         return self._nfvi_instance.avail_status  # assume one-to-one mapping
 
     @property
     def action(self):
-        """
-        Returns the current action the instance is performing
-        """
+        """Returns the current action the instance is performing."""
+
         return self._nfvi_instance.action  # assume one-to-one mapping
 
     @property
     def action_data(self):
-        """
-        Returns the current action data for the action the instance is
-        performing
+        """Returns the current action data for the action the instance is
+
+        performing.
         """
         return self._action_data
 
     @property
     def last_action_data(self):
-        """
-        Returns the last action data for the action the instance performed
-        """
+        """Returns the last action data for the action the instance performed."""
+
         return self._last_action_data
 
     @property
     def host_name(self):
-        """
-        Returns the host name the instance resides on
-        """
+        """Returns the host name the instance resides on."""
+
         return self._nfvi_instance.host_name
 
     @property
     def from_host_name(self):
-        """
-        Returns the from host name the instance resides on
-        """
+        """Returns the from host name the instance resides on."""
+
         if self._live_migrate_from_host is not None:
             return self._live_migrate_from_host
 
@@ -989,87 +929,76 @@ class Instance(ObjectData):
 
     @property
     def instance_type_original_name(self):
-        """
-        Returns the instance type original name
-        """
+        """Returns the instance type original name."""
+
         if self._nfvi_instance is not None:
             return self._nfvi_instance.instance_type_original_name
         return None
 
     @property
     def from_instance_type_original_name(self):
-        """
-        Returns the from instance type original name
-        """
+        """Returns the from instance type original name."""
+
         return self._resize_from_instance_type_original_name
 
     @property
     def image_uuid(self):
-        """
-        Returns the image identifier
-        """
+        """Returns the image identifier."""
+
         return self._nfvi_instance.image_uuid
 
     @property
     def attached_volumes(self):
-        """
-        Returns the volumes that are attached to this instance
-        """
+        """Returns the volumes that are attached to this instance."""
+
         return self._nfvi_instance.attached_volumes
 
     @property
     def nfvi_instance(self):
-        """
-        Returns the nfvi instance data
-        """
+        """Returns the nfvi instance data."""
+
         return self._nfvi_instance
 
     @property
     def nfvi_action_data(self):
-        """
-        Returns the nfvi instance action data
-        """
+        """Returns the nfvi instance action data."""
+
         return self._action_data.get_nfvi_action_data()
 
     @property
     def action_fsm(self):
-        """
-        Returns access to the current action being performed
-        """
+        """Returns access to the current action being performed."""
+
         if self._action_data is not None:
             return self._action_fsm.action_fsm
         return None
 
     @property
     def action_fsm_action_type(self):
-        """
-        Returns the current type of action being performed
-        """
+        """Returns the current type of action being performed."""
+
         if self._action_data is not None:
             return self._action_fsm.action_type
         return None
 
     @property
     def action_fsm_data(self):
-        """
-        Returns access to the current action data being performed
-        """
+        """Returns access to the current action data being performed."""
+
         if self._action_fsm is not None:
             return self._action_fsm.action_data
         return None
 
     @property
     def task(self):
-        """
-        Returns access to the current task
-        """
+        """Returns access to the current task."""
+
         return self._task
 
     @task.setter
     def task(self, task):
-        """
-        Allows setting the current task
-        """
+        """Allows setting the current task."""
+
         if self._task is not None:
             del self._task
 
@@ -1077,30 +1006,26 @@ class Instance(ObjectData):
 
     @property
     def last_state_change_datetime(self):
-        """
-        Returns the datetime of the last state change
-        """
+        """Returns the datetime of the last state change."""
+
         return self._last_state_change_datetime
 
     @property
     def nfvi_instance_audit_in_progress(self):
-        """
-        Returns whether an audit is in progress
-        """
+        """Returns whether an audit is in progress."""
+
         return self._nfvi_instance_audit_in_progress
 
     @nfvi_instance_audit_in_progress.setter
     def nfvi_instance_audit_in_progress(self, nfvi_instance_audit_in_progress):
-        """
-        Allows setting whether an audit is in progress
-        """
+        """Allows setting whether an audit is in progress."""
+
         self._nfvi_instance_audit_in_progress = nfvi_instance_audit_in_progress
 
     @property
     def elapsed_time_in_state(self):
-        """
-        Returns the elapsed time this instance has been in the current state
-        """
+        """Returns the elapsed time this instance has been in the current state."""
+
         elapsed_time_in_state = self._elapsed_time_in_state
 
         if 0 != self._last_state_timestamp:
@@ -1112,86 +1037,74 @@ class Instance(ObjectData):
 
     @property
     def elapsed_time_on_host(self):
-        """
-        Returns the elapsed time this instance has been on this host
-        """
+        """Returns the elapsed time this instance has been on this host."""
+
         return self._elapsed_time_on_host
 
     @property
     def vcpus(self):
-        """
-        Returns the number of vcpus needed for the instance
-        """
+        """Returns the number of vcpus needed for the instance."""
+
         return self._nfvi_instance.instance_type_vcpus
 
     @property
     def memory_mb(self):
-        """
-        Returns the memory needed for this instance
-        """
+        """Returns the memory needed for this instance."""
+
         return self._nfvi_instance.instance_type_mem_mb
 
     @property
     def disk_gb(self):
-        """
-        Returns the disk size needed for this instance
-        """
+        """Returns the disk size needed for this instance."""
+
         return self._nfvi_instance.instance_type_disk_gb
 
     @property
     def ephemeral_gb(self):
-        """
-        Returns the ephemeral size needed for this instance
-        """
+        """Returns the ephemeral size needed for this instance."""
+
         return self._nfvi_instance.instance_type_ephemeral_gb
 
     @property
     def swap_gb(self):
-        """
-        Returns the swap size needed for this instance
-        """
+        """Returns the swap size needed for this instance."""
+
         return self._nfvi_instance.instance_type_swap_gb
 
     @property
     def fail_reason(self):
-        """
-        Returns the reason for the failure
-        """
+        """Returns the reason for the failure."""
+
         return self._fail_reason
 
     @property
     def events(self):
-        """
-        Returns a list of events recently generated
-        """
+        """Returns a list of events recently generated."""
+
         return self._events
 
     @events.setter
     def events(self, events):
-        """
-        Allows setting the list of events recently generated
-        """
+        """Allows setting the list of events recently generated."""
+
         self._events[:] = events
 
     @property
     def alarms(self):
-        """
-        Returns a list of alarms raised
-        """
+        """Returns a list of alarms raised."""
+
         return self._alarms
 
     @alarms.setter
     def alarms(self, alarms):
-        """
-        Allows setting the list of alarms raised
-        """
+        """Allows setting the list of alarms raised."""
+
         self._alarms[:] = alarms
 
     @property
     def guest_services(self):
-        """
-        Returns the guest services for this instance
-        """
+        """Returns the guest services for this instance."""
+
         if self._nfvi_instance.instance_type_guest_services:
             for service in list(
                 self._nfvi_instance.instance_type_guest_services.keys()
@@ -1205,16 +1118,15 @@ class Instance(ObjectData):
 
     @property
     def recoverable(self):
-        """
-        Returns whether this instance is recoverable or not
-        """
+        """Returns whether this instance is recoverable or not."""
+
         DLOG.verbose("Recoverable is %s for %s." % (self._recoverable, self.name))
         return self._recoverable
 
     @staticmethod
     def recovery_sort_key(instance):
-        """
-        Use to sort instances by their recovery priority and then by their
+        """Use to sort instances by their recovery priority and then by their
+
         attributes (largest instances first). Use the reverse option with
         this sort key function.
         """
@@ -1231,8 +1143,8 @@ class Instance(ObjectData):
 
     @property
     def recovery_priority(self):
-        """
-        Returns the priority for recovering this instance (1 to 10 with 1
+        """Returns the priority for recovering this instance (1 to 10 with 1
+
         being the highest priority). If no priority is set, returns 10.
         """
         if self._nfvi_instance.recovery_priority is None:
@@ -1242,16 +1154,16 @@ class Instance(ObjectData):
 
     @property
     def unlock_to_recover(self):
-        """
-        Returns whether instance should be unlocked to recover after hypervisor
+        """Returns whether instance should be unlocked to recover after hypervisor
+
         becomes available.
         """
         return self._unlock_to_recover
 
     @unlock_to_recover.setter
     def unlock_to_recover(self, unlock_to_recover):
-        """
-        Set whether and instance should be unlocked to recover after hypervisor
+        """Set whether and instance should be unlocked to recover after hypervisor
+
         becomes available.
         """
         self._unlock_to_recover = unlock_to_recover
@@ -1259,9 +1171,8 @@ class Instance(ObjectData):
 
     @property
     def auto_recovery(self):
-        """
-        Returns whether Instance Auto Recovery is turned on for this instance
-        """
+        """Returns whether Instance Auto Recovery is turned on for this instance."""
+
         from nfv_vim import tables
 
         auto_recovery = self._nfvi_instance.instance_type_auto_recovery
@@ -1282,9 +1193,8 @@ class Instance(ObjectData):
 
     @property
     def max_live_migrate_wait_in_secs(self):
-        """
-        Returns the live migration timeout value for this instance
-        """
+        """Returns the live migration timeout value for this instance."""
+
         from nfv_vim import tables
 
         # check the image for the live migration timeout
@@ -1394,9 +1304,8 @@ class Instance(ObjectData):
 
     @property
     def max_live_migration_downtime_in_ms(self):
-        """
-        Returns the live migration max downtime value for this instance
-        """
+        """Returns the live migration max downtime value for this instance."""
+
         from nfv_vim import tables
 
         # always pull from image to pick up updates from image-update
@@ -1435,9 +1344,8 @@ class Instance(ObjectData):
 
     @property
     def max_cold_migrate_wait_in_secs(self):
-        """
-        Returns the cold migration timeout value for this instance
-        """
+        """Returns the cold migration timeout value for this instance."""
+
         if self._max_cold_migrate_wait_in_secs is not None:
             DLOG.debug(
                 "Cold-Migrate timeout is %s secs for %s."
@@ -1461,9 +1369,8 @@ class Instance(ObjectData):
 
     @property
     def max_resize_wait_in_secs(self):
-        """
-        Returns the resize timeout value for this instance
-        """
+        """Returns the resize timeout value for this instance."""
+
         if self._max_resize_wait_in_secs is not None:
             DLOG.debug(
                 "Resize timeout is %s secs for %s."
@@ -1487,9 +1394,8 @@ class Instance(ObjectData):
 
     @property
     def max_evacuate_wait_in_secs(self):
-        """
-        Returns the evacuation timeout value for this instance
-        """
+        """Returns the evacuation timeout value for this instance."""
+
         if self._max_evacuate_wait_in_secs is not None:
             DLOG.debug(
                 "Evacuate timeout is %s secs for %s."
@@ -1512,15 +1418,13 @@ class Instance(ObjectData):
         return self._max_evacuate_wait_in_secs
 
     def can_live_migrate(self, system_initiated=False):
-        """
-        Returns true if the instance can be live-migrated
-        """
+        """Returns true if the instance can be live-migrated."""
+
         return True
 
     def can_cold_migrate(self, system_initiated=False):
-        """
-        Returns true if the instance can be cold-migrated
-        """
+        """Returns true if the instance can be cold-migrated."""
+
         from nfv_vim import tables
 
         if not system_initiated:
@@ -1558,9 +1462,8 @@ class Instance(ObjectData):
         return True
 
     def can_evacuate(self, system_initiated=False):
-        """
-        Returns true if the instance can be evacuated
-        """
+        """Returns true if the instance can be evacuated."""
+
         from nfv_vim import tables
 
         if not system_initiated:
@@ -1598,9 +1501,8 @@ class Instance(ObjectData):
         return True
 
     def supports_live_migration(self):
-        """
-        Returns true if this instance supports live-migration
-        """
+        """Returns true if this instance supports live-migration."""
+
         if self._live_migration_support is not None:
             if not self._live_migration_support:
                 return False
@@ -1608,45 +1510,40 @@ class Instance(ObjectData):
         return True
 
     def is_locked(self):
-        """
-        Returns true if this instance is locked
-        """
+        """Returns true if this instance is locked."""
+
         return (
             nfvi.objects.v1.INSTANCE_ADMIN_STATE.LOCKED
             == self._nfvi_instance.admin_state
         )
 
     def is_enabled(self):
-        """
-        Returns true if this instance is enabled
-        """
+        """Returns true if this instance is enabled."""
+
         return (
             nfvi.objects.v1.INSTANCE_OPER_STATE.ENABLED
             == self._nfvi_instance.oper_state
         )
 
     def is_disabled(self):
-        """
-        Returns true if this instance is disabled
-        """
+        """Returns true if this instance is disabled."""
+
         return (
             nfvi.objects.v1.INSTANCE_OPER_STATE.DISABLED
             == self._nfvi_instance.oper_state
         )
 
     def is_failed(self):
-        """
-        Returns true if this instance is failed
-        """
+        """Returns true if this instance is failed."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.FAILED
             in self._nfvi_instance.avail_status
         )
 
     def is_recovered(self):
-        """
-        Returns true if this instance is unlocked enabled not failed
-        """
+        """Returns true if this instance is unlocked enabled not failed."""
+
         if (
             nfvi.objects.v1.INSTANCE_ADMIN_STATE.UNLOCKED
             == self._nfvi_instance.admin_state
@@ -1656,174 +1553,151 @@ class Instance(ObjectData):
         return False
 
     def is_paused(self):
-        """
-        Returns true if this instance is paused
-        """
+        """Returns true if this instance is paused."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.PAUSED
             in self._nfvi_instance.avail_status
         )
 
     def is_suspended(self):
-        """
-        Returns true if this instance is suspended
-        """
+        """Returns true if this instance is suspended."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.SUSPENDED
             in self._nfvi_instance.avail_status
         )
 
     def is_resized(self):
-        """
-        Returns true if this instances is resized
-        """
+        """Returns true if this instances is resized."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.RESIZED
             in self._nfvi_instance.avail_status
         )
 
     def is_resizing(self):
-        """
-        Returns true if this instance is resizing
-        """
+        """Returns true if this instance is resizing."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.RESIZING == self.action
 
     def is_pausing(self):
-        """
-        Returns true if this instance is pausing
-        """
+        """Returns true if this instance is pausing."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.PAUSING == self.action
 
     def is_suspending(self):
-        """
-        Returns true if this instance is suspending
-        """
+        """Returns true if this instance is suspending."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.SUSPENDING == self.action
 
     def is_rebuilding(self):
-        """
-        Returns true if this instance is rebuilding
-        """
+        """Returns true if this instance is rebuilding."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.REBUILDING == self.action
 
     def is_rebooting(self):
-        """
-        Returns true if this instance is rebooting
-        """
+        """Returns true if this instance is rebooting."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.REBOOTING == self.action
 
     def is_migrating(self):
-        """
-        Returns true if this instance is live migrating
-        """
+        """Returns true if this instance is live migrating."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.MIGRATING == self.action
 
     def is_cold_migrating(self):
-        """
-        Returns true if this instance is cold migrating
-        """
+        """Returns true if this instance is cold migrating."""
+
         return (
             nfvi.objects.v1.INSTANCE_ACTION.RESIZING == self.action
             and INSTANCE_ACTION_TYPE.COLD_MIGRATE == self._action_data.action_type
         )
 
     def is_deleting(self):
-        """
-        Returns true if this instance is deleting
-        """
+        """Returns true if this instance is deleting."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.DELETING == self.action
 
     def is_deleted(self):
-        """
-        Returns true if this instance has been deleted
-        """
+        """Returns true if this instance has been deleted."""
+
         return self._deleted
 
     def nfvi_instance_is_deleted(self):
-        """
-        Returns true if the nfvi instance has been deleted
-        """
+        """Returns true if the nfvi instance has been deleted."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.DELETED
             in self._nfvi_instance.avail_status
         )
 
     def is_powering_off(self):
-        """
-        Returns true if this instance is powering off
-        """
+        """Returns true if this instance is powering off."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.POWERING_OFF == self.action
 
     def is_action_running(self):
-        """
-        Returns true if this instance is running an action
-        """
+        """Returns true if this instance is running an action."""
+
         return nfvi.objects.v1.INSTANCE_ACTION.NONE != self.action
 
     def was_locked(self):
-        """
-        Returns true if the instance was previously locked
-        """
+        """Returns true if the instance was previously locked."""
+
         return (
             nfvi.objects.v1.INSTANCE_ADMIN_STATE.LOCKED
             == self._last_nfvi_instance_admin_state
         )
 
     def was_enabled(self):
-        """
-        Returns true if this instance was previously enabled
-        """
+        """Returns true if this instance was previously enabled."""
+
         return (
             nfvi.objects.v1.INSTANCE_OPER_STATE.ENABLED
             == self._last_nfvi_instance_oper_state
         )
 
     def was_disabled(self):
-        """
-        Returns true if this instance was previously disabled
-        """
+        """Returns true if this instance was previously disabled."""
+
         return (
             nfvi.objects.v1.INSTANCE_OPER_STATE.DISABLED
             == self._last_nfvi_instance_oper_state
         )
 
     def was_failed(self):
-        """
-        Returns true if this instance was previously failed
-        """
+        """Returns true if this instance was previously failed."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.FAILED
             in self._last_nfvi_instance_avail_status
         )
 
     def was_paused(self):
-        """
-        Returns true if this instance was previously paused
-        """
+        """Returns true if this instance was previously paused."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.PAUSED
             in self._last_nfvi_instance_avail_status
         )
 
     def was_suspended(self):
-        """
-        Returns true if this instance was previously suspended
-        """
+        """Returns true if this instance was previously suspended."""
+
         return (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.SUSPENDED
             in self._last_nfvi_instance_avail_status
         )
 
     def on_host(self, host_name):
-        """
-        Returns true if this instance is running on a given host
-        """
+        """Returns true if this instance is running on a given host."""
+
         return host_name == self.host_name
 
     def fail(self, reason=None):
-        """
-        Fail this instance
-        """
+        """Fail this instance."""
+
         if reason is not None:
             DLOG.info("Fail instance %s, reason=%s." % (self.name, reason))
         else:
@@ -1833,9 +1707,8 @@ class Instance(ObjectData):
         self._action_fsm.do(InstanceActionFsm.FAIL, reason=reason)
 
     def deleted(self):
-        """
-        Deleted this instance
-        """
+        """Deleted this instance."""
+
         from nfv_vim import tables
 
         DLOG.info("Deleted instance %s." % self.name)
@@ -1858,9 +1731,8 @@ class Instance(ObjectData):
     def guest_services_failed(
         self, do_soft_reboot=False, do_stop=False, health_check_failed_only=False
     ):
-        """
-        Guest services have failed for this instance
-        """
+        """Guest services have failed for this instance."""
+
         DLOG.info(
             "Guest-Services have failed for instance %s, "
             "soft_reboot=%s, do_stop=%s." % (self.name, do_soft_reboot, do_stop)
@@ -1953,57 +1825,50 @@ class Instance(ObjectData):
             )
 
     def guest_services_created(self):
-        """
-        Set Guest Services to created for the instance
-        """
+        """Set Guest Services to created for the instance."""
+
         DLOG.debug("Guest-Services configured for instance %s." % self.name)
         self._guest_services.configured()
         self._persist()
 
     def enable_guest_services(self):
-        """
-        Enable Guest Services for this instance
-        """
+        """Enable Guest Services for this instance."""
+
         DLOG.debug("Enable Guest-Services for instance %s." % self.name)
         self._guest_services.enable()
         self._action_fsm.do(InstanceActionFsm.GUEST_SERVICES_ENABLE)
 
     def disable_guest_services(self):
-        """
-        Disable Guest Services for this instance
-        """
+        """Disable Guest Services for this instance."""
+
         DLOG.debug("Disable Guest-Services for instance %s." % self.name)
         self._guest_services.disable()
         self._action_fsm.do(InstanceActionFsm.GUEST_SERVICES_DISABLE)
 
     def guest_services_deleted(self):
-        """
-        Set Guest Services to deleted for the instance
-        """
+        """Set Guest Services to deleted for the instance."""
+
         DLOG.debug("Guest-Services deleted for instance %s." % self.name)
         self._guest_services.deleted()
         self._persist()
 
     def guest_services_enabling(self):
-        """
-        Set Guest Services to enabling for the instance
-        """
+        """Set Guest Services to enabling for the instance."""
+
         DLOG.debug("Guest-Services enabling for instance %s." % self.name)
         self._guest_services.enable()
         self._persist()
 
     def guest_services_disabling(self):
-        """
-        Set Guest Services to disabling for the instance
-        """
+        """Set Guest Services to disabling for the instance."""
+
         DLOG.debug("Guest-Services disabling for instance %s." % self.name)
         self._guest_services.disable()
         self._persist()
 
     def do_action(self, action_type, action_data=None, initiated_by=None, reason=None):
-        """
-        Execute action for this instance if allowed by the instance director
-        """
+        """Execute action for this instance if allowed by the instance director."""
+
         from nfv_vim import directors
 
         instance_director = directors.get_instance_director()
@@ -2142,9 +2007,8 @@ class Instance(ObjectData):
         return True
 
     def cancel_action(self, action_type, reason=None):
-        """
-        Cancel an action for this instance
-        """
+        """Cancel an action for this instance."""
+
         if INSTANCE_ACTION_TYPE.PAUSE == action_type:
             DLOG.debug("Pause cancelled for instance %s." % self.name)
             event_id = event_log.EVENT_ID.INSTANCE_PAUSE_CANCELLED
@@ -2225,9 +2089,8 @@ class Instance(ObjectData):
         self._action_fsm.handle_event(instance_fsm.INSTANCE_EVENT.TASK_STOP)
 
     def fail_action(self, action_type, reason=None):
-        """
-        Fail an action for this instance
-        """
+        """Fail an action for this instance."""
+
         event_id = None
 
         if INSTANCE_ACTION_TYPE.PAUSE == action_type:
@@ -2404,9 +2267,8 @@ class Instance(ObjectData):
     def do_action_start(
         self, do_action_name, action_data=None, initiated_by=None, reason=None
     ):
-        """
-        Notified that an action for this instance is about to be started
-        """
+        """Notified that an action for this instance is about to be started."""
+
         from nfv_vim import tables
 
         additional_text = ""
@@ -2535,16 +2397,14 @@ class Instance(ObjectData):
             )
 
     def do_action_finished(self, do_action_name, action_data=None):
-        """
-        Notified that an action for this instance has finished
-        """
+        """Notified that an action for this instance has finished."""
+
         # audit the guest services after an action has finished
         self.manage_guest_services()
 
     def manage_guest_services_alarms(self):
-        """
-        Manage guest services alarms
-        """
+        """Manage guest services alarms."""
+
         guest_services = self.guest_services
         if not guest_services.are_provisioned():
             if self._guest_heartbeat_alarms:
@@ -2572,9 +2432,8 @@ class Instance(ObjectData):
                     self._guest_heartbeat_alarms[:] = list()
 
     def manage_guest_services(self, enabling=False):
-        """
-        Manage guest services associated with this instance
-        """
+        """Manage guest services associated with this instance."""
+
         guest_services = self.guest_services
         if not guest_services.are_provisioned():
             return
@@ -2645,9 +2504,8 @@ class Instance(ObjectData):
             self._persist()
 
     def _nfvi_instance_handle_state_change(self):
-        """
-        NFVI Instance Handle State Change
-        """
+        """NFVI Instance Handle State Change."""
+
         if (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.RESIZED
             in self._nfvi_instance.avail_status
@@ -2679,9 +2537,8 @@ class Instance(ObjectData):
         nfvi_action,
         nfvi_host_name,
     ):
-        """
-        NFVI Instance State Change
-        """
+        """NFVI Instance State Change."""
+
         from nfv_vim import directors
         from nfv_vim import tables
 
@@ -2843,9 +2700,8 @@ class Instance(ObjectData):
                 instance_group.instance_updated()
 
     def nfvi_instance_update(self, nfvi_instance):
-        """
-        NFVI Instance Update
-        """
+        """NFVI Instance Update."""
+
         if self.is_deleted():
             # Make sure no alarms or other actions are taken because of
             # a late update
@@ -2884,9 +2740,8 @@ class Instance(ObjectData):
         self._persist()
 
     def _nfvi_instance_handle_action_change(self):
-        """
-        NFVI Instance Handle Action Change
-        """
+        """NFVI Instance Handle Action Change."""
+
         if not self._action_data.is_inprogress():
             return
 
@@ -3038,9 +2893,8 @@ class Instance(ObjectData):
     def nfvi_instance_action_change(
         self, nfvi_action_type, nfvi_action_state, reason=""
     ):
-        """
-        NFVI Instance Action Change
-        """
+        """NFVI Instance Action Change."""
+
         if self.is_deleted():
             # Make sure no alarms or other actions are taken because of
             # a late update
@@ -3093,9 +2947,8 @@ class Instance(ObjectData):
         self._nfvi_instance_handle_action_change()
 
     def nfvi_instance_action_update(self, nfvi_action_data):
-        """
-        NFVI Instance Action Update
-        """
+        """NFVI Instance Action Update."""
+
         from nfv_vim import tables
 
         if self.is_deleted():
@@ -3173,9 +3026,8 @@ class Instance(ObjectData):
         self._nfvi_instance_handle_action_change()
 
     def nfvi_guest_services_update(self, nfvi_guest_services, host_name):
-        """
-        NFVI Guest Services Update
-        """
+        """NFVI Guest Services Update."""
+
         if self.is_deleted():
             # Make sure no alarms or other actions are taken because of
             # a late update
@@ -3205,7 +3057,6 @@ class Instance(ObjectData):
             prev_guest_communication_established
             != guest_services.guest_communication_established()
         ):
-
             if guest_services.guest_communication_established():
                 event_id = event_log.EVENT_ID.INSTANCE_GUEST_HEARTBEAT_ESTABLISHED
             else:
@@ -3224,9 +3075,8 @@ class Instance(ObjectData):
             self._action_fsm.do(InstanceActionFsm.GUEST_SERVICES_SET)
 
     def nfvi_instance_delete(self):
-        """
-        NFVI Instance Delete
-        """
+        """NFVI Instance Delete."""
+
         if not self.nfvi_instance_is_deleted():
             event_id = event_log.EVENT_ID.INSTANCE_DELETING
             self._events = event_log.instance_issue_log(self, event_id)
@@ -3235,9 +3085,8 @@ class Instance(ObjectData):
             self._persist()
 
     def nfvi_instance_deleted(self):
-        """
-        NFVI Instance Deleted
-        """
+        """NFVI Instance Deleted."""
+
         if (
             nfvi.objects.v1.INSTANCE_AVAIL_STATUS.DELETED
             not in self._nfvi_instance.avail_status
@@ -3249,9 +3098,8 @@ class Instance(ObjectData):
         self._action_fsm.do(InstanceActionFsm.DELETE)
 
     def host_offline(self):
-        """
-        Host is offline notification
-        """
+        """Host is offline notification."""
+
         from nfv_vim import tables
 
         host_table = tables.tables_get_host_table()
@@ -3263,17 +3111,15 @@ class Instance(ObjectData):
                 )
 
     def _persist(self):
-        """
-        Persist changes to instance object
-        """
+        """Persist changes to instance object."""
+
         from nfv_vim import database
 
         database.database_instance_add(self)
 
     def as_dict(self):
-        """
-        Represent instance object as dictionary
-        """
+        """Represent instance object as dictionary."""
+
         data = dict()
         data["uuid"] = self.uuid
         data["name"] = self.name

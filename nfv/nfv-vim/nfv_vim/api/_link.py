@@ -8,9 +8,7 @@ from wsme import types as wsme_types
 
 
 class Link(wsme_types.Base):
-    """
-    Representation of a Link using JSON Hyper-Schema
-    """
+    """Representation of a Link using JSON Hyper-Schema."""
 
     title = wsme_types.text
     rel = wsme_types.text

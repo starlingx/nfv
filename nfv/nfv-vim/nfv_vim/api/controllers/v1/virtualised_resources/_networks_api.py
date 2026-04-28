@@ -10,43 +10,41 @@ import wsmeext.pecan as wsme_pecan
 from nfv_common import debug
 
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    network_allocate
+    network_allocate,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    network_delete
+    network_delete,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    network_get
+    network_get,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    network_get_all
+    network_get_all,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    network_update
+    network_update,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkResourceType
+    NetworkResourceType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkSubnetResourceType
+    NetworkSubnetResourceType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkSubnetType
+    NetworkSubnetType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkType
+    NetworkType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
-    NetworkResourceClass
+    NetworkResourceClass,
 )
 
 DLOG = debug.debug_get_logger("nfv_vim.api.virtualised_network")
 
 
 class NetworkCreateInputData(wsme_types.Base):
-    """
-    Virtualised Resources - Network Create Input Data
-    """
+    """Virtualised Resources - Network Create Input Data."""
 
     network_resource_id = wsme_types.wsattr(str, mandatory=True)
     reservation_id = wsme_types.wsattr(str, mandatory=False)
@@ -59,9 +57,7 @@ class NetworkCreateInputData(wsme_types.Base):
 
 
 class NetworkCreateOutputData(wsme_types.Base):
-    """
-    Virtualised Resources - Network Create Output Data
-    """
+    """Virtualised Resources - Network Create Output Data."""
 
     operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
     network_data = wsme_types.wsattr(NetworkResourceType, mandatory=False)
@@ -70,9 +66,7 @@ class NetworkCreateOutputData(wsme_types.Base):
 
 
 class NetworkUpdateInputData(wsme_types.Base):
-    """
-    Virtualised Resources - Network Create Input Data
-    """
+    """Virtualised Resources - Network Create Input Data."""
 
     network_resource_id = wsme_types.wsattr(str, mandatory=True)
     update_network_data = wsme_types.wsattr(NetworkType, mandatory=False, default=None)
@@ -83,9 +77,7 @@ class NetworkUpdateInputData(wsme_types.Base):
 
 
 class NetworkUpdateOutputData(wsme_types.Base):
-    """
-    Virtualised Resources - Network Update Output Data
-    """
+    """Virtualised Resources - Network Update Output Data."""
 
     operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
     network_resource_id = wsme_types.wsattr(str, mandatory=True)
@@ -95,17 +87,13 @@ class NetworkUpdateOutputData(wsme_types.Base):
 
 
 class NetworkDeleteInputData(wsme_types.Base):
-    """
-    Virtualised Resources - Network Delete Input Data
-    """
+    """Virtualised Resources - Network Delete Input Data."""
 
     network_resource_ids = wsme_types.wsattr([str], mandatory=True)
 
 
 class NetworkDeleteOutputData(wsme_types.Base):
-    """
-    Virtualised Resources - Network Delete Output Data
-    """
+    """Virtualised Resources - Network Delete Output Data."""
 
     operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
     network_resource_ids = wsme_types.wsattr([str], mandatory=False)
@@ -113,9 +101,7 @@ class NetworkDeleteOutputData(wsme_types.Base):
 
 
 class NetworkQueryOutputData(wsme_types.Base):
-    """
-    Virtualised Resources - Network Query Output Data
-    """
+    """Virtualised Resources - Network Query Output Data."""
 
     operation_result = wsme_types.wsattr(str, mandatory=False, default=None)
     query_result = wsme_types.wsattr([NetworkResourceType], mandatory=False)
@@ -123,15 +109,13 @@ class NetworkQueryOutputData(wsme_types.Base):
 
 
 class NetworksAPI(pecan.rest.RestController):
-    """
-    Virtualised Resources - Networks API
-    """
+    """Virtualised Resources - Networks API."""
 
     @wsme_pecan.wsexpose(NetworkQueryOutputData, str, status_code=httplib.OK)
     def get_one(self, network_resource_id):
         DLOG.verbose("Network-API get called for network %s." % network_resource_id)
 
-        (http_status_code, network_resource_type) = network_get(network_resource_id)
+        http_status_code, network_resource_type = network_get(network_resource_id)
         if httplib.OK == http_status_code:
             output_data = NetworkQueryOutputData()
             output_data.query_result = list()
@@ -144,7 +128,7 @@ class NetworksAPI(pecan.rest.RestController):
     def get_all(self):
         DLOG.verbose("Network-API get-all called.")
 
-        (http_status_code, network_resource_types) = network_get_all()
+        http_status_code, network_resource_types = network_get_all()
         if httplib.OK == http_status_code:
             output_data = NetworkQueryOutputData()
             output_data.query_result = network_resource_types
@@ -163,7 +147,7 @@ class NetworksAPI(pecan.rest.RestController):
         )
 
         if "network" == input_data.network_resource_type:
-            (http_status_code, network_resource_type) = network_allocate(
+            http_status_code, network_resource_type = network_allocate(
                 input_data.network_resource_id, input_data.type_network_data
             )
             if httplib.OK == http_status_code:
@@ -188,7 +172,7 @@ class NetworksAPI(pecan.rest.RestController):
         )
 
         if input_data.update_network_data is not None:
-            (http_status_code, network_resource_type) = network_update(
+            http_status_code, network_resource_type = network_update(
                 input_data.network_resource_id, input_data.update_network_data
             )
             if httplib.OK == http_status_code:
@@ -213,7 +197,7 @@ class NetworksAPI(pecan.rest.RestController):
             % input_data.network_resource_ids
         )
 
-        (http_status_code, deleted_network_resource_ids) = network_delete(
+        http_status_code, deleted_network_resource_ids = network_delete(
             input_data.network_resource_ids
         )
         if httplib.OK == http_status_code:

@@ -21,9 +21,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.host")
 
 
 class HostPersonality(object, metaclass=Singleton):
-    """
-    Host Personality Constants
-    """
+    """Host Personality Constants."""
 
     UNKNOWN = Constant("unknown")
     CONTROLLER = Constant("controller")
@@ -33,9 +31,7 @@ class HostPersonality(object, metaclass=Singleton):
 
 
 class HostNames(object, metaclass=Singleton):
-    """
-    Host Name Constants
-    """
+    """Host Name Constants."""
 
     CONTROLLER_0 = Constant("controller-0")
     CONTROLLER_1 = Constant("controller-1")
@@ -43,9 +39,7 @@ class HostNames(object, metaclass=Singleton):
 
 
 class HostServicesState(object, metaclass=Singleton):
-    """
-    Host-Services State Constants
-    """
+    """Host-Services State Constants."""
 
     ENABLED = Constant("enabled")
     DISABLED = Constant("disabled")
@@ -53,9 +47,7 @@ class HostServicesState(object, metaclass=Singleton):
 
 
 class HostServices(object, metaclass=Singleton):
-    """
-    Host-Services Constants
-    """
+    """Host-Services Constants."""
 
     GUEST = Constant("guest")
     NETWORK = Constant("network")
@@ -71,9 +63,7 @@ HOST_SERVICES = HostServices()
 
 
 class Host(ObjectData):
-    """
-    Host Object
-    """
+    """Host Object."""
 
     _ACTION_NONE = Constant("")
     _ACTION_LOCKING = Constant("locking")
@@ -142,36 +132,31 @@ class Host(ObjectData):
 
     @property
     def uuid(self):
-        """
-        Returns the uuid of the host
-        """
+        """Returns the uuid of the host."""
+
         return self._nfvi_host.uuid
 
     @property
     def name(self):
-        """
-        Returns the name of the host
-        """
+        """Returns the name of the host."""
+
         return self._nfvi_host.name
 
     @property
     def personality(self):
-        """
-        Returns the personality of the host
-        """
+        """Returns the personality of the host."""
+
         return self._nfvi_host.personality
 
     @property
     def state(self):
-        """
-        Returns the current state of the host
-        """
+        """Returns the current state of the host."""
+
         return self._fsm.current_state.name
 
     def host_service_configured(self, service):
-        """
-        Returns whether a host service is configured or not
-        """
+        """Returns whether a host service is configured or not."""
+
         configured = True
 
         if service == HOST_SERVICES.COMPUTE:
@@ -200,15 +185,13 @@ class Host(ObjectData):
         return configured
 
     def host_service_state(self, service):
-        """
-        Returns the state for a host service
-        """
+        """Returns the state for a host service."""
+
         return self._host_service_state[service]
 
     def host_service_state_aggregate(self, ignore_services=None):
-        """
-        Returns the overall state of the host services
-        """
+        """Returns the overall state of the host services."""
+
         if ignore_services is None:
             ignore_services = []
         all_enabled = True
@@ -240,45 +223,39 @@ class Host(ObjectData):
 
     @property
     def host_services_locked(self):
-        """
-        Returns the whether the host services have been locked
-        """
+        """Returns the whether the host services have been locked."""
+
         return self._host_services_locked
 
     @host_services_locked.setter
     def host_services_locked(self, value):
-        """
-        Allows setting the host services locked
-        """
+        """Allows setting the host services locked."""
+
         self._host_services_locked = value
         self._persist()
 
     @property
     def action(self):
-        """
-        Returns the current action the host is performing
-        """
+        """Returns the current action the host is performing."""
+
         return self._action
 
     @property
     def reason(self):
-        """
-        Returns the current reason for the host
-        """
+        """Returns the current reason for the host."""
+
         return self._reason
 
     @property
     def uptime(self):
-        """
-        Returns the approximate uptime of the host
-        """
+        """Returns the approximate uptime of the host."""
+
         return self._nfvi_host.uptime
 
     @property
     def elapsed_time_in_state(self):
-        """
-        Returns the elapsed time this host has been in the current state
-        """
+        """Returns the elapsed time this host has been in the current state."""
+
         elapsed_time_in_state = self._elapsed_time_in_state
 
         if 0 != self._last_state_timestamp:
@@ -290,8 +267,8 @@ class Host(ObjectData):
 
     @property
     def upgrade_inprogress(self):
-        """
-        Returns true if this host is being upgraded. Note that this is abused
+        """Returns true if this host is being upgraded. Note that this is abused
+
         and really just means that we are in the early stages of an upgrade.
         It has nothing to do with a specific host.
         """
@@ -299,65 +276,56 @@ class Host(ObjectData):
 
     @property
     def sw_version(self):
-        """
-        Returns sw_version running on this host
-        """
+        """Returns sw_version running on this host."""
+
         return self._nfvi_host.sw_version
 
     @property
     def openstack_compute(self):
-        """
-        Returns openstack_compute for this host
-        """
+        """Returns openstack_compute for this host."""
+
         return self._nfvi_host.openstack_compute
 
     @property
     def openstack_control(self):
-        """
-        Returns openstack_control for this host
-        """
+        """Returns openstack_control for this host."""
+
         return self._nfvi_host.openstack_control
 
     @property
     def remote_storage(self):
-        """
-        Returns remote_storage for this host
-        """
+        """Returns remote_storage for this host."""
+
         return self._nfvi_host.remote_storage
 
     @property
     def recover_instances(self):
-        """
-        Returns true if the instances on this host are allowed to be recovered
-        """
+        """Returns true if the instances on this host are allowed to be recovered."""
+
         return self._recover_instances
 
     @property
     def nfvi_host(self):
-        """
-        Returns the nfvi host data
-        """
+        """Returns the nfvi host data."""
+
         return self._nfvi_host
 
     @property
     def fsm(self):
-        """
-        Returns access to the fsm
-        """
+        """Returns access to the fsm."""
+
         return self._fsm
 
     @property
     def task(self):
-        """
-        Returns access to the current task
-        """
+        """Returns access to the current task."""
+
         return self._task
 
     @task.setter
     def task(self, task):
-        """
-        Allows setting the current task
-        """
+        """Allows setting the current task."""
+
         if self._task is not None:
             del self._task
 
@@ -365,85 +333,73 @@ class Host(ObjectData):
 
     @property
     def fail_notification_required(self):
-        """
-        Returns true if notification that the host has failed is required
-        """
+        """Returns true if notification that the host has failed is required."""
+
         return self._fail_notification_required
 
     @fail_notification_required.setter
     def fail_notification_required(self, value):
-        """
-        Allows setting the host has failed notification required
-        """
+        """Allows setting the host has failed notification required."""
+
         self._fail_notification_required = value
 
     @property
     def fsm_start_time(self):
-        """
-        Returns access to the current action fsm
-        """
+        """Returns access to the current action fsm."""
+
         return self._fsm_start_time
 
     @fsm_start_time.setter
     def fsm_start_time(self, fsm_start_time):
-        """
-        Allows setting the current fsm_start_time
-        """
+        """Allows setting the current fsm_start_time."""
+
         if self._fsm_start_time is not None:
             del self._fsm_start_time
 
         self._fsm_start_time = fsm_start_time
 
     def has_reason(self):
-        """
-        Returns True if host has reason
-        """
+        """Returns True if host has reason."""
+
         return self._reason != "" and self._reason is not None
 
     def update_failure_reason(self, reason):
-        """
-        Update reason for this host
-        """
+        """Update reason for this host."""
+
         if self._reason is None:
             self._reason = ""
         self._reason += reason
         self._persist()
 
     def clear_reason(self):
-        """
-        Update reason for this host
-        """
+        """Update reason for this host."""
+
         self._reason = ""
         self._persist()
 
     def is_locked(self):
-        """
-        Returns true if the host is locked
-        """
+        """Returns true if the host is locked."""
+
         return nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED == self._nfvi_host.admin_state
 
     def is_unlocked(self):
-        """
-        Returns true if the host is unlocked
-        """
+        """Returns true if the host is unlocked."""
+
         return nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED == self._nfvi_host.admin_state
 
     def is_enabled(self):
-        """
-        Returns true if the host is enabled
-        """
+        """Returns true if the host is enabled."""
+
         return self._fsm.current_state.name == host_fsm.HOST_STATE.ENABLED
 
     def is_disabled(self):
-        """
-        Returns true if the host is disabled
-        """
+        """Returns true if the host is disabled."""
+
         return self._fsm.current_state.name == host_fsm.HOST_STATE.DISABLED
 
     def is_locking(self):
-        """
-        Returns true if the host is locking or not
-        """
+        """Returns true if the host is locking or not."""
+
         return (
             (nfvi.objects.v1.HOST_ACTION.LOCK == self._nfvi_host.action)
             or (nfvi.objects.v1.HOST_ACTION.LOCK_FORCE == self._nfvi_host.action)
@@ -452,59 +408,52 @@ class Host(ObjectData):
         )
 
     def is_force_lock(self):
-        """
-        Returns true if the host is force locking or not
-        """
+        """Returns true if the host is force locking or not."""
+
         return self._action == self._ACTION_LOCKING_FORCE or (
             nfvi.objects.v1.HOST_ACTION.LOCK_FORCE == self._nfvi_host.action
         )
 
     def is_unlocking(self):
-        """
-        Returns if the host is unlocking or not
-        """
+        """Returns if the host is unlocking or not."""
+
         return self._action == self._ACTION_UNLOCKING
 
     def is_available(self):
-        """
-        Returns true if the host is available or not
-        """
+        """Returns true if the host is available or not."""
+
         if nfvi.objects.v1.HOST_AVAIL_STATUS.AVAILABLE == self._nfvi_host.avail_status:
             return True
 
         return False
 
     def is_online(self):
-        """
-        Returns true if the host is online or not
-        """
+        """Returns true if the host is online or not."""
+
         if nfvi.objects.v1.HOST_AVAIL_STATUS.ONLINE == self._nfvi_host.avail_status:
             return True
 
         return False
 
     def is_offline(self):
-        """
-        Returns true if the host is offline or not
-        """
+        """Returns true if the host is offline or not."""
+
         if nfvi.objects.v1.HOST_AVAIL_STATUS.OFFLINE == self._nfvi_host.avail_status:
             return True
 
         return False
 
     def is_power_off(self):
-        """
-        Returns true if the host is powered off
-        """
+        """Returns true if the host is powered off."""
+
         if nfvi.objects.v1.HOST_AVAIL_STATUS.POWER_OFF == self._nfvi_host.avail_status:
             return True
 
         return False
 
     def is_failed(self):
-        """
-        Returns true if the host is failed or not
-        """
+        """Returns true if the host is failed or not."""
+
         if nfvi.objects.v1.HOST_AVAIL_STATUS.FAILED == self._nfvi_host.avail_status:
             return True
 
@@ -517,9 +466,8 @@ class Host(ObjectData):
         return False
 
     def is_component_failure(self):
-        """
-        Returns true if the host is failed because of a component or not
-        """
+        """Returns true if the host is failed because of a component or not."""
+
         if (
             nfvi.objects.v1.HOST_AVAIL_STATUS.FAILED_COMPONENT
             == self._nfvi_host.avail_status
@@ -529,15 +477,13 @@ class Host(ObjectData):
         return False
 
     def is_deleted(self):
-        """
-        Returns true if this host has been deleted
-        """
+        """Returns true if this host has been deleted."""
+
         return self._fsm.current_state.name == host_fsm.HOST_STATE.DELETED
 
     def lock(self, force=False):
-        """
-        Lock this host
-        """
+        """Lock this host."""
+
         if force:
             self._action = self._ACTION_LOCKING_FORCE
         else:
@@ -547,62 +493,54 @@ class Host(ObjectData):
         self._persist()
 
     def cancel_lock(self):
-        """
-        Cancel the lock on this host
-        """
+        """Cancel the lock on this host."""
+
         if self.is_locking():
             self._action = self._ACTION_NONE
             self._persist()
 
     def unlock(self):
-        """
-        Unlock this host
-        """
+        """Unlock this host."""
+
         self._action = self._ACTION_UNLOCKING
         self._fsm.handle_event(host_fsm.HOST_EVENT.UNLOCK)
         self._persist()
 
     def notify_instance_moved(self):
-        """
-        Notify that an instance has moved
-        """
+        """Notify that an instance has moved."""
+
         self._fsm.handle_event(host_fsm.HOST_EVENT.INSTANCE_MOVED)
 
     def notify_instances_moved(self, operation):
-        """
-        Notify that the instances have moved
-        """
+        """Notify that the instances have moved."""
+
         event_data = dict()
         event_data["host-operation"] = operation
         self._fsm.handle_event(host_fsm.HOST_EVENT.INSTANCES_MOVED, event_data)
 
     def notify_instance_stopped(self):
-        """
-        Notify that an instance has stopped
-        """
+        """Notify that an instance has stopped."""
+
         self._fsm.handle_event(host_fsm.HOST_EVENT.INSTANCE_STOPPED)
 
     def notify_instances_stopped(self, operation):
-        """
-        Notify that the instances have stopped
-        """
+        """Notify that the instances have stopped."""
+
         event_data = dict()
         event_data["host-operation"] = operation
         self._fsm.handle_event(host_fsm.HOST_EVENT.INSTANCES_STOPPED, event_data)
 
     def nfvi_host_is_enabled(self):
-        """
-        Returns true if the nfvi host is enabled
-        """
+        """Returns true if the nfvi host is enabled."""
+
         if not self.is_locking():
             if nfvi.objects.v1.HOST_OPER_STATE.ENABLED == self._nfvi_host.oper_state:
                 return True
         return False
 
     def _nfvi_host_handle_state_change(self):
-        """
-        NFVI Host Handle State Change
-        """
+        """NFVI Host Handle State Change."""
+
         if self.is_unlocking():
             if nfvi.objects.v1.HOST_ADMIN_STATE.UNLOCKED == self._nfvi_host.admin_state:
                 self._action = self._ACTION_NONE
@@ -640,9 +578,8 @@ class Host(ObjectData):
     def nfvi_host_state_change(
         self, nfvi_admin_state, nfvi_oper_state, nfvi_avail_status, nfvi_data=None
     ):
-        """
-        NFVI Host State Change
-        """
+        """NFVI Host State Change."""
+
         if nfvi_data is not None:
             self._nfvi_host.nfvi_data = nfvi_data
             self._persist()
@@ -738,9 +675,8 @@ class Host(ObjectData):
                 self._fsm.handle_event(host_fsm.HOST_EVENT.AUDIT)
 
     def nfvi_host_update(self, nfvi_host):
-        """
-        NFVI Host Update
-        """
+        """NFVI Host Update."""
+
         self.nfvi_host_state_change(
             nfvi_host.admin_state, nfvi_host.oper_state, nfvi_host.avail_status
         )
@@ -748,33 +684,28 @@ class Host(ObjectData):
         self._persist()
 
     def nfvi_host_add(self):
-        """
-        NFVI Host Add
-        """
+        """NFVI Host Add."""
+
         self._fsm.handle_event(host_fsm.HOST_EVENT.ADD)
 
     def nfvi_host_delete(self):
-        """
-        NFVI Host Delete
-        """
+        """NFVI Host Delete."""
+
         self._fsm.handle_event(host_fsm.HOST_EVENT.DELETE)
 
     def nfvi_host_audit(self):
-        """
-        NFVI Host Audit
-        """
+        """NFVI Host Audit."""
+
         self._fsm.handle_event(host_fsm.HOST_EVENT.AUDIT)
 
     def periodic_timer(self):
-        """
-        Periodic Timer
-        """
+        """Periodic Timer."""
+
         self._fsm.handle_event(host_fsm.HOST_EVENT.PERIODIC_TIMER)
 
     def host_services_update_all(self, host_service_state, reason=None):
-        """
-        Host services update all
-        """
+        """Host services update all."""
+
         at_least_one_change = False
 
         for service, state in list(self._host_service_state.items()):
@@ -786,8 +717,8 @@ class Host(ObjectData):
             self.host_services_update(None, host_service_state, reason)
 
     def host_services_update(self, service, host_service_state, reason=None):
-        """
-        Host services update.  None input service parameter indicates
+        """Host services update.  None input service parameter indicates
+
         that the _host_service_state has already been updated through
         host_services_update_all.
         """
@@ -817,9 +748,8 @@ class Host(ObjectData):
                 )
 
     def nfvi_host_upgrade_status(self, upgrade_inprogress, recover_instances):
-        """
-        NFVI Host Upgrade
-        """
+        """NFVI Host Upgrade."""
+
         if upgrade_inprogress != self._upgrade_inprogress:
             if upgrade_inprogress:
                 DLOG.info(
@@ -837,9 +767,8 @@ class Host(ObjectData):
             self._persist()
 
     def _state_change_callback(self, prev_state, state, event):
-        """
-        Host state change callback
-        """
+        """Host state change callback."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -864,17 +793,15 @@ class Host(ObjectData):
         host_director.host_state_change_notify(self)
 
     def _persist(self):
-        """
-        Persist changes to host object
-        """
+        """Persist changes to host object."""
+
         from nfv_vim import database
 
         database.database_host_add(self)
 
     def as_dict(self):
-        """
-        Represent host object as dictionary
-        """
+        """Represent host object as dictionary."""
+
         data = dict()
         data["uuid"] = self.uuid
         data["name"] = self.name

@@ -60,9 +60,8 @@ AUDIT_DELAY_SECONDS = 60  # 60 seconds
 
 
 def _audit_dump_debug_info(do_dump=True):
-    """
-    Dump Audit Debug Information
-    """
+    """Dump Audit Debug Information."""
+
     global _audit_debug_dump_back_off_ms, _last_audit_debug_dump_ms
 
     elapsed_ms = timers.get_monotonic_timestamp_in_ms() - _last_audit_debug_dump_ms
@@ -82,9 +81,8 @@ def _audit_dump_debug_info(do_dump=True):
 
 @coroutine
 def _audit_nfvi_system_info_callback(timer_id):
-    """
-    Audit System Information
-    """
+    """Audit System Information."""
+
     global _main_audit_inprogress
 
     response = yield
@@ -116,9 +114,8 @@ def _audit_nfvi_system_info_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_hosts_callback(timer_id):
-    """
-    Audit Hosts
-    """
+    """Audit Hosts."""
+
     global _main_audit_inprogress
 
     response = yield
@@ -132,8 +129,7 @@ def _audit_nfvi_hosts_callback(timer_id):
             if host_name in deletable_host_groups:
                 deletable_host_groups.remove(host_name)
                 DLOG.info(
-                    "Not deleting host %s, incomplete information "
-                    "returned." % host_name
+                    "Not deleting host %s, incomplete information returned." % host_name
                 )
 
         for nfvi_host in response["result-data"]:
@@ -200,9 +196,8 @@ def _audit_nfvi_hosts_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_host_aggregates_callback(timer_id):
-    """
-    Audit Host Aggregates
-    """
+    """Audit Host Aggregates."""
+
     global _main_audit_inprogress
 
     response = yield
@@ -237,9 +232,8 @@ def _audit_nfvi_host_aggregates_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_hypervisors_callback(timer_id):
-    """
-    Audit Hypervisors
-    """
+    """Audit Hypervisors."""
+
     global _main_audit_inprogress
     global _nfvi_hypervisors_to_audit
 
@@ -295,9 +289,8 @@ def _audit_nfvi_hypervisors_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_tenants_callback(timer_id):
-    """
-    Audit Tenants
-    """
+    """Audit Tenants."""
+
     global _main_audit_inprogress
 
     response = yield
@@ -335,9 +328,8 @@ def _audit_nfvi_tenants_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_instance_types_callback(timer_id):
-    """
-    Audit Instance Types
-    """
+    """Audit Instance Types."""
+
     global _main_audit_inprogress
     global _deletable_instance_types, _nfvi_instance_types_paging
     global _nfvi_instance_types_to_audit, _nfvi_instance_types_outstanding
@@ -347,7 +339,6 @@ def _audit_nfvi_instance_types_callback(timer_id):
 
     if response["completed"]:
         if response["page-request-id"] == _nfvi_instance_types_paging.page_request_id:
-
             instance_type_table = tables.tables_get_instance_type_table()
 
             if _deletable_instance_types is None:
@@ -416,9 +407,8 @@ def _audit_nfvi_instance_types_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_instances_callback(timer_id):
-    """
-    Audit Instances
-    """
+    """Audit Instances."""
+
     global _main_audit_inprogress
     global _deletable_instances, _nfvi_instances_paging
     global _nfvi_instances_to_audit, _nfvi_instance_outstanding
@@ -491,9 +481,8 @@ def _audit_nfvi_instances_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_instance_groups_callback(timer_id):
-    """
-    Audit Instance Groups
-    """
+    """Audit Instance Groups."""
+
     global _main_audit_inprogress
 
     response = yield
@@ -531,9 +520,8 @@ def _audit_nfvi_instance_groups_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_images_callback(timer_id):
-    """
-    Audit Images
-    """
+    """Audit Images."""
+
     global _main_audit_inprogress
     global _deletable_images, _nfvi_images_paging
 
@@ -589,9 +577,8 @@ def _audit_nfvi_images_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_volumes_callback(timer_id):
-    """
-    Audit Volumes
-    """
+    """Audit Volumes."""
+
     global _main_audit_inprogress
     global _added_volumes, _deletable_volumes, _nfvi_volumes_paging
     global _nfvi_volumes_to_audit, _nfvi_volumes_outstanding
@@ -670,9 +657,8 @@ def _audit_nfvi_volumes_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_volume_snapshots_callback(timer_id):
-    """
-    Audit Volume Snapshots
-    """
+    """Audit Volume Snapshots."""
+
     global _main_audit_inprogress
 
     response = yield
@@ -699,8 +685,7 @@ def _audit_nfvi_volume_snapshots_callback(timer_id):
 
     else:
         DLOG.error(
-            "Audit-Volume-Snapshots callback, not completed, "
-            "responses=%s." % response
+            "Audit-Volume-Snapshots callback, not completed, responses=%s." % response
         )
 
     _main_audit_inprogress = False
@@ -709,9 +694,8 @@ def _audit_nfvi_volume_snapshots_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_subnets_callback(timer_id):
-    """
-    Audit Subnets
-    """
+    """Audit Subnets."""
+
     global _main_audit_inprogress
     global _deletable_subnets, _nfvi_subnets_paging
 
@@ -772,9 +756,8 @@ def _audit_nfvi_subnets_callback(timer_id):
 
 @coroutine
 def _audit_nfvi_networks_callback(timer_id):
-    """
-    Audit Networks
-    """
+    """Audit Networks."""
+
     global _main_audit_inprogress
     global _deletable_networks, _nfvi_networks_paging
 
@@ -841,9 +824,8 @@ def _audit_nfvi_networks_callback(timer_id):
 
 @timers.interval_timer("audit_nfvi", initial_delay_secs=1, interval_secs=1)
 def _audit_nfvi():
-    """
-    Audit NFVI
-    """
+    """Audit NFVI."""
+
     global _main_audit_inprogress, _last_audit_time_ms
 
     # Initialize the last audit time to the current time
@@ -907,15 +889,21 @@ def _audit_nfvi():
         # keystone. This audit is relevant when stx-openstack is installed because it
         # uses projects to isolate virtualized resources.
         # The solution implemented here is a very simple one. It uses information
-        # already stored in tables_get_host_table() to determine if openstack is installed
-        # or not. It does not follow this repository's standard of defining flags in
-        # configuration files via puppet.
-        # A better alternative is to make use of a config file flag, generated with puppet,
-        # as per conventions here. [1] defines a list of flags to indicate which plugin is disabled
-        # Add a new item like nfvi_identity_plugin_disabled to mark that the keystone identity
+        # already stored in tables_get_host_table() to determine if openstack is
+        # installed or not. It does not follow this repository's standard of defining
+        # flags in configuration files via puppet.
+        # A better alternative is to make use of a config file flag, generated with
+        # puppet, as per conventions here. [1] defines a list of flags to indicate
+        # which plugin is disabled
+        # Add a new item like nfvi_identity_plugin_disabled to mark that
+        # the keystone identity
         # plugin should be disabled and use here in vim like [2].
-        # [1] https://opendev.org/starlingx/config/src/commit/7f3ae1c40df99274c61e4691803662ad04198620/sysinv/sysinv/sysinv/sysinv/puppet/nfv.py#L295
-        # [2] https://opendev.org/starlingx/nfv/src/commit/d3ed569df7989e405df17ee67f62574575f196ca/nfv/nfv-vim/nfv_vim/audits/_vim_nfvi_audits.py#L867
+        # [1] https://opendev.org/starlingx/config/src/commit/
+        # 7f3ae1c40df99274c61e4691803662ad04198620/sysinv/sysinv/sysinv/sysinv/
+        # puppet/nfv.py#L295
+        # [2] https://opendev.org/starlingx/nfv/src/commit/
+        # d3ed569df7989e405df17ee67f62574575f196ca/nfv/nfv-vim/nfv_vim/
+        # audits/_vim_nfvi_audits.py#L867
         if any(
             host.openstack_control for host in tables.tables_get_host_table().values()
         ):
@@ -1009,9 +997,8 @@ def _audit_nfvi():
 
 @coroutine
 def _audit_nfvi_instance_callback(instance_uuid):
-    """
-    Audit Instance
-    """
+    """Audit Instance."""
+
     global _nfvi_instance_outstanding
 
     response = yield
@@ -1047,9 +1034,8 @@ def _audit_nfvi_instance_callback(instance_uuid):
 
 @timers.interval_timer("audit_nfvi_instance", initial_delay_secs=10, interval_secs=10)
 def _audit_nfvi_instance():
-    """
-    Audit NFVI for Instance Details
-    """
+    """Audit NFVI for Instance Details."""
+
     global _nfvi_instances_to_audit, _nfvi_instance_outstanding
 
     while True:
@@ -1098,9 +1084,8 @@ def _audit_nfvi_instance():
 
 @coroutine
 def _audit_nfvi_hypervisor_callback():
-    """
-    Audit Hypervisor
-    """
+    """Audit Hypervisor."""
+
     response = yield
     DLOG.verbose("Audit-Hypervisor callback, response=%s." % response)
 
@@ -1119,9 +1104,8 @@ def _audit_nfvi_hypervisor_callback():
 
 @timers.interval_timer("audit_hypervisor", initial_delay_secs=4, interval_secs=4)
 def _audit_nfvi_hypervisor_details():
-    """
-    Audit NFVI for Hypervisor Details
-    """
+    """Audit NFVI for Hypervisor Details."""
+
     global _nfvi_hypervisors_to_audit
 
     while True:
@@ -1136,9 +1120,8 @@ def _audit_nfvi_hypervisor_details():
 
 @coroutine
 def _audit_nfvi_instance_type_callback(instance_type_uuid):
-    """
-    Audit Instance Type
-    """
+    """Audit Instance Type."""
+
     global _nfvi_instance_types_outstanding
 
     response = yield
@@ -1174,9 +1157,8 @@ def _audit_nfvi_instance_type_callback(instance_type_uuid):
 
 @timers.interval_timer("audit_instance_type", initial_delay_secs=2, interval_secs=2)
 def _audit_nfvi_instance_type_details():
-    """
-    Audit NFVI for Instance Type Details
-    """
+    """Audit NFVI for Instance Type Details."""
+
     global _nfvi_instance_types_to_audit, _nfvi_instance_types_outstanding
 
     while True:
@@ -1207,9 +1189,8 @@ def _audit_nfvi_instance_type_details():
 
 @coroutine
 def _audit_nfvi_volume_callback(volume_uuid):
-    """
-    Audit Volumes
-    """
+    """Audit Volumes."""
+
     global _nfvi_volumes_outstanding
 
     response = yield
@@ -1233,9 +1214,8 @@ def _audit_nfvi_volume_callback(volume_uuid):
 
 @timers.interval_timer("audit_nfvi_volume", initial_delay_secs=10, interval_secs=10)
 def _audit_nfvi_volume():
-    """
-    Audit NFVI Volume
-    """
+    """Audit NFVI Volume."""
+
     global _nfvi_volumes_to_audit, _nfvi_volumes_outstanding
 
     while True:
@@ -1262,9 +1242,8 @@ def _audit_nfvi_volume():
 
 @coroutine
 def _audit_nfvi_guest_services_callback():
-    """
-    Audit Guest Services
-    """
+    """Audit Guest Services."""
+
     response = yield
     DLOG.verbose("Audit-Guest-Services callback, response=%s." % response)
 
@@ -1289,9 +1268,8 @@ def _audit_nfvi_guest_services_callback():
     "audit_nfvi_guest_services", initial_delay_secs=30, interval_secs=30
 )
 def _audit_nfvi_guest_services():
-    """
-    Audit NFVI Guest Services
-    """
+    """Audit NFVI Guest Services."""
+
     while True:
         timer_id = yield
         DLOG.verbose("Audit guest services called, timer_id=%s." % timer_id)
@@ -1307,9 +1285,8 @@ def _audit_nfvi_guest_services():
 
 
 def vim_nfvi_audits_initialize():
-    """
-    Initialize nfvi audits
-    """
+    """Initialize nfvi audits."""
+
     audits = list()
 
     audits.append(_audit_nfvi)
@@ -1329,7 +1306,6 @@ def vim_nfvi_audits_initialize():
 
 
 def vim_nfvi_audits_finalize():
-    """
-    Finalize nfvi audits
-    """
+    """Finalize nfvi audits."""
+
     pass

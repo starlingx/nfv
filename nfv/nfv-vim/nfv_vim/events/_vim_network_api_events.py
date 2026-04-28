@@ -22,9 +22,8 @@ _network_delete_operations = dict()
 def _create_subnet_callback(
     success, network_uuid, subnet_name, subnet_ip, subnet_prefix
 ):
-    """
-    Handle Create-Subnet callback
-    """
+    """Handle Create-Subnet callback."""
+
     DLOG.verbose(
         "Create subnet callback, network_uuid=%s, name=%s, ip=%s, "
         "prefix=%s." % (network_uuid, subnet_name, subnet_ip, subnet_prefix)
@@ -63,9 +62,8 @@ def _create_subnet_callback(
 
 
 def vim_network_api_create_subnet(connection, msg):
-    """
-    Handle Create-Subnet API request
-    """
+    """Handle Create-Subnet API request."""
+
     global _subnet_create_operations
 
     DLOG.verbose(
@@ -110,9 +108,8 @@ def vim_network_api_create_subnet(connection, msg):
 def _update_subnet_callback(
     success, network_uuid, subnet_uuid, subnet_name, subnet_ip, subnet_prefix
 ):
-    """
-    Handle Update-Subnet callback
-    """
+    """Handle Update-Subnet callback."""
+
     DLOG.verbose(
         "Update subnet callback, network_uuid=%s, name=%s, ip=%s, "
         "prefix=%s." % (network_uuid, subnet_name, subnet_ip, subnet_prefix)
@@ -151,9 +148,8 @@ def _update_subnet_callback(
 
 
 def vim_network_api_update_subnet(connection, msg):
-    """
-    Handle Update-Subnet API request
-    """
+    """Handle Update-Subnet API request."""
+
     global _subnet_update_operations
 
     DLOG.verbose(
@@ -198,9 +194,8 @@ def vim_network_api_update_subnet(connection, msg):
 def _delete_subnet_callback(
     success, network_uuid, subnet_uuid, subnet_name, subnet_ip, subnet_prefix
 ):
-    """
-    Handle Delete-Subnet callback
-    """
+    """Handle Delete-Subnet callback."""
+
     DLOG.verbose(
         "Delete subnet callback, network_uuid=%s, name=%s, ip=%s, "
         "prefix=%s." % (network_uuid, subnet_name, subnet_ip, subnet_prefix)
@@ -226,9 +221,8 @@ def _delete_subnet_callback(
 
 
 def vim_network_api_delete_subnet(connection, msg):
-    """
-    Handle Delete-Network API request
-    """
+    """Handle Delete-Network API request."""
+
     global _subnet_delete_operations
 
     DLOG.verbose(
@@ -270,9 +264,8 @@ def vim_network_api_delete_subnet(connection, msg):
 
 
 def vim_network_api_get_subnet(connection, msg):
-    """
-    Handle Get-Subnet API request
-    """
+    """Handle Get-Subnet API request."""
+
     DLOG.verbose("Get subnet, filter_by_uuid=%s." % msg.filter_by_uuid)
 
     subnet_table = tables.tables_get_subnet_table()
@@ -295,9 +288,8 @@ def vim_network_api_get_subnet(connection, msg):
 
 
 def vim_network_api_get_subnets(connection, msg):
-    """
-    Handle Get-Subnets API request
-    """
+    """Handle Get-Subnets API request."""
+
     subnet_table = tables.tables_get_subnet_table()
     if msg.filter_by_network_uuid is not None:
         DLOG.verbose(
@@ -333,9 +325,8 @@ def vim_network_api_get_subnets(connection, msg):
 
 
 def _create_network_callback(success, network_name):
-    """
-    Handle Create-Network callback
-    """
+    """Handle Create-Network callback."""
+
     DLOG.verbose("Create network callback, name=%s." % network_name)
 
     connection = _network_create_operations.get(network_name, None)
@@ -367,9 +358,8 @@ def _create_network_callback(success, network_name):
 
 
 def vim_network_api_create_network(connection, msg):
-    """
-    Handle Create-Network API request
-    """
+    """Handle Create-Network API request."""
+
     global _network_create_operations
 
     DLOG.verbose("Create network, name=%s." % msg.name)
@@ -396,9 +386,8 @@ def vim_network_api_create_network(connection, msg):
 
 
 def _update_network_callback(success, network_uuid):
-    """
-    Handle Update-Network callback
-    """
+    """Handle Update-Network callback."""
+
     DLOG.verbose("Update network callback, uuid=%s." % network_uuid)
 
     connection = _network_update_operations.get(network_uuid, None)
@@ -430,9 +419,8 @@ def _update_network_callback(success, network_uuid):
 
 
 def vim_network_api_update_network(connection, msg):
-    """
-    Handle Update-Network API request
-    """
+    """Handle Update-Network API request."""
+
     global _network_update_operations
 
     DLOG.verbose("Update network, name=%s." % msg.name)
@@ -454,9 +442,8 @@ def vim_network_api_update_network(connection, msg):
 
 
 def _delete_network_callback(success, network_uuid):
-    """
-    Handle Delete-Network callback
-    """
+    """Handle Delete-Network callback."""
+
     DLOG.verbose("Delete network callback, id=%s." % network_uuid)
 
     connection = _network_delete_operations.get(network_uuid, None)
@@ -472,9 +459,8 @@ def _delete_network_callback(success, network_uuid):
 
 
 def vim_network_api_delete_network(connection, msg):
-    """
-    Handle Delete-Network API request
-    """
+    """Handle Delete-Network API request."""
+
     global _network_delete_operations
 
     network_table = tables.tables_get_network_table()
@@ -499,9 +485,8 @@ def vim_network_api_delete_network(connection, msg):
 
 
 def vim_network_api_get_network(connection, msg):
-    """
-    Handle Get-Network API request
-    """
+    """Handle Get-Network API request."""
+
     if msg.filter_by_uuid is not None:
         DLOG.verbose("Get network, filter_by_uuid=%s." % msg.filter_by_uuid)
     else:
@@ -532,9 +517,8 @@ def vim_network_api_get_network(connection, msg):
 
 
 def vim_network_api_get_networks(connection, msg):
-    """
-    Handle Get-Networks API request
-    """
+    """Handle Get-Networks API request."""
+
     DLOG.verbose("Get network, all=%s." % msg.get_all)
     network_table = tables.tables_get_network_table()
     for network in list(network_table.values()):
@@ -555,14 +539,12 @@ def vim_network_api_get_networks(connection, msg):
 
 
 def vim_network_api_initialize():
-    """
-    Initialize VIM Network API Handling
-    """
+    """Initialize VIM Network API Handling."""
+
     pass
 
 
 def vim_network_api_finalize():
-    """
-    Finalize VIM Network API Handling
-    """
+    """Finalize VIM Network API Handling."""
+
     pass

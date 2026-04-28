@@ -13,9 +13,7 @@ DLOG = debug.debug_get_logger("nfv_common.thread.thread_progress_marker")
 
 
 class ThreadProgressMarker(object):
-    """
-    Thread Progress Marker
-    """
+    """Thread Progress Marker."""
 
     def __init__(self, initial_value=0):
         self.progress_marker = RawValue(c_ulonglong, initial_value)

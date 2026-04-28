@@ -11,9 +11,7 @@ _hypervisor_table = None
 
 
 class HypervisorTable(Table):
-    """
-    Hypervisor Table
-    """
+    """Hypervisor Table."""
 
     def __init__(self):
         super(HypervisorTable, self).__init__()
@@ -32,16 +30,14 @@ class HypervisorTable(Table):
 
 
 def tables_get_hypervisor_table():
-    """
-    Get the hypervisor table
-    """
+    """Get the hypervisor table."""
+
     return _hypervisor_table
 
 
 def hypervisor_table_initialize():
-    """
-    Initialize the hypervisor table
-    """
+    """Initialize the hypervisor table."""
+
     global _hypervisor_table
 
     _hypervisor_table = HypervisorTable()
@@ -54,9 +50,8 @@ def hypervisor_table_initialize():
 
 
 def hypervisor_table_finalize():
-    """
-    Finalize the hypervisor table
-    """
+    """Finalize the hypervisor table."""
+
     global _hypervisor_table
 
     del _hypervisor_table

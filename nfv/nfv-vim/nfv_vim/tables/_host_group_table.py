@@ -11,9 +11,7 @@ _host_group_table = None
 
 
 class HostGroupTable(Table):
-    """
-    Host Group Table
-    """
+    """Host Group Table."""
 
     def __init__(self):
         super(HostGroupTable, self).__init__()
@@ -57,16 +55,14 @@ class HostGroupTable(Table):
 
 
 def tables_get_host_group_table():
-    """
-    Get the host group table
-    """
+    """Get the host group table."""
+
     return _host_group_table
 
 
 def host_group_table_initialize():
-    """
-    Initialize the host group table
-    """
+    """Initialize the host group table."""
+
     global _host_group_table
 
     _host_group_table = HostGroupTable()
@@ -79,9 +75,8 @@ def host_group_table_initialize():
 
 
 def host_group_table_finalize():
-    """
-    Finalize the host group table
-    """
+    """Finalize the host group table."""
+
     global _host_group_table
 
     del _host_group_table

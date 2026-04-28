@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.instance_type")
 
 
 class InstanceTypeStorage(Constants, metaclass=Singleton):
-    """
-    Instance Type Storage Constants
-    """
+    """Instance Type Storage Constants."""
 
     UNKNOWN = Constant("unknown")
     REMOTE_BACKED = Constant("remote")
@@ -24,9 +22,7 @@ class InstanceTypeStorage(Constants, metaclass=Singleton):
 
 
 class InstanceTypeExtension(Constants, metaclass=Singleton):
-    """
-    Instance Type Extension Constants
-    """
+    """Instance Type Extension Constants."""
 
     INSTANCE_AUTO_RECOVERY = Constant("sw:wrs:auto_recovery")
     LIVE_MIGRATION_TIMEOUT = Constant("hw:wrs:live_migration_timeout")
@@ -39,9 +35,7 @@ INSTANCE_TYPE_EXTENSION = InstanceTypeExtension()
 
 
 class InstanceTypeAttributes(ObjectData):
-    """
-    Instance Type Attributes Object
-    """
+    """Instance Type Attributes Object."""
 
     def __init__(
         self,
@@ -72,9 +66,7 @@ class InstanceTypeAttributes(ObjectData):
 
 
 class InstanceType(ObjectData):
-    """
-    Instance Type Object
-    """
+    """Instance Type Object."""
 
     def __init__(self, uuid, name):
         super(InstanceType, self).__init__("1.0.0")

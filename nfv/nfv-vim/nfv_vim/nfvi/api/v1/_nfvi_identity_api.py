@@ -7,59 +7,50 @@ import abc
 
 
 class NFVIIdentityAPI(object, metaclass=abc.ABCMeta):
-    """
-    Abstract NFVI Identity API Class Definition
-    """
+    """Abstract NFVI Identity API Class Definition."""
 
     @property
     @abc.abstractmethod
     def name(self):
-        """
-        Returns the name of plugin
-        """
+        """Returns the name of plugin."""
+
         pass
 
     @property
     @abc.abstractmethod
     def version(self):
-        """
-        Returns the version of the plugin
-        """
+        """Returns the version of the plugin."""
+
         pass
 
     @property
     @abc.abstractmethod
     def provider(self):
-        """
-        Returns the vendor who created the plugin
-        """
+        """Returns the vendor who created the plugin."""
+
         pass
 
     @property
     @abc.abstractmethod
     def signature(self):
-        """
-        Returns the signature of the plugin
-        """
+        """Returns the signature of the plugin."""
+
         pass
 
     @abc.abstractmethod
     def get_tenants(self, future, callback):
-        """
-        Get a list of tenants using the plugin
-        """
+        """Get a list of tenants using the plugin."""
+
         pass
 
     @abc.abstractmethod
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         pass
 
     @abc.abstractmethod
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         pass

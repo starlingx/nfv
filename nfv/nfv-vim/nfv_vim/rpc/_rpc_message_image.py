@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.rpc.image")
 
 
 class APIRequestCreateImage(RPCMessage):
-    """
-    RPC API Request Message - Create Image
-    """
+    """RPC API Request Message - Create Image."""
 
     name = None
     description = None
@@ -72,9 +70,7 @@ class APIRequestCreateImage(RPCMessage):
 
 
 class APIResponseCreateImage(RPCMessage):
-    """
-    RPC API Response Message - Create Image
-    """
+    """RPC API Response Message - Create Image."""
 
     uuid = None
     name = None
@@ -135,9 +131,7 @@ class APIResponseCreateImage(RPCMessage):
 
 
 class APIRequestUpdateImage(RPCMessage):
-    """
-    RPC API Request Message - Update Image
-    """
+    """RPC API Request Message - Update Image."""
 
     uuid = None
     description = None
@@ -178,9 +172,7 @@ class APIRequestUpdateImage(RPCMessage):
 
 
 class APIResponseUpdateImage(RPCMessage):
-    """
-    RPC API Response Message - Update Image
-    """
+    """RPC API Response Message - Update Image."""
 
     uuid = None
     name = None
@@ -241,9 +233,7 @@ class APIResponseUpdateImage(RPCMessage):
 
 
 class APIRequestDeleteImage(RPCMessage):
-    """
-    RPC API Request Message - Delete Image
-    """
+    """RPC API Request Message - Delete Image."""
 
     uuid = None
 
@@ -266,9 +256,7 @@ class APIRequestDeleteImage(RPCMessage):
 
 
 class APIResponseDeleteImage(RPCMessage):
-    """
-    RPC API Response Message - Delete Image
-    """
+    """RPC API Response Message - Delete Image."""
 
     uuid = None
 
@@ -291,9 +279,7 @@ class APIResponseDeleteImage(RPCMessage):
 
 
 class APIRequestGetImage(RPCMessage):
-    """
-    RPC API Request Message - Get Image
-    """
+    """RPC API Request Message - Get Image."""
 
     get_all = False
     filter_by_uuid = None
@@ -322,9 +308,7 @@ class APIRequestGetImage(RPCMessage):
 
 
 class APIResponseGetImage(RPCMessage):
-    """
-    RPC API Response Message - Get Image
-    """
+    """RPC API Response Message - Get Image."""
 
     uuid = None
     name = None

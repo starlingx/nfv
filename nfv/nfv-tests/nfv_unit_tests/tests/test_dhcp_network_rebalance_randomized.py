@@ -7,19 +7,15 @@ import random
 from unittest import mock
 
 from nfv_vim.network_rebalance._dhcp_rebalance import (
-    _add_network_to_dhcp_agent_callback_body
+    _add_network_to_dhcp_agent_callback_body,
 )
+from nfv_vim.network_rebalance._dhcp_rebalance import _get_datanetworks_callback_body
 from nfv_vim.network_rebalance._dhcp_rebalance import (
-    _get_datanetworks_callback_body
+    _get_dhcp_agent_networks_callback_body,
 )
+from nfv_vim.network_rebalance._dhcp_rebalance import _get_network_agents_callback_body
 from nfv_vim.network_rebalance._dhcp_rebalance import (
-    _get_dhcp_agent_networks_callback_body
-)
-from nfv_vim.network_rebalance._dhcp_rebalance import (
-    _get_network_agents_callback_body
-)
-from nfv_vim.network_rebalance._dhcp_rebalance import (
-    _remove_network_from_dhcp_agent_callback_body
+    _remove_network_from_dhcp_agent_callback_body,
 )
 from nfv_vim.network_rebalance._dhcp_rebalance import _DHCPRebalance
 from nfv_vim.network_rebalance._dhcp_rebalance import _run_state_machine
@@ -28,7 +24,6 @@ from nfv_vim.network_rebalance._dhcp_rebalance import DHCP_REBALANCE_STATE
 
 from nfv_unit_tests.tests import testcase
 from nfv_unit_tests.tests import utils
-
 
 DEBUG_PRINTING = False
 MAX_AGENTS = 40
@@ -188,7 +183,6 @@ def add_to_fake_host_table(host_name):
 )
 @mock.patch("nfv_vim.tables.tables_get_host_table", fake_tables_get_host_table)
 class TestNeutronDHCPRebalance(testcase.NFVTestCase):
-
     def setUp(self):
         super(TestNeutronDHCPRebalance, self).setUp()
 

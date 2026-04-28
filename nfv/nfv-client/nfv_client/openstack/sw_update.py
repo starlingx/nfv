@@ -23,7 +23,7 @@ class StrategyStep(object):
     reason = None
 
     def __repr__(self):
-        return "%s" % str(self.__dict__)
+        return "%s" % str(self.__dict__)  # noqa: H501
 
 
 class StrategyStage(object):
@@ -40,7 +40,7 @@ class StrategyStage(object):
     reason = None
 
     def __repr__(self):
-        return "%s" % str(self.__dict__)
+        return "%s" % str(self.__dict__)  # noqa: H501
 
 
 class StrategyPhase(object):
@@ -59,7 +59,7 @@ class StrategyPhase(object):
     response = None
 
     def __repr__(self):
-        return "%s" % str(self.__dict__)
+        return "%s" % str(self.__dict__)  # noqa: H501
 
 
 class Strategy(object):
@@ -81,13 +81,12 @@ class Strategy(object):
     abort_phase = None
 
     def __repr__(self):
-        return "%s" % str(self.__dict__)
+        return "%s" % str(self.__dict__)  # noqa: H501
 
 
 def _get_strategy_step_object_from_response(response):
-    """
-    Convert the Rest-API response into a strategy step object
-    """
+    """Convert the Rest-API response into a strategy step object."""
+
     step = StrategyStep()
     step.step_id = response["step-id"]
     step.step_name = response["step-name"]
@@ -103,9 +102,8 @@ def _get_strategy_step_object_from_response(response):
 
 
 def _get_strategy_stage_object_from_response(response):
-    """
-    Convert the Rest-API response into a strategy stage object
-    """
+    """Convert the Rest-API response into a strategy stage object."""
+
     stage = StrategyStage()
     stage.stage_id = response["stage-id"]
     stage.stage_name = response["stage-name"]
@@ -126,9 +124,8 @@ def _get_strategy_stage_object_from_response(response):
 
 
 def _get_strategy_phase_object_from_response(response):
-    """
-    Convert the Rest-API response into a strategy phase object
-    """
+    """Convert the Rest-API response into a strategy phase object."""
+
     phase = StrategyPhase()
     phase.phase_name = response["phase-name"]
     phase.total_stages = response["total-stages"]
@@ -151,9 +148,8 @@ def _get_strategy_phase_object_from_response(response):
 
 
 def _get_strategy_object_from_response(response):
-    """
-    Convert the Rest-API response into a strategy object
-    """
+    """Convert the Rest-API response into a strategy object."""
+
     strategy_data = response.get("strategy", None)
     if strategy_data is None:
         return None
@@ -189,9 +185,8 @@ def _get_strategy_object_from_response(response):
 
 
 def _get_current_strategy_from_response(response):
-    """
-    Returns Strategy Type and State
-    """
+    """Returns Strategy Type and State."""
+
     current_strategy = {}
     strategy_data = response.get("strategy", None)
     if strategy_data is None:
@@ -213,9 +208,8 @@ def get_strategies(
     tenant=None,
     auth_type=AUTH_TYPES.KEYSTONE,
 ):
-    """
-    Software Update - Get Strategies
-    """
+    """Software Update - Get Strategies."""
+
     api_cmd = url + "/api/orchestration/%s/strategy" % strategy_name
 
     api_cmd_headers = dict()
@@ -245,9 +239,8 @@ def get_strategy(
     tenant=None,
     auth_type=AUTH_TYPES.KEYSTONE,
 ):
-    """
-    Software Update - Get Strategy
-    """
+    """Software Update - Get Strategy."""
+
     api_cmd = url + "/api/orchestration/%s/strategy/%s" % (strategy_name, strategy_uuid)
 
     api_cmd_headers = dict()
@@ -282,11 +275,10 @@ def create_strategy(
     user_domain_name=None,
     tenant=None,
     auth_type=AUTH_TYPES.KEYSTONE,
-    **kwargs
+    **kwargs,
 ):
-    """
-    Software Update - Create Strategy
-    """
+    """Software Update - Create Strategy."""
+
     api_cmd = url + "/api/orchestration/%s/strategy" % strategy_name
 
     api_cmd_headers = dict()
@@ -359,9 +351,8 @@ def delete_strategy(
     tenant=None,
     auth_type=AUTH_TYPES.KEYSTONE,
 ):
-    """
-    Software Update - Delete Strategy
-    """
+    """Software Update - Delete Strategy."""
+
     api_cmd = url + "/api/orchestration/%s/strategy" % strategy_name
 
     api_cmd_headers = dict()
@@ -403,9 +394,8 @@ def apply_strategy(
     tenant=None,
     auth_type=AUTH_TYPES.KEYSTONE,
 ):
-    """
-    Software Update - Apply Strategy
-    """
+    """Software Update - Apply Strategy."""
+
     api_cmd = url + ("/api/orchestration/%s/strategy/actions" % strategy_name)
 
     api_cmd_headers = dict()
@@ -448,9 +438,8 @@ def abort_strategy(
     tenant=None,
     auth_type=AUTH_TYPES.KEYSTONE,
 ):
-    """
-    Software Update - Abort Strategy
-    """
+    """Software Update - Abort Strategy."""
+
     api_cmd = url + ("/api/orchestration/%s/strategy/actions" % strategy_name)
 
     api_cmd_headers = dict()
@@ -488,9 +477,8 @@ def get_current_strategy(
     tenant=None,
     auth_type=AUTH_TYPES.KEYSTONE,
 ):
-    """
-    Get The Current Active Strategy Type And State
-    """
+    """Get The Current Active Strategy Type And State."""
+
     api_cmd = url + "/api/orchestration/current-strategy/strategy"
 
     api_cmd_headers = dict()

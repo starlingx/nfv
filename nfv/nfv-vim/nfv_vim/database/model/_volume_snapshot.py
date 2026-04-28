@@ -12,9 +12,7 @@ from nfv_vim.database.model._base import Base
 
 
 class VolumeSnapshot(AsDictMixin, Base):
-    """
-    Volume Snapshot Database Table Entry
-    """
+    """Volume Snapshot Database Table Entry."""
 
     __tablename__ = "volume_snapshots"
 

@@ -11,9 +11,7 @@ from nfv_vim.database.model._base import Base
 
 
 class HostAggregate(AsDictMixin, Base):
-    """
-    Host Aggregate Database Table
-    """
+    """Host Aggregate Database Table."""
 
     __tablename__ = "host_aggregates"
 

@@ -12,9 +12,7 @@ from nfv_common.helpers import Singleton
 
 
 class HostGroupPolicy(Constants, metaclass=Singleton):
-    """
-    Host Group Policy Constants
-    """
+    """Host Group Policy Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -26,9 +24,7 @@ HOST_GROUP_POLICY = HostGroupPolicy()
 
 
 class HostGroup(ObjectData):
-    """
-    NFVI Host Group Object
-    """
+    """NFVI Host Group Object."""
 
     def __init__(self, name, member_names, policies):
         super(HostGroup, self).__init__("1.0.0")

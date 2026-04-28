@@ -34,8 +34,8 @@ DEBUG_WITH_JSON = False
 
 
 def validate_strategy_persists(strategy):
-    """
-    Validate that the strategy can be converted to a dict and back without any
+    """Validate that the strategy can be converted to a dict and back without any
+
     loss of data.
     Note: This is not foolproof - it won't catch cases where the an object
     attribute was missed from both the as_dict and from_dict methods.
@@ -61,8 +61,8 @@ def validate_strategy_persists(strategy):
 
 
 def validate_phase(phase, expected_results):
-    """
-    Validate that the phase matches everything contained in expected_results
+    """Validate that the phase matches everything contained in expected_results
+
     Note: there is probably a super generic, pythonic way to do this, but this
     is good enough (tm).
     """
@@ -90,7 +90,8 @@ def validate_phase(phase, expected_results):
                             apply_step = apply_stage[stages_key][step_number]
                             for step_key in step:
                                 assert apply_step[step_key] == step[step_key], (
-                                    "for [%s][%d][%s][%d][%s] found: %s but expected: %s\n"
+                                    "for [%s][%d][%s][%d][%s] found: %s "
+                                    "but expected: %s\n"
                                     "\n===== Found Step =====\n%s\n"
                                     "\n===== Expected Step =====\n%s"
                                     % (
@@ -148,7 +149,7 @@ def fake_host_name_controller_0():
 
 
 def fake_host_name_flipper(before, after, n):
-    """Flip host after n-calls"""
+    """Flip host after n-calls."""
 
     hosts = [before, after]
     index = 0
@@ -166,8 +167,8 @@ def fake_callback():
 
 
 def fake_event_issue(a, b, c, d):
-    """
-    Mock out the _event_issue function because it is being called when instance
+    """Mock out the _event_issue function because it is being called when instance
+
     objects are created. It ends up trying to communicate with another thread
     (that doesn't exist) and this eventually leads to nosetests hanging if
     enough events are issued.
@@ -182,9 +183,8 @@ def fake_nfvi_compute_plugin_disabled():
 class SwUpdateStrategyTestCase(testcase.NFVTestCase):
 
     def setUp(self):
-        """
-        Setup for testing.
-        """
+        """Setup for testing."""
+
         super(SwUpdateStrategyTestCase, self).setUp()
         self._tenant_table = Table()
         self._instance_type_table = Table()
@@ -259,9 +259,8 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
         self._instance_type_table[instance_type_uuid] = instance_type
 
     def tearDown(self):
-        """
-        Cleanup testing setup.
-        """
+        """Cleanup testing setup."""
+
         super(SwUpdateStrategyTestCase, self).tearDown()
         self._tenant_table.clear()
         self._instance_type_table.clear()
@@ -278,9 +277,8 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
         host_name,
         admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.UNLOCKED,
     ):
-        """
-        Create an instance
-        """
+        """Create an instance."""
+
         tenant_uuid = str(uuid.uuid4())
         image_uuid = str(uuid.uuid4())
 
@@ -311,9 +309,8 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
         assert 0, "Unknown instance_type_name: %s" % instance_type_name
 
     def create_instance_group(self, name, members, policies):
-        """
-        Create an instance group
-        """
+        """Create an instance group."""
+
         member_uuids = []
 
         for instance_uuid, instance in list(self._instance_table.items()):
@@ -340,9 +337,8 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
         sw_version="12.01",
         openstack_installed=True,
     ):
-        """
-        Create a host
-        """
+        """Create a host."""
+
         personality = ""
 
         openstack_control = False
@@ -388,9 +384,8 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
         self._host_table[host.name] = host
 
     def create_host_group(self, name, members, policies):
-        """
-        Create a host group
-        """
+        """Create a host group."""
+
         member_uuids = []
 
         for instance_uuid, instance in list(self._instance_table.items()):
@@ -405,9 +400,8 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
         self._host_group_table[host_group.name] = host_group
 
     def create_host_aggregate(self, name, host_names):
-        """
-        Create a host aggregate
-        """
+        """Create a host aggregate."""
+
         nfvi_host_aggregate = nfvi.objects.v1.HostAggregate(
             name=name, host_names=host_names, availability_zone=""
         )

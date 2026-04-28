@@ -13,9 +13,7 @@ from nfv_vim.database.model._base import Base
 
 
 class Hypervisor(AsDictMixin, Base):
-    """
-    Hypervisor Database Table
-    """
+    """Hypervisor Database Table."""
 
     __tablename__ = "hypervisors"
 
@@ -35,9 +33,8 @@ class Hypervisor(AsDictMixin, Base):
     nfvi_hypervisor_data = Column(String(2048), nullable=False)
 
     def __init__(self):
-        """
-        Default some of the statistics of the hypervisor
-        """
+        """Default some of the statistics of the hypervisor."""
+
         self.stats_available = False
         self.vcpus_used = 0
         self.vcpus_max = 0

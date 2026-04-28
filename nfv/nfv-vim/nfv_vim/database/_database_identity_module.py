@@ -11,9 +11,8 @@ from nfv_vim.database._database import database_get
 
 
 def database_tenant_add(tenant_obj):
-    """
-    Add a tenant object to the database
-    """
+    """Add a tenant object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Tenant)
@@ -32,9 +31,8 @@ def database_tenant_add(tenant_obj):
 
 
 def database_tenant_delete(tenant_uuid):
-    """
-    Delete a tenant object from the database
-    """
+    """Delete a tenant object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Tenant)
@@ -43,9 +41,8 @@ def database_tenant_delete(tenant_uuid):
 
 
 def database_tenant_get_list():
-    """
-    Fetch all the tenant objects from the database
-    """
+    """Fetch all the tenant objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Tenant)

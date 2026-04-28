@@ -13,29 +13,25 @@ TASK_TIMEOUT = 20
 
 
 class TaskFuture(object):
-    """
-    Task Future
-    """
+    """Task Future."""
 
     def __init__(self, scheduler):
-        """
-        Create a task future
-        """
+        """Create a task future."""
+
         self._scheduler = scheduler
         self._result = None
         self._timeouts = None
 
     def set_timeouts(self, timeouts):
-        """
-        Set the timeout values to be used when work is to be done
-        Parameter timeouts is a dictionary of target and the timeout in seconds
+        """Set the timeout values to be used when work is to be done
+
+        Parameter timeouts is a dictionary of target and the timeout in seconds.
         """
         self._timeouts = timeouts
 
     def work(self, target, *args, **kwargs):
-        """
-        Schedule work in the future
-        """
+        """Schedule work in the future."""
+
         timeout_in_secs = None
         if self._timeouts is not None:
             # Look for a target specific timeout
@@ -87,10 +83,10 @@ class TaskFuture(object):
             raise LookupError("Running task no longer running")
 
     def timer(self, name, interval_secs):
-        """
-        Schedule a timer to be fired after so many milliseconds,
+        """Schedule a timer to be fired after so many milliseconds,
+
         callback is a co-routine that is sent the timer identifier
-        that has fired
+        that has fired.
         """
         if self._scheduler.running_task is not None:
             timer_id = self._scheduler.running_task.add_timer(name, interval_secs)
@@ -99,45 +95,40 @@ class TaskFuture(object):
             raise LookupError("Running task no longer running")
 
     def cancel_timer(self, timer_id):
-        """
-        Cancel a scheduled timer
-        """
+        """Cancel a scheduled timer."""
+
         if self._scheduler.running_task is not None:
             self._scheduler.running_task.cancel_timer(timer_id)
         else:
             raise LookupError("Running task no longer running")
 
     def io_read_wait(self, select_obj):
-        """
-        Wait on a read selection object
-        """
+        """Wait on a read selection object."""
+
         if self._scheduler.running_task is not None:
             self._scheduler.running_task.add_io_read_wait(select_obj)
         else:
             raise LookupError("Running task no longer running")
 
     def io_read_wait_cancel(self, select_obj):
-        """
-        Cancel a wait on a read selection object
-        """
+        """Cancel a wait on a read selection object."""
+
         if self._scheduler.running_task is not None:
             self._scheduler.running_task.cancel_io_read_wait(select_obj)
         else:
             raise LookupError("Running task no longer running")
 
     def io_write_wait(self, select_obj):
-        """
-        Wait on a write selection object
-        """
+        """Wait on a write selection object."""
+
         if self._scheduler.running_task is not None:
             self._scheduler.running_task.add_io_write_wait(select_obj)
         else:
             raise LookupError("Running task no longer running")
 
     def io_write_wait_cancel(self, select_obj):
-        """
-        Cancel a wait on a write selection object
-        """
+        """Cancel a wait on a write selection object."""
+
         if self._scheduler.running_task is not None:
             self._scheduler.running_task.cancel_io_write_wait(select_obj)
         else:
@@ -145,14 +136,12 @@ class TaskFuture(object):
 
     @property
     def result(self):
-        """
-        Returns the result of a future
-        """
+        """Returns the result of a future."""
+
         return self._result
 
     @result.setter
     def result(self, result):
-        """
-        Set the result of a future
-        """
+        """Set the result of a future."""
+
         self._result = result

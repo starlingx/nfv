@@ -9,13 +9,13 @@ from nfv_common import debug
 from nfv_vim import rpc
 
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
-    NetworkResourceType
+    NetworkResourceType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
-    NetworkSubnetResourceType
+    NetworkSubnetResourceType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
-    NetworkSubnetType
+    NetworkSubnetType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import NetworkType
 
@@ -23,9 +23,8 @@ DLOG = debug.debug_get_logger("nfv_vim.api.virtualised_network")
 
 
 def subnet_allocate(network_resource_id, subnet_type):
-    """
-    Allocate a subnet
-    """
+    """Allocate a subnet."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestCreateSubnet()
     rpc_request.network_name = network_resource_id
@@ -81,9 +80,8 @@ def subnet_allocate(network_resource_id, subnet_type):
 
 
 def subnet_update(network_resource_id, subnet_type):
-    """
-    Update a subnet
-    """
+    """Update a subnet."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestUpdateSubnet()
     rpc_request.network_name = network_resource_id
@@ -142,9 +140,8 @@ def subnet_update(network_resource_id, subnet_type):
 
 
 def subnet_delete(network_resource_id, subnet_type):
-    """
-    Delete a subnet
-    """
+    """Delete a subnet."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestDeleteSubnet()
     rpc_request.network_name = network_resource_id
@@ -196,9 +193,8 @@ def subnet_delete(network_resource_id, subnet_type):
 
 
 def subnet_get_all(network_resource_id):
-    """
-    Get all subnets
-    """
+    """Get all subnets."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestGetSubnet()
     rpc_request.filter_by_network_name = network_resource_id
@@ -241,9 +237,8 @@ def subnet_get_all(network_resource_id):
 
 
 def network_allocate(network_resource_id, network_type):
-    """
-    Allocate a network
-    """
+    """Allocate a network."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestCreateNetwork()
     rpc_request.name = network_resource_id
@@ -275,7 +270,7 @@ def network_allocate(network_resource_id, network_type):
         network_attributes.layer3_attributes = list()
 
         for subnet_type in network_type.layer3_attributes:
-            (http_status_code, subnet_resource_type) = subnet_allocate(
+            http_status_code, subnet_resource_type = subnet_allocate(
                 network_resource_id, subnet_type
             )
 
@@ -311,9 +306,8 @@ def network_allocate(network_resource_id, network_type):
 
 
 def network_update(network_resource_id, network_type):
-    """
-    Update a network
-    """
+    """Update a network."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestUpdateNetwork()
     rpc_request.name = network_resource_id
@@ -340,7 +334,7 @@ def network_update(network_resource_id, network_type):
         network_attributes.type_of_segment = str(response.segmentation_id)
         network_attributes.is_shared = response.is_shared
 
-        (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
+        http_status_code, subnet_resource_types = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
             add_list = list()
             update_list = list()
@@ -379,9 +373,7 @@ def network_update(network_resource_id, network_type):
 
             for subnet_type in add_list:
                 DLOG.info("Add subnet: %s" % subnet_type.wrs_subnet_ip)
-                (http_status_code, _) = subnet_allocate(
-                    network_resource_id, subnet_type
-                )
+                http_status_code, _ = subnet_allocate(network_resource_id, subnet_type)
                 if httplib.OK != http_status_code:
                     DLOG.error(
                         "Failed to add subnet %s/%s for network %s, "
@@ -416,7 +408,7 @@ def network_update(network_resource_id, network_type):
 
             for subnet_type in update_list:
                 DLOG.info("Update subnet: %s" % subnet_type.wrs_subnet_ip)
-                (http_status_code, _) = subnet_update(network_resource_id, subnet_type)
+                http_status_code, _ = subnet_update(network_resource_id, subnet_type)
                 if httplib.OK != http_status_code:
                     DLOG.error(
                         "Failed to update subnet %s/%s for network %s, "
@@ -430,7 +422,7 @@ def network_update(network_resource_id, network_type):
                     )
                     return http_status_code, None
 
-            (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
+            http_status_code, subnet_resource_types = subnet_get_all(response.name)
             if httplib.OK == http_status_code:
                 layer3_attributes = list()
                 for subnet_resource_type in subnet_resource_types:
@@ -463,9 +455,8 @@ def network_update(network_resource_id, network_type):
 
 
 def network_delete(network_resource_ids):
-    """
-    Delete networks
-    """
+    """Delete networks."""
+
     deleted_network_resource_ids = list()
     for network_resource_id in network_resource_ids:
         vim_connection = pecan.request.vim.open_connection()
@@ -491,9 +482,8 @@ def network_delete(network_resource_ids):
 
 
 def network_get(network_resource_id):
-    """
-    Get a network
-    """
+    """Get a network."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestGetNetwork()
     rpc_request.filter_by_name = network_resource_id
@@ -518,7 +508,7 @@ def network_get(network_resource_id):
         network_attributes.type_of_segment = str(response.segmentation_id)
         network_attributes.is_shared = response.is_shared
 
-        (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
+        http_status_code, subnet_resource_types = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
             layer3_attributes = list()
             for subnet_resource_type in subnet_resource_types:
@@ -545,9 +535,8 @@ def network_get(network_resource_id):
 
 
 def network_get_all():
-    """
-    Get all networks
-    """
+    """Get all networks."""
+
     vim_connection = pecan.request.vim.open_connection()
     rpc_request = rpc.APIRequestGetNetwork()
     rpc_request.get_all = True
@@ -576,7 +565,7 @@ def network_get_all():
         network_attributes.type_of_segment = str(response.segmentation_id)
         network_attributes.is_shared = response.is_shared
 
-        (http_status_code, subnet_resource_types) = subnet_get_all(response.name)
+        http_status_code, subnet_resource_types = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
             layer3_attributes = list()
             for subnet_resource_type in subnet_resource_types:

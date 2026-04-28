@@ -13,14 +13,11 @@ DLOG = debug.debug_get_logger("nfv_common.tasks.task_worker_pool")
 
 
 class TaskWorkerPool(object):
-    """
-    Task Worker Pool
-    """
+    """Task Worker Pool."""
 
     def __init__(self, pool_name, num_workers=1):
-        """
-        Create Task Worker Pool
-        """
+        """Create Task Worker Pool."""
+
         self._pool_name = pool_name
         self._workers_avail = collections.OrderedDict()
         self._workers = list()
@@ -35,23 +32,20 @@ class TaskWorkerPool(object):
 
     @property
     def name(self):
-        """
-        Returns the pool name
-        """
+        """Returns the pool name."""
+
         return self._pool_name
 
     def available_workers(self):
-        """
-        Returns true if there are workers available to do work
-        """
+        """Returns true if there are workers available to do work."""
+
         if self._workers_avail:
             return True
         return False
 
     def claim_worker(self):
-        """
-        Claims a worker, returns a worker if available or None otherwise
-        """
+        """Claims a worker, returns a worker if available or None otherwise."""
+
         if self._workers_avail:
             _, worker = self._workers_avail.popitem()
             DLOG.verbose("Claim worker %s" % worker.name)
@@ -59,17 +53,15 @@ class TaskWorkerPool(object):
         return None
 
     def release_worker(self, worker, timeout=False):
-        """
-        Release a worker back into the pool
-        """
+        """Release a worker back into the pool."""
+
         if worker is not None:
             DLOG.verbose("Release worker %s" % worker.name)
             self._workers_avail[worker.id] = worker
 
     def timeout_worker(self, worker):
-        """
-        Timeout a worker
-        """
+        """Timeout a worker."""
+
         if worker is not None:
             DLOG.info("Timeout worker %s" % worker.name)
             worker.stop(max_wait_in_seconds=1)
@@ -81,8 +73,7 @@ class TaskWorkerPool(object):
             del worker
 
     def shutdown(self):
-        """
-        Shutdown the pool of workers
-        """
+        """Shutdown the pool of workers."""
+
         for worker in self._workers:
             worker.stop(max_wait_in_seconds=1)

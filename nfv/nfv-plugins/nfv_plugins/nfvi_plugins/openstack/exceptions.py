@@ -7,14 +7,11 @@ from nfv_common import exceptions
 
 
 class OpenStackException(exceptions.PickleableException):
-    """
-    OpenStack Exception
-    """
+    """OpenStack Exception."""
 
     def __init__(self, method, url, headers, body, message, reason):
-        """
-        Create an OpenStack exception
-        """
+        """Create an OpenStack exception."""
+
         super(OpenStackException, self).__init__(message, reason)
         self._method = method
         self._url = url
@@ -24,9 +21,8 @@ class OpenStackException(exceptions.PickleableException):
         self._reason = reason  # a message string or another exception
 
     def __str__(self):
-        """
-        Return a string representing the exception
-        """
+        """Return a string representing the exception."""
+
         return (
             "[OpenStack Exception: method=%s, url=%s, headers=%s, "
             "body=%s, reason=%s]"
@@ -34,15 +30,13 @@ class OpenStackException(exceptions.PickleableException):
         )
 
     def __repr__(self):
-        """
-        Provide a representation of the exception
-        """
+        """Provide a representation of the exception."""
+
         return str(self)
 
     def __reduce__(self):
-        """
-        Return a tuple so that we can properly pickle the exception
-        """
+        """Return a tuple so that we can properly pickle the exception."""
+
         return (
             OpenStackException,
             (
@@ -57,23 +51,19 @@ class OpenStackException(exceptions.PickleableException):
 
     @property
     def message(self):
-        """
-        Returns the message for the exception
-        """
+        """Returns the message for the exception."""
+
         return self._message
 
     @property
     def reason(self):
-        """
-        Returns the reason for the exception
-        """
+        """Returns the reason for the exception."""
+
         return self._reason
 
 
 class OpenStackRestAPIException(exceptions.PickleableException):
-    """
-    OpenStack Rest-API Exception
-    """
+    """OpenStack Rest-API Exception."""
 
     def __init__(
         self,
@@ -88,9 +78,8 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         response_body,
         response_reason,
     ):
-        """
-        Create an OpenStack Rest-API exception
-        """
+        """Create an OpenStack Rest-API exception."""
+
         super(OpenStackRestAPIException, self).__init__(message, reason)
         self._method = method
         self._url = url
@@ -104,9 +93,8 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         self._response_reason = response_reason
 
     def __str__(self):
-        """
-        Return a string representing the exception
-        """
+        """Return a string representing the exception."""
+
         return (
             "[OpenStack Rest-API Exception: method=%s, url=%s, "
             "headers=%s, body=%s, status_code=%s, reason=%s, "
@@ -124,15 +112,13 @@ class OpenStackRestAPIException(exceptions.PickleableException):
         )
 
     def __repr__(self):
-        """
-        Provide a representation of the exception
-        """
+        """Provide a representation of the exception."""
+
         return str(self)
 
     def __reduce__(self):
-        """
-        Return a tuple so that we can properly pickle the exception
-        """
+        """Return a tuple so that we can properly pickle the exception."""
+
         return (
             OpenStackRestAPIException,
             (
@@ -151,80 +137,67 @@ class OpenStackRestAPIException(exceptions.PickleableException):
 
     @property
     def http_status_code(self):
-        """
-        Returns the HTTP status code
-        """
+        """Returns the HTTP status code."""
+
         return self._status_code
 
     @property
     def http_response_headers(self):
-        """
-        Returns the HTTP response headers
-        """
+        """Returns the HTTP response headers."""
+
         return self._response_headers
 
     @property
     def http_response_body(self):
-        """
-        Returns the HTTP response body
-        """
+        """Returns the HTTP response body."""
+
         return self._response_body
 
     @property
     def http_response_reason(self):
-        """
-        Returns the HTTP response reason
-        """
+        """Returns the HTTP response reason."""
+
         return self._response_reason
 
     @property
     def message(self):
-        """
-        Returns the message for the exception
-        """
+        """Returns the message for the exception."""
+
         return self._message
 
     @property
     def reason(self):
-        """
-        Returns the reason for the exception
-        """
+        """Returns the reason for the exception."""
+
         return self._reason
 
 
 class NotFound(exceptions.PickleableException):
-    """
-    Not Found Exception
-    """
+    """Not Found Exception."""
 
     def __init__(self, message):
-        """
-        Create an OpenStack exception
-        """
+        """Create an OpenStack exception."""
+
         super(NotFound, self).__init__(message)
         self._message = message
 
     def __str__(self):
-        """
-        Return a string representing the exception
-        """
+        """Return a string representing the exception."""
+
         return "[NotFound Exception: message=%s]" % self._message
 
     def __repr__(self):
-        """
-        Provide a representation of the exception
-        """
+        """Provide a representation of the exception."""
+
         return str(self)
 
     def __reduce__(self):
-        """
-        Return a tuple so that we can properly pickle the exception
-        """
+        """Return a tuple so that we can properly pickle the exception."""
+
         return NotFound, (self.message,)
 
     @property
     def message(self):
-        """
-        Returns the message for the exception
-        """
+        """Returns the message for the exception."""
+
         return self._message

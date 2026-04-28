@@ -13,9 +13,7 @@ from nfv_common.debug._debug_thread import DebugLoggingThread
 
 
 class Debug(object, metaclass=Singleton):
-    """
-    Debug
-    """
+    """Debug."""
 
     def __init__(self):
         self._config_change_callbacks = list()
@@ -30,22 +28,19 @@ class Debug(object, metaclass=Singleton):
         self._config_change_callbacks = list()
 
     def register_config_change_callback(self, callback):
-        """
-        Register a configuration change callback
-        """
+        """Register a configuration change callback."""
+
         if callback not in self._config_change_callbacks:
             self._config_change_callbacks.append(callback)
 
     def deregister_config_change_callback(self, callback):
-        """
-        Deregister a configuration change callback
-        """
+        """Deregister a configuration change callback."""
+
         self._config_change_callbacks.remove(callback)
 
     def load(self, process_name=None, thread_name=None):
-        """
-        Load debug configuration settings
-        """
+        """Load debug configuration settings."""
+
         from nfv_common.debug._debug_log import debug_get_logger
         from nfv_common.debug._debug_log import debug_set_loggers_level
 
@@ -58,9 +53,8 @@ class Debug(object, metaclass=Singleton):
                 debug_get_logger(name, debug_level, process_name, thread_name)
 
     def reload(self):
-        """
-        Reload debug configuration settings
-        """
+        """Reload debug configuration settings."""
+
         from nfv_common.debug._debug_log import debug_get_logger
         from nfv_common.debug._debug_log import debug_set_loggers_level
 
@@ -77,16 +71,14 @@ class Debug(object, metaclass=Singleton):
 
     @property
     def config(self):
-        """
-        Returns the debug configuration
-        """
+        """Returns the debug configuration."""
+
         return self._config
 
     @config.setter
     def config(self, config):
-        """
-        Set the debug configuration file
-        """
+        """Set the debug configuration file."""
+
         if self._config is None:
             self._config = config
             self._debug_config = DebugConfig(config["config_file"])
@@ -94,72 +86,62 @@ class Debug(object, metaclass=Singleton):
 
     @property
     def debug_level(self):
-        """
-        Returns the debug level currently set
-        """
+        """Returns the debug level currently set."""
+
         return self._debug_level
 
     @property
     def trace_level(self):
-        """
-        Returns the debug trace level currently set
-        """
+        """Returns the debug trace level currently set."""
+
         return self._debug_trace_level
 
     @property
     def trace_depth(self):
-        """
-        Returns the debug trace depth currently set
-        """
+        """Returns the debug trace depth currently set."""
+
         return self._debug_trace_depth
 
     @trace_depth.setter
     def trace_depth(self, trace_depth):
-        """
-        Set the current trace depth
-        """
+        """Set the current trace depth."""
+
         self._debug_trace_depth = trace_depth
 
     @property
     def output(self):
-        """
-        Returns where the debug output should go
-        """
+        """Returns where the debug output should go."""
+
         return self._debug_output
 
 
 def debug_register_config_change_callback(callback):
-    """
-    Register debug configuration change callback
-    """
+    """Register debug configuration change callback."""
+
     return Debug().register_config_change_callback(callback)
 
 
 def debug_deregister_config_change_callback(callback):
-    """
-    Deregister debug configuration change callback
-    """
+    """Deregister debug configuration change callback."""
+
     return Debug().deregister_config_change_callback(callback)
 
 
 def debug_get_config():
-    """
-    Get debug configuration
-    """
+    """Get debug configuration."""
+
     return Debug().config
 
 
 def debug_reload_config():
-    """
-    Reload debug configuration
-    """
+    """Reload debug configuration."""
+
     Debug().reload()
 
 
 def debug_initialize(config, process_name=None, thread_name=None):
-    """
-    Initializes the debug subsystem
-    """
+    """Initializes the debug subsystem."""
+
     Debug().reinitialize()
 
     if config is not None:
@@ -169,7 +151,6 @@ def debug_initialize(config, process_name=None, thread_name=None):
 
 
 def debug_finalize():
-    """
-    Finalizes the debug subsystem
-    """
+    """Finalizes the debug subsystem."""
+
     return

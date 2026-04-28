@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class FailState(state_machine.State):
-    """
-    Instance - Fail State
-    """
+    """Instance - Fail State."""
 
     def __init__(self, name):
         super(FailState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering fail state
-        """
+        """Entering fail state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = FailTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting fail state
-        """
+        """Exiting fail state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, FailTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the fail state
-        """
+        """Transition from the fail state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the fail state
-        """
+        """Handle event while in the fail state."""
+
         if INSTANCE_EVENT.TASK_STOP == event:
             return INSTANCE_STATE.INITIAL
 

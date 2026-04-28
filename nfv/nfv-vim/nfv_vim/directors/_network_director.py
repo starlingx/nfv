@@ -18,17 +18,14 @@ _network_director = None
 
 
 class NetworkDirector(object, metaclass=Singleton):
-    """
-    Network Director
-    """
+    """Network Director."""
 
     @coroutine
     def _subnet_create_callback(
         self, network_uuid, subnet_name, subnet_ip, subnet_prefix, callback
     ):
-        """
-        Subnet Create Callback
-        """
+        """Subnet Create Callback."""
+
         response = yield
         DLOG.verbose("Subnet-Create callback response=%s." % response)
         if response["completed"]:
@@ -65,9 +62,8 @@ class NetworkDirector(object, metaclass=Singleton):
         dhcp_enabled,
         callback,
     ):
-        """
-        Subnet Create
-        """
+        """Subnet Create."""
+
         nfvi.nfvi_create_subnet(
             network_uuid,
             subnet_name,
@@ -85,9 +81,8 @@ class NetworkDirector(object, metaclass=Singleton):
     def _subnet_update_callback(
         self, network_uuid, subnet_uuid, subnet_name, subnet_ip, subnet_prefix, callback
     ):
-        """
-        Subnet Update Callback
-        """
+        """Subnet Update Callback."""
+
         response = yield
         DLOG.verbose("Subnet-Update callback response=%s." % response)
         if response["completed"]:
@@ -118,9 +113,8 @@ class NetworkDirector(object, metaclass=Singleton):
         dhcp_enabled,
         callback,
     ):
-        """
-        Subnet Update
-        """
+        """Subnet Update."""
+
         nfvi.nfvi_update_subnet(
             subnet_uuid,
             gateway_ip,
@@ -140,9 +134,8 @@ class NetworkDirector(object, metaclass=Singleton):
     def _subnet_delete_callback(
         self, network_uuid, subnet_uuid, subnet_name, subnet_ip, subnet_prefix, callback
     ):
-        """
-        Subnet Delete Callback
-        """
+        """Subnet Delete Callback."""
+
         response = yield
         DLOG.verbose("Subnet-Delete callback response=%s." % response)
         if response["completed"]:
@@ -162,9 +155,8 @@ class NetworkDirector(object, metaclass=Singleton):
     def subnet_delete(
         self, network_uuid, subnet_uuid, subnet_name, subnet_ip, subnet_prefix, callback
     ):
-        """
-        Subnet Delete
-        """
+        """Subnet Delete."""
+
         nfvi.nfvi_delete_subnet(
             subnet_uuid,
             self._subnet_delete_callback(
@@ -179,9 +171,8 @@ class NetworkDirector(object, metaclass=Singleton):
 
     @coroutine
     def _network_create_callback(self, network_name, callback):
-        """
-        Network Create Callback
-        """
+        """Network Create Callback."""
+
         response = yield
         DLOG.verbose("Network-Create callback response=%s." % response)
         if response["completed"]:
@@ -218,9 +209,8 @@ class NetworkDirector(object, metaclass=Singleton):
         shared,
         callback,
     ):
-        """
-        Network Create
-        """
+        """Network Create."""
+
         nfvi.nfvi_create_network(
             network_name,
             network_type,
@@ -232,9 +222,8 @@ class NetworkDirector(object, metaclass=Singleton):
 
     @coroutine
     def _network_update_callback(self, network_uuid, callback):
-        """
-        Network Update Callback
-        """
+        """Network Update Callback."""
+
         response = yield
         DLOG.verbose("Network-Update callback response=%s." % response)
         if response["completed"]:
@@ -263,18 +252,16 @@ class NetworkDirector(object, metaclass=Singleton):
         callback(response["completed"], network_uuid)
 
     def network_update(self, network_uuid, shared, callback):
-        """
-        Network Update
-        """
+        """Network Update."""
+
         nfvi.nfvi_update_network(
             network_uuid, shared, self._network_update_callback(network_uuid, callback)
         )
 
     @coroutine
     def _network_delete_callback(self, network_uuid, callback):
-        """
-        Network Delete Callback
-        """
+        """Network Delete Callback."""
+
         response = yield
         DLOG.verbose("Network-Delete callback response=%s." % response)
         if response["completed"]:
@@ -291,32 +278,28 @@ class NetworkDirector(object, metaclass=Singleton):
         callback(response["completed"], network_uuid)
 
     def network_delete(self, network_uuid, callback):
-        """
-        Network Delete
-        """
+        """Network Delete."""
+
         nfvi.nfvi_delete_network(
             network_uuid, self._network_delete_callback(network_uuid, callback)
         )
 
 
 def get_network_director():
-    """
-    Returns the Network Director
-    """
+    """Returns the Network Director."""
+
     return _network_director
 
 
 def network_director_initialize():
-    """
-    Initialize Network Director
-    """
+    """Initialize Network Director."""
+
     global _network_director
 
     _network_director = NetworkDirector()
 
 
 def network_director_finalize():
-    """
-    Finalize Image Director
-    """
+    """Finalize Image Director."""
+
     pass

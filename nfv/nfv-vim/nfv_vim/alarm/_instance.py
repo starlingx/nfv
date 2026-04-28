@@ -238,8 +238,7 @@ _alarm_templates = {
         "severity": alarm.ALARM_SEVERITY.CRITICAL,
         "probable_cause": alarm.ALARM_PROBABLE_CAUSE.SOFTWARE_ERROR,
         "reason_text": "Instance %(instance_name)s has failed",
-        "repair_action": "The system will attempt recovery; no repair action "
-        "required",
+        "repair_action": "The system will attempt recovery; no repair action required",
         "exclude_alarm_context": [],
         "alarm_context_data": {
             alarm.ALARM_CONTEXT.ADMIN: {
@@ -313,8 +312,7 @@ _alarm_templates = {
         "event_type": alarm.ALARM_EVENT_TYPE.COMMUNICATIONS_ALARM,
         "severity": alarm.ALARM_SEVERITY.MAJOR,
         "probable_cause": alarm.ALARM_PROBABLE_CAUSE.PROCEDURAL_ERROR,
-        "reason_text": "Guest Heartbeat not established for instance "
-        "%(instance_name)s",
+        "reason_text": "Guest Heartbeat not established for instance %(instance_name)s",
         "repair_action": "Verify that the instance is running the Guest-Client "
         "daemon, or disable Guest Heartbeat for the instance "
         "if no longer needed, otherwise contact next level of "
@@ -334,9 +332,8 @@ _alarm_templates = {
 
 
 def _alarm_template_get(alarm_type, alarm_context):
-    """
-    Returns the alarm template associated with the given context
-    """
+    """Returns the alarm template associated with the given context."""
+
     if alarm_type not in _alarm_templates:
         return None
 
@@ -385,9 +382,8 @@ def _alarm_template_get(alarm_type, alarm_context):
 
 
 def _alarm_raise(alarm_type, alarm_context, template, data):
-    """
-    Raises an alarm given the alarm template and data
-    """
+    """Raises an alarm given the alarm template and data."""
+
     alarm_uuid = uuid.uuid4()
     alarm_data = alarm.AlarmData(
         alarm_uuid,
@@ -411,9 +407,8 @@ def _alarm_raise(alarm_type, alarm_context, template, data):
 def instance_raise_alarm(
     instance, alarm_type, additional_text=None, alarm_context=None, alarm_timestamp=None
 ):
-    """
-    Raise alarms against the instance
-    """
+    """Raise alarms against the instance."""
+
     data = dict()
     data["tenant_uuid"] = instance.tenant_uuid
     data["tenant_name"] = instance.tenant_name
@@ -445,17 +440,14 @@ def instance_raise_alarm(
 
 
 def instance_clear_alarm(alarm_list):
-    """
-    Clear alarms against the instance
-    """
+    """Clear alarms against the instance."""
+
     for alarm_data in alarm_list:
         alarm.alarm_clear(alarm_data.alarm_uuid)
 
 
 def instance_manage_alarms(instance):
-    """
-    Manage alarms associated with the given instance
-    """
+    """Manage alarms associated with the given instance."""
 
     def last_event(ev_id):
         return event_log.instance_last_event(instance, ev_id)

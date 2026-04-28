@@ -13,9 +13,7 @@ from nfv_vim.database.model._base import Base
 
 
 class Instance_v4(AsDictMixin, Base):
-    """
-    Instance Database Table
-    """
+    """Instance Database Table."""
 
     __tablename__ = "instances_v4"
 
@@ -43,9 +41,7 @@ class Instance_v4(AsDictMixin, Base):
 
 
 class Instance_v5(AsDictMixin, Base):
-    """
-    Instance Database Table
-    """
+    """Instance Database Table."""
 
     __tablename__ = "instances_v5"
 

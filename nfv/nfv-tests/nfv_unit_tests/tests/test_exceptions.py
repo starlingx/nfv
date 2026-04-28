@@ -13,14 +13,16 @@ from nfv_unit_tests.tests import testcase
 
 
 class TestPickleableExceptions(testcase.NFVTestCase):
-    """Unit tests that verify pickleable exceptions"""
+    """Unit tests that verify pickleable exceptions."""
 
     def setUp(self):
         """Setup for testing."""
+
         super(TestPickleableExceptions, self).setUp()
 
     def tearDown(self):
         """Cleanup testing setup."""
+
         super(TestPickleableExceptions, self).tearDown()
 
     def _do_pickling_test(self, ex):

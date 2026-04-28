@@ -14,9 +14,9 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.ceilometer")
 
 
 def get_meter_stats(token, meter_name, resources, period_start, period_end):
-    """
-    Asks OpenStack Ceilometer for stats for a particular period of time
-    for a meter
+    """Asks OpenStack Ceilometer for stats for a particular period of time
+
+    for a meter.
     """
     url = token.get_service_url(OPENSTACK_SERVICE.CEILOMETER)
     if url is None:
@@ -34,9 +34,8 @@ def get_meter_stats(token, meter_name, resources, period_start, period_end):
 
 
 def get_meters(token):
-    """
-    Asks OpenStack Ceilometer for a list of meters
-    """
+    """Asks OpenStack Ceilometer for a list of meters."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CEILOMETER)
     if url is None:
         raise ValueError("OpenStack Ceilometer URL is invalid")
@@ -48,9 +47,8 @@ def get_meters(token):
 
 
 def publish_meter_sample(token, resource, meter_name, type, unit, sample, timestamp):
-    """
-    Publish a sample for a meter to OpenStack Ceilometer
-    """
+    """Publish a sample for a meter to OpenStack Ceilometer."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CEILOMETER)
     if url is None:
         raise ValueError("OpenStack Ceilometer URL is invalid")
@@ -75,9 +73,8 @@ def publish_meter_sample(token, resource, meter_name, type, unit, sample, timest
 
 
 def get_alarms(token):
-    """
-    Asks OpenStack Ceilometer for a list of alarms
-    """
+    """Asks OpenStack Ceilometer for a list of alarms."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CEILOMETER)
     if url is None:
         raise ValueError("OpenStack Ceilometer URL is invalid")
@@ -91,9 +88,8 @@ def get_alarms(token):
 def create_threshold_alarm(
     token, name, meter_name, comparison_operator, threshold, period, alarm_url
 ):
-    """
-    Asks OpenStack Ceilometer to create a threshold alarm
-    """
+    """Asks OpenStack Ceilometer to create a threshold alarm."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CEILOMETER)
     if url is None:
         raise ValueError("OpenStack Ceilometer URL is invalid")
@@ -130,9 +126,8 @@ def create_threshold_alarm(
 
 
 def delete_alarm(token, alarm_id):
-    """
-    Asks OpenStack Ceilometer to delete an alarm
-    """
+    """Asks OpenStack Ceilometer to delete an alarm."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.CEILOMETER)
     if url is None:
         raise ValueError("OpenStack Ceilometer URL is invalid")

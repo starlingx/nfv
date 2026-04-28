@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ColdMigrateConfirmState(state_machine.State):
-    """
-    Instance - Cold Migrate Confirm State
-    """
+    """Instance - Cold Migrate Confirm State."""
 
     def __init__(self, name):
         super(ColdMigrateConfirmState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering cold migrate confirm state
-        """
+        """Entering cold migrate confirm state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = ColdMigrateConfirmTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting cold migrate confirm state
-        """
+        """Exiting cold migrate confirm state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, ColdMigrateConfirmTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the cold migrate confirm state
-        """
+        """Transition from the cold migrate confirm state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the cold migrate confirm state
-        """
+        """Handle event while in the cold migrate confirm state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

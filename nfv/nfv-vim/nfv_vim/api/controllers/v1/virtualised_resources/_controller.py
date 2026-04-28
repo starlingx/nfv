@@ -17,9 +17,7 @@ from nfv_vim.api.controllers.v1.virtualised_resources._volume_api import VolumeA
 
 
 class VirtualisedResourcesDescription(wsme_types.Base):
-    """
-    Virtualised Resources Description
-    """
+    """Virtualised Resources Description."""
 
     id = wsme_types.text
     links = wsme_types.wsattr([Link], name="links")
@@ -41,9 +39,7 @@ class VirtualisedResourcesDescription(wsme_types.Base):
 
 
 class VirtualisedResourcesAPI(rest.RestController):
-    """
-    Virtualised Resources API
-    """
+    """Virtualised Resources API."""
 
     @pecan.expose()
     def _lookup(self, key, *remainder):

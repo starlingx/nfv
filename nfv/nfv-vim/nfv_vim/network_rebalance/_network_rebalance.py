@@ -19,9 +19,7 @@ DLOG = debug.debug_get_logger("nfv_vim.l3_rebalance")
 
 
 class AgentType(Constants, metaclass=Singleton):
-    """
-    AGENT TYPE Constants
-    """
+    """AGENT TYPE Constants."""
 
     L3 = Constant("L3 agent")
     DHCP = Constant("DHCP agent")
@@ -31,9 +29,7 @@ AGENT_TYPE = AgentType()
 
 
 class L3RebalanceState(Constants, metaclass=Singleton):
-    """
-    L3 REBALANCE STATE Constants
-    """
+    """L3 REBALANCE STATE Constants."""
 
     GET_NETWORK_AGENTS = Constant("GET_NETWORK_AGENTS")
     GET_ROUTERS_HOSTED_ON_AGENT = Constant("GET_ROUTERS_HOSTED_ON_AGENT")
@@ -209,10 +205,10 @@ class L3AgentRebalance(object, metaclass=Singleton):
         return self.l3agents[self.l3agent_idx]["host_uuid"]
 
     def update_network(self, physical_network):
-        """
-        Overwrite the network_id of the stored network with the input
+        """Overwrite the network_id of the stored network with the input
+
         physical_network.
-        Returns True if there are no more networks to gather, False otherwise
+        Returns True if there are no more networks to gather, False otherwise.
         """
         agent_routers = self.router_ids_per_agent[self.l3agents[self.l3agent_idx]["id"]]
         working_router = agent_routers[self.router_idx]
@@ -272,7 +268,6 @@ class L3AgentRebalance(object, metaclass=Singleton):
         all_networks_found = False
         router_id = None
         for router_id in agent_routers:
-
             router_networks = self.networks_per_router[router_id]
             DLOG.debug(
                 "router_networks = %s, physical_networks = %s"
@@ -502,11 +497,11 @@ _L3Rebalance = L3AgentRebalance()
 
 
 def add_rebalance_work_l3(host_name, host_is_going_down):
-    """
-    API for external use to launch a rebalance operation.
+    """API for external use to launch a rebalance operation.
+
     host_is_going_down is boolean indicating if the host is
     coming up (rebalance routers, moving some to newly available host),
-    or going down (move routers off this host, distributing amongst rest)
+    or going down (move routers off this host, distributing amongst rest).
     """
     global _L3Rebalance
 
@@ -515,18 +510,16 @@ def add_rebalance_work_l3(host_name, host_is_going_down):
 
 @coroutine
 def _add_router_to_agent_callback():
-    """
-    Add router to agent callback
-    """
+    """Add router to agent callback."""
+
     response = yield
 
     _add_router_to_agent_callback_body(response)
 
 
 def _add_router_to_agent_callback_body(response):
-    """
-    Add router to agent callback body
-    """
+    """Add router to agent callback body."""
+
     global _L3Rebalance
 
     _L3Rebalance.state_machine_in_progress = False
@@ -539,18 +532,16 @@ def _add_router_to_agent_callback_body(response):
 
 @coroutine
 def _remove_router_from_agent_callback(to_agent_id, router_id):
-    """
-    Remove router from agent callback
-    """
+    """Remove router from agent callback."""
+
     response = yield
 
     _remove_router_from_agent_callback_body(to_agent_id, router_id, response)
 
 
 def _remove_router_from_agent_callback_body(to_agent_id, router_id, response):
-    """
-    Remove router from agent callback body
-    """
+    """Remove router from agent callback body."""
+
     global _L3Rebalance
 
     DLOG.debug("_remove_router_from_agent_callback , response = %s" % response)
@@ -569,18 +560,16 @@ def _remove_router_from_agent_callback_body(to_agent_id, router_id, response):
 
 @coroutine
 def _get_datanetworks_callback(host_id):
-    """
-    Get data networks callback
-    """
+    """Get data networks callback."""
+
     response = yield
 
     _get_datanetworks_callback_body(host_id, response)
 
 
 def _get_datanetworks_callback_body(host_id, response):
-    """
-    Get data networks callback body
-    """
+    """Get data networks callback body."""
+
     global _L3Rebalance
 
     _L3Rebalance.state_machine_in_progress = False
@@ -603,9 +592,7 @@ def _get_datanetworks_callback_body(host_id, response):
 
 
 def _get_host_data_networks():
-    """
-    Get the physical networks supported by a host.
-    """
+    """Get the physical networks supported by a host."""
 
     host_id = _L3Rebalance.get_host_id_of_current_l3agent()
     nfvi.nfvi_get_datanetworks(host_id, _get_datanetworks_callback(host_id))
@@ -613,18 +600,16 @@ def _get_host_data_networks():
 
 @coroutine
 def _get_physical_network_callback(network_id):
-    """
-    Get Physical Network callback
-    """
+    """Get Physical Network callback."""
+
     response = yield
 
     _get_physical_network_callback_body(network_id, response)
 
 
 def _get_physical_network_callback_body(network_id, response):
-    """
-    Get Physical Network callback body
-    """
+    """Get Physical Network callback body."""
+
     global _L3Rebalance
 
     _L3Rebalance.state_machine_in_progress = False
@@ -640,9 +625,7 @@ def _get_physical_network_callback_body(network_id, response):
 
 
 def _get_physical_networks():
-    """
-    Get the physical network corresponding to a network.
-    """
+    """Get the physical network corresponding to a network."""
 
     network_id = _L3Rebalance.get_current_working_network()
     DLOG.debug("Current working network: %s" % network_id)
@@ -659,8 +642,8 @@ def _get_physical_networks():
 
 @coroutine
 def _get_router_ports_callback(router):
-    """
-    Get Router Ports callback.  Save the network_id for each port attached
+    """Get Router Ports callback.  Save the network_id for each port attached
+
     to the router.
     """
     response = yield
@@ -669,9 +652,8 @@ def _get_router_ports_callback(router):
 
 
 def _get_router_ports_callback_body(router, response):
-    """
-    Get Router Ports callback body
-    """
+    """Get Router Ports callback body."""
+
     global _L3Rebalance
 
     _L3Rebalance.state_machine_in_progress = False
@@ -706,8 +688,8 @@ def _get_router_ports_callback_body(router, response):
 
 
 def _get_router_port_networks():
-    """
-    For each router, look at all the ports and find the
+    """For each router, look at all the ports and find the
+
     underlying physical network.  Even though pagination is supported,
     do not worry about it as the assumption is that there will be a
     relatively small number of ports on the router.
@@ -730,24 +712,21 @@ def _get_router_port_networks():
 
 @coroutine
 def _get_agent_routers_callback(agent_id):
-    """
-    Get Agent Routers callback
-    """
+    """Get Agent Routers callback."""
+
     response = yield
 
     _get_agent_routers_callback_body(agent_id, response)
 
 
 def _get_agent_routers_callback_body(agent_id, response):
-    """
-    Get Agent Routers callback body
-    """
+    """Get Agent Routers callback body."""
+
     global _L3Rebalance
 
     _L3Rebalance.state_machine_in_progress = False
     DLOG.debug("_get_agent_routers_callback, response = %s" % response)
     if response["completed"]:
-
         result_data = response.get("result-data", None)
         for router in result_data:
             _L3Rebalance.add_router_to_agent(agent_id, router["id"])
@@ -759,7 +738,6 @@ def _get_agent_routers_callback_body(agent_id, response):
         )
 
         if _L3Rebalance.agent_routers_done():
-
             _L3Rebalance.set_state(L3_REBALANCE_STATE.GET_ROUTER_PORT_NETWORKS)
 
             # Do this check here to save us from going through the rest
@@ -781,8 +759,8 @@ def _get_agent_routers_callback_body(agent_id, response):
 
 
 def _get_routers_on_agents():
-    """
-    Get Routers hosted by an L3 Agent
+    """Get Routers hosted by an L3 Agent
+
     Note paging is not supported by the l3-agent api.
     """
 
@@ -809,18 +787,16 @@ def _get_routers_on_agents():
 
 @coroutine
 def _get_network_agents_callback():
-    """
-    Get Network Agents callback
-    """
+    """Get Network Agents callback."""
+
     response = yield
 
     _get_network_agents_callback_body(response)
 
 
 def _get_network_agents_callback_body(response):
-    """
-    Get Network Agents callback body
-    """
+    """Get Network Agents callback body."""
+
     global _L3Rebalance
 
     _L3Rebalance.state_machine_in_progress = False
@@ -843,8 +819,8 @@ def _get_network_agents_callback_body(response):
 
 
 def _get_network_agents():
-    """
-    Get Network Agents
+    """Get Network Agents
+
     Note paging is not supported for getting network agents.
     """
     global _L3Rebalance
@@ -853,9 +829,7 @@ def _get_network_agents():
 
 
 def _reschedule_down_agent():
-    """
-    Reschedule down agent
-    """
+    """Reschedule down agent."""
 
     # For each Router on the down agent, schedule it to the host with the
     # least amount of routers that also hosts the required physical networks.
@@ -874,7 +848,6 @@ def _reschedule_down_agent():
     num_routers_on_agents.pop(0)
 
     while not found_router_to_move:
-
         router_to_move, router_to_move_physical_networks = (
             _L3Rebalance.get_next_router_to_move()
         )
@@ -886,7 +859,6 @@ def _reschedule_down_agent():
         agent_with_least_routers = 0
 
         while len(possible_agent_targets) > 0:
-
             min_routers = min(num_routers_on_agents)
 
             agent_with_least_routers_index = num_routers_on_agents.index(min_routers)
@@ -943,8 +915,8 @@ def _reschedule_down_agent():
 
 
 def _reschedule_new_agent():
-    """
-    Reschedule for a new agent coming up.
+    """Reschedule for a new agent coming up.
+
     Try to achieve a balance of routers hosted by the L3 agents.
     """
     global _L3Rebalance
@@ -971,7 +943,6 @@ def _reschedule_new_agent():
     num_routers_on_agents.pop(agent_with_most_routers_index)
 
     while True:
-
         min_routers = min(num_routers_on_agents)
 
         agent_with_least_routers_index = num_routers_on_agents.index(min_routers)
@@ -1061,7 +1032,6 @@ def _run_state_machine():
     global _L3Rebalance
 
     if not _L3Rebalance.state_machine_in_progress:
-
         _L3Rebalance.state_machine_in_progress = True
 
         _L3Rebalance.check_abort()
@@ -1070,36 +1040,28 @@ def _run_state_machine():
         DLOG.debug("Network Rebalance State %s" % my_state)
 
         if my_state == L3_REBALANCE_STATE.GET_NETWORK_AGENTS:
-
             _L3Rebalance.reinit()
             _get_network_agents()
 
         elif my_state == L3_REBALANCE_STATE.GET_ROUTERS_HOSTED_ON_AGENT:
-
             _get_routers_on_agents()
 
         elif my_state == L3_REBALANCE_STATE.GET_ROUTER_PORT_NETWORKS:
-
             _get_router_port_networks()
 
         elif my_state == L3_REBALANCE_STATE.GET_PHYSICAL_NETWORK_FROM_NETWORKS:
-
             _get_physical_networks()
 
         elif my_state == L3_REBALANCE_STATE.GET_HOST_PHYSICAL_NETWORKS:
-
             _get_host_data_networks()
 
         elif my_state == L3_REBALANCE_STATE.RESCHEDULE_DOWN_AGENT:
-
             _reschedule_down_agent()
 
         elif my_state == L3_REBALANCE_STATE.RESCHEDULE_NEW_AGENT:
-
             _reschedule_new_agent()
 
         elif my_state == L3_REBALANCE_STATE.DONE:
-
             _L3Rebalance.state_machine_in_progress = False
 
             # Check for work...
@@ -1109,7 +1071,6 @@ def _run_state_machine():
                 _L3Rebalance.set_state(L3_REBALANCE_STATE.HOLD_OFF)
 
         elif my_state == L3_REBALANCE_STATE.HOLD_OFF:
-
             _L3Rebalance.state_machine_in_progress = False
             if _L3Rebalance.hold_off_is_done():
                 if len(_L3Rebalance.host_down_queue) > 0:
@@ -1143,9 +1104,8 @@ def _run_state_machine():
 
 @coroutine
 def _nr_timer():
-    """
-    Network Rebalance timer
-    """
+    """Network Rebalance timer."""
+
     from nfv_vim import dor
 
     while True:
@@ -1155,9 +1115,8 @@ def _nr_timer():
 
 
 def nr_initialize():
-    """
-    Initialize Network Rebalance handling
-    """
+    """Initialize Network Rebalance handling."""
+
     global _L3Rebalance
 
     _L3Rebalance.set_state(L3_REBALANCE_STATE.DONE)
@@ -1190,7 +1149,6 @@ def nr_initialize():
 
 
 def nr_finalize():
-    """
-    Finalize Network Rebalance handling
-    """
+    """Finalize Network Rebalance handling."""
+
     pass

@@ -14,14 +14,11 @@ from nfv_common.helpers import Singleton
 
 
 class DebugLoggingThreadFormatter(logging.Formatter):
-    """
-    Debug Log Formatter
-    """
+    """Debug Log Formatter."""
 
     def format(self, record):
-        """
-        Override the formatter if the record has already been formatted
-        """
+        """Override the formatter if the record has already been formatted."""
+
         if hasattr(record, "formatted_log"):
             return record.formatted_log
         else:
@@ -29,9 +26,7 @@ class DebugLoggingThreadFormatter(logging.Formatter):
 
 
 class DebugLoggingThread(object, metaclass=Singleton):
-    """
-    Debug Logging Thread
-    """
+    """Debug Logging Thread."""
 
     def __init__(self):
         self._handlers = list()
@@ -41,21 +36,18 @@ class DebugLoggingThread(object, metaclass=Singleton):
         self._thread.start()
 
     def send_log_record(self, log_record):
-        """
-        Send a log record to debug logging thread
-        """
+        """Send a log record to debug logging thread."""
+
         self._log_queue.put_nowait(["log-record", log_record])
 
     def send_log_config(self, config):
-        """
-        Send log configuration to debug logging thread
-        """
+        """Send log configuration to debug logging thread."""
+
         self._log_queue.put_nowait(["log-config", config])
 
     def _receive_logs(self):
-        """
-        Receive log records sent to the debug logging thread
-        """
+        """Receive log records sent to the debug logging thread."""
+
         formatter = DebugLoggingThreadFormatter()
 
         while True:

@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class Subnet(ObjectData):
-    """
-    NFVI Subnet Data Object
-    """
+    """NFVI Subnet Data Object."""
 
     def __init__(
         self,

@@ -11,9 +11,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.tenant")
 
 
 class Tenant(ObjectData):
-    """
-    Tenant Object
-    """
+    """Tenant Object."""
 
     def __init__(self, uuid, name, description, enabled):
         super(Tenant, self).__init__("1.0.0")

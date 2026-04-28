@@ -12,9 +12,7 @@ from nfv_common.helpers import Singleton
 
 
 class ImageAvailabilityStatus(Constants, metaclass=Singleton):
-    """
-    Image Availability Status Constants
-    """
+    """Image Availability Status Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -23,9 +21,7 @@ class ImageAvailabilityStatus(Constants, metaclass=Singleton):
 
 
 class ImageAction(Constants, metaclass=Singleton):
-    """
-    Image Action Constants
-    """
+    """Image Action Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -34,9 +30,7 @@ class ImageAction(Constants, metaclass=Singleton):
 
 
 class ImageProperty(Constants, metaclass=Singleton):
-    """
-    Image Property Constants
-    """
+    """Image Property Constants."""
 
     INSTANCE_AUTO_RECOVERY = Constant("sw_wrs_auto_recovery")
     LIVE_MIGRATION_TIMEOUT = Constant("hw_wrs_live_migration_timeout")
@@ -50,9 +44,7 @@ IMAGE_PROPERTY = ImageProperty()
 
 
 class ImageAttributes(ObjectData):
-    """
-    NFVI Image Attributes Object
-    """
+    """NFVI Image Attributes Object."""
 
     def __init__(
         self,
@@ -79,9 +71,7 @@ class ImageAttributes(ObjectData):
 
 
 class Image(ObjectData):
-    """
-    NFVI Image Object
-    """
+    """NFVI Image Object."""
 
     def __init__(
         self,

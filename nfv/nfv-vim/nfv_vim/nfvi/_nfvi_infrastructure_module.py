@@ -13,9 +13,8 @@ _infrastructure_plugin = None
 
 
 def nfvi_get_datanetworks(host_uuid, callback):
-    """
-    Get host data network information
-    """
+    """Get host data network information."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_datanetworks", host_uuid, callback=callback
     )
@@ -23,33 +22,29 @@ def nfvi_get_datanetworks(host_uuid, callback):
 
 
 def nfvi_get_system_info(callback):
-    """
-    Get information about the system
-    """
+    """Get information about the system."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin("get_system_info", callback=callback)
     return cmd_id
 
 
 def nfvi_get_system_state(callback):
-    """
-    Get the state of the system
-    """
+    """Get the state of the system."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin("get_system_state", callback=callback)
     return cmd_id
 
 
 def nfvi_get_hosts(callback):
-    """
-    Get a list of hosts
-    """
+    """Get a list of hosts."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin("get_hosts", callback=callback)
     return cmd_id
 
 
 def nfvi_get_host(host_uuid, host_name, callback):
-    """
-    Get host details
-    """
+    """Get host details."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_host", host_uuid, host_name, callback=callback
     )
@@ -57,9 +52,8 @@ def nfvi_get_host(host_uuid, host_name, callback):
 
 
 def nfvi_get_deployment_host(host_name, callback):
-    """
-    Get host resource from deployment namespace
-    """
+    """Get host resource from deployment namespace."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_deployment_host", host_name, callback=callback
     )
@@ -67,9 +61,8 @@ def nfvi_get_deployment_host(host_name, callback):
 
 
 def nfvi_list_deployment_hosts(callback):
-    """
-    Get host resource from deployment namespace
-    """
+    """Get host resource from deployment namespace."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "list_deployment_hosts", callback=callback
     )
@@ -77,9 +70,8 @@ def nfvi_list_deployment_hosts(callback):
 
 
 def nfvi_get_system_config_unlock_request(host_names, callback):
-    """
-    Get host unlock request from deployment namespace
-    """
+    """Get host unlock request from deployment namespace."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_system_config_unlock_request", host_names, callback=callback
     )
@@ -87,9 +79,8 @@ def nfvi_get_system_config_unlock_request(host_names, callback):
 
 
 def nfvi_get_host_devices(host_uuid, host_name, callback):
-    """
-    Get host device list details
-    """
+    """Get host device list details."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_host_devices", host_uuid, host_name, callback=callback
     )
@@ -97,9 +88,8 @@ def nfvi_get_host_devices(host_uuid, host_name, callback):
 
 
 def nfvi_get_host_device(host_uuid, host_name, device_uuid, device_name, callback):
-    """
-    Get host device details
-    """
+    """Get host device details."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_host_device",
         host_uuid,
@@ -112,9 +102,8 @@ def nfvi_get_host_device(host_uuid, host_name, device_uuid, device_name, callbac
 
 
 def nfvi_host_device_image_update(host_uuid, host_name, callback):
-    """
-    Update host device image
-    """
+    """Update host device image."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "host_device_image_update", host_uuid, host_name, callback=callback
     )
@@ -122,9 +111,8 @@ def nfvi_host_device_image_update(host_uuid, host_name, callback):
 
 
 def nfvi_host_device_image_update_abort(host_uuid, host_name, callback):
-    """
-    Abort host device image update
-    """
+    """Abort host device image update."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "host_device_image_update_abort", host_uuid, host_name, callback=callback
     )
@@ -132,9 +120,8 @@ def nfvi_host_device_image_update_abort(host_uuid, host_name, callback):
 
 
 def nfvi_kube_host_cordon(host_uuid, host_name, force, callback):
-    """
-    Kube Host Upgrade Cordon
-    """
+    """Kube Host Upgrade Cordon."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_host_cordon", host_uuid, host_name, force, callback=callback
     )
@@ -142,9 +129,8 @@ def nfvi_kube_host_cordon(host_uuid, host_name, force, callback):
 
 
 def nfvi_kube_host_uncordon(host_uuid, host_name, force, callback):
-    """
-    Kube Host Upgrade Uncordon
-    """
+    """Kube Host Upgrade Uncordon."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_host_uncordon", host_uuid, host_name, force, callback=callback
     )
@@ -152,9 +138,8 @@ def nfvi_kube_host_uncordon(host_uuid, host_name, force, callback):
 
 
 def nfvi_kube_host_upgrade_control_plane(host_uuid, host_name, force, callback):
-    """
-    Kube Host Upgrade Control Plane
-    """
+    """Kube Host Upgrade Control Plane."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_host_upgrade_control_plane",
         host_uuid,
@@ -166,9 +151,8 @@ def nfvi_kube_host_upgrade_control_plane(host_uuid, host_name, force, callback):
 
 
 def nfvi_kube_host_upgrade_kubelet(host_uuid, host_name, force, callback):
-    """
-    Kube Host Upgrade Kubelet
-    """
+    """Kube Host Upgrade Kubelet."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_host_upgrade_kubelet", host_uuid, host_name, force, callback=callback
     )
@@ -176,7 +160,8 @@ def nfvi_kube_host_upgrade_kubelet(host_uuid, host_name, force, callback):
 
 
 def nfvi_kube_rootca_update_abort(callback):
-    """Kube RootCA Update - Abort"""
+    """Kube RootCA Update - Abort."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_rootca_update_abort", callback=callback
     )
@@ -184,7 +169,8 @@ def nfvi_kube_rootca_update_abort(callback):
 
 
 def nfvi_kube_rootca_update_complete(callback):
-    """Kube RootCA Update - Complete"""
+    """Kube RootCA Update - Complete."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_rootca_update_complete", callback=callback
     )
@@ -192,7 +178,8 @@ def nfvi_kube_rootca_update_complete(callback):
 
 
 def nfvi_kube_rootca_update_generate_cert(expiry_date, subject, callback):
-    """Kube RootCA Update - Generate Cert"""
+    """Kube RootCA Update - Generate Cert."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_rootca_update_generate_cert",
         expiry_date=expiry_date,
@@ -211,7 +198,8 @@ def nfvi_kube_rootca_update_host(
     failed_state,
     callback,
 ):
-    """Kube RootCA Update - Host"""
+    """Kube RootCA Update - Host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_rootca_update_host",
         host_uuid,
@@ -228,7 +216,8 @@ def nfvi_kube_rootca_update_host(
 # todo(abailey): Similar in-progress/complete/failed handling as used for hosts
 # would protect stalled pod states from blocking orchestration
 def nfvi_kube_rootca_update_pods(phase, callback):
-    """Kube RootCA Update - Pods for a particular phase"""
+    """Kube RootCA Update - Pods for a particular phase."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_rootca_update_pods", phase, callback=callback
     )
@@ -236,7 +225,8 @@ def nfvi_kube_rootca_update_pods(phase, callback):
 
 
 def nfvi_kube_rootca_update_start(force, alarm_ignore_list, callback):
-    """Kube RootCA Update - Start"""
+    """Kube RootCA Update - Start."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_rootca_update_start",
         force=force,
@@ -247,7 +237,8 @@ def nfvi_kube_rootca_update_start(force, alarm_ignore_list, callback):
 
 
 def nfvi_kube_upgrade_abort(callback):
-    """Kube Upgrade - Abort"""
+    """Kube Upgrade - Abort."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_upgrade_abort", callback=callback
     )
@@ -255,9 +246,8 @@ def nfvi_kube_upgrade_abort(callback):
 
 
 def nfvi_kube_upgrade_cleanup(callback):
-    """
-    Kube Upgrade Cleanup
-    """
+    """Kube Upgrade Cleanup."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_upgrade_cleanup", callback=callback
     )
@@ -265,9 +255,8 @@ def nfvi_kube_upgrade_cleanup(callback):
 
 
 def nfvi_kube_upgrade_complete(callback):
-    """
-    Kube Upgrade Complete
-    """
+    """Kube Upgrade Complete."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_upgrade_complete", callback=callback
     )
@@ -275,9 +264,8 @@ def nfvi_kube_upgrade_complete(callback):
 
 
 def nfvi_kube_upgrade_download_images(callback):
-    """
-    Kube Upgrade Download Images
-    """
+    """Kube Upgrade Download Images."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_upgrade_download_images", callback=callback
     )
@@ -285,9 +273,8 @@ def nfvi_kube_upgrade_download_images(callback):
 
 
 def nfvi_kube_upgrade_networking(callback):
-    """
-    Kube Upgrade Networking
-    """
+    """Kube Upgrade Networking."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_upgrade_networking", callback=callback
     )
@@ -295,9 +282,8 @@ def nfvi_kube_upgrade_networking(callback):
 
 
 def nfvi_kube_upgrade_storage(callback):
-    """
-    Kube Upgrade Storage
-    """
+    """Kube Upgrade Storage."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_upgrade_storage", callback=callback
     )
@@ -305,9 +291,8 @@ def nfvi_kube_upgrade_storage(callback):
 
 
 def nfvi_kube_upgrade_start(to_version, force, alarm_ignore_list, callback):
-    """
-    Kube Upgrade Start
-    """
+    """Kube Upgrade Start."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_upgrade_start",
         to_version=to_version,
@@ -319,9 +304,8 @@ def nfvi_kube_upgrade_start(to_version, force, alarm_ignore_list, callback):
 
 
 def nfvi_kube_pre_application_update(callback):
-    """
-    Kube Upgrade Pre Application Update
-    """
+    """Kube Upgrade Pre Application Update."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_pre_application_update", callback=callback
     )
@@ -329,9 +313,8 @@ def nfvi_kube_pre_application_update(callback):
 
 
 def nfvi_kube_post_application_update(callback):
-    """
-    Kube Upgrade Post Application Update
-    """
+    """Kube Upgrade Post Application Update."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_post_application_update", callback=callback
     )
@@ -339,9 +322,8 @@ def nfvi_kube_post_application_update(callback):
 
 
 def nfvi_get_kube_host_upgrade_list(callback):
-    """
-    Get kube host upgrade list
-    """
+    """Get kube host upgrade list."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_kube_host_upgrade_list", callback=callback
     )
@@ -349,9 +331,8 @@ def nfvi_get_kube_host_upgrade_list(callback):
 
 
 def nfvi_get_kube_rootca_host_update_list(callback):
-    """
-    Get kube rootca update host list
-    """
+    """Get kube rootca update host list."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_kube_rootca_host_update_list", callback=callback
     )
@@ -359,9 +340,8 @@ def nfvi_get_kube_rootca_host_update_list(callback):
 
 
 def nfvi_get_kube_rootca_update(callback):
-    """
-    Get kube rootca update
-    """
+    """Get kube rootca update."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_kube_rootca_update", callback=callback
     )
@@ -369,17 +349,15 @@ def nfvi_get_kube_rootca_update(callback):
 
 
 def nfvi_get_kube_upgrade(callback):
-    """
-    Get kube upgrade
-    """
+    """Get kube upgrade."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin("get_kube_upgrade", callback=callback)
     return cmd_id
 
 
 def nfvi_get_kube_version_list(callback):
-    """
-    Get kube version list
-    """
+    """Get kube version list."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_kube_version_list", callback=callback
     )
@@ -387,9 +365,8 @@ def nfvi_get_kube_version_list(callback):
 
 
 def nfvi_get_upgrade(release, callback):
-    """
-    Get Software deploy
-    """
+    """Get Software deploy."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_upgrade", release, callback=callback
     )
@@ -397,9 +374,8 @@ def nfvi_get_upgrade(release, callback):
 
 
 def nfvi_sw_deploy_precheck(release, force, snapshot, callback):
-    """
-    Software deploy precheck
-    """
+    """Software deploy precheck."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "sw_deploy_precheck", release, force, snapshot, callback=callback
     )
@@ -407,9 +383,8 @@ def nfvi_sw_deploy_precheck(release, force, snapshot, callback):
 
 
 def nfvi_upgrade_start(release, force, snapshot, callback):
-    """
-    Software deploy start
-    """
+    """Software deploy start."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "sw_deploy_start", release, force, snapshot, callback=callback
     )
@@ -417,9 +392,8 @@ def nfvi_upgrade_start(release, force, snapshot, callback):
 
 
 def nfvi_upgrade_activate(release, callback):
-    """
-    Software deploy activate
-    """
+    """Software deploy activate."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "sw_deploy_activate", release, callback=callback
     )
@@ -427,9 +401,8 @@ def nfvi_upgrade_activate(release, callback):
 
 
 def nfvi_upgrade_complete(release, callback):
-    """
-    Software deploy complete
-    """
+    """Software deploy complete."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "sw_deploy_complete", release, callback=callback
     )
@@ -437,9 +410,8 @@ def nfvi_upgrade_complete(release, callback):
 
 
 def nfvi_deploy_delete(release, callback):
-    """
-    Software deploy delete
-    """
+    """Software deploy delete."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "sw_deploy_delete", release, callback=callback
     )
@@ -447,17 +419,15 @@ def nfvi_deploy_delete(release, callback):
 
 
 def nfvi_sw_deploy_abort(callback):
-    """
-    Software deploy abort
-    """
+    """Software deploy abort."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin("sw_deploy_abort", callback=callback)
     return cmd_id
 
 
 def nfvi_sw_deploy_activate_rollback(callback):
-    """
-    Software deploy activate rollback
-    """
+    """Software deploy activate rollback."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "sw_deploy_activate_rollback", callback=callback
     )
@@ -467,9 +437,8 @@ def nfvi_sw_deploy_activate_rollback(callback):
 def nfvi_disable_container_host_services(
     host_uuid, host_name, host_personality, host_offline, callback
 ):
-    """
-    Disable container services on a host
-    """
+    """Disable container services on a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "disable_host_services",
         host_uuid,
@@ -484,9 +453,8 @@ def nfvi_disable_container_host_services(
 def nfvi_enable_container_host_services(
     host_uuid, host_name, host_personality, callback
 ):
-    """
-    Enable container services on a host
-    """
+    """Enable container services on a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "enable_host_services",
         host_uuid,
@@ -500,9 +468,8 @@ def nfvi_enable_container_host_services(
 def nfvi_delete_container_host_services(
     host_uuid, host_name, host_personality, callback
 ):
-    """
-    Delete container services on a host
-    """
+    """Delete container services on a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "delete_host_services",
         host_uuid,
@@ -514,9 +481,8 @@ def nfvi_delete_container_host_services(
 
 
 def nfvi_notify_host_services_enabled(host_uuid, host_name, callback):
-    """
-    Notify host services are enabled
-    """
+    """Notify host services are enabled."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "notify_host_services_enabled", host_uuid, host_name, callback=callback
     )
@@ -524,9 +490,8 @@ def nfvi_notify_host_services_enabled(host_uuid, host_name, callback):
 
 
 def nfvi_notify_host_services_disabled(host_uuid, host_name, callback):
-    """
-    Notify host services are disabled
-    """
+    """Notify host services are disabled."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "notify_host_services_disabled", host_uuid, host_name, callback=callback
     )
@@ -534,9 +499,8 @@ def nfvi_notify_host_services_disabled(host_uuid, host_name, callback):
 
 
 def nfvi_notify_host_services_disable_extend(host_uuid, host_name, callback):
-    """
-    Notify host services disable extend timeout
-    """
+    """Notify host services disable extend timeout."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "notify_host_services_disable_extend", host_uuid, host_name, callback=callback
     )
@@ -544,9 +508,8 @@ def nfvi_notify_host_services_disable_extend(host_uuid, host_name, callback):
 
 
 def nfvi_notify_host_services_disable_failed(host_uuid, host_name, reason, callback):
-    """
-    Notify host services disable failed
-    """
+    """Notify host services disable failed."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "notify_host_services_disable_failed",
         host_uuid,
@@ -558,9 +521,8 @@ def nfvi_notify_host_services_disable_failed(host_uuid, host_name, reason, callb
 
 
 def nfvi_notify_host_services_deleted(host_uuid, host_name, callback):
-    """
-    Notify host services have been deleted
-    """
+    """Notify host services have been deleted."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "notify_host_services_deleted", host_uuid, host_name, callback=callback
     )
@@ -568,9 +530,8 @@ def nfvi_notify_host_services_deleted(host_uuid, host_name, callback):
 
 
 def nfvi_notify_host_services_delete_failed(host_uuid, host_name, reason, callback):
-    """
-    Notify host services delete failed
-    """
+    """Notify host services delete failed."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "notify_host_services_delete_failed",
         host_uuid,
@@ -582,9 +543,8 @@ def nfvi_notify_host_services_delete_failed(host_uuid, host_name, reason, callba
 
 
 def nfvi_notify_host_failed(host_uuid, host_name, host_personality, callback):
-    """
-    Notify host is failed
-    """
+    """Notify host is failed."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "notify_host_failed", host_uuid, host_name, host_personality, callback=callback
     )
@@ -592,9 +552,8 @@ def nfvi_notify_host_failed(host_uuid, host_name, host_personality, callback):
 
 
 def nfvi_lock_host(host_uuid, host_name, callback):
-    """
-    Lock a host
-    """
+    """Lock a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "lock_host", host_uuid, host_name, callback=callback
     )
@@ -602,9 +561,8 @@ def nfvi_lock_host(host_uuid, host_name, callback):
 
 
 def nfvi_unlock_host(host_uuid, host_name, callback):
-    """
-    Unlock a host
-    """
+    """Unlock a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "unlock_host", host_uuid, host_name, callback=callback
     )
@@ -612,9 +570,8 @@ def nfvi_unlock_host(host_uuid, host_name, callback):
 
 
 def nfvi_reboot_host(host_uuid, host_name, callback):
-    """
-    Reboot a host
-    """
+    """Reboot a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "reboot_host", host_uuid, host_name, callback=callback
     )
@@ -622,9 +579,8 @@ def nfvi_reboot_host(host_uuid, host_name, callback):
 
 
 def nfvi_upgrade_host(host_uuid, host_name, rollback, callback):
-    """
-    Upgrade a host
-    """
+    """Upgrade a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "upgrade_host", host_uuid, host_name, rollback, callback=callback
     )
@@ -632,9 +588,8 @@ def nfvi_upgrade_host(host_uuid, host_name, rollback, callback):
 
 
 def nfvi_swact_from_host(host_uuid, host_name, callback):
-    """
-    Swact from a host
-    """
+    """Swact from a host."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "swact_from_host", host_uuid, host_name, callback=callback
     )
@@ -642,17 +597,15 @@ def nfvi_swact_from_host(host_uuid, host_name, callback):
 
 
 def nfvi_get_alarms(callback):
-    """
-    Get alarms
-    """
+    """Get alarms."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin("get_alarms", callback=callback)
     return cmd_id
 
 
 def nfvi_get_logs(start_period, end_period, callback):
-    """
-    Get logs
-    """
+    """Get logs."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_logs", start_period, end_period, callback=callback
     )
@@ -660,9 +613,8 @@ def nfvi_get_logs(start_period, end_period, callback):
 
 
 def nfvi_get_alarm_history(start_period, end_period, callback):
-    """
-    Get logs
-    """
+    """Get logs."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_alarm_history", start_period, end_period, callback=callback
     )
@@ -670,9 +622,8 @@ def nfvi_get_alarm_history(start_period, end_period, callback):
 
 
 def nfvi_get_terminating_pods(host_name, callback):
-    """
-    Get terminating pods
-    """
+    """Get terminating pods."""
+
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "get_terminating_pods", host_name, callback=callback
     )
@@ -680,81 +631,72 @@ def nfvi_get_terminating_pods(host_name, callback):
 
 
 def nfvi_register_host_add_callback(callback):
-    """
-    Register for host add notifications
-    """
+    """Register for host add notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_host_add_callback", callback=callback
     )
 
 
 def nfvi_register_host_action_callback(callback):
-    """
-    Register for host action notifications
-    """
+    """Register for host action notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_host_action_callback", callback=callback
     )
 
 
 def nfvi_register_host_state_change_callback(callback):
-    """
-    Register for host state change notifications
-    """
+    """Register for host state change notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_host_state_change_callback", callback=callback
     )
 
 
 def nfvi_register_host_get_callback(callback):
-    """
-    Register for host get notifications
-    """
+    """Register for host get notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_host_get_callback", callback=callback
     )
 
 
 def nfvi_register_host_upgrade_callback(callback):
-    """
-    Register for host upgrade notifications
-    """
+    """Register for host upgrade notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_host_upgrade_callback", callback=callback
     )
 
 
 def nfvi_register_host_update_callback(callback):
-    """
-    Register for host update notifications
-    """
+    """Register for host update notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_host_update_callback", callback=callback
     )
 
 
 def nfvi_register_host_notification_callback(callback):
-    """
-    Register for host notifications
-    """
+    """Register for host notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_host_notification_callback", callback=callback
     )
 
 
 def nfvi_register_sw_update_get_callback(callback):
-    """
-    Register for software update get notifications
-    """
+    """Register for software update get notifications."""
+
     _infrastructure_plugin.invoke_plugin(
         "register_sw_update_get_callback", callback=callback
     )
 
 
 def nfvi_infrastructure_initialize(config, pool):
-    """
-    Initialize the NFVI infrastructure package
-    """
+    """Initialize the NFVI infrastructure package."""
+
     global _infrastructure_plugin
 
     _infrastructure_plugin = NFVIInfrastructurePlugin(config["namespace"], pool)
@@ -762,8 +704,7 @@ def nfvi_infrastructure_initialize(config, pool):
 
 
 def nfvi_infrastructure_finalize():
-    """
-    Finalize the NFVI infrastructure package
-    """
+    """Finalize the NFVI infrastructure package."""
+
     if _infrastructure_plugin is not None:
         _infrastructure_plugin.finalize()

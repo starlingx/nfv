@@ -11,9 +11,7 @@ DLOG = debug.debug_get_logger("nfv_common.timers.timer")
 
 
 class Timer(object):
-    """
-    Timer
-    """
+    """Timer."""
 
     _id = 1
 
@@ -24,11 +22,10 @@ class Timer(object):
         interval_secs,
         callback,
         *callback_args,
-        **callback_kwargs
+        **callback_kwargs,
     ):
-        """
-        Create timer
-        """
+        """Create timer."""
+
         self._timer_id = Timer._id
         self._timer_name = timer_name
         self._interval_secs = interval_secs
@@ -43,29 +40,26 @@ class Timer(object):
 
     @property
     def timer_id(self):
-        """
-        Returns the unique timer identifier
-        """
+        """Returns the unique timer identifier."""
+
         return self._timer_id
 
     @property
     def timer_name(self):
-        """
-        Returns the name of the timer
-        """
+        """Returns the name of the timer."""
+
         return self._timer_name
 
     def reschedule(self, interval_secs):
-        """
-        Reschedule a timer
-        """
+        """Reschedule a timer."""
+
         self._interval_secs = interval_secs
         self._next_expiry_in_secs = self._interval_secs
 
     def callback(self, now_ms):
-        """
-        Execute the callback associated with this timer if enough
-        time has elapsed
+        """Execute the callback associated with this timer if enough
+
+        time has elapsed.
         """
         rearm = True
         secs_expired = (now_ms - self._arm_timestamp) // 1000

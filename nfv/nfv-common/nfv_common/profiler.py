@@ -18,9 +18,8 @@ except ImportError:
 
 
 def profile_memory_references(obj_type, obj_name):
-    """
-    Graph memory references
-    """
+    """Graph memory references."""
+
     if memory_profiling is not None:
         objs = objgraph.by_type(obj_type)
         objgraph.show_backrefs(
@@ -32,17 +31,15 @@ def profile_memory_references(obj_type, obj_name):
 
 
 def profile_memory_set_reference():
-    """
-    Set the memory usage reference
-    """
+    """Set the memory usage reference."""
+
     if memory_profiling is not None:
         memory_profiling.setref()
 
 
 def profile_memory_dump():
-    """
-    Dumps the current memory usage
-    """
+    """Dumps the current memory usage."""
+
     if memory_profiling is not None:
         DLOG.info("%s" % "-" * 120)
         DLOG.info("Memory Profile: %s" % memory_profiling.heap())
@@ -51,16 +48,14 @@ def profile_memory_dump():
 
 
 def profiler_initialize():
-    """
-    Profiler - Initialize
-    """
+    """Profiler - Initialize."""
+
     if memory_profiling is not None:
         DLOG.info("Memory Profiling Enabled")
         memory_profiling.setref()
 
 
 def profiler_finalize():
-    """
-    Profiler - Finalize
-    """
+    """Profiler - Finalize."""
+
     pass

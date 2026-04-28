@@ -20,9 +20,7 @@ empty_reason = ""
 
 
 class QueryHypervisorTaskWork(state_machine.StateTaskWork):
-    """
-    Query-Hypervisor Task Work
-    """
+    """Query-Hypervisor Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(QueryHypervisorTaskWork, self).__init__(
@@ -35,17 +33,15 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for query hypervisor
-        """
+        """Callback for query hypervisor."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -73,9 +69,8 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run query-hypervisor
-        """
+        """Run query-hypervisor."""
+
         from nfv_vim import tables
 
         DLOG.verbose("Query-Hypervisor for %s." % self._instance.name)
@@ -89,9 +84,7 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
 
 
 class LiveMigrateTaskWork(state_machine.StateTaskWork):
-    """
-    Live-Migrate Task Work
-    """
+    """Live-Migrate Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(LiveMigrateTaskWork, self).__init__(
@@ -104,17 +97,15 @@ class LiveMigrateTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for live-migrate instance
-        """
+        """Callback for live-migrate instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -140,9 +131,8 @@ class LiveMigrateTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run live-migrate instance
-        """
+        """Run live-migrate instance."""
+
         DLOG.debug("Live-Migrate-Instance for %s." % self._instance.name)
 
         action_data = None
@@ -189,9 +179,7 @@ class LiveMigrateTaskWork(state_machine.StateTaskWork):
 
 
 class ColdMigrateTaskWork(state_machine.StateTaskWork):
-    """
-    Cold-Migrate Task Work
-    """
+    """Cold-Migrate Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(ColdMigrateTaskWork, self).__init__(
@@ -204,17 +192,15 @@ class ColdMigrateTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for cold-migrate instance
-        """
+        """Callback for cold-migrate instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -240,9 +226,8 @@ class ColdMigrateTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run cold-migrate instance
-        """
+        """Run cold-migrate instance."""
+
         DLOG.verbose("Cold-Migrate-Instance for %s." % self._instance.name)
 
         context = None
@@ -264,9 +249,7 @@ class ColdMigrateTaskWork(state_machine.StateTaskWork):
 
 
 class ColdMigrateConfirmTaskWork(state_machine.StateTaskWork):
-    """
-    Cold-Migrate-Confirm Task Work
-    """
+    """Cold-Migrate-Confirm Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(ColdMigrateConfirmTaskWork, self).__init__(
@@ -279,17 +262,15 @@ class ColdMigrateConfirmTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for cold-migrate-confirm instance
-        """
+        """Callback for cold-migrate-confirm instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -315,9 +296,8 @@ class ColdMigrateConfirmTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run cold-migrate-confirm instance
-        """
+        """Run cold-migrate-confirm instance."""
+
         DLOG.verbose("Cold-Migrate-Confirm-Instance for %s." % self._instance.name)
 
         context = None
@@ -339,9 +319,7 @@ class ColdMigrateConfirmTaskWork(state_machine.StateTaskWork):
 
 
 class ColdMigrateRevertTaskWork(state_machine.StateTaskWork):
-    """
-    Cold-Migrate-Revert Task Work
-    """
+    """Cold-Migrate-Revert Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(ColdMigrateRevertTaskWork, self).__init__(
@@ -355,17 +333,15 @@ class ColdMigrateRevertTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for cold-migrate-revert instance
-        """
+        """Callback for cold-migrate-revert instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -401,9 +377,8 @@ class ColdMigrateRevertTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run cold-migrate-revert instance
-        """
+        """Run cold-migrate-revert instance."""
+
         DLOG.verbose("Cold-Migrate-Revert-Instance for %s." % self._instance.name)
 
         context = None
@@ -424,9 +399,8 @@ class ColdMigrateRevertTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instance action proceed notifications
-        """
+        """Handle instance action proceed notifications."""
+
         handled = False
 
         if INSTANCE_EVENT.NFVI_HOST_CHANGED == event:
@@ -449,9 +423,7 @@ class ColdMigrateRevertTaskWork(state_machine.StateTaskWork):
 
 
 class ResizeTaskWork(state_machine.StateTaskWork):
-    """
-    Resize Task Work
-    """
+    """Resize Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(ResizeTaskWork, self).__init__(
@@ -464,17 +436,15 @@ class ResizeTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for resize instance
-        """
+        """Callback for resize instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -500,9 +470,8 @@ class ResizeTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run resize instance
-        """
+        """Run resize instance."""
+
         if self._instance.action_fsm is None:
             return state_machine.STATE_TASK_WORK_RESULT.FAILED, empty_reason
 
@@ -545,9 +514,7 @@ class ResizeTaskWork(state_machine.StateTaskWork):
 
 
 class ResizeConfirmTaskWork(state_machine.StateTaskWork):
-    """
-    Resize-Confirm Task Work
-    """
+    """Resize-Confirm Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(ResizeConfirmTaskWork, self).__init__(
@@ -560,17 +527,15 @@ class ResizeConfirmTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for resize-confirm instance
-        """
+        """Callback for resize-confirm instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -596,9 +561,8 @@ class ResizeConfirmTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run resize-confirm instance
-        """
+        """Run resize-confirm instance."""
+
         DLOG.verbose("Resize-Confirm-Instance for %s." % self._instance.name)
 
         context = None
@@ -620,9 +584,7 @@ class ResizeConfirmTaskWork(state_machine.StateTaskWork):
 
 
 class ResizeRevertTaskWork(state_machine.StateTaskWork):
-    """
-    Resize-Revert Task Work
-    """
+    """Resize-Revert Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(ResizeRevertTaskWork, self).__init__(
@@ -636,17 +598,15 @@ class ResizeRevertTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for resize-revert instance
-        """
+        """Callback for resize-revert instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -682,9 +642,8 @@ class ResizeRevertTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run resize-revert instance
-        """
+        """Run resize-revert instance."""
+
         DLOG.verbose("Resize-Revert-Instance for %s." % self._instance.name)
 
         context = None
@@ -705,9 +664,8 @@ class ResizeRevertTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instance action proceed notifications
-        """
+        """Handle instance action proceed notifications."""
+
         handled = False
 
         if INSTANCE_EVENT.NFVI_HOST_CHANGED == event:
@@ -736,9 +694,7 @@ class ResizeRevertTaskWork(state_machine.StateTaskWork):
 
 
 class EvacuateTaskWork(state_machine.StateTaskWork):
-    """
-    Evacuate Task Work
-    """
+    """Evacuate Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(EvacuateTaskWork, self).__init__(
@@ -752,17 +708,15 @@ class EvacuateTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for evacuate instance
-        """
+        """Callback for evacuate instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -788,9 +742,8 @@ class EvacuateTaskWork(state_machine.StateTaskWork):
                     )
 
     def _do_evacuate(self):
-        """
-        Perform the evacuate
-        """
+        """Perform the evacuate."""
+
         self._evacuate_inprogress = True
 
         context = None
@@ -811,9 +764,8 @@ class EvacuateTaskWork(state_machine.StateTaskWork):
                 action_data.set_action_initiated()
 
     def run(self):
-        """
-        Run evacuate instance
-        """
+        """Run evacuate instance."""
+
         from nfv_vim import tables
 
         host_table = tables.tables_get_host_table()
@@ -834,9 +786,8 @@ class EvacuateTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instance action proceed notifications
-        """
+        """Handle instance action proceed notifications."""
+
         from nfv_vim import tables
 
         handled = False
@@ -858,9 +809,7 @@ class EvacuateTaskWork(state_machine.StateTaskWork):
 
 
 class StartTaskWork(state_machine.StateTaskWork):
-    """
-    Start Task Work
-    """
+    """Start Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(StartTaskWork, self).__init__(
@@ -873,17 +822,15 @@ class StartTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for start instance
-        """
+        """Callback for start instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -909,9 +856,8 @@ class StartTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run start instance
-        """
+        """Run start instance."""
+
         DLOG.verbose("Start-Instance for %s." % self._instance.name)
 
         context = None
@@ -931,9 +877,7 @@ class StartTaskWork(state_machine.StateTaskWork):
 
 
 class StopTaskWork(state_machine.StateTaskWork):
-    """
-    Stop Task Work
-    """
+    """Stop Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(StopTaskWork, self).__init__(
@@ -946,17 +890,15 @@ class StopTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for stop instance
-        """
+        """Callback for stop instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -982,9 +924,8 @@ class StopTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run stop instance
-        """
+        """Run stop instance."""
+
         DLOG.verbose("Stop-Instance for %s." % self._instance.name)
 
         context = None
@@ -1004,9 +945,7 @@ class StopTaskWork(state_machine.StateTaskWork):
 
 
 class PauseTaskWork(state_machine.StateTaskWork):
-    """
-    Pause Task Work
-    """
+    """Pause Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(PauseTaskWork, self).__init__(
@@ -1019,17 +958,15 @@ class PauseTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for pause instance
-        """
+        """Callback for pause instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1055,9 +992,8 @@ class PauseTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run pause instance
-        """
+        """Run pause instance."""
+
         DLOG.verbose("Pause-Instance for %s." % self._instance.name)
 
         context = None
@@ -1077,9 +1013,7 @@ class PauseTaskWork(state_machine.StateTaskWork):
 
 
 class UnpauseTaskWork(state_machine.StateTaskWork):
-    """
-    Unpause Task Work
-    """
+    """Unpause Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(UnpauseTaskWork, self).__init__(
@@ -1092,17 +1026,15 @@ class UnpauseTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for unpause instance
-        """
+        """Callback for unpause instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1128,9 +1060,8 @@ class UnpauseTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run unpause instance
-        """
+        """Run unpause instance."""
+
         DLOG.verbose("Unpause-Instance for %s." % self._instance.name)
 
         context = None
@@ -1152,9 +1083,7 @@ class UnpauseTaskWork(state_machine.StateTaskWork):
 
 
 class SuspendTaskWork(state_machine.StateTaskWork):
-    """
-    Suspend Task Work
-    """
+    """Suspend Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(SuspendTaskWork, self).__init__(
@@ -1167,17 +1096,15 @@ class SuspendTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for suspend instance
-        """
+        """Callback for suspend instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1203,9 +1130,8 @@ class SuspendTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run suspend instance
-        """
+        """Run suspend instance."""
+
         DLOG.verbose("Suspend-Instance for %s." % self._instance.name)
 
         context = None
@@ -1227,9 +1153,7 @@ class SuspendTaskWork(state_machine.StateTaskWork):
 
 
 class ResumeTaskWork(state_machine.StateTaskWork):
-    """
-    Resume Task Work
-    """
+    """Resume Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(ResumeTaskWork, self).__init__(
@@ -1242,17 +1166,15 @@ class ResumeTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for resume instance
-        """
+        """Callback for resume instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1278,9 +1200,8 @@ class ResumeTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run resume instance
-        """
+        """Run resume instance."""
+
         DLOG.verbose("Resume-Instance for %s." % self._instance.name)
 
         context = None
@@ -1302,9 +1223,7 @@ class ResumeTaskWork(state_machine.StateTaskWork):
 
 
 class RebootTaskWork(state_machine.StateTaskWork):
-    """
-    Reboot Task Work
-    """
+    """Reboot Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(RebootTaskWork, self).__init__(
@@ -1317,17 +1236,15 @@ class RebootTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for reboot instance
-        """
+        """Callback for reboot instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1353,9 +1270,8 @@ class RebootTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run reboot instance
-        """
+        """Run reboot instance."""
+
         action_data = None
         nfvi_action_data = None
         if self._instance.action_fsm is not None:
@@ -1393,9 +1309,7 @@ class RebootTaskWork(state_machine.StateTaskWork):
 
 
 class RebuildTaskWork(state_machine.StateTaskWork):
-    """
-    Rebuild Task Work
-    """
+    """Rebuild Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(RebuildTaskWork, self).__init__(
@@ -1408,17 +1322,15 @@ class RebuildTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for rebuild instance
-        """
+        """Callback for rebuild instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1444,9 +1356,8 @@ class RebuildTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run rebuild instance
-        """
+        """Run rebuild instance."""
+
         DLOG.verbose(
             "Rebuild-Instance for %s, image_uuid=%s"
             % (self._instance.name, self._instance.image_uuid)
@@ -1492,9 +1403,7 @@ class RebuildTaskWork(state_machine.StateTaskWork):
 
 
 class FailTaskWork(state_machine.StateTaskWork):
-    """
-    Fail Task Work
-    """
+    """Fail Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(FailTaskWork, self).__init__(
@@ -1507,17 +1416,15 @@ class FailTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for fail instance
-        """
+        """Callback for fail instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1543,9 +1450,8 @@ class FailTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run fail instance
-        """
+        """Run fail instance."""
+
         DLOG.verbose("Fail-Instance for %s." % self._instance.name)
 
         context = None
@@ -1565,9 +1471,7 @@ class FailTaskWork(state_machine.StateTaskWork):
 
 
 class DeleteTaskWork(state_machine.StateTaskWork):
-    """
-    Delete Task Work
-    """
+    """Delete Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(DeleteTaskWork, self).__init__(
@@ -1580,17 +1484,15 @@ class DeleteTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for delete instance
-        """
+        """Callback for delete instance."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1616,9 +1518,8 @@ class DeleteTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run delete instance
-        """
+        """Run delete instance."""
+
         # Disable for now until the MANO APIs are used.
         return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
@@ -1646,9 +1547,7 @@ class DeleteTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesCreateTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Create Task Work
-    """
+    """Guest-Services-Create Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(GuestServicesCreateTaskWork, self).__init__(
@@ -1661,17 +1560,15 @@ class GuestServicesCreateTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Create
-        """
+        """Callback for Guest-Services-Create."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1698,9 +1595,8 @@ class GuestServicesCreateTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Create
-        """
+        """Run Guest-Services-Create."""
+
         guest_services = self._instance.guest_services
 
         if not guest_services.are_provisioned():
@@ -1729,9 +1625,7 @@ class GuestServicesCreateTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesEnableTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Enable Task Work
-    """
+    """Guest-Services-Enable Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(GuestServicesEnableTaskWork, self).__init__(
@@ -1744,17 +1638,15 @@ class GuestServicesEnableTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Enable
-        """
+        """Callback for Guest-Services-Enable."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1788,9 +1680,8 @@ class GuestServicesEnableTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Enable instance
-        """
+        """Run Guest-Services-Enable instance."""
+
         guest_services = self._instance.guest_services
 
         if not guest_services.are_provisioned():
@@ -1820,9 +1711,7 @@ class GuestServicesEnableTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesDisableTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Disable Task Work
-    """
+    """Guest-Services-Disable Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(GuestServicesDisableTaskWork, self).__init__(
@@ -1835,17 +1724,15 @@ class GuestServicesDisableTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Disable
-        """
+        """Callback for Guest-Services-Disable."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1879,9 +1766,8 @@ class GuestServicesDisableTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Disable instance
-        """
+        """Run Guest-Services-Disable instance."""
+
         guest_services = self._instance.guest_services
 
         if not guest_services.are_provisioned():
@@ -1911,9 +1797,7 @@ class GuestServicesDisableTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesSetTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Set Task Work
-    """
+    """Guest-Services-Set Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(GuestServicesSetTaskWork, self).__init__(
@@ -1926,17 +1810,15 @@ class GuestServicesSetTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Set
-        """
+        """Callback for Guest-Services-Set."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -1970,9 +1852,8 @@ class GuestServicesSetTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Set instance
-        """
+        """Run Guest-Services-Set instance."""
+
         guest_services = self._instance.guest_services
 
         if not guest_services.are_provisioned():
@@ -2001,9 +1882,7 @@ class GuestServicesSetTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesQueryTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Query Task Work
-    """
+    """Guest-Services-Query Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(GuestServicesQueryTaskWork, self).__init__(
@@ -2016,17 +1895,15 @@ class GuestServicesQueryTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Query
-        """
+        """Callback for Guest-Services-Query."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -2060,9 +1937,8 @@ class GuestServicesQueryTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Query instance
-        """
+        """Run Guest-Services-Query instance."""
+
         guest_services = self._instance.guest_services
 
         if not guest_services.are_provisioned():
@@ -2086,9 +1962,7 @@ class GuestServicesQueryTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesDeleteTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Delete Task Work
-    """
+    """Guest-Services-Delete Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
         super(GuestServicesDeleteTaskWork, self).__init__(
@@ -2101,17 +1975,15 @@ class GuestServicesDeleteTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Delete
-        """
+        """Callback for Guest-Services-Delete."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -2138,9 +2010,8 @@ class GuestServicesDeleteTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Delete instance
-        """
+        """Run Guest-Services-Delete instance."""
+
         guest_services = self._instance.guest_services
 
         if not guest_services.are_provisioned():
@@ -2159,9 +2030,7 @@ class GuestServicesDeleteTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Vote Task Work
-    """
+    """Guest-Services-Vote Task Work."""
 
     def __init__(self, task, instance, action_type, force_pass=False):
         super(GuestServicesVoteTaskWork, self).__init__(
@@ -2175,16 +2044,14 @@ class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def timeout(self):
-        """
-        Handle task work timeout
-        """
+        """Handle task work timeout."""
+
         if self.force_pass:
             DLOG.info(
                 "Guest-Services-Vote timeout for %s, force-passing."
@@ -2199,9 +2066,8 @@ class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Vote
-        """
+        """Callback for Guest-Services-Vote."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -2234,9 +2100,8 @@ class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Vote instance
-        """
+        """Run Guest-Services-Vote instance."""
+
         from nfv_vim import tables
 
         if self._instance.is_locked():
@@ -2300,9 +2165,8 @@ class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instance action allow & reject notifications
-        """
+        """Handle instance action allow & reject notifications."""
+
         handled = False
 
         if INSTANCE_EVENT.GUEST_ACTION_ALLOW == event:
@@ -2323,9 +2187,7 @@ class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Pre-Notify Task Work
-    """
+    """Guest-Services-Pre-Notify Task Work."""
 
     def __init__(self, task, instance, action_type, force_pass=False):
         super(GuestServicesPreNotifyTaskWork, self).__init__(
@@ -2339,16 +2201,14 @@ class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def timeout(self):
-        """
-        Handle task work timeout
-        """
+        """Handle task work timeout."""
+
         if self.force_pass:
             DLOG.info(
                 "Guest-Services-Pre-Notify timeout for %s, "
@@ -2363,9 +2223,8 @@ class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Pre-Notify
-        """
+        """Callback for Guest-Services-Pre-Notify."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -2399,9 +2258,8 @@ class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Pre-Notify instance
-        """
+        """Run Guest-Services-Pre-Notify instance."""
+
         if self._instance.is_locked():
             DLOG.verbose(
                 "Guest-Services-Pre-Notify for %s, skipping "
@@ -2453,9 +2311,8 @@ class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instance action proceed notifications
-        """
+        """Handle instance action proceed notifications."""
+
         handled = False
 
         if INSTANCE_EVENT.GUEST_ACTION_PROCEED == event:
@@ -2472,9 +2329,7 @@ class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
 
 
 class GuestServicesPostNotifyTaskWork(state_machine.StateTaskWork):
-    """
-    Guest-Services-Post-Notify Task Work
-    """
+    """Guest-Services-Post-Notify Task Work."""
 
     def __init__(self, task, instance, action_type, force_pass=False):
         super(GuestServicesPostNotifyTaskWork, self).__init__(
@@ -2488,16 +2343,14 @@ class GuestServicesPostNotifyTaskWork(state_machine.StateTaskWork):
 
     @property
     def _instance(self):
-        """
-        Returns the instance
-        """
+        """Returns the instance."""
+
         instance = self._instance_reference()
         return instance
 
     def timeout(self):
-        """
-        Handle task work timeout
-        """
+        """Handle task work timeout."""
+
         if self.force_pass:
             DLOG.info(
                 "Guest-Services-Post-Notify timeout for %s, "
@@ -2514,9 +2367,8 @@ class GuestServicesPostNotifyTaskWork(state_machine.StateTaskWork):
 
     @coroutine
     def _callback(self):
-        """
-        Callback for Guest-Services-Post-Notify
-        """
+        """Callback for Guest-Services-Post-Notify."""
+
         response = yield
         if self.task is not None:
             DLOG.debug(
@@ -2550,9 +2402,8 @@ class GuestServicesPostNotifyTaskWork(state_machine.StateTaskWork):
                     )
 
     def run(self):
-        """
-        Run Guest-Services-Post-Notify instance
-        """
+        """Run Guest-Services-Post-Notify instance."""
+
         guest_services = self._instance.guest_services
 
         if not guest_services.are_provisioned():
@@ -2614,9 +2465,8 @@ class GuestServicesPostNotifyTaskWork(state_machine.StateTaskWork):
         return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
     def handle_event(self, event, event_data=None):
-        """
-        Handle instance action proceed notifications
-        """
+        """Handle instance action proceed notifications."""
+
         handled = False
 
         if INSTANCE_EVENT.GUEST_COMMUNICATION_ESTABLISHED == event:

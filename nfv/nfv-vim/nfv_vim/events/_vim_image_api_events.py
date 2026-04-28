@@ -32,9 +32,8 @@ def _create_image_callback(
     action,
     properties,
 ):
-    """
-    Handle Create-Image callback
-    """
+    """Handle Create-Image callback."""
+
     DLOG.verbose("Create image callback, name=%s." % image_name)
 
     connection = _image_create_operations.get(image_name, None)
@@ -63,9 +62,8 @@ def _create_image_callback(
 
 
 def vim_image_api_create_image(connection, msg):
-    """
-    Handle Create-Image API request
-    """
+    """Handle Create-Image API request."""
+
     global _image_create_operations
 
     DLOG.verbose("Create image, name=%s." % msg.name)
@@ -101,9 +99,8 @@ def _update_image_callback(
     action,
     properties,
 ):
-    """
-    Handle Update-Image callback
-    """
+    """Handle Update-Image callback."""
+
     DLOG.verbose("Update image callback, uuid=%s." % image_uuid)
 
     connection = _image_update_operations.get(image_uuid, None)
@@ -132,9 +129,8 @@ def _update_image_callback(
 
 
 def vim_image_api_update_image(connection, msg):
-    """
-    Handle Update-Image API request
-    """
+    """Handle Update-Image API request."""
+
     global _image_update_operations
 
     DLOG.verbose("Update image, uuid=%s." % msg.uuid)
@@ -153,9 +149,8 @@ def vim_image_api_update_image(connection, msg):
 
 
 def _delete_image_callback(success, image_uuid):
-    """
-    Handle Delete-Image callback
-    """
+    """Handle Delete-Image callback."""
+
     DLOG.verbose("Delete image callback, uuid=%s." % image_uuid)
 
     connection = _image_delete_operations.get(image_uuid, None)
@@ -173,9 +168,8 @@ def _delete_image_callback(success, image_uuid):
 
 
 def vim_image_api_delete_image(connection, msg):
-    """
-    Handle Delete-Image API request
-    """
+    """Handle Delete-Image API request."""
+
     global _image_delete_operations
 
     DLOG.verbose("Delete image, uuid=%s." % msg.uuid)
@@ -185,9 +179,8 @@ def vim_image_api_delete_image(connection, msg):
 
 
 def vim_image_api_get_image(connection, msg):
-    """
-    Handle Get-Image API request
-    """
+    """Handle Get-Image API request."""
+
     DLOG.verbose("Get image, filter_by_uuid=%s." % msg.filter_by_uuid)
     image_table = tables.tables_get_image_table()
     response = rpc.APIResponseGetImage()
@@ -213,9 +206,8 @@ def vim_image_api_get_image(connection, msg):
 
 
 def vim_image_api_get_images(connection, msg):
-    """
-    Handle Get-Images API request
-    """
+    """Handle Get-Images API request."""
+
     DLOG.verbose("Get image, all=%s." % msg.get_all)
     image_table = tables.tables_get_image_table()
     for image in list(image_table.values()):
@@ -238,14 +230,12 @@ def vim_image_api_get_images(connection, msg):
 
 
 def vim_image_api_initialize():
-    """
-    Initialize VIM Image API Handling
-    """
+    """Initialize VIM Image API Handling."""
+
     pass
 
 
 def vim_image_api_finalize():
-    """
-    Finalize VIM Image API Handling
-    """
+    """Finalize VIM Image API Handling."""
+
     pass

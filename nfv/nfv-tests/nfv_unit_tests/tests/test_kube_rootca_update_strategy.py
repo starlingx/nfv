@@ -32,7 +32,6 @@ from nfv_unit_tests.tests import sw_update_testcase
     sw_update_testcase.fake_nfvi_compute_plugin_disabled,
 )
 class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
-
     def _create_kube_rootca_update_strategy(
         self,
         sw_update_obj,
@@ -47,9 +46,8 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         subject=None,
         nfvi_kube_rootca_update=None,
     ):
-        """
-        Create a kube rootca update strategy
-        """
+        """Create a kube rootca update strategy."""
+
         strategy = KubeRootcaUpdateStrategy(
             uuid=str(uuid.uuid4()),
             controller_apply_type=controller_apply_type,
@@ -69,9 +67,8 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     @mock.patch("nfv_common.strategy._strategy.Strategy._build")
     def test_kube_rootca_update_strategy_build_steps(self, fake_build):
-        """
-        Verify build phases, etc.. for kube_rootca_update strategy creation.
-        """
+        """Verify build phases, etc.. for kube_rootca_update strategy creation."""
+
         # setup a minimal host environment
         self.create_host("controller-0", aio=True)
 
@@ -111,7 +108,6 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 # since one of the testtools base classes does not call 'super' for setUp
 # and tearDown
 class HostListMixin(object):
-
     def setUp(self):
         self._hosts = []
         super(HostListMixin, self).setUp()
@@ -121,7 +117,8 @@ class HostListMixin(object):
         self._hosts = []
 
     def sort_hosts(self):
-        """sort_hosts requires mixing with SwUpdateStrategyTestCase"""
+        """sort_hosts requires mixing with SwUpdateStrategyTestCase."""
+
         self._hosts = []
         for host_name in list(self._host_table):
             if "storage" not in host_name:
@@ -132,7 +129,6 @@ class HostListMixin(object):
 
 
 class SimplexMixin(HostListMixin):
-
     def setUp(self):
         super(SimplexMixin, self).setUp()
 
@@ -144,7 +140,6 @@ class SimplexMixin(HostListMixin):
 
 
 class DuplexMixin(HostListMixin):
-
     def setUp(self):
         super(DuplexMixin, self).setUp()
 
@@ -170,9 +165,8 @@ class ApplyStageMixin(object):
         super(ApplyStageMixin, self).setUp()
 
     def _create_kube_rootca_update_obj(self, state):
-        """
-        Create a kube rootca update db object
-        """
+        """Create a kube rootca update db object."""
+
         return nfvi.objects.v1.KubeRootcaUpdate(state=state)
 
     def _create_built_kube_rootca_update_strategy(
@@ -184,9 +178,9 @@ class ApplyStageMixin(object):
         expiry_date=None,
         subject=None,
     ):
-        """
-        Create a kube rootca update strategy
-        populate the API query results from the build steps
+        """Create a kube rootca update strategy
+
+        populate the API query results from the build steps.
         """
         strategy = KubeRootcaUpdateStrategy(
             uuid=str(uuid.uuid4()),
@@ -383,7 +377,8 @@ class ApplyStageMixin(object):
         add_pods_trustnew=True,
         add_complete=True,
     ):
-        """The order of the host_list determines the patch and kubelets"""
+        """The order of the host_list determines the patch and kubelets."""
+
         stages = []
         if add_start:
             stages.append(self._kube_rootca_update_start_stage())
@@ -414,10 +409,10 @@ class ApplyStageMixin(object):
         return stages
 
     def test_no_existing_update(self):
-        """
-        Test the kube_rootca_update strategy creation for the hosts when there is
+        """Test the kube_rootca_update strategy creation for the hosts when there is
+
         no existing kube rootca update exists.
-        A duplex env will have more steps than a simplex environment
+        A duplex env will have more steps than a simplex environment.
         """
         kube_rootca_update = None
         # default stage list includes all , however second plane is duplex only
@@ -425,11 +420,11 @@ class ApplyStageMixin(object):
         self.validate_apply_phase(self.is_simplex(), kube_rootca_update, stages)
 
     def test_resume_after_update_started(self):
-        """
-        Test the kube_rootca_update strategy creation when the update was created
+        """Test the kube_rootca_update strategy creation when the update was created
+
         already (update-started)
         The 'start stage should be skipped and the upgdate resumes at the
-        next stage
+        next stage.
         """
         kube_rootca_update = self._create_kube_rootca_update_obj(
             KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_STARTED
@@ -439,10 +434,10 @@ class ApplyStageMixin(object):
         self.validate_apply_phase(self.is_simplex(), kube_rootca_update, stages)
 
     def test_resume_after_update_complete(self):
-        """
-        Test the kube_rootca_update strategy creation when the update had previously
+        """Test the kube_rootca_update strategy creation when the update had previously
+
         stopped after update-completed.
-        It is expected to resume at the complete stage
+        It is expected to resume at the complete stage.
         """
         kube_rootca_update = self._create_kube_rootca_update_obj(
             KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED
@@ -535,7 +530,6 @@ class TestDuplexPlusApplyStrategy(
 class TestDuplexPlusApplyStrategyTwoWorkers(
     ApplyStageMixin, DuplexMixin, sw_update_testcase.SwUpdateStrategyTestCase
 ):
-
     def setUp(self):
         super(TestDuplexPlusApplyStrategyTwoWorkers, self).setUp()
         self.create_host("controller-0", aio=True)
@@ -560,7 +554,6 @@ class TestDuplexPlusApplyStrategyTwoWorkers(
 class TestDuplexPlusApplyStrategyTwoWorkersParallel(
     ApplyStageMixin, DuplexMixin, sw_update_testcase.SwUpdateStrategyTestCase
 ):
-
     def setUp(self):
         # override the strategy values before calling setup of the superclass
         self.worker_apply_type = SW_UPDATE_APPLY_TYPE.PARALLEL
@@ -587,7 +580,6 @@ class TestDuplexPlusApplyStrategyTwoWorkersParallel(
 class TestDuplexPlusApplyStrategyTwoStorage(
     ApplyStageMixin, DuplexMixin, sw_update_testcase.SwUpdateStrategyTestCase
 ):
-
     def setUp(self):
         super(TestDuplexPlusApplyStrategyTwoStorage, self).setUp()
         self.create_host("controller-0", aio=True)
@@ -612,7 +604,6 @@ class TestDuplexPlusApplyStrategyTwoStorage(
 class TestDuplexPlusApplyStrategyTwoStorageParallel(
     ApplyStageMixin, DuplexMixin, sw_update_testcase.SwUpdateStrategyTestCase
 ):
-
     def setUp(self):
         # override the strategy values before calling setup of the superclass
         self.storage_apply_type = SW_UPDATE_APPLY_TYPE.PARALLEL
@@ -639,7 +630,6 @@ class TestDuplexPlusApplyStrategyTwoStorageParallel(
 class TestStandardTwoWorkerTwoStorage(
     ApplyStageMixin, DuplexMixin, sw_update_testcase.SwUpdateStrategyTestCase
 ):
-
     def setUp(self):
         super(TestStandardTwoWorkerTwoStorage, self).setUp()
         # This is not AIO, so the stages are a little different

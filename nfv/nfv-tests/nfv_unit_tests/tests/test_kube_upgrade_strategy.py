@@ -46,7 +46,6 @@ FAKE_LOAD = "12.01"
     sw_update_testcase.fake_nfvi_compute_plugin_disabled,
 )
 class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
-
     def _create_kube_upgrade_strategy(
         self,
         sw_update_obj,
@@ -60,9 +59,8 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         single_controller=False,
         nfvi_kube_upgrade=None,
     ):
-        """
-        Create a kube upgrade strategy
-        """
+        """Create a kube upgrade strategy."""
+
         strategy = KubeUpgradeStrategy(
             uuid=str(uuid.uuid4()),
             controller_apply_type=controller_apply_type,
@@ -81,9 +79,8 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     @mock.patch("nfv_common.strategy._strategy.Strategy._build")
     def test_kube_upgrade_strategy_build_steps(self, fake_build):
-        """
-        Verify build phase steps and stages for kube_upgrade strategy creation.
-        """
+        """Verify build phase steps and stages for kube_upgrade strategy creation."""
+
         # setup a minimal host environment
         self.create_host("controller-0", aio=True)
 
@@ -299,7 +296,8 @@ class DuplexKubeUpgradeMixin(object):
 
 class ApplyStageMixin(object):
     """This Mixin will not work unless combined with other mixins.
-    HostMixin - to provide the kube host upgrade states
+
+    HostMixin - to provide the kube host upgrade states.
     """
 
     # override any of these prior to calling setup in classes that use mixin
@@ -326,7 +324,8 @@ class ApplyStageMixin(object):
         super(ApplyStageMixin, self).setUp()
 
     def _create_kube_upgrade_obj(self, state, from_version, to_version):
-        """Create a kube upgrade db object"""
+        """Create a kube upgrade db object."""
+
         return nfvi.objects.v1.KubeUpgrade(
             state=state, from_version=from_version, to_version=to_version
         )
@@ -341,9 +340,9 @@ class ApplyStageMixin(object):
         kube_versions_list=None,
         kube_hosts_list=None,
     ):
-        """
-        Create a kube upgrade strategy
-        populate the API query results from the build steps
+        """Create a kube upgrade strategy
+
+        populate the API query results from the build steps.
         """
         strategy = KubeUpgradeStrategy(
             uuid=str(uuid.uuid4()),
@@ -448,7 +447,8 @@ class ApplyStageMixin(object):
         }
 
     def _kube_upgrade_second_control_plane_stage(self, ver):
-        """This stage only executes on a duplex system"""
+        """This stage only executes on a duplex system."""
+
         return {
             "name": "kube-upgrade-second-control-plane %s" % ver,
             "total_steps": 1,
@@ -519,7 +519,8 @@ class ApplyStageMixin(object):
         }
 
     def _kube_upgrade_kubelet_controller_stage(self, host, ver, do_lock=True):
-        """duplex needs to swact/lock/unlock whereas simplex does not"""
+        """duplex needs to swact/lock/unlock whereas simplex does not."""
+
         if do_lock:
             steps = [
                 {"name": "query-alarms"},
@@ -629,7 +630,8 @@ class ApplyStageMixin(object):
     def _kube_upgrade_kubelet_stages(
         self, ver, std_controller_list, aio_controller_list, worker_list
     ):
-        """This section will change as more host types are supported"""
+        """This section will change as more host types are supported."""
+
         if worker_list is None:
             worker_list = []
         kubelet_stages = []
@@ -658,8 +660,8 @@ class ApplyStageMixin(object):
     def validate_apply_phase(
         self, single_controller, kube_upgrade, stages, kube_hosts_list=None
     ):
-        """
-        Build a strategy and compare against a predetermined set of stages.
+        """Build a strategy and compare against a predetermined set of stages.
+
         Validate stage counts and contents per unique stage name.
         Validate that strategy is persistable without loss of data.
 
@@ -713,7 +715,8 @@ class ApplyStageMixin(object):
         add_complete=True,
         add_cleanup=True,
     ):
-        """The order of the host_list determines the kubelets"""
+        """The order of the host_list determines the kubelets."""
+
         # We never add a second control plane on a simplex
         if self.is_simplex():
             add_second_control_plane = False
@@ -757,10 +760,10 @@ class ApplyStageMixin(object):
         return stages
 
     def test_no_existing_upgrade(self):
-        """
-        Test the kube_upgrade strategy creation for the hosts when there is
+        """Test the kube_upgrade strategy creation for the hosts when there is
+
         no existing kube upgrade exists.
-        A duplex env will have more steps than a simplex environment
+        A duplex env will have more steps than a simplex environment.
         """
         kube_upgrade = None
         # default stage list includes all , however second plane is duplex only
@@ -773,11 +776,11 @@ class ApplyStageMixin(object):
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_upgrade_started(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade was created
+        """Test the kube_upgrade strategy creation when the upgrade was created
+
         already (upgrade-started)
         The 'start stage should be skipped and the upgrade resumes at the
-        'downloading images' stage
+        'downloading images' stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
@@ -795,10 +798,10 @@ class ApplyStageMixin(object):
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_upgrade_complete(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
+        """Test the kube_upgrade strategy creation when the upgrade had previously
+
         stopped after upgrade-completed.
-        It is expected to resume at the post application update stage
+        It is expected to resume at the post application update stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
@@ -813,8 +816,8 @@ class ApplyStageMixin(object):
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_first_control_plane_succeeded_partial(self):
-        """
-        Test the kube_upgrade strategy creation after the first control plane
+        """Test the kube_upgrade strategy creation after the first control plane
+
         has succeeded one kube version.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
@@ -951,10 +954,10 @@ class TestSimplexApplyStrategy(
         self.storage_list = []
 
     def test_resume_after_download_images_failed(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
+        """Test the kube_upgrade strategy creation when the upgrade had previously
+
         stopped with 'downloading-images-failed'
-        It is expected to resume at the 'downloading images' stage
+        It is expected to resume at the 'downloading images' stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED,
@@ -992,8 +995,8 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_download_images_succeeded(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
+        """Test the kube_upgrade strategy creation when the upgrade had previously
+
         stopped with 'downloaded-images'
         It is expected to resume at the 'pre application update' stage.
         """
@@ -1032,8 +1035,8 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_pre_app_update_failed(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
+        """Test the kube_upgrade strategy creation when the upgrade had previously
+
         stopped with 'pre-updating-apps-failed'.
         It is expected to resume at the pre application update stage.
         """
@@ -1072,8 +1075,8 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_pre_app_update_succeeded(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
+        """Test the kube_upgrade strategy creation when the upgrade had previously
+
         stopped with 'pre-updated-apps'.
         It is expected to resume at the upgrade networking stage.
         """
@@ -1111,10 +1114,10 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_first_control_plane_failed(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously failed during the first control plane.
-        It is expected to resume and retry the 'first control plane' stage
+        It is expected to resume and retry the 'first control plane' stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED,
@@ -1145,10 +1148,10 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_first_control_plane_succeeded(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously stopped after the first control plane.
-        It is expected to resume at the second control plane stage in duplex
+        It is expected to resume at the second control plane stage in duplex.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
@@ -1209,10 +1212,10 @@ class TestSimplexApplyStrategy(
         )
 
     def test_resume_after_networking_failed(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously failed during networking.
-        It is expected to retry and resume at the networking stage
+        It is expected to retry and resume at the networking stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED,
@@ -1248,10 +1251,10 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_networking_succeeded(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously stopped after successful networking.
-        It is expected to resume at the storage stage
+        It is expected to resume at the storage stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
@@ -1284,10 +1287,10 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_storage_failed(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously failed during storage.
-        It is expected to retry and resume at the storage stage
+        It is expected to retry and resume at the storage stage.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED,
@@ -1322,10 +1325,10 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_storage_succeeded(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously stopped after successful storage.
-        It is expected to resume at the first control plane
+        It is expected to resume at the first control plane.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE,
@@ -1358,8 +1361,8 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_invalid_second_master_state(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously stopped after a second control plane
         state is encountered.
         There should never be a second control plane state in a simplex, so
@@ -1424,12 +1427,12 @@ class TestSimplexApplyStrategy(
         )
 
     def test_resume_after_invalid_second_master_fail_state(self):
-        """
-        Test the kube_upgrade strategy creation when there is only a simplex
+        """Test the kube_upgrade strategy creation when there is only a simplex
+
         and the upgrade had previously stopped after a second control plane
         failure state is encountered.
         There should never be a second control plane state in a simplex
-        so the logic should just proceed to the kubelets
+        so the logic should just proceed to the kubelets.
         """
         kube_upgrade = self._create_kube_upgrade_obj(
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_SECOND_MASTER_FAILED,
@@ -1490,8 +1493,8 @@ class TestSimplexApplyStrategy(
         )
 
     def test_resume_after_post_app_update_failed(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
+        """Test the kube_upgrade strategy creation when the upgrade had previously
+
         stopped with 'post-updating-apps-failed'
         It is expected to resume at the post application update stage.
         """
@@ -1507,8 +1510,8 @@ class TestSimplexApplyStrategy(
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
     def test_resume_after_post_app_update_succeeded(self):
-        """
-        Test the kube_upgrade strategy creation when the upgrade had previously
+        """Test the kube_upgrade strategy creation when the upgrade had previously
+
         stopped with 'post-updated-apps'.
         It is expected to resume at the cleanup stage.
         """
@@ -1540,7 +1543,7 @@ class TestSimplexMultiApplyStrategy(
     MultiApplyStageMixin,
     SimplexKubeUpgradeMixin,
 ):
-    """This test class can be updated to resume from partial control plane"""
+    """This test class can be updated to resume from partial control plane."""
 
     def setUp(self):
         super(TestSimplexMultiApplyStrategy, self).setUp()
@@ -1571,7 +1574,7 @@ class TestSimplexMultiMajorApplyStrategy(
     MultiMajorApplyStageMixin,
     SimplexMajorKubeUpgradeMixin,
 ):
-    """This test class can be updated to resume from partial control plane"""
+    """This test class can be updated to resume from partial control plane."""
 
     def setUp(self):
         super(TestSimplexMultiMajorApplyStrategy, self).setUp()
@@ -1655,7 +1658,6 @@ class TestDuplexPlusApplyStrategy(
 class TestDuplexPlusApplyStrategyTwoWorkers(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
-
     def setUp(self):
         super(TestDuplexPlusApplyStrategyTwoWorkers, self).setUp()
         self.create_host("controller-0", aio=True)
@@ -1685,7 +1687,6 @@ class TestDuplexPlusApplyStrategyTwoWorkers(
 class TestDuplexPlusApplyStrategyTwoWorkersParallel(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
-
     def setUp(self):
         # override the strategy values before calling setup of the superclass
         self.worker_apply_type = SW_UPDATE_APPLY_TYPE.PARALLEL
@@ -1717,7 +1718,6 @@ class TestDuplexPlusApplyStrategyTwoWorkersParallel(
 class TestDuplexPlusApplyStrategyTwoStorage(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
-
     def setUp(self):
         super(TestDuplexPlusApplyStrategyTwoStorage, self).setUp()
         self.create_host("controller-0", aio=True)
@@ -1747,7 +1747,6 @@ class TestDuplexPlusApplyStrategyTwoStorage(
 class TestDuplexPlusApplyStrategyTwoStorageParallel(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
-
     def setUp(self):
         # override the strategy values before calling setup of the superclass
         self.storage_apply_type = SW_UPDATE_APPLY_TYPE.PARALLEL
@@ -1779,7 +1778,6 @@ class TestDuplexPlusApplyStrategyTwoStorageParallel(
 class TestStandardTwoWorkerTwoStorage(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
-
     def setUp(self):
         super(TestStandardTwoWorkerTwoStorage, self).setUp()
         # This is not AIO, so the stages are a little different
@@ -1797,6 +1795,7 @@ class TestStandardTwoWorkerTwoStorage(
 
 class SimplexMultiPatchKubeUpgradeMixin(object):
     """Mixin with multiple patch versions for the same minor (v1.30).
+
     The strategy should filter to only the highest patch per minor.
     """
 
@@ -1835,8 +1834,9 @@ class SimplexMultiPatchKubeUpgradeMixin(object):
 
 
 class MultiPatchApplyStageMixin(ApplyStageMixin):
-    """Strategy should skip v1.30.6 and only use v1.30.11 (highest patch
-    for minor v1.30) for control plane and kubelet stages.
+    """Strategy should skip v1.30.6 and only use v1.30.11 (highest patch for minor
+
+    v1.30) for control plane and kubelet stages.
     """
 
     default_from_version = FROM_KUBE_VERSION
@@ -1870,8 +1870,9 @@ class TestSimplexMultiPatchApplyStrategy(
     MultiPatchApplyStageMixin,
     SimplexMultiPatchKubeUpgradeMixin,
 ):
-    """Test that when multiple patch versions exist for the same minor,
-    only the highest patch version is used in upgrade stages.
+    """Test that when multiple patch versions exist for the same minor, only the highest
+
+    patch version is used in upgrade stages.
     """
 
     def setUp(self):

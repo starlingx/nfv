@@ -10,9 +10,7 @@ from sqlalchemy.types import TypeDecorator
 
 
 class Secret(str):
-    """
-    Secret
-    """
+    """Secret."""
 
     def __new__(cls, value, encrypt=True, salt=None, rounds=40000):
         if encrypt:
@@ -32,9 +30,7 @@ class Secret(str):
 
 
 class SecretType(TypeDecorator):
-    """
-    Secret Database Type
-    """
+    """Secret Database Type."""
 
     impl = String(128)
 
@@ -46,9 +42,7 @@ class SecretType(TypeDecorator):
 
 
 class VNF_UUID(TypeDecorator):
-    """
-    VNF UUID Database Type
-    """
+    """VNF UUID Database Type."""
 
     impl = String(64)  # Prefix string (28 characters) + uuid (36 characters)
 

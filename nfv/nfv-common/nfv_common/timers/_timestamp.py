@@ -14,9 +14,7 @@ CLOCK_MONOTONIC_RAW = 4  # from <linux/time.h>
 
 
 class timespec(ctypes.Structure):
-    """
-    Timespec C Type
-    """
+    """Timespec C Type."""
 
     _fields_ = [("tv_sec", ctypes.c_long), ("tv_nsec", ctypes.c_long)]
 
@@ -30,9 +28,8 @@ except Exception:
 
 
 def get_monotonic_timestamp_in_ms():
-    """
-    Returns the timestamp in milliseconds
-    """
+    """Returns the timestamp in milliseconds."""
+
     t = timespec()
     if 0 != clock_gettime(CLOCK_MONOTONIC_RAW, ctypes.pointer(t)):
         errno_ = ctypes.get_errno()

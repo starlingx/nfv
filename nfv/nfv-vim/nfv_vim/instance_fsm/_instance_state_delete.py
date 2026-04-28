@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class DeleteState(state_machine.State):
-    """
-    Instance - Delete State
-    """
+    """Instance - Delete State."""
 
     def __init__(self, name):
         super(DeleteState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering delete state
-        """
+        """Entering delete state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = DeleteTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting delete state
-        """
+        """Exiting delete state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, DeleteTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the delete state
-        """
+        """Transition from the delete state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the delete state
-        """
+        """Handle event while in the delete state."""
+
         from nfv_vim import directors
 
         instance_director = directors.get_instance_director()

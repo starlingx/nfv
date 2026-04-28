@@ -14,9 +14,8 @@ from nfv_vim.database._database import database_get
 
 
 def database_service_host_add(service_host_obj):
-    """
-    Add a service-host object to the database
-    """
+    """Add a service-host object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.ServiceHost)
@@ -32,9 +31,8 @@ def database_service_host_add(service_host_obj):
 
 
 def database_service_host_delete(service_host_name):
-    """
-    Delete a service-host object from the database
-    """
+    """Delete a service-host object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.ServiceHost)
@@ -43,9 +41,8 @@ def database_service_host_delete(service_host_name):
 
 
 def database_service_host_get_list():
-    """
-    Fetch all the service host objects from the database
-    """
+    """Fetch all the service host objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.ServiceHost)
@@ -60,9 +57,8 @@ def database_service_host_get_list():
 
 
 def database_hypervisor_add(hypervisor_obj):
-    """
-    Add a hypervisor object to the database
-    """
+    """Add a hypervisor object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Hypervisor)
@@ -108,9 +104,8 @@ def database_hypervisor_add(hypervisor_obj):
 
 
 def database_hypervisor_delete(hypervisor_uuid):
-    """
-    Delete a hypervisor object from the database
-    """
+    """Delete a hypervisor object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Hypervisor)
@@ -119,9 +114,8 @@ def database_hypervisor_delete(hypervisor_uuid):
 
 
 def database_hypervisor_get_list():
-    """
-    Fetch all the hypervisor objects from the database
-    """
+    """Fetch all the hypervisor objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Hypervisor)
@@ -163,9 +157,8 @@ def database_hypervisor_get_list():
 
 
 def database_instance_type_add(instance_type_obj):
-    """
-    Add an instance type object to the database
-    """
+    """Add an instance type object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.InstanceType_v5)
@@ -213,9 +206,8 @@ def database_instance_type_add(instance_type_obj):
 
 
 def database_instance_type_delete(instance_type_uuid):
-    """
-    Delete an instance type object from the database
-    """
+    """Delete an instance type object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.InstanceType_v5)
@@ -224,9 +216,8 @@ def database_instance_type_delete(instance_type_uuid):
 
 
 def database_instance_type_get_list():
-    """
-    Fetch all the instance type objects from the database
-    """
+    """Fetch all the instance type objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.InstanceType_v5)
@@ -252,9 +243,8 @@ def database_instance_type_get_list():
 
 
 def database_instance_add(instance_obj):
-    """
-    Add an instance object to the database
-    """
+    """Add an instance object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Instance_v5)
@@ -301,9 +291,8 @@ def database_instance_add(instance_obj):
 
 
 def database_instance_delete(instance_uuid):
-    """
-    Delete an instance object from the database
-    """
+    """Delete an instance object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Instance_v5)
@@ -312,9 +301,8 @@ def database_instance_delete(instance_uuid):
 
 
 def database_instance_get_list():
-    """
-    Fetch all the instance objects from the database
-    """
+    """Fetch all the instance objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Instance_v5)
@@ -383,7 +371,6 @@ def database_instance_get_list():
 
             nfvi_guest_services = list()
             for nfvi_guest_service_data in guest_services_data["nfvi_guest_services"]:
-
                 nfvi_guest_service = nfvi.objects.v1.GuestService(
                     nfvi_guest_service_data["name"],
                     nfvi_guest_service_data["admin_state"],
@@ -436,9 +423,8 @@ def database_instance_get_list():
 
 
 def database_instance_group_add(instance_group_obj):
-    """
-    Add an instance group object to the database
-    """
+    """Add an instance group object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.InstanceGroup)
@@ -465,9 +451,8 @@ def database_instance_group_add(instance_group_obj):
 
 
 def database_instance_group_delete(instance_group_uuid):
-    """
-    Delete an instance group object from the database
-    """
+    """Delete an instance group object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.InstanceGroup)
@@ -476,9 +461,8 @@ def database_instance_group_delete(instance_group_uuid):
 
 
 def database_instance_group_get_list():
-    """
-    Fetch all the instance group objects from the database
-    """
+    """Fetch all the instance group objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.InstanceGroup)
@@ -498,9 +482,8 @@ def database_instance_group_get_list():
 
 
 def database_host_aggregate_add(host_aggregate_obj):
-    """
-    Add a host aggregate object to the database
-    """
+    """Add a host aggregate object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.HostAggregate).filter(
@@ -526,9 +509,8 @@ def database_host_aggregate_add(host_aggregate_obj):
 
 
 def database_host_aggregate_delete(host_aggregate_name):
-    """
-    Delete a host aggregate object from the database
-    """
+    """Delete a host aggregate object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.HostAggregate)
@@ -537,9 +519,8 @@ def database_host_aggregate_delete(host_aggregate_name):
 
 
 def database_host_aggregate_get_list():
-    """
-    Fetch all the host aggregate objects from the database
-    """
+    """Fetch all the host aggregate objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.HostAggregate)

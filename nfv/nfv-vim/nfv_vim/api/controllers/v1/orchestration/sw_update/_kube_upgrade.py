@@ -12,16 +12,14 @@ import wsmeext.pecan as wsme_pecan
 from nfv_common import debug
 from nfv_vim.api._link import Link
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_strategy import (
-    KubeUpgradeStrategyAPI
+    KubeUpgradeStrategyAPI,
 )
 
 DLOG = debug.debug_get_logger("nfv_vim.api.kube_upgrade")
 
 
 class KubeUpgradeDescription(wsme_types.Base):
-    """
-    Kubernetes Update Description
-    """
+    """Kubernetes Update Description."""
 
     id = wsme_types.text
     links = wsme_types.wsattr([Link], name="links")
@@ -40,9 +38,7 @@ class KubeUpgradeDescription(wsme_types.Base):
 
 
 class KubeUpgradeAPI(rest.RestController):
-    """
-    KubeUpgradeRest API
-    """
+    """KubeUpgradeRest API."""
 
     @pecan.expose()
     def _lookup(self, key, *remainder):

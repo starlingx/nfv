@@ -13,9 +13,7 @@ from nfv_vim.database.model._base import Base
 
 
 class Network(AsDictMixin, Base):
-    """
-    Network Database Table
-    """
+    """Network Database Table."""
 
     __tablename__ = "networks"
 

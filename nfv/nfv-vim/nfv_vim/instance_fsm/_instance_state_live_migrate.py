@@ -15,17 +15,14 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class LiveMigrateState(state_machine.State):
-    """
-    Instance - Live Migrate State
-    """
+    """Instance - Live Migrate State."""
 
     def __init__(self, name):
         super(LiveMigrateState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering live migrate state
-        """
+        """Entering live migrate state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance._live_migration_started = False
         instance.action_fsm.start_time = timers.get_monotonic_timestamp_in_ms()
@@ -35,24 +32,21 @@ class LiveMigrateState(state_machine.State):
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting live migrate state
-        """
+        """Exiting live migrate state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         instance._live_migration_started = False
         if isinstance(instance.task, LiveMigrateTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the live migrate state
-        """
+        """Transition from the live migrate state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the live migrate state
-        """
+        """Handle event while in the live migrate state."""
+
         from nfv_vim import directors
 
         instance_director = directors.get_instance_director()

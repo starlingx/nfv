@@ -11,9 +11,7 @@ _network_table = None
 
 
 class NetworkTable(Table):
-    """
-    Network Table
-    """
+    """Network Table."""
 
     def __init__(self):
         super(NetworkTable, self).__init__()
@@ -32,16 +30,14 @@ class NetworkTable(Table):
 
 
 def tables_get_network_table():
-    """
-    Get the network table
-    """
+    """Get the network table."""
+
     return _network_table
 
 
 def network_table_initialize():
-    """
-    Initialize the network table
-    """
+    """Initialize the network table."""
+
     global _network_table
 
     _network_table = NetworkTable()
@@ -54,9 +50,8 @@ def network_table_initialize():
 
 
 def network_table_finalize():
-    """
-    Finalize the network table
-    """
+    """Finalize the network table."""
+
     global _network_table
 
     del _network_table

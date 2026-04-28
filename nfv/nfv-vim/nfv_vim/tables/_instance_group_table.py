@@ -11,9 +11,7 @@ _instance_group_table = None
 
 
 class InstanceGroupTable(Table):
-    """
-    Instance Group Table
-    """
+    """Instance Group Table."""
 
     def __init__(self):
         super(InstanceGroupTable, self).__init__()
@@ -57,16 +55,14 @@ class InstanceGroupTable(Table):
 
 
 def tables_get_instance_group_table():
-    """
-    Get the instance group table
-    """
+    """Get the instance group table."""
+
     return _instance_group_table
 
 
 def instance_group_table_initialize():
-    """
-    Initialize the instance group table
-    """
+    """Initialize the instance group table."""
+
     global _instance_group_table
 
     _instance_group_table = InstanceGroupTable()
@@ -79,9 +75,8 @@ def instance_group_table_initialize():
 
 
 def instance_group_table_finalize():
-    """
-    Finalize the instance group table
-    """
+    """Finalize the instance group table."""
+
     global _instance_group_table
 
     del _instance_group_table

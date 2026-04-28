@@ -21,9 +21,8 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.block_storage_api")
 
 
 def volume_get_avail_status(status):
-    """
-    Convert the nfvi volume status to a volume availability status
-    """
+    """Convert the nfvi volume status to a volume availability status."""
+
     avail_status = list()
 
     if cinder.VOLUME_STATUS.AVAILABLE == status:
@@ -48,9 +47,8 @@ def volume_get_avail_status(status):
 
 
 def volume_get_action(status):
-    """
-    Convert the nfvi volume status to a volume action
-    """
+    """Convert the nfvi volume status to a volume action."""
+
     if cinder.VOLUME_STATUS.CREATING == status:
         return nfvi.objects.v1.VOLUME_ACTION.BUILDING
 
@@ -74,9 +72,7 @@ def volume_get_action(status):
 
 
 class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
-    """
-    NFVI Block Storage API Class Definition
-    """
+    """NFVI Block Storage API Class Definition."""
 
     _name = "Block-Storage-API"
     _version = "1.0.0"
@@ -105,9 +101,8 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
         return self._signature
 
     def get_volumes(self, future, paging, callback):
-        """
-        Get a list of volumes
-        """
+        """Get a list of volumes."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -190,9 +185,8 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     def create_volume(
         self, future, volume_name, volume_description, size_gb, image_uuid, callback
     ):
-        """
-        Create a volume
-        """
+        """Create a volume."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -295,9 +289,8 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
             callback.close()
 
     def delete_volume(self, future, volume_uuid, callback):
-        """
-        Delete a volume
-        """
+        """Delete a volume."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -343,9 +336,8 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
             callback.close()
 
     def update_volume(self, future, volume_uuid, volume_description, callback):
-        """
-        Update a volume
-        """
+        """Update a volume."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -441,9 +433,8 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
             callback.close()
 
     def get_volume(self, future, volume_uuid, callback):
-        """
-        Get a volume
-        """
+        """Get a volume."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -531,9 +522,8 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
             callback.close()
 
     def get_volume_snapshots(self, future, callback):
-        """
-        Get a list of volume snapshots
-        """
+        """Get a list of volume snapshots."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -611,16 +601,14 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
             callback.close()
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.OPENSTACK
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         return

@@ -11,9 +11,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class NetworkAdministrativeState(Constants, metaclass=Singleton):
-    """
-    Network Administrative State Constants
-    """
+    """Network Administrative State Constants."""
 
     UNKNOWN = Constant("unknown")
     LOCKED = Constant("locked")
@@ -21,9 +19,7 @@ class NetworkAdministrativeState(Constants, metaclass=Singleton):
 
 
 class NetworkOperationalState(Constants, metaclass=Singleton):
-    """
-    Network Operational State Constants
-    """
+    """Network Operational State Constants."""
 
     UNKNOWN = Constant("unknown")
     ENABLED = Constant("enabled")
@@ -31,9 +27,7 @@ class NetworkOperationalState(Constants, metaclass=Singleton):
 
 
 class NetworkAvailabilityStatus(Constants, metaclass=Singleton):
-    """
-    Network Availability Status Constants
-    """
+    """Network Availability Status Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant("")
@@ -48,9 +42,7 @@ NETWORK_AVAIL_STATUS = NetworkAvailabilityStatus()
 
 
 class NetworkProviderData(ObjectData):
-    """
-    NFVI Network Provider Data Object
-    """
+    """NFVI Network Provider Data Object."""
 
     def __init__(self, physical_network, network_type, segmentation_id):
         super(NetworkProviderData, self).__init__("1.0.0")
@@ -64,9 +56,7 @@ class NetworkProviderData(ObjectData):
 
 
 class Network(ObjectData):
-    """
-    NFVI Network Object
-    """
+    """NFVI Network Object."""
 
     def __init__(
         self,

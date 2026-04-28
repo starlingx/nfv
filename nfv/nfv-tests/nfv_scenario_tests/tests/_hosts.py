@@ -18,9 +18,8 @@ _directory = None
 
 
 def _get_token():
-    """
-    Returns a valid token
-    """
+    """Returns a valid token."""
+
     global _directory, _token
 
     if _directory is None:
@@ -38,9 +37,8 @@ def _get_token():
 
 
 def host_get(host_uuid):
-    """
-    Fetch host data by the uuid of the host
-    """
+    """Fetch host data by the uuid of the host."""
+
     token = _get_token()
 
     host_data = sysinv.get_host(token, host_uuid).result_data
@@ -48,9 +46,8 @@ def host_get(host_uuid):
 
 
 def host_get_by_name(host_name):
-    """
-    Fetch host data by the name of the host
-    """
+    """Fetch host data by the name of the host."""
+
     token = _get_token()
 
     hosts = sysinv.get_hosts(token).result_data
@@ -60,23 +57,20 @@ def host_get_by_name(host_name):
 
 
 def host_get_uuid(host):
-    """
-    Retrieve the host uuid
-    """
+    """Retrieve the host uuid."""
+
     return host["uuid"]
 
 
 def host_get_id(host):
-    """
-    Retrieve the host id
-    """
+    """Retrieve the host id."""
+
     return host["id"]
 
 
 def host_is_locked(host):
-    """
-    Returns true if the host is locked
-    """
+    """Returns true if the host is locked."""
+
     if HOST_ADMIN_STATE.LOCKED == host["administrative"]:
         return True, "host is locked"
 
@@ -84,9 +78,8 @@ def host_is_locked(host):
 
 
 def host_is_unlocked(host):
-    """
-    Returns true if the host is unlocked
-    """
+    """Returns true if the host is unlocked."""
+
     if HOST_ADMIN_STATE.UNLOCKED == host["administrative"]:
         return True, "host is unlocked"
 
@@ -94,9 +87,7 @@ def host_is_unlocked(host):
 
 
 def host_is_enabled(host):
-    """
-    Returns true if the host is enabled
-    """
+    """Returns true if the host is enabled."""
 
     if HOST_OPER_STATE.ENABLED == host["operational"]:
         return True, "host is enabled"
@@ -105,9 +96,8 @@ def host_is_enabled(host):
 
 
 def host_is_disabled(host):
-    """
-    Returns true if the host is disabled
-    """
+    """Returns true if the host is disabled."""
+
     if HOST_OPER_STATE.DISABLED == host["operational"]:
         return True, "host is disabled"
 

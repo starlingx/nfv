@@ -11,9 +11,7 @@ from nfv_plugins.alarm_handlers import config
 
 
 class FileStorage(alarm_handlers_v1.AlarmHandler):
-    """
-    File Storage Alarm Handler is used to store alarm data to disk.
-    """
+    """File Storage Alarm Handler is used to store alarm data to disk."""
 
     _name = "File-Storage"
     _version = "1.0.0"
@@ -37,9 +35,8 @@ class FileStorage(alarm_handlers_v1.AlarmHandler):
         return self._signature
 
     def _write_alarm_data(self, alarm_action, alarm_uuid, alarm_data=None):
-        """
-        Write alarm data to a file
-        """
+        """Write alarm data to a file."""
+
         # Write the file in utf-8 format to support unicode text
         with codecs.open(config.CONF["File-Storage"]["file"], "a", "utf-8") as f:
             line_separator_str = "%s" % ("=" * 84)
@@ -150,31 +147,26 @@ class FileStorage(alarm_handlers_v1.AlarmHandler):
             print(line_separator_str, file=f)
 
     def raise_alarm(self, alarm_uuid, alarm_data):
-        """
-        Write the fact that an alarm is being raised to a file
-        """
+        """Write the fact that an alarm is being raised to a file."""
+
         self._write_alarm_data("Raise-Alarm", alarm_uuid, alarm_data)
 
     def clear_alarm(self, alarm_uuid):
-        """
-        Write the fact that an alarm is being cleared to a file
-        """
+        """Write the fact that an alarm is being cleared to a file."""
+
         self._write_alarm_data("Clear-Alarm", alarm_uuid, None)
 
     def audit_alarms(self):
-        """
-        Audit alarms
-        """
+        """Audit alarms."""
+
         return
 
     def initialize(self, config_file):
-        """
-        Initialize
-        """
+        """Initialize."""
+
         config.load(config_file)
 
     def finalize(self):
-        """
-        Finalize
-        """
+        """Finalize."""
+
         return

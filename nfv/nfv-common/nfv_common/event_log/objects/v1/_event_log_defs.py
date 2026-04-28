@@ -10,9 +10,7 @@ from nfv_common.helpers import Singleton
 
 
 class _EventId(Constants, metaclass=Singleton):
-    """
-    Event Type Constants
-    """
+    """Event Type Constants."""
 
     UNKNOWN = Constant("unknown")
     MULTI_NODE_RECOVERY_MODE_ENTER = Constant("multi-node-recovery-enter")
@@ -279,9 +277,7 @@ class _EventId(Constants, metaclass=Singleton):
 
 
 class _EventType(Constants, metaclass=Singleton):
-    """
-    Event Type Constants
-    """
+    """Event Type Constants."""
 
     UNKNOWN = Constant("unknown")
     STATE_EVENT = Constant("state-event")
@@ -291,18 +287,14 @@ class _EventType(Constants, metaclass=Singleton):
 
 
 class _EventContext(Constants, metaclass=Singleton):
-    """
-    Event Context Constants
-    """
+    """Event Context Constants."""
 
     ADMIN = Constant("admin")
     TENANT = Constant("tenant")
 
 
 class _EventImportance(Constants, metaclass=Singleton):
-    """
-    Event Importance Constants
-    """
+    """Event Importance Constants."""
 
     UNKNOWN = Constant("unknown")
     HIGH = Constant("high")
@@ -311,9 +303,7 @@ class _EventImportance(Constants, metaclass=Singleton):
 
 
 class _EventInitiatedBy(Constants, metaclass=Singleton):
-    """
-    Initiated-By Constants
-    """
+    """Initiated-By Constants."""
 
     UNKNOWN = Constant("unknown")
     TENANT = Constant("tenant")

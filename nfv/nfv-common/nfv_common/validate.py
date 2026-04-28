@@ -9,9 +9,8 @@ import uuid
 
 
 def valid_uuid_str(uuid_str, version=4):
-    """
-    Returns true if uuid string given is a valid uuid
-    """
+    """Returns true if uuid string given is a valid uuid."""
+
     try:
         uuid.UUID(uuid_str, version=version)
 
@@ -22,9 +21,8 @@ def valid_uuid_str(uuid_str, version=4):
 
 
 def valid_uuid_hex(uuid_hex_str, version=4):
-    """
-    Returns true if uuid hex string given is a valid uuid
-    """
+    """Returns true if uuid hex string given is a valid uuid."""
+
     try:
         uuid_value = uuid.UUID(uuid_hex_str, version=version)
 
@@ -38,18 +36,16 @@ def valid_uuid_hex(uuid_hex_str, version=4):
 
 
 def valid_bool(boolean_str):
-    """
-    Returns true if string given is a valid boolean
-    """
+    """Returns true if string given is a valid boolean."""
+
     if boolean_str.lower() in ["true", "1", "false", "0"]:
         return True
     return False
 
 
 def valid_integer(integer_str):
-    """
-    Returns true if string given is a valid integer
-    """
+    """Returns true if string given is a valid integer."""
+
     try:
         int(integer_str)
 
@@ -60,9 +56,9 @@ def valid_integer(integer_str):
 
 
 def validate_certificate_subject(subject):
-    """
-    Duplicate the get_subject validation logic defined in:
-    sysinv/api/controllers/v1/kube_rootca_update.py
+    """Duplicate the get_subject validation logic defined in:
+
+    sysinv/api/controllers/v1/kube_rootca_update.py.
 
     Returns a tuple of True, "" if the input is None
     Returns a tuple of True, "" if the input is valid
@@ -96,9 +92,9 @@ def validate_certificate_subject(subject):
 
 
 def validate_expiry_date(expiry_date):
-    """
-    Duplicate the expiry_date validation logic defined in:
-    sysinv/api/controllers/v1/kube_rootca_update.py
+    """Duplicate the expiry_date validation logic defined in:
+
+    sysinv/api/controllers/v1/kube_rootca_update.py.
 
     Returns a tuple of True, "" if the input is None
     Returns a tuple of True, "" if the input is valid
@@ -110,9 +106,7 @@ def validate_expiry_date(expiry_date):
     try:
         date = datetime.datetime.strptime(expiry_date, "%Y-%m-%d")
     except ValueError:
-        return False, (
-            "expiry_date %s doesn't match format YYYY-MM-DD" % expiry_date
-        )
+        return False, ("expiry_date %s doesn't match format YYYY-MM-DD" % expiry_date)
 
     delta = date - datetime.datetime.now()
     # we sum one day (24 hours) to accomplish the certificate expiry
@@ -126,7 +120,6 @@ def validate_expiry_date(expiry_date):
     # cert-manager to block the creation of the resources.
     if duration <= 24:
         return False, (
-            "New k8s rootCA should have at least 24 hours of "
-            "validation before expiry."
+            "New k8s rootCA should have at least 24 hours of validation before expiry."
         )
     return True, ""

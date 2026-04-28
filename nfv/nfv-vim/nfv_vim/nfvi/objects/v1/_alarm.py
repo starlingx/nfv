@@ -12,9 +12,7 @@ from nfv_common.helpers import Singleton
 
 
 class AlarmSeverity(Constants, metaclass=Singleton):
-    """
-    Alarm Severity Constants
-    """
+    """Alarm Severity Constants."""
 
     NONE = Constant("")
     MINOR = Constant("minor")
@@ -27,9 +25,7 @@ ALARM_SEVERITY = AlarmSeverity()
 
 
 class Alarm(ObjectData):
-    """
-    NFVI Alarm Object
-    """
+    """NFVI Alarm Object."""
 
     def __init__(
         self,

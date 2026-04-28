@@ -23,18 +23,15 @@ _host_director = None
 
 
 class HostDirector(object, metaclass=Singleton):
-    """
-    Host Director
-    """
+    """Host Director."""
 
     def __init__(self):
         self._host_operation = None
 
     @coroutine
     def _nfvi_lock_host_callback(self):
-        """
-        NFVI Lock Host Callback
-        """
+        """NFVI Lock Host Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -66,22 +63,19 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.host_lock_failed(host)
 
     def _nfvi_lock_host(self, host_uuid, host_name):
-        """
-        NFVI Lock Host
-        """
+        """NFVI Lock Host."""
+
         nfvi.nfvi_lock_host(host_uuid, host_name, self._nfvi_lock_host_callback())
 
     @coroutine
     def _nfvi_disable_host_services_callback(self, service):
-        """
-        NFVI Disable Host Services Callback
-        """
+        """NFVI Disable Host Services Callback."""
+
         from nfv_vim import directors
 
         response = yield
         DLOG.verbose(
-            "NFVI Disable Host %s Services callback "
-            "response=%s." % (service, response)
+            "NFVI Disable Host %s Services callback response=%s." % (service, response)
         )
         if not response["completed"]:
             DLOG.info(
@@ -115,9 +109,8 @@ class HostDirector(object, metaclass=Singleton):
     def _nfvi_disable_host_services(
         self, host_uuid, host_name, host_personality, host_offline, service
     ):
-        """
-        NFVI Disable Host Services
-        """
+        """NFVI Disable Host Services."""
+
         if service == objects.HOST_SERVICES.COMPUTE:
             nfvi.nfvi_disable_compute_host_services(
                 host_uuid,
@@ -149,15 +142,13 @@ class HostDirector(object, metaclass=Singleton):
 
     @coroutine
     def _nfvi_enable_host_services_callback(self, service):
-        """
-        NFVI Enable Host Services Callback
-        """
+        """NFVI Enable Host Services Callback."""
+
         from nfv_vim import directors
 
         response = yield
         DLOG.verbose(
-            "NFVI Enable Host %s Services callback "
-            "response=%s." % (service, response)
+            "NFVI Enable Host %s Services callback response=%s." % (service, response)
         )
         if not response["completed"]:
             DLOG.info(
@@ -191,9 +182,8 @@ class HostDirector(object, metaclass=Singleton):
     def _nfvi_enable_host_services(
         self, host_uuid, host_name, host_personality, service
     ):
-        """
-        NFVI Enable Host Services
-        """
+        """NFVI Enable Host Services."""
+
         if service == objects.HOST_SERVICES.COMPUTE:
             nfvi.nfvi_enable_compute_host_services(
                 host_uuid,
@@ -229,9 +219,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @coroutine
     def _nfvi_unlock_host_callback(self):
-        """
-        NFVI Unlock Host Callback
-        """
+        """NFVI Unlock Host Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -263,16 +252,14 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.host_unlock_failed(host)
 
     def _nfvi_unlock_host(self, host_uuid, host_name):
-        """
-        NFVI Unlock Host
-        """
+        """NFVI Unlock Host."""
+
         nfvi.nfvi_unlock_host(host_uuid, host_name, self._nfvi_unlock_host_callback())
 
     @coroutine
     def _nfvi_reboot_host_callback(self):
-        """
-        NFVI Reboot Host Callback
-        """
+        """NFVI Reboot Host Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -304,16 +291,14 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.host_reboot_failed(host)
 
     def _nfvi_reboot_host(self, host_uuid, host_name):
-        """
-        NFVI Reboot Host
-        """
+        """NFVI Reboot Host."""
+
         nfvi.nfvi_reboot_host(host_uuid, host_name, self._nfvi_reboot_host_callback())
 
     @coroutine
     def _nfvi_upgrade_host_callback(self):
-        """
-        NFVI Upgrade Host Callback
-        """
+        """NFVI Upgrade Host Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -360,18 +345,16 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.host_upgrade_changed(result)
 
     def _nfvi_upgrade_host(self, host_uuid, host_name, rollback):
-        """
-        NFVI Upgrade Host
-        """
+        """NFVI Upgrade Host."""
+
         nfvi.nfvi_upgrade_host(
             host_uuid, host_name, rollback, self._nfvi_upgrade_host_callback()
         )
 
     @coroutine
     def _nfvi_swact_host_callback(self):
-        """
-        NFVI Swact Host Callback
-        """
+        """NFVI Swact Host Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -403,18 +386,16 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.host_swact_failed(host, response.get("reason"))
 
     def _nfvi_swact_host(self, host_uuid, host_name):
-        """
-        NFVI Swact Host
-        """
+        """NFVI Swact Host."""
+
         nfvi.nfvi_swact_from_host(
             host_uuid, host_name, self._nfvi_swact_host_callback()
         )
 
     @coroutine
     def _nfvi_fw_update_host_callback(self):
-        """
-        NFVI Firmware Update Host Callback
-        """
+        """NFVI Firmware Update Host Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -446,18 +427,16 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.host_fw_update_failed(host)
 
     def _nfvi_fw_update_host(self, host_uuid, host_name):
-        """
-        NFVI Firmware Image Update Host
-        """
+        """NFVI Firmware Image Update Host."""
+
         nfvi.nfvi_host_device_image_update(
             host_uuid, host_name, self._nfvi_fw_update_host_callback()
         )
 
     @coroutine
     def _nfvi_fw_update_abort_callback(self):
-        """
-        NFVI Abort Firmware Update callback
-        """
+        """NFVI Abort Firmware Update callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -492,26 +471,23 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.host_fw_update_abort_failed(host)
 
     def _nfvi_fw_update_abort_host(self, host_uuid, host_name):
-        """
-        NFVI Abort Firmware Update
-        """
+        """NFVI Abort Firmware Update."""
+
         nfvi.nfvi_host_device_image_update_abort(
             host_uuid, host_name, self._nfvi_fw_update_abort_callback()
         )
 
     def host_operation_inprogress(self):
-        """
-        Returns true if a lock of hosts
-        """
+        """Returns true if a lock of hosts."""
+
         if self._host_operation is not None:
             return self._host_operation.is_inprogress()
         return False
 
     @staticmethod
     def host_has_instances(host, skip_stopped=False):
-        """
-        Returns true if a host has instances located on it
-        """
+        """Returns true if a host has instances located on it."""
+
         from nfv_vim import directors
 
         instance_director = directors.get_instance_director()
@@ -519,25 +495,24 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_instances_moved(host, host_operation):
-        """
-        Notifies the host director that all the instances have been moved from
-        a host
+        """Notifies the host director that all the instances have been moved from
+
+        a host.
         """
         host.notify_instances_moved(host_operation)
 
     @staticmethod
     def host_instances_stopped(host, host_operation):
-        """
-        Notifies the host director that all the instances have been stopped on
-        a host
+        """Notifies the host director that all the instances have been stopped on
+
+        a host.
         """
         host.notify_instances_stopped(host_operation)
 
     @staticmethod
     def host_enabled(host):
-        """
-        Notifies the host director that a host is enabled
-        """
+        """Notifies the host director that a host is enabled."""
+
         from nfv_vim import directors
 
         DLOG.info("Notify other directors that the host %s is enabled." % host.name)
@@ -546,9 +521,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_services_disabling(host):
-        """
-        Notifies the host director that host services are being disabled
-        """
+        """Notifies the host director that host services are being disabled."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -561,14 +535,12 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_services_disabled(host):
-        """
-        Notifies the host director that host services are disabled
-        """
+        """Notifies the host director that host services are disabled."""
+
         from nfv_vim import directors
 
         DLOG.info(
-            "Notify other directors that the host %s services are "
-            "disabled." % host.name
+            "Notify other directors that the host %s services are disabled." % host.name
         )
         instance_director = directors.get_instance_director()
         host_operation = instance_director.host_services_disabled(host)
@@ -576,9 +548,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_disabled(host):
-        """
-        Notifies the host director that a host is disabled
-        """
+        """Notifies the host director that a host is disabled."""
+
         from nfv_vim import directors
 
         DLOG.info("Notify other directors that the host %s is disabled." % host.name)
@@ -588,9 +559,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_offline(host):
-        """
-        Notifies the host director that a host is offline
-        """
+        """Notifies the host director that a host is offline."""
+
         from nfv_vim import directors
 
         DLOG.info("Notify other directors that the host %s is offline." % host.name)
@@ -602,9 +572,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_audit(host):
-        """
-        Notifies the host director that a host audit is in progress
-        """
+        """Notifies the host director that a host audit is in progress."""
+
         from nfv_vim import directors
 
         DLOG.verbose(
@@ -618,9 +587,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_abort(host):
-        """
-        Notifies the host director that a host abort is in progress
-        """
+        """Notifies the host director that a host abort is in progress."""
+
         from nfv_vim import directors
 
         DLOG.info(
@@ -631,9 +599,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @staticmethod
     def host_state_change_notify(host):
-        """
-        Notifies the host director that a host has changed state
-        """
+        """Notifies the host director that a host has changed state."""
+
         from nfv_vim import directors
 
         DLOG.info("Host %s state change notification." % host.name)
@@ -642,9 +609,8 @@ class HostDirector(object, metaclass=Singleton):
         sw_mgmt_director.host_state_change(host)
 
     def lock_hosts(self, host_names):
-        """
-        Lock a list of hosts
-        """
+        """Lock a list of hosts."""
+
         DLOG.info("Lock hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.LOCK_HOSTS)
@@ -682,9 +648,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def unlock_hosts(self, host_names):
-        """
-        Unlock a list of hosts
-        """
+        """Unlock a list of hosts."""
+
         DLOG.info("Unlock hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.UNLOCK_HOSTS)
@@ -722,9 +687,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def reboot_hosts(self, host_names):
-        """
-        Reboot a list of hosts
-        """
+        """Reboot a list of hosts."""
+
         DLOG.info("Reboot hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.REBOOT_HOSTS)
@@ -762,9 +726,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def upgrade_hosts(self, host_names, rollback):
-        """
-        Upgrade a list of hosts
-        """
+        """Upgrade a list of hosts."""
+
         DLOG.info("Upgrade hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.UPGRADE_HOSTS)
@@ -795,9 +758,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def swact_hosts(self, host_names):
-        """
-        Swact a list of hosts
-        """
+        """Swact a list of hosts."""
+
         DLOG.info("Swact hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.SWACT_HOSTS)
@@ -833,9 +795,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def fw_update_hosts(self, host_names):
-        """
-        Firmware Update hosts
-        """
+        """Firmware Update hosts."""
+
         DLOG.info("Firmware Update hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.FW_UPDATE_HOSTS)
@@ -866,9 +827,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def fw_update_abort_hosts(self, host_names):
-        """
-        Firmware Update Abort Hosts
-        """
+        """Firmware Update Abort Hosts."""
+
         DLOG.info("Firmware Update Abort for hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.FW_UPDATE_ABORT_HOSTS)
@@ -900,9 +860,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @coroutine
     def _nfvi_kube_host_upgrade_control_plane_callback(self):
-        """
-        NFVI Kube Host Upgrade Control Plane Callback
-        """
+        """NFVI Kube Host Upgrade Control Plane Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -934,9 +893,8 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.kube_host_upgrade_control_plane_failed(host)
 
     def _nfvi_kube_host_upgrade_control_plane(self, host_uuid, host_name, force):
-        """
-        NFVI Kube Host Upgrade Control Plane
-        """
+        """NFVI Kube Host Upgrade Control Plane."""
+
         nfvi.nfvi_kube_host_upgrade_control_plane(
             host_uuid,
             host_name,
@@ -945,9 +903,8 @@ class HostDirector(object, metaclass=Singleton):
         )
 
     def kube_upgrade_hosts_control_plane(self, host_names, force):
-        """
-        Kube Upgrade Hosts Control Plane for multiple hosts
-        """
+        """Kube Upgrade Hosts Control Plane for multiple hosts."""
+
         DLOG.info("Kube Host Upgrade control plane for hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
@@ -980,9 +937,8 @@ class HostDirector(object, metaclass=Singleton):
     # cordon
     @coroutine
     def _nfvi_kube_host_cordon_callback(self):
-        """
-        NFVI Kube Host Cordon Callback
-        """
+        """NFVI Kube Host Cordon Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -1014,17 +970,15 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.kube_host_cordon_failed(host)
 
     def _nfvi_kube_host_cordon(self, host_uuid, host_name, force):
-        """
-        NFVI Kube Host Cordon
-        """
+        """NFVI Kube Host Cordon."""
+
         nfvi.nfvi_kube_host_cordon(
             host_uuid, host_name, force, self._nfvi_kube_host_cordon_callback()
         )
 
     def kube_host_cordon(self, host_names, force):
-        """
-        Kube Host Cordon for multiple hosts
-        """
+        """Kube Host Cordon for multiple hosts."""
+
         DLOG.info("Kube Host Cordon for hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
@@ -1055,9 +1009,8 @@ class HostDirector(object, metaclass=Singleton):
     # uncordon
     @coroutine
     def _nfvi_kube_host_uncordon_callback(self):
-        """
-        NFVI Kube Host Uncordon Callback
-        """
+        """NFVI Kube Host Uncordon Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -1089,17 +1042,15 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.kube_host_uncordon_failed(host)
 
     def _nfvi_kube_host_uncordon(self, host_uuid, host_name, force):
-        """
-        NFVI Kube Host Uncordon
-        """
+        """NFVI Kube Host Uncordon."""
+
         nfvi.nfvi_kube_host_uncordon(
             host_uuid, host_name, force, self._nfvi_kube_host_uncordon_callback()
         )
 
     def kube_host_uncordon(self, host_names, force):
-        """
-        Kube Host Uncordon for multiple hosts
-        """
+        """Kube Host Uncordon for multiple hosts."""
+
         DLOG.info("Kube Host Uncordon for hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
@@ -1129,9 +1080,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @coroutine
     def _nfvi_kube_host_upgrade_kubelet_callback(self):
-        """
-        NFVI Kube Host Upgrade Kubelet Callback (for a single host)
-        """
+        """NFVI Kube Host Upgrade Kubelet Callback (for a single host)."""
+
         from nfv_vim import directors
 
         response = yield
@@ -1163,17 +1113,15 @@ class HostDirector(object, metaclass=Singleton):
             sw_mgmt_director.kube_host_upgrade_kubelet_failed(host)
 
     def _nfvi_kube_host_upgrade_kubelet(self, host_uuid, host_name, force):
-        """
-        NFVI Kube Host Upgrade Kubelet
-        """
+        """NFVI Kube Host Upgrade Kubelet."""
+
         nfvi.nfvi_kube_host_upgrade_kubelet(
             host_uuid, host_name, force, self._nfvi_kube_host_upgrade_kubelet_callback()
         )
 
     def kube_upgrade_hosts_kubelet(self, host_names, force):
-        """
-        Kube Upgrade Hosts Kubelet for multiple hosts
-        """
+        """Kube Upgrade Hosts Kubelet for multiple hosts."""
+
         DLOG.info("Kube Host Upgrade kubelet for hosts: %s" % host_names)
 
         host_operation = Operation(OPERATION_TYPE.KUBE_UPGRADE_HOSTS)
@@ -1205,9 +1153,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @coroutine
     def _nfvi_kube_rootca_update_host_callback(self):
-        """
-        NFVI Kube Root CA Update Host Callback (for a single host)
-        """
+        """NFVI Kube Root CA Update Host Callback (for a single host)."""
+
         from nfv_vim import directors
 
         response = yield
@@ -1250,7 +1197,8 @@ class HostDirector(object, metaclass=Singleton):
         completed_state,
         failed_state,
     ):
-        """NFVI Kube Root CA Update - Host"""
+        """NFVI Kube Root CA Update - Host."""
+
         nfvi.nfvi_kube_rootca_update_host(
             host_uuid,
             host_name,
@@ -1264,7 +1212,8 @@ class HostDirector(object, metaclass=Singleton):
     def kube_rootca_update_hosts_by_type(
         self, host_names, update_type, in_progress_state, completed_state, failed_state
     ):
-        """Utility method for Kube Root CA Update - Host"""
+        """Utility method for Kube Root CA Update - Host."""
+
         DLOG.info(
             "Kube RootCA Update %s (%s) for hosts: %s"
             % (update_type, in_progress_state, host_names)
@@ -1300,9 +1249,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def disable_host_services(self, host_names, service):
-        """
-        Disable a host service on a list of hosts
-        """
+        """Disable a host service on a list of hosts."""
+
         DLOG.info("Disable host services: %s service: %s" % (host_names, service))
 
         host_operation = Operation(OPERATION_TYPE.DISABLE_HOST_SERVICES)
@@ -1343,9 +1291,8 @@ class HostDirector(object, metaclass=Singleton):
         return host_operation
 
     def enable_host_services(self, host_names, service):
-        """
-        Enable a host service on a list of hosts
-        """
+        """Enable a host service on a list of hosts."""
+
         DLOG.info("Enable host services: %s service: %s" % (host_names, service))
 
         host_operation = Operation(OPERATION_TYPE.ENABLE_HOST_SERVICES)
@@ -1387,9 +1334,8 @@ class HostDirector(object, metaclass=Singleton):
 
     @coroutine
     def _nfvi_get_kube_host_upgrade_list_callback(self):
-        """
-        Get Kube Host Upgrade List Callback
-        """
+        """Get Kube Host Upgrade List Callback."""
+
         from nfv_vim import directors
 
         response = yield
@@ -1398,32 +1344,28 @@ class HostDirector(object, metaclass=Singleton):
         sw_mgmt_director.kube_host_upgrade_list(response)
 
     def _nfvi_get_kube_host_upgrade_list(self):
-        """
-        NFVI Kube host upgrade list
-        """
+        """NFVI Kube host upgrade list."""
+
         nfvi.nfvi_get_kube_host_upgrade_list(
             self._nfvi_get_kube_host_upgrade_list_callback()
         )
 
 
 def get_host_director():
-    """
-    Returns the Host Director
-    """
+    """Returns the Host Director."""
+
     return _host_director
 
 
 def host_director_initialize():
-    """
-    Initialize Host Director
-    """
+    """Initialize Host Director."""
+
     global _host_director
 
     _host_director = HostDirector()
 
 
 def host_director_finalize():
-    """
-    Finalize Host Director
-    """
+    """Finalize Host Director."""
+
     pass

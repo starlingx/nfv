@@ -69,7 +69,6 @@
     name: nfv-tox-black
     parent: nfv-tox-base
     description: Run black for nfv
-    voting: false
     vars:
       python_version: 3.9
       tox_envlist: black

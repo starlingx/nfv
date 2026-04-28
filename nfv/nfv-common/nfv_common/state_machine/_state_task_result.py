@@ -11,9 +11,7 @@ from nfv_common.state_machine._state_task_work_result import STATE_TASK_WORK_RES
 
 
 class _StateTaskResult(object, metaclass=Singleton):
-    """
-    State Task Result - Constants
-    """
+    """State Task Result - Constants."""
 
     SUCCESS = Constant("success")
     FAILED = Constant("failed")
@@ -25,15 +23,13 @@ class _StateTaskResult(object, metaclass=Singleton):
 def state_task_result_update(
     task_result, task_result_reason, task_work_result, task_work_result_reason
 ):
-    """
-    Update State Task Result given a state task work result
-    """
+    """Update State Task Result given a state task work result."""
+
     if STATE_TASK_WORK_RESULT.WAIT == task_result:
         # Nothing to update
         return task_result, task_result_reason
 
     if STATE_TASK_RESULT.SUCCESS == task_result:
-
         if STATE_TASK_WORK_RESULT.FAILED == task_work_result:
             return STATE_TASK_RESULT.FAILED, task_work_result_reason
 
@@ -47,7 +43,6 @@ def state_task_result_update(
             return STATE_TASK_RESULT.TIMED_OUT, task_work_result_reason
 
     elif STATE_TASK_RESULT.DEGRADED == task_result:
-
         if STATE_TASK_WORK_RESULT.FAILED == task_work_result:
             return STATE_TASK_RESULT.FAILED, task_work_result_reason
 

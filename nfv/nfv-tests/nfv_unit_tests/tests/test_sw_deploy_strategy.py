@@ -19,7 +19,6 @@ from nfv_vim.strategy._strategy import SwUpgradeStrategy
 
 from nfv_unit_tests.tests import sw_update_testcase
 
-
 INITIAL_RELEASE = "3.2.1"
 PATCH_RELEASE_UPGRADE = "3.2.2"
 # Minor and Major are both major release upgrades
@@ -54,7 +53,6 @@ def _unlock_hosts_stage_as_dict(host_names, retry_count=5, retry_delay=120):
 )
 @mock.patch.object(nfvi.objects.v1.upgrade, "SW_VERSION", INITIAL_RELEASE)
 class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
-
     def create_sw_deploy_strategy(
         self,
         controller_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
@@ -70,9 +68,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         nfvi_upgrade=None,
         single_controller=False,
     ):
-        """
-        Create a software update strategy
-        """
+        """Create a software update strategy."""
+
         strategy = SwUpgradeStrategy(
             uuid=str(uuid.uuid4()),
             controller_apply_type=controller_apply_type,
@@ -218,9 +215,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     @mock.patch("nfv_common.strategy._strategy.Strategy._build")
     def test_sw_deploy_strategy_build_steps(self, fake_build):
-        """
-        Verify build phase steps and stages for sw deploy strategy creation.
-        """
+        """Verify build phase steps and stages for sw deploy strategy creation."""
+
         # setup a minimal host environment
         self.create_host("controller-0", aio=True)
 
@@ -257,11 +253,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_0,
     )
     def test_sw_deploy_strategy_start_on_controller_0_aiosx(self):
-        """
-        Test the sw_upgrade strategy start stage controller-0
+        """Test the sw_upgrade strategy start stage controller-0
+
         - sx
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -305,11 +301,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_0,
     )
     def test_sw_deploy_strategy_start_on_controller_0__aiodx(self):
-        """
-        Test the sw_upgrade strategy start stages on controller-0:
+        """Test the sw_upgrade strategy start stages on controller-0:
+
         - dx
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -350,11 +346,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     # pylint: disable=no-member
     def test_sw_deploy_strategy_start_on_controller_1_aiodx(self):
-        """
-        Test the sw_upgrade strategy start stages on controller-1:
+        """Test the sw_upgrade strategy start stages on controller-1:
+
         - dx
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -395,12 +391,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     # pylint: disable=no-member
     def test_sw_deploy_strategy_start_on_controller_1_aiodx_major(self):
-        """
-        Test the sw_upgrade strategy start stages on controller-1:
+        """Test the sw_upgrade strategy start stages on controller-1:
+
         - dx
         - major release
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -447,11 +443,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_0,
     )
     def test_sw_deploy_strategy_complete_on_controller_0_aiosx(self):
-        """
-        Test the sw_upgrade strategy complete stage controller-0
+        """Test the sw_upgrade strategy complete stage controller-0
+
         - sx
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -497,11 +493,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_0,
     )
     def test_sw_deploy_strategy_complete_on_controller_0__aiodx(self):
-        """
-        Test the sw_upgrade strategy complete stages on controller-0:
+        """Test the sw_upgrade strategy complete stages on controller-0:
+
         - dx
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -544,11 +540,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     # pylint: disable=no-member
     def test_sw_deploy_strategy_complete_on_controller_1_aiodx(self):
-        """
-        Test the sw_upgrade strategy complete stages on controller-1:
+        """Test the sw_upgrade strategy complete stages on controller-1:
+
         - dx
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -591,12 +587,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
     # pylint: disable=no-member
     def test_sw_deploy_strategy_complete_on_controller_1_aiodx_major(self):
-        """
-        Test the sw_upgrade strategy complete stages on controller-1:
+        """Test the sw_upgrade strategy complete stages on controller-1:
+
         - dx
         - major releasee
         Verify:
-        - pass
+        - pass.
         """
 
         release = "888.8"
@@ -641,15 +637,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     # ~~~ AIO-SX NRR ~~~
 
     def test_sw_deploy_strategy_aiosx_controllers_serial_nrr(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - serial apply
         - no reboot required
         - stop_start instances
         - no instances
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy()
@@ -679,15 +675,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_controllers_parallel_nrr(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - no reboot required
         - stop_start instances
         - no instances
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -719,8 +715,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_controllers_parallel_nrr_no_openstack(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - no reboot required
@@ -728,7 +724,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - no instances
         - no openstack
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -761,15 +757,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_controllers_parallel_nrr_instances_migrate(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - no reboot required
         - migrate instances
         - instances
         Verify:
-        - Fail
+        - Fail.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -790,15 +786,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_deploy_strategy_aiosx_controllers_parallel_nrr_instances_stop_start(
         self,
     ):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - no reboot required
         - stop_start instances
         - instances
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -833,15 +829,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     # ~~~ AIO-SX RR ~~~
 
     def test_sw_deploy_strategy_aiosx_controllers_serial_rr(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - serial apply
         - reboot required
         - stop_start instances
         - no instances
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy()
@@ -880,15 +876,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_controllers_parallel_rr(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - reboot required
         - stop_start instances
         - no instances
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -929,8 +925,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_controllers_parallel_rr_no_openstack(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - reboot required
@@ -938,7 +934,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         - no instances
         - no openstack
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -980,15 +976,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_controllers_parallel_rr_instances_migrate(self):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - reboot required
         - migrate instances
         - instances
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1009,15 +1005,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_deploy_strategy_aiosx_controllers_parallel_rr_instances_stop_start(
         self,
     ):
-        """
-        Test the sw_deploy strategy add controller strategy stages:
+        """Test the sw_deploy strategy add controller strategy stages:
+
         - aio-sx host
         - parallel apply
         - reboot required
         - stop_start instances
         - instances
         Verify:
-        - Pass
+        - Pass.
         """
 
         controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1064,11 +1060,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_already_deploying(self):
-        """
-        Test the sw_deploy strategy when patch already deploying:
+        """Test the sw_deploy strategy when patch already deploying:
+
         - patch already deploying
         Verify:
-        - Success
+        - Success.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1096,11 +1092,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     def test_sw_deploy_strategy_aiosx_already_removing(self):
-        """
-        Test the sw_deploy strategy when patch already removing:
+        """Test the sw_deploy strategy when patch already removing:
+
         - patch already removing
         Verify:
-        - Success
+        - Success.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1128,11 +1124,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     def test_sw_deploy_strategy_aiosx_already_deploy_completed(self):
-        """
-        Test the sw_deploy strategy when patch already deploy completed:
+        """Test the sw_deploy strategy when patch already deploy completed:
+
         - patch deploy completed
         Verify:
-        - Fail
+        - Fail.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1158,11 +1154,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert bpr.result_reason == expected_reason, bpr.result_reason
 
     def test_sw_deploy_strategy_aiosx_already_deployed(self):
-        """
-        Test the sw_deploy strategy when patch already deploy completed:
+        """Test the sw_deploy strategy when patch already deploy completed:
+
         - patch deployed
         Verify:
-        - Fail
+        - Fail.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1188,11 +1184,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert bpr.result_reason == expected_reason, bpr.result_reason
 
     def test_sw_deploy_strategy_aiosx_already_deployed_downgrade_create(self):
-        """
-        Test the sw_deploy strategy when patch already deploy completed:
+        """Test the sw_deploy strategy when patch already deploy completed:
+
         - patch deployed
         Verify:
-        - Fail
+        - Fail.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1221,11 +1217,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     def test_sw_deploy_strategy_aiosx_already_committed(self):
-        """
-        Test the sw_deploy strategy when patch already committed:
+        """Test the sw_deploy strategy when patch already committed:
+
         - patch already committed
         Verify:
-        - Fail
+        - Fail.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1254,11 +1250,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.INITIAL, bpr.result
 
     def test_sw_deploy_strategy_aiosx_release_does_not_exist(self):
-        """
-        Test the sw_deploy strategy when patch does not exist:
+        """Test the sw_deploy strategy when patch does not exist:
+
         - patch does not exist
         Verify:
-        - Fail
+        - Fail.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1282,11 +1278,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert bpr.result_reason == expected_reason, strategy.build_phase.result_reason
 
     def test_sw_deploy_strategy_aiosx_release_is_unavailable(self):
-        """
-        Test the sw_deploy strategy when patch is unavailable:
+        """Test the sw_deploy strategy when patch is unavailable:
+
         - patch does not exist
         Verify:
-        - Fail
+        - Fail.
         """
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
@@ -1312,12 +1308,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     # ~~~~~~ Full Apply Phase ~~~~~~~
 
     def test_sw_deploy_strategy_aiosx_apply_phase_nrr(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - nrr
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -1378,12 +1374,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_apply_phase_rr(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - rr
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -1452,12 +1448,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiodx_apply_phase_nrr(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-dx
         - nrr
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -1534,12 +1530,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiodx_apply_phase_rr(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-dx
         - rr
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -1635,14 +1631,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_standard_apply_phase_nrr(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - standard
         - nrr
         - parallel storage
         - parallel workers
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -1733,14 +1729,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_standard_apply_phase_rr(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - standard
         - rr
         - parallel storage
         - parallel workers
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -1870,15 +1866,15 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_standard_apply_phase_rr_major(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - standard
         - rr
         - parallel storage
         - parallel workers
         - major release
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2010,13 +2006,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_complete(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - complete
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2101,13 +2097,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_active_done(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - activate-deon
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2192,13 +2188,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_activate_failed(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - activate-failed
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2283,13 +2279,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_start_done(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - start-done
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2352,14 +2348,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_start_done_locked(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - start-done
         - c0 locked
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2449,14 +2445,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_deploy_strategy_aiosx_rollback_from_host_rollback_deployed_unlocked(
         self,
     ):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - host-rollback-done
         - c0 unloacked
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2519,14 +2515,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_host_rollback_deployed_locked(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - host-rollback-done
         - c0 loacked
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2611,13 +2607,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_host_done(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - host-done
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2687,13 +2683,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_host_failed(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - host-failed
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2763,13 +2759,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_host(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - host
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2838,17 +2834,17 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
-    def test_sw_deploy_strategy_aiodx_rollback_from_host_rollback_deployed_unlocked_pending(
+    def test_sw_deploy_strategy_aiodx_rollback_host_rollback_deployed_unlocked_pending(
         self,
     ):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-dx
         - major
         - host-rollback-done
         - c0 locked
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -2944,14 +2940,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_deploy_strategy_aiodx_rollback_from_host_rollback_deployed_unlocked(
         self,
     ):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-dx
         - major
         - host-rollback-done
         - c0 locked
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -3019,14 +3015,14 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiodx_rollback_from_host_rollback_deployed_locked(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-dx
         - major
         - host-rollback-done
         - c0 locked
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -3125,13 +3121,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiodx_rollback_from_host_done(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-dx
         - major
         - host-done
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -3216,13 +3212,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiodx_rollback_from_host_failed(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-dx
         - major
         - host-failed
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -3307,13 +3303,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiodx_rollback_from_host(self):
-        """
-        Test the sw_deploy strategy rollback phase:
+        """Test the sw_deploy strategy rollback phase:
+
         - aio-dx
         - major
         - host
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -3398,13 +3394,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_downgrade(self):
-        """
-        Test the sw_deploy strategy apply phase:
+        """Test the sw_deploy strategy apply phase:
+
         - aio-sx
         - major
         - host
         Verify:
-        - Pass
+        - Pass.
         """
 
         release = "888.8"
@@ -3465,11 +3461,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_is_upgrade(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - We should be able to upgrade to a deployed release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3493,12 +3489,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_upgrade_rr(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - We should be able to upgrade to a deployed release
         - RR
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3522,12 +3518,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_upgrade_multiple(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - We should be able to upgrade to a deployed release
         - Upgrade multiple releases at once
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 2
@@ -3555,13 +3551,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_upgrade_multiple_rr_first(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - We should be able to upgrade to a deployed release
         - Upgrade multiple releases at once
         - RR on the oldest release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 2
@@ -3589,13 +3585,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_upgrade_multiple_rr_second(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - We should be able to upgrade to a deployed release
         - Upgrade multiple releases at once
         - RR on the most recent release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 2
@@ -3623,13 +3619,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_upgrade_deploying_complex(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - We should be able to upgrade to a deployed release
         - Upgrade multiple releases at once
         - RR on the most recent release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 4
@@ -3665,11 +3661,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_upgrade_not_required(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - Nothing to upgrade
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3692,11 +3688,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_upgrade_reenter(self):
-        """
-        Test the sw_deploy strategy upgrade logic:
+        """Test the sw_deploy strategy upgrade logic:
+
         - Nothing to upgrade
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3720,12 +3716,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade(self):
-        """
+        """Test the sw_deploy strategy downgrade logic:
 
-        Test the sw_deploy strategy downgrade logic:
         - We should be able to downgrade to a deployed release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3748,12 +3743,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_rr(self):
-        """
-        Test the sw_deploy strategy downgrade logic:
+        """Test the sw_deploy strategy downgrade logic:
+
         - We should be able to downgrade to a deployed release
         - RR
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3776,12 +3771,12 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_multiple(self):
-        """
-        Test the sw_deploy strategy downgrade logic:
+        """Test the sw_deploy strategy downgrade logic:
+
         - We should be able to downgrade to a deployed release
         - Downgrade multiple releases at once
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3808,14 +3803,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_RR_invalid_release(self):
-        """
+        """Test the sw_deploy strategy downgrade logic:
 
-        Test the sw_deploy strategy downgrade logic:
         - We should be able to downgrade to a deployed release
         - Downgrade multiple releases at once
         - Invalid release uploaded and is in 'available' statei with RR.
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3848,14 +3842,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_NRR_invalid_release(self):
-        """
+        """Test the sw_deploy strategy downgrade logic:
 
-        Test the sw_deploy strategy downgrade logic:
         - We should be able to downgrade to a deployed release
         - Downgrade multiple releases at once
         - Invalid release uploaded and is in 'available' state with NRR.
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3894,14 +3887,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
     def test_sw_deploy_strategy_aiosx_is_downgrade_NRR_invalid_release_with_index2(
         self,
     ):
-        """
+        """Test the sw_deploy strategy downgrade logic:
 
-        Test the sw_deploy strategy downgrade logic:
         - We should be able to downgrade to a deployed release
         - Downgrade multiple releases at once
         - Invalid release uploaded and is in 'available' state with NRR.
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 2
@@ -3938,13 +3930,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_multiple_rr_first(self):
-        """
-        Test the sw_deploy strategy downgrade logic:
+        """Test the sw_deploy strategy downgrade logic:
+
         - We should be able to downgrade to a deployed release
         - Downgrade multiple releases at once
         - RR on the oldest release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -3971,13 +3963,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_multiple_rr_second(self):
-        """
-        Test the sw_deploy strategy downgrade logic:
+        """Test the sw_deploy strategy downgrade logic:
+
         - We should be able to downgrade to a deployed release
         - Downgrade multiple releases at once
         - RR on the most recent release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -4004,13 +3996,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_removing_complex(self):
-        """
-        Test the sw_deploy strategy downgrade logic:
+        """Test the sw_deploy strategy downgrade logic:
+
         - We should be able to downgrade to a deployed release
         - Downgrade multiple releases at once
         - RR on the most recent release
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 3
@@ -4045,11 +4037,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_not_required(self):
-        """
-        Test the sw_deploy strategy downgrade logic:
+        """Test the sw_deploy strategy downgrade logic:
+
         - Nothing to downgrade
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1
@@ -4072,11 +4064,11 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not vim_rr
 
     def test_sw_deploy_strategy_aiosx_is_downgrade_reenter(self):
-        """
-        Test the sw_deploy strategy downgrade logic:
+        """Test the sw_deploy strategy downgrade logic:
+
         - Nothing to downgrade
         Verify:
-        - Pass
+        - Pass.
         """
 
         index = 1

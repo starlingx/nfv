@@ -16,9 +16,7 @@ from nfv_vim.api.controllers.v1 import virtualised_resources
 
 
 class APIVersion(wsme_types.Base):
-    """
-    API - Version
-    """
+    """API - Version."""
 
     id = wsme_types.text
     status = wsme_types.text
@@ -41,9 +39,7 @@ class APIVersion(wsme_types.Base):
 
 
 class API(wsme_types.Base):
-    """
-    API
-    """
+    """API."""
 
     versions = wsme_types.wsattr([APIVersion], name="versions")
 
@@ -55,9 +51,7 @@ class API(wsme_types.Base):
 
 
 class APIController(rest.RestController):
-    """
-    Virtual Infrastructure Manager API Controller
-    """
+    """Virtual Infrastructure Manager API Controller."""
 
     @pecan.expose()
     def _lookup(self, key, *remainder):

@@ -21,14 +21,11 @@ DLOG = debug.debug_get_logger("nfv_common.tasks.task_scheduler")
 
 
 class TaskScheduler(object):
-    """
-    Task Scheduler
-    """
+    """Task Scheduler."""
 
     def __init__(self, name, task_worker_pool):
-        """
-        Create a task scheduler
-        """
+        """Create a task scheduler."""
+
         self._name = name
         self._task_worker_pool = task_worker_pool
         self._workers_selobj = dict()
@@ -51,22 +48,19 @@ class TaskScheduler(object):
 
     @property
     def name(self):
-        """
-        Returns the name of the scheduler
-        """
+        """Returns the name of the scheduler."""
+
         return self._name
 
     @property
     def running_task(self):
-        """
-        Returns the running task
-        """
+        """Returns the running task."""
+
         return self._running_task
 
     def add_task(self, priority, target, *args, **kwargs):
-        """
-        Add a task to the task scheduler
-        """
+        """Add a task to the task scheduler."""
+
         if inspect.isgeneratorfunction(target):
             future = TaskFuture(self)
             task = Task(self, priority, target(future, *args, **kwargs))
@@ -80,9 +74,8 @@ class TaskScheduler(object):
         return result
 
     def delete_task(self, task):
-        """
-        Delete a task from the task scheduler
-        """
+        """Delete a task from the task scheduler."""
+
         DLOG.debug(
             "Pool %s: Delete Task, name=%s." % (self._task_worker_pool.name, task.name)
         )
@@ -109,9 +102,8 @@ class TaskScheduler(object):
         del self._tasks[task.id]
 
     def add_task_timer(self, name, interval_secs, task):
-        """
-        Add timer for a task
-        """
+        """Add timer for a task."""
+
         timer_id = timers.timers_create_timer(
             name, interval_secs, interval_secs, self.task_timer_timeout
         )
@@ -127,9 +119,8 @@ class TaskScheduler(object):
 
     @coroutine
     def task_timer_timeout(self):
-        """
-        Called when a task timer has fired
-        """
+        """Called when a task timer has fired."""
+
         while True:
             timer_id = yield
             task = self._task_timers.get(timer_id, None)
@@ -142,16 +133,14 @@ class TaskScheduler(object):
                 break
 
     def add_task_io_read_wait(self, select_obj, task):
-        """
-        Add a task read selection object to wait on
-        """
+        """Add a task read selection object to wait on."""
+
         selobj.selobj_add_read_obj(select_obj, self.task_io_wait_complete)
         self._task_read_selobjs[select_obj] = task
 
     def cancel_task_io_read_wait(self, select_obj, task):
-        """
-        Cancel a task read selection object being waited on
-        """
+        """Cancel a task read selection object being waited on."""
+
         select_obj_owner = self._task_read_selobjs.get(select_obj, None)
         if select_obj_owner is not None:
             if select_obj_owner.id == task.id:
@@ -159,16 +148,14 @@ class TaskScheduler(object):
                 del self._task_read_selobjs[select_obj]
 
     def add_io_write_wait(self, select_obj, task):
-        """
-        Add a task write selection object to wait on
-        """
+        """Add a task write selection object to wait on."""
+
         selobj.selobj_add_write_obj(select_obj, self.task_io_wait_complete)
         self._task_write_selobjs[select_obj] = task
 
     def cancel_io_write_wait(self, select_obj, task):
-        """
-        Cancel a task write selection object being waited on
-        """
+        """Cancel a task write selection object being waited on."""
+
         select_obj_owner = self._task_write_selobjs.get(select_obj, None)
         if select_obj_owner is not None:
             if select_obj_owner.id == task.id:
@@ -177,9 +164,9 @@ class TaskScheduler(object):
 
     @coroutine
     def task_io_wait_complete(self):
-        """
-        Called when a task selection object being waited on has become
-        readable or writeable
+        """Called when a task selection object being waited on has become
+
+        readable or writeable.
         """
         while True:
             select_obj = yield
@@ -195,9 +182,8 @@ class TaskScheduler(object):
                 break
 
     def _schedule_next_task(self):
-        """
-        Schedule next task
-        """
+        """Schedule next task."""
+
         task_id = None
 
         if self._ready_dequeues[TASK_PRIORITY.HIGH] >= 60:
@@ -236,9 +222,8 @@ class TaskScheduler(object):
             self._tasks_scheduled = True
 
     def _schedule_task(self, task, reschedule=False):
-        """
-        Schedule or Reschedule a task
-        """
+        """Schedule or Reschedule a task."""
+
         DLOG.verbose(
             "Pool %s: Scheduling Task, name=%s."
             % (self._task_worker_pool.name, task.name)
@@ -264,21 +249,18 @@ class TaskScheduler(object):
             self._schedule_next_task()
 
     def reschedule_task(self, task):
-        """
-        Reschedule a task
-        """
+        """Reschedule a task."""
+
         self._schedule_task(task, reschedule=True)
 
     def schedule_task(self, task):
-        """
-        Schedule a task
-        """
+        """Schedule a task."""
+
         self._schedule_task(task)
 
     def schedule_task_work(self, task_work=None):
-        """
-        Schedule task work to one of the task workers if available
-        """
+        """Schedule task work to one of the task workers if available."""
+
         if task_work is not None:
             self._wait_queue.appendleft(task_work)
 
@@ -317,9 +299,8 @@ class TaskScheduler(object):
 
     @coroutine
     def task_work_complete(self):
-        """
-        A task worker has completed it's assigned work
-        """
+        """A task worker has completed it's assigned work."""
+
         while True:
             select_obj = yield
             worker = self._workers_selobj.get(select_obj, None)
@@ -349,9 +330,8 @@ class TaskScheduler(object):
 
     @coroutine
     def task_work_timeout(self):
-        """
-        Work being done by the task has timed out
-        """
+        """Work being done by the task has timed out."""
+
         timer_id = yield
         worker = self._workers_timer.get(timer_id, None)
         if worker is not None:
@@ -375,9 +355,8 @@ class TaskScheduler(object):
 
     @coroutine
     def run_tasks(self):
-        """
-        Run tasks that are ready to run
-        """
+        """Run tasks that are ready to run."""
+
         while True:
             select_obj = yield
             if select_obj == self._run_queue.selobj:

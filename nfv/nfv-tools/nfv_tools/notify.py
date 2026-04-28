@@ -13,9 +13,8 @@ from nfv_common import tcp
 
 
 def process_main():
-    """
-    Notify - Process Main
-    """
+    """Notify - Process Main."""
+
     connection = None
 
     try:

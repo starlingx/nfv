@@ -14,9 +14,8 @@ from nfv_vim.database._database import database_get
 
 
 def database_system_add(system_obj):
-    """
-    Add a system object to the database
-    """
+    """Add a system object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.System).filter(model.System.name == system_obj.name)
@@ -32,9 +31,8 @@ def database_system_add(system_obj):
 
 
 def database_system_delete(system_name):
-    """
-    Delete a system object from the database
-    """
+    """Delete a system object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.System)
@@ -43,9 +41,8 @@ def database_system_delete(system_name):
 
 
 def database_system_get_list():
-    """
-    Fetch all the system objects from the database
-    """
+    """Fetch all the system objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.System)
@@ -58,9 +55,8 @@ def database_system_get_list():
 
 
 def database_host_add(host_obj):
-    """
-    Add a host object to the database
-    """
+    """Add a host object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Host_v8).filter(model.Host_v8.name == host_obj.name)
@@ -92,9 +88,8 @@ def database_host_add(host_obj):
 
 
 def database_host_delete(host_name):
-    """
-    Delete a host object from the database
-    """
+    """Delete a host object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Host_v8)
@@ -103,9 +98,8 @@ def database_host_delete(host_name):
 
 
 def database_host_get_list():
-    """
-    Fetch all the host objects from the database
-    """
+    """Fetch all the host objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.Host_v8)
@@ -144,9 +138,8 @@ def database_host_get_list():
 
 
 def database_host_group_add(host_group_obj):
-    """
-    Add a host group object to the database
-    """
+    """Add a host group object to the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.HostGroup).filter(
@@ -172,9 +165,8 @@ def database_host_group_add(host_group_obj):
 
 
 def database_host_group_delete(host_group_name):
-    """
-    Delete a host group object from the database
-    """
+    """Delete a host group object from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.HostGroup)
@@ -183,9 +175,8 @@ def database_host_group_delete(host_group_name):
 
 
 def database_host_group_get_list():
-    """
-    Fetch all the host group objects from the database
-    """
+    """Fetch all the host group objects from the database."""
+
     db = database_get()
     session = db.session()
     query = session.query(model.HostGroup)

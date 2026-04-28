@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class System(ObjectData):
-    """
-    NFVI System Object
-    """
+    """NFVI System Object."""
 
     def __init__(self, name, description):
         super(System, self).__init__("1.0.0")

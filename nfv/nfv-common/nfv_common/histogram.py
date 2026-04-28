@@ -13,9 +13,7 @@ DLOG = debug.debug_get_logger("nfv_common.histogram")
 
 
 class Histogram(object):
-    """
-    Histogram Object
-    """
+    """Histogram Object."""
 
     def __init__(self, name, num_buckets, units):
         self._name = name
@@ -32,15 +30,13 @@ class Histogram(object):
 
     @property
     def name(self):
-        """
-        Returns the name of the histogram
-        """
+        """Returns the name of the histogram."""
+
         return self._name
 
     def add_data(self, sample):
-        """
-        Convert data given to the nearest power of two.
-        """
+        """Convert data given to the nearest power of two."""
+
         sample_as_int = int(sample)
         if 0 == sample_as_int:
             bucket_idx = sample_as_int.bit_length()
@@ -61,9 +57,8 @@ class Histogram(object):
         self._buckets[bucket_idx] += 1
 
     def reset_data(self):
-        """
-        Clear out the collected samples.
-        """
+        """Clear out the collected samples."""
+
         self._reset_date = datetime.datetime.now()
         self._sample_total = 0
         self._num_samples = 0
@@ -75,9 +70,8 @@ class Histogram(object):
 
     @staticmethod
     def _scale_sample(scale_min, scale_max, sample_min, sample_max, sample):
-        """
-        Normalize sample to be compared with other samples
-        """
+        """Normalize sample to be compared with other samples."""
+
         if scale_min == scale_max:
             return sample
 
@@ -90,9 +84,8 @@ class Histogram(object):
         ) + sample_max
 
     def display_data(self, pretty_format=True):
-        """
-        Output the histogram to a log.
-        """
+        """Output the histogram to a log."""
+
         date_str = ""
         values_str = ""
 
@@ -153,18 +146,16 @@ _histograms = dict()
 
 
 def _find_histogram(name):
-    """
-    Lookup a histogram with a particular name
-    """
+    """Lookup a histogram with a particular name."""
+
     if name in _histograms:
         return _histograms[name]
     return None
 
 
 def add_histogram_data(name, sample, units):
-    """
-    Add a sample to a histogram
-    """
+    """Add a sample to a histogram."""
+
     global _histograms
 
     histogram = _find_histogram(name)
@@ -176,9 +167,8 @@ def add_histogram_data(name, sample, units):
 
 
 def reset_histogram_data(name=None):
-    """
-    Reset histogram data
-    """
+    """Reset histogram data."""
+
     if name is None:
         for histogram in list(_histograms.values()):
             histogram.reset_data()
@@ -189,9 +179,8 @@ def reset_histogram_data(name=None):
 
 
 def display_histogram_data(name=None, pretty_format=True):
-    """
-    Display histogram data captured
-    """
+    """Display histogram data captured."""
+
     if name is None:
         for histogram in list(_histograms.values()):
             histogram.display_data(pretty_format)

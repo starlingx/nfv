@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class RebuildState(state_machine.State):
-    """
-    Instance - Rebuild State
-    """
+    """Instance - Rebuild State."""
 
     def __init__(self, name):
         super(RebuildState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering rebuild state
-        """
+        """Entering rebuild state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = RebuildTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting rebuild state
-        """
+        """Exiting rebuild state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, RebuildTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the rebuild state
-        """
+        """Transition from the rebuild state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the rebuild state
-        """
+        """Handle event while in the rebuild state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

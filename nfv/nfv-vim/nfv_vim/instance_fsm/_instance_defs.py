@@ -9,9 +9,7 @@ from nfv_common.helpers import Singleton
 
 
 class StateNames(object, metaclass=Singleton):
-    """
-    Instance - State Name Constants
-    """
+    """Instance - State Name Constants."""
 
     INITIAL = Constant("initial")
     MIGRATE_SELECT = Constant("migrate-select")
@@ -45,9 +43,7 @@ class StateNames(object, metaclass=Singleton):
 
 
 class EventNames(object, metaclass=Singleton):
-    """
-    Instance - Event Name Constants
-    """
+    """Instance - Event Name Constants."""
 
     NFVI_ENABLED = Constant("nfvi-enabled")
     NFVI_DISABLED = Constant("nfvi-disabled")
@@ -71,9 +67,7 @@ class EventNames(object, metaclass=Singleton):
 
 
 class TaskNames(object, metaclass=Singleton):
-    """
-    Instance - Task Name Constants
-    """
+    """Instance - Task Name Constants."""
 
     ADD_INSTANCE = Constant("add-instance")
     DELETE_INSTANCE = Constant("delete-instance")

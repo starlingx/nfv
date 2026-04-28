@@ -14,38 +14,32 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class ConfigureState(state_machine.State):
-    """
-    Host - Configure State
-    """
+    """Host - Configure State."""
 
     def __init__(self, name):
         super(ConfigureState, self).__init__(name)
 
     def enter(self, host):
-        """
-        Entering configure state
-        """
+        """Entering configure state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, host.name))
         host.task = AddHostTask(host)
         host.task.start()
 
     def exit(self, host):
-        """
-        Exiting configure state
-        """
+        """Exiting configure state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, host.name))
         host.task.abort()
 
     def transition(self, host, event, event_data, to_state):
-        """
-        Transition from the configure state
-        """
+        """Transition from the configure state."""
+
         pass
 
     def handle_event(self, host, event, event_data=None):
-        """
-        Handle event while in the configure state
-        """
+        """Handle event while in the configure state."""
+
         if HOST_EVENT.ADD == event:
             if not host.task.inprogress():
                 host.task = AddHostTask(host)

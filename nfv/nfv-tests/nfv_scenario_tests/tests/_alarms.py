@@ -28,9 +28,8 @@ def _instance_alarm_was_raised(alarms, expected_alarms, instance):
 
 
 def is_instance_failed_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance failed alarm has been raised
-    """
+    """Check if an instance failed alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_FAILED,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -40,9 +39,8 @@ def is_instance_failed_alarm(alarms, instance, guest_hb=False):
 
 
 def is_instance_stop_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance stop alarm has been raised
-    """
+    """Check if an instance stop alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_STOPPED,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -52,9 +50,8 @@ def is_instance_stop_alarm(alarms, instance, guest_hb=False):
 
 
 def is_instance_pause_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance pause alarm has been raised
-    """
+    """Check if an instance pause alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_PAUSED,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -64,9 +61,8 @@ def is_instance_pause_alarm(alarms, instance, guest_hb=False):
 
 
 def is_instance_suspend_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance suspend alarm has been raised
-    """
+    """Check if an instance suspend alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_SUSPENDED,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -76,9 +72,8 @@ def is_instance_suspend_alarm(alarms, instance, guest_hb=False):
 
 
 def is_instance_reboot_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance reboot alarm has been raised
-    """
+    """Check if an instance reboot alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_REBOOTING,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -88,9 +83,8 @@ def is_instance_reboot_alarm(alarms, instance, guest_hb=False):
 
 
 def is_instance_rebuild_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance rebuild alarm has been raised
-    """
+    """Check if an instance rebuild alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_REBUILDING,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -100,9 +94,8 @@ def is_instance_rebuild_alarm(alarms, instance, guest_hb=False):
 
 
 def was_instance_live_migrate_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance live-migrate alarm was raised
-    """
+    """Check if an instance live-migrate alarm was raised."""
+
     expected_alarms = [
         {
             "alarm_set": "set",
@@ -120,9 +113,8 @@ def was_instance_live_migrate_alarm(alarms, instance, guest_hb=False):
 
 
 def was_instance_cold_migrate_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance cold-migrate alarm was raised
-    """
+    """Check if an instance cold-migrate alarm was raised."""
+
     expected_alarms = [
         {
             "alarm_set": "set",
@@ -140,9 +132,8 @@ def was_instance_cold_migrate_alarm(alarms, instance, guest_hb=False):
 
 
 def is_instance_cold_migrated_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance cold-migrated alarm has been raised
-    """
+    """Check if an instance cold-migrated alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_COLD_MIGRATED,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -152,9 +143,8 @@ def is_instance_cold_migrated_alarm(alarms, instance, guest_hb=False):
 
 
 def was_instance_cold_migrate_revert_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance cold-migrate revert alarm was raised
-    """
+    """Check if an instance cold-migrate revert alarm was raised."""
+
     expected_alarms = [
         {
             "alarm_set": "set",
@@ -172,9 +162,8 @@ def was_instance_cold_migrate_revert_alarm(alarms, instance, guest_hb=False):
 
 
 def was_instance_resize_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance resize alarm was raised
-    """
+    """Check if an instance resize alarm was raised."""
+
     expected_alarms = [
         {
             "alarm_set": "set",
@@ -192,9 +181,8 @@ def was_instance_resize_alarm(alarms, instance, guest_hb=False):
 
 
 def is_instance_resized_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance resized alarm has been raised
-    """
+    """Check if an instance resized alarm has been raised."""
+
     expected_alarm = {
         "alarm_id": fm_constants.FM_ALARM_ID_VM_RESIZED,
         "severity": fm_constants.FM_ALARM_SEVERITY_CRITICAL,
@@ -204,9 +192,8 @@ def is_instance_resized_alarm(alarms, instance, guest_hb=False):
 
 
 def was_instance_resize_revert_alarm(alarms, instance, guest_hb=False):
-    """
-    Check if an instance resize revert alarm was raised
-    """
+    """Check if an instance resize revert alarm was raised."""
+
     expected_alarms = [
         {
             "alarm_set": "set",

@@ -6,25 +6,25 @@
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT  # noqa: F401
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE  # noqa: F401
 from nfv_vim.instance_fsm._instance_fsm import (  # noqa: F401
-    ColdMigrateConfirmStateMachine
+    ColdMigrateConfirmStateMachine,
 )
 from nfv_vim.instance_fsm._instance_fsm import (  # noqa: F401
-    ColdMigrateRevertStateMachine
+    ColdMigrateRevertStateMachine,
 )
 from nfv_vim.instance_fsm._instance_fsm import (  # noqa: F401
-    GuestServicesCreateStateMachine
+    GuestServicesCreateStateMachine,
 )
 from nfv_vim.instance_fsm._instance_fsm import (  # noqa: F401
-    GuestServicesDeleteStateMachine
+    GuestServicesDeleteStateMachine,
 )
 from nfv_vim.instance_fsm._instance_fsm import (  # noqa: F401
-    GuestServicesDisableStateMachine
+    GuestServicesDisableStateMachine,
 )
 from nfv_vim.instance_fsm._instance_fsm import (  # noqa: F401
-    GuestServicesEnableStateMachine
+    GuestServicesEnableStateMachine,
 )
 from nfv_vim.instance_fsm._instance_fsm import (  # noqa: F401
-    GuestServicesSetStateMachine
+    GuestServicesSetStateMachine,
 )
 from nfv_vim.instance_fsm._instance_fsm import ColdMigrateStateMachine  # noqa: F401
 from nfv_vim.instance_fsm._instance_fsm import DeleteStateMachine  # noqa: F401

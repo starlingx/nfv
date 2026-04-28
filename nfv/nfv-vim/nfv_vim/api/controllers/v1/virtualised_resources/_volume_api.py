@@ -18,9 +18,7 @@ DLOG = debug.debug_get_logger("nfv_vim.api.volume")
 
 
 class VolumeCreateData(wsme_types.Base):
-    """
-    Volume - Create Data
-    """
+    """Volume - Create Data."""
 
     name = wsme_types.wsattr(str, mandatory=True)
     description = wsme_types.wsattr(str, mandatory=False, default="")
@@ -37,17 +35,13 @@ class VolumeCreateData(wsme_types.Base):
 
 
 class VolumeUpdateData(wsme_types.Base):
-    """
-    Volume - Update Data
-    """
+    """Volume - Update Data."""
 
     description = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class VolumeQueryData(wsme_types.Base):
-    """
-    Volume - Query Data
-    """
+    """Volume - Query Data."""
 
     uuid = str
     name = str
@@ -72,15 +66,12 @@ class VolumeQueryData(wsme_types.Base):
 
 
 class VolumeAPI(pecan.rest.RestController):
-    """
-    Volume Rest API
-    """
+    """Volume Rest API."""
 
     @staticmethod
     def _get_volume_details(volume_uuid, volume):
-        """
-        Return a volume details
-        """
+        """Return a volume details."""
+
         vim_connection = pecan.request.vim.open_connection()
         rpc_request = rpc.APIRequestGetVolume()
         rpc_request.filter_by_uuid = volume_uuid

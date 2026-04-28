@@ -10,9 +10,7 @@ DLOG = debug.debug_get_logger("nfv_common.thread.thread_worker")
 
 
 class ThreadWorker(object):
-    """
-    Thread Worker
-    """
+    """Thread Worker."""
 
     def __init__(
         self,
@@ -29,9 +27,8 @@ class ThreadWorker(object):
 
     @property
     def name(self):
-        """
-        Returns the name of thread worker
-        """
+        """Returns the name of thread worker."""
+
         return self._name
 
     @property
@@ -48,38 +45,33 @@ class ThreadWorker(object):
 
     @property
     def selobj(self):
-        """
-        Returns the selection object that signals when thread work
-        is complete
+        """Returns the selection object that signals when thread work
+
+        is complete.
         """
         return self._result_queue.selobj
 
     def send_result(self, result):
-        """
-        Send work result
-        """
+        """Send work result."""
+
         self._result_queue.put(result)
 
     def get_result(self):
-        """
-        Get work result
-        """
+        """Get work result."""
+
         return self._result_queue.get()
 
     def do_work(self, action, work):
-        """
-        Called to do work from thread-main
-        """
+        """Called to do work from thread-main."""
+
         DLOG.verbose("Default thread worker do_work called for %s." % self._name)
 
     def initialize(self):
-        """
-        Called to initialize thread worker from thread-main
-        """
+        """Called to initialize thread worker from thread-main."""
+
         DLOG.verbose("Default thread worker initialize called for %s." % self._name)
 
     def finalize(self):
-        """
-        Called to finalize thread worker from thread-main
-        """
+        """Called to finalize thread worker from thread-main."""
+
         DLOG.verbose("Default thread worker finalize called for %s." % self._name)

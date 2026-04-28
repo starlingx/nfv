@@ -39,9 +39,8 @@ NFV_VIM_DOR_COMPLETE_FILE = "/var/run/.nfv-vim.dor_complete"
 
 @coroutine
 def _system_state_query_callback():
-    """
-    System state query callback
-    """
+    """System state query callback."""
+
     global _alarm_data
     global _minimum_hosts, _dor_stabilized, _dor_completed
     global _dor_complete_percentage
@@ -125,9 +124,8 @@ def _system_state_query_callback():
 
 @coroutine
 def _dor_timer():
-    """
-    DOR timer
-    """
+    """DOR timer."""
+
     global _alarm_data
     global _dor_stabilized, _dor_completed
     global _system_state_get_inprogress
@@ -176,23 +174,20 @@ def _dor_timer():
 
 
 def system_is_stabilized():
-    """
-    Returns true if system is stabilized after a DOR
-    """
+    """Returns true if system is stabilized after a DOR."""
+
     return _dor_stabilized
 
 
 def dor_is_complete():
-    """
-    Returns true if DOR is complete
-    """
+    """Returns true if DOR is complete."""
+
     return _dor_completed
 
 
 def dor_initialize():
-    """
-    Initialize DOR handling
-    """
+    """Initialize DOR handling."""
+
     global _minimum_hosts, _dor_process_uptime, _dor_stabilize_uptime
     global _dor_complete_uptime, _dor_complete_percentage
     global _system_state_get_inprogress, _system_state_gathered
@@ -223,7 +218,6 @@ def dor_initialize():
 
 
 def dor_finalize():
-    """
-    Finalize DOR handling
-    """
+    """Finalize DOR handling."""
+
     pass

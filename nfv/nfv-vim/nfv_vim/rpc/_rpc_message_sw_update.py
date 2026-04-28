@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.rpc.sw_update")
 
 
 class APIRequestCreateSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Request Message - Create Software Update Strategy
-    """
+    """RPC API Request Message - Create Software Update Strategy."""
 
     sw_update_type = None
     controller_apply_type = None
@@ -62,9 +60,7 @@ class APIRequestCreateSwUpdateStrategy(RPCMessage):
 
 
 class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
-    """
-    RPC API Request Message - Create Software Deploy Strategy
-    """
+    """RPC API Request Message - Create Software Deploy Strategy."""
 
     release = None
     rollback = None
@@ -100,9 +96,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
 
 
 class APIRequestCreateKubeRootcaUpdateStrategy(APIRequestCreateSwUpdateStrategy):
-    """
-    RPC API Request Message - Create Kube Root CA Update Strategy
-    """
+    """RPC API Request Message - Create Kube Root CA Update Strategy."""
 
     expiry_date = None
     subject = None
@@ -134,9 +128,7 @@ class APIRequestCreateKubeRootcaUpdateStrategy(APIRequestCreateSwUpdateStrategy)
 
 
 class APIRequestCreateKubeUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
-    """
-    RPC API Request Message - Create Kube Upgrade Strategy
-    """
+    """RPC API Request Message - Create Kube Upgrade Strategy."""
 
     to_version = None
 
@@ -163,9 +155,7 @@ class APIRequestCreateKubeUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
 
 
 class APIRequestCreateSystemConfigUpdateStrategy(APIRequestCreateSwUpdateStrategy):
-    """
-    RPC API Request Message - Create System Config Update Strategy
-    """
+    """RPC API Request Message - Create System Config Update Strategy."""
 
     def __init__(
         self,
@@ -185,9 +175,7 @@ class APIRequestCreateSystemConfigUpdateStrategy(APIRequestCreateSwUpdateStrateg
 
 
 class APIResponseCreateSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Response Message - Create Software Update Strategy
-    """
+    """RPC API Response Message - Create Software Update Strategy."""
 
     strategy = None
     error_string = None
@@ -215,9 +203,7 @@ class APIResponseCreateSwUpdateStrategy(RPCMessage):
 
 
 class APIRequestApplySwUpdateStrategy(RPCMessage):
-    """
-    RPC API Request Message - Apply Software Update Strategy
-    """
+    """RPC API Request Message - Apply Software Update Strategy."""
 
     sw_update_type = None
     stage_id = None
@@ -248,9 +234,7 @@ class APIRequestApplySwUpdateStrategy(RPCMessage):
 
 
 class APIResponseApplySwUpdateStrategy(RPCMessage):
-    """
-    RPC API Response Message - Apply Software Update Strategy
-    """
+    """RPC API Response Message - Apply Software Update Strategy."""
 
     strategy = None
 
@@ -275,9 +259,7 @@ class APIResponseApplySwUpdateStrategy(RPCMessage):
 
 
 class APIRequestAbortSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Request Message - Abort Software Update Strategy
-    """
+    """RPC API Request Message - Abort Software Update Strategy."""
 
     sw_update_type = None
     stage_id = None
@@ -308,9 +290,7 @@ class APIRequestAbortSwUpdateStrategy(RPCMessage):
 
 
 class APIResponseAbortSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Response Message - Abort Software Update Strategy
-    """
+    """RPC API Response Message - Abort Software Update Strategy."""
 
     strategy = None
     error_string = None
@@ -338,9 +318,7 @@ class APIResponseAbortSwUpdateStrategy(RPCMessage):
 
 
 class APIRequestDeleteSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Request Message - Delete Software Update Strategy
-    """
+    """RPC API Request Message - Delete Software Update Strategy."""
 
     sw_update_type = None
     force = False
@@ -372,9 +350,7 @@ class APIRequestDeleteSwUpdateStrategy(RPCMessage):
 
 
 class APIResponseDeleteSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Response Message - Delete Software Update Strategy
-    """
+    """RPC API Response Message - Delete Software Update Strategy."""
 
     strategy = None
 
@@ -399,9 +375,7 @@ class APIResponseDeleteSwUpdateStrategy(RPCMessage):
 
 
 class APIRequestGetSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Request Message - Get Software Update Strategy
-    """
+    """RPC API Request Message - Get Software Update Strategy."""
 
     sw_update_type = None
     uuid = None
@@ -429,9 +403,7 @@ class APIRequestGetSwUpdateStrategy(RPCMessage):
 
 
 class APIResponseGetSwUpdateStrategy(RPCMessage):
-    """
-    RPC API Response Message - Get Software Update Strategy
-    """
+    """RPC API Response Message - Get Software Update Strategy."""
 
     strategy = None
 

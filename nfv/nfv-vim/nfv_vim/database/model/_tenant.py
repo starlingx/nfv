@@ -11,9 +11,7 @@ from nfv_vim.database.model._base import Base
 
 
 class Tenant(AsDictMixin, Base):
-    """
-    Tenant Database Table
-    """
+    """Tenant Database Table."""
 
     __tablename__ = "tenants"
 

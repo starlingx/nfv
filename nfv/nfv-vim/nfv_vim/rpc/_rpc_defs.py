@@ -10,18 +10,14 @@ from nfv_common.helpers import Singleton
 
 
 class _RPCMessageVersion(Constants, metaclass=Singleton):
-    """
-    RPC Message Version Constants
-    """
+    """RPC Message Version Constants."""
 
     UNKNOWN = Constant("unknown")
     VERSION_1_0 = Constant("1.0")
 
 
 class _RPCMessageType(Constants, metaclass=Singleton):
-    """
-    RPC Message Type Constants
-    """
+    """RPC Message Type Constants."""
 
     UNKNOWN = Constant("unknown")
 
@@ -117,9 +113,7 @@ class _RPCMessageType(Constants, metaclass=Singleton):
 
 
 class _RPCMessageResult(Constants, metaclass=Singleton):
-    """
-    RPC Message Result Constants
-    """
+    """RPC Message Result Constants."""
 
     UNKNOWN = Constant("unknown")
     SUCCESS = Constant("success")

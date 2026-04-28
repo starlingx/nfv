@@ -22,9 +22,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.rpc")
 
 
 class RPCListener(threading.Thread):
-    """
-    RPC Listener
-    """
+    """RPC Listener."""
 
     def __init__(
         self,
@@ -64,9 +62,8 @@ class RPCListener(threading.Thread):
 
     @coroutine
     def _dispatch_messages(self):
-        """
-        Dispatch messages from the message queue
-        """
+        """Dispatch messages from the message queue."""
+
         while True:
             select_obj = yield
             if select_obj == self._message_queue.selobj:
@@ -79,9 +76,8 @@ class RPCListener(threading.Thread):
                             msg_handler(msg["data"])
 
     def add_message_handler(self, msg_type, msg_filter, msg_handler):
-        """
-        Add message handler
-        """
+        """Add message handler."""
+
         self._message_filters_lock.acquire()
         try:
             self._message_filters[msg_type] = msg_filter
@@ -91,9 +87,8 @@ class RPCListener(threading.Thread):
         self._message_handlers[msg_type] = msg_handler
 
     def del_message_handler(self, msg_type):
-        """
-        Delete message handler
-        """
+        """Delete message handler."""
+
         self._message_filters_lock.acquire()
         try:
             if msg_type in self._message_filters:
@@ -105,9 +100,8 @@ class RPCListener(threading.Thread):
             del self._message_handlers[msg_type]
 
     def _callback(self, body, message):
-        """
-        RPC Listener callback
-        """
+        """RPC Listener callback."""
+
         self._message_filters_lock.acquire()
         try:
             for msg_type, msg_filter in self._message_filters.items():
@@ -127,9 +121,7 @@ class RPCListener(threading.Thread):
             message.ack()
 
     def run(self):
-        """
-        RPC Listener main
-        """
+        """RPC Listener main."""
 
         def _connection_error(exc, interval):
             DLOG.info("Connection error, exception=%s" % exc)
@@ -164,18 +156,16 @@ class RPCListener(threading.Thread):
                 time.sleep(2)
 
     def stop(self):
-        """
-        Stop RPC Listener
-        """
+        """Stop RPC Listener."""
+
         self._exit.set()
 
 
 def test_connection(
     host, port, user_id, password, virt_host, exchange_name, queue_name
 ):
-    """
-    Test a connection to an exchange on a virtual host
-    """
+    """Test a connection to an exchange on a virtual host."""
+
     connection = None
     connected = False
     success = False

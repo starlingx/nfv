@@ -33,9 +33,8 @@ DISABLED_LIST = ["Yes", "yes", "Y", "y", "True", "true", "T", "t", "1"]
 
 
 def nfvi_initialize(config):
-    """
-    Initialize the NFVI package
-    """
+    """Initialize the NFVI package."""
+
     global _task_worker_pools
 
     init_complete = True
@@ -102,9 +101,8 @@ def nfvi_initialize(config):
 
 
 def nfvi_reinitialize(config):
-    """
-    Re-initialize the NFVI package
-    """
+    """Re-initialize the NFVI package."""
+
     global _task_worker_pools
 
     init_complete = True
@@ -118,9 +116,8 @@ def nfvi_reinitialize(config):
 
 
 def nfvi_finalize():
-    """
-    Finalize the NFVI package
-    """
+    """Finalize the NFVI package."""
+
     global _task_worker_pools
 
     nfvi_infrastructure_finalize()

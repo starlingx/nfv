@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class SwPatch(ObjectData):
-    """
-    NFVI Software Patch Object
-    """
+    """NFVI Software Patch Object."""
 
     def __init__(self, name, sw_version, repo_state, patch_state):
         super(SwPatch, self).__init__("1.0.0")

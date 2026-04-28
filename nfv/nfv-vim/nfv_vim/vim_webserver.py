@@ -29,9 +29,8 @@ do_reload = False
 
 
 def process_signal_handler(signum, frame):
-    """
-    Virtual Infrastructure Manager Web Server - Process Signal Handler
-    """
+    """Virtual Infrastructure Manager Web Server - Process Signal Handler."""
+
     global stay_on, do_reload
 
     if signal.SIGTERM == signum:
@@ -45,9 +44,8 @@ def process_signal_handler(signum, frame):
 
 
 def process_initialize():
-    """
-    Virtual Infrastructure Manager Web Server - Initialize
-    """
+    """Virtual Infrastructure Manager Web Server - Initialize."""
+
     debug.debug_initialize(config.CONF["debug"], "VIM-WEB")
     selobj.selobj_initialize()
     timers.timers_initialize(
@@ -60,9 +58,8 @@ def process_initialize():
 
 
 def process_finalize():
-    """
-    Virtual Infrastructure Manager Web Server - Finalize
-    """
+    """Virtual Infrastructure Manager Web Server - Finalize."""
+
     tables.tables_finalize()
     database.database_finalize()
     timers.timers_finalize()
@@ -71,9 +68,8 @@ def process_finalize():
 
 
 def process_main():
-    """
-    Virtual Infrastructure Manager Web Server - Main
-    """
+    """Virtual Infrastructure Manager Web Server - Main."""
+
     global do_reload
 
     try:

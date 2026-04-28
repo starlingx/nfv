@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ResumeState(state_machine.State):
-    """
-    Instance - Resume State
-    """
+    """Instance - Resume State."""
 
     def __init__(self, name):
         super(ResumeState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering resume state
-        """
+        """Entering resume state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = ResumeTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting resume state
-        """
+        """Exiting resume state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, ResumeTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the resume state
-        """
+        """Transition from the resume state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the resume state
-        """
+        """Handle event while in the resume state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

@@ -15,7 +15,6 @@ from nfv_unit_tests.tests import testcase
 
 
 class TestNFVDatabaseUpgrade(testcase.NFVTestCase):
-
     def setUp(self):
         super(TestNFVDatabaseUpgrade, self).setUp()
         root_dir = os.environ["VIRTUAL_ENV"]
@@ -27,9 +26,8 @@ class TestNFVDatabaseUpgrade(testcase.NFVTestCase):
         shutil.rmtree(self.db_dir)
 
     def test_nfv_vim_database_load_and_dump(self):
-        """
-        Test VIM database load
-        """
+        """Test VIM database load."""
+
         root_dir = os.environ["VIRTUAL_ENV"]
         config = dict()
         config["database_dir"] = self.db_dir
@@ -41,9 +39,8 @@ class TestNFVDatabaseUpgrade(testcase.NFVTestCase):
         database.database_finalize()
 
     def test_nfv_vim_database_upgrade_from_25_09(self):
-        """
-        Test VIM database upgrades from stx 25_09
-        """
+        """Test VIM database upgrades from stx 25_09."""
+
         root_dir = os.environ["VIRTUAL_ENV"]
         # stage some old data
         devnull = open(os.devnull, "w")

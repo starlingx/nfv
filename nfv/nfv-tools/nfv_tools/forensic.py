@@ -13,9 +13,8 @@ from nfv_common import forensic
 
 
 def process_main():
-    """
-    Forensic - Process Main
-    """
+    """Forensic - Process Main."""
+
     try:
         arg_parser = argparse.ArgumentParser()
         arg_parser.add_argument("-c", "--config", help="configuration file")

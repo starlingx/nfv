@@ -18,9 +18,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.sw_mgmt_api")
 
 
 class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
-    """
-    NFVI Software Management API Class Definition
-    """
+    """NFVI Software Management API Class Definition."""
 
     _name = "SwMgmt-API"
     _version = "1.0.0"
@@ -49,9 +47,8 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
         return self._signature
 
     def query_updates(self, future, callback):
-        """
-        Query software updates
-        """
+        """Query software updates."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -112,9 +109,8 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             callback.close()
 
     def query_hosts(self, future, callback):
-        """
-        Query hosts
-        """
+        """Query hosts."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -178,9 +174,8 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             callback.close()
 
     def update_host(self, future, host_name, callback):
-        """
-        Apply a software update to a host
-        """
+        """Apply a software update to a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -229,9 +224,8 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             callback.close()
 
     def apply_patches(self, future, patch_names, callback):
-        """
-        Apply a software patch that has already been uploaded
-        """
+        """Apply a software patch that has already been uploaded."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -301,9 +295,8 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             callback.close()
 
     def update_hosts(self, future, host_names, callback):
-        """
-        Apply a software update to a list of hosts
-        """
+        """Apply a software update to a list of hosts."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -353,16 +346,14 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             callback.close()
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.PLATFORM
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         return

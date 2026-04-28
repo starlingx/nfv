@@ -10,9 +10,8 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
 
 def get_versions(token):
-    """
-    Asks OpenStack Heat for a list of versions
-    """
+    """Asks OpenStack Heat for a list of versions."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.HEAT)
     if url is None:
         raise ValueError("OpenStack Heat URL is invalid")
@@ -24,9 +23,8 @@ def get_versions(token):
 
 
 def get_stacks(token, page_limit=None, next_page=None):
-    """
-    Asks OpenStack Heat for a list of stacks
-    """
+    """Asks OpenStack Heat for a list of stacks."""
+
     if next_page is None:
         url = token.get_service_url(OPENSTACK_SERVICE.HEAT)
         if url is None:
@@ -53,9 +51,8 @@ def create_stack(
     tags=None,
     disable_rollback=True,
 ):
-    """
-    Asks OpenStack Heat to create a stack
-    """
+    """Asks OpenStack Heat to create a stack."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.HEAT)
     if url is None:
         raise ValueError("OpenStack Heat URL is invalid")
@@ -92,9 +89,8 @@ def create_stack(
 
 
 def delete_stack(token, stack_name, stack_id):
-    """
-    Asks OpenStack Heat to delete a stack
-    """
+    """Asks OpenStack Heat to delete a stack."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.HEAT)
     if url is None:
         raise ValueError("OpenStack Heat URL is invalid")
@@ -106,9 +102,8 @@ def delete_stack(token, stack_name, stack_id):
 
 
 def get_stack(token, stack_id):
-    """
-    Asks OpenStack Heat for stack details
-    """
+    """Asks OpenStack Heat for stack details."""
+
     url = token.get_service_url(OPENSTACK_SERVICE.HEAT)
     if url is None:
         raise ValueError("OpenStack Heat URL is invalid")

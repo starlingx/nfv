@@ -48,9 +48,7 @@ VisibilityType = wsme_types.Enum(str, "private", "public", "shared")
 
 
 class ImageCreateData(wsme_types.Base):
-    """
-    Image - Create Data
-    """
+    """Image - Create Data."""
 
     name = wsme_types.wsattr(str, mandatory=True)
     description = wsme_types.wsattr(str, mandatory=False, default="")
@@ -85,9 +83,7 @@ class ImageCreateData(wsme_types.Base):
 
 
 class ImageUpdateData(wsme_types.Base):
-    """
-    Image - Update Data
-    """
+    """Image - Update Data."""
 
     description = wsme_types.wsattr(str, mandatory=False, default=None)
     minimum_disk_size = wsme_types.wsattr(int, mandatory=False, default=None)
@@ -98,9 +94,7 @@ class ImageUpdateData(wsme_types.Base):
 
 
 class ImageQueryData(wsme_types.Base):
-    """
-    Image - Query Data
-    """
+    """Image - Query Data."""
 
     uuid = str
     name = str
@@ -133,15 +127,12 @@ class ImageQueryData(wsme_types.Base):
 
 
 class ImageAPI(rest.RestController):
-    """
-    Image Rest API
-    """
+    """Image Rest API."""
 
     @staticmethod
     def _get_image_details(image_uuid, image):
-        """
-        Return image details
-        """
+        """Return image details."""
+
         vim_connection = pecan.request.vim.open_connection()
         rpc_request = rpc.APIRequestGetImage()
         rpc_request.filter_by_uuid = image_uuid

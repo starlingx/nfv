@@ -10,7 +10,7 @@ from tsconfig.tsconfig import SW_VERSION
 
 
 def is_major_release(to_release, from_release):
-    """Determine if this is a major release software deployment
+    """Determine if this is a major release software deployment.
 
     Major release if major or minor version changed:
     eg. 10.11.12 -> (11.1.1 or 10.12.1)
@@ -20,9 +20,7 @@ def is_major_release(to_release, from_release):
 
 
 class Upgrade(ObjectData):
-    """
-    NFVI Upgrade Object
-    """
+    """NFVI Upgrade Object."""
 
     def __init__(self, release, release_info, deploy_info, hosts_info):
         super(Upgrade, self).__init__("1.0.0")
@@ -55,9 +53,9 @@ class Upgrade(ObjectData):
     @property
     def reboot_required(self):
         # Ideally we use the reboot_required value from the deployment in progress.
-        # However, if we haven't started the deployment yet we need to use our own derived
-        # reboot_required value stored in vim_rr.  Using the reboot_required from release_info
-        # will not be correct during multi-patch situations.
+        # However, if we haven't started the deployment yet we need to use our own
+        # derived reboot_required value stored in vim_rr. Using the reboot_required
+        # from release_info will not be correct during multi-patch situations.
         if self.deploy_info:
             return self.deploy_info["reboot_required"]
 
@@ -92,8 +90,9 @@ class Upgrade(ObjectData):
         if self.deploy_info:
             return is_major_release(self.from_release, self.to_release)
         elif self.release_info:
-            # On DX systems, SW_VERSION will not be accurate if only one host has be deployed.
-            # Therefore, it should only be used when a deployment is not in progress.
+            # On DX systems, SW_VERSION will not be accurate if only one host has been
+            # deployed. Therefore, it should only be used when a deployment is not
+            # in progress.
             return is_major_release(SW_VERSION, self.sw_version)
 
     @property

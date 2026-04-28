@@ -11,9 +11,7 @@ _host_aggregate_table = None
 
 
 class HostAggregateTable(Table):
-    """
-    Host Aggregate Table
-    """
+    """Host Aggregate Table."""
 
     def __init__(self):
         super(HostAggregateTable, self).__init__()
@@ -45,16 +43,14 @@ class HostAggregateTable(Table):
 
 
 def tables_get_host_aggregate_table():
-    """
-    Get the host aggregate table
-    """
+    """Get the host aggregate table."""
+
     return _host_aggregate_table
 
 
 def host_aggregate_table_initialize():
-    """
-    Initialize the host aggregate table
-    """
+    """Initialize the host aggregate table."""
+
     global _host_aggregate_table
 
     _host_aggregate_table = HostAggregateTable()
@@ -67,9 +63,8 @@ def host_aggregate_table_initialize():
 
 
 def host_aggregate_table_finalize():
-    """
-    Finalize the host aggregate table
-    """
+    """Finalize the host aggregate table."""
+
     global _host_aggregate_table
 
     del _host_aggregate_table

@@ -7,10 +7,10 @@
 from nfv_vim.nfvi.objects.v1._alarm import Alarm  # noqa: F401
 from nfv_vim.nfvi.objects.v1._alarm import ALARM_SEVERITY  # noqa: F401
 from nfv_vim.nfvi.objects.v1._guest_service import (  # noqa: F401
-    GUEST_SERVICE_ADMIN_STATE
+    GUEST_SERVICE_ADMIN_STATE,
 )
 from nfv_vim.nfvi.objects.v1._guest_service import (  # noqa: F401
-    GUEST_SERVICE_OPER_STATE
+    GUEST_SERVICE_OPER_STATE,
 )
 from nfv_vim.nfvi.objects.v1._guest_service import GUEST_SERVICE_NAME  # noqa: F401
 from nfv_vim.nfvi.objects.v1._guest_service import GuestService  # noqa: F401
@@ -28,7 +28,7 @@ from nfv_vim.nfvi.objects.v1._host_group import HOST_GROUP_POLICY  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_group import HostGroup  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_sw_patch import HostSwPatch  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_system_config_update import (  # noqa: F401
-    HostSystemConfigUpdate
+    HostSystemConfigUpdate,
 )
 from nfv_vim.nfvi.objects.v1._hypervisor import Hypervisor  # noqa: F401
 from nfv_vim.nfvi.objects.v1._hypervisor import HYPERVISOR_ADMIN_STATE  # noqa: F401
@@ -57,10 +57,10 @@ from nfv_vim.nfvi.objects.v1._instance_type import INSTANCE_TYPE_EXTENSION  # no
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceType  # noqa: F401
 from nfv_vim.nfvi.objects.v1._instance_type import InstanceTypeAttributes  # noqa: F401
 from nfv_vim.nfvi.objects.v1._kube_rootca_update import (  # noqa: F401
-    KUBE_ROOTCA_UPDATE_STATE
+    KUBE_ROOTCA_UPDATE_STATE,
 )
 from nfv_vim.nfvi.objects.v1._kube_rootca_update import (  # noqa: F401
-    KubeRootcaHostUpdate
+    KubeRootcaHostUpdate,
 )
 from nfv_vim.nfvi.objects.v1._kube_rootca_update import KubeRootcaUpdate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._kube_upgrade import KUBE_HOST_UPGRADE_STATE  # noqa: F401

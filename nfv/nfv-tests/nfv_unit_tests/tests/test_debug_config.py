@@ -13,13 +13,14 @@ from nfv_unit_tests.tests import testcase
 
 
 class TestDebugConfig(testcase.NFVTestCase):
-
     def setUp(self):
         """Setup for testing."""
+
         super(TestDebugConfig, self).setUp()
 
     def tearDown(self):
         """Cleanup testing setup."""
+
         super(TestDebugConfig, self).tearDown()
 
     def test_create_debug_config(self):

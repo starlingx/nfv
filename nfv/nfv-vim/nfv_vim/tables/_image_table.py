@@ -11,9 +11,7 @@ _image_table = None
 
 
 class ImageTable(Table):
-    """
-    Image Table
-    """
+    """Image Table."""
 
     def __init__(self):
         super(ImageTable, self).__init__()
@@ -26,16 +24,14 @@ class ImageTable(Table):
 
 
 def tables_get_image_table():
-    """
-    Get the image table
-    """
+    """Get the image table."""
+
     return _image_table
 
 
 def image_table_initialize():
-    """
-    Initialize the image table
-    """
+    """Initialize the image table."""
+
     global _image_table
 
     _image_table = ImageTable()
@@ -48,9 +44,8 @@ def image_table_initialize():
 
 
 def image_table_finalize():
-    """
-    Finalize the image table
-    """
+    """Finalize the image table."""
+
     global _image_table
 
     del _image_table

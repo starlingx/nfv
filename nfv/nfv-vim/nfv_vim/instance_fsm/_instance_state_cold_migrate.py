@@ -15,17 +15,14 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ColdMigrateState(state_machine.State):
-    """
-    Instance - Cold Migrate State
-    """
+    """Instance - Cold Migrate State."""
 
     def __init__(self, name):
         super(ColdMigrateState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering cold migrate state
-        """
+        """Entering cold migrate state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.action_fsm.start_time = timers.get_monotonic_timestamp_in_ms()
         instance.action_fsm.wait_time = 0
@@ -34,23 +31,20 @@ class ColdMigrateState(state_machine.State):
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting cold migrate state
-        """
+        """Exiting cold migrate state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, ColdMigrateTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the cold migrate state
-        """
+        """Transition from the cold migrate state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the cold migrate state
-        """
+        """Handle event while in the cold migrate state."""
+
         from nfv_vim import directors
 
         instance_director = directors.get_instance_director()

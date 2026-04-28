@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class HostSwPatch(ObjectData):
-    """
-    NFVI Host Software Patch Object
-    """
+    """NFVI Host Software Patch Object."""
 
     def __init__(
         self,

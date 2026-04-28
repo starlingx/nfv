@@ -12,9 +12,7 @@ from nfv_common.helpers import Singleton
 
 
 class VolumeAvailabilityStatus(Constants, metaclass=Singleton):
-    """
-    Volume Availability Status Constants
-    """
+    """Volume Availability Status Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -25,9 +23,7 @@ class VolumeAvailabilityStatus(Constants, metaclass=Singleton):
 
 
 class VolumeAction(Constants, metaclass=Singleton):
-    """
-    Volume Action Constants
-    """
+    """Volume Action Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -45,9 +41,7 @@ VOLUME_ACTION = VolumeAction()
 
 
 class Volume(ObjectData):
-    """
-    NFVI Volume Object
-    """
+    """NFVI Volume Object."""
 
     def __init__(
         self,

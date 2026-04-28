@@ -29,8 +29,7 @@ _event_templates = {
         "entity": "host=%(host_name)s.services=compute",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Host %(host_name)s compute services failure"
-        "%(additional_text)s",
+        "reason_text": "Host %(host_name)s compute services failure%(additional_text)s",
         "exclude_event_context": [event_log.EVENT_CONTEXT.TENANT],
     },
     event_log.EVENT_ID.HYPERVISOR_STATE_CHANGE: {
@@ -46,9 +45,8 @@ _event_templates = {
 
 
 def _event_template_get(event_id, event_context):
-    """
-    Returns the event template associated with the given context
-    """
+    """Returns the event template associated with the given context."""
+
     if event_id not in _event_templates:
         return None
 
@@ -89,9 +87,8 @@ def _event_template_get(event_id, event_context):
 
 
 def _event_issue(event_id, event_context, template, data):
-    """
-    Issue an event given the event template and data
-    """
+    """Issue an event given the event template and data."""
+
     event_data = event_log.EventLogData(
         event_id,
         template["event_type"],
@@ -107,9 +104,8 @@ def _event_issue(event_id, event_context, template, data):
 
 
 def host_issue_log(host, event_id, additional_text=None, event_context=None):
-    """
-    Issue an event log for host
-    """
+    """Issue an event log for host."""
+
     data = dict()
     data["host_name"] = host.name
     data["additional_text"] = additional_text
@@ -134,9 +130,8 @@ def host_issue_log(host, event_id, additional_text=None, event_context=None):
 def hypervisor_issue_log(
     hypervisor, event_id, additional_text=None, event_context=None
 ):
-    """
-    Issue an event log for host
-    """
+    """Issue an event log for host."""
+
     data = dict()
     data["hypervisor_uuid"] = hypervisor.uuid
     data["host_name"] = hypervisor.host_name

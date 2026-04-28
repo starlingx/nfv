@@ -34,9 +34,8 @@ _alarm_templates = {
 
 
 def _alarm_template_get(alarm_type, alarm_context):
-    """
-    Returns the alarm template associated with the given context
-    """
+    """Returns the alarm template associated with the given context."""
+
     if alarm_type not in _alarm_templates:
         return None
 
@@ -85,9 +84,8 @@ def _alarm_template_get(alarm_type, alarm_context):
 
 
 def _alarm_raise(alarm_type, alarm_context, template, data):
-    """
-    Raises an alarm given the alarm template and data
-    """
+    """Raises an alarm given the alarm template and data."""
+
     alarm_uuid = uuid.uuid4()
     alarm_data = alarm.AlarmData(
         alarm_uuid,
@@ -110,9 +108,8 @@ def _alarm_raise(alarm_type, alarm_context, template, data):
 def raise_instance_group_policy_alarm(
     instance_group, policy, alarm_type, additional_text=None, alarm_context=None
 ):
-    """
-    Raise an instance group alarm
-    """
+    """Raise an instance group alarm."""
+
     data = dict()
     data["group_uuid"] = instance_group.uuid
     data["group_name"] = instance_group.name
@@ -140,8 +137,7 @@ def raise_instance_group_policy_alarm(
 
 
 def clear_instance_group_alarm(alarm_list):
-    """
-    Clear instance group alarms
-    """
+    """Clear instance group alarms."""
+
     for alarm_data in alarm_list:
         alarm.alarm_clear(alarm_data.alarm_uuid)

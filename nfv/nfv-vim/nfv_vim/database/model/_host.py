@@ -12,9 +12,10 @@ from nfv_vim.database.model._base import Base
 
 
 class Host_v8(AsDictMixin, Base):
-    """
-    Host Database Table Entry
-    Note: Changes are only in nfvi_host_data to replace software_load and target_load with sw_version.
+    """Host Database Table Entry
+
+    Note: Changes are only in nfvi_host_data to replace software_load and
+    target_load with sw_version.
     """
 
     __tablename__ = "hosts_v8"
@@ -43,9 +44,9 @@ class Host_v8(AsDictMixin, Base):
 
 
 class Host_v7(AsDictMixin, Base):
-    """
-    Host Database Table Entry
-    Note: Changes are only in nfvi_host_data to add device_image_update string
+    """Host Database Table Entry
+
+    Note: Changes are only in nfvi_host_data to add device_image_update string.
     """
 
     __tablename__ = "hosts_v7"
@@ -74,8 +75,8 @@ class Host_v7(AsDictMixin, Base):
 
 
 class Host_v6(AsDictMixin, Base):
-    """
-    Host Database Table Entry
+    """Host Database Table Entry
+
     Note: Changes are only in nfvi_host_data.
     """
 

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2023,2025-2026 Wind River Systems, Inc.
+# Copyright (c) 2016-2023, 2025-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -25,9 +25,7 @@ DLOG = debug.debug_get_logger("nfv_vim.api.acl.application")
 
 
 class AuthenticationApplication(object):
-    """
-    Authentication Application
-    """
+    """Authentication Application."""
 
     def __init__(self, app):
         self._app = app
@@ -67,7 +65,7 @@ class AuthenticationApplication(object):
         return env.get(env_key, default_value)
 
     def _validate_oidc_token(self, oidc_token):
-        """Validate OIDC token and return auth context"""
+        """Validate OIDC token and return auth context."""
 
         try:
             # Get token claims

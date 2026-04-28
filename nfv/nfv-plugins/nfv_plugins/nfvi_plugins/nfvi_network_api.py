@@ -20,9 +20,9 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.network_api")
 
 
 def network_get_admin_state(admin_state):
-    """
-    Convert the nfvi network administrative state to a network administrative
-    state
+    """Convert the nfvi network administrative state to a network administrative
+
+    state.
     """
     if neutron.NETWORK_ADMIN_STATE.UP == admin_state:
         return nfvi.objects.v1.NETWORK_ADMIN_STATE.UNLOCKED
@@ -31,9 +31,8 @@ def network_get_admin_state(admin_state):
 
 
 def network_get_oper_state(status):
-    """
-    Convert the nfvi network status to a network operational state
-    """
+    """Convert the nfvi network status to a network operational state."""
+
     if neutron.NETWORK_STATUS.ACTIVE == status:
         return nfvi.objects.v1.NETWORK_OPER_STATE.ENABLED
     else:
@@ -41,9 +40,8 @@ def network_get_oper_state(status):
 
 
 def network_get_avail_status(status):
-    """
-    Convert the nfvi network status to a network availability status
-    """
+    """Convert the nfvi network status to a network availability status."""
+
     avail_status = list()
 
     if neutron.NETWORK_STATUS.BUILD == status:
@@ -56,9 +54,7 @@ def network_get_avail_status(status):
 
 
 class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
-    """
-    NFVI Network API Class Definition
-    """
+    """NFVI Network API Class Definition."""
 
     _name = "Network-API"
     _version = "1.0.0"
@@ -93,9 +89,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
         )
 
     def get_networks(self, future, paging, callback):
-        """
-        Get a list of networks
-        """
+        """Get a list of networks."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -199,9 +194,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
         shared,
         callback,
     ):
-        """
-        Create a network
-        """
+        """Create a network."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -262,8 +256,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to create a "
-                    "network, error=%s." % e
+                    "Caught exception while trying to create a network, error=%s." % e
                 )
 
         except Exception as e:
@@ -276,9 +269,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def update_network(self, future, network_uuid, shared, callback):
-        """
-        Update a network
-        """
+        """Update a network."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -333,8 +325,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to update a "
-                    "network, error=%s." % e
+                    "Caught exception while trying to update a network, error=%s." % e
                 )
 
         except Exception as e:
@@ -347,9 +338,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def delete_network(self, future, network_uuid, callback):
-        """
-        Delete a network
-        """
+        """Delete a network."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -385,8 +375,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to delete a "
-                    "network, error=%s." % e
+                    "Caught exception while trying to delete a network, error=%s." % e
                 )
 
         except Exception as e:
@@ -399,9 +388,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_network(self, future, network_uuid, callback):
-        """
-        Get a network
-        """
+        """Get a network."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -470,9 +458,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_subnets(self, future, paging, callback):
-        """
-        Get a list of subnets
-        """
+        """Get a list of subnets."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -578,9 +565,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
         dhcp_enabled,
         callback,
     ):
-        """
-        Create a subnet
-        """
+        """Create a subnet."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -657,9 +643,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
     def update_subnet(
         self, future, subnet_uuid, gateway_ip, delete_gateway, dhcp_enabled, callback
     ):
-        """
-        Update a subnet
-        """
+        """Update a subnet."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -730,9 +715,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def delete_subnet(self, future, subnet_uuid, callback):
-        """
-        Delete a subnet
-        """
+        """Delete a subnet."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -781,9 +765,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_subnet(self, future, subnet_uuid, callback):
-        """
-        Get a subnet
-        """
+        """Get a subnet."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -852,9 +835,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
     def delete_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Delete Host Services, notify neutron to delete services for a host.
-        """
+        """Delete Host Services, notify neutron to delete services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -892,7 +874,6 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
                 if neutron.lookup_extension(
                     neutron.EXTENSION_NAMES.AGENT, self._neutron_extensions
                 ):
-
                     response["reason"] = "failed to delete neutron services"
 
                     future.work(neutron.delete_network_agents, self._token, host_name)
@@ -939,9 +920,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
     def enable_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Enable Host Services, notify neutron to enable services for a host.
-        """
+        """Enable Host Services, notify neutron to enable services for a host."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1028,9 +1008,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_network_agents(self, future, callback):
-        """
-        Get Network Agent Information for all agents on all hosts.
-        """
+        """Get Network Agent Information for all agents on all hosts."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1067,8 +1046,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
                 future.result = yield
                 if not future.result.is_complete():
                     DLOG.error(
-                        "Neutron get-network-agents failed, "
-                        "operation did not complete"
+                        "Neutron get-network-agents failed, operation did not complete"
                     )
                     return
                 else:
@@ -1102,9 +1080,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_agent_routers(self, future, agent_id, callback):
-        """
-        Get Routers hosted by Network Agent.
-        """
+        """Get Routers hosted by Network Agent."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1119,8 +1096,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
                 if not future.result.is_complete() or future.result.data is None:
                     DLOG.error(
-                        "OpenStack get-token did not complete, "
-                        "agent_id=%s." % agent_id
+                        "OpenStack get-token did not complete, agent_id=%s." % agent_id
                     )
                     return
 
@@ -1165,8 +1141,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to get "
-                    "agent routers, error=%s." % e
+                    "Caught exception while trying to get agent routers, error=%s." % e
                 )
 
         except Exception as e:
@@ -1180,9 +1155,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_dhcp_agent_networks(self, future, agent_id, callback):
-        """
-        Get Networks hosted by DHCP Network Agent.
-        """
+        """Get Networks hosted by DHCP Network Agent."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1197,8 +1171,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
                 if not future.result.is_complete() or future.result.data is None:
                     DLOG.error(
-                        "OpenStack get-token did not complete, "
-                        "agent_id=%s." % agent_id
+                        "OpenStack get-token did not complete, agent_id=%s." % agent_id
                     )
                     return
 
@@ -1243,8 +1216,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to get "
-                    "dhcp networks, error=%s." % e
+                    "Caught exception while trying to get dhcp networks, error=%s." % e
                 )
 
         except Exception as e:
@@ -1258,9 +1230,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_router_ports(self, future, router_id, callback):
-        """
-        Get Ports on a Router
-        """
+        """Get Ports on a Router."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1321,8 +1292,7 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
 
             else:
                 DLOG.exception(
-                    "Caught exception while trying to get "
-                    "router ports, error=%s." % e
+                    "Caught exception while trying to get router ports, error=%s." % e
                 )
 
         except Exception as e:
@@ -1336,9 +1306,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def add_router_to_agent(self, future, agent_id, router_id, callback):
-        """
-        Add a router to an L3 Agent.
-        """
+        """Add a router to an L3 Agent."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1417,9 +1386,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def add_network_to_dhcp_agent(self, future, agent_id, network_id, callback):
-        """
-        Add a network to an DHCP Agent.
-        """
+        """Add a network to an DHCP Agent."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1498,9 +1466,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def remove_router_from_agent(self, future, agent_id, router_id, callback):
-        """
-        Remove a router from an L3 Agent.
-        """
+        """Remove a router from an L3 Agent."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1579,9 +1546,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def remove_network_from_dhcp_agent(self, future, agent_id, network_id, callback):
-        """
-        Remove a network from a DHCP Agent.
-        """
+        """Remove a network from a DHCP Agent."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1663,9 +1629,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def get_physical_network(self, future, network_id, callback):
-        """
-        Get Physical Network of a network.
-        """
+        """Get Physical Network of a network."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = ""
@@ -1743,9 +1708,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
     def query_host_services(
         self, future, host_uuid, host_name, host_personality, check_fully_up, callback
     ):
-        """
-        Query Neutron Services for a host.
-        """
+        """Query Neutron Services for a host."""
+
         response = dict()
         response["completed"] = False
         response["result-data"] = "enabled"
@@ -1831,9 +1795,8 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
     def notify_host_disabled(
         self, future, host_uuid, host_name, host_personality, callback
     ):
-        """
-        Notify host disabled
-        """
+        """Notify host disabled."""
+
         response = dict()
         response["completed"] = False
         response["reason"] = ""
@@ -1920,16 +1883,14 @@ class NFVINetworkAPI(nfvi.api.v1.NFVINetworkAPI):
             callback.close()
 
     def initialize(self, config_file):
-        """
-        Initialize the plugin
-        """
+        """Initialize the plugin."""
+
         config.load(config_file)
         self._directory = openstack.get_directory(
             config, openstack.SERVICE_CATEGORY.OPENSTACK
         )
 
     def finalize(self):
-        """
-        Finalize the plugin
-        """
+        """Finalize the plugin."""
+
         return

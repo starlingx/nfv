@@ -9,7 +9,6 @@ Base = declarative_base()
 
 
 class AsDictMixin(object):
-
     @property
     def data(self):
         data = dict()

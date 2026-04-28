@@ -16,9 +16,7 @@ DLOG = debug.debug_get_logger("nfv_common.tasks.task")
 
 
 class TaskPriority(Constants, metaclass=Singleton):
-    """
-    Task Priority Constants
-    """
+    """Task Priority Constants."""
 
     HIGH = 0
     MED = 1
@@ -30,9 +28,7 @@ TASK_PRIORITY = TaskPriority()
 
 
 class Task(object):
-    """
-    Task
-    """
+    """Task."""
 
     _READY = Constant("Ready")
     _RUNNING = Constant("Running")
@@ -44,9 +40,9 @@ class Task(object):
     _id = 1
 
     def __init__(self, scheduler, priority, target):
-        """
-        Create a task, scheduler is used to schedule this task and the task
-        work, the target is a co-routine that is sent task results
+        """Create a task, scheduler is used to schedule this task and the task
+
+        work, the target is a co-routine that is sent task results.
         """
         self._id = Task._id
         self._priority = priority
@@ -60,42 +56,37 @@ class Task(object):
 
     @property
     def id(self):
-        """
-        Returns the unique identifier of the task
-        """
+        """Returns the unique identifier of the task."""
+
         return self._id
 
     @property
     def name(self):
-        """
-        Returns the name of the task
-        """
+        """Returns the name of the task."""
+
         return self._name
 
     @property
     def priority(self):
-        """
-        Returns the priority of the task
-        """
+        """Returns the priority of the task."""
+
         return self._priority
 
     def add_timer(self, name, interval_secs):
-        """
-        Add a timer that will fire in so many milliseconds
-        """
+        """Add a timer that will fire in so many milliseconds."""
+
         timer_id = self._scheduler.add_task_timer(name, interval_secs, self)
         return timer_id
 
     def cancel_timer(self, timer_id):
-        """
-        Cancel timer
-        """
+        """Cancel timer."""
+
         self._scheduler.cancel_task_timer(timer_id, self)
 
     def timer_fired(self, timer_id):
-        """
-        Handle timer firing; the timer identifier is sent to
-        the task's co-routine target
+        """Handle timer firing; the timer identifier is sent to
+
+        the task's co-routine target.
         """
         task_result = TaskResult(
             complete=True,
@@ -107,34 +98,30 @@ class Task(object):
         self._scheduler.schedule_task(self)
 
     def add_io_read_wait(self, select_obj):
-        """
-        Add a read selection object to wait on
-        """
+        """Add a read selection object to wait on."""
+
         self._scheduler.add_task_io_read_wait(select_obj, self)
 
     def cancel_io_read_wait(self, select_obj):
-        """
-        Cancel a read selection object being waited on
-        """
+        """Cancel a read selection object being waited on."""
+
         self._scheduler.cancel_task_io_read_wait(select_obj, self)
 
     def add_io_write_wait(self, select_obj):
-        """
-        Add a write selection object to wait on
-        """
+        """Add a write selection object to wait on."""
+
         self._scheduler.add_task_io_write_wait(select_obj, self)
 
     def cancel_io_write_wait(self, select_obj):
-        """
-        Cancel a write selection object being waited on
-        """
+        """Cancel a write selection object being waited on."""
+
         self._scheduler.cancel_task_io_write_wait(select_obj, self)
 
     def io_wait_complete(self, select_obj):
-        """
-        Called when a selection object being waited on has become
+        """Called when a selection object being waited on has become
+
         readable or writeable; the selection object is sent to
-        the tasks co-routine target
+        the tasks co-routine target.
         """
         task_result = TaskResult(
             complete=True,
@@ -146,17 +133,16 @@ class Task(object):
         self._scheduler.schedule_task(self)
 
     def add_task_work(self, task_work):
-        """
-        Add work to be done by the task
-        """
+        """Add work to be done by the task."""
+
         task_work.task_id = self._id
         self._work_list[task_work.id] = [Task._READY, task_work]
         return task_work
 
     def task_work_complete(self, task_work):
-        """
-        Task work has been completed, send result to the task target
-        (results are sent in order the task work was scheduled)
+        """Task work has been completed, send result to the task target
+
+        (results are sent in order the task work was scheduled).
         """
         DLOG.verbose("TaskWork complete, name=%s." % task_work.name)
 
@@ -204,9 +190,8 @@ class Task(object):
                     self._target.send(task_result)
 
     def task_work_timeout(self, task_work):
-        """
-        Work being done by the task has timed out
-        """
+        """Work being done by the task has timed out."""
+
         DLOG.error(
             "Task(%s) work (%s) timed out, id=%s."
             % (self._name, task_work.name, self._id)
@@ -219,9 +204,8 @@ class Task(object):
         self._scheduler.schedule_task(self)
 
     def run(self):
-        """
-        Run the task
-        """
+        """Run the task."""
+
         DLOG.debug("Task(%s) run, id=%s." % (self._name, self._id))
         if not self._started:
             self._target.send(None)

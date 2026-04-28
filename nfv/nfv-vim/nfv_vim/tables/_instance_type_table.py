@@ -11,9 +11,7 @@ _instance_type_table = None
 
 
 class InstanceTypeTable(Table):
-    """
-    Instance Type Table
-    """
+    """Instance Type Table."""
 
     def __init__(self):
         super(InstanceTypeTable, self).__init__()
@@ -26,16 +24,14 @@ class InstanceTypeTable(Table):
 
 
 def tables_get_instance_type_table():
-    """
-    Get the instance type table
-    """
+    """Get the instance type table."""
+
     return _instance_type_table
 
 
 def instance_type_table_initialize():
-    """
-    Initialize the instance type table
-    """
+    """Initialize the instance type table."""
+
     global _instance_type_table
 
     _instance_type_table = InstanceTypeTable()
@@ -48,9 +44,8 @@ def instance_type_table_initialize():
 
 
 def instance_type_table_finalize():
-    """
-    Finalize the instance type table
-    """
+    """Finalize the instance type table."""
+
     global _instance_type_table
 
     del _instance_type_table

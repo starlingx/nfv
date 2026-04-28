@@ -16,9 +16,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.guest_services")
 
 
 class GuestServiceNames(object, metaclass=Singleton):
-    """
-    Guest Services Name Constants
-    """
+    """Guest Services Name Constants."""
 
     HEARTBEAT = Constant("heartbeat")
 
@@ -28,9 +26,7 @@ GUEST_SERVICE_NAME = GuestServiceNames()
 
 
 class GuestServices(ObjectData):
-    """
-    Guest Services Object
-    """
+    """Guest Services Object."""
 
     SERVICE_NOT_CONFIGURED = "not-configured"
     SERVICE_CONFIGURED = "configured"
@@ -58,18 +54,16 @@ class GuestServices(ObjectData):
 
     @staticmethod
     def _convert_nfvi_service_name(nfvi_service_name):
-        """
-        Returns the service name given the nfvi service name
-        """
+        """Returns the service name given the nfvi service name."""
+
         if nfvi.objects.v1.GUEST_SERVICE_NAME.HEARTBEAT == nfvi_service_name:
             return GUEST_SERVICE_NAME.HEARTBEAT
         return None
 
     @staticmethod
     def _convert_nfvi_service_state(nfvi_service_admin_state, nfvi_service_oper_state):
-        """
-        Returns the service state given the nfvi service state
-        """
+        """Returns the service state given the nfvi service state."""
+
         if nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED == nfvi_service_admin_state:
             return GuestServices.SERVICE_DISABLED
         else:
@@ -83,18 +77,16 @@ class GuestServices(ObjectData):
 
     @staticmethod
     def _get_nfvi_service_name(service_name):
-        """
-        Returns the nfvi service name
-        """
+        """Returns the nfvi service name."""
+
         if GUEST_SERVICE_NAME.HEARTBEAT == service_name:
             return nfvi.objects.v1.GUEST_SERVICE_NAME.HEARTBEAT
         return None
 
     @staticmethod
     def _get_nfvi_service_admin_state(service_state):
-        """
-        Returns the nfvi service state
-        """
+        """Returns the nfvi service state."""
+
         if GuestServices.SERVICE_NOT_CONFIGURED == service_state:
             return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED
 
@@ -118,21 +110,17 @@ class GuestServices(ObjectData):
 
     @property
     def services(self):
-        """
-        Returns a list of services
-        """
+        """Returns a list of services."""
+
         return list(self._services)
 
     @property
     def state(self):
-        """
-        Returns the overall state of the guest services
-        """
+        """Returns the overall state of the guest services."""
 
         def update_overall_state(current_state, state):
-            """
-            Returns the overall_state updated if needed
-            """
+            """Returns the overall_state updated if needed."""
+
             if current_state is None:
                 return state
 
@@ -198,10 +186,10 @@ class GuestServices(ObjectData):
 
     @property
     def communication_establish_timeout(self):
-        """
-        Returns the maximum amount of time in seconds to wait for the guest
+        """Returns the maximum amount of time in seconds to wait for the guest
+
         to establish communication, includes reboot time plus heartbeat
-        initialization time required
+        initialization time required.
         """
         restart_timeout = 300
 
@@ -219,119 +207,104 @@ class GuestServices(ObjectData):
         return restart_timeout
 
     def provision(self, service):
-        """
-        Add a service to the list of known services
-        """
+        """Add a service to the list of known services."""
+
         if service not in self._services:
             self._services[service] = GuestServices.SERVICE_NOT_CONFIGURED
 
     def are_provisioned(self):
-        """
-        Returns true if services have been provisioned
-        """
+        """Returns true if services have been provisioned."""
+
         return 0 < len(self._services)
 
     def are_configured(self):
-        """
-        Return true if all guest services are configured
-        """
+        """Return true if all guest services are configured."""
+
         for service in self._services:
             if GuestServices.SERVICE_NOT_CONFIGURED == self._services[service]:
                 return False
         return True
 
     def are_enabling(self):
-        """
-        Return true if all guest services are enabling or are enabled
-        """
+        """Return true if all guest services are enabling or are enabled."""
+
         for service in self._services:
             if GuestServices.SERVICE_ENABLING != self._services[service]:
                 return False
         return True
 
     def are_enabled(self):
-        """
-        Return true if all guest services are enabled
-        """
+        """Return true if all guest services are enabled."""
+
         for service in self._services:
             if GuestServices.SERVICE_ENABLED != self._services[service]:
                 return False
         return True
 
     def are_disabling(self):
-        """
-        Return true if all guest services are disabling or are disabled
-        """
+        """Return true if all guest services are disabling or are disabled."""
+
         for service in self._services:
             if GuestServices.SERVICE_DISABLING != self._services[service]:
                 return False
         return True
 
     def are_disabled(self):
-        """
-        Return true if all guest services are disabled
-        """
+        """Return true if all guest services are disabled."""
+
         for service in self._services:
             if GuestServices.SERVICE_DISABLED != self._services[service]:
                 return False
         return True
 
     def are_deleting(self):
-        """
-        Return true if all guest services are deleting
-        """
+        """Return true if all guest services are deleting."""
+
         for service in self._services:
             if GuestServices.SERVICE_DELETING != self._services[service]:
                 return False
         return True
 
     def configured(self):
-        """
-        Set guest services to the configured state
-        """
+        """Set guest services to the configured state."""
+
         for service in self._services:
             self._services[service] = GuestServices.SERVICE_CONFIGURED
 
     def enable(self):
-        """
-        Set guest services to the enabling state
-        """
+        """Set guest services to the enabling state."""
+
         for service in self._services:
             self._services[service] = GuestServices.SERVICE_ENABLING
 
     def disable(self):
-        """
-        Set guest services to the disabling state
-        """
+        """Set guest services to the disabling state."""
+
         for service in self._services:
             self._services[service] = GuestServices.SERVICE_DISABLING
 
     def delete(self):
-        """
-        Set guest services to the deleting state
-        """
+        """Set guest services to the deleting state."""
+
         for service in self._services:
             self._services[service] = GuestServices.SERVICE_DELETING
 
     def deleted(self):
-        """
-        Delete guest services
-        """
+        """Delete guest services."""
+
         if self._services is not None:
             del self._services
         self._services = dict()
 
     def guest_communication_established(self):
-        """
-        Returns true if guest communication has been established
-        """
+        """Returns true if guest communication has been established."""
+
         state = self._services.get(GUEST_SERVICE_NAME.HEARTBEAT, None)
         return GuestServices.SERVICE_ENABLED == state
 
     def get_nfvi_guest_service_names(self):
-        """
-        Returns a listing of nfvi guest services and their state
-        """
+        """Returns a listing of nfvi guest services and their state."""
+
         nfvi_service_names = list()
         for service_name, service_state in list(self._services.items()):
             nfvi_name = self._get_nfvi_service_name(service_name)
@@ -341,9 +314,8 @@ class GuestServices(ObjectData):
         return nfvi_service_names
 
     def get_nfvi_guest_services(self):
-        """
-        Returns a listing of nfvi guest services and their state
-        """
+        """Returns a listing of nfvi guest services and their state."""
+
         nfvi_services = list()
         for service_name, service_state in list(self._services.items()):
             nfvi_name = self._get_nfvi_service_name(service_name)
@@ -358,9 +330,8 @@ class GuestServices(ObjectData):
         return nfvi_services
 
     def nfvi_guest_services_update(self, nfvi_guest_services):
-        """
-        NFVI Guest Services Update
-        """
+        """NFVI Guest Services Update."""
+
         for nfvi_service in nfvi_guest_services:
             # Preserve the restart-timeout, on disables it can be set to zero
             if (
@@ -403,9 +374,8 @@ class GuestServices(ObjectData):
         self._nfvi_guest_services = nfvi_guest_services
 
     def nfvi_guest_services_state_update_needed(self):
-        """
-        Returns true if the nfvi guest services needs to be updated
-        """
+        """Returns true if the nfvi guest services needs to be updated."""
+
         if not self.are_configured():
             return False
 
@@ -426,9 +396,8 @@ class GuestServices(ObjectData):
         return False
 
     def as_dict(self):
-        """
-        Represent Guest Services as dictionary
-        """
+        """Represent Guest Services as dictionary."""
+
         data = dict()
         data["state"] = self.state
         data["services"] = self._services

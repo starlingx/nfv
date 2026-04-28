@@ -16,9 +16,7 @@ DLOG = debug.debug_get_logger("nfv_vim.api.openstack")
 
 
 class ServiceCategory(Constants, metaclass=Singleton):
-    """
-    Service Category Constants
-    """
+    """Service Category Constants."""
 
     PLATFORM = Constant("platform")
     OPENSTACK = Constant("openstack")
@@ -29,9 +27,7 @@ SERVICE_CATEGORY = ServiceCategory()
 
 
 class PlatformServices(Constants, metaclass=Singleton):
-    """
-    Platform Services Constants
-    """
+    """Platform Services Constants."""
 
     GUEST = Constant("guest")
     KEYSTONE = Constant("keystone")
@@ -47,9 +43,7 @@ PLATFORM_SERVICE = PlatformServices()
 
 
 class OpenStackServices(Constants, metaclass=Singleton):
-    """
-    OpenStack Services Constants
-    """
+    """OpenStack Services Constants."""
 
     CEILOMETER = Constant("ceilometer")
     CINDER = Constant("cinder")
@@ -66,9 +60,7 @@ OPENSTACK_SERVICE = OpenStackServices()
 
 
 class Service(object):
-    """
-    Service
-    """
+    """Service."""
 
     def __init__(
         self, region_name, service_name, service_type, endpoint_type, endpoint_override
@@ -81,44 +73,37 @@ class Service(object):
 
     @property
     def region_name(self):
-        """
-        Returns the region name associated with this entry
-        """
+        """Returns the region name associated with this entry."""
+
         return self._region_name
 
     @property
     def service_name(self):
-        """
-        Returns the service name associated with this entry
-        """
+        """Returns the service name associated with this entry."""
+
         return self._service_name
 
     @property
     def service_type(self):
-        """
-        Returns the service type associated with this entry
-        """
+        """Returns the service type associated with this entry."""
+
         return self._service_type
 
     @property
     def endpoint_type(self):
-        """
-        Returns the endpoint type associated with this entry
-        """
+        """Returns the endpoint type associated with this entry."""
+
         return self._endpoint_type
 
     @property
     def endpoint_override(self):
-        """
-        Returns the endpoint override associated with this entry
-        """
+        """Returns the endpoint override associated with this entry."""
+
         return self._endpoint_override
 
 
 class Directory(object):
-    """
-    Directory
-    """
+    """Directory."""
 
     def __init__(
         self,
@@ -149,79 +134,68 @@ class Directory(object):
 
     @property
     def service_category(self):
-        """
-        Returns the service category
-        """
+        """Returns the service category."""
+
         return self._service_category
 
     @property
     def keyring_service(self):
-        """
-        Returns the keyring service
-        """
+        """Returns the keyring service."""
+
         return self._keyring_service
 
     @property
     def auth_protocol(self):
-        """
-        Returns the authorization protocol
-        """
+        """Returns the authorization protocol."""
+
         return self._auth_protocol
 
     @property
     def auth_host(self):
-        """
-        Returns the authorization host
-        """
+        """Returns the authorization host."""
+
         return self._auth_host
 
     @property
     def auth_port(self):
-        """
-        Returns the authorization port
-        """
+        """Returns the authorization port."""
+
         return self._auth_port
 
     @property
     def auth_project(self):
-        """
-        Returns the authorization project
-        """
+        """Returns the authorization project."""
+
         return self._auth_project
 
     @property
     def auth_username(self):
-        """
-        Returns the authorization username
-        """
+        """Returns the authorization username."""
+
         return self._auth_username
 
     @property
     def auth_password(self):
-        """
-        Returns the authorization password
-        """
+        """Returns the authorization password."""
+
         return self._auth_password
 
     @property
     def auth_uri(self):
-        """
-        Returns the authorization uri
-        """
+        """Returns the authorization uri."""
+
         return self._auth_uri
 
     @property
     def auth_user_domain_name(self):
-        """
-        Returns the authorization user domain name
-        """
+        """Returns the authorization user domain name."""
+
         return self._auth_user_domain_name
 
     @property
     def auth_project_domain_name(self):
-        """
-        Returns the authorization project domain name
-        """
+        """Returns the authorization project domain name."""
+
         return self._auth_project_domain_name
 
     def set_service_info(
@@ -233,9 +207,8 @@ class Directory(object):
         endpoint_type,
         endpoint_override,
     ):
-        """
-        Set information for a particular service
-        """
+        """Set information for a particular service."""
+
         if self._entries.get(service, None) is not None:
             del self._entries[service]
 
@@ -245,16 +218,13 @@ class Directory(object):
         self._entries[service] = entry
 
     def get_service_info(self, service):
-        """
-        Get information for a particular service
-        """
+        """Get information for a particular service."""
+
         return self._entries.get(service, None)
 
 
 class Token(object):
-    """
-    Token
-    """
+    """Token."""
 
     def __init__(self, token_data, directory, token_id):
         self._expired = False
@@ -276,42 +246,36 @@ class Token(object):
         return True
 
     def is_admin(self):
-        """
-        Check if this token has the admin role.
-        """
+        """Check if this token has the admin role."""
+
         for role in self._data["token"]["roles"]:
             if role["name"] == "admin":
                 return True
         return False
 
     def get_id(self):
-        """
-        Get the identifier of the token.
-        """
+        """Get the identifier of the token."""
+
         return self._token_id
 
     def get_tenant_id(self):
-        """
-        Get the project identifier of the token.
-        """
+        """Get the project identifier of the token."""
+
         return self._data["token"]["project"]["id"]
 
     def get_project_name(self):
-        """
-        Get the project name of the token.
-        """
+        """Get the project name of the token."""
+
         return self._data["token"]["project"]["name"]
 
     def get_project_domain_name(self):
-        """
-        Get the project domain name of the token.
-        """
+        """Get the project domain name of the token."""
+
         return self._data["token"]["project"]["domain"]["name"]
 
     def _url_strip_version(self, url):
-        """
-        Strip the version information from the url
-        """
+        """Strip the version information from the url."""
+
         # Get rid of the trailing '/' if present and remove the version
         # information from the URL.
         url = url.rstrip("/")
@@ -326,9 +290,8 @@ class Token(object):
         return url
 
     def _get_service_url(self, region_name, service_name, service_type, endpoint_type):
-        """
-        Search the catalog of a service in a region for the url
-        """
+        """Search the catalog of a service in a region for the url."""
+
         for catalog in self._data["token"]["catalog"]:
             if catalog["type"] == service_type:
                 if catalog["name"] == service_name:
@@ -342,12 +305,10 @@ class Token(object):
         return None
 
     def get_service_url(self, service, strip_version=False):
-        """
-        Get the service url for a service
-        """
+        """Get the service url for a service."""
+
         service_info = self._directory.get_service_info(service)
         if service_info is not None:
-
             region_name = service_info.region_name
             service_name = service_info.service_name
             service_type = service_info.service_type

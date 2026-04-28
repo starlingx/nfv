@@ -25,14 +25,12 @@ from nfv_plugins.nfvi_plugins import config
 
 import tests
 
-
 DLOG = debug.debug_get_logger("nfv_tests")
 
 
 def process_signal_handler(signum, frame):
-    """
-    Test - Process Signal Handler
-    """
+    """Test - Process Signal Handler."""
+
     if signal.SIGINT == signum:
         raise KeyboardInterrupt
     else:
@@ -40,9 +38,8 @@ def process_signal_handler(signum, frame):
 
 
 def process_initialize():
-    """
-    Test - Process Initialize
-    """
+    """Test - Process Initialize."""
+
     utf8_writer = codecs.getwriter("utf8")
     sys.stdout = utf8_writer(sys.stdout)
     debug.debug_initialize(config.CONF["debug"], "NFV-TEST")
@@ -50,9 +47,8 @@ def process_initialize():
 
 
 def process_finalize():
-    """
-    Test - Process Finalize
-    """
+    """Test - Process Finalize."""
+
     forensic.forensic_finalize()
     debug.debug_finalize()
 
@@ -72,9 +68,8 @@ def process_progress_marker_end(marker_result):
 
 
 def process_do_setup(loads_dir, setup_data):
-    """
-    Test - Process Do Setup
-    """
+    """Test - Process Do Setup."""
+
     from nfv_plugins.nfvi_plugins.openstack import cinder
     from nfv_plugins.nfvi_plugins.openstack import glance
     from nfv_plugins.nfvi_plugins.openstack import neutron
@@ -409,9 +404,8 @@ def process_do_setup(loads_dir, setup_data):
 
 
 def process_do_tests(test_data):
-    """
-    Test - Process Do Tests
-    """
+    """Test - Process Do Tests."""
+
     test_output_dir = config.CONF["test-output"]["dir"]
     if os.path.exists(test_output_dir):
         shutil.rmtree(test_output_dir)
@@ -565,9 +559,8 @@ def process_do_tests(test_data):
 
 
 def process_do_teardown(setup_data):
-    """
-    Test - Process Do Teardown
-    """
+    """Test - Process Do Teardown."""
+
     from nfv_plugins.nfvi_plugins.openstack import cinder
     from nfv_plugins.nfvi_plugins.openstack import glance
     from nfv_plugins.nfvi_plugins.openstack import neutron
@@ -662,9 +655,8 @@ def process_do_teardown(setup_data):
 
 
 def process_main():
-    """
-    Test - Process Main
-    """
+    """Test - Process Main."""
+
     try:
         want_teardown = False
         root_dir = os.path.dirname(__file__)

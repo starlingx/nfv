@@ -13,9 +13,7 @@ DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_fault_mgmt_plugin")
 
 
 class NFVIFaultMgmtPlugin(NFVIPlugin):
-    """
-    NFVI Fault Management Plugin
-    """
+    """NFVI Fault Management Plugin."""
 
     _version = "1.0.0"
     _signature = "2808f351-92bb-482c-b873-66ab232254af"

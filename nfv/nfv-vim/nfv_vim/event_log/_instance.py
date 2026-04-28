@@ -150,8 +150,7 @@ _event_templates = {
             event_log.EVENT_CONTEXT.ADMIN: {
                 "entity_type": "tenant.instance",
                 "entity": "tenant=%(tenant_uuid)s.instance=%(instance_uuid)s",
-                "reason_text": "Create failed for instance %(instance_name)s"
-                "%(reason)s",
+                "reason_text": "Create failed for instance %(instance_name)s%(reason)s",
             }
         },
     },
@@ -694,8 +693,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Live-Migrate rejected for instance %(instance_name)s"
-        "%(reason)s",
+        "reason_text": "Live-Migrate rejected for instance %(instance_name)s%(reason)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -797,8 +795,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Cold-Migrate rejected for instance %(instance_name)s"
-        "%(reason)s",
+        "reason_text": "Cold-Migrate rejected for instance %(instance_name)s%(reason)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -866,8 +863,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Cold-Migrate-Confirm issued against instance "
-        "%(instance_name)s",
+        "reason_text": "Cold-Migrate-Confirm issued against instance %(instance_name)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -884,8 +880,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Cold-Migrate-Confirm inprogress for instance "
-        "%(instance_name)s",
+        "reason_text": "Cold-Migrate-Confirm inprogress for instance %(instance_name)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -920,8 +915,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Cold-Migrate-Confirm cancelled for instance "
-        "%(instance_name)s",
+        "reason_text": "Cold-Migrate-Confirm cancelled for instance %(instance_name)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -953,9 +947,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": (
-            "Cold-Migrate-Confirm complete for instance %(instance_name)s"
-        ),
+        "reason_text": ("Cold-Migrate-Confirm complete for instance %(instance_name)s"),
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -971,8 +963,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Cold-Migrate-Revert issued against instance "
-        "%(instance_name)s",
+        "reason_text": "Cold-Migrate-Revert issued against instance %(instance_name)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -989,8 +980,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Cold-Migrate-Revert inprogress for instance "
-        "%(instance_name)s",
+        "reason_text": "Cold-Migrate-Revert inprogress for instance %(instance_name)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -1026,8 +1016,7 @@ _event_templates = {
         "entity": "instance=%(instance_uuid)s",
         "event_type": event_log.EVENT_TYPE.ACTION_EVENT,
         "importance": event_log.EVENT_IMPORTANCE.HIGH,
-        "reason_text": "Cold-Migrate-Revert cancelled for instance "
-        "%(instance_name)s",
+        "reason_text": "Cold-Migrate-Revert cancelled for instance %(instance_name)s",
         "exclude_event_context": [],
         "event_context_data": {
             event_log.EVENT_CONTEXT.ADMIN: {
@@ -1931,9 +1920,8 @@ _event_templates = {
 
 
 def _event_template_get(event_id, event_context):
-    """
-    Returns the event template associated with the given context
-    """
+    """Returns the event template associated with the given context."""
+
     if event_id not in _event_templates:
         return None
 
@@ -1974,9 +1962,8 @@ def _event_template_get(event_id, event_context):
 
 
 def _event_issue(event_id, event_context, template, data):
-    """
-    Issue an event given the event template and data
-    """
+    """Issue an event given the event template and data."""
+
     event_data = event_log.EventLogData(
         event_id,
         template["event_type"],
@@ -2000,9 +1987,8 @@ def instance_issue_log(
     reason=None,
     repair_action=None,
 ):
-    """
-    Issue an event log for instance
-    """
+    """Issue an event log for instance."""
+
     data = dict()
     data["tenant_uuid"] = instance.tenant_uuid
     data["tenant_name"] = instance.tenant_name
@@ -2065,9 +2051,8 @@ def instance_issue_log(
 
 
 def instance_last_event(instance, event_id):
-    """
-    Returns true if the given event was last generated
-    """
+    """Returns true if the given event was last generated."""
+
     if instance.events:
         if any(x.event_id == event_id for x in instance.events):
             return True
@@ -2075,9 +2060,7 @@ def instance_last_event(instance, event_id):
 
 
 def instance_manage_events(instance, enabling=False):
-    """
-    Generate events associated with the given instance
-    """
+    """Generate events associated with the given instance."""
 
     def last_event(ev_id):
         return instance_last_event(instance, ev_id)

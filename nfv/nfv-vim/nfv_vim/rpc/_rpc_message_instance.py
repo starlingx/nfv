@@ -14,9 +14,7 @@ DLOG = debug.debug_get_logger("nfv_vim.rpc.instance")
 
 
 class APIRequestCreateInstance(RPCMessage):
-    """
-    RPC API Request Message - Create Instance
-    """
+    """RPC API Request Message - Create Instance."""
 
     name = None
     instance_type_uuid = None
@@ -76,9 +74,7 @@ class APIRequestCreateInstance(RPCMessage):
 
 
 class APIResponseCreateInstance(RPCMessage):
-    """
-    RPC API Response Message - Create Instance
-    """
+    """RPC API Response Message - Create Instance."""
 
     uuid = None
     name = None
@@ -159,9 +155,7 @@ class APIResponseCreateInstance(RPCMessage):
 
 
 class APIRequestStartInstance(RPCMessage):
-    """
-    RPC API Request Message - Start Instance
-    """
+    """RPC API Request Message - Start Instance."""
 
     uuid = None
 
@@ -184,9 +178,7 @@ class APIRequestStartInstance(RPCMessage):
 
 
 class APIResponseStartInstance(RPCMessage):
-    """
-    RPC API Response Message - Start Instance
-    """
+    """RPC API Response Message - Start Instance."""
 
     uuid = None
 
@@ -211,9 +203,7 @@ class APIResponseStartInstance(RPCMessage):
 
 
 class APIRequestStopInstance(RPCMessage):
-    """
-    RPC API Request Message - Stop Instance
-    """
+    """RPC API Request Message - Stop Instance."""
 
     uuid = None
 
@@ -236,9 +226,7 @@ class APIRequestStopInstance(RPCMessage):
 
 
 class APIResponseStopInstance(RPCMessage):
-    """
-    RPC API Response Message - Stop Instance
-    """
+    """RPC API Response Message - Stop Instance."""
 
     uuid = None
 
@@ -261,9 +249,7 @@ class APIResponseStopInstance(RPCMessage):
 
 
 class APIRequestPauseInstance(RPCMessage):
-    """
-    RPC API Request Message - Pause Instance
-    """
+    """RPC API Request Message - Pause Instance."""
 
     uuid = None
 
@@ -286,9 +272,7 @@ class APIRequestPauseInstance(RPCMessage):
 
 
 class APIResponsePauseInstance(RPCMessage):
-    """
-    RPC API Response Message - Pause Instance
-    """
+    """RPC API Response Message - Pause Instance."""
 
     uuid = None
 
@@ -313,9 +297,7 @@ class APIResponsePauseInstance(RPCMessage):
 
 
 class APIRequestUnpauseInstance(RPCMessage):
-    """
-    RPC API Request Message - Unpause Instance
-    """
+    """RPC API Request Message - Unpause Instance."""
 
     uuid = None
 
@@ -340,9 +322,7 @@ class APIRequestUnpauseInstance(RPCMessage):
 
 
 class APIResponseUnpauseInstance(RPCMessage):
-    """
-    RPC API Response Message - Unpause Instance
-    """
+    """RPC API Response Message - Unpause Instance."""
 
     uuid = None
 
@@ -367,9 +347,7 @@ class APIResponseUnpauseInstance(RPCMessage):
 
 
 class APIRequestSuspendInstance(RPCMessage):
-    """
-    RPC API Request Message - Suspend Instance
-    """
+    """RPC API Request Message - Suspend Instance."""
 
     uuid = None
 
@@ -394,9 +372,7 @@ class APIRequestSuspendInstance(RPCMessage):
 
 
 class APIResponseSuspendInstance(RPCMessage):
-    """
-    RPC API Response Message - Suspend Instance
-    """
+    """RPC API Response Message - Suspend Instance."""
 
     uuid = None
 
@@ -421,9 +397,7 @@ class APIResponseSuspendInstance(RPCMessage):
 
 
 class APIRequestResumeInstance(RPCMessage):
-    """
-    RPC API Request Message - Resume Instance
-    """
+    """RPC API Request Message - Resume Instance."""
 
     uuid = None
 
@@ -448,9 +422,7 @@ class APIRequestResumeInstance(RPCMessage):
 
 
 class APIResponseResumeInstance(RPCMessage):
-    """
-    RPC API Response Message - Resume Instance
-    """
+    """RPC API Response Message - Resume Instance."""
 
     uuid = None
 
@@ -475,9 +447,7 @@ class APIResponseResumeInstance(RPCMessage):
 
 
 class APIRequestRebootInstance(RPCMessage):
-    """
-    RPC API Request Message - Reboot Instance
-    """
+    """RPC API Request Message - Reboot Instance."""
 
     uuid = None
 
@@ -502,9 +472,7 @@ class APIRequestRebootInstance(RPCMessage):
 
 
 class APIResponseRebootInstance(RPCMessage):
-    """
-    RPC API Response Message - Reboot Instance
-    """
+    """RPC API Response Message - Reboot Instance."""
 
     uuid = None
 
@@ -529,9 +497,7 @@ class APIResponseRebootInstance(RPCMessage):
 
 
 class APIRequestLiveMigrateInstance(RPCMessage):
-    """
-    RPC API Request Message - Live Migrate Instance
-    """
+    """RPC API Request Message - Live Migrate Instance."""
 
     uuid = None
 
@@ -556,9 +522,7 @@ class APIRequestLiveMigrateInstance(RPCMessage):
 
 
 class APIResponseLiveMigrateInstance(RPCMessage):
-    """
-    RPC API Response Message - Live Migrate Instance
-    """
+    """RPC API Response Message - Live Migrate Instance."""
 
     uuid = None
 
@@ -583,9 +547,7 @@ class APIResponseLiveMigrateInstance(RPCMessage):
 
 
 class APIRequestColdMigrateInstance(RPCMessage):
-    """
-    RPC API Request Message - Cold Migrate Instance
-    """
+    """RPC API Request Message - Cold Migrate Instance."""
 
     uuid = None
 
@@ -610,9 +572,7 @@ class APIRequestColdMigrateInstance(RPCMessage):
 
 
 class APIResponseColdMigrateInstance(RPCMessage):
-    """
-    RPC API Response Message - Cold Migrate Instance
-    """
+    """RPC API Response Message - Cold Migrate Instance."""
 
     uuid = None
 
@@ -637,9 +597,7 @@ class APIResponseColdMigrateInstance(RPCMessage):
 
 
 class APIRequestEvacuateInstance(RPCMessage):
-    """
-    RPC API Request Message - Evacuate Instance
-    """
+    """RPC API Request Message - Evacuate Instance."""
 
     uuid = None
 
@@ -664,9 +622,7 @@ class APIRequestEvacuateInstance(RPCMessage):
 
 
 class APIResponseEvacuateInstance(RPCMessage):
-    """
-    RPC API Response Message - Evacuate Instance
-    """
+    """RPC API Response Message - Evacuate Instance."""
 
     uuid = None
 
@@ -691,9 +647,7 @@ class APIResponseEvacuateInstance(RPCMessage):
 
 
 class APIRequestDeleteInstance(RPCMessage):
-    """
-    RPC API Request Message - Delete Instance
-    """
+    """RPC API Request Message - Delete Instance."""
 
     uuid = None
 
@@ -718,9 +672,7 @@ class APIRequestDeleteInstance(RPCMessage):
 
 
 class APIResponseDeleteInstance(RPCMessage):
-    """
-    RPC API Response Message - Delete Instance
-    """
+    """RPC API Response Message - Delete Instance."""
 
     uuid = None
 
@@ -745,9 +697,7 @@ class APIResponseDeleteInstance(RPCMessage):
 
 
 class APIRequestGetInstance(RPCMessage):
-    """
-    RPC API Request Message - Get Instance
-    """
+    """RPC API Request Message - Get Instance."""
 
     get_all = False
     filter_by_uuid = None
@@ -776,9 +726,7 @@ class APIRequestGetInstance(RPCMessage):
 
 
 class APIResponseGetInstance(RPCMessage):
-    """
-    RPC API Response Message - Get Instance
-    """
+    """RPC API Response Message - Get Instance."""
 
     uuid = None
     name = None

@@ -12,9 +12,7 @@ from nfv_common.helpers import Singleton
 
 
 class InstanceGroupPolicy(Constants, metaclass=Singleton):
-    """
-    Instance Group Policy Constants
-    """
+    """Instance Group Policy Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -29,9 +27,7 @@ INSTANCE_GROUP_POLICY = InstanceGroupPolicy()
 
 
 class InstanceGroup(ObjectData):
-    """
-    NFVI Instance Group Object
-    """
+    """NFVI Instance Group Object."""
 
     def __init__(self, uuid, name, member_uuids, policies):
         super(InstanceGroup, self).__init__("1.0.0")

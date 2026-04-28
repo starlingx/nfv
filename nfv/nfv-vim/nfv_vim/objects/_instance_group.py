@@ -16,9 +16,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.instance_group")
 
 
 class InstanceGroupPolicy(Constants, metaclass=Singleton):
-    """
-    Instance Group Policy Constants
-    """
+    """Instance Group Policy Constants."""
 
     NONE = Constant("")
     UNKNOWN = Constant("unknown")
@@ -33,9 +31,7 @@ INSTANCE_GROUP_POLICY = InstanceGroupPolicy()
 
 
 class InstanceGroup(ObjectData):
-    """
-    Instance Group Object
-    """
+    """Instance Group Object."""
 
     def __init__(self, nfvi_instance_group):
         super(InstanceGroup, self).__init__("1.0.0")
@@ -44,53 +40,46 @@ class InstanceGroup(ObjectData):
 
     @property
     def uuid(self):
-        """
-        Returns the uuid of the instance group
-        """
+        """Returns the uuid of the instance group."""
+
         return self._nfvi_instance_group.uuid
 
     @property
     def name(self):
-        """
-        Returns the name of the instance group
-        """
+        """Returns the name of the instance group."""
+
         if self._nfvi_instance_group.name is None:
             return self._nfvi_instance_group.uuid
         return self._nfvi_instance_group.name
 
     @property
     def member_uuids(self):
-        """
-        Returns the member uuids of the instance group
-        """
+        """Returns the member uuids of the instance group."""
+
         return self._nfvi_instance_group.member_uuids
 
     @property
     def policies(self):
-        """
-        Returns the policies for the instance group
-        """
+        """Returns the policies for the instance group."""
+
         return self._nfvi_instance_group.policies
 
     @property
     def nfvi_instance_group(self):
-        """
-        Returns the nfvi instance group
-        """
+        """Returns the nfvi instance group."""
+
         return self._nfvi_instance_group
 
     def clear_alarms(self):
-        """
-        Clear alarms
-        """
+        """Clear alarms."""
+
         if self._alarms:
             alarm.clear_instance_group_alarm(self._alarms)
             self._alarms[:] = list()
 
     def manage_alarms(self):
-        """
-        Manage alarms
-        """
+        """Manage alarms."""
+
         from nfv_vim import tables
 
         instance_table = tables.tables_get_instance_table()
@@ -137,31 +126,27 @@ class InstanceGroup(ObjectData):
         self.clear_alarms()
 
     def instance_updated(self):
-        """
-        Notification of an instance being updated
-        """
+        """Notification of an instance being updated."""
+
         self.manage_alarms()
 
     def nfvi_instance_group_update(self, nfvi_instance_group):
-        """
-        NFVI Instance Group Update
-        """
+        """NFVI Instance Group Update."""
+
         self._nfvi_instance_group = nfvi_instance_group
         self.manage_alarms()
         self._persist()
 
     def _persist(self):
-        """
-        Persist changes to instance group object
-        """
+        """Persist changes to instance group object."""
+
         from nfv_vim import database
 
         database.database_instance_group_add(self)
 
     def as_dict(self):
-        """
-        Represent instance group object as dictionary
-        """
+        """Represent instance group object as dictionary."""
+
         data = dict()
         data["uuid"] = self.uuid
         data["name"] = self.name

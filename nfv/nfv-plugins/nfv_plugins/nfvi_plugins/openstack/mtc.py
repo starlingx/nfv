@@ -17,9 +17,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.mtc")
 
 
 class HostSeverity(Constants, metaclass=Singleton):
-    """
-    Host Severity Constants
-    """
+    """Host Severity Constants."""
 
     CLEARED = Constant("cleared")
     DEGRADED = Constant("degraded")
@@ -31,9 +29,8 @@ HOST_SEVERITY = HostSeverity()
 
 
 def system_query(token):
-    """
-    Query Maintenance for the system information
-    """
+    """Query Maintenance for the system information."""
+
     url = token.get_service_url(PLATFORM_SERVICE.MTC)
     if url is None:
         raise ValueError("OpenStack Mtc URL is invalid")
@@ -49,9 +46,8 @@ def system_query(token):
 
 
 def host_query(token, host_uuid, host_name):
-    """
-    Query Maintenance for the host information
-    """
+    """Query Maintenance for the host information."""
+
     url = token.get_service_url(PLATFORM_SERVICE.MTC)
     if url is None:
         raise ValueError("OpenStack Mtc URL is invalid")
@@ -73,9 +69,8 @@ def host_query(token, host_uuid, host_name):
 
 
 def notify_host_severity(token, host_uuid, host_name, host_severity):
-    """
-    Notify Maintenance the severity of a host
-    """
+    """Notify Maintenance the severity of a host."""
+
     url = token.get_service_url(PLATFORM_SERVICE.MTC)
     if url is None:
         raise ValueError("OpenStack Mtc URL is invalid")

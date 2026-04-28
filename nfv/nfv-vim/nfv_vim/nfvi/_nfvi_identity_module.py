@@ -13,17 +13,15 @@ _identity_plugin = None
 
 
 def nfvi_get_tenants(callback):
-    """
-    Get a list of tenants
-    """
+    """Get a list of tenants."""
+
     cmd_id = _identity_plugin.invoke_plugin("get_tenants", callback=callback)
     return cmd_id
 
 
 def nfvi_identity_initialize(config, pool):
-    """
-    Initialize the NFVI identity package
-    """
+    """Initialize the NFVI identity package."""
+
     global _identity_plugin
 
     _identity_plugin = NFVIIdentityPlugin(config["namespace"], pool)
@@ -31,8 +29,7 @@ def nfvi_identity_initialize(config, pool):
 
 
 def nfvi_identity_finalize():
-    """
-    Finalize the NFVI identity package
-    """
+    """Finalize the NFVI identity package."""
+
     if _identity_plugin is not None:
         _identity_plugin.finalize()

@@ -7,9 +7,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class HostFwUpdate(ObjectData):
-    """
-    NFVI Host Firmware Update Object
-    """
+    """NFVI Host Firmware Update Object."""
 
     def __init__(self, hostname, personality, uuid):
         super(HostFwUpdate, self).__init__("1.0.0")

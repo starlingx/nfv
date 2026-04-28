@@ -11,9 +11,7 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.network")
 
 
 class NetworkProviderData(ObjectData):
-    """
-    Network Provider Data Object
-    """
+    """Network Provider Data Object."""
 
     def __init__(self, physical_network, network_type, segmentation_id):
         super(NetworkProviderData, self).__init__("1.0.0")
@@ -27,9 +25,7 @@ class NetworkProviderData(ObjectData):
 
 
 class Network(ObjectData):
-    """
-    Network Object
-    """
+    """Network Object."""
 
     def __init__(
         self,
@@ -57,9 +53,8 @@ class Network(ObjectData):
         )
 
     def as_dict(self):
-        """
-        Represent network object as dictionary
-        """
+        """Represent network object as dictionary."""
+
         data = dict()
         data["uuid"] = self.uuid
         data["name"] = self.name

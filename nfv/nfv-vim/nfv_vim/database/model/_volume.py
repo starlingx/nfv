@@ -12,9 +12,7 @@ from nfv_vim.database.model._base import Base
 
 
 class Volume(AsDictMixin, Base):
-    """
-    Volume Database Table Entry
-    """
+    """Volume Database Table Entry."""
 
     __tablename__ = "volumes_v1"
 

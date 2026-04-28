@@ -9,9 +9,7 @@ from nfv_common.helpers import Singleton
 
 
 class _StateTaskWorkResult(object, metaclass=Singleton):
-    """
-    State Task Work Result - Constants
-    """
+    """State Task Work Result - Constants."""
 
     WAIT = Constant("wait")
     SUCCESS = Constant("success")

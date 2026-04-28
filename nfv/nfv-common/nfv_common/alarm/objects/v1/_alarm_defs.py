@@ -10,9 +10,7 @@ from nfv_common.helpers import Singleton
 
 
 class _AlarmType(Constants, metaclass=Singleton):
-    """
-    Alarm Type Constants
-    """
+    """Alarm Type Constants."""
 
     UNKNOWN = Constant("unknown")
     MULTI_NODE_RECOVERY_MODE = Constant("multi-node-recovery-mode")
@@ -67,18 +65,14 @@ class _AlarmType(Constants, metaclass=Singleton):
 
 
 class _AlarmContext(Constants, metaclass=Singleton):
-    """
-    Alarm Context Constants
-    """
+    """Alarm Context Constants."""
 
     ADMIN = Constant("admin")
     TENANT = Constant("tenant")
 
 
 class _AlarmEventType(Constants, metaclass=Singleton):
-    """
-    Alarm Event Type Constants
-    """
+    """Alarm Event Type Constants."""
 
     UNKNOWN = Constant("unknown")
     COMMUNICATIONS_ALARM = Constant("communications-alarm")
@@ -95,9 +89,7 @@ class _AlarmEventType(Constants, metaclass=Singleton):
 
 
 class _AlarmProbableCause(Constants, metaclass=Singleton):
-    """
-    Alarm Probable Cause Constants
-    """
+    """Alarm Probable Cause Constants."""
 
     UNKNOWN = Constant("unknown")
     INDETERMINATE = Constant("indeterminate")
@@ -108,9 +100,7 @@ class _AlarmProbableCause(Constants, metaclass=Singleton):
 
 
 class _AlarmSeverity(Constants, metaclass=Singleton):
-    """
-    Alarm Severity Constants
-    """
+    """Alarm Severity Constants."""
 
     UNKNOWN = Constant("unknown")
     CLEARED = Constant("cleared")
@@ -122,9 +112,7 @@ class _AlarmSeverity(Constants, metaclass=Singleton):
 
 
 class _AlarmTrendIndication(Constants, metaclass=Singleton):
-    """
-    Alarm Trend Indication Constants
-    """
+    """Alarm Trend Indication Constants."""
 
     UNKNOWN = Constant("unknown")
     LESS_SEVERE = Constant("less-severe")

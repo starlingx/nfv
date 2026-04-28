@@ -13,32 +13,28 @@ _compute_plugin = None
 
 
 def nfvi_compute_plugin_disabled():
-    """
-    Get compute plugin disabled status
-    """
+    """Get compute plugin disabled status."""
+
     return _compute_plugin is None
 
 
 def nfvi_get_host_aggregates(callback):
-    """
-    Get a list of host aggregates
-    """
+    """Get a list of host aggregates."""
+
     cmd_id = _compute_plugin.invoke_plugin("get_host_aggregates", callback=callback)
     return cmd_id
 
 
 def nfvi_get_hypervisors(callback):
-    """
-    Get a list of hypervisors
-    """
+    """Get a list of hypervisors."""
+
     cmd_id = _compute_plugin.invoke_plugin("get_hypervisors", callback=callback)
     return cmd_id
 
 
 def nfvi_get_hypervisor(hypervisor_id, callback):
-    """
-    Get hypervisor details
-    """
+    """Get hypervisor details."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "get_hypervisor", hypervisor_id, callback=callback
     )
@@ -46,9 +42,8 @@ def nfvi_get_hypervisor(hypervisor_id, callback):
 
 
 def nfvi_get_instance_types(paging, callback):
-    """
-    Get a list of instance types
-    """
+    """Get a list of instance types."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "get_instance_types", paging, callback=callback
     )
@@ -58,9 +53,8 @@ def nfvi_get_instance_types(paging, callback):
 def nfvi_create_instance_type(
     instance_type_uuid, instance_type_name, instance_type_attributes, callback
 ):
-    """
-    Create an instance type
-    """
+    """Create an instance type."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "create_instance_type",
         instance_type_uuid,
@@ -72,9 +66,8 @@ def nfvi_create_instance_type(
 
 
 def nfvi_delete_instance_type(instance_type_uuid, callback):
-    """
-    Delete an instance type
-    """
+    """Delete an instance type."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "delete_instance_type", instance_type_uuid, callback=callback
     )
@@ -82,9 +75,8 @@ def nfvi_delete_instance_type(instance_type_uuid, callback):
 
 
 def nfvi_get_instance_type(instance_type_uuid, callback):
-    """
-    Get an instance type
-    """
+    """Get an instance type."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "get_instance_type", instance_type_uuid, callback=callback
     )
@@ -92,17 +84,15 @@ def nfvi_get_instance_type(instance_type_uuid, callback):
 
 
 def nfvi_get_instance_groups(callback):
-    """
-    Get a list of instance groups
-    """
+    """Get a list of instance groups."""
+
     cmd_id = _compute_plugin.invoke_plugin("get_instance_groups", callback=callback)
     return cmd_id
 
 
 def nfvi_get_instances(paging, callback, context=None):
-    """
-    Get a list of instances
-    """
+    """Get a list of instances."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "get_instances", paging, context, callback=callback
     )
@@ -118,9 +108,8 @@ def nfvi_create_instance(
     callback,
     context=None,
 ):
-    """
-    Create an instance
-    """
+    """Create an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "create_instance",
         instance_name,
@@ -141,9 +130,8 @@ def nfvi_live_migrate_instance(
     block_storage_migration="auto",
     context=None,
 ):
-    """
-    Live migrate an instance
-    """
+    """Live migrate an instance."""
+
     if context is None:
         cmd_id = _compute_plugin.invoke_plugin_expediate(
             "live_migrate_instance",
@@ -168,9 +156,8 @@ def nfvi_live_migrate_instance(
 def nfvi_cold_migrate_instance(
     instance_uuid, callback, to_host_name=None, context=None
 ):
-    """
-    Cold migrate an instance
-    """
+    """Cold migrate an instance."""
+
     if context is None:
         cmd_id = _compute_plugin.invoke_plugin_expediate(
             "cold_migrate_instance",
@@ -191,9 +178,8 @@ def nfvi_cold_migrate_instance(
 
 
 def nfvi_cold_migrate_confirm_instance(instance_uuid, callback, context=None):
-    """
-    Cold migrate confirm an instance
-    """
+    """Cold migrate confirm an instance."""
+
     if context is None:
         cmd_id = _compute_plugin.invoke_plugin_expediate(
             "cold_migrate_confirm_instance", instance_uuid, context, callback=callback
@@ -206,9 +192,8 @@ def nfvi_cold_migrate_confirm_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_cold_migrate_revert_instance(instance_uuid, callback, context=None):
-    """
-    Cold migrate revert an instance
-    """
+    """Cold migrate revert an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "cold_migrate_revert_instance", instance_uuid, context, callback=callback
     )
@@ -216,9 +201,8 @@ def nfvi_cold_migrate_revert_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_resize_instance(instance_uuid, instance_type_uuid, callback, context=None):
-    """
-    Resize an instance
-    """
+    """Resize an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "resize_instance", instance_uuid, instance_type_uuid, context, callback=callback
     )
@@ -226,9 +210,8 @@ def nfvi_resize_instance(instance_uuid, instance_type_uuid, callback, context=No
 
 
 def nfvi_resize_confirm_instance(instance_uuid, callback, context=None):
-    """
-    Resize confirm an instance
-    """
+    """Resize confirm an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "resize_confirm_instance", instance_uuid, context, callback=callback
     )
@@ -236,9 +219,8 @@ def nfvi_resize_confirm_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_resize_revert_instance(instance_uuid, callback, context=None):
-    """
-    Resize revert an instance
-    """
+    """Resize revert an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "resize_revert_instance", instance_uuid, context, callback=callback
     )
@@ -248,9 +230,8 @@ def nfvi_resize_revert_instance(instance_uuid, callback, context=None):
 def nfvi_evacuate_instance(
     instance_uuid, callback, admin_password=None, to_host_name=None, context=None
 ):
-    """
-    Evacuate an instance
-    """
+    """Evacuate an instance."""
+
     if context is None:
         cmd_id = _compute_plugin.invoke_plugin_expediate(
             "evacuate_instance",
@@ -273,9 +254,8 @@ def nfvi_evacuate_instance(
 
 
 def nfvi_reboot_instance(instance_uuid, graceful_shutdown, callback, context=None):
-    """
-    Reboot an instance
-    """
+    """Reboot an instance."""
+
     if context is None:
         cmd_id = _compute_plugin.invoke_plugin_expediate(
             "reboot_instance",
@@ -303,9 +283,8 @@ def nfvi_rebuild_instance(
     admin_password=None,
     context=None,
 ):
-    """
-    Rebuild an instance
-    """
+    """Rebuild an instance."""
+
     if context is None:
         cmd_id = _compute_plugin.invoke_plugin_expediate(
             "rebuild_instance",
@@ -330,9 +309,8 @@ def nfvi_rebuild_instance(
 
 
 def nfvi_fail_instance(instance_uuid, callback, context=None):
-    """
-    Fail an instance
-    """
+    """Fail an instance."""
+
     if context is None:
         cmd_id = _compute_plugin.invoke_plugin_expediate(
             "fail_instance", instance_uuid, context, callback=callback
@@ -345,9 +323,8 @@ def nfvi_fail_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_pause_instance(instance_uuid, callback, context=None):
-    """
-    Pause an instance
-    """
+    """Pause an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "pause_instance", instance_uuid, context, callback=callback
     )
@@ -355,9 +332,8 @@ def nfvi_pause_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_unpause_instance(instance_uuid, callback, context=None):
-    """
-    Unpause an instance
-    """
+    """Unpause an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "unpause_instance", instance_uuid, context, callback=callback
     )
@@ -365,9 +341,8 @@ def nfvi_unpause_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_suspend_instance(instance_uuid, callback, context=None):
-    """
-    Suspend an instance
-    """
+    """Suspend an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "suspend_instance", instance_uuid, context, callback=callback
     )
@@ -375,9 +350,8 @@ def nfvi_suspend_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_resume_instance(instance_uuid, callback, context=None):
-    """
-    Resume an instance
-    """
+    """Resume an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "resume_instance", instance_uuid, context, callback=callback
     )
@@ -385,9 +359,8 @@ def nfvi_resume_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_start_instance(instance_uuid, callback, context=None):
-    """
-    Start an instance
-    """
+    """Start an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "start_instance", instance_uuid, context, callback=callback
     )
@@ -395,9 +368,8 @@ def nfvi_start_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_stop_instance(instance_uuid, callback, context=None):
-    """
-    Stop an instance
-    """
+    """Stop an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "stop_instance", instance_uuid, context, callback=callback
     )
@@ -405,9 +377,8 @@ def nfvi_stop_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_delete_instance(instance_uuid, callback, context=None):
-    """
-    Delete an instance
-    """
+    """Delete an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "delete_instance", instance_uuid, context, callback=callback
     )
@@ -415,9 +386,8 @@ def nfvi_delete_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_get_instance(instance_uuid, callback, context=None):
-    """
-    Get an instance
-    """
+    """Get an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "get_instance", instance_uuid, context, callback=callback
     )
@@ -425,9 +395,8 @@ def nfvi_get_instance(instance_uuid, callback, context=None):
 
 
 def nfvi_reject_instance_action(instance_uuid, message, context):
-    """
-    Reject an action against an instance
-    """
+    """Reject an action against an instance."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "reject_instance_action", instance_uuid, message, context
     )
@@ -435,45 +404,40 @@ def nfvi_reject_instance_action(instance_uuid, message, context):
 
 
 def nfvi_register_instance_state_change_callback(callback):
-    """
-    Register for instance state change notifications
-    """
+    """Register for instance state change notifications."""
+
     _compute_plugin.invoke_plugin(
         "register_instance_state_change_callback", callback=callback
     )
 
 
 def nfvi_register_instance_action_change_callback(callback):
-    """
-    Register for instance action change notifications
-    """
+    """Register for instance action change notifications."""
+
     _compute_plugin.invoke_plugin(
         "register_instance_action_change_callback", callback=callback
     )
 
 
 def nfvi_register_instance_action_callback(callback):
-    """
-    Register for instance action callback
-    """
+    """Register for instance action callback."""
+
     _compute_plugin.invoke_plugin(
         "register_instance_action_callback", callback=callback
     )
 
 
 def nfvi_register_instance_delete_callback(callback):
-    """
-    Register for instance delete notifications
-    """
+    """Register for instance delete notifications."""
+
     _compute_plugin.invoke_plugin(
         "register_instance_delete_callback", callback=callback
     )
 
 
 def nfvi_notify_compute_host_enabled(host_uuid, host_name, host_personality, callback):
-    """
-    Notify compute host is enabled
-    """
+    """Notify compute host is enabled."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "notify_host_enabled", host_uuid, host_name, host_personality, callback=callback
     )
@@ -481,9 +445,8 @@ def nfvi_notify_compute_host_enabled(host_uuid, host_name, host_personality, cal
 
 
 def nfvi_notify_compute_host_disabled(host_uuid, host_name, host_personality, callback):
-    """
-    Notify compute host is disabled
-    """
+    """Notify compute host is disabled."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "notify_host_disabled",
         host_uuid,
@@ -497,9 +460,8 @@ def nfvi_notify_compute_host_disabled(host_uuid, host_name, host_personality, ca
 def nfvi_disable_compute_host_services(
     host_uuid, host_name, host_personality, callback
 ):
-    """
-    Disable compute host services
-    """
+    """Disable compute host services."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "disable_host_services",
         host_uuid,
@@ -511,9 +473,8 @@ def nfvi_disable_compute_host_services(
 
 
 def nfvi_enable_compute_host_services(host_uuid, host_name, host_personality, callback):
-    """
-    Enable compute host services
-    """
+    """Enable compute host services."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "enable_host_services",
         host_uuid,
@@ -525,9 +486,8 @@ def nfvi_enable_compute_host_services(host_uuid, host_name, host_personality, ca
 
 
 def nfvi_delete_compute_host_services(host_uuid, host_name, host_personality, callback):
-    """
-    Delete compute services
-    """
+    """Delete compute services."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "delete_host_services",
         host_uuid,
@@ -539,9 +499,8 @@ def nfvi_delete_compute_host_services(host_uuid, host_name, host_personality, ca
 
 
 def nfvi_query_compute_host_services(host_uuid, host_name, host_personality, callback):
-    """
-    Query compute services
-    """
+    """Query compute services."""
+
     cmd_id = _compute_plugin.invoke_plugin(
         "query_host_services", host_uuid, host_name, host_personality, callback=callback
     )
@@ -549,9 +508,8 @@ def nfvi_query_compute_host_services(host_uuid, host_name, host_personality, cal
 
 
 def nfvi_compute_initialize(config, pool):
-    """
-    Initialize the NFVI compute package
-    """
+    """Initialize the NFVI compute package."""
+
     global _compute_plugin
 
     if _compute_plugin is None:
@@ -564,8 +522,7 @@ def nfvi_compute_initialize(config, pool):
 
 
 def nfvi_compute_finalize():
-    """
-    Finalize the NFVI compute package
-    """
+    """Finalize the NFVI compute package."""
+
     if _compute_plugin is not None:
         _compute_plugin.finalize()

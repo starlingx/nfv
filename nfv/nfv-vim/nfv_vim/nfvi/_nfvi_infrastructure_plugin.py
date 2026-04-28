@@ -12,9 +12,7 @@ DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_infrastructure_plugin")
 
 
 class NFVIInfrastructurePlugin(NFVIPlugin):
-    """
-    NFVI Infrastructure Plugin
-    """
+    """NFVI Infrastructure Plugin."""
 
     _version = "1.0.0"
     _signature = "22b3dbf6-e4ba-441b-8797-fb8a51210a43"

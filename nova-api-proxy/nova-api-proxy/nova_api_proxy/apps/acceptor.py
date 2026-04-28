@@ -166,7 +166,6 @@ class Acceptor(Router):
 
 
 class VersionController(Middleware):
-
     def __init__(self, app, _):
         self._default_dispatcher = Proxy()
         self._remote_host = CONF.osapi_compute_listen
@@ -197,7 +196,6 @@ class VersionAcceptor(Router):
 
 
 class DebugHeaders(Middleware):
-
     translate_keys = {
         "CONTENT_LENGTH": "HTTP_CONTENT_LENGTH",
         "CONTENT_TYPE": "HTTP_CONTENT_TYPE",

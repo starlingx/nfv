@@ -18,16 +18,13 @@ DLOG = debug.debug_get_logger("nfv_common.tcp")
 
 
 class TCPConnection(object):
-    """
-    TCP Connection
-    """
+    """TCP Connection."""
 
     AUTH_VECTOR_MAX_SIZE = 64
 
     def __init__(self, ip, port, sock=None, blocking=True, owner=None, auth_key=None):
-        """
-        Create a TCP connection
-        """
+        """Create a TCP connection."""
+
         self._owner = owner
         self._auth_key = auth_key
         self._ip = ip
@@ -61,42 +58,36 @@ class TCPConnection(object):
 
     @property
     def ip(self):
-        """
-        Returns the ip of the connection
-        """
+        """Returns the ip of the connection."""
+
         return self._ip
 
     @property
     def port(self):
-        """
-        Returns the port of the connection
-        """
+        """Returns the port of the connection."""
+
         return self._port
 
     @property
     def sock(self):
-        """
-        Returns the socket object of the connection
-        """
+        """Returns the socket object of the connection."""
+
         return self._socket
 
     @property
     def selobj(self):
-        """
-        Returns the selection object associated with the connection
-        """
+        """Returns the selection object associated with the connection."""
+
         return self._socket.fileno()
 
     def is_shutdown(self):
-        """
-        Returns true if the connection has shutdown
-        """
+        """Returns true if the connection has shutdown."""
+
         return self._socket is None
 
     def connect(self, ip, port, timeout_in_secs=None):
-        """
-        Connect to an end-point
-        """
+        """Connect to an end-point."""
+
         try:
             if timeout_in_secs is not None:
                 self._socket.settimeout(timeout_in_secs)
@@ -116,10 +107,10 @@ class TCPConnection(object):
             raise
 
     def send(self, payload):
-        """
-        Send a message into the TCP connection, assumes the following
+        """Send a message into the TCP connection, assumes the following
+
         messaging format:  | length (4-bytes) | string of bytes |
-        struct.pack returns string in python2 and bytes in python3
+        struct.pack returns string in python2 and bytes in python3.
         """
         bytes_sent = 0
 
@@ -140,9 +131,9 @@ class TCPConnection(object):
         return bytes_sent
 
     def _receive_non_blocking(self):
-        """
-        Receive a message from the TCP connection (non-blocking), assumes the
-        following messaging format:  | length (4-bytes) | string of bytes |
+        """Receive a message from the TCP connection (non-blocking), assumes the
+
+        following messaging format:  | length (4-bytes) | string of bytes |.
         """
         if self._socket is None:
             return None
@@ -187,8 +178,8 @@ class TCPConnection(object):
                         if self._auth_key is None:
                             message = msg
                         else:
-                            auth_vector = msg[:self.AUTH_VECTOR_MAX_SIZE]
-                            message = msg[self.AUTH_VECTOR_MAX_SIZE:]
+                            auth_vector = msg[: self.AUTH_VECTOR_MAX_SIZE]
+                            message = msg[self.AUTH_VECTOR_MAX_SIZE :]
                             expected = hmac.new(
                                 self._auth_key, msg=message, digestmod=hashlib.sha512
                             ).digest()
@@ -224,9 +215,8 @@ class TCPConnection(object):
         return message
 
     def _receive_blocking(self, timeout_in_secs=5):
-        """
-        Receive a message from the TCP connection (blocking)
-        """
+        """Receive a message from the TCP connection (blocking)."""
+
         start_ms = timers.get_monotonic_timestamp_in_ms()
 
         while self._socket is not None:
@@ -257,18 +247,16 @@ class TCPConnection(object):
         return None
 
     def receive(self, blocking=True, timeout_in_secs=5):
-        """
-        Receive a message from the TCP connection
-        """
+        """Receive a message from the TCP connection."""
+
         if blocking:
             return self._receive_blocking(timeout_in_secs)
         else:
             return self._receive_non_blocking()
 
     def close(self):
-        """
-        Close the TCP connection
-        """
+        """Close the TCP connection."""
+
         if self._socket is not None:
             if self._owner is not None:
                 self._owner.closing_connection(self.selobj)

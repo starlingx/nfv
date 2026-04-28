@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class ResizeRevertState(state_machine.State):
-    """
-    Instance - Resize Revert State
-    """
+    """Instance - Resize Revert State."""
 
     def __init__(self, name):
         super(ResizeRevertState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering resize revert state
-        """
+        """Entering resize revert state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = ResizeRevertTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting resize revert state
-        """
+        """Exiting resize revert state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, ResizeRevertTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the resize revert state
-        """
+        """Transition from the resize revert state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the resize revert state
-        """
+        """Handle event while in the resize revert state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

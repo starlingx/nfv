@@ -28,9 +28,8 @@ _event_templates = {
 
 
 def _event_template_get(event_id, event_context):
-    """
-    Returns the event template associated with the given context
-    """
+    """Returns the event template associated with the given context."""
+
     if event_id not in _event_templates:
         return None
 
@@ -71,9 +70,8 @@ def _event_template_get(event_id, event_context):
 
 
 def _event_issue(event_id, event_context, template, data):
-    """
-    Issue an event given the event template and data
-    """
+    """Issue an event given the event template and data."""
+
     event_data = event_log.EventLogData(
         event_id,
         template["event_type"],
@@ -89,9 +87,8 @@ def _event_issue(event_id, event_context, template, data):
 
 
 def issue_general_log(event_id, additional_text=None, event_context=None):
-    """
-    Issue a general event log
-    """
+    """Issue a general event log."""
+
     data = dict()
     data["additional_text"] = additional_text
 

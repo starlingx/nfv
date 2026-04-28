@@ -11,9 +11,7 @@ _service_host_table = None
 
 
 class ServiceHostTable(Table):
-    """
-    Service Host Table
-    """
+    """Service Host Table."""
 
     def __init__(self):
         super(ServiceHostTable, self).__init__()
@@ -26,16 +24,14 @@ class ServiceHostTable(Table):
 
 
 def tables_get_service_host_table():
-    """
-    Get the service-host table
-    """
+    """Get the service-host table."""
+
     return _service_host_table
 
 
 def service_host_table_initialize():
-    """
-    Initialize the service-host table
-    """
+    """Initialize the service-host table."""
+
     global _service_host_table
 
     _service_host_table = ServiceHostTable()
@@ -48,9 +44,8 @@ def service_host_table_initialize():
 
 
 def service_host_table_finalize():
-    """
-    Finalize the service-host table
-    """
+    """Finalize the service-host table."""
+
     global _service_host_table
 
     del _service_host_table

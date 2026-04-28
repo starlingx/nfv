@@ -13,9 +13,8 @@ DLOG = debug.debug_get_logger("nfv_vim.api.openstack")
 
 
 def rest_api_request(token, method, url, headers=None, body=None):
-    """
-    Make a rest-api request
-    """
+    """Make a rest-api request."""
+
     headers_per_hop = [
         "connection",
         "keep-alive",

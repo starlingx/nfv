@@ -14,36 +14,30 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class EnabledState(state_machine.State):
-    """
-    Host - Enabled State
-    """
+    """Host - Enabled State."""
 
     def __init__(self, name):
         super(EnabledState, self).__init__(name)
 
     def enter(self, host):
-        """
-        Entering enabled state
-        """
+        """Entering enabled state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, host.name))
 
     def exit(self, host):
-        """
-        Exiting enabled state
-        """
+        """Exiting enabled state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, host.name))
         host.task.abort()
 
     def transition(self, host, event, event_data, to_state):
-        """
-        Transition from the enabled state
-        """
+        """Transition from the enabled state."""
+
         pass
 
     def handle_event(self, host, event, event_data=None):
-        """
-        Handle event while in the enabled state
-        """
+        """Handle event while in the enabled state."""
+
         from nfv_vim import objects
 
         if HOST_EVENT.DELETE == event:

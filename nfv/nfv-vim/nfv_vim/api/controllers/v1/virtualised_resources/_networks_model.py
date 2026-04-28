@@ -10,9 +10,7 @@ NetworkResourceClass = wsme_types.Enum(str, "network", "subnet")
 
 
 class NetworkSubnetType(wsme_types.Base):
-    """
-    Virtualised Resources - Network Subnet Type
-    """
+    """Virtualised Resources - Network Subnet Type."""
 
     network_id = wsme_types.wsattr(str, mandatory=False)
     ip_version = wsme_types.wsattr(str, mandatory=True)
@@ -26,9 +24,7 @@ class NetworkSubnetType(wsme_types.Base):
 
 
 class NetworkSubnetResourceType(wsme_types.Base):
-    """
-    Virtualised Resources - Network Subnet Resource Type
-    """
+    """Virtualised Resources - Network Subnet Resource Type."""
 
     resource_id = wsme_types.wsattr(str, mandatory=True)
     subnet_attributes = wsme_types.wsattr(NetworkSubnetType, mandatory=True)
@@ -36,18 +32,14 @@ class NetworkSubnetResourceType(wsme_types.Base):
 
 
 class NetworkQosType(wsme_types.Base):
-    """
-    Virtualised Resources - Network QoS Type
-    """
+    """Virtualised Resources - Network QoS Type."""
 
     qos_name = wsme_types.wsattr(str, mandatory=False, default=None)
     qos_value = wsme_types.wsattr(str, mandatory=False, default=None)
 
 
 class NetworkType(wsme_types.Base):
-    """
-    Virtualised Resources - Network Type
-    """
+    """Virtualised Resources - Network Type."""
 
     bandwidth = wsme_types.wsattr(int, mandatory=False, default=0)
     type_of_network = wsme_types.wsattr(NetworkClass, mandatory=False, default=None)
@@ -65,9 +57,7 @@ class NetworkType(wsme_types.Base):
 
 
 class NetworkResourceType(wsme_types.Base):
-    """
-    Virtualised Resources - Network Resource Type
-    """
+    """Virtualised Resources - Network Resource Type."""
 
     resource_id = wsme_types.wsattr(str, mandatory=True)
     reservation_id = wsme_types.wsattr(str, mandatory=False)

@@ -17,9 +17,8 @@ MESSAGE_ONE = b"1"
 
 
 def schedule_function_call(func, *args, **kwargs):
-    """
-    Schedule a function call to be performed at a later time
-    """
+    """Schedule a function call to be performed at a later time."""
+
     global _send_socket, _pending_function_calls
 
     function_data = (func, args, kwargs)
@@ -43,9 +42,8 @@ def _schedule_dispatch():
 
 
 def schedule_initialize():
-    """
-    Initialize the schedule module
-    """
+    """Initialize the schedule module."""
+
     global _send_socket, _receive_socket, _pending_function_calls
 
     _send_socket, _receive_socket = socket.socketpair()
@@ -57,9 +55,8 @@ def schedule_initialize():
 
 
 def schedule_finalize():
-    """
-    Finalize the schedule module
-    """
+    """Finalize the schedule module."""
+
     global _send_socket, _receive_socket, _pending_function_calls
 
     if _send_socket is not None:

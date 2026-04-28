@@ -18,9 +18,8 @@ _sw_update_strategy_delete_operations = dict()
 
 
 def _vim_sw_update_api_create_strategy_callback(success, reason, strategy):
-    """
-    Handle Sw-Update Create Strategy API callback
-    """
+    """Handle Sw-Update Create Strategy API callback."""
+
     global _sw_update_strategy_create_operations
 
     if strategy is not None:
@@ -44,9 +43,8 @@ def _vim_sw_update_api_create_strategy_callback(success, reason, strategy):
 
 
 def vim_sw_update_api_create_strategy(connection, msg):
-    """
-    Handle Sw-Update Create Strategy API request
-    """
+    """Handle Sw-Update Create Strategy API request."""
+
     global _sw_update_strategy_create_operations
 
     DLOG.info("Create sw-update strategy.")
@@ -202,9 +200,8 @@ def vim_sw_update_api_create_strategy(connection, msg):
 
 
 def _vim_sw_update_api_apply_strategy_callback(success, reason, strategy):
-    """
-    Handle Sw-Update Apply Strategy API callback
-    """
+    """Handle Sw-Update Apply Strategy API callback."""
+
     global _sw_update_strategy_apply_operations
 
     if strategy is not None:
@@ -228,9 +225,8 @@ def _vim_sw_update_api_apply_strategy_callback(success, reason, strategy):
 
 
 def vim_sw_update_api_apply_strategy(connection, msg):
-    """
-    Handle Sw-Update Apply Strategy API request
-    """
+    """Handle Sw-Update Apply Strategy API request."""
+
     DLOG.info("Apply sw-update strategy: (%s) called." % msg.sw_update_type)
     if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
@@ -266,9 +262,8 @@ def vim_sw_update_api_apply_strategy(connection, msg):
 
 
 def _vim_sw_update_api_abort_strategy_callback(success, reason, strategy):
-    """
-    Handle Sw-Update Abort Strategy API callback
-    """
+    """Handle Sw-Update Abort Strategy API callback."""
+
     global _sw_update_strategy_abort_operations
 
     if strategy is not None:
@@ -304,7 +299,7 @@ def _send_response(connection, error_message):
 
 
 def _is_abort_supported(connection, strategy):
-    """Validates if the strategy, in the current stage and step, accepts abort"""
+    """Validates if the strategy, in the current stage and step, accepts abort."""
 
     if not strategy.is_applying():
         abort_rejected_msg = (
@@ -356,9 +351,8 @@ def _is_abort_supported(connection, strategy):
 
 
 def vim_sw_update_api_abort_strategy(connection, msg):
-    """
-    Handle Sw-Update Abort Strategy API request
-    """
+    """Handle Sw-Update Abort Strategy API request."""
+
     DLOG.info("Abort sw-update strategy.")
     if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
@@ -397,9 +391,8 @@ def vim_sw_update_api_abort_strategy(connection, msg):
 
 
 def _vim_sw_update_api_delete_strategy_callback(success, reason, strategy_uuid):
-    """
-    Handle Sw-Update Delete Strategy API callback
-    """
+    """Handle Sw-Update Delete Strategy API callback."""
+
     global _sw_update_strategy_delete_operations
 
     DLOG.info(
@@ -420,9 +413,8 @@ def _vim_sw_update_api_delete_strategy_callback(success, reason, strategy_uuid):
 
 
 def vim_sw_update_api_delete_strategy(connection, msg):
-    """
-    Handle Sw-Update Delete Strategy API request
-    """
+    """Handle Sw-Update Delete Strategy API request."""
+
     DLOG.info("Delete sw-update strategy, force=%s.", msg.force)
     if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
@@ -458,9 +450,8 @@ def vim_sw_update_api_delete_strategy(connection, msg):
 
 
 def vim_sw_update_api_get_strategy(connection, msg):
-    """
-    Handle Sw-Update Get Strategy API request
-    """
+    """Handle Sw-Update Get Strategy API request."""
+
     DLOG.verbose("Get sw-update strategy.")
     if "sw-patch" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
@@ -502,14 +493,12 @@ def vim_sw_update_api_get_strategy(connection, msg):
 
 
 def vim_sw_update_api_initialize():
-    """
-    Initialize VIM Software Update API Handling
-    """
+    """Initialize VIM Software Update API Handling."""
+
     pass
 
 
 def vim_sw_update_api_finalize():
-    """
-    Finalize VIM Software Update API Handling
-    """
+    """Finalize VIM Software Update API Handling."""
+
     pass

@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class LiveMigrateFinishState(state_machine.State):
-    """
-    Instance - Live Migrate Finish State
-    """
+    """Instance - Live Migrate Finish State."""
 
     def __init__(self, name):
         super(LiveMigrateFinishState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering live-migrate finish state
-        """
+        """Entering live-migrate finish state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = LiveMigrateFinishTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting live-migrate finish state
-        """
+        """Exiting live-migrate finish state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, LiveMigrateFinishTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the live-migrate finish state
-        """
+        """Transition from the live-migrate finish state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the live-migrate finish state
-        """
+        """Handle event while in the live-migrate finish state."""
+
         if event_data is not None:
             reason = event_data.get("reason", "")
         else:

@@ -13,24 +13,21 @@ _fault_mgmt_plugin = None
 
 
 def nfvi_fault_mgmt_plugin_disabled():
-    """
-    Get fault management plugin disabled status
-    """
+    """Get fault management plugin disabled status."""
+
     return _fault_mgmt_plugin is None
 
 
 def nfvi_get_openstack_alarms(callback):
-    """
-    Get alarms
-    """
+    """Get alarms."""
+
     cmd_id = _fault_mgmt_plugin.invoke_plugin("get_openstack_alarms", callback=callback)
     return cmd_id
 
 
 def nfvi_get_openstack_logs(start_period, end_period, callback):
-    """
-    Get logs
-    """
+    """Get logs."""
+
     cmd_id = _fault_mgmt_plugin.invoke_plugin(
         "get_openstack_logs", start_period, end_period, callback=callback
     )
@@ -38,9 +35,8 @@ def nfvi_get_openstack_logs(start_period, end_period, callback):
 
 
 def nfvi_get_openstack_alarm_history(start_period, end_period, callback):
-    """
-    Get logs
-    """
+    """Get logs."""
+
     cmd_id = _fault_mgmt_plugin.invoke_plugin(
         "get_openstack_alarm_history", start_period, end_period, callback=callback
     )
@@ -48,9 +44,8 @@ def nfvi_get_openstack_alarm_history(start_period, end_period, callback):
 
 
 def nfvi_fault_mgmt_initialize(config, pool):
-    """
-    Initialize the NFVI fault_mgmt package
-    """
+    """Initialize the NFVI fault_mgmt package."""
+
     global _fault_mgmt_plugin
 
     _fault_mgmt_plugin = NFVIFaultMgmtPlugin(config["namespace"], pool)
@@ -58,8 +53,7 @@ def nfvi_fault_mgmt_initialize(config, pool):
 
 
 def nfvi_fault_mgmt_finalize():
-    """
-    Finalize the NFVI fault_mgmt package
-    """
+    """Finalize the NFVI fault_mgmt package."""
+
     if _fault_mgmt_plugin is not None:
         _fault_mgmt_plugin.finalize()

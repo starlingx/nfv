@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 
 class DisablingState(state_machine.State):
-    """
-    Host - Disabling State
-    """
+    """Host - Disabling State."""
 
     def __init__(self, name):
         super(DisablingState, self).__init__(name)
 
     def enter(self, host):
-        """
-        Entering disabling state
-        """
+        """Entering disabling state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, host.name))
         host.clear_reason()
         host.task = DisableHostTask(host)
         host.task.start()
 
     def exit(self, host):
-        """
-        Exiting disabling state
-        """
+        """Exiting disabling state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, host.name))
         host.task.abort()
 
     def transition(self, host, event, event_data, to_state):
-        """
-        Transition from the disabling state
-        """
+        """Transition from the disabling state."""
+
         pass
 
     def handle_event(self, host, event, event_data=None):
-        """
-        Handle event while in the disabling state
-        """
+        """Handle event while in the disabling state."""
+
         handled = False
 
         if host.task.inprogress():
@@ -68,7 +62,6 @@ class DisablingState(state_machine.State):
                 or HOST_EVENT.DISABLE == event
                 or HOST_EVENT.UNLOCK == event
             ):
-
                 if not host.task.inprogress():
                     host.task = DisableHostTask(host)
                     host.task.start()

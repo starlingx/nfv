@@ -18,14 +18,11 @@ from nfv_vim.api.acl import policy
 
 from nfv_common.helpers import Object
 
-
 DLOG = debug.debug_get_logger("nfv_vim.api")
 
 
 class VimConnectionMgmt(object):
-    """
-    VIM Connection Management
-    """
+    """VIM Connection Management."""
 
     def __init__(self):
         super(VimConnectionMgmt, self).__init__()
@@ -33,9 +30,8 @@ class VimConnectionMgmt(object):
         self._connections = list()
 
     def open_connection(self):
-        """
-        Open a connection to the VIM
-        """
+        """Open a connection to the VIM."""
+
         connection = tcp.TCPConnection(
             config.CONF["vim-api"]["rpc_host"], config.CONF["vim-api"]["rpc_port"]
         )
@@ -46,26 +42,22 @@ class VimConnectionMgmt(object):
         return connection
 
     def close_connection(self, connection):
-        """
-        Close a connection to the VIM
-        """
+        """Close a connection to the VIM."""
+
         if connection in self._connections:
             self._connections.remove(connection)
 
         connection.close()
 
     def close_connections(self):
-        """
-        Close all connections to the VIM
-        """
+        """Close all connections to the VIM."""
+
         for connection in self._connections:
             connection.close()
 
 
 class ConnectionHook(hooks.PecanHook):
-    """
-    Connection Hook
-    """
+    """Connection Hook."""
 
     def __init__(self):
         super(ConnectionHook, self).__init__()
@@ -86,9 +78,7 @@ class ConnectionHook(hooks.PecanHook):
 
 
 class ContextHook(hooks.PecanHook):
-    """
-    Context Hook
-    """
+    """Context Hook."""
 
     def __init__(self, acl_public_routes):
         super(ContextHook, self).__init__()
@@ -100,8 +90,8 @@ class ContextHook(hooks.PecanHook):
 
 
 class AuditLoggingHook(hooks.PecanHook):
-    """
-    Performs audit logging of all Fault Manager
+    """Performs audit logging of all Fault Manager
+
     ["POST", "PUT", "PATCH", "DELETE"] REST requests.
     """
 
@@ -189,7 +179,6 @@ class AccessPolicyHook(hooks.PecanHook):
 
     Checks if the user has rights to perform the current action based on rules
     specified. The rules enforcement is done using the openstack policy engine.
-
     """
 
     def before(self, state):

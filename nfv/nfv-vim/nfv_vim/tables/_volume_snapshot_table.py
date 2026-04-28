@@ -10,9 +10,7 @@ _volume_snapshot_table = None
 
 
 class VolumeSnapshotTable(Table):
-    """
-    Volume Snapshot Table
-    """
+    """Volume Snapshot Table."""
 
     def __init__(self):
         super(VolumeSnapshotTable, self).__init__()
@@ -25,16 +23,14 @@ class VolumeSnapshotTable(Table):
 
 
 def tables_get_volume_snapshot_table():
-    """
-    Get the volume snapshot table
-    """
+    """Get the volume snapshot table."""
+
     return _volume_snapshot_table
 
 
 def volume_snapshot_table_initialize():
-    """
-    Initialize the volume snapshot table
-    """
+    """Initialize the volume snapshot table."""
+
     global _volume_snapshot_table
 
     _volume_snapshot_table = VolumeSnapshotTable()
@@ -47,9 +43,8 @@ def volume_snapshot_table_initialize():
 
 
 def volume_snapshot_table_finalize():
-    """
-    Finalize the volume snapshot table
-    """
+    """Finalize the volume snapshot table."""
+
     global _volume_snapshot_table
 
     del _volume_snapshot_table

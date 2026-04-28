@@ -10,9 +10,7 @@ from nfv_common.helpers import Singleton
 
 
 class OperationTypes(Constants, metaclass=Singleton):
-    """
-    Operation - Type Constants
-    """
+    """Operation - Type Constants."""
 
     HOST_LOCK = Constant("host-lock")
     HOST_LOCK_FORCE = Constant("host-lock-force")
@@ -37,9 +35,7 @@ class OperationTypes(Constants, metaclass=Singleton):
 
 
 class OperationStates(Constants, metaclass=Singleton):
-    """
-    Operation - State Constants
-    """
+    """Operation - State Constants."""
 
     READY = Constant("ready")
     INPROGRESS = Constant("inprogress")
@@ -55,9 +51,7 @@ OPERATION_STATE = OperationStates()
 
 
 class Operation(object):
-    """
-    Operation Object
-    """
+    """Operation Object."""
 
     def __init__(self, operation_type):
         self._operation_type = operation_type
@@ -70,50 +64,43 @@ class Operation(object):
 
     @property
     def operation_type(self):
-        """
-        Returns the type of operation
-        """
+        """Returns the type of operation."""
+
         return self._operation_type
 
     @property
     def total_hosts(self):
-        """
-        Returns the total number of hosts in the operation
-        """
+        """Returns the total number of hosts in the operation."""
+
         return len(self._hosts)
 
     @property
     def total_instances(self):
-        """
-        Returns the total number of instances in the operation
-        """
+        """Returns the total number of instances in the operation."""
+
         return len(self._instances)
 
     @property
     def reason(self):
-        """
-        Returns the reason for the result
-        """
+        """Returns the reason for the result."""
+
         return self._reason
 
     def set_failed(self, reason=None):
-        """
-        Sets the operation as failed
-        """
+        """Sets the operation as failed."""
+
         self._operation_failed = True
         if reason is not None:
             self._reason = reason
 
     def host_exists(self, host_name):
-        """
-        Returns true if host exists
-        """
+        """Returns true if host exists."""
+
         return host_name in self._hosts
 
     def add_host(self, host_name, operation_state):
-        """
-        Add a host
-        """
+        """Add a host."""
+
         if host_name in self._hosts:
             prev_operation_state = self._hosts[host_name]
             if OPERATION_STATE.INPROGRESS == prev_operation_state:
@@ -125,9 +112,8 @@ class Operation(object):
             self._host_total_inprogress += 1
 
     def update_host(self, host_name, operation_state):
-        """
-        Update the host operation state
-        """
+        """Update the host operation state."""
+
         if host_name in self._hosts:
             prev_operation_state = self._hosts[host_name]
             if OPERATION_STATE.INPROGRESS == prev_operation_state:
@@ -137,33 +123,29 @@ class Operation(object):
             self._hosts[host_name] = operation_state
 
     def remove_host(self, host_name):
-        """
-        Remove a host
-        """
+        """Remove a host."""
+
         if host_name in self._hosts:
             if OPERATION_STATE.INPROGRESS == self._hosts[host_name]:
                 self._host_total_inprogress -= 1
             del self._hosts[host_name]
 
     def instance_exists(self, instance_uuid):
-        """
-        Returns true if instance exists
-        """
+        """Returns true if instance exists."""
+
         return instance_uuid in self._instances
 
     def instance_ready(self, instance_uuid):
-        """
-        Returns true if instance exists and is in the READY state.
-        """
+        """Returns true if instance exists and is in the READY state."""
+
         return (
             instance_uuid in self._instances
             and OPERATION_STATE.READY == self._instances[instance_uuid]
         )
 
     def add_instance(self, instance_uuid, operation_state):
-        """
-        Add the instance
-        """
+        """Add the instance."""
+
         if instance_uuid in self._instances:
             prev_operation_state = self._instances[instance_uuid]
             if OPERATION_STATE.INPROGRESS == prev_operation_state:
@@ -175,9 +157,8 @@ class Operation(object):
             self._instance_total_inprogress += 1
 
     def update_instance(self, instance_uuid, operation_state):
-        """
-        Update the instance operation state
-        """
+        """Update the instance operation state."""
+
         if instance_uuid in self._instances:
             prev_operation_state = self._instances[instance_uuid]
             if OPERATION_STATE.INPROGRESS == prev_operation_state:
@@ -187,31 +168,27 @@ class Operation(object):
             self._instances[instance_uuid] = operation_state
 
     def remove_instance(self, instance_uuid):
-        """
-        Remove an instance
-        """
+        """Remove an instance."""
+
         if instance_uuid in self._instances:
             if OPERATION_STATE.INPROGRESS == self._instances[instance_uuid]:
                 self._instance_total_inprogress -= 1
             del self._instances[instance_uuid]
 
     def update_failure_reason(self, reason):
-        """
-        Update the reason for the result
-        """
+        """Update the reason for the result."""
+
         if not self._reason:
             self._reason = reason
 
     def total_inprogress(self):
-        """
-        Returns the total operation states inprogress
-        """
+        """Returns the total operation states inprogress."""
+
         return self._host_total_inprogress + self._instance_total_inprogress
 
     def is_inprogress(self):
-        """
-        Returns true if the operation is inprogress
-        """
+        """Returns true if the operation is inprogress."""
+
         return (
             OPERATION_STATE.INPROGRESS in list(self._hosts.values())
             or OPERATION_STATE.READY in list(self._hosts.values())
@@ -220,9 +197,8 @@ class Operation(object):
         )
 
     def is_failed(self):
-        """
-        Returns true if the operation has failed
-        """
+        """Returns true if the operation has failed."""
+
         if not self._operation_failed:
             return OPERATION_STATE.FAILED in list(
                 self._hosts.values()
@@ -230,9 +206,8 @@ class Operation(object):
         return True
 
     def is_timed_out(self):
-        """
-        Returns true if the operation has timed out
-        """
+        """Returns true if the operation has timed out."""
+
         return OPERATION_STATE.TIMED_OUT in list(
             self._hosts.values()
         ) or OPERATION_STATE.TIMED_OUT in list(self._instances.values())

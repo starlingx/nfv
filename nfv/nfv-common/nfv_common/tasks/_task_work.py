@@ -13,16 +13,13 @@ DLOG = debug.debug_get_logger("nfv_common.tasks.task_work")
 
 
 class TaskWork(object):
-    """
-    Task Work
-    """
+    """Task Work."""
 
     _id = 0
 
     def __init__(self, timeout, target, *args, **kwargs):
-        """
-        Create task work
-        """
+        """Create task work."""
+
         self._id = TaskWork._id
         self._name = target.__name__
         self._task_id = None
@@ -42,65 +39,57 @@ class TaskWork(object):
 
     @property
     def name(self):
-        """
-        Returns the name of the task work
-        """
+        """Returns the name of the task work."""
+
         return self._name
 
     @property
     def id(self):
-        """
-        Returns the unique identifier of the task work
-        """
+        """Returns the unique identifier of the task work."""
+
         return self._id
 
     @property
     def task_id(self):
-        """
-        Returns the task identifier that owns this task work
-        """
+        """Returns the task identifier that owns this task work."""
+
         return self._task_id
 
     @task_id.setter
     def task_id(self, task_id):
-        """
-        Set the task identifier that owns this task work
-        """
+        """Set the task identifier that owns this task work."""
+
         self._task_id = task_id
 
     @property
     def create_timestamp_ms(self):
-        """
-        Returns the creation timestamp in milliseconds
-        """
+        """Returns the creation timestamp in milliseconds."""
+
         return self._create_timestamp_ms
 
     @property
     def timeout_in_secs(self):
-        """
-        Returns the maximum timeout in seconds that the task work should
-        take to run
+        """Returns the maximum timeout in seconds that the task work should
+
+        take to run.
         """
         return self._timeout_in_secs
 
     @property
     def ancillary_result_data(self):
-        """
-        Returns the ancillary result data for the task work
-        """
+        """Returns the ancillary result data for the task work."""
+
         return self._ancillary_result_data
 
     @property
     def result(self):
-        """
-        Returns the result of the task work
-        """
+        """Returns the result of the task work."""
+
         return self._result
 
     def run(self):
-        """
-        Runs the task work
-        """
+        """Runs the task work."""
+
         DLOG.debug("TaskWork run, id=%s, name=%s." % (self._id, self._name))
         try:
             result = self._target(*self._args, **self._kwargs)

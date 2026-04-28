@@ -10,9 +10,7 @@ from nfv_common.helpers import Singleton
 
 
 class StrategyApplyTypes(Constants, metaclass=Singleton):
-    """
-    Strategy - Apply Type Constants
-    """
+    """Strategy - Apply Type Constants."""
 
     SERIAL = Constant("serial")
     PARALLEL = Constant("parallel")
@@ -20,9 +18,7 @@ class StrategyApplyTypes(Constants, metaclass=Singleton):
 
 
 class StrategyAlarmRestrictionTypes(Constants, metaclass=Singleton):
-    """
-    Strategy - Alarm Restriction Type Constants
-    """
+    """Strategy - Alarm Restriction Type Constants."""
 
     STRICT = Constant("strict")
     RELAXED = Constant("relaxed")
@@ -30,9 +26,7 @@ class StrategyAlarmRestrictionTypes(Constants, metaclass=Singleton):
 
 
 class StrategyPhases(Constants, metaclass=Singleton):
-    """
-    Strategy - Phase Constants
-    """
+    """Strategy - Phase Constants."""
 
     INITIAL = Constant("initial")
     BUILD = Constant("build")
@@ -41,9 +35,7 @@ class StrategyPhases(Constants, metaclass=Singleton):
 
 
 class StrategyStates(Constants, metaclass=Singleton):
-    """
-    Strategy - State Constants
-    """
+    """Strategy - State Constants."""
 
     INITIAL = Constant("initial")
     BUILDING = Constant("building")

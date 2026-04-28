@@ -12,9 +12,7 @@ DLOG = debug.debug_get_logger("nfv_common.alarm.alarm_handlers")
 
 
 class AlarmHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Singleton):
-    """
-    Alarm Handlers
-    """
+    """Alarm Handlers."""
 
     _version = "1.0.0"
     _signature = "e33d7cf6-f270-4256-893e-16266ee4dd2e"
@@ -43,9 +41,8 @@ class AlarmHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Singlet
 
     @staticmethod
     def valid_handler(handler):
-        """
-        Verify signature of the handler is valid
-        """
+        """Verify signature of the handler is valid."""
+
         if AlarmHandlers._signature == handler.obj.signature:
             return True
         else:
@@ -57,36 +54,31 @@ class AlarmHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Singlet
         return False
 
     def raise_alarm(self, alarm_uuid, alarm_data):
-        """
-        Raise an alarm using the handlers
-        """
+        """Raise an alarm using the handlers."""
+
         for handler_type, handler in list(self._handlers.items()):
             handler.obj.raise_alarm(alarm_uuid, alarm_data)
 
     def clear_alarm(self, alarm_uuid):
-        """
-        Clear an alarm using the handlers
-        """
+        """Clear an alarm using the handlers."""
+
         for handler_type, handler in list(self._handlers.items()):
             handler.obj.clear_alarm(alarm_uuid)
 
     def audit_alarms(self):
-        """
-        Audit alarms using the handlers
-        """
+        """Audit alarms using the handlers."""
+
         for handler_type, handler in list(self._handlers.items()):
             handler.obj.audit_alarms()
 
     def initialize(self, config_file):
-        """
-        Initialize handlers
-        """
+        """Initialize handlers."""
+
         for handler_id, handler in list(self._handlers.items()):
             handler.obj.initialize(config_file)
 
     def finalize(self):
-        """
-        Finalize handlers
-        """
+        """Finalize handlers."""
+
         for handler_id, handler in list(self._handlers.items()):
             handler.obj.finalize()

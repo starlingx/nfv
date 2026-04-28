@@ -11,9 +11,7 @@ from nfv_vim.database.model._base import Base
 
 
 class System(AsDictMixin, Base):
-    """
-    System Database Table Entry
-    """
+    """System Database Table Entry."""
 
     __tablename__ = "systems"
 

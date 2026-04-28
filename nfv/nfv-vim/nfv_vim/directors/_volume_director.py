@@ -21,9 +21,7 @@ _volume_director = None
 
 
 class OperationTypes(Constants, metaclass=Singleton):
-    """
-    Operation - Type Constants
-    """
+    """Operation - Type Constants."""
 
     VOLUME_CREATE = Constant("volume-create")
     VOLUME_UPDATE = Constant("volume-update")
@@ -31,9 +29,7 @@ class OperationTypes(Constants, metaclass=Singleton):
 
 
 class OperationStates(Constants, metaclass=Singleton):
-    """
-    Operation - State Constants
-    """
+    """Operation - State Constants."""
 
     READY = Constant("ready")
     INPROGRESS = Constant("inprogress")
@@ -48,15 +44,12 @@ OPERATION_STATE = OperationStates()
 
 
 class VolumeDirector(object, metaclass=Singleton):
-    """
-    Volume Director
-    """
+    """Volume Director."""
 
     @coroutine
     def _volume_create_callback(self, volume_name, callback):
-        """
-        Volume Create Callback
-        """
+        """Volume Create Callback."""
+
         response = yield
         DLOG.verbose("Volume-Create callback response=%s." % response)
         if response["completed"]:
@@ -95,9 +88,8 @@ class VolumeDirector(object, metaclass=Singleton):
     def volume_create(
         self, volume_name, volume_description, size_gb, image_uuid, callback
     ):
-        """
-        Volume Create
-        """
+        """Volume Create."""
+
         volume_create_callback = self._volume_create_callback(volume_name, callback)
         nfvi.nfvi_create_volume(
             volume_name, volume_description, size_gb, volume_create_callback, image_uuid
@@ -105,9 +97,8 @@ class VolumeDirector(object, metaclass=Singleton):
 
     @coroutine
     def _volume_update_callback(self, volume_uuid, callback):
-        """
-        Volume Update Callback
-        """
+        """Volume Update Callback."""
+
         response = yield
         DLOG.verbose("Volume-Update callback response=%s." % response)
         if response["completed"]:
@@ -144,9 +135,8 @@ class VolumeDirector(object, metaclass=Singleton):
             )
 
     def volume_update(self, volume_uuid, volume_description, callback):
-        """
-        Volume Update
-        """
+        """Volume Update."""
+
         nfvi.nfvi_update_volume(
             volume_uuid,
             volume_description,
@@ -155,9 +145,8 @@ class VolumeDirector(object, metaclass=Singleton):
 
     @coroutine
     def _volume_delete_callback(self, volume_uuid, callback):
-        """
-        Volume Delete Callback
-        """
+        """Volume Delete Callback."""
+
         response = yield
         DLOG.verbose("Volume-Delete callback response=%s." % response)
         if response["completed"]:
@@ -169,32 +158,28 @@ class VolumeDirector(object, metaclass=Singleton):
         callback(response["completed"], volume_uuid)
 
     def volume_delete(self, volume_uuid, callback):
-        """
-        Volume Delete
-        """
+        """Volume Delete."""
+
         nfvi.nfvi_delete_volume(
             volume_uuid, self._volume_delete_callback(volume_uuid, callback)
         )
 
 
 def get_volume_director():
-    """
-    Returns the Volume Director
-    """
+    """Returns the Volume Director."""
+
     return _volume_director
 
 
 def volume_director_initialize():
-    """
-    Initialize Volume Director
-    """
+    """Initialize Volume Director."""
+
     global _volume_director
 
     _volume_director = VolumeDirector()
 
 
 def volume_director_finalize():
-    """
-    Finalize Volume Director
-    """
+    """Finalize Volume Director."""
+
     pass

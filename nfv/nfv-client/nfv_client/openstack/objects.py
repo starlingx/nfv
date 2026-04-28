@@ -9,9 +9,7 @@ import re
 
 
 class Token(object):
-    """
-    Token
-    """
+    """Token."""
 
     def __init__(self, token_data, token_id):
         self._expired = False
@@ -32,22 +30,19 @@ class Token(object):
         return True
 
     def get_id(self):
-        """
-        Get the identifier of the token.
-        """
+        """Get the identifier of the token."""
+
         return self._token_id
 
     def get_tenant_id(self):
-        """
-        Get the tenant identifier of the token.
-        """
+        """Get the tenant identifier of the token."""
+
         return self._data["token"]["project"]["id"]
 
     @staticmethod
     def _url_strip_version(url):
-        """
-        Strip the version information from the url
-        """
+        """Strip the version information from the url."""
+
         # Get rid of the trailing '/' if present and remove the version
         # information from the URL.
         url = url.rstrip("/")
@@ -64,9 +59,8 @@ class Token(object):
         return url
 
     def get_service_url(self, region_name, service_name, service_type, interface):
-        """
-        Search the catalog of a service in a region for the url
-        """
+        """Search the catalog of a service in a region for the url."""
+
         for catalog in self._data["token"]["catalog"]:
             if catalog["type"] == service_type:
                 if catalog["name"] == service_name:

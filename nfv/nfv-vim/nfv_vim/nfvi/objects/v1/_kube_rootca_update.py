@@ -12,9 +12,9 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class KubeRootcaUpdateState(Constants, metaclass=Singleton):
-    """
-    Kube RootCA Update State Constants
-    These values are copied from sysinv/common/kubernetes.py
+    """Kube RootCA Update State Constants
+
+    These values are copied from sysinv/common/kubernetes.py.
     """
 
     KUBE_ROOTCA_UPDATE_STARTED = Constant("update-started")
@@ -48,9 +48,7 @@ KUBE_ROOTCA_UPDATE_STATE = KubeRootcaUpdateState()
 
 
 class KubeRootcaUpdate(ObjectData):
-    """
-    NFVI Kube RootCA Update Object
-    """
+    """NFVI Kube RootCA Update Object."""
 
     def __init__(self, state):
         super(KubeRootcaUpdate, self).__init__("1.0.0")
@@ -58,9 +56,7 @@ class KubeRootcaUpdate(ObjectData):
 
 
 class KubeRootcaHostUpdate(ObjectData):
-    """
-    NFVI Kube RootCA Host Update Object
-    """
+    """NFVI Kube RootCA Host Update Object."""
 
     def __init__(
         self,

@@ -16,9 +16,8 @@ _instance_create_operations = dict()
 
 
 def _create_instance_callback(success, instance_name, instance_uuid):
-    """
-    Handle Create-Instance callback
-    """
+    """Handle Create-Instance callback."""
+
     DLOG.verbose("Create instance callback, name=%s." % instance_name)
     connection = _instance_create_operations.get(instance_name, None)
     if connection is not None:
@@ -65,9 +64,8 @@ def _create_instance_callback(success, instance_name, instance_uuid):
 
 
 def vim_instance_api_create_instance(connection, msg):
-    """
-    Handle Create-Instance API request
-    """
+    """Handle Create-Instance API request."""
+
     global _instance_create_operations
 
     DLOG.verbose("Create instance, name=%s." % msg.name)
@@ -98,9 +96,8 @@ def vim_instance_api_create_instance(connection, msg):
 
 
 def vim_instance_api_start_instance(connection, msg):
-    """
-    Handle Start-Instance API request
-    """
+    """Handle Start-Instance API request."""
+
     DLOG.verbose("Start instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseStartInstance()
@@ -116,9 +113,8 @@ def vim_instance_api_start_instance(connection, msg):
 
 
 def vim_instance_api_stop_instance(connection, msg):
-    """
-    Handle Stop-Instance API request
-    """
+    """Handle Stop-Instance API request."""
+
     DLOG.verbose("Stop instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseStopInstance()
@@ -134,9 +130,8 @@ def vim_instance_api_stop_instance(connection, msg):
 
 
 def vim_instance_api_pause_instance(connection, msg):
-    """
-    Handle Pause-Instance API request
-    """
+    """Handle Pause-Instance API request."""
+
     DLOG.verbose("Pause instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponsePauseInstance()
@@ -152,9 +147,8 @@ def vim_instance_api_pause_instance(connection, msg):
 
 
 def vim_instance_api_unpause_instance(connection, msg):
-    """
-    Handle Unpause-Instance API request
-    """
+    """Handle Unpause-Instance API request."""
+
     DLOG.verbose("Unpause instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseUnpauseInstance()
@@ -170,9 +164,8 @@ def vim_instance_api_unpause_instance(connection, msg):
 
 
 def vim_instance_api_suspend_instance(connection, msg):
-    """
-    Handle Suspend-Instance API request
-    """
+    """Handle Suspend-Instance API request."""
+
     DLOG.verbose("Suspend instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseSuspendInstance()
@@ -188,9 +181,8 @@ def vim_instance_api_suspend_instance(connection, msg):
 
 
 def vim_instance_api_resume_instance(connection, msg):
-    """
-    Handle Resume-Instance API request
-    """
+    """Handle Resume-Instance API request."""
+
     DLOG.verbose("Resume instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseResumeInstance()
@@ -206,9 +198,8 @@ def vim_instance_api_resume_instance(connection, msg):
 
 
 def vim_instance_api_reboot_instance(connection, msg):
-    """
-    Handle Reboot-Instance API request
-    """
+    """Handle Reboot-Instance API request."""
+
     DLOG.verbose("Reboot instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseRebootInstance()
@@ -224,9 +215,8 @@ def vim_instance_api_reboot_instance(connection, msg):
 
 
 def vim_instance_api_live_migrate_instance(connection, msg):
-    """
-    Handle Live-Migrate-Instance API request
-    """
+    """Handle Live-Migrate-Instance API request."""
+
     DLOG.verbose("Live-Migrate instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseLiveMigrateInstance()
@@ -242,9 +232,8 @@ def vim_instance_api_live_migrate_instance(connection, msg):
 
 
 def vim_instance_api_cold_migrate_instance(connection, msg):
-    """
-    Handle Cold-Migrate-Instance API request
-    """
+    """Handle Cold-Migrate-Instance API request."""
+
     DLOG.verbose("Cold-Migrate instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseColdMigrateInstance()
@@ -260,9 +249,8 @@ def vim_instance_api_cold_migrate_instance(connection, msg):
 
 
 def vim_instance_api_evacuate_instance(connection, msg):
-    """
-    Handle Evacuate-Instance API request
-    """
+    """Handle Evacuate-Instance API request."""
+
     DLOG.verbose("Evacuate instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseEvacuateInstance()
@@ -278,9 +266,8 @@ def vim_instance_api_evacuate_instance(connection, msg):
 
 
 def vim_instance_api_delete_instance(connection, msg):
-    """
-    Handle Delete-Instance API request
-    """
+    """Handle Delete-Instance API request."""
+
     DLOG.verbose("Delete instance %s." % msg.uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseDeleteInstance()
@@ -297,9 +284,8 @@ def vim_instance_api_delete_instance(connection, msg):
 
 
 def vim_instance_api_get_instance(connection, msg):
-    """
-    Handle Get-Instance API request
-    """
+    """Handle Get-Instance API request."""
+
     DLOG.verbose("Get instance, filter_by_uuid=%s." % msg.filter_by_uuid)
     instance_table = tables.tables_get_instance_table()
     response = rpc.APIResponseGetInstance()
@@ -338,9 +324,8 @@ def vim_instance_api_get_instance(connection, msg):
 
 
 def vim_instance_api_get_instances(connection, msg):
-    """
-    Handle Get-Instances API request
-    """
+    """Handle Get-Instances API request."""
+
     DLOG.verbose("Get instance, all=%s." % msg.get_all)
     instance_table = tables.tables_get_instance_table()
     for instance in list(instance_table.values()):
@@ -375,14 +360,12 @@ def vim_instance_api_get_instances(connection, msg):
 
 
 def vim_instance_api_initialize():
-    """
-    Initialize VIM Instance API Handling
-    """
+    """Initialize VIM Instance API Handling."""
+
     pass
 
 
 def vim_instance_api_finalize():
-    """
-    Finalize VIM Instance API Handling
-    """
+    """Finalize VIM Instance API Handling."""
+
     pass

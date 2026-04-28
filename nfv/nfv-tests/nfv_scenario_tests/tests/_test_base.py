@@ -13,9 +13,7 @@ DLOG = debug.debug_get_logger("nfv_tests.test_base")
 
 
 class Test(object):
-    """
-    Test Base Class
-    """
+    """Test Base Class."""
 
     LOG_FILES = {}
 
@@ -27,69 +25,59 @@ class Test(object):
 
     @property
     def name(self):
-        """
-        Returns the name of the test
-        """
+        """Returns the name of the test."""
+
         return self._name
 
     @property
     def timeout_secs(self):
-        """
-        Returns the timeout in seconds
-        """
+        """Returns the timeout in seconds."""
+
         return self._timeout_secs
 
     @property
     def start_datetime(self):
-        """
-        Returns the start datetime of the test run
-        """
+        """Returns the start datetime of the test run."""
+
         return self._start_datetime
 
     @property
     def end_datetime(self):
-        """
-        Returns the end datetime of the test run
-        """
+        """Returns the end datetime of the test run."""
+
         return self._end_datetime
 
     @property
     def elapsed_datetime(self):
-        """
-        Returns the elapsed datetime of the test run
-        """
+        """Returns the elapsed datetime of the test run."""
+
         return self._end_datetime - self._start_datetime
 
     def _reset_log_files(self):
-        """
-        Clears the log files so that they are empty, expected to be overloaded
-        """
+        """Clears the log files so that they are empty, expected to be overloaded."""
+
         for file_name in list(self.LOG_FILES.values()):
             with open(file_name, "w"):
                 pass
 
     def _do_setup(self):
-        """
-        Setup the test, expected to be overloaded
-        """
+        """Setup the test, expected to be overloaded."""
+
         return False, "abstract method _do_setup called"
 
     def _do_test(self):
-        """
-        Perform the test, expected to be overloaded
-        """
+        """Perform the test, expected to be overloaded."""
+
         return False, "abstract method _do_test called"
 
     def _test_passed(self):
-        """
-        Determine if test passed, expected to be overloaded
-        """
+        """Determine if test passed, expected to be overloaded."""
+
         return False, "abstract method _test_passed called"
 
     def setup(self):
-        """
-        Setup test
-        """
+        """Setup test."""
+
         try:
             self._start_datetime = datetime.datetime.now()
             success, reason = self._do_setup()
@@ -107,9 +95,8 @@ class Test(object):
             self._end_datetime = datetime.datetime.now()
 
     def run(self):
-        """
-        Run test
-        """
+        """Run test."""
+
         try:
             self._start_datetime = datetime.datetime.now()
             self._reset_log_files()

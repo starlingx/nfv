@@ -18,9 +18,7 @@ from pyparsing import Word
 
 
 class NfvVimParser(object):
-    """
-    NFV-VIM Parser
-    """
+    """NFV-VIM Parser."""
 
     def __init__(self, config_data):
         self._config_data = config_data
@@ -122,9 +120,8 @@ class NfvVimParser(object):
 
 
 def parser_initialize():
-    """
-    Initialize module
-    """
+    """Initialize module."""
+
     path = os.path.abspath(__file__)
     config_file = os.path.dirname(path) + "/config/nfv-vim.yaml"
     if os.path.isfile(config_file):
@@ -134,7 +131,6 @@ def parser_initialize():
 
 
 def parser_finalize():
-    """
-    Finalize module
-    """
+    """Finalize module."""
+
     pass

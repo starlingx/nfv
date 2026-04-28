@@ -42,9 +42,8 @@ reset_data_captured = False
 
 
 def process_signal_handler(signum, frame):
-    """
-    Virtual Infrastructure Manager - Process Signal Handler
-    """
+    """Virtual Infrastructure Manager - Process Signal Handler."""
+
     global stay_on, do_reload, dump_data_captured, reset_data_captured
 
     if signal.SIGTERM == signum:
@@ -62,9 +61,8 @@ def process_signal_handler(signum, frame):
 
 
 def process_initialize():
-    """
-    Virtual Infrastructure Manager - Initialize
-    """
+    """Virtual Infrastructure Manager - Initialize."""
+
     init_complete = True
 
     debug.debug_initialize(config.CONF["debug"], "VIM")
@@ -94,9 +92,8 @@ def process_initialize():
 
 
 def process_reinitialize():
-    """
-    Virtual Infrastructure Manager - Reinitialize
-    """
+    """Virtual Infrastructure Manager - Reinitialize."""
+
     init_complete = True
 
     if not nfvi.nfvi_reinitialize(config.CONF["nfvi"]):
@@ -108,9 +105,8 @@ def process_reinitialize():
 
 
 def process_finalize():
-    """
-    Virtual Infrastructure Manager - Finalize
-    """
+    """Virtual Infrastructure Manager - Finalize."""
+
     dor.dor_finalize()
     network_rebalance.dr_finalize()
     network_rebalance.nr_finalize()
@@ -130,9 +126,7 @@ def process_finalize():
 
 
 def process_main():
-    """
-    Virtual Infrastructure Manager - Main
-    """
+    """Virtual Infrastructure Manager - Main."""
 
     def _force_exit():
         # Always finalize DB or it can become corrupted

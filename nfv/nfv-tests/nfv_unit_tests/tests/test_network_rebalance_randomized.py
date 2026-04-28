@@ -7,25 +7,21 @@ import random
 from unittest import mock
 
 from nfv_vim.network_rebalance._network_rebalance import (
-    _add_router_to_agent_callback_body
+    _add_router_to_agent_callback_body,
 )
 from nfv_vim.network_rebalance._network_rebalance import (
-    _get_agent_routers_callback_body
+    _get_agent_routers_callback_body,
+)
+from nfv_vim.network_rebalance._network_rebalance import _get_datanetworks_callback_body
+from nfv_vim.network_rebalance._network_rebalance import (
+    _get_network_agents_callback_body,
 )
 from nfv_vim.network_rebalance._network_rebalance import (
-    _get_datanetworks_callback_body
+    _get_physical_network_callback_body,
 )
+from nfv_vim.network_rebalance._network_rebalance import _get_router_ports_callback_body
 from nfv_vim.network_rebalance._network_rebalance import (
-    _get_network_agents_callback_body
-)
-from nfv_vim.network_rebalance._network_rebalance import (
-    _get_physical_network_callback_body
-)
-from nfv_vim.network_rebalance._network_rebalance import (
-    _get_router_ports_callback_body
-)
-from nfv_vim.network_rebalance._network_rebalance import (
-    _remove_router_from_agent_callback_body
+    _remove_router_from_agent_callback_body,
 )
 from nfv_vim.network_rebalance._network_rebalance import _L3Rebalance
 from nfv_vim.network_rebalance._network_rebalance import _run_state_machine
@@ -228,7 +224,6 @@ def add_to_fake_host_table(host_name):
 @mock.patch("nfv_vim.nfvi.nfvi_add_router_to_agent", fake_nfvi_add_router_to_agent)
 @mock.patch("nfv_vim.tables.tables_get_host_table", fake_tables_get_host_table)
 class TestNeutronRebalance2(testcase.NFVTestCase):
-
     def setUp(self):
         super(TestNeutronRebalance2, self).setUp()
 

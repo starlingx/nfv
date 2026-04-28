@@ -12,9 +12,7 @@ from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class HostAdministrativeState(Constants, metaclass=Singleton):
-    """
-    Host Administrative State Constants
-    """
+    """Host Administrative State Constants."""
 
     UNKNOWN = Constant("unknown")
     LOCKED = Constant("locked")
@@ -22,9 +20,7 @@ class HostAdministrativeState(Constants, metaclass=Singleton):
 
 
 class HostOperationalState(Constants, metaclass=Singleton):
-    """
-    Host Operational State Constants
-    """
+    """Host Operational State Constants."""
 
     UNKNOWN = Constant("unknown")
     ENABLED = Constant("enabled")
@@ -32,9 +28,7 @@ class HostOperationalState(Constants, metaclass=Singleton):
 
 
 class HostAvailabilityStatus(Constants, metaclass=Singleton):
-    """
-    Host Availability Status Constants
-    """
+    """Host Availability Status Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant("none")
@@ -50,9 +44,7 @@ class HostAvailabilityStatus(Constants, metaclass=Singleton):
 
 
 class HostAction(Constants, metaclass=Singleton):
-    """
-    Host Action Constants
-    """
+    """Host Action Constants."""
 
     UNKNOWN = Constant("unknown")
     NONE = Constant(" none")
@@ -64,27 +56,21 @@ class HostAction(Constants, metaclass=Singleton):
 
 
 class HostNotifications(Constants, metaclass=Singleton):
-    """
-    Host Notification Constants
-    """
+    """Host Notification Constants."""
 
     UNKNOWN = Constant("unknown")
     BOOTING = Constant("booting")
 
 
 class KubernetesLabelValues(Constants, metaclass=Singleton):
-    """
-    Host Kubernetes Label Value Constants
-    """
+    """Host Kubernetes Label Value Constants."""
 
     ENABLED = Constant("enabled")
     DISABLED = Constant("disabled")
 
 
 class KubernetesLabelKeys(Constants, metaclass=Singleton):
-    """
-    Host Kubernetes Label Key Constants
-    """
+    """Host Kubernetes Label Key Constants."""
 
     OS_COMPUTE_NODE = Constant("openstack-compute-node")
     OS_CONTROL_PLANE = Constant("openstack-control-plane")
@@ -102,9 +88,7 @@ HOST_LABEL_VALUES = KubernetesLabelValues()
 
 
 class Host(ObjectData):
-    """
-    NFVI Host Object
-    """
+    """NFVI Host Object."""
 
     def __init__(
         self,

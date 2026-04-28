@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2025, 2026 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -37,9 +37,7 @@ _ssl_context = None
 
 
 class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
-    """
-    Reset-API Request Handler
-    """
+    """Reset-API Request Handler."""
 
     _handlers = dict()
 
@@ -53,37 +51,32 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         )
 
     def response_delayed(self):
-        """
-        Indicate that the response is not done inline.
-        """
+        """Indicate that the response is not done inline."""
+
         self._response_delayed = True
 
     def send_header(self, keyword, value):
-        """
-        Override send_header so that the Server header is not returned.
-        """
+        """Override send_header so that the Server header is not returned."""
+
         if not self._is_shutdown:
             if "server" != keyword.lower():
                 BaseHTTPServer.BaseHTTPRequestHandler.send_header(self, keyword, value)
 
     def send_response(self, code, message=None):
-        """
-        Override send_response.
-        """
+        """Override send_response."""
+
         if not self._is_shutdown:
             BaseHTTPServer.BaseHTTPRequestHandler.send_response(self, code, message)
 
     def send_error(self, code, message=None):
-        """
-        Override send_error.
-        """
+        """Override send_error."""
+
         if not self._is_shutdown:
             BaseHTTPServer.BaseHTTPRequestHandler.send_error(self, code, message)
 
     def log_error(self, format, *args):
-        """
-        Override log_error so that it goes to syslog on error.
-        """
+        """Override log_error so that it goes to syslog on error."""
+
         DLOG.error(format, *args)
 
     def done(self):
@@ -91,9 +84,8 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         DLOG.debug("Deprecated: 'done' method no longer supported")
 
     def _done(self):
-        """
-        Finished with processing the request.
-        """
+        """Finished with processing the request."""
+
         if not self._is_shutdown:
             if not self.wfile.closed:
                 try:
@@ -117,17 +109,15 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
             self._is_shutdown = True
 
     def finish(self):
-        """
-        Override finish so that the socket is not closed, until we respond.
-        """
+        """Override finish so that the socket is not closed, until we respond."""
+
         if not self._response_delayed:
             # Clean up the request
             self._done()
 
     def _dispatch(self, handlers):
-        """
-        Dispatch Rest-API command to the appropriate handler
-        """
+        """Dispatch Rest-API command to the appropriate handler."""
+
         DLOG.verbose("Rest-API dispatch, path=%s" % self.path)
 
         path_list = list(handlers.keys())
@@ -140,40 +130,34 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
                 break
 
     def do_GET(self):
-        """
-        Handle GET Rest-API command
-        """
+        """Handle GET Rest-API command."""
+
         self._dispatch(self._handlers[self.server.port]["GET"])
 
     def do_POST(self):
-        """
-        Handle POST Rest-API command
-        """
+        """Handle POST Rest-API command."""
+
         self._dispatch(self._handlers[self.server.port]["POST"])
 
     def do_PATCH(self):
-        """
-        Handle PATCH Rest-API command
-        """
+        """Handle PATCH Rest-API command."""
+
         self._dispatch(self._handlers[self.server.port]["PATCH"])
 
     def do_DELETE(self):
-        """
-        Handle DELETE Rest-API command
-        """
+        """Handle DELETE Rest-API command."""
+
         self._dispatch(self._handlers[self.server.port]["DELETE"])
 
     def do_PUT(self):
-        """
-        Handle PUT Rest-API command
-        """
+        """Handle PUT Rest-API command."""
+
         self._dispatch(self._handlers[self.server.port]["PUT"])
 
     @classmethod
     def add_handler(cls, host, port, operation, path, handler):
-        """
-        Add Rest-API handler
-        """
+        """Add Rest-API handler."""
+
         if port not in cls._handlers:
             cls._handlers[port] = dict()
 
@@ -184,9 +168,8 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
 
     @classmethod
     def del_handler(cls, host, port, operation, path):
-        """
-        Delete Rest-API handler
-        """
+        """Delete Rest-API handler."""
+
         if port in cls._handlers:
             if operation.upper() in cls._handlers[port]:
                 if path in cls._handlers[port][operation.upper()]:
@@ -194,14 +177,11 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
 
 
 class RestAPIServer(SocketServer.TCPServer):
-    """
-    Rest-API Server
-    """
+    """Rest-API Server."""
 
     def __init__(self, ip, port):
-        """
-        Create the Rest-API Server
-        """
+        """Create the Rest-API Server."""
+
         l_on_off = 1
         l_linger = 0
 
@@ -232,34 +212,29 @@ class RestAPIServer(SocketServer.TCPServer):
 
     @property
     def ip(self):
-        """
-        Returns the server ip
-        """
+        """Returns the server ip."""
+
         return self._ip
 
     @property
     def port(self):
-        """
-        Returns the server port
-        """
+        """Returns the server port."""
+
         return self._port
 
     def add_handler(self, operation, path, handler):
-        """
-        Add Rest-API handler
-        """
+        """Add Rest-API handler."""
+
         self._http_handler.add_handler(self._ip, self._port, operation, path, handler)
 
     def del_handler(self, operation, path):
-        """
-        Delete Rest-API handler
-        """
+        """Delete Rest-API handler."""
+
         self._http_handler.del_handler(self._ip, self._port, operation, path)
 
     def process_request(self, request, client_address):
-        """
-        Process a request by invoking the http_handler
-        """
+        """Process a request by invoking the http_handler."""
+
         self.finish_request(request, client_address)
         # Override process_request so that the socket is not closed,
         # until we respond.
@@ -267,9 +242,8 @@ class RestAPIServer(SocketServer.TCPServer):
 
     @coroutine
     def dispatch_rest_api(self):
-        """
-        Dispatch Rest-API received
-        """
+        """Dispatch Rest-API received."""
+
         while True:
             select_obj = yield
             if select_obj == self.fileno():
@@ -289,8 +263,7 @@ class RestAPIServer(SocketServer.TCPServer):
 
                     except BaseException as e:
                         DLOG.error(
-                            "Caught exception while processing "
-                            "request, error=%s." % e
+                            "Caught exception while processing request, error=%s." % e
                         )
                         self.handle_error(request, client_address)
                         self.shutdown_request(request)
@@ -300,9 +273,8 @@ class RestAPIServer(SocketServer.TCPServer):
 
 
 def rest_api_get_server(host, port):
-    """
-    Get a reference to the res-api server
-    """
+    """Get a reference to the res-api server."""
+
     DLOG.verbose("Creating Rest-API Servier, host=%s, port=%s." % (host, port))
     return RestAPIServer(host, port)
 
@@ -316,9 +288,8 @@ def _rest_api_request(
     timeout_in_secs,
     file_to_post,
 ):
-    """
-    Internal: make a rest-api request
-    """
+    """Internal: make a rest-api request."""
+
     headers_per_hop = [
         "connection",
         "keep-alive",
@@ -541,8 +512,8 @@ def rest_api_request(
     timeout_in_secs=20,
     file_to_post=None,
 ):
-    """
-    Make a rest-api request using the given token
+    """Make a rest-api request using the given token
+
     WARNING: Any change to the default timeout must be reflected in the timeout
     calculations done in the TaskFuture class.
     """
@@ -572,8 +543,8 @@ def rest_api_request_with_context(
     timeout_in_secs=20,
     file_to_post=None,
 ):
-    """
-    Make a rest-api request using the given context
+    """Make a rest-api request using the given context
+
     WARNING: Any change to the default timeout must be reflected in the timeout
     calculations done in the TaskFuture class.
     """

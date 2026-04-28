@@ -14,39 +14,33 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 
 class GuestServicesSetState(state_machine.State):
-    """
-    Instance - GuestServicesSet State
-    """
+    """Instance - GuestServicesSet State."""
 
     def __init__(self, name):
         super(GuestServicesSetState, self).__init__(name)
 
     def enter(self, instance):
-        """
-        Entering GuestServicesSet state
-        """
+        """Entering GuestServicesSet state."""
+
         DLOG.info("Entering state (%s) for %s." % (self.name, instance.name))
         instance.task = GuestServicesSetTask(instance)
         instance.task.start()
 
     def exit(self, instance):
-        """
-        Exiting GuestServicesSet state
-        """
+        """Exiting GuestServicesSet state."""
+
         DLOG.info("Exiting state (%s) for %s." % (self.name, instance.name))
         if isinstance(instance.task, GuestServicesSetTask):
             instance.task.abort()
 
     def transition(self, instance, event, event_data, to_state):
-        """
-        Transition from the GuestServicesSet state
-        """
+        """Transition from the GuestServicesSet state."""
+
         pass
 
     def handle_event(self, instance, event, event_data=None):
-        """
-        Handle event while in the GuestServicesSet state
-        """
+        """Handle event while in the GuestServicesSet state."""
+
         if INSTANCE_EVENT.TASK_STOP == event:
             return INSTANCE_STATE.INITIAL
 

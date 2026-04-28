@@ -18,9 +18,8 @@ DLOG = debug.debug_get_logger("nfv_vim.vim_nfvi_events")
 
 @coroutine
 def _nfvi_host_query_callback():
-    """
-    NFVI Host query callback
-    """
+    """NFVI Host query callback."""
+
     response = yield
     DLOG.verbose("Query-Host callback, response=%s." % response)
 
@@ -38,9 +37,8 @@ def _nfvi_host_query_callback():
 
 
 def _nfvi_host_add_callback(nfvi_host_uuid, nfvi_host_name):
-    """
-    NFVI Host add callback
-    """
+    """NFVI Host add callback."""
+
     DLOG.debug("Host add, nfvi_host=%s." % nfvi_host_name)
 
     host_table = tables.tables_get_host_table()
@@ -55,9 +53,8 @@ def _nfvi_host_add_callback(nfvi_host_uuid, nfvi_host_name):
 
 
 def _nfvi_host_action_callback(nfvi_host_uuid, nfvi_host_name, do_action):
-    """
-    NFVI host action callback
-    """
+    """NFVI host action callback."""
+
     DLOG.debug(
         "Host action, host_uuid=%s, host_name=%s, do_action=%s."
         % (nfvi_host_uuid, nfvi_host_name, do_action)
@@ -97,9 +94,8 @@ def _nfvi_host_state_change_callback(
     nfvi_avail_status,
     nfvi_data,
 ):
-    """
-    NFVI Host state change callback
-    """
+    """NFVI Host state change callback."""
+
     DLOG.debug(
         "Host state-change, nfvi_host_uuid=%s, nfvi_host_name=%s, "
         "nfvi_host_admin_state=%s, nfvi_host_oper_state=%s, "
@@ -123,9 +119,7 @@ def _nfvi_host_state_change_callback(
 
 
 def _nfvi_sw_update_get_callback():
-    """
-    NFVI Software update get callback
-    """
+    """NFVI Software update get callback."""
 
     sw_mgmt_director = directors.get_sw_mgmt_director()
     sw_update = sw_mgmt_director.sw_update
@@ -159,9 +153,8 @@ def _nfvi_sw_update_get_callback():
 
 
 def _nfvi_host_get_callback(nfvi_host_uuid, nfvi_host_name):
-    """
-    NFVI Host get callback
-    """
+    """NFVI Host get callback."""
+
     DLOG.debug(
         "Host get, nfvi_host_uuid=%s, nfvi_host_name=%s."
         % (nfvi_host_uuid, nfvi_host_name)
@@ -197,9 +190,8 @@ def _nfvi_host_get_callback(nfvi_host_uuid, nfvi_host_name):
 def _nfvi_host_upgrade_callback(
     nfvi_host_uuid, nfvi_host_name, upgrade_inprogress, recover_instances
 ):
-    """
-    NFVI Host upgrade callback
-    """
+    """NFVI Host upgrade callback."""
+
     DLOG.debug(
         "Host upgrade, nfvi_host_uuid=%s, nfvi_host_name=%s, "
         "upgrade_inprogress=%s, recover_instances=%s."
@@ -215,9 +207,8 @@ def _nfvi_host_upgrade_callback(
 
 
 def _nfvi_host_update_callback(nfvi_host_uuid, nfvi_host_name):
-    """
-    NFVI Host update callback
-    """
+    """NFVI Host update callback."""
+
     DLOG.debug(
         "Host update, nfvi_host_uuid=%s, nfvi_host_name=%s"
         % (nfvi_host_uuid, nfvi_host_name)
@@ -229,9 +220,8 @@ def _nfvi_host_update_callback(nfvi_host_uuid, nfvi_host_name):
 
 
 def _nfvi_host_notification_callback(host_ip, nfvi_notify_type, nfvi_notify_data):
-    """
-    NFVI Host notification callback
-    """
+    """NFVI Host notification callback."""
+
     instance_count = 0
     status = "error"
 
@@ -276,9 +266,8 @@ def _nfvi_host_notification_callback(host_ip, nfvi_notify_type, nfvi_notify_data
 
 @coroutine
 def _query_nfvi_instance_callback():
-    """
-    Query Instance
-    """
+    """Query Instance."""
+
     response = yield
     DLOG.verbose("Query-Instance callback, response=%s." % response)
 
@@ -301,9 +290,8 @@ def _query_nfvi_instance_callback():
 
 
 def _nfvi_instance_state_change_callback(nfvi_instance):
-    """
-    NFVI Instance state change callback
-    """
+    """NFVI Instance state change callback."""
+
     DLOG.debug("Instance state-change, nfvi_instance=%s." % nfvi_instance)
 
     instance_table = tables.tables_get_instance_table()
@@ -352,9 +340,8 @@ def _nfvi_instance_state_change_callback(nfvi_instance):
 def _nfvi_instance_action_change_callback(
     nfvi_instance_uuid, nfvi_action_type, nfvi_action_state, reason=""
 ):
-    """
-    NFVI Instance action change callback
-    """
+    """NFVI Instance action change callback."""
+
     DLOG.debug(
         "Instance action-change, uuid=%s, nfvi_action=%s, "
         "nfvi_action_state=%s, reason=%s."
@@ -371,9 +358,8 @@ def _nfvi_instance_action_change_callback(
 
 
 def _nfvi_instance_action_callback(nfvi_instance_uuid, nfvi_action_data):
-    """
-    NFVI Instance action callback
-    """
+    """NFVI Instance action callback."""
+
     DLOG.debug(
         "Instance action, uuid=%s, nfvi_action_data=%s"
         % (nfvi_instance_uuid, nfvi_action_data)
@@ -390,9 +376,8 @@ def _nfvi_instance_action_callback(nfvi_instance_uuid, nfvi_action_data):
 
 
 def _nfvi_instance_delete_callback(nfvi_instance_uuid):
-    """
-    NFVI Instance delete callback
-    """
+    """NFVI Instance delete callback."""
+
     DLOG.info("Instance delete, nfvi_instance_uuid=%s." % nfvi_instance_uuid)
 
     instance_table = tables.tables_get_instance_table()
@@ -402,9 +387,8 @@ def _nfvi_instance_delete_callback(nfvi_instance_uuid):
 
 
 def _nfvi_host_services_query_callback(nfvi_host_name):
-    """
-    NFVI Host Services query callback
-    """
+    """NFVI Host Services query callback."""
+
     DLOG.debug("Host-Services query, host_name=%s." % nfvi_host_name)
 
     host_table = tables.tables_get_host_table()
@@ -421,9 +405,8 @@ def _nfvi_host_services_query_callback(nfvi_host_name):
 
 
 def _nfvi_guest_services_query_callback(nfvi_host_uuid, nfvi_instance_uuid):
-    """
-    NFVI Guest Services query callback
-    """
+    """NFVI Guest Services query callback."""
+
     DLOG.debug(
         "Guest-Services query, nfvi_host_uuid=%s, "
         "nfvi_instance_uuid=%s." % (nfvi_host_uuid, nfvi_instance_uuid)
@@ -467,9 +450,8 @@ def _nfvi_guest_services_query_callback(nfvi_host_uuid, nfvi_instance_uuid):
 def _nfvi_guest_services_state_notify_callback(
     nfvi_instance_uuid, nfvi_host_name, nfvi_guest_services
 ):
-    """
-    NFVI Guest Services notify callback for service type event
-    """
+    """NFVI Guest Services notify callback for service type event."""
+
     DLOG.debug(
         "Guest-Services state notify, instance_uuid=%s, "
         "host_name=%s guest_services=%s."
@@ -485,9 +467,8 @@ def _nfvi_guest_services_state_notify_callback(
 def _nfvi_guest_services_alarm_notify_callback(
     nfvi_instance_uuid, nfvi_avail_status, nfvi_repair_action
 ):
-    """
-    NFVI Guest Services notify callback for alarm type event
-    """
+    """NFVI Guest Services notify callback for alarm type event."""
+
     DLOG.debug(
         "Guest-Services alarm notify, instance_uuid=%s, "
         "avail_status=%s, repair_action=%s."
@@ -527,9 +508,8 @@ def _nfvi_guest_services_alarm_notify_callback(
 def _nfvi_guest_services_action_notify_callback(
     nfvi_instance_uuid, nfvi_action_type, nfvi_action_state, reason
 ):
-    """
-    NFVI Guest Services notify callback for action type event
-    """
+    """NFVI Guest Services notify callback for action type event."""
+
     DLOG.debug(
         "Guest-Services action notify, instance_uuid=%s, "
         "nfvi_action_type=%s, nfvi_action_state=%s, reason=%s."
@@ -549,9 +529,8 @@ def _nfvi_guest_services_action_notify_callback(
     "nfvi_periodic_timer_event", initial_delay_secs=10, interval_secs=10
 )
 def _nfvi_periodic_timer_event():
-    """
-    Periodic timer for hosts
-    """
+    """Periodic timer for hosts."""
+
     while True:
         timer_id = yield
         DLOG.verbose("NFVI periodic timer called, timer_id=%s." % timer_id)
@@ -562,9 +541,8 @@ def _nfvi_periodic_timer_event():
 
 
 def vim_nfvi_events_initialize():
-    """
-    Initialize listening for nfvi events
-    """
+    """Initialize listening for nfvi events."""
+
     nfvi.nfvi_register_host_add_callback(_nfvi_host_add_callback)
 
     nfvi.nfvi_register_host_action_callback(_nfvi_host_action_callback)
@@ -619,7 +597,6 @@ def vim_nfvi_events_initialize():
 
 
 def vim_nfvi_events_finalize():
-    """
-    Finalize listening for nfvi events
-    """
+    """Finalize listening for nfvi events."""
+
     pass
