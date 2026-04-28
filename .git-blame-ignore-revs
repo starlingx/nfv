@@ -1,0 +1,34 @@
+# git hyper-blame master ignore list.
+#
+# This file contains a list of git hashes of revisions to be ignored by git
+# hyper-blame. These revisions are considered "unimportant" in that they are
+# unlikely to be what you are interested in when blaming.
+#
+# Instructions:
+# - Only large (generally automated) reformatting or renaming commits should be
+#   added to this list. Do not put things here just because you feel they are
+#   trivial or unimportant. If in doubt, do not put it on this list.
+# - Precede each revision with a comment containing the first line of its log.
+#   For bulk work over many commits, place all commits in a block with a single
+#   comment at the top describing the work done in those commits.
+# - Only put full 40-character hashes on this list (not short hashes or any
+#   other revision reference).
+# - Append to the bottom of the file (revisions should be in chronological order
+#   from oldest to newest).
+# - Because you must use a hash, you need to append to this list in a follow-up
+#   commit to the actual reformatting commit that you are trying to ignore.
+
+# Apply black formatter to nfv
+f26d2125a1fdd982a93b3f724c856f8b800fbf49
+
+# Update tox and add coverage job to zuul
+50c17f3eb0b47ce78dd51120be34a1265719ec00
+
+# Update linting for nova-api-proxy
+9f340ba93831c26a40b4652a632cba813d666354
+
+# Update flake8 rules for nfv
+44f728b64a76a17431da408dd6fae7fa53e6925d
+
+# Update pylint rules for nfv
+0f8eafa6431b2adbef3af80a2291885c66051232
