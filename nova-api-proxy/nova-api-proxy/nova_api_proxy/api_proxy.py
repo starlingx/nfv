@@ -1,14 +1,14 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 
-import eventlet
 import os
 import signal
 import sys
 
+import eventlet
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -16,28 +16,30 @@ from nova_api_proxy.common import config
 from nova_api_proxy.common import histogram
 from nova_api_proxy.common.service import Server
 
+
 LOG = logging.getLogger(__name__)
 
-eventlet.patcher.monkey_patch(all=False, socket=True, time=True,
-                              select=True, thread=True, os=False)
+eventlet.patcher.monkey_patch(
+    all=False, socket=True, time=True, select=True, thread=True, os=False
+)
 
 server_opts = [
-    cfg.StrOpt('osapi_proxy_listen',
-               default="0.0.0.0",
-               help='IP address for nova api proxy to listen'),
-    cfg.IntOpt('osapi_proxy_listen_port',
-               default=8774,
-               help='listen port for nova api proxy'),
-    cfg.BoolOpt('use_ssl',
-                default=False,
-                help="If True, the client is using https "),
+    cfg.StrOpt(
+        "osapi_proxy_listen",
+        default="0.0.0.0",
+        help="IP address for nova api proxy to listen",
+    ),
+    cfg.IntOpt(
+        "osapi_proxy_listen_port", default=8774, help="listen port for nova api proxy"
+    ),
+    cfg.BoolOpt("use_ssl", default=False, help="If True, the client is using https "),
 ]
 
 CONF = cfg.CONF
 CONF.register_opts(server_opts)
 
 
-def process_signal_handler(signum, frame):
+def process_signal_handler(signum, _):
 
     if signal.SIGTERM == signum:
         LOG.info("Caught SIGTERM...")
@@ -49,7 +51,7 @@ def process_signal_handler(signum, frame):
             CONF.debug = False
         else:
             CONF.debug = True
-        logging.toggle_debug_log(CONF.debug)
+        logging.toggle_debug_log(CONF.debug)  # pylint: disable=no-member
     elif signal.SIGUSR1 == signum:
         LOG.info("Caught SIGUSR1...")
         histogram.display_histogram_data()
@@ -57,11 +59,14 @@ def process_signal_handler(signum, frame):
         LOG.info("Caught SIGUSR2...")
         histogram.reset_histogram_data()
     else:
-        LOG.info("Ignoring signal" % signum)
+        LOG.info(
+            "Ignoring signal"  # pylint: disable=format-string-without-interpolation
+            % signum
+        )
 
 
 def main():
-    global server
+    global server  # pylint: disable=global-variable-undefined
     try:
         signal.signal(signal.SIGTERM, process_signal_handler)
         signal.signal(signal.SIGHUP, process_signal_handler)
@@ -70,7 +75,7 @@ def main():
 
         logging.register_options(cfg.CONF)
         config.parse_args(sys.argv)
-        logging.setup(cfg.CONF, 'nova-api-proxy')
+        logging.setup(cfg.CONF, "nova-api-proxy")
 
         should_use_ssl = CONF.use_ssl
         LOG.debug("Load paste apps")
@@ -78,20 +83,25 @@ def main():
 
         pidfile = "/var/run/nova-api-proxy.pid"
         if not os.path.exists(pidfile):
+            # pylint: disable=invalid-name,unspecified-encoding
             with open(pidfile, "w") as f:
                 f.write(str(os.getpid()))
 
         # initialize the socket and app
         LOG.debug("Initialize the socket and app")
-        server = Server("osapi_proxy", app, host=CONF.osapi_proxy_listen,
-                        port=CONF.osapi_proxy_listen_port,
-                        use_ssl=should_use_ssl)
+        server = Server(
+            "osapi_proxy",
+            app,
+            host=CONF.osapi_proxy_listen,
+            port=CONF.osapi_proxy_listen_port,
+            use_ssl=should_use_ssl,
+        )
         LOG.debug("Start the server")
         server.start()
 
     except KeyboardInterrupt:
         LOG.info("Keyboard Interrupt received.")
-
+    # pylint: disable-next=broad-exception-caught,invalid-name
     except Exception as e:
         LOG.exception(e)
         sys.exit(200)

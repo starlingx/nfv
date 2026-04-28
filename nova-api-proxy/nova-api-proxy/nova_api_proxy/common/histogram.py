@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -13,9 +13,8 @@ LOG = logging.getLogger(__name__)
 
 
 class Histogram(object):
-    """
-    Histogram Object
-    """
+    """Histogram Object"""
+
     def __init__(self, name, num_buckets):
         self._name = name
         self._num_buckets = num_buckets
@@ -30,15 +29,11 @@ class Histogram(object):
 
     @property
     def name(self):
-        """
-        Returns the name of the histogram
-        """
+        """Returns the name of the histogram"""
         return self._name
 
     def add_data(self, sample):
-        """
-        Convert data given to the nearest power of two.
-        """
+        """Convert data given to the nearest power of two."""
         sample_as_int = int(sample)
         if 0 == sample_as_int:
             bucket_idx = sample_as_int.bit_length()
@@ -54,14 +49,12 @@ class Histogram(object):
 
         self._sample_total += sample_as_int
         self._num_samples += 1
-        self._average_sample = (self._sample_total // self._num_samples)
+        self._average_sample = self._sample_total // self._num_samples
 
         self._buckets[bucket_idx] += 1
 
     def reset_data(self):
-        """
-        Clear out the collected samples.
-        """
+        """Clear out the collected samples."""
         self._reset_date = datetime.datetime.now()
         self._sample_total = 0
         self._num_samples = 0
@@ -72,9 +65,7 @@ class Histogram(object):
             self._buckets[idx] = 0
 
     def display_data(self):
-        """
-        Output the histogram to a log.
-        """
+        """Output the histogram to a log."""
         date_str = ""
         values_str = ""
 
@@ -88,10 +79,9 @@ class Histogram(object):
             values_str += "  avg: %s" % self._average_sample
 
         if self._max_sample_date is not None:
-            values_str += ("  max: %s (%s)" % (self._max_sample,
-                                               self._max_sample_date))
+            values_str += "  max: %s (%s)" % (self._max_sample, self._max_sample_date)
 
-        LOG.info("%s" % '-' * 120)
+        LOG.info("%s" % "-" * 120)
         LOG.info("Histogram: %s" % self._name)
         LOG.info("%s" % date_str)
 
@@ -100,19 +90,18 @@ class Histogram(object):
 
         for idx, bucket_value in enumerate(self._buckets):
             if 0 != bucket_value:
-                LOG.info("    %03i [up to %03i secs]: %07i %s"
-                         % (idx, math.pow(2, idx), bucket_value,
-                            '*' * min(60, bucket_value)))
-        LOG.info("%s" % '-' * 120)
+                LOG.info(
+                    "    %03i [up to %03i secs]: %07i %s"
+                    % (idx, math.pow(2, idx), bucket_value, "*" * min(60, bucket_value))
+                )
+        LOG.info("%s" % "-" * 120)
 
 
 _histograms = list()
 
 
 def _find_histogram(name):
-    """
-    Lookup a histogram with a particular name
-    """
+    """Lookup a histogram with a particular name."""
     for histogram in _histograms:
         if name == histogram.name:
             return histogram
@@ -120,9 +109,8 @@ def _find_histogram(name):
 
 
 def add_histogram_data(name, sample):
-    """
-    Add a sample to a histogram
-    """
+    """Add a sample to a histogram."""
+    # pylint: disable-next=global-variable-undefined,global-variable-not-assigned
     global _histograms
 
     histogram = _find_histogram(name)
@@ -134,9 +122,7 @@ def add_histogram_data(name, sample):
 
 
 def reset_histogram_data(name=None):
-    """
-    Reset histogram data
-    """
+    """Reset histogram data."""
     if name is None:
         for histogram in _histograms:
             histogram.reset_data()
@@ -147,9 +133,7 @@ def reset_histogram_data(name=None):
 
 
 def display_histogram_data(name=None):
-    """
-    Display histogram data captured
-    """
+    """Display histogram data captured."""
     if name is None:
         for histogram in _histograms:
             histogram.display_data()

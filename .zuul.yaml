@@ -125,7 +125,6 @@
       python_version: 3.9
       tox_envlist: black
       tox_extra_args: -c nova-api-proxy/tox.ini
-    voting: false
 
 - job:
     name: stx-nfv-upload-git-mirror

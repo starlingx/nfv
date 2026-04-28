@@ -1,34 +1,41 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 
 import os
-from oslo_config import cfg
-from paste import deploy
 
+from oslo_config import cfg
 from oslo_log import log as logging
+from paste import deploy
 
 LOG = logging.getLogger(__name__)
 
 paste_deploy_opts = [
-    cfg.StrOpt('api_paste_config',
-               default='api-proxy-paste.ini',
-               help='The API paste config file to use.')]
+    cfg.StrOpt(
+        "api_paste_config",
+        default="api-proxy-paste.ini",
+        help="The API paste config file to use.",
+    )
+]
 
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts)
 
 
 def parse_args(argv, default_config_files=None):
-    CONF(argv[1:],
-         project='api-proxy',
-         version='1.0',
-         default_config_files=default_config_files)
+    CONF(
+        argv[1:],
+        project="api-proxy",
+        version="1.0",
+        default_config_files=default_config_files,
+    )
 
 
-def paste_deploy_app(paste_config_file, app_name, conf):
+# TODO(rlima): the conf variable now represented by _ is unused and can be removed
+# from the method's declaratiPon.
+def paste_deploy_app(paste_config_file, app_name, _):
     """Load a WSGI app from a PasteDeploy configuration.
 
     Use deploy.loadapp() to load the app from the PasteDeploy configuration,
@@ -44,8 +51,8 @@ def paste_deploy_app(paste_config_file, app_name, conf):
 
 
 def _get_paste_config_file():
-    """
-    Retrieve the paste_config_file config item, formatted as an
+    """Retrieve the paste_config_file config item, formatted as an
+
     absolute pathname.
     """
     config_path = CONF.find_file(CONF.api_paste_config)
@@ -56,15 +63,12 @@ def _get_paste_config_file():
 
 
 def load_paste_app(app_name=None):
-    """
-    Loads a WSGI app from a paste config file.
-    """
+    """Loads a WSGI app from a paste config file."""
     if app_name is None:
         app_name = CONF.prog
 
     conf_file = _get_paste_config_file()
-    LOG.info("Load application: config: (%s), app: (%s)" % (conf_file,
-                                                            app_name))
+    LOG.info("Load application: config: (%s), app: (%s)" % (conf_file, app_name))
     if conf_file is None:
         raise RuntimeError("Unable to locate config file")
 

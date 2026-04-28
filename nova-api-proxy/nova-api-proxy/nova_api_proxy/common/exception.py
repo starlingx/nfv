@@ -21,20 +21,21 @@
 #
 #
 
+
 class ProxyException(Exception):
-    """Base Exception
-    """
+    """Base Exception"""
+
     code = 500
     headers = {}
     safe = False
-    message = ("An unknown exception occurred.")
+    message = "An unknown exception occurred."
 
     def __init__(self, message=None, **kwargs):
         self.kwargs = kwargs
 
-        if 'code' not in self.kwargs:
+        if "code" not in self.kwargs:
             try:
-                self.kwargs['code'] = self.code
+                self.kwargs["code"] = self.code
             except AttributeError:
                 pass
 
@@ -42,13 +43,13 @@ class ProxyException(Exception):
             try:
                 message = self.message % kwargs  # pylint: disable=W1645
 
-            except Exception as e:
+            except Exception as e:  # pylint: disable=invalid-name
                 raise e
 
         super(ProxyException, self).__init__(message)
 
     def format_message(self):
-        if self.__class__.__name__.endswith('_Remote'):
+        if self.__class__.__name__.endswith("_Remote"):
             return self.args[0]
         else:
             return str(self)
