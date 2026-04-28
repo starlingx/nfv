@@ -13,7 +13,6 @@ from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
 from platform_util.oidc import oidc_utils
 
-
 STRATEGY_NAME_SW_DEPLOY = "sw-deploy"
 STRATEGY_NAME_SW_UPGRADE = "sw-upgrade"
 STRATEGY_NAME_FW_UPDATE = "fw-update"
@@ -198,9 +197,24 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
 
     _print(2, "strategy-uuid", strategy.uuid)
     if strategy.name == STRATEGY_NAME_SW_UPGRADE:
-        _print(2, "release-id", strategy.release)
+        # When the release information has not been fully retrieved yet,
+        # only display the release parameter the user sent. Otherwise,
+        # display release-id and metapackage data.
+        if strategy.release_id and strategy.metapackages:
+            _print(2, "release-id", strategy.release_id)
+            _print(2, "metapackages", ", ".join(strategy.metapackages))
+        else:
+            # TODO(rlima): change this behavior to, instead, display a default message
+            # for when the user specifies an empty release, i.e. previously selected
+            # metapackages
+            if strategy.release is None:
+                strategy.release = []
+
+            _print(2, "release", ", ".join(strategy.release))
+
         if strategy.kube_version:
             _print(2, "kube-version", strategy.kube_version)
+
     _print(2, "controller-apply-type", strategy.controller_apply_type)
     _print(2, "storage-apply-type", strategy.storage_apply_type)
     _print(2, "worker-apply-type", strategy.worker_apply_type)

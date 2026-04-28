@@ -67,6 +67,12 @@ class SwMgmtDirector(metaclass=Singleton):
             return None, reason
 
         self._sw_update = objects.SwUpgrade()
+
+        # Reset the upgrade object before instantiating a new strategy
+        from nfv_vim import nfvi
+
+        nfvi.nfvi_sw_deploy_reset_upgrade_object()
+
         success, reason = self._sw_update.strategy_build(
             strategy_uuid,
             controller_apply_type,

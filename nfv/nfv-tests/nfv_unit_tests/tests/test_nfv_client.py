@@ -275,16 +275,17 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
 
         return ["starlingx-24.03.1"]
 
-    def test_create_missing_both(self):
+    def test_create_with_empty_release(self):
+        # When the create is sent without rollback, it is assumed to be a sw-deploy with
+        # an empty release parameter.
         shell_args = [self.strategy, "create"]
-        e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == "Must set release or either --rollback or --cleanup", e
+        self._test_shell_create(shell_args=shell_args)
 
     def test_create_rollback(self):
         shell_args = [self.strategy, "create", "--rollback"]
         self._test_shell_create(shell_args=shell_args)
 
-    def test_create_with_both(self):
+    def test_create_release_with_rollback(self):
         shell_args = [self.strategy, "create", "v123.1", "--rollback"]
         e = self._test_shell_create_with_error(shell_args=shell_args)
         assert str(e) == "Cannot set both --rollback and release", e

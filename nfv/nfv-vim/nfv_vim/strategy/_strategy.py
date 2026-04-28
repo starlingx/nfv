@@ -1576,13 +1576,10 @@ class SwUpgradeStrategy(
     def build(self):
         """Build the strategy."""
 
-        if self._release is None and not (self._rollback or self._cleanup):
-            reason = "Release or either rollback or cleanup must be set"
-            self.report_build_failure(reason)
-        elif self._kube_upgrade_version and self._rollback:
+        if self._kube_upgrade_version and self._rollback:
             reason = "Cannot set both kube_upgrade and rollback"
             self.report_build_failure(reason)
-        elif self._release is not None and self._rollback:
+        elif self._release and self._rollback:
             reason = "Cannot set both release and rollback"
             self.report_build_failure(reason)
 
@@ -2260,6 +2257,7 @@ class SwUpgradeStrategy(
         if nfvi_upgrade_data:
             self._nfvi_upgrade = nfvi.objects.v1.Upgrade(
                 nfvi_upgrade_data["release"],
+                nfvi_upgrade_data.get("metapackages", None),
                 nfvi_upgrade_data["release_info"],
                 nfvi_upgrade_data["deploy_info"],
                 nfvi_upgrade_data["hosts_info"],

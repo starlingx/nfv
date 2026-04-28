@@ -417,6 +417,11 @@ def nfvi_deploy_delete(release, callback):
     return cmd_id
 
 
+def nfvi_sw_deploy_reset_upgrade_object():
+    """Reset the cached upgrade held by the plugin."""
+    _infrastructure_plugin.reset_upgrade_object()
+
+
 def nfvi_sw_deploy_abort(callback):
     """Software deploy abort."""
 

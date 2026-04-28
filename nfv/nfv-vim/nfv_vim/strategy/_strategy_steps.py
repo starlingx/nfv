@@ -787,6 +787,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
 
         if response["completed"] and response["result-data"]:
             DLOG.debug("sw-deploy precheck completed")
+            self.strategy.nfvi_upgrade = response["upgrade-object-data"]
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             reason = response["complete-data"].get("info", "").strip()
             self.stage.step_complete(result, reason)
@@ -1604,18 +1605,16 @@ class SwDeployDeleteStep(strategy.StrategyStep):
         reason = ""
 
         if response["completed"]:
-            self.strategy.nfvi_upgrade = response.get("result-data")
-            # Release will be None in the case of cleanup
-            if self._release is None or (
-                not self.strategy._rollback
-                and self.strategy.nfvi_upgrade.is_deployed
-                or self.strategy._rollback
-                and self.strategy.nfvi_upgrade.is_available
-            ):
+            error = response["complete-data"].get("error", None)
+
+            if not error:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 reason = response["complete-data"].get("info", "").strip()
-
-        if result is None:
+            else:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                reason = error.strip()
+                self.phase.result_complete_response(response)
+        else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             reason = response.get(
                 "error-message",

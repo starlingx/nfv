@@ -130,7 +130,9 @@ class SwUpdateStrategyData(wsme_types.Base):
 
     uuid = wsme_types.wsattr(str, name="uuid")
     name = wsme_types.wsattr(SwUpdateNames, name="name")
-    release = wsme_types.wsattr(str, mandatory=False, name="release")
+    release = wsme_types.wsattr([str], mandatory=False, name="release")
+    release_id = wsme_types.wsattr(str, mandatory=False, name="release-id")
+    metapackages = wsme_types.wsattr([str], mandatory=False, name="metapackages")
     kube_version = wsme_types.wsattr(str, mandatory=False, name="kube-version")
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, name="controller-apply-type"
@@ -163,7 +165,7 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="controller-apply-type"
     )
-    release = wsme_types.wsattr(str, mandatory=False, name="release")
+    release = wsme_types.wsattr([str], mandatory=False, name="release")
     rollback = wsme_types.wsattr(bool, mandatory=False, name="rollback")
     delete = wsme_types.wsattr(bool, mandatory=False, name="delete")
     snapshot = wsme_types.wsattr(bool, mandatory=False, name="snapshot", default=None)
@@ -376,6 +378,14 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
         if strategy.name == SW_UPDATE_NAME.SW_UPGRADE:
             strategy.release = strategy_data["release"]
             strategy.kube_version = strategy_data.get("kube_upgrade_version")
+            nfvi_upgrade_data = strategy_data.get("nfvi_upgrade_data")
+
+            if nfvi_upgrade_data and nfvi_upgrade_data.get("release_info"):
+                release_info = nfvi_upgrade_data.get("release_info")
+
+                if release_info:
+                    strategy.release_id = release_info.get("release_id")
+                    strategy.metapackages = nfvi_upgrade_data.get("metapackages")
         strategy.controller_apply_type = strategy_data["controller_apply_type"]
         strategy.storage_apply_type = strategy_data["storage_apply_type"]
         strategy.swift_apply_type = strategy_data["swift_apply_type"]

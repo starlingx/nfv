@@ -23,10 +23,27 @@ class Upgrade(ObjectData):
     """NFVI Upgrade Object."""
 
     def __init__(
-        self, release, release_info, deploy_info, hosts_info, system_deploy=None
+        self,
+        release,
+        metapackages,
+        release_info,
+        deploy_info,
+        hosts_info,
+        system_deploy=None,
     ):
+        # TODO(rlima): map the major_release property from the usm requests rather
+        # than using the current validation logic.
         super().__init__("1.0.0")
         self.release = release
+        self.metapackages = metapackages
+        self.release_info = release_info
+        self.deploy_info = deploy_info
+        self.hosts_info = hosts_info
+        self.system_deploy = system_deploy
+
+    def update(self, release_info, deploy_info, hosts_info, system_deploy=None):
+        """Update fields."""
+
         self.release_info = release_info
         self.deploy_info = deploy_info
         self.hosts_info = hosts_info

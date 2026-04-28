@@ -190,6 +190,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         self._neutron_extensions = None
         self._data_port_fault_handling_enabled = False
         self._host_listener = None
+        # Stores the upgrade object to avoid recreating it
+        self._upgrade_obj = None
 
     def _host_supports_nova_compute(self, personality):
         return ("worker" in personality) and (
@@ -2325,7 +2327,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
                 self._platform_token = future.result.data
 
-            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
+            future.work(
+                usm.sw_deploy_get_upgrade_obj,
+                self._platform_token,
+                release,
+                self._upgrade_obj,
+            )
             future.result = yield
 
             if not future.result.is_complete():
@@ -2337,7 +2344,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 response["error-message"] = error_msg
                 return
 
-            response["result-data"] = future.result.data
+            self._upgrade_obj = future.result.data
+            response["result-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2365,6 +2373,11 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         finally:
             callback.send(response)
             callback.close()
+
+    def reset_upgrade_object(self):
+        """Reset the upgrade object."""
+
+        self._upgrade_obj = None
 
     def sw_deploy_precheck(self, future, release, force, snapshot, callback):
         """Precheck a USM software deploy."""
@@ -2403,13 +2416,39 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 return
 
             # System healthy needs to be checked for each metapackage in the release
-            precheck_data = all(
+            system_health_data = all(
                 metapackage_data["system_healthy"]
                 for metapackage_data in future.result.data["additional_data"].values()
             )
+            precheck_data = future.result.data
 
-            response["complete-data"] = future.result.data
-            response["result-data"] = precheck_data
+            response["complete-data"] = precheck_data
+            response["result-data"] = system_health_data
+
+            # Update the local upgrade object so that it has the correct release
+            # information. In metapackages or empty/unspecified release deployments, the
+            # data can only be retrieved initially through precheck's request
+            future.work(
+                usm.sw_deploy_get_upgrade_obj,
+                self._platform_token,
+                release,
+                self._upgrade_obj,
+                precheck_data,
+            )
+            future.result = yield
+
+            if not future.result.is_complete():
+                error_msg = (
+                    "Could not obtain deployment information from USM, "
+                    "check /var/log/nfv-vim.log or /var/log/software.log "
+                    "for more information."
+                )
+                response["error-message"] = error_msg
+                return
+
+            self._upgrade_obj = future.result.data
+            # Handle this later on
+            response["upgrade-object-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2487,7 +2526,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             response["complete-data"] = future.result.data
 
-            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
+            future.work(
+                usm.sw_deploy_get_upgrade_obj,
+                self._platform_token,
+                release,
+                self._upgrade_obj,
+            )
             future.result = yield
 
             if not future.result.is_complete():
@@ -2499,7 +2543,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 response["error-message"] = error_msg
                 return
 
-            response["result-data"] = future.result.data
+            self._upgrade_obj = future.result.data
+            response["result-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2570,7 +2615,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             response["complete-data"] = future.result.data
 
-            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
+            future.work(
+                usm.sw_deploy_get_upgrade_obj,
+                self._platform_token,
+                release,
+                self._upgrade_obj,
+            )
             future.result = yield
 
             if not future.result.is_complete():
@@ -2582,7 +2632,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 response["error-message"] = error_msg
                 return
 
-            response["result-data"] = future.result.data
+            self._upgrade_obj = future.result.data
+            response["result-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2652,7 +2703,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             response["complete-data"] = future.result.data
 
-            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
+            future.work(
+                usm.sw_deploy_get_upgrade_obj,
+                self._platform_token,
+                release,
+                self._upgrade_obj,
+            )
             future.result = yield
 
             if not future.result.is_complete():
@@ -2664,7 +2720,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 response["error-message"] = error_msg
                 return
 
-            response["result-data"] = future.result.data
+            self._upgrade_obj = future.result.data
+            response["result-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2739,7 +2796,10 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             # information after deletion
             if release is not None:
                 future.work(
-                    usm.sw_deploy_get_upgrade_obj, self._platform_token, release
+                    usm.sw_deploy_get_upgrade_obj,
+                    self._platform_token,
+                    release,
+                    self._upgrade_obj,
                 )
                 future.result = yield
 
@@ -2752,7 +2812,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                     response["error-message"] = error_msg
                     return
 
-                response["result-data"] = future.result.data
+                self._upgrade_obj = future.result.data
+                response["result-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2823,7 +2884,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             response["complete-data"] = future.result.data
 
-            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, None)
+            future.work(
+                usm.sw_deploy_get_upgrade_obj,
+                self._platform_token,
+                None,
+                self._upgrade_obj,
+            )
             future.result = yield
 
             if not future.result.is_complete():
@@ -2835,7 +2901,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 response["error-message"] = error_msg
                 return
 
-            response["result-data"] = future.result.data
+            self._upgrade_obj = future.result.data
+            response["result-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
@@ -2906,7 +2973,12 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             response["complete-data"] = future.result.data
 
-            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, None)
+            future.work(
+                usm.sw_deploy_get_upgrade_obj,
+                self._platform_token,
+                None,
+                self._upgrade_obj,
+            )
             future.result = yield
 
             if not future.result.is_complete():
@@ -2918,7 +2990,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 response["error-message"] = error_msg
                 return
 
-            response["result-data"] = future.result.data
+            self._upgrade_obj = future.result.data
+            response["result-data"] = self._upgrade_obj
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:

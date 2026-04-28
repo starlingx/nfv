@@ -8,7 +8,6 @@ from unittest import mock
 import uuid
 
 from nfv_common import strategy as common_strategy
-from nfv_plugins.nfvi_plugins.openstack.usm import is_target_release_downgrade
 from nfv_unit_tests.tests import sw_update_testcase
 from nfv_vim import nfvi
 from nfv_vim.nfvi.objects.v1 import KUBE_UPGRADE_STATE
@@ -29,6 +28,11 @@ MAJOR_RELEASE_UPGRADE = "4.0.1"
 # Kubernetes version constants reused across combined strategy tests
 _COMBINED_FROM_KUBE = "v1.29.2"
 _COMBINED_TO_KUBE = "v1.30.6"
+
+# The release-id and metapackages are not used in these test cases, because they were
+# created before the componentization feature. Nevertheless, the upgrade object still
+# requires a value for them.
+MOCK_METAPACKAGES = ["distcloud", "k8s"]
 
 # A minimal kube versions list: FROM is active, TO is available.
 # Used to satisfy _build_kube_upgrade_stages version chain lookups.
@@ -80,6 +84,7 @@ def _make_nfvi_upgrade(release, state="available", reboot_required=True):
     """Helper: build an nfvi.objects.v1.Upgrade for combined strategy tests."""
     return nfvi.objects.v1.Upgrade(
         release,
+        MOCK_METAPACKAGES,
         {
             "state": state,
             "reboot_required": reboot_required,
@@ -360,6 +365,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -408,6 +414,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -453,6 +460,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -499,6 +507,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": True,
@@ -550,6 +559,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -600,6 +610,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -647,6 +658,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -695,6 +707,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": True,
@@ -1165,6 +1178,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "13.01",
+                MOCK_METAPACKAGES,
                 {
                     "state": "deploying",
                     "reboot_required": False,
@@ -1197,6 +1211,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "13.01",
+                MOCK_METAPACKAGES,
                 {
                     "state": "removing",
                     "reboot_required": False,
@@ -1229,6 +1244,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "13.01",
+                MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
                 None,
@@ -1259,6 +1275,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "13.01",
+                MOCK_METAPACKAGES,
                 {"state": "deployed"},
                 None,
                 None,
@@ -1289,6 +1306,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "13.01",
+                MOCK_METAPACKAGES,
                 {
                     "state": "deployed",
                     "downgrade": True,
@@ -1322,6 +1340,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "13.01",
+                MOCK_METAPACKAGES,
                 {
                     "state": "commited",
                     "downgrade": True,
@@ -1354,10 +1373,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
-                None,
-                None,
-                None,
+                "13.01", MOCK_METAPACKAGES, None, None, None
             )
         )
 
@@ -1383,6 +1399,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "13.01",
+                MOCK_METAPACKAGES,
                 {"state": "unavailable"},
                 None,
                 None,
@@ -1416,6 +1433,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -1482,6 +1500,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": True,
@@ -1557,6 +1576,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -1639,6 +1659,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": True,
@@ -1741,6 +1762,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -1839,6 +1861,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": True,
@@ -1977,6 +2000,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": True,
@@ -2117,6 +2141,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2208,6 +2233,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2299,6 +2325,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2390,6 +2417,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2460,6 +2488,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2557,6 +2586,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2627,6 +2657,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2718,6 +2749,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2794,6 +2826,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2870,6 +2903,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -2963,6 +2997,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "888.8",
+                MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
                 None,
@@ -3017,6 +3052,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "888.8",
+                MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 None,
                 None,
@@ -3078,6 +3114,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "888.8",
+                MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
                 None,
@@ -3137,6 +3174,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 "888.8",
+                MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
                 None,
@@ -3207,7 +3245,12 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         return step
 
     def _create_response(
-        self, completed, result_data, complete_data, error_message=None
+        self,
+        completed,
+        result_data,
+        complete_data,
+        error_message=None,
+        upgrade_object_data=None,
     ):
         response = {
             "completed": completed,
@@ -3218,6 +3261,11 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         if error_message:
             response["error-message"] = error_message
 
+        # On the success path the precheck callback stores the upgrade object
+        # built by USM from the precheck data into the strategy.
+        if upgrade_object_data:
+            response["upgrade-object-data"] = upgrade_object_data
+
         return response
 
     def _assert_response(
@@ -3225,19 +3273,33 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         step,
         expected_result=common_strategy.STRATEGY_STEP_RESULT.SUCCESS,
         expected_reason=None,
+        error_response=None,
     ):
         result, reason = step.stage.step_complete.call_args[0]
 
         self.assertEqual(result, expected_result)
         self.assertEqual(reason, expected_reason)
 
+        # No failure response should be reported on the success path.
+        if expected_result == common_strategy.STRATEGY_STEP_RESULT.SUCCESS:
+            step.phase.result_complete_response.assert_not_called()
+        else:
+            step.phase.result_complete_response.assert_called_once_with(error_response)
+
     def test_sw_deploy_precheck_callback_success(self):
         """Callback succeeds when completed=True and result-data=True"""
 
         step = self._create_precheck_step()
-        response = self._create_response(True, True, {"info": "all healthy"})
+        upgrade_obj = nfvi.objects.v1.Upgrade(
+            "13.0", MOCK_METAPACKAGES, None, None, None
+        )
+        response = self._create_response(
+            True, True, {"info": "all healthy"}, upgrade_object_data=upgrade_obj
+        )
         self._send_precheck_callback(step, response)
 
+        # The callback stores the upgrade object returned by USM precheck.
+        self.assertEqual(step.strategy.nfvi_upgrade, upgrade_obj)
         self._assert_response(step, expected_reason=response["complete-data"]["info"])
 
     def test_sw_deploy_precheck_callback_fails_when_result_data_is_false(self):
@@ -3248,7 +3310,10 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         self._send_precheck_callback(step, response)
 
         self._assert_response(
-            step, common_strategy.STRATEGY_STEP_RESULT.FAILED, response["error-message"]
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            response["error-message"],
+            response,
         )
 
     def test_sw_deploy_precheck_callback_fails_when_not_completed(self):
@@ -3259,7 +3324,10 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         self._send_precheck_callback(step, response)
 
         self._assert_response(
-            step, common_strategy.STRATEGY_STEP_RESULT.FAILED, response["error-message"]
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            response["error-message"],
+            response,
         )
 
     def test_sw_deploy_precheck_callback_returns_unhealthy_metapackage_message(self):
@@ -3273,6 +3341,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             step,
             common_strategy.STRATEGY_STEP_RESULT.FAILED,
             "One or more metapackages are not healthy",
+            response,
         )
 
     def test_sw_deploy_precheck_callback_fails_with_default_message_when_not_completed(
@@ -3289,6 +3358,124 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             common_strategy.STRATEGY_STEP_RESULT.FAILED,
             "Unknown error while trying software deploy precheck, check "
             "/var/log/nfv-vim.log or /var/log/software.log for more information.",
+            response,
+        )
+
+    def _send_deploy_delete_callback(self, step, response):
+        """Run the SwDeployDeleteStep coroutine with the given response"""
+
+        callback = step._deploy_delete_callback()
+
+        try:
+            callback.send(response)
+        except StopIteration:
+            pass
+
+    def _create_deploy_delete_step(self):
+        from nfv_vim.strategy._strategy_steps import SwDeployDeleteStep
+
+        step = SwDeployDeleteStep(release="12.0")
+        step.stage = mock.MagicMock()
+        return step
+
+    def test_sw_deploy_delete_callback_success(self):
+        """Callback succeeds when completed=True and no error is reported"""
+
+        step = self._create_deploy_delete_step()
+        response = self._create_response(
+            True, {}, {"info": "Deploy deleted with success"}
+        )
+        self._send_deploy_delete_callback(step, response)
+
+        self.assertNotIn("error", response["complete-data"])
+        self._assert_response(step, expected_reason="Deploy deleted with success")
+
+    def test_sw_deploy_delete_callback_success_strips_info(self):
+        """Callback strips surrounding whitespace from the success info message"""
+
+        step = self._create_deploy_delete_step()
+        response = self._create_response(
+            True, None, {"info": "  Deploy deleted with success  ", "error": ""}
+        )
+        self._send_deploy_delete_callback(step, response)
+
+        self._assert_response(step, expected_reason="Deploy deleted with success")
+
+    def test_sw_deploy_delete_callback_success_when_error_is_empty(self):
+        """Callback succeeds when the error field is present but empty"""
+
+        step = self._create_deploy_delete_step()
+        response = self._create_response(
+            True, None, {"info": "Deploy deleted with success", "error": ""}
+        )
+        self._send_deploy_delete_callback(step, response)
+
+        self._assert_response(step, expected_reason="Deploy deleted with success")
+
+    def test_sw_deploy_delete_callback_fails_when_completed_with_error(self):
+        """Callback fails when completed=True but an error is reported.
+
+        The failure reason must be the raw error value from complete-data and the
+        full response must be forwarded to result_complete_response.
+        """
+
+        step = self._create_deploy_delete_step()
+        response = self._create_response(
+            True, None, {"info": "", "error": "Deploy delete failed"}
+        )
+        self._send_deploy_delete_callback(step, response)
+
+        self._assert_response(
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Deploy delete failed",
+            response,
+        )
+
+    def test_sw_deploy_delete_callback_error_strips_reason(self):
+        """Callback strips surrounding whitespace from the error message"""
+
+        step = self._create_deploy_delete_step()
+        response = self._create_response(
+            True, None, {"error": "  Deploy delete failed  "}
+        )
+        self._send_deploy_delete_callback(step, response)
+
+        self._assert_response(
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Deploy delete failed",
+            response,
+        )
+
+    def test_sw_deploy_delete_callback_fails_when_not_completed(self):
+        """Callback fails with the error-message when completed=False"""
+
+        step = self._create_deploy_delete_step()
+        response = self._create_response(False, None, {}, "Delete timed out")
+        self._send_deploy_delete_callback(step, response)
+
+        self._assert_response(
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Delete timed out",
+            response,
+        )
+
+    def test_sw_deploy_delete_callback_fails_with_default_message(self):
+        """Callback returns the default message when completed=False and no error"""
+
+        step = self._create_deploy_delete_step()
+        response = self._create_response(False, None, {})
+        self._send_deploy_delete_callback(step, response)
+
+        self._assert_response(
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Unknown error while trying software deploy delete, "
+            "check /var/log/nfv-vim.log or /var/log/software.log "
+            "for more information.",
+            response,
         )
 
     def test_sw_deploy_strategy_aiodx_rollback_host_rollback_deployed_unlocked_pending(
@@ -3311,6 +3498,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -3414,6 +3602,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -3489,6 +3678,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -3594,6 +3784,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -3685,6 +3876,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -3776,6 +3968,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             delete=False,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "release_id": MAJOR_RELEASE_UPGRADE,
                     "state": "deploying",
@@ -3865,6 +4058,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "available",
                     "reboot_required": False,
@@ -3916,636 +4110,6 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - We should be able to upgrade to a deployed release
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "available",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "available",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert upgrade
-        assert not downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade_rr(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - We should be able to upgrade to a deployed release
-        - RR
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "available",  # Target
-                "reboot_required": True,
-            },
-            {
-                "state": "available",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert upgrade
-        assert not downgrade
-        assert vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade_multiple(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - We should be able to upgrade to a deployed release
-        - Upgrade multiple releases at once
-        Verify:
-        - Pass.
-        """
-
-        index = 2
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "available",
-                "reboot_required": False,
-            },
-            {
-                "state": "available",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "available",
-                "reboot_required": True,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert upgrade
-        assert not downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade_multiple_rr_first(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - We should be able to upgrade to a deployed release
-        - Upgrade multiple releases at once
-        - RR on the oldest release
-        Verify:
-        - Pass.
-        """
-
-        index = 2
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "available",
-                "reboot_required": True,
-            },
-            {
-                "state": "available",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "available",
-                "reboot_required": True,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert upgrade
-        assert not downgrade
-        assert vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade_multiple_rr_second(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - We should be able to upgrade to a deployed release
-        - Upgrade multiple releases at once
-        - RR on the most recent release
-        Verify:
-        - Pass.
-        """
-
-        index = 2
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "available",
-                "reboot_required": False,
-            },
-            {
-                "state": "available",  # Target
-                "reboot_required": True,
-            },
-            {
-                "state": "available",
-                "reboot_required": True,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert upgrade
-        assert not downgrade
-        assert vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade_deploying_complex(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - We should be able to upgrade to a deployed release
-        - Upgrade multiple releases at once
-        - RR on the most recent release
-        Verify:
-        - Pass.
-        """
-
-        index = 4
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-            {
-                "state": "deploying",
-                "reboot_required": False,
-            },
-            {
-                "state": "deploying",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "available",
-                "reboot_required": True,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert upgrade
-        assert not downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade_not_required(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - Nothing to upgrade
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "available",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_upgrade_reenter(self):
-        """Test the sw_deploy strategy upgrade logic:
-
-        - Nothing to upgrade
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deploying",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "available",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert upgrade
-        assert not downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_rr(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - RR
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_multiple(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - Downgrade multiple releases at once
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_RR_invalid_release(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - Downgrade multiple releases at once
-        - Invalid release uploaded and is in 'available' statei with RR.
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-            {
-                "state": "deployed",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "available",  # Invalid Release
-                "reboot_required": True,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_NRR_invalid_release(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - Downgrade multiple releases at once
-        - Invalid release uploaded and is in 'available' state with NRR.
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-            {
-                "state": "deployed",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "available",  # Invalid Release
-                "reboot_required": True,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_NRR_invalid_release_with_index2(
-        self,
-    ):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - Downgrade multiple releases at once
-        - Invalid release uploaded and is in 'available' state with NRR.
-        Verify:
-        - Pass.
-        """
-
-        index = 2
-        release_data = [
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "available",  # Invalid Release
-                "reboot_required": True,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_multiple_rr_first(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - Downgrade multiple releases at once
-        - RR on the oldest release
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_multiple_rr_second(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - Downgrade multiple releases at once
-        - RR on the most recent release
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "deployed",
-                "reboot_required": False,
-            },
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_removing_complex(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - We should be able to downgrade to a deployed release
-        - Downgrade multiple releases at once
-        - RR on the most recent release
-        Verify:
-        - Pass.
-        """
-
-        index = 3
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",
-            },
-            {
-                "state": "deployed",
-                "reboot_required": True,
-            },
-            {
-                "state": "removing",  # Target
-                "reboot_required": False,
-            },
-            {
-                "state": "removing",
-                "reboot_required": False,
-            },
-            {
-                "state": "available",
-                "reboot_required": True,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_not_required(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - Nothing to downgrade
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "available",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
-
-    def test_sw_deploy_strategy_aiosx_is_downgrade_reenter(self):
-        """Test the sw_deploy strategy downgrade logic:
-
-        - Nothing to downgrade
-        Verify:
-        - Pass.
-        """
-
-        index = 1
-        release_data = [
-            {
-                "state": "unavailable",
-            },
-            {
-                "state": "deployed",  # Target
-            },
-            {
-                "state": "removing",
-                "reboot_required": False,
-            },
-        ]
-
-        upgrade, downgrade, vim_rr = is_target_release_downgrade(index, release_data)
-        assert not upgrade
-        assert downgrade
-        assert not vim_rr
 
     def test_sw_upgrade_strategy_kube_version_normalization(self):
         """Test that kube_upgrade_version without 'v' prefix gets 'v' prepended.
@@ -4670,6 +4234,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             kube_upgrade_version="v1.29.0",
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
                 release,
+                MOCK_METAPACKAGES,
                 {
                     "state": "deploying",
                     "reboot_required": True,

@@ -90,7 +90,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         max_parallel_worker_hosts=10,
         alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
         default_instance_action=SW_UPDATE_INSTANCE_ACTION.MIGRATE,
-        release="starlingx-24.03.1",
+        release=None,
         rollback=False,
         delete=False,
         cleanup=False,
@@ -100,6 +100,9 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         single_controller=False,
     ):
         """Create a software update strategy."""
+
+        if release is None:
+            release = ["starlingx-24.03.1"]
 
         strategy = SwUpgradeStrategy(
             uuid=str(uuid.uuid4()),
@@ -122,6 +125,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         if nfvi_upgrade is True:
             nfvi_upgrade = nfvi.objects.v1.Upgrade(
                 release,
+                ["distcloud", "k8s"],
                 {
                     "state": "available",
                     "reboot_required": True,

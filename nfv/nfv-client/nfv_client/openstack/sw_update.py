@@ -66,6 +66,8 @@ class Strategy:
     uuid = None
     name = None
     release = None
+    release_id = None
+    metapackages = None
     kube_version = None
     controller_apply_type = None
     storage_apply_type = None
@@ -158,8 +160,17 @@ def _get_strategy_object_from_response(response):
     strategy.uuid = strategy_data["uuid"]
     strategy.name = strategy_data["name"]
     if strategy.name == sw_update.STRATEGY_NAME_SW_UPGRADE:
-        strategy.release = strategy_data["release"]
         strategy.kube_version = strategy_data.get("kube-version")
+
+        # When the release information has not been fully retrieved yet,
+        # only display the release parameter the user sent. Otherwise,
+        # display release-id and metapackage data.
+        if strategy_data.get("release-id") and strategy_data.get("metapackages"):
+            strategy.release_id = strategy_data["release-id"]
+            strategy.metapackages = strategy_data["metapackages"]
+        else:
+            strategy.release = strategy_data["release"]
+
     strategy.controller_apply_type = strategy_data["controller-apply-type"]
     strategy.storage_apply_type = strategy_data["storage-apply-type"]
     strategy.swift_apply_type = strategy_data["swift-apply-type"]

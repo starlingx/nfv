@@ -26,3 +26,9 @@ class NFVIInfrastructurePlugin(NFVIPlugin):
             NFVIInfrastructurePlugin._plugin_type,
             scheduler,
         )
+
+    def reset_upgrade_object(self):
+        """Reset the cached upgrade object held by the plugin."""
+
+        if self._plugin is not None:
+            self._plugin.obj.reset_upgrade_object()

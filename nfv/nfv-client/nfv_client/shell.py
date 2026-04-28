@@ -53,9 +53,7 @@ def get_extra_create_args(cmd_area, args):
     if sw_update.CMD_NAME_SW_DEPLOY == cmd_area:
         # We can't use mutual exclusion for release and rollback because
         # release is a positional arg.
-        if args.release is None and not (args.rollback or args.cleanup):
-            raise ValueError("Must set release or either --rollback or --cleanup")
-        elif args.release is not None and args.rollback:
+        if args.release and args.rollback:
             raise ValueError("Cannot set both --rollback and release")
         elif args.rollback and args.delete:
             raise ValueError("Cannot set both --rollback and --delete")
@@ -486,7 +484,7 @@ def setup_sw_deploy_parser(commands):
 
     # sw-deploy create (upgrade)
     create_strategy_cmd.add_argument(
-        "release", help="software release for deployment", default=None, nargs="?"
+        "release", help="software release for deployment", default=None, nargs="*"
     )
 
     # sw-deploy create (rollback)
