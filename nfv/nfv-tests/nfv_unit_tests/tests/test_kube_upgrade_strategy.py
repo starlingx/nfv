@@ -26,6 +26,7 @@ MID1_KUBE_VERSION = 'v1.30.6'
 MID2_KUBE_VERSION = 'v1.31.5'
 MID3_KUBE_VERSION = 'v1.32.2'
 HIGH_KUBE_VERSION = 'v1.33.0'
+PATCH_KUBE_VERSION = 'v1.30.11'
 MAJOR1_KUBE_VERSION = 'v2.0.0'
 MAJOR2_KUBE_VERSION = 'v2.1.1'
 DEFAULT_TO_VERSION = MID1_KUBE_VERSION
@@ -1574,3 +1575,88 @@ class TestStandardTwoWorkerTwoStorage(
         self.aio_controller_list = []
         self.worker_list = [['compute-0'], ['compute-1']]
         self.storage_list = [['storage-0'], ['storage-1']]
+
+
+class SimplexMultiPatchKubeUpgradeMixin(object):
+    """Mixin with multiple patch versions for the same minor (v1.30).
+    The strategy should filter to only the highest patch per minor.
+    """
+    FAKE_KUBE_HOST_UPGRADES_LIST = []
+
+    FAKE_KUBE_VERSIONS_LIST = [
+        KubeVersion(
+            FROM_KUBE_VERSION,  # v1.29.2
+            'active',
+            True,
+            [],
+            [],
+            [],
+            []
+        ),
+        KubeVersion(
+            MID1_KUBE_VERSION,  # v1.30.6
+            'available',
+            False,
+            [FROM_KUBE_VERSION],
+            [],
+            [],
+            []
+        ),
+        KubeVersion(
+            PATCH_KUBE_VERSION,  # v1.30.11
+            'available',
+            False,
+            [MID1_KUBE_VERSION],
+            [],
+            [],
+            []
+        ),
+    ]
+
+    def setUp(self):
+        super(SimplexMultiPatchKubeUpgradeMixin, self).setUp()
+
+    def is_simplex(self):
+        return True
+
+    def is_duplex(self):
+        return False
+
+
+class MultiPatchApplyStageMixin(ApplyStageMixin):
+    """Strategy should skip v1.30.6 and only use v1.30.11 (highest patch
+    for minor v1.30) for control plane and kubelet stages.
+    """
+    default_from_version = FROM_KUBE_VERSION
+    default_to_version = PATCH_KUBE_VERSION
+    # Only the highest patch per minor should appear
+    kube_versions = [PATCH_KUBE_VERSION, ]
+    kubelet_versions = [PATCH_KUBE_VERSION, ]
+
+    def setUp(self):
+        super(MultiPatchApplyStageMixin, self).setUp()
+
+
+@mock.patch('nfv_vim.event_log._instance._event_issue',
+            sw_update_testcase.fake_event_issue)
+@mock.patch('nfv_vim.objects._sw_update.SwUpdate.save',
+            sw_update_testcase.fake_save)
+@mock.patch('nfv_vim.objects._sw_update.timers.timers_create_timer',
+            sw_update_testcase.fake_timer)
+@mock.patch('nfv_vim.nfvi.nfvi_compute_plugin_disabled',
+            sw_update_testcase.fake_nfvi_compute_plugin_disabled)
+class TestSimplexMultiPatchApplyStrategy(
+        sw_update_testcase.SwUpdateStrategyTestCase,
+        MultiPatchApplyStageMixin,
+        SimplexMultiPatchKubeUpgradeMixin):
+    """Test that when multiple patch versions exist for the same minor,
+    only the highest patch version is used in upgrade stages.
+    """
+
+    def setUp(self):
+        super(TestSimplexMultiPatchApplyStrategy, self).setUp()
+        self.create_host('controller-0', aio=True)
+        self.std_controller_list = []
+        self.aio_controller_list = ['controller-0']
+        self.worker_list = []
+        self.storage_list = []

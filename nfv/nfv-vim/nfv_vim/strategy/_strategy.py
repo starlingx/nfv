@@ -7,6 +7,8 @@ import copy
 import functools
 import weakref
 
+from distutils.version import LooseVersion
+
 from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -23,6 +25,20 @@ from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 
 DLOG = debug.debug_get_logger('nfv_vim.strategy')
+
+
+def filter_highest_patch_versions(ver_list):
+    """Filter a list of strings with major.minor.patch and return a
+    list containing the highest patch version for each major.minor.
+    """
+    if not ver_list:
+        return []
+    ver_dict = {}
+    for v in ver_list:
+        key = tuple(LooseVersion(v).version[1:3])  # skip 'v', take major.minor
+        if key not in ver_dict or LooseVersion(v) > LooseVersion(ver_dict[key]):
+            ver_dict[key] = v
+    return sorted(ver_dict.values(), key=LooseVersion)
 
 
 class StrategyNames(Constants, metaclass=Singleton):
@@ -3757,7 +3773,6 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         #   - second control plane
         #   - kubelets: if exceeded skew, or last version
         # -------------------------
-        from distutils.version import LooseVersion
         from nfv_vim import strategy
 
         first_host = self.get_first_host()
@@ -3767,6 +3782,11 @@ class KubeUpgradeStrategy(SwUpdateStrategy,
         kubeadm_map = self._kubeadm_map()
         kubelet_map = self._kubelet_map()
         kubelet_min_version = min(kubelet_map.values(), key=LooseVersion, default=None)
+
+        # Use the highest patch version when multiple Kubernetes versions
+        # share the same major.minor. This filters out redundant Kubernetes
+        # versions (major.minor.patch).
+        ver_list = filter_highest_patch_versions(ver_list)
 
         # convert the kube_list into a dictionary indexed by version
         kube_dict = {}
