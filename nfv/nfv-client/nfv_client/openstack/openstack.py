@@ -41,7 +41,7 @@ def get_token(auth_uri, project_name, project_domain_name, username, password,
     try:
         # handle auth_uri re-direct (300)
         ssl_context = ssl.create_default_context(
-            ssl.Purpose.CLIENT_AUTH, cafile=CAFILE
+            ssl.Purpose.SERVER_AUTH, cafile=CAFILE
         )
         with urllib.request.urlopen(auth_uri, context=ssl_context):
             pass

@@ -363,7 +363,7 @@ def _rest_api_request(token_id,
                     ca_file = get_system_ca_file()
                     if ca_file:
                         _ssl_context = ssl.create_default_context(
-                            ssl.Purpose.CLIENT_AUTH,
+                            ssl.Purpose.SERVER_AUTH,
                             cafile=ca_file
                         )
                 ssl_context = _ssl_context
