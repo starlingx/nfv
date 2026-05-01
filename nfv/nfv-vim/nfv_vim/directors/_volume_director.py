@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common import debug
 
@@ -21,8 +20,7 @@ DLOG = debug.debug_get_logger('nfv_vim.volume_director')
 _volume_director = None
 
 
-@six.add_metaclass(Singleton)
-class OperationTypes(Constants):
+class OperationTypes(Constants, metaclass=Singleton):
     """
     Operation - Type Constants
     """
@@ -31,8 +29,7 @@ class OperationTypes(Constants):
     VOLUME_DELETE = Constant('volume-delete')
 
 
-@six.add_metaclass(Singleton)
-class OperationStates(Constants):
+class OperationStates(Constants, metaclass=Singleton):
     """
     Operation - State Constants
     """
@@ -48,8 +45,7 @@ OPERATION_TYPE = OperationTypes()
 OPERATION_STATE = OperationStates()
 
 
-@six.add_metaclass(Singleton)
-class VolumeDirector(object):
+class VolumeDirector(object, metaclass=Singleton):
     """
     Volume Director
     """

@@ -1,11 +1,11 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
 import config
-from six.moves import http_client as httplib
+import http.client as httplib
 import socket
 import time
 
@@ -441,7 +441,7 @@ def do_unit_tests(test_set=None, rest_api_debug=False, test_config=None):
     """
     if rest_api_debug:
         # Enable debugging of request and response headers for rest-api calls
-        from six.moves import urllib
+        import urllib.request
         handler = urllib.request.HTTPHandler(debuglevel=1)
         opener = urllib.request.build_opener(handler)
         urllib.request.install_opener(opener)

@@ -12,7 +12,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+#
+# Copyright (c) 2026 Wind River Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 """
 Common Policy Engine Implementation
 
@@ -56,9 +60,8 @@ as it allows particular rules to be explicitly disabled.
 
 import abc
 import re
-import six
-from six.moves.urllib.parse import urlencode
-from six.moves.urllib.request import urlopen
+from urllib.parse import urlencode
+from urllib.request import urlopen
 
 from oslo_log import log as logging
 from oslo_serialization import jsonutils
@@ -184,8 +187,7 @@ def check(rule, target, creds, exc=None, *args, **kwargs):  # pylint: disable=ke
     return result
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseCheck(object):
+class BaseCheck(object, metaclass=abc.ABCMeta):
     """
     Abstract base class for Check classes.
     """
@@ -422,7 +424,7 @@ def _parse_list_rule(rule):
             continue
 
         # Handle bare strings
-        if isinstance(inner_rule, six.string_types):
+        if isinstance(inner_rule, str):
             inner_rule = [inner_rule]
 
         # Parse the inner rules into Check objects
@@ -543,8 +545,7 @@ def reducer(*tokens):
     return decorator
 
 
-@six.add_metaclass(ParseStateMeta)
-class ParseState(object):
+class ParseState(object, metaclass=ParseStateMeta):
     """
     Implement the core of parsing the policy language.  Uses a greedy
     reduction algorithm to reduce a sequence of tokens into a single
@@ -686,7 +687,7 @@ def parse_rule(rule):
     """
 
     # If the rule is a string, it's in the policy language
-    if isinstance(rule, six.string_types):
+    if isinstance(rule, str):
         return _parse_text_rule(rule)
     return _parse_list_rule(rule)
 
@@ -773,5 +774,5 @@ class GenericCheck(Check):
         # TODO(termie): do dict inspection via dot syntax
         match = self.match % target
         if self.kind in creds:
-            return match == six.text_type(creds[self.kind])
+            return match == str(creds[self.kind])
         return False

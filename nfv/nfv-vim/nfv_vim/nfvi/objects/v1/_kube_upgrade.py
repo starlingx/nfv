@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -12,8 +11,7 @@ from nfv_common.helpers import Singleton
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
-@six.add_metaclass(Singleton)
-class KubeHostUpgradeState(Constants):
+class KubeHostUpgradeState(Constants, metaclass=Singleton):
     """
     Kube Host Upgrade State Constants
     These values are copied from sysinv/common/kubernetes.py
@@ -29,8 +27,7 @@ class KubeHostUpgradeState(Constants):
 KUBE_HOST_UPGRADE_STATE = KubeHostUpgradeState()
 
 
-@six.add_metaclass(Singleton)
-class KubeUpgradeState(Constants):
+class KubeUpgradeState(Constants, metaclass=Singleton):
     """
     Kube Upgrade State Constants
     These values are copied from sysinv/common/kubernetes.py

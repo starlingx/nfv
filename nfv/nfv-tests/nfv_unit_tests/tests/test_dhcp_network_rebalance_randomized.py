@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -160,20 +160,21 @@ def add_to_fake_host_table(host_name):
     _fake_host_table[host_name] = _fake_host(host_name + "_uuid")
 
 
-@mock.patch('nfv_vim.network_rebalance._dhcp_rebalance.DLOG',
-            dlog_local)
-@mock.patch('nfv_vim.nfvi.nfvi_remove_network_from_dhcp_agent',
-            fake_nfvi_remove_network_from_dhcp_agent)
-@mock.patch('nfv_vim.nfvi.nfvi_get_network_agents',
-            fake_nfvi_get_network_agents)
-@mock.patch('nfv_vim.nfvi.nfvi_get_datanetworks',
-            fake_nfvi_get_datanetworks)
-@mock.patch('nfv_vim.nfvi.nfvi_remove_network_from_dhcp_agent',
-            fake_nfvi_remove_network_from_dhcp_agent)
-@mock.patch('nfv_vim.nfvi.nfvi_add_network_to_dhcp_agent',
-            fake_nfvi_add_network_to_dhcp_agent)
-@mock.patch('nfv_vim.tables.tables_get_host_table',
-            fake_tables_get_host_table)
+@mock.patch("nfv_vim.network_rebalance._dhcp_rebalance.DLOG", dlog_local)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_remove_network_from_dhcp_agent",
+    fake_nfvi_remove_network_from_dhcp_agent,
+)
+@mock.patch("nfv_vim.nfvi.nfvi_get_network_agents", fake_nfvi_get_network_agents)
+@mock.patch("nfv_vim.nfvi.nfvi_get_datanetworks", fake_nfvi_get_datanetworks)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_remove_network_from_dhcp_agent",
+    fake_nfvi_remove_network_from_dhcp_agent,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_add_network_to_dhcp_agent", fake_nfvi_add_network_to_dhcp_agent
+)
+@mock.patch("nfv_vim.tables.tables_get_host_table", fake_tables_get_host_table)
 class TestNeutronDHCPRebalance(testcase.NFVTestCase):
 
     def setUp(self):

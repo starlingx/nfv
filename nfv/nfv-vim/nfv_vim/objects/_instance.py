@@ -1,11 +1,10 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import collections
 import datetime
-import six
 import uuid
 import weakref
 
@@ -31,8 +30,7 @@ DLOG = debug.debug_get_logger('nfv_vim.objects.instance')
 MAX_EVENT_REASON_LENGTH = 255
 
 
-@six.add_metaclass(Singleton)
-class InstanceActionType(Constants):
+class InstanceActionType(Constants, metaclass=Singleton):
     """
     Instance Action Type Constants
     """
@@ -186,8 +184,7 @@ class InstanceActionType(Constants):
             return InstanceActionType.UNKNOWN
 
 
-@six.add_metaclass(Singleton)
-class InstanceActionState(Constants):
+class InstanceActionState(Constants, metaclass=Singleton):
     """
     Instance Action State Constants
     """
@@ -206,8 +203,7 @@ class InstanceActionState(Constants):
     CANCELLED = Constant('cancelled')
 
 
-@six.add_metaclass(Singleton)
-class InstanceActionInitiatedBy(Constants):
+class InstanceActionInitiatedBy(Constants, metaclass=Singleton):
     """
     Instance Action Initiated-By Constants
     """
@@ -569,7 +565,7 @@ class InstanceActionFsm(object):
         """
         action_name = ""
         if self._action_fsm is not None:
-            action_name = next(k for k, v in six.iteritems(self._actions)
+            action_name = next(k for k, v in self._actions.items()
                                if self._action_fsm == v)
         return action_name
 
@@ -650,7 +646,7 @@ class InstanceActionFsm(object):
             DLOG.verbose("Starting action %r, action_data=%s."
                          % (action_fsm, action_data))
 
-            do_action_name = next(k for k, v in six.iteritems(self._actions)
+            do_action_name = next(k for k, v in self._actions.items()
                                   if action_fsm == v)
 
             self._instance.do_action_start(do_action_name, action_data,
@@ -683,7 +679,7 @@ class InstanceActionFsm(object):
                 DLOG.verbose("Restarting action %r, action_data=%s."
                              % (action_fsm, action_data))
 
-                do_action_name = next(k for k, v in six.iteritems(self._actions)
+                do_action_name = next(k for k, v in self._actions.items()
                                       if action_fsm == v)
 
                 self._instance.do_action_start(do_action_name, action_data,
@@ -724,7 +720,7 @@ class InstanceActionFsm(object):
                      % (prev_state, state))
 
         if instance_fsm.INSTANCE_STATE.INITIAL == str(state):
-            do_action_name = next(k for k, v in six.iteritems(self._actions)
+            do_action_name = next(k for k, v in self._actions.items()
                                   if self._action_fsm == v)
 
             self._instance.do_action_finished(do_action_name, self._action_data)

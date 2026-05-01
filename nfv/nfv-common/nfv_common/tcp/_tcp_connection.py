@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,7 +8,6 @@ import errno
 import hashlib
 import hmac
 import select
-import six
 import socket
 import struct
 
@@ -127,20 +126,14 @@ class TCPConnection(object):
         if self._socket is not None:
             if self._auth_key is None:
                 msg = struct.pack('!L', socket.htonl(len(payload)))
-                if six.PY3:
-                    msg += bytes(payload, 'utf-8')
-                else:
-                    msg += payload
+                msg += bytes(payload, 'utf-8')
             else:
                 auth_vector = hmac.new(self._auth_key, msg=payload,
                                        digestmod=hashlib.sha512).digest()
                 msg_len = len(auth_vector) + len(payload)
                 msg = struct.pack('!L', socket.htonl(msg_len))
                 msg += auth_vector[:self.AUTH_VECTOR_MAX_SIZE]
-                if six.PY3:
-                    msg += bytes(payload, 'utf-8')
-                else:
-                    msg += payload
+                msg += bytes(payload, 'utf-8')
 
             bytes_sent = self._socket.send(bytes(msg))
         return bytes_sent

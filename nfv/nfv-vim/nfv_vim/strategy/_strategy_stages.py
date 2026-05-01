@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -14,8 +13,7 @@ from nfv_common import strategy
 DLOG = debug.debug_get_logger('nfv_vim.strategy.stage')
 
 
-@six.add_metaclass(Singleton)
-class StrategyStageNames(Constants):
+class StrategyStageNames(Constants, metaclass=Singleton):
     """
     Strategy Stage Names
     """

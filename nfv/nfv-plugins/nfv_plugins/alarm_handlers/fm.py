@@ -1,12 +1,12 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from fm_api import constants as fm_constants
 from fm_api import fm_api
+import http.client as httplib
 import json
-from six.moves import http_client as httplib
 
 from nfv_common import debug
 

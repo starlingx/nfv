@@ -1,39 +1,42 @@
 #
 # Copyright (C) 2019 Intel Corporation
+# Copyright (c) 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import abc
-import six
 
 
-@six.add_metaclass(abc.ABCMeta)
-class NFVIFaultMgmtAPI(object):
+class NFVIFaultMgmtAPI(object, metaclass=abc.ABCMeta):
     """
     Abstract NFVI Fault Management API Class Definition
     """
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def name(self):
         """
         Returns the name of plugin
         """
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def version(self):
         """
         Returns the version of the plugin
         """
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def provider(self):
         """
         Returns the vendor who created the plugin
         """
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def signature(self):
         """
         Returns the signature of the plugin

@@ -6,8 +6,10 @@
 import json
 import os
 
-from six.moves import urllib
 import ssl
+import urllib.error
+import urllib.request
+
 
 from nfv_client.openstack.objects import Token
 

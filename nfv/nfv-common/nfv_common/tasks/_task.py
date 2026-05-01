@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import collections
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -16,8 +15,7 @@ from nfv_common.tasks._task_result import TaskResult
 DLOG = debug.debug_get_logger('nfv_common.tasks.task')
 
 
-@six.add_metaclass(Singleton)
-class TaskPriority(Constants):
+class TaskPriority(Constants, metaclass=Singleton):
     """
     Task Priority Constants
     """

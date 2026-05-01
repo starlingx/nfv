@@ -2,7 +2,7 @@
 #  mwa-chilon/sysinv/sysinv/sysinv/common/exception.py
 # Which has the following license statement:
 #
-# Copyright (c) 2013-2016 Wind River Systems, Inc.
+# Copyright (c) 2013-2016, 2026 Wind River Systems, Inc.
 # Copyright 2010 United States Government as represented by the
 # Administrator of the National Aeronautics and Space Administration.
 # All Rights Reserved.
@@ -20,8 +20,6 @@
 #    under the License.
 #
 #
-import six
-
 
 class ProxyException(Exception):
     """Base Exception
@@ -53,4 +51,4 @@ class ProxyException(Exception):
         if self.__class__.__name__.endswith('_Remote'):
             return self.args[0]
         else:
-            return six.text_type(self)
+            return str(self)

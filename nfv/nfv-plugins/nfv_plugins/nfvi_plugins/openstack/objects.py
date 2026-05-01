@@ -1,23 +1,22 @@
 #
-# Copyright (c) 2015-2024 Wind River Systems, Inc.
+# Copyright (c) 2015-2024, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import datetime
 import iso8601
 import re
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
+
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.objects')
 
 
-@six.add_metaclass(Singleton)
-class ServiceCategory(Constants):
+class ServiceCategory(Constants, metaclass=Singleton):
     """
     Service Category Constants
     """
@@ -29,8 +28,7 @@ class ServiceCategory(Constants):
 SERVICE_CATEGORY = ServiceCategory()
 
 
-@six.add_metaclass(Singleton)
-class PlatformServices(Constants):
+class PlatformServices(Constants, metaclass=Singleton):
     """
     Platform Services Constants
     """
@@ -47,8 +45,7 @@ class PlatformServices(Constants):
 PLATFORM_SERVICE = PlatformServices()
 
 
-@six.add_metaclass(Singleton)
-class OpenStackServices(Constants):
+class OpenStackServices(Constants, metaclass=Singleton):
     """
     OpenStack Services Constants
     """
@@ -317,7 +314,7 @@ class Token(object):
                 if endpoint is None:
                     endpoint = service_info.endpoint_override
                 else:
-                    from six.moves import urllib
+                    import urllib.parse
                     # this is necessary to keep tenant_id in place
                     endpoint = \
                         service_info.endpoint_override + urllib.parse.urlparse(endpoint).path

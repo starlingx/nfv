@@ -1,16 +1,14 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class StrategyResult(object):
+class StrategyResult(object, metaclass=Singleton):
     """
     Strategy Result - Constants
     """
@@ -25,8 +23,7 @@ class StrategyResult(object):
     ABORTED = Constant('aborted')
 
 
-@six.add_metaclass(Singleton)
-class StrategyPhaseResult(object):
+class StrategyPhaseResult(object, metaclass=Singleton):
     """
     Strategy Phase Result - Constants
     """
@@ -41,8 +38,7 @@ class StrategyPhaseResult(object):
     ABORTED = Constant('aborted')
 
 
-@six.add_metaclass(Singleton)
-class StrategyStageResult(object):
+class StrategyStageResult(object, metaclass=Singleton):
     """
     Strategy Stage Result - Constants
     """
@@ -57,8 +53,7 @@ class StrategyStageResult(object):
     ABORTED = Constant('aborted')
 
 
-@six.add_metaclass(Singleton)
-class StrategyStepResult(object):
+class StrategyStepResult(object, metaclass=Singleton):
     """
     Strategy Step Result - Constants
     """

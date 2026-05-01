@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -12,8 +11,7 @@ from nfv_common.helpers import Singleton
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
-@six.add_metaclass(Singleton)
-class HostAdministrativeState(Constants):
+class HostAdministrativeState(Constants, metaclass=Singleton):
     """
     Host Administrative State Constants
     """
@@ -22,8 +20,7 @@ class HostAdministrativeState(Constants):
     UNLOCKED = Constant('unlocked')
 
 
-@six.add_metaclass(Singleton)
-class HostOperationalState(Constants):
+class HostOperationalState(Constants, metaclass=Singleton):
     """
     Host Operational State Constants
     """
@@ -32,8 +29,7 @@ class HostOperationalState(Constants):
     DISABLED = Constant('disabled')
 
 
-@six.add_metaclass(Singleton)
-class HostAvailabilityStatus(Constants):
+class HostAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Host Availability Status Constants
     """
@@ -50,8 +46,7 @@ class HostAvailabilityStatus(Constants):
     FAILED_COMPONENT = Constant('failed (component)')
 
 
-@six.add_metaclass(Singleton)
-class HostAction(Constants):
+class HostAction(Constants, metaclass=Singleton):
     """
     Host Action Constants
     """
@@ -64,8 +59,7 @@ class HostAction(Constants):
     HOST_AUDIT = Constant('host-audit')
 
 
-@six.add_metaclass(Singleton)
-class HostNotifications(Constants):
+class HostNotifications(Constants, metaclass=Singleton):
     """
     Host Notification Constants
     """
@@ -73,8 +67,7 @@ class HostNotifications(Constants):
     BOOTING = Constant('booting')
 
 
-@six.add_metaclass(Singleton)
-class KubernetesLabelValues(Constants):
+class KubernetesLabelValues(Constants, metaclass=Singleton):
     """
     Host Kubernetes Label Value Constants
     """
@@ -82,8 +75,7 @@ class KubernetesLabelValues(Constants):
     DISABLED = Constant('disabled')
 
 
-@six.add_metaclass(Singleton)
-class KubernetesLabelKeys(Constants):
+class KubernetesLabelKeys(Constants, metaclass=Singleton):
     """
     Host Kubernetes Label Key Constants
     """

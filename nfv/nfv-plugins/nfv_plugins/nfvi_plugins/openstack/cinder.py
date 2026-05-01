@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -17,8 +16,7 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.cinder')
 
 
-@six.add_metaclass(Singleton)
-class VolumeStatus(Constants):
+class VolumeStatus(Constants, metaclass=Singleton):
     """
     VOLUME STATUS Constants
     """

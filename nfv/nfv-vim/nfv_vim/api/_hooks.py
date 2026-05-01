@@ -1,14 +1,14 @@
 #
-# Copyright (c) 2015-2016, 2022 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2022, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import http.client as httplib
 import pecan
 from pecan import hooks
 import re
-from six.moves import http_client as httplib
-from six.moves.urllib.parse import urlparse
 import time
+from urllib.parse import urlparse
 
 from nfv_common import config
 from nfv_common import debug

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018-2023 Wind River Systems, Inc.
+# Copyright (c) 2018-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -17,7 +17,7 @@ from kubernetes import config
 from nfv_common import debug
 from nfv_common.helpers import Result
 
-from six.moves import http_client as httplib
+import http.client as httplib
 import subprocess
 
 K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split('.', maxsplit=1)[0])

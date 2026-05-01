@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2025 Wind River Systems, Inc.
+# Copyright (c) 2016-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,8 +7,8 @@ import argparse
 import http.client as http_client
 import os
 import signal
-from six.moves import urllib
 import sys
+import urllib.request
 
 from nfv_client import sw_update
 

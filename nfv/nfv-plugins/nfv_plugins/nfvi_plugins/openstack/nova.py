@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -23,8 +22,7 @@ NOVA_API_VERSION = '2.53'
 NOVA_API_VERSION_NEWTON = '2.38'
 
 
-@six.add_metaclass(Singleton)
-class HypervisorState(Constants):
+class HypervisorState(Constants, metaclass=Singleton):
     """
     HYPERVISOR STATE Constants
     """
@@ -32,8 +30,7 @@ class HypervisorState(Constants):
     DOWN = Constant('down')
 
 
-@six.add_metaclass(Singleton)
-class HypervisorStatus(Constants):
+class HypervisorStatus(Constants, metaclass=Singleton):
     """
     HYPERVISOR STATUS Constants
     """
@@ -41,8 +38,7 @@ class HypervisorStatus(Constants):
     DISABLED = Constant('disabled')
 
 
-@six.add_metaclass(Singleton)
-class VmState(Constants):
+class VmState(Constants, metaclass=Singleton):
     """
     VM STATE Constants
     """
@@ -56,8 +52,7 @@ class VmState(Constants):
     ERROR = Constant('error')
 
 
-@six.add_metaclass(Singleton)
-class VmTaskState(Constants):
+class VmTaskState(Constants, metaclass=Singleton):
     """
     VM TASK-STATE Constants
     """
@@ -89,8 +84,7 @@ class VmTaskState(Constants):
     RESIZE_CONFIRMING = Constant('resize_confirming')
 
 
-@six.add_metaclass(Singleton)
-class VmTaskStatus(Constants):
+class VmTaskStatus(Constants, metaclass=Singleton):
     """
     VM TASK-STATUS Constants
     """
@@ -99,8 +93,7 @@ class VmTaskStatus(Constants):
     COMPLETE = Constant('complete')
 
 
-@six.add_metaclass(Singleton)
-class VmPowerState(Constants):
+class VmPowerState(Constants, metaclass=Singleton):
     """
     VM POWER-STATE Constants
     """
@@ -113,8 +106,7 @@ class VmPowerState(Constants):
     BUILDING = Constant(9)
 
 
-@six.add_metaclass(Singleton)
-class VmPowerStateStr(Constants):
+class VmPowerStateStr(Constants, metaclass=Singleton):
     """
     VM POWER-STATE String Constants
     """
@@ -127,8 +119,7 @@ class VmPowerStateStr(Constants):
     BUILDING = Constant('building')
 
 
-@six.add_metaclass(Singleton)
-class VmAction(Constants):
+class VmAction(Constants, metaclass=Singleton):
     """
     VM ACTION Constants
     """
@@ -147,8 +138,7 @@ class VmAction(Constants):
     STOP = Constant('os-stop')
 
 
-@six.add_metaclass(Singleton)
-class VmRebootType(Constants):
+class VmRebootType(Constants, metaclass=Singleton):
     """
     VM REBOOT TYPE Constants
     """
@@ -156,8 +146,7 @@ class VmRebootType(Constants):
     HARD = Constant('HARD')
 
 
-@six.add_metaclass(Singleton)
-class RPCMessageTypes(Constants):
+class RPCMessageTypes(Constants, metaclass=Singleton):
     """
     RPC Message Type Constants
     """

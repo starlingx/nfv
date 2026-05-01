@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2016-2023 Wind River Systems, Inc.
+# Copyright (c) 2016-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 import uuid
 
 from nfv_common import debug
@@ -22,8 +21,7 @@ from nfv_vim.objects._object import ObjectData
 DLOG = debug.debug_get_logger('nfv_vim.objects.sw_update')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateTypes(Constants):
+class SwUpdateTypes(Constants, metaclass=Singleton):
     """
     Software Update - Type Constants
     """
@@ -36,8 +34,7 @@ class SwUpdateTypes(Constants):
     CURRENT_STRATEGY = Constant('current-strategy')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateApplyTypes(Constants):
+class SwUpdateApplyTypes(Constants, metaclass=Singleton):
     """
     Software Update - Apply Type Constants
     """
@@ -46,8 +43,7 @@ class SwUpdateApplyTypes(Constants):
     IGNORE = Constant('ignore')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateInstanceActionTypes(Constants):
+class SwUpdateInstanceActionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Instance Action Type Constants
     """
@@ -55,8 +51,7 @@ class SwUpdateInstanceActionTypes(Constants):
     STOP_START = Constant('stop-start')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateAlarmRestrictionTypes(Constants):
+class SwUpdateAlarmRestrictionTypes(Constants, metaclass=Singleton):
     """
     Software Update - Alarm Restriction Type Constants
     """
@@ -65,8 +60,7 @@ class SwUpdateAlarmRestrictionTypes(Constants):
     PERMISSIVE = Constant('permissive')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateAlarmTypes(Constants):
+class SwUpdateAlarmTypes(Constants, metaclass=Singleton):
     """
     Software Update - Alarm and Event Type Constants
     """
@@ -75,8 +69,7 @@ class SwUpdateAlarmTypes(Constants):
     APPLY_FAILED = Constant('apply-failed')
 
 
-@six.add_metaclass(Singleton)
-class SwUpdateEventIds(Constants):
+class SwUpdateEventIds(Constants, metaclass=Singleton):
     """
     Software Update - Alarm and Event Type Constants
     """

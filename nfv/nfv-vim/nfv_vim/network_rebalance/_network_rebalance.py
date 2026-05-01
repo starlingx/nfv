@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -19,8 +18,7 @@ from nfv_vim import nfvi
 DLOG = debug.debug_get_logger('nfv_vim.l3_rebalance')
 
 
-@six.add_metaclass(Singleton)
-class AgentType(Constants):
+class AgentType(Constants, metaclass=Singleton):
     """
     AGENT TYPE Constants
     """
@@ -31,8 +29,7 @@ class AgentType(Constants):
 AGENT_TYPE = AgentType()
 
 
-@six.add_metaclass(Singleton)
-class L3RebalanceState(Constants):
+class L3RebalanceState(Constants, metaclass=Singleton):
     """
     L3 REBALANCE STATE Constants
     """
@@ -51,8 +48,7 @@ class L3RebalanceState(Constants):
 L3_REBALANCE_STATE = L3RebalanceState()
 
 
-@six.add_metaclass(Singleton)
-class L3AgentRebalance(object):
+class L3AgentRebalance(object, metaclass=Singleton):
     def __init__(self):
         # Our state.
         self.state = L3_REBALANCE_STATE.DONE

@@ -1,14 +1,13 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import six
 
 from fm_api import constants as fm_constants
 from fm_api import fm_api
-from six.moves import http_client as httplib
+import http.client as httplib
 
 from nfv_common import debug
 
@@ -491,7 +490,7 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
             fm_probable_cause = fm_constants.ALARM_PROBABLE_CAUSE_65
             fm_event_state = fm_constants.FM_ALARM_STATE_MSG
             fm_severity = _fm_event_importance_mapping[log_data.importance]
-            fm_reason_text = six.text_type(log_data.reason_text)
+            fm_reason_text = str(log_data.reason_text)
             format_log = fm_api.Fault(fm_event_id, fm_event_state,
                                  log_data.entity_type, log_data.entity,
                                  fm_severity, fm_reason_text, fm_event_type,

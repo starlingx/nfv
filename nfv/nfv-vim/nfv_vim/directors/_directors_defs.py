@@ -1,17 +1,15 @@
 #
-# Copyright (c) 2015-2021 Wind River Systems, Inc.
+# Copyright (c) 2015-2021, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class OperationTypes(Constants):
+class OperationTypes(Constants, metaclass=Singleton):
     """
     Operation - Type Constants
     """
@@ -37,8 +35,7 @@ class OperationTypes(Constants):
     ENABLE_HOST_SERVICES = Constant('enable-host-services')
 
 
-@six.add_metaclass(Singleton)
-class OperationStates(Constants):
+class OperationStates(Constants, metaclass=Singleton):
     """
     Operation - State Constants
     """

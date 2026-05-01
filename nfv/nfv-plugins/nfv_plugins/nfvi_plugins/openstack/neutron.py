@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import six
 import uuid
 
 from nfv_common import debug
@@ -18,8 +17,7 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.neutron')
 
 
-@six.add_metaclass(Singleton)
-class NeutronExtensionNames(Constants):
+class NeutronExtensionNames(Constants, metaclass=Singleton):
     """
     Neutron Extension Name Constants
     """
@@ -27,8 +25,7 @@ class NeutronExtensionNames(Constants):
     AGENT = Constant('agent')
 
 
-@six.add_metaclass(Singleton)
-class NetworkAdministrativeState(Constants):
+class NetworkAdministrativeState(Constants, metaclass=Singleton):
     """
     NETWORK ADMINISTRATIVE STATE Constants
     """
@@ -36,8 +33,7 @@ class NetworkAdministrativeState(Constants):
     DOWN = Constant(False)
 
 
-@six.add_metaclass(Singleton)
-class NetworkStatus(Constants):
+class NetworkStatus(Constants, metaclass=Singleton):
     """
     NETWORK STATUS Constants
     """
@@ -47,8 +43,7 @@ class NetworkStatus(Constants):
     ERROR = Constant('ERROR')
 
 
-@six.add_metaclass(Singleton)
-class AgentType(Constants):
+class AgentType(Constants, metaclass=Singleton):
     """
     AGENT TYPE Constants
     """
@@ -56,8 +51,7 @@ class AgentType(Constants):
     DHCP = Constant('DHCP agent')
 
 
-@six.add_metaclass(Singleton)
-class VnicType(Constants):
+class VnicType(Constants, metaclass=Singleton):
     """
     VNIC TYPE constants
     """

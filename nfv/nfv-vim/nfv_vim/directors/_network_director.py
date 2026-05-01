@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import coroutine
@@ -18,8 +17,7 @@ DLOG = debug.debug_get_logger('nfv_vim.network_director')
 _network_director = None
 
 
-@six.add_metaclass(Singleton)
-class NetworkDirector(object):
+class NetworkDirector(object, metaclass=Singleton):
     """
     Network Director
     """

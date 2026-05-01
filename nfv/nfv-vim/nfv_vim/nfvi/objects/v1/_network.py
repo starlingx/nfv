@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -11,8 +10,7 @@ from nfv_common.helpers import Singleton
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
-@six.add_metaclass(Singleton)
-class NetworkAdministrativeState(Constants):
+class NetworkAdministrativeState(Constants, metaclass=Singleton):
     """
     Network Administrative State Constants
     """
@@ -21,8 +19,7 @@ class NetworkAdministrativeState(Constants):
     UNLOCKED = Constant('unlocked')
 
 
-@six.add_metaclass(Singleton)
-class NetworkOperationalState(Constants):
+class NetworkOperationalState(Constants, metaclass=Singleton):
     """
     Network Operational State Constants
     """
@@ -31,8 +28,7 @@ class NetworkOperationalState(Constants):
     DISABLED = Constant('disabled')
 
 
-@six.add_metaclass(Singleton)
-class NetworkAvailabilityStatus(Constants):
+class NetworkAvailabilityStatus(Constants, metaclass=Singleton):
     """
     Network Availability Status Constants
     """

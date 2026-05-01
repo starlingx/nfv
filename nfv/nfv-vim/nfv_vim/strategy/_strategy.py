@@ -1,11 +1,10 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
 import functools
-import six
 import weakref
 
 from nfv_common import debug
@@ -26,8 +25,7 @@ from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 DLOG = debug.debug_get_logger('nfv_vim.strategy')
 
 
-@six.add_metaclass(Singleton)
-class StrategyNames(Constants):
+class StrategyNames(Constants, metaclass=Singleton):
     """
     Strategy Names
     """

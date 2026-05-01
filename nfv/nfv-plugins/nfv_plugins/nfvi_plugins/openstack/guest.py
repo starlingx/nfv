@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2018 Wind River Systems, Inc.
+# Copyright (c) 2015-2018, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import six
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -17,16 +16,14 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 DLOG = debug.debug_get_logger('nfv_plugins.nfvi_plugins.openstack.guest')
 
 
-@six.add_metaclass(Singleton)
-class GuestServiceNames(Constants):
+class GuestServiceNames(Constants, metaclass=Singleton):
     """
     GUEST SERVICE NAMES Constants
     """
     HEARTBEAT = Constant('heartbeat')
 
 
-@six.add_metaclass(Singleton)
-class GuestServiceState(Constants):
+class GuestServiceState(Constants, metaclass=Singleton):
     """
     GUEST SERVICE STATE Constants
     """
@@ -34,8 +31,7 @@ class GuestServiceState(Constants):
     DISABLED = Constant('disabled')
 
 
-@six.add_metaclass(Singleton)
-class GuestServiceStatus(Constants):
+class GuestServiceStatus(Constants, metaclass=Singleton):
     """
     GUEST SERVICE STATUS Constants
     """
@@ -43,8 +39,7 @@ class GuestServiceStatus(Constants):
     DISABLED = Constant('disabled')
 
 
-@six.add_metaclass(Singleton)
-class GuestEvent(Constants):
+class GuestEvent(Constants, metaclass=Singleton):
     """
     GUEST EVENT Constants
     """
@@ -64,8 +59,7 @@ class GuestEvent(Constants):
     DOWNSCALE = Constant('downscale')
 
 
-@six.add_metaclass(Singleton)
-class GuestVoteState(Constants):
+class GuestVoteState(Constants, metaclass=Singleton):
     """
     GUEST VOTE STATE Constants
     """

@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 import uuid
 
 from nfv_common import config
@@ -20,8 +19,7 @@ DLOG = debug.debug_get_logger('nfv_vim.sw_mgmt_director')
 _sw_mgmt_director = None
 
 
-@six.add_metaclass(Singleton)
-class SwMgmtDirector(object):
+class SwMgmtDirector(object, metaclass=Singleton):
     """
     Software Management Director
     """

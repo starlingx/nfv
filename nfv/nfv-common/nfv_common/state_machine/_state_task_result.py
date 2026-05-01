@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
@@ -11,8 +10,7 @@ from nfv_common.helpers import Singleton
 from nfv_common.state_machine._state_task_work_result import STATE_TASK_WORK_RESULT
 
 
-@six.add_metaclass(Singleton)
-class _StateTaskResult(object):
+class _StateTaskResult(object, metaclass=Singleton):
     """
     State Task Result - Constants
     """

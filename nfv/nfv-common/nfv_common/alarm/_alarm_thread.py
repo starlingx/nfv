@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import datetime
-import six
 
 from nfv_common import debug
 from nfv_common import thread
@@ -18,8 +17,7 @@ from nfv_common.alarm._alarm_handlers import AlarmHandlers
 DLOG = debug.debug_get_logger('nfv_common.alarm.alarm_thread')
 
 
-@six.add_metaclass(Singleton)
-class AlarmWorker(thread.ThreadWorker):
+class AlarmWorker(thread.ThreadWorker, metaclass=Singleton):
     """
     Alarm Worker
     """
@@ -76,8 +74,7 @@ class AlarmWorker(thread.ThreadWorker):
             DLOG.debug("Unknown action %s given." % action)
 
 
-@six.add_metaclass(Singleton)
-class AlarmThread(thread.Thread):
+class AlarmThread(thread.Thread, metaclass=Singleton):
     """
     Alarm Thread
     """

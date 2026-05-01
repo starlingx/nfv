@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
-import six
 
 from nfv_common import config
 from nfv_common import debug
@@ -29,8 +28,7 @@ _instance_director = None
 NFV_VIM_UNLOCK_COMPLETE_FILE = '/var/run/.nfv-vim.unlock_complete'
 
 
-@six.add_metaclass(Singleton)
-class InstanceDirector(object):
+class InstanceDirector(object, metaclass=Singleton):
     """
     Instance Director
     """

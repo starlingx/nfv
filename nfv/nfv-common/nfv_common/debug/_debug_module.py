@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 import sys
 
 from nfv_common.helpers import Singleton
@@ -13,8 +12,7 @@ from nfv_common.debug._debug_defs import DEBUG_LEVEL
 from nfv_common.debug._debug_thread import DebugLoggingThread
 
 
-@six.add_metaclass(Singleton)
-class Debug(object):
+class Debug(object, metaclass=Singleton):
     """
     Debug
     """

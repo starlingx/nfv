@@ -1,16 +1,14 @@
 #
-# Copyright (c) 2015-2023 Wind River Systems, Inc.
+# Copyright (c) 2015-2023, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-@six.add_metaclass(Singleton)
-class EventNames(object):
+class EventNames(object, metaclass=Singleton):
     """
     Strategy - Event Name Constants
     """
@@ -47,8 +45,7 @@ class EventNames(object):
 STRATEGY_EVENT = EventNames()
 
 
-@six.add_metaclass(Singleton)
-class FirmwareUpdateLabels(object):
+class FirmwareUpdateLabels(object, metaclass=Singleton):
     """
     Firmware Update Labels
     """

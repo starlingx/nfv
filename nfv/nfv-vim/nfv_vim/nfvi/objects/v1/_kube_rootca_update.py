@@ -1,9 +1,8 @@
 #
-# Copyright (c) 2016-2021,2025 Wind River Systems, Inc.
+# Copyright (c) 2016-2021, 2025-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
@@ -12,8 +11,7 @@ from nfv_common.helpers import Singleton
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
-@six.add_metaclass(Singleton)
-class KubeRootcaUpdateState(Constants):
+class KubeRootcaUpdateState(Constants, metaclass=Singleton):
     """
     Kube RootCA Update State Constants
     These values are copied from sysinv/common/kubernetes.py

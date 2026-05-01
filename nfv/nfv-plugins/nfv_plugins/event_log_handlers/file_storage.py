@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 import codecs
-import six
 
 import nfv_common.event_log.handlers.v1 as event_log_handlers_v1
 
@@ -43,40 +42,40 @@ class FileStorage(event_log_handlers_v1.EventLogHandler):
         # Write the file in utf-8 format to support unicode text
         with codecs.open(config.CONF['File-Storage']['file'], "a", 'utf-8') as f:
             line_separator_str = "%s" % ('=' * 84)
-            six.print_(line_separator_str, file=f)
-            six.print_("%-24s = %s" % ("log-id", log_data.log_id), file=f)
-            six.print_("%-24s = %s" % ("event-id",
+            print(line_separator_str, file=f)
+            print("%-24s = %s" % ("log-id", log_data.log_id), file=f)
+            print("%-24s = %s" % ("event-id",
                                        log_data.event_id), file=f)
-            six.print_("%-24s = %s" % ("event-type",
+            print("%-24s = %s" % ("event-type",
                                        log_data.event_type), file=f)
-            six.print_("%-24s = %s" % ("event-context",
+            print("%-24s = %s" % ("event-context",
                                        log_data.event_context), file=f)
-            six.print_("%-24s = %s" % ("importance",
+            print("%-24s = %s" % ("importance",
                                        log_data.importance), file=f)
-            six.print_("%-24s = %s" % ("entity", log_data.entity), file=f)
-            six.print_("%-24s = %s" % ("reason_text",
+            print("%-24s = %s" % ("entity", log_data.entity), file=f)
+            print("%-24s = %s" % ("reason_text",
                                        log_data.reason_text), file=f)
-            six.print_("%-24s = %s" % ("additional_text",
+            print("%-24s = %s" % ("additional_text",
                                        log_data.additional_text), file=f)
 
             if log_data.state_data is not None:
-                six.print_("%-24s = %s"
+                print("%-24s = %s"
                            % ("state-data.state",
                               log_data.state_data.state), file=f)
 
             if log_data.threshold_data is not None:
-                six.print_("%-24s = %s"
+                print("%-24s = %s"
                            % ("threshold-data.threshold-value",
                               log_data.threshold_data.threshold_value), file=f)
-                six.print_("%40s = %s"
+                print("%40s = %s"
                            % ("threshold-data.observed-value",
                               log_data.threshold_data.observed_value), file=f)
 
             if log_data.timestamp is not None:
-                six.print_("%-24s = %s" % ("timestamp",
+                print("%-24s = %s" % ("timestamp",
                                            log_data.timestamp), file=f)
 
-            six.print_(line_separator_str, file=f)
+            print(line_separator_str, file=f)
 
     def log(self, log_data):
         """

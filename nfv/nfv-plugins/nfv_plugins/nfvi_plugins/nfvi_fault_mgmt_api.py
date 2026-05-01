@@ -1,9 +1,10 @@
 #
 # Copyright (C) 2019 Intel Corporation
+# Copyright (c) 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from six.moves import http_client as httplib
+import http.client as httplib
 
 from nfv_common import debug
 from nfv_plugins.nfvi_plugins import config

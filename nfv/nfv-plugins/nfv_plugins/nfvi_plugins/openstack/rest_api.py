@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2015-2025 Wind River Systems, Inc.
+# Copyright (c) 2015-2025, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,10 +8,11 @@ import re
 import requests
 import ssl
 
-from six.moves import BaseHTTPServer
-from six.moves import http_client as httplib
-from six.moves import socketserver as SocketServer
-from six.moves import urllib
+import http.client as httplib
+import http.server as BaseHTTPServer
+import socketserver as SocketServer
+import urllib.error
+import urllib.request
 
 import socket
 import struct

@@ -1,10 +1,8 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import six
-
 from nfv_common import event_log
 
 # Log Template Definitions
@@ -2009,7 +2007,7 @@ def instance_issue_log(instance, event_id, additional_text=None,
     if additional_text is None:
         data['additional_text'] = ""
     else:
-        data['additional_text'] = six.text_type(
+        data['additional_text'] = str(
             additional_text).rstrip('. \t\n\r')
 
     if initiated_by is None:
@@ -2034,12 +2032,12 @@ def instance_issue_log(instance, event_id, additional_text=None,
         data['reason'] = ""
     else:
         data['reason'] = (", reason = %s"
-                          % six.text_type(reason).rstrip('. \t\n\r'))
+                          % str(reason).rstrip('. \t\n\r'))
 
     if repair_action is None or '' == repair_action:
         data['repair_action'] = ""
     else:
-        data['repair_action'] = (", %s" % six.text_type(
+        data['repair_action'] = (", %s" % str(
             repair_action).rstrip('. \t\n\r'))
 
     event_list = list()
