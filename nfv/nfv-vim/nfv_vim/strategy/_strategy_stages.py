@@ -89,7 +89,7 @@ def strategy_stage_rebuild_from_dict(data):
 
     from nfv_vim.strategy._strategy_steps import strategy_step_rebuild_from_dict
 
-    steps = list()
+    steps = []
     for step_data in data["steps"]:
         step = strategy_step_rebuild_from_dict(step_data)
         steps.append(step)

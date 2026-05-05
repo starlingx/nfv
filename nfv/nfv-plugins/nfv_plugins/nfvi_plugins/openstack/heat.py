@@ -59,10 +59,10 @@ def create_stack(
 
     api_cmd = url + "/stacks"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["stack_name"] = stack_name
 
     if template is not None:

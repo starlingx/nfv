@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common.alarm import *  # noqa: F401,F403
-
 from nfv_vim.alarm._general import clear_general_alarm  # noqa: F401
 from nfv_vim.alarm._general import raise_general_alarm  # noqa: F401
 from nfv_vim.alarm._instance import instance_clear_alarm  # noqa: F401

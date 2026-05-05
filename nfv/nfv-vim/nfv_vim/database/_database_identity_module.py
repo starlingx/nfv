@@ -3,11 +3,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from nfv_vim import objects
-
-from nfv_vim.database import model
-
 from nfv_vim.database._database import database_get
+from nfv_vim.database import model
+from nfv_vim import objects
 
 
 def database_tenant_add(tenant_obj):
@@ -47,7 +45,7 @@ def database_tenant_get_list():
     session = db.session()
     query = session.query(model.Tenant)
 
-    tenant_objs = list()
+    tenant_objs = []
     for tenant in query.all():
         tenant_obj = objects.Tenant(
             tenant.uuid, tenant.name, tenant.description, tenant.enabled

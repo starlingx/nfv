@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.nfvi._nfvi_guest_plugin import NFVIGuestPlugin
 
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_guest_module")

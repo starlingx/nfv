@@ -8,7 +8,7 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-class _StateTaskWorkResult(object, metaclass=Singleton):
+class _StateTaskWorkResult(metaclass=Singleton):
     """State Task Work Result - Constants."""
 
     WAIT = Constant("wait")

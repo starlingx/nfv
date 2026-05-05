@@ -39,16 +39,16 @@
 #
 ################################################################################
 
-from builtins import input
 import csv
 from glob import iglob
 import os
-import plotly
-import plotly.graph_objs as go
-from plotly import tools
 import subprocess
 import sys
 import time
+
+import plotly
+import plotly.graph_objs as go
+from plotly import tools
 
 dir = os.path.dirname(__file__)
 fig = plotly.graph_objs.graph_objs.Figure
@@ -429,10 +429,10 @@ def formatGraph(two, oneAxis):
     if two:
         if oneAxis:
             fig["layout"]["xaxis1"].update(
-                title="Timestamp", titlefont=dict(size=20, color="#4d4d4d")
+                title="Timestamp", titlefont={"size": 20, "color": "#4d4d4d"}
             )
             fig["layout"]["yaxis1"].update(
-                title="Hits Per Sample", titlefont=dict(size=20, color="#4d4d4d")
+                title="Hits Per Sample", titlefont={"size": 20, "color": "#4d4d4d"}
             )
             fig["layout"]["yaxis2"].update(
                 title="Average Execution Time (milliseconds)",
@@ -440,42 +440,46 @@ def formatGraph(two, oneAxis):
                 overlaying="y",
                 side="right",
                 position=1,
-                titlefont=dict(size=20, color="#4d4d4d"),
+                titlefont={"size": 20, "color": "#4d4d4d"},
             )
         else:
             fig["layout"]["xaxis1"].update(
-                title="Timestamp", titlefont=dict(size=20, color="#4d4d4d")
+                title="Timestamp", titlefont={"size": 20, "color": "#4d4d4d"}
             )
             fig["layout"]["yaxis1"].update(
                 title="Average Execution Time (milliseconds)",
-                titlefont=dict(size=20, color="#4d4d4d"),
+                titlefont={"size": 20, "color": "#4d4d4d"},
             )
             fig["layout"]["xaxis2"].update(
-                title="Timestamp", titlefont=dict(size=20, color="#4d4d4d")
+                title="Timestamp", titlefont={"size": 20, "color": "#4d4d4d"}
             )
             fig["layout"]["yaxis2"].update(
-                title="Hits Per Sample", titlefont=dict(size=20, color="#4d4d4d")
+                title="Hits Per Sample", titlefont={"size": 20, "color": "#4d4d4d"}
             )
-        fig["layout"].update(title=graphName, titlefont=dict(size=26))
+        fig["layout"].update(title=graphName, titlefont={"size": 26})
     else:
         fig["layout"].update(
             title=graphName,
-            xaxis=dict(
-                title="Timestamp",
-                titlefont=dict(
-                    family="Courier New, monospace", size=18, color="#4d4d4d"
-                ),
-            ),
-            yaxis=dict(
-                title=(
+            xaxis={
+                "title": "Timestamp",
+                "titlefont": {
+                    "family": "Courier New, monospace",
+                    "size": 18,
+                    "color": "#4d4d4d",
+                },
+            },
+            yaxis={
+                "title": (
                     "Average Execution Time (milliseconds)"
                     if execTime
                     else "Hits Per Sample"
                 ),
-                titlefont=dict(
-                    family="Courier New, monospace", size=18, color="#4d4d4d"
-                ),
-            ),
+                "titlefont": {
+                    "family": "Courier New, monospace",
+                    "size": 18,
+                    "color": "#4d4d4d",
+                },
+            },
         )
 
 

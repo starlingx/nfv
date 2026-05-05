@@ -8,7 +8,7 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-class StateNames(object, metaclass=Singleton):
+class StateNames(metaclass=Singleton):
     """Instance - State Name Constants."""
 
     INITIAL = Constant("initial")
@@ -42,7 +42,7 @@ class StateNames(object, metaclass=Singleton):
     GUEST_SERVICES_NOTIFY = Constant("guest-services-notify")
 
 
-class EventNames(object, metaclass=Singleton):
+class EventNames(metaclass=Singleton):
     """Instance - Event Name Constants."""
 
     NFVI_ENABLED = Constant("nfvi-enabled")
@@ -66,7 +66,7 @@ class EventNames(object, metaclass=Singleton):
     TASK_TIMEOUT = Constant("task-timeout")
 
 
-class TaskNames(object, metaclass=Singleton):
+class TaskNames(metaclass=Singleton):
     """Instance - Task Name Constants."""
 
     ADD_INSTANCE = Constant("add-instance")

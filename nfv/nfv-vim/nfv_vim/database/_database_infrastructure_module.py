@@ -5,12 +5,10 @@
 #
 import json
 
+from nfv_vim.database._database import database_get
+from nfv_vim.database import model
 from nfv_vim import nfvi
 from nfv_vim import objects
-
-from nfv_vim.database import model
-
-from nfv_vim.database._database import database_get
 
 
 def database_system_add(system_obj):
@@ -47,7 +45,7 @@ def database_system_get_list():
     session = db.session()
     query = session.query(model.System)
 
-    system_objs = list()
+    system_objs = []
     for system in query.all():
         system_obj = objects.System(system.name, system.description)
         system_objs.append(system_obj)
@@ -104,7 +102,7 @@ def database_host_get_list():
     session = db.session()
     query = session.query(model.Host_v8)
 
-    host_objs = list()
+    host_objs = []
     for host in query.all():
         nfvi_host_data = json.loads(host.nfvi_host_data)
         nfvi_host = nfvi.objects.v1.Host(
@@ -181,7 +179,7 @@ def database_host_group_get_list():
     session = db.session()
     query = session.query(model.HostGroup)
 
-    host_group_objs = list()
+    host_group_objs = []
     for host_group in query.all():
         nfvi_data = json.loads(host_group.nfvi_host_group_data)
         nfvi_host_group = nfvi.objects.v1.HostGroup(

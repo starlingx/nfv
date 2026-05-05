@@ -12,9 +12,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 class DeletedState(state_machine.State):
     """Host - Deleted State."""
 
-    def __init__(self, name):
-        super(DeletedState, self).__init__(name)
-
     def enter(self, host):
         """Entering deleted state."""
 
@@ -27,8 +24,6 @@ class DeletedState(state_machine.State):
 
     def transition(self, host, event, event_data, to_state):
         """Transition from the deleted state."""
-
-        pass
 
     def handle_event(self, host, event, event_data=None):
         """Handle event while in the deleted state."""

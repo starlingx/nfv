@@ -29,6 +29,7 @@ class Secret(str):
         return not self.__eq__(other)
 
 
+# pylint: disable-next=abstract-method
 class SecretType(TypeDecorator):
     """Secret Database Type."""
 
@@ -41,6 +42,7 @@ class SecretType(TypeDecorator):
         return Secret(value, encrypt=False)
 
 
+# pylint: disable-next=abstract-method
 class VNF_UUID(TypeDecorator):
     """VNF UUID Database Type."""
 

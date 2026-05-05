@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _tenant_table = None
@@ -12,9 +11,6 @@ _tenant_table = None
 
 class TenantTable(Table):
     """Tenant Table."""
-
-    def __init__(self):
-        super(TenantTable, self).__init__()
 
     def _persist_value(self, value):
         database.database_tenant_add(value)

@@ -7,15 +7,13 @@ from unittest import mock
 import uuid
 
 from nfv_common import strategy as common_strategy
+from nfv_unit_tests.tests import sw_update_testcase
 from nfv_vim import nfvi
-
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.objects import SystemConfigUpdate
 from nfv_vim.strategy._strategy import SystemConfigUpdateStrategy
-
-from nfv_unit_tests.tests import sw_update_testcase
 
 
 @mock.patch(
@@ -108,7 +106,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         self.create_host("controller-0", aio=True)
 
         update_obj = SystemConfigUpdate()
-        nfvi_system_config_update_hosts = list()
+        nfvi_system_config_update_hosts = []
         controller_0_resource = nfvi.objects.v1.HostSystemConfigUpdate(
             "controller-0", "lock_required"
         )
@@ -156,7 +154,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         self.create_host("controller-1", aio=True)
 
         update_obj = SystemConfigUpdate()
-        nfvi_system_config_update_hosts = list()
+        nfvi_system_config_update_hosts = []
         controller_0_resource = nfvi.objects.v1.HostSystemConfigUpdate(
             "controller-0", "lock_required"
         )
@@ -228,7 +226,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         self.create_host("compute-1")
 
         update_obj = SystemConfigUpdate()
-        nfvi_system_config_update_hosts = list()
+        nfvi_system_config_update_hosts = []
         controller_0_resource = nfvi.objects.v1.HostSystemConfigUpdate(
             "controller-0", "lock_required"
         )
@@ -378,7 +376,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         self.create_host("compute-1")
 
         update_obj = SystemConfigUpdate()
-        nfvi_system_config_update_hosts = list()
+        nfvi_system_config_update_hosts = []
         controller_0_resource = nfvi.objects.v1.HostSystemConfigUpdate(
             "controller-0", "lock_required"
         )
@@ -519,7 +517,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         self.create_host("compute-1")
 
         update_obj = SystemConfigUpdate()
-        nfvi_system_config_update_hosts = list()
+        nfvi_system_config_update_hosts = []
         controller_0_resource = nfvi.objects.v1.HostSystemConfigUpdate(
             "controller-0", "lock_required"
         )
@@ -623,7 +621,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         self.create_host("compute-1")
 
         update_obj = SystemConfigUpdate()
-        nfvi_system_config_update_hosts = list()
+        nfvi_system_config_update_hosts = []
         controller_0_resource = nfvi.objects.v1.HostSystemConfigUpdate(
             "controller-0", "lock_required"
         )
@@ -712,7 +710,7 @@ class TestSystemConfigUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase
         self.create_host("compute-1")
 
         update_obj = SystemConfigUpdate()
-        nfvi_system_config_update_hosts = list()
+        nfvi_system_config_update_hosts = []
         controller_0_resource = nfvi.objects.v1.HostSystemConfigUpdate(
             "controller-0", "lock_required"
         )

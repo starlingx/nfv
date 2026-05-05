@@ -5,14 +5,12 @@
 #
 import datetime
 
+from nfv_common.alarm._alarm_handlers import AlarmHandlers
 from nfv_common import debug
-from nfv_common import thread
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Singleton
-
-from nfv_common.alarm._alarm_handlers import AlarmHandlers
+from nfv_common import thread
+from nfv_common import timers
 
 DLOG = debug.debug_get_logger("nfv_common.alarm.alarm_thread")
 
@@ -21,7 +19,7 @@ class AlarmWorker(thread.ThreadWorker, metaclass=Singleton):
     """Alarm Worker."""
 
     def __init__(self, name, config):
-        super(AlarmWorker, self).__init__(name)
+        super().__init__(name)
         self._config = config
         self._handlers = None
         self._alarm_audit_timer_id = None
@@ -81,12 +79,12 @@ class AlarmThread(thread.Thread, metaclass=Singleton):
 
     def __init__(self, config=None):
         self._worker = AlarmWorker("Alarm", config)
-        super(AlarmThread, self).__init__("Alarm", self._worker)
+        super().__init__("Alarm", self._worker)
 
     def alarm_raise(self, alarm_uuid, alarm_data):
         """Send raise alarm to the Alarm Thread Worker."""
 
-        work = dict()
+        work = {}
         work["alarm-uuid"] = alarm_uuid
         work["alarm-data"] = alarm_data
         work["alarm-change-date"] = datetime.datetime.utcnow()
@@ -95,7 +93,7 @@ class AlarmThread(thread.Thread, metaclass=Singleton):
     def alarm_clear(self, alarm_uuid):
         """Send clear alarm to the Alarm Thread Worker."""
 
-        work = dict()
+        work = {}
         work["alarm-uuid"] = alarm_uuid
         work["alarm-data"] = None
         work["alarm-change-date"] = datetime.datetime.utcnow()

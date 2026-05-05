@@ -6,8 +6,6 @@
 from nfv_common import config
 from nfv_common import debug
 from nfv_common import tcp
-from nfv_vim import rpc
-
 from nfv_vim.events._vim_image_api_events import vim_image_api_create_image
 from nfv_vim.events._vim_image_api_events import vim_image_api_delete_image
 from nfv_vim.events._vim_image_api_events import vim_image_api_finalize
@@ -15,15 +13,7 @@ from nfv_vim.events._vim_image_api_events import vim_image_api_get_image
 from nfv_vim.events._vim_image_api_events import vim_image_api_get_images
 from nfv_vim.events._vim_image_api_events import vim_image_api_initialize
 from nfv_vim.events._vim_image_api_events import vim_image_api_update_image
-
-from nfv_vim.events._vim_volume_api_events import vim_volume_api_create_volume
-from nfv_vim.events._vim_volume_api_events import vim_volume_api_delete_volume
-from nfv_vim.events._vim_volume_api_events import vim_volume_api_finalize
-from nfv_vim.events._vim_volume_api_events import vim_volume_api_get_volume
-from nfv_vim.events._vim_volume_api_events import vim_volume_api_get_volumes
-from nfv_vim.events._vim_volume_api_events import vim_volume_api_initialize
-from nfv_vim.events._vim_volume_api_events import vim_volume_api_update_volume
-
+from nfv_vim import rpc
 from nfv_vim.events._vim_instance_api_events import (
     vim_instance_api_cold_migrate_instance,
 )
@@ -44,7 +34,6 @@ from nfv_vim.events._vim_instance_api_events import vim_instance_api_start_insta
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_stop_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_suspend_instance
 from nfv_vim.events._vim_instance_api_events import vim_instance_api_unpause_instance
-
 from nfv_vim.events._vim_network_api_events import vim_network_api_create_network
 from nfv_vim.events._vim_network_api_events import vim_network_api_create_subnet
 from nfv_vim.events._vim_network_api_events import vim_network_api_delete_network
@@ -57,7 +46,6 @@ from nfv_vim.events._vim_network_api_events import vim_network_api_get_subnets
 from nfv_vim.events._vim_network_api_events import vim_network_api_initialize
 from nfv_vim.events._vim_network_api_events import vim_network_api_update_network
 from nfv_vim.events._vim_network_api_events import vim_network_api_update_subnet
-
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_abort_strategy
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_apply_strategy
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_create_strategy
@@ -65,6 +53,13 @@ from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_delete_st
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_finalize
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_get_strategy
 from nfv_vim.events._vim_sw_update_api_events import vim_sw_update_api_initialize
+from nfv_vim.events._vim_volume_api_events import vim_volume_api_create_volume
+from nfv_vim.events._vim_volume_api_events import vim_volume_api_delete_volume
+from nfv_vim.events._vim_volume_api_events import vim_volume_api_finalize
+from nfv_vim.events._vim_volume_api_events import vim_volume_api_get_volume
+from nfv_vim.events._vim_volume_api_events import vim_volume_api_get_volumes
+from nfv_vim.events._vim_volume_api_events import vim_volume_api_initialize
+from nfv_vim.events._vim_volume_api_events import vim_volume_api_update_volume
 
 DLOG = debug.debug_get_logger("nfv_vim.vim_api_events")
 

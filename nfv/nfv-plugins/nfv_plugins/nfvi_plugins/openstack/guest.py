@@ -9,7 +9,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
@@ -80,11 +79,11 @@ def host_services_create(token, host_uuid, host_name):
 
     api_cmd = url + "/v1/hosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = host_uuid
     api_cmd_payload["hostname"] = host_name
 
@@ -103,11 +102,11 @@ def host_services_enable(token, host_uuid, host_name):
 
     api_cmd = url + "/v1/hosts/%s/enable" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = host_uuid
     api_cmd_payload["hostname"] = host_name
 
@@ -126,11 +125,11 @@ def host_services_disable(token, host_uuid, host_name):
 
     api_cmd = url + "/v1/hosts/%s/disable" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = host_uuid
     api_cmd_payload["hostname"] = host_name
 
@@ -149,7 +148,7 @@ def host_services_delete(token, host_uuid):
 
     api_cmd = url + "/v1/hosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -166,11 +165,11 @@ def host_services_query(token, host_uuid, host_name):
 
     api_cmd = url + "/v1/hosts/%s/disable" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = host_uuid
     api_cmd_payload["hostname"] = host_name
 
@@ -189,11 +188,11 @@ def guest_services_create(token, instance_uuid, host_name, services):
 
     api_cmd = url + "/v1/instances/%s" % instance_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = instance_uuid
     api_cmd_payload["hostname"] = host_name
     api_cmd_payload["services"] = services
@@ -213,11 +212,11 @@ def guest_services_set(token, instance_uuid, host_name, services):
 
     api_cmd = url + "/v1/instances/%s" % instance_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = instance_uuid
     api_cmd_payload["hostname"] = host_name
     api_cmd_payload["services"] = services
@@ -237,7 +236,7 @@ def guest_services_delete(token, instance_uuid):
 
     api_cmd = url + "/v1/instances/%s" % instance_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -254,7 +253,7 @@ def guest_services_query(token, instance_uuid):
 
     api_cmd = url + "/v1/instances/%s" % instance_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -271,11 +270,11 @@ def guest_services_vote(token, instance_uuid, host_name, action):
 
     api_cmd = url + "/v1/instances/%s/vote" % instance_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = instance_uuid
     api_cmd_payload["hostname"] = host_name
     api_cmd_payload["action"] = action
@@ -295,11 +294,11 @@ def guest_services_notify(token, instance_uuid, host_name, action):
 
     api_cmd = url + "/v1/instances/%s/notify" % instance_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = instance_uuid
     api_cmd_payload["hostname"] = host_name
     api_cmd_payload["action"] = action

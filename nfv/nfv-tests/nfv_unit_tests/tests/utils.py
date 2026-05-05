@@ -8,14 +8,14 @@ from nfv_vim import nfvi
 
 
 def instance_type_to_flavor_dict(instance_type):
-    flavor = dict()
+    flavor = {}
     flavor["vcpus"] = instance_type.vcpus
     flavor["ram"] = instance_type.mem_mb
     flavor["disk"] = instance_type.disk_gb
     flavor["ephemeral"] = instance_type.ephemeral_gb
     flavor["swap"] = instance_type.swap_gb
     flavor["original_name"] = "JustAName"
-    extra_specs = dict()
+    extra_specs = {}
     extra_specs[nfvi.objects.v1.INSTANCE_TYPE_EXTENSION.LIVE_MIGRATION_TIMEOUT] = (
         instance_type.live_migration_timeout
     )
@@ -27,7 +27,7 @@ def instance_type_to_flavor_dict(instance_type):
     return flavor
 
 
-class dlog(object):
+class dlog:
     def __init__(self, debug_printing=False):
         self.nothing = 0
         self.debug_printing = debug_printing

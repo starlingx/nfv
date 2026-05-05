@@ -9,7 +9,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
@@ -56,7 +55,7 @@ def get_volumes(token, page_limit=None, next_page=None, all_tenants=True):
     else:
         api_cmd = next_page
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -73,10 +72,10 @@ def create_volume(
 
     api_cmd = url + "/volumes"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    volume = dict()
+    volume = {}
     volume["name"] = volume_name
     volume["description"] = volume_description
     volume["size"] = size_gb
@@ -87,7 +86,7 @@ def create_volume(
     if bootable is not None:
         volume["bootable"] = bootable
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["volume"] = volume
 
     response = rest_api_request(
@@ -105,13 +104,13 @@ def update_volume(token, volume_id, volume_description):
 
     api_cmd = url + "/volumes/%s" % volume_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    volume = dict()
+    volume = {}
     volume["description"] = volume_description
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["volume"] = volume
 
     response = rest_api_request(
@@ -129,7 +128,7 @@ def delete_volume(token, volume_id):
 
     api_cmd = url + "/volumes/%s" % volume_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
     return response
@@ -144,7 +143,7 @@ def get_volume(token, volume_id):
 
     api_cmd = url + "/volumes/%s" % volume_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -162,7 +161,7 @@ def get_volume_snapshots(token, all_tenants=True):
     if all_tenants:
         api_cmd += "?all_tenants=1"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response

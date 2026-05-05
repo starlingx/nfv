@@ -17,9 +17,12 @@ from nfv_common.catalog.model._defs import CONNECTIVITY_TYPE
 #       |
 #       +------ VDU ------ VNFC ------ ConnectionPointVNFC
 #
+# TODO(rlima): the classes in this file are redefining the builtin id.
+# The associated pylint rule is disabled.
+# pylint: disable=redefined-builtin
 
 
-class VNFD(object):
+class VNFD:
     """Virtual Network Function Descriptor.
 
     id: unique name for this vnfd
@@ -56,7 +59,7 @@ class VNFD(object):
         self.manifest_file_security = []
 
 
-class ConnectionPointVNFD(object):
+class ConnectionPointVNFD:
     """Connection Point of a Virtual Network Function Descriptor.
 
     id: connection point identifier
@@ -71,7 +74,7 @@ class ConnectionPointVNFD(object):
         self.type = CONNECTION_TYPE.UNKNOWN
 
 
-class VirtualLink(object):
+class VirtualLink:
     """Virtual Link.
 
     id: unique identifier of this internal virtual link
@@ -94,7 +97,7 @@ class VirtualLink(object):
         self.test_access = None
 
 
-class DeploymentFlavor(object):
+class DeploymentFlavor:
     """Deployment Flavor.
 
     id: vnf flavor identifier
@@ -111,7 +114,7 @@ class DeploymentFlavor(object):
         self.constituent_vdu = []
 
 
-class ConstituentVDU(object):
+class ConstituentVDU:
     """Constituent Virtual Deployment Unit.
 
     vdu_reference: identifier of a vdu
@@ -126,7 +129,7 @@ class ConstituentVDU(object):
         self.constituent_vnfc = []
 
 
-class VDU(object):
+class VDU:
     """Virtual Deployment Unit.
 
     id: unique identifier for this vdu within the scope of the vnfd
@@ -162,7 +165,7 @@ class VDU(object):
         self.monitoring_parameter = []
 
 
-class VNFC(object):
+class VNFC:
     """Virtual Network Function Component.
 
     id: unique vnfc identification within the namespace of a specific vnf
@@ -174,7 +177,7 @@ class VNFC(object):
         self.connection_point = []
 
 
-class ConnectionPointVNFC(object):
+class ConnectionPointVNFC:
     """Connection Point of a Virtual Network Function Component.
 
     id: connection point identifier

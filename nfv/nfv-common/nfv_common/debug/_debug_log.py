@@ -34,7 +34,7 @@ class DebugLogHandler(logging.Handler):
     """Debug Log Handler."""
 
     def __init__(self):
-        super(DebugLogHandler, self).__init__()
+        super().__init__()
         self.process_name = None
         self.thread_name = None
 
@@ -106,14 +106,11 @@ class DebugLogHandler(logging.Handler):
             log_record = self._format_record(record)
             DebugLoggingThread().send_log_record(log_record)
 
-        except (KeyboardInterrupt, SystemExit):
-            raise
-
         except Exception:
             self.handleError(record)
 
 
-class DebugLogger(object):
+class DebugLogger:
     """Debug Logger."""
 
     log_level_mapping = {
@@ -274,8 +271,7 @@ def debug_trace(trace_level):
                 print(" " * Debug().trace_depth, file=Debug().output, end="\n", sep="")
                 print("exiting " + func.__name__, file=Debug().output, end="\n", sep="")
                 return result
-            else:
-                return func(*args, **kwargs)
+            return func(*args, **kwargs)
 
         functools.update_wrapper(trace_wrapper, func)
         return trace_wrapper

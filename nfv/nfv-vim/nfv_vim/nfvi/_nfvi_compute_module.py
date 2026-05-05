@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.nfvi._nfvi_compute_plugin import NFVIComputePlugin
 
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_compute_module")
@@ -517,8 +516,7 @@ def nfvi_compute_initialize(config, pool):
     if _compute_plugin.ready_to_initialize(config["config_file"]):
         _compute_plugin.initialize(config["config_file"])
         return True
-    else:
-        return False
+    return False
 
 
 def nfvi_compute_finalize():

@@ -4,10 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
-
+from nfv_common import timers
 from nfv_vim import directors
 from nfv_vim import nfvi
 from nfv_vim import objects
@@ -141,6 +139,7 @@ def _nfvi_sw_update_get_callback():
         elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.KUBE_UPGRADE:
             sw_update_type = "kube-upgrade"
 
+        # pylint: disable-next=simplifiable-if-statement
         if sw_update.strategy.is_applying() or sw_update.strategy.is_aborting():
             in_progress = True
         else:
@@ -370,9 +369,8 @@ def _nfvi_instance_action_callback(nfvi_instance_uuid, nfvi_action_data):
     if instance is not None:
         instance.nfvi_instance_action_update(nfvi_action_data)
         return True
-    else:
-        DLOG.error("Instance %s is not found" % nfvi_instance_uuid)
-        return False
+    DLOG.error("Instance %s is not found" % nfvi_instance_uuid)
+    return False
 
 
 def _nfvi_instance_delete_callback(nfvi_instance_uuid):
@@ -419,7 +417,7 @@ def _nfvi_guest_services_query_callback(nfvi_host_uuid, nfvi_instance_uuid):
         if instance is None:
             return False, None
 
-        result = dict()
+        result = {}
         result["uuid"] = instance.uuid
         result["hostname"] = instance.host_name
         result["services"] = instance.guest_services.get_nfvi_guest_services()
@@ -432,17 +430,17 @@ def _nfvi_guest_services_query_callback(nfvi_host_uuid, nfvi_instance_uuid):
         return False, None
 
     instance_table = tables.tables_get_instance_table()
-    instances = list()
+    instances = []
     for instance in instance_table.on_host(host.name):
         guest_services = instance.guest_services
         if guest_services.are_provisioned():
-            result = dict()
+            result = {}
             result["uuid"] = instance.uuid
             result["hostname"] = instance.host_name
             result["services"] = guest_services.get_nfvi_guest_services()
             instances.append(result)
 
-    results = dict()
+    results = {}
     results["instances"] = instances
     return True, results
 
@@ -498,7 +496,7 @@ def _nfvi_guest_services_alarm_notify_callback(
         else:
             instance.guest_services_failed(health_check_failed_only=True)
 
-    result = dict()
+    result = {}
     result["uuid"] = instance.uuid
     result["hostname"] = instance.host_name
     result["services"] = instance.guest_services.get_nfvi_guest_services()
@@ -598,5 +596,3 @@ def vim_nfvi_events_initialize():
 
 def vim_nfvi_events_finalize():
     """Finalize listening for nfvi events."""
-
-    pass

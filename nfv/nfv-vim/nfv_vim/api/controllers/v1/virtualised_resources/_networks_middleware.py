@@ -201,7 +201,7 @@ def subnet_get_all(network_resource_id):
     rpc_request.get_all = True
     vim_connection.send(rpc_request.serialize())
 
-    subnet_resource_types = list()
+    subnet_resource_types = []
     while True:
         msg = vim_connection.receive()
         if msg is None:
@@ -267,7 +267,7 @@ def network_allocate(network_resource_id, network_type):
         network_attributes.type_of_network = response.network_type
         network_attributes.type_of_segment = str(response.segmentation_id)
         network_attributes.is_shared = response.is_shared
-        network_attributes.layer3_attributes = list()
+        network_attributes.layer3_attributes = []
 
         for subnet_type in network_type.layer3_attributes:
             http_status_code, subnet_resource_type = subnet_allocate(
@@ -287,7 +287,7 @@ def network_allocate(network_resource_id, network_type):
                         http_status_code,
                     )
                 )
-                network_resource_ids = list()
+                network_resource_ids = []
                 network_resource_ids.append(network_resource_id)
                 network_delete(network_resource_ids)
                 return http_status_code, None
@@ -336,9 +336,9 @@ def network_update(network_resource_id, network_type):
 
         http_status_code, subnet_resource_types = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
-            add_list = list()
-            update_list = list()
-            delete_list = list()
+            add_list = []
+            update_list = []
+            delete_list = []
 
             for subnet_type in network_type.layer3_attributes:
                 for subnet_resource_type in subnet_resource_types:
@@ -424,7 +424,7 @@ def network_update(network_resource_id, network_type):
 
             http_status_code, subnet_resource_types = subnet_get_all(response.name)
             if httplib.OK == http_status_code:
-                layer3_attributes = list()
+                layer3_attributes = []
                 for subnet_resource_type in subnet_resource_types:
                     layer3_attributes.append(subnet_resource_type.subnet_attributes)
 
@@ -457,7 +457,7 @@ def network_update(network_resource_id, network_type):
 def network_delete(network_resource_ids):
     """Delete networks."""
 
-    deleted_network_resource_ids = list()
+    deleted_network_resource_ids = []
     for network_resource_id in network_resource_ids:
         vim_connection = pecan.request.vim.open_connection()
         rpc_request = rpc.APIRequestDeleteNetwork()
@@ -510,7 +510,7 @@ def network_get(network_resource_id):
 
         http_status_code, subnet_resource_types = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
-            layer3_attributes = list()
+            layer3_attributes = []
             for subnet_resource_type in subnet_resource_types:
                 layer3_attributes.append(subnet_resource_type.subnet_attributes)
 
@@ -542,7 +542,7 @@ def network_get_all():
     rpc_request.get_all = True
     vim_connection.send(rpc_request.serialize())
 
-    network_resource_types = list()
+    network_resource_types = []
     while True:
         msg = vim_connection.receive()
         if msg is None:
@@ -567,7 +567,7 @@ def network_get_all():
 
         http_status_code, subnet_resource_types = subnet_get_all(response.name)
         if httplib.OK == http_status_code:
-            layer3_attributes = list()
+            layer3_attributes = []
             for subnet_resource_type in subnet_resource_types:
                 layer3_attributes.append(subnet_resource_type.subnet_attributes)
 

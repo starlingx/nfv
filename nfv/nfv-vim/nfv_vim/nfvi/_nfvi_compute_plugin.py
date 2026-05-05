@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import tasks
-
 from nfv_vim.nfvi._nfvi_plugin import NFVIPlugin
 
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_compute_plugin")
@@ -20,7 +19,7 @@ class NFVIComputePlugin(NFVIPlugin):
 
     def __init__(self, namespace, pool):
         scheduler = tasks.TaskScheduler("compute-plugin", pool)
-        super(NFVIComputePlugin, self).__init__(
+        super().__init__(
             namespace,
             NFVIComputePlugin._version,
             NFVIComputePlugin._signature,

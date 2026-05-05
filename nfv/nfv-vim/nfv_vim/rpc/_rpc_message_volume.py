@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
@@ -27,7 +26,7 @@ class APIRequestCreateVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_VOLUME_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["name"] = self.name
@@ -68,7 +67,7 @@ class APIResponseCreateVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_VOLUME_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseCreateVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -110,7 +109,7 @@ class APIRequestUpdateVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_VOLUME_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestUpdateVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -142,7 +141,7 @@ class APIResponseUpdateVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_VOLUME_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseUpdateVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -183,7 +182,7 @@ class APIRequestDeleteVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_VOLUME_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestDeleteVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -206,7 +205,7 @@ class APIResponseDeleteVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_VOLUME_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseDeleteVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -230,7 +229,7 @@ class APIRequestGetVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_VOLUME_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestGetVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["get-all"] = self.get_all
@@ -243,8 +242,7 @@ class APIRequestGetVolume(RPCMessage):
     def __str__(self):
         if self.get_all:
             return "get-volume request: get-all"
-        else:
-            return "get-volume request: %s" % self.filter_by_uuid
+        return "get-volume request: %s" % self.filter_by_uuid
 
 
 class APIResponseGetVolume(RPCMessage):
@@ -265,7 +263,7 @@ class APIResponseGetVolume(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_VOLUME_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseGetVolume, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid

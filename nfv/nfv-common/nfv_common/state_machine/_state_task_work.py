@@ -6,13 +6,12 @@
 import weakref
 
 from nfv_common import debug
-
 from nfv_common.state_machine._state_task_result import STATE_TASK_WORK_RESULT
 
 DLOG = debug.debug_get_logger("nfv_common.state_machine.state_task_work")
 
 
-class StateTaskWork(object):
+class StateTaskWork:
     """State Task Work."""
 
     def __init__(self, name, task, force_pass=False, timeout_in_secs=1, max_retries=1):

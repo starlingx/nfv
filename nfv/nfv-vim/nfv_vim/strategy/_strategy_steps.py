@@ -126,25 +126,23 @@ class AbstractStrategyStep(strategy.StrategyStep):
     """An abstract base class for strategy steps."""
 
     def __init__(self, step_name, timeout_in_secs):
-        super(AbstractStrategyStep, self).__init__(
-            step_name, timeout_in_secs=timeout_in_secs
-        )
+        super().__init__(step_name, timeout_in_secs=timeout_in_secs)
 
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractStrategyStep, self).from_dict(data)
+        super().from_dict(data)
         return self
 
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(AbstractStrategyStep, self).as_dict()
+        data = super().as_dict()
         # Next 3 lines are required for all strategy steps and may be
         # overridden by subclass in some cases
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         return data
 
 
@@ -152,12 +150,10 @@ class AbstractHostsStrategyStep(AbstractStrategyStep):
     """An abstract base class for strategy steps performed on list of hosts."""
 
     def __init__(self, step_name, hosts, timeout_in_secs=1800):
-        super(AbstractHostsStrategyStep, self).__init__(
-            step_name, timeout_in_secs=timeout_in_secs
-        )
+        super().__init__(step_name, timeout_in_secs=timeout_in_secs)
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -165,9 +161,9 @@ class AbstractHostsStrategyStep(AbstractStrategyStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractHostsStrategyStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -180,7 +176,7 @@ class AbstractHostsStrategyStep(AbstractStrategyStep):
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(AbstractHostsStrategyStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -201,15 +197,13 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         retry_count - the number of times to retry per host if unlock fails
         retry_delay - the amount of time to delay before retrying unlock.
         """
-        super(UnlockHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.UNLOCK_HOSTS, hosts, timeout_in_secs=1800
-        )
+        super().__init__(STRATEGY_STEP_NAME.UNLOCK_HOSTS, hosts, timeout_in_secs=1800)
         # step_name, hosts, timeout are serialized by parent classes
         # retry_count and retry_delay must be serialized in from_dict/as_dict
         self._retry_count = retry_count
         self._retry_delay = retry_delay
         # Do not persist: _retries, _wait_time _retrying
-        self._retries = dict()
+        self._retries = {}
         for host_name in self._host_names:
             self._retries[host_name] = retry_count
         self._wait_time = 0
@@ -218,7 +212,7 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
     def from_dict(self, data):
         """Returns unlock hosts step object initialized using the given dictionary."""
 
-        super(UnlockHostsStep, self).from_dict(data)
+        super().from_dict(data)
         # deserialize retry_delay and retry_count
         # 'retry_delay' and 'retry_count' were added to this step since last
         # release. Need to perform 'get' with a default value in case
@@ -229,7 +223,7 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
         # Do not deserialize _retries, _wait_time and _retrying
         self._wait_time = 0
         self._retry_requested = False
-        self._retries = dict()
+        self._retries = {}
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
             host = host_table.get(host_name, None)
@@ -241,7 +235,7 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
     def as_dict(self):
         """Represent the unlock hosts step as a dictionary."""
 
-        data = super(UnlockHostsStep, self).as_dict()
+        data = super().as_dict()
         # serialize retries
         data["retry_count"] = self._retry_count
         # serialize retry_delay
@@ -358,13 +352,11 @@ class LockHostsStep(strategy.StrategyStep):
     """Lock Hosts - Strategy Step."""
 
     def __init__(self, hosts, wait_until_disabled=True):
-        super(LockHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.LOCK_HOSTS, timeout_in_secs=900
-        )
+        super().__init__(STRATEGY_STEP_NAME.LOCK_HOSTS, timeout_in_secs=900)
         self._hosts = hosts
         self._wait_until_disabled = wait_until_disabled
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -474,10 +466,10 @@ class LockHostsStep(strategy.StrategyStep):
     def from_dict(self, data):
         """Returns the lock hosts step object initialized using the given dictionary."""
 
-        super(LockHostsStep, self).from_dict(data)
-        self._hosts = list()
+        super().from_dict(data)
+        self._hosts = []
         self._wait_until_disabled = data["wait_until_disabled"]
-        self._host_uuids = list()
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -491,7 +483,7 @@ class LockHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the lock hosts step as a dictionary."""
 
-        data = super(LockHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -503,12 +495,10 @@ class RebootHostsStep(strategy.StrategyStep):
     """Reboot Hosts - Strategy Step."""
 
     def __init__(self, hosts):
-        super(RebootHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.REBOOT_HOSTS, timeout_in_secs=900
-        )
+        super().__init__(STRATEGY_STEP_NAME.REBOOT_HOSTS, timeout_in_secs=900)
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -560,9 +550,9 @@ class RebootHostsStep(strategy.StrategyStep):
     def from_dict(self, data):
         """Returns the reboot hosts step object initialized using the dictionary."""
 
-        super(RebootHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -576,7 +566,7 @@ class RebootHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the reboot hosts step as a dictionary."""
 
-        data = super(RebootHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -587,12 +577,10 @@ class SwactHostsStep(strategy.StrategyStep):
     """Swact Hosts - Strategy Step."""
 
     def __init__(self, hosts):
-        super(SwactHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.SWACT_HOSTS, timeout_in_secs=900
-        )
+        super().__init__(STRATEGY_STEP_NAME.SWACT_HOSTS, timeout_in_secs=900)
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -753,9 +741,9 @@ class SwactHostsStep(strategy.StrategyStep):
     def from_dict(self, data):
         """Returns the swact hosts step object initialized using the dictionary."""
 
-        super(SwactHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -781,7 +769,7 @@ class SwactHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the swact hosts step as a dictionary."""
 
-        data = super(SwactHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -805,13 +793,11 @@ class SwPatchHostsStep(strategy.StrategyStep):
     """Software Patch Hosts - Strategy Step."""
 
     def __init__(self, hosts):
-        super(SwPatchHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_PATCH_HOSTS, timeout_in_secs=1800
-        )
+        super().__init__(STRATEGY_STEP_NAME.SW_PATCH_HOSTS, timeout_in_secs=1800)
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
-        self._host_completed = dict()
+        self._host_names = []
+        self._host_uuids = []
+        self._host_completed = {}
         self._query_inprogress = False
 
         for host in hosts:
@@ -846,6 +832,7 @@ class SwPatchHostsStep(strategy.StrategyStep):
             failed = False
             failed_reason = ""
 
+            # pylint: disable-next=consider-using-dict-items
             for host_name in self._host_completed:
                 completed, success, reason = self._host_completed[host_name]
                 if not completed:
@@ -905,10 +892,10 @@ class SwPatchHostsStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(SwPatchHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
-        self._host_completed = dict()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
+        self._host_completed = {}
         self._query_inprogress = False
 
         self._host_names = data["entity_names"]
@@ -924,7 +911,7 @@ class SwPatchHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the software patch hosts step as a dictionary."""
 
-        data = super(SwPatchHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -936,13 +923,13 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
     """System Config Update Hosts - Strategy Step."""
 
     def __init__(self, hosts):
-        super(SystemConfigUpdateHostsStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.SYSTEM_CONFIG_UPDATE_HOSTS, timeout_in_secs=1800
         )
         self._hosts = hosts
         self._wait_time = 0
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         self._query_inprogress = False
 
         for host in hosts:
@@ -1005,10 +992,10 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
 
         the given dictionary.
         """
-        super(SystemConfigUpdateHostsStep, self).from_dict(data)
-        self._hosts = list()
+        super().from_dict(data)
+        self._hosts = []
         self._wait_time = 0
-        self._host_uuids = list()
+        self._host_uuids = []
         self._query_inprogress = False
 
         self._host_names = data["entity_names"]
@@ -1023,7 +1010,7 @@ class SystemConfigUpdateHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the system config update hosts step as a dictionary."""
 
-        data = super(SystemConfigUpdateHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -1034,9 +1021,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
     """Software Deploy Precheck - Strategy Step."""
 
     def __init__(self, release, snapshot=False):
-        super(SwDeployPrecheckStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK, timeout_in_secs=60)
         self._release = release
         self._snapshot = snapshot
 
@@ -1075,37 +1060,37 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
             reason = "Deployment already in progress, skipping precheck"
             DLOG.info(reason)
             return strategy.STRATEGY_STEP_RESULT.SUCCESS, reason
-        else:
-            force = self.strategy._alarm_restrictions in [
-                strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED,
-                strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
-            ]
 
-            nfvi.nfvi_sw_deploy_precheck(
-                self._release,
-                force,
-                self._snapshot,
-                self._sw_deploy_precheck_callback(),
-            )
-            return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+        force = self.strategy._alarm_restrictions in [
+            strategy.STRATEGY_ALARM_RESTRICTION_TYPES.RELAXED,
+            strategy.STRATEGY_ALARM_RESTRICTION_TYPES.PERMISSIVE,
+        ]
+
+        nfvi.nfvi_sw_deploy_precheck(
+            self._release,
+            force,
+            self._snapshot,
+            self._sw_deploy_precheck_callback(),
+        )
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def from_dict(self, data):
         """Returns the sw-deploy precheck step object initialized using the given
 
         dictionary.
         """
-        super(SwDeployPrecheckStep, self).from_dict(data)
+        super().from_dict(data)
         self._release = data["release"]
         return self
 
     def as_dict(self):
         """Represent the sw-deploy precheck step as a dictionary."""
 
-        data = super(SwDeployPrecheckStep, self).as_dict()
+        data = super().as_dict()
         data["release"] = self._release
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         return data
 
 
@@ -1113,11 +1098,9 @@ class SwDeployDoNothingStep(strategy.StrategyStep):
     """Do nothing, be happy."""
 
     def __init__(self, hosts):
-        super(SwDeployDoNothingStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_DEPLOY_DO_NOTHING, timeout_in_secs=10
-        )
-        self._host_names = list()
-        self._host_uuids = list()
+        super().__init__(STRATEGY_STEP_NAME.SW_DEPLOY_DO_NOTHING, timeout_in_secs=10)
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
 
@@ -1132,15 +1115,15 @@ class SwDeployDoNothingStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(SwDeployDoNothingStep, self).from_dict(data)
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         return self
 
     def as_dict(self):
         """Represent the upgrade hosts step as a dictionary."""
 
-        data = super(SwDeployDoNothingStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -1151,11 +1134,9 @@ class UpgradeHostsStep(strategy.StrategyStep):
     """Upgrade Hosts - Strategy Step."""
 
     def __init__(self, hosts):
-        super(UpgradeHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.UPGRADE_HOSTS, timeout_in_secs=self.TIMEOUT
-        )
-        self._host_names = list()
-        self._host_uuids = list()
+        super().__init__(STRATEGY_STEP_NAME.UPGRADE_HOSTS, timeout_in_secs=self.TIMEOUT)
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
         self._query_inprogress = False
@@ -1314,7 +1295,6 @@ class UpgradeHostsStep(strategy.StrategyStep):
         DLOG.warn("VIM restart detected. Set value to disable infinite loop")
         # Value to be set to False to avoid infinite loop
         self._skip_loop = False
-        return
 
     def handle_event(self, event, event_data=None):
         """Handle Host events."""
@@ -1401,8 +1381,8 @@ class UpgradeHostsStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(UpgradeHostsStep, self).from_dict(data)
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         self._query_inprogress = False
         self._step_complete = False
@@ -1421,7 +1401,7 @@ class UpgradeHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the upgrade hosts step as a dictionary."""
 
-        data = super(UpgradeHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -1440,9 +1420,7 @@ class UpgradeStartStep(strategy.StrategyStep):
     """Upgrade Start - Strategy Step."""
 
     def __init__(self, release, snapshot=False, timeout=None):
-        super(UpgradeStartStep, self).__init__(
-            STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT
-        )
+        super().__init__(STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
         self._snapshot = snapshot
@@ -1565,7 +1543,7 @@ class UpgradeStartStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(UpgradeStartStep, self).from_dict(data)
+        super().from_dict(data)
         self._release = data["release"]
         self._query_inprogress = False
         return self
@@ -1573,10 +1551,10 @@ class UpgradeStartStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the upgrade start step as a dictionary."""
 
-        data = super(UpgradeStartStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["release"] = self._release
         return data
 
@@ -1585,7 +1563,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
     """Upgrade Activate - Strategy Step."""
 
     def __init__(self, release):
-        super(UpgradeActivateStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.ACTIVATE_UPGRADE, timeout_in_secs=self.TIMEOUT
         )
 
@@ -1763,7 +1741,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(UpgradeActivateStep, self).from_dict(data)
+        super().from_dict(data)
         self._release = data["release"]
         self._query_inprogress = False
         self._retry_count = data["retry_count"]
@@ -1776,10 +1754,10 @@ class UpgradeActivateStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the upgrade activate step as a dictionary."""
 
-        data = super(UpgradeActivateStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["release"] = self._release
         data["retry_count"] = self._retry_count
         data["retry_sleep"] = self._retry_sleep
@@ -1793,9 +1771,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
     """Upgrade Complete - Strategy Step."""
 
     def __init__(self, release):
-        super(UpgradeCompleteStep, self).__init__(
-            STRATEGY_STEP_NAME.COMPLETE_UPGRADE, timeout_in_secs=300
-        )
+        super().__init__(STRATEGY_STEP_NAME.COMPLETE_UPGRADE, timeout_in_secs=300)
 
         self._release = release
 
@@ -1841,17 +1817,17 @@ class UpgradeCompleteStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(UpgradeCompleteStep, self).from_dict(data)
+        super().from_dict(data)
         self._release = data["release"]
         return self
 
     def as_dict(self):
         """Represent the upgrade complete step as a dictionary."""
 
-        data = super(UpgradeCompleteStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["release"] = self._release
         return data
 
@@ -1860,9 +1836,7 @@ class SwDeployDeleteStep(strategy.StrategyStep):
     """Upgrade Complete - Strategy Step."""
 
     def __init__(self, release):
-        super(SwDeployDeleteStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_DEPLOY_DELETE, timeout_in_secs=300
-        )
+        super().__init__(STRATEGY_STEP_NAME.SW_DEPLOY_DELETE, timeout_in_secs=300)
 
         self._release = release
 
@@ -1914,17 +1888,17 @@ class SwDeployDeleteStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(SwDeployDeleteStep, self).from_dict(data)
+        super().from_dict(data)
         self._release = data["release"]
         return self
 
     def as_dict(self):
         """Represent the deploy delete step as a dictionary."""
 
-        data = super(SwDeployDeleteStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["release"] = self._release
         return data
 
@@ -1933,9 +1907,7 @@ class SwDeployAbortStep(strategy.StrategyStep):
     """Software Deploy Abort - Strategy Step."""
 
     def __init__(self):
-        super(SwDeployAbortStep, self).__init__(
-            STRATEGY_STEP_NAME.SW_DEPLOY_ABORT, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.SW_DEPLOY_ABORT, timeout_in_secs=60)
 
     @coroutine
     def _sw_deploy_abort_callback(self):
@@ -1994,16 +1966,16 @@ class SwDeployAbortStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(SwDeployAbortStep, self).from_dict(data)
+        super().from_dict(data)
         return self
 
     def as_dict(self):
         """Represent the upgrade activate step as a dictionary."""
 
-        data = super(SwDeployAbortStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         return data
 
 
@@ -2011,7 +1983,7 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
     """Software Deploy Activate-Rollback - Strategy Step."""
 
     def __init__(self):
-        super(SwDeployActivateRollbackStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.SW_DEPLOY_ACTIVATE_ROLLBACK, timeout_in_secs=1830
         )
 
@@ -2127,17 +2099,17 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(SwDeployActivateRollbackStep, self).from_dict(data)
+        super().from_dict(data)
         self._query_inprogress = False
         return self
 
     def as_dict(self):
         """Represent the activate-rollback step as a dictionary."""
 
-        data = super(SwDeployActivateRollbackStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         return data
 
 
@@ -2145,15 +2117,15 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
     """Migrate Instances From Host - Strategy Step."""
 
     def __init__(self, hosts, instances):
-        super(MigrateInstancesFromHostStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.MIGRATE_INSTANCES_FROM_HOST, timeout_in_secs=1800
         )
         self._hosts = hosts
-        self._host_names = list()
+        self._host_names = []
         self._instances = instances
-        self._instance_names = list()
-        self._instance_uuids = list()
-        self._instance_host_names = dict()
+        self._instance_names = []
+        self._instance_uuids = []
+        self._instance_host_names = {}
         for host in hosts:
             self._host_names.append(host.name)
         for instance in instances:
@@ -2260,13 +2232,13 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         dictionary.
         """
 
-        super(MigrateInstancesFromHostStep, self).from_dict(data)
-        self._hosts = list()
+        super().from_dict(data)
+        self._hosts = []
         self._host_names = data["host_names"]
         self._instance_uuids = data["entity_uuids"]
-        self._instances = list()
-        self._instance_names = list()
-        self._instance_host_names = dict()
+        self._instances = []
+        self._instance_names = []
+        self._instance_host_names = {}
 
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -2290,7 +2262,7 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the migrate instances from hosts step as a dictionary."""
 
-        data = super(MigrateInstancesFromHostStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
         data["entity_uuids"] = self._instance_uuids
@@ -2303,13 +2275,11 @@ class MigrateInstancesStep(strategy.StrategyStep):
     """Migrate Instances - Strategy Step."""
 
     def __init__(self, instances):
-        super(MigrateInstancesStep, self).__init__(
-            STRATEGY_STEP_NAME.MIGRATE_INSTANCES, timeout_in_secs=1800
-        )
+        super().__init__(STRATEGY_STEP_NAME.MIGRATE_INSTANCES, timeout_in_secs=1800)
         self._instances = instances
-        self._instance_names = list()
-        self._instance_uuids = list()
-        self._instance_host_names = dict()
+        self._instance_names = []
+        self._instance_uuids = []
+        self._instance_host_names = {}
         for instance in instances:
             self._instance_names.append(instance.name)
             self._instance_uuids.append(instance.uuid)
@@ -2402,11 +2372,11 @@ class MigrateInstancesStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(MigrateInstancesStep, self).from_dict(data)
+        super().from_dict(data)
         self._instance_uuids = data["entity_uuids"]
-        self._instances = list()
-        self._instance_names = list()
-        self._instance_host_names = dict()
+        self._instances = []
+        self._instance_names = []
+        self._instance_host_names = {}
 
         instance_table = tables.tables_get_instance_table()
         for instance_uuid in self._instance_uuids:
@@ -2424,7 +2394,7 @@ class MigrateInstancesStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the migrate instances step as a dictionary."""
 
-        data = super(MigrateInstancesStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
         data["entity_uuids"] = self._instance_uuids
@@ -2436,12 +2406,10 @@ class StartInstancesStep(strategy.StrategyStep):
     """Start Instances - Strategy Step."""
 
     def __init__(self, instances):
-        super(StartInstancesStep, self).__init__(
-            STRATEGY_STEP_NAME.START_INSTANCES, timeout_in_secs=900
-        )
+        super().__init__(STRATEGY_STEP_NAME.START_INSTANCES, timeout_in_secs=900)
         self._instances = instances
-        self._instance_names = list()
-        self._instance_uuids = list()
+        self._instance_names = []
+        self._instance_uuids = []
         for instance in instances:
             self._instance_names.append(instance.name)
             self._instance_uuids.append(instance.uuid)
@@ -2509,10 +2477,10 @@ class StartInstancesStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(StartInstancesStep, self).from_dict(data)
+        super().from_dict(data)
         self._instance_uuids = data["entity_uuids"]
-        self._instances = list()
-        self._instance_names = list()
+        self._instances = []
+        self._instance_names = []
 
         instance_table = tables.tables_get_instance_table()
         for instance_uuid in self._instance_uuids:
@@ -2525,7 +2493,7 @@ class StartInstancesStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the start instances step as a dictionary."""
 
-        data = super(StartInstancesStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
         data["entity_uuids"] = self._instance_uuids
@@ -2536,13 +2504,11 @@ class StopInstancesStep(strategy.StrategyStep):
     """Stop Instances - Strategy Step."""
 
     def __init__(self, instances):
-        super(StopInstancesStep, self).__init__(
-            STRATEGY_STEP_NAME.STOP_INSTANCES, timeout_in_secs=900
-        )
+        super().__init__(STRATEGY_STEP_NAME.STOP_INSTANCES, timeout_in_secs=900)
         self._instances = instances
-        self._instance_names = list()
-        self._instance_uuids = list()
-        self._instance_host_names = dict()
+        self._instance_names = []
+        self._instance_uuids = []
+        self._instance_host_names = {}
         for instance in instances:
             self._instance_names.append(instance.name)
             self._instance_uuids.append(instance.uuid)
@@ -2632,11 +2598,11 @@ class StopInstancesStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(StopInstancesStep, self).from_dict(data)
+        super().from_dict(data)
         self._instance_uuids = data["entity_uuids"]
-        self._instances = list()
-        self._instance_names = list()
-        self._instance_host_names = dict()
+        self._instances = []
+        self._instance_names = []
+        self._instance_host_names = {}
 
         instance_table = tables.tables_get_instance_table()
         for instance_uuid in self._instance_uuids:
@@ -2655,7 +2621,7 @@ class StopInstancesStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the stop instances step as a dictionary."""
 
-        data = super(StopInstancesStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "instances"
         data["entity_names"] = self._instance_names
         data["entity_uuids"] = self._instance_uuids
@@ -2667,7 +2633,7 @@ class SystemStabilizeStep(strategy.StrategyStep):
     """System Stabilize - Strategy Step."""
 
     def __init__(self, timeout_in_secs=60):
-        super(SystemStabilizeStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.SYSTEM_STABILIZE, timeout_in_secs=timeout_in_secs
         )
 
@@ -2708,10 +2674,10 @@ class SystemStabilizeStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the system stabilize step as a dictionary."""
 
-        data = super(SystemStabilizeStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         return data
 
 
@@ -2721,9 +2687,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
     def __init__(
         self, fail_on_alarms=False, ignore_alarms=None, ignore_alarms_conditional=None
     ):
-        super(QueryAlarmsStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_ALARMS, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.QUERY_ALARMS, timeout_in_secs=60)
         if ignore_alarms is None:
             ignore_alarms = []
         self._fail_on_alarms = fail_on_alarms
@@ -2803,7 +2767,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
         from nfv_vim import nfvi
 
         DLOG.info("Step (%s) apply." % self._name)
-        self.strategy.nfvi_alarms = list()
+        self.strategy.nfvi_alarms = []
         nfvi.nfvi_get_alarms(self._query_alarms_callback("platform"))
         if not nfvi.nfvi_fault_mgmt_plugin_disabled():
             nfvi.nfvi_get_openstack_alarms(self._query_alarms_callback("openstack"))
@@ -2814,7 +2778,7 @@ class QueryAlarmsStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(QueryAlarmsStep, self).from_dict(data)
+        super().from_dict(data)
         self._fail_on_alarms = data["fail_on_alarms"]
         self._ignore_alarms = data["ignore_alarms"]
         self._ignore_alarms_conditional = data.get("ignore_alarms_conditional", [])
@@ -2823,10 +2787,10 @@ class QueryAlarmsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the query alarms step as a dictionary."""
 
-        data = super(QueryAlarmsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["fail_on_alarms"] = self._fail_on_alarms
         data["ignore_alarms"] = self._ignore_alarms
         data["ignore_alarms_conditional"] = self._ignore_alarms_conditional
@@ -2837,7 +2801,7 @@ class WaitDataSyncStep(strategy.StrategyStep):
     """Alarm Wait - Strategy Step."""
 
     def __init__(self, timeout_in_secs=300, ignore_alarms=None):
-        super(WaitDataSyncStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.WAIT_DATA_SYNC, timeout_in_secs=timeout_in_secs
         )
         if ignore_alarms is None:
@@ -2857,7 +2821,7 @@ class WaitDataSyncStep(strategy.StrategyStep):
 
         if response["completed"]:
             if self.strategy is not None:
-                nfvi_alarms = list()
+                nfvi_alarms = []
                 for nfvi_alarm in response["result-data"]:
                     if nfvi_alarm.alarm_id in self._ignore_alarms:
                         DLOG.info(
@@ -2931,7 +2895,7 @@ class WaitDataSyncStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(WaitDataSyncStep, self).from_dict(data)
+        super().from_dict(data)
         self._ignore_alarms = data["ignore_alarms"]
         self._wait_time = 0
         self._query_inprogress = False
@@ -2940,10 +2904,10 @@ class WaitDataSyncStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the alarm wait step as a dictionary."""
 
-        data = super(WaitDataSyncStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["ignore_alarms"] = self._ignore_alarms
         return data
 
@@ -2958,7 +2922,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         ignore_alarms=None,
         ignore_alarms_conditional=None,
     ):
-        super(WaitAlarmsClearStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.WAIT_ALARMS_CLEAR, timeout_in_secs=timeout_in_secs
         )
         self._first_query_delay_in_secs = first_query_delay_in_secs
@@ -2984,7 +2948,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
 
         if response["completed"]:
             if self.strategy is not None:
-                nfvi_alarms = list()
+                nfvi_alarms = []
                 for nfvi_alarm in response["result-data"]:
                     if nfvi_alarm.alarm_id in self._ignore_alarms:
                         DLOG.info(
@@ -3099,7 +3063,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
 
         dictionary.
         """
-        super(WaitAlarmsClearStep, self).from_dict(data)
+        super().from_dict(data)
         self._first_query_delay_in_secs = data["first_query_delay_in_secs"]
         self._ignore_alarms = data["ignore_alarms"]
         self._ignore_alarms_conditional = data.get("ignore_alarms_conditional", [])
@@ -3110,10 +3074,10 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the alarm wait step as a dictionary."""
 
-        data = super(WaitAlarmsClearStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["first_query_delay_in_secs"] = self._first_query_delay_in_secs
         data["ignore_alarms"] = self._ignore_alarms
         data["ignore_alarms_conditional"] = self._ignore_alarms_conditional
@@ -3122,7 +3086,7 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
     def timeout(self):
         """Strategy Step Timeout Override."""
 
-        result, _ = super(WaitAlarmsClearStep, self).timeout()
+        result, _ = super().timeout()
         reason = (
             "Unignored alarms did not clear before timeout: "
             f"{json.dumps([v.as_dict() for v in self.strategy.nfvi_alarms], indent=2)}"
@@ -3134,9 +3098,7 @@ class QuerySwPatchesStep(strategy.StrategyStep):
     """Query Software Patches - Strategy Step."""
 
     def __init__(self):
-        super(QuerySwPatchesStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_SW_PATCHES, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.QUERY_SW_PATCHES, timeout_in_secs=60)
 
     @coroutine
     def _query_sw_patches_callback(self):
@@ -3167,10 +3129,10 @@ class QuerySwPatchesStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the query software update step as a dictionary."""
 
-        data = super(QuerySwPatchesStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         return data
 
 
@@ -3178,9 +3140,7 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
     """Query Software Patch Hosts - Strategy Step."""
 
     def __init__(self):
-        super(QuerySwPatchHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_SW_PATCH_HOSTS, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.QUERY_SW_PATCH_HOSTS, timeout_in_secs=60)
 
     @coroutine
     def _query_hosts_callback(self):
@@ -3211,10 +3171,10 @@ class QuerySwPatchHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the query software patches hosts step as a dictionary."""
 
-        data = super(QuerySwPatchHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         return data
 
 
@@ -3222,7 +3182,7 @@ class QuerySystemConfigUpdateHostsStep(AbstractStrategyStep):
     """Query System Config Update Hosts - Strategy Step."""
 
     def __init__(self):
-        super(QuerySystemConfigUpdateHostsStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.QUERY_SYSTEM_CONFIG_UPDATE_HOSTS, timeout_in_secs=60
         )
 
@@ -3261,12 +3221,10 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
     # hostname is added to the strategy's fw_update_hosts list.
 
     def __init__(self, host):
-        super(QueryFwUpdateHostStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_FW_UPDATE_HOST, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.QUERY_FW_UPDATE_HOST, timeout_in_secs=60)
 
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         self._host_names.append(host.name)
         self._host_uuids.append(host.uuid)
 
@@ -3345,7 +3303,7 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
     def from_dict(self, data):
         """Load the firmware update host device list step."""
 
-        super(QueryFwUpdateHostStep, self).from_dict(data)
+        super().from_dict(data)
         self._host_names = data["entity_names"]
         self._host_uuids = data["entity_uuids"]
         return self
@@ -3353,7 +3311,7 @@ class QueryFwUpdateHostStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the object as a dictionary for the strategy."""
 
-        data = super(QueryFwUpdateHostStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -3365,16 +3323,14 @@ class FwUpdateHostsStep(strategy.StrategyStep):
 
     # This step starts the firmware update process for the passed in hosts
     def __init__(self, hosts):
-        super(FwUpdateHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.FW_UPDATE_HOSTS, timeout_in_secs=3600
-        )
+        super().__init__(STRATEGY_STEP_NAME.FW_UPDATE_HOSTS, timeout_in_secs=3600)
 
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         self._monitoring_fw_update = False
         self._wait_time = 0
-        self._host_completed = dict()
+        self._host_completed = {}
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -3515,7 +3471,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         from nfv_vim import directors
 
         DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
-
+        # pylint: disable-next=use-implicit-booleaness-not-len
         if len(self._host_names):
             host_director = directors.get_host_director()
             operation = host_director.fw_update_hosts(self._host_names)
@@ -3580,7 +3536,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
         """Returns the abort step with applicable host list."""
 
         # abort all hosts that are not in the completed state
-        hosts = list()
+        hosts = []
         for host in self._hosts:
             if self._host_completed[host.name][0] is False:
                 hosts.append(host)
@@ -3591,10 +3547,10 @@ class FwUpdateHostsStep(strategy.StrategyStep):
 
         initialized using the given dictionary.
         """
-        super(FwUpdateHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
-        self._host_completed = dict()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
+        self._host_completed = {}
         self._wait_time = 0
         self._monitoring_fw_update = False
 
@@ -3611,7 +3567,7 @@ class FwUpdateHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the firmware update hosts step as a dictionary."""
 
-        data = super(FwUpdateHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -3623,17 +3579,15 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
     """Firmware Update Abort Hosts Step."""
 
     def __init__(self, hosts):
-        super(FwUpdateAbortHostsStep, self).__init__(
-            STRATEGY_STEP_NAME.FW_UPDATE_ABORT_HOSTS, timeout_in_secs=600
-        )
+        super().__init__(STRATEGY_STEP_NAME.FW_UPDATE_ABORT_HOSTS, timeout_in_secs=600)
 
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
 
         self._wait_time = 0
 
-        self._host_completed = dict()
+        self._host_completed = {}
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -3681,10 +3635,10 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
     def from_dict(self, data):
         """Load the firmware update abort hosts step object."""
 
-        super(FwUpdateAbortHostsStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
-        self._host_completed = dict()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
+        self._host_completed = {}
         self._wait_time = 0
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
@@ -3699,7 +3653,7 @@ class FwUpdateAbortHostsStep(strategy.StrategyStep):
     def as_dict(self):
         """Save the firmware update abort hosts step as a dictionary."""
 
-        data = super(FwUpdateAbortHostsStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -3711,9 +3665,7 @@ class QueryUpgradeStep(strategy.StrategyStep):
     """Query Upgrade - Strategy Step."""
 
     def __init__(self, release):
-        super(QueryUpgradeStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_UPGRADE, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.QUERY_UPGRADE, timeout_in_secs=60)
 
         self._release = release
 
@@ -3753,10 +3705,10 @@ class QueryUpgradeStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the query upgrade step as a dictionary."""
 
-        data = super(QueryUpgradeStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = ""
-        data["entity_names"] = list()
-        data["entity_uuids"] = list()
+        data["entity_names"] = []
+        data["entity_uuids"] = []
         data["release"] = None
         return data
 
@@ -3765,12 +3717,12 @@ class DisableHostServicesStep(strategy.StrategyStep):
     """Disable Host Services - Strategy Step."""
 
     def __init__(self, hosts, service):
-        super(DisableHostServicesStep, self).__init__(
+        super().__init__(
             "%s" % STRATEGY_STEP_NAME.DISABLE_HOST_SERVICES, timeout_in_secs=180
         )
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         self._service = service
         for host in hosts:
             self._host_names.append(host.name)
@@ -3846,9 +3798,9 @@ class DisableHostServicesStep(strategy.StrategyStep):
     def from_dict(self, data):
         """Returns the object initialized using the given dictionary."""
 
-        super(DisableHostServicesStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         self._service = data["entity_service"]
         host_table = tables.tables_get_host_table()
@@ -3862,7 +3814,7 @@ class DisableHostServicesStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the object as a dictionary."""
 
-        data = super(DisableHostServicesStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -3874,12 +3826,12 @@ class EnableHostServicesStep(strategy.StrategyStep):
     """Enable Host Services - Strategy Step."""
 
     def __init__(self, hosts, service):
-        super(EnableHostServicesStep, self).__init__(
+        super().__init__(
             "%s" % STRATEGY_STEP_NAME.ENABLE_HOST_SERVICES, timeout_in_secs=180
         )
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         self._service = service
         for host in hosts:
             self._host_names.append(host.name)
@@ -3950,9 +3902,9 @@ class EnableHostServicesStep(strategy.StrategyStep):
     def from_dict(self, data):
         """Returns the object initialized using the given dictionary."""
 
-        super(EnableHostServicesStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         self._service = data["entity_service"]
         host_table = tables.tables_get_host_table()
@@ -3966,7 +3918,7 @@ class EnableHostServicesStep(strategy.StrategyStep):
     def as_dict(self):
         """Represent the object as a dictionary."""
 
-        data = super(EnableHostServicesStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -3978,9 +3930,7 @@ class ApplySwPatchesStep(AbstractStrategyStep):
     """Apply Patches using patch API."""
 
     def __init__(self, patches_to_apply):
-        super(ApplySwPatchesStep, self).__init__(
-            STRATEGY_STEP_NAME.APPLY_PATCHES, timeout_in_secs=600
-        )
+        super().__init__(STRATEGY_STEP_NAME.APPLY_PATCHES, timeout_in_secs=600)
         self._patches_to_apply = patches_to_apply
 
     @coroutine
@@ -4011,7 +3961,7 @@ class ApplySwPatchesStep(AbstractStrategyStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(ApplySwPatchesStep, self).from_dict(data)
+        super().from_dict(data)
         # only the names are serialized
         self._patches_to_apply = data["entity_names"]
         return self
@@ -4019,7 +3969,7 @@ class ApplySwPatchesStep(AbstractStrategyStep):
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(ApplySwPatchesStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "patches"
         data["entity_names"] = self._patches_to_apply
         # there are no entity_uuids
@@ -4033,7 +3983,7 @@ class QueryKubeRootcaUpdateStep(AbstractStrategyStep):
     """Query Kube RootCA Update."""
 
     def __init__(self):
-        super(QueryKubeRootcaUpdateStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_UPDATE, timeout_in_secs=60
         )
 
@@ -4068,7 +4018,7 @@ class QueryKubeRootcaHostUpdatesStep(AbstractStrategyStep):
     """Query Kube Rootca Host Update list."""
 
     def __init__(self):
-        super(QueryKubeRootcaHostUpdatesStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.QUERY_KUBE_ROOTCA_HOST_UPDATES, timeout_in_secs=60
         )
 
@@ -4125,7 +4075,7 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
         fail_state,
         timeout_in_secs=600,
     ):
-        super(AbstractKubeRootcaUpdateStep, self).__init__(step_name, timeout_in_secs)
+        super().__init__(step_name, timeout_in_secs)
         # _wait_time and _query_inprogress are NOT persisted
         self._wait_time = 0
         self._query_inprogress = False
@@ -4218,7 +4168,7 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractKubeRootcaUpdateStep, self).from_dict(data)
+        super().from_dict(data)
         # these two attributes are not persisted
         self._wait_time = 0
         self._query_inprogress = False
@@ -4231,7 +4181,7 @@ class AbstractKubeRootcaUpdateStep(AbstractStrategyStep):
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(AbstractKubeRootcaUpdateStep, self).as_dict()
+        data = super().as_dict()
         data["success_state"] = self._success_state
         data["in_progress_state"] = self._in_progress_state
         data["fail_state"] = self._fail_state
@@ -4249,7 +4199,7 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
         update_type,
         timeout_in_secs=600,
     ):
-        super(AbstractKubeRootcaUpdateHostStep, self).__init__(
+        super().__init__(
             step_name,
             success_state,
             in_progress_state,
@@ -4257,8 +4207,8 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
             timeout_in_secs=timeout_in_secs,
         )
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -4267,9 +4217,9 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractKubeRootcaUpdateHostStep, self).from_dict(data)
-        self._hosts = list()
-        self._host_uuids = list()
+        super().from_dict(data)
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -4283,7 +4233,7 @@ class AbstractKubeRootcaUpdateHostStep(AbstractKubeRootcaUpdateStep):
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(AbstractKubeRootcaUpdateHostStep, self).as_dict()
+        data = super().as_dict()
         data["entity_type"] = "hosts"
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
@@ -4396,7 +4346,7 @@ class KubeRootcaUpdateHostTrustBothcasStep(AbstractKubeRootcaUpdateHostStep):
 
         objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
-        super(KubeRootcaUpdateHostTrustBothcasStep, self).__init__(
+        super().__init__(
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTBOTHCAS,
             objects_v1.KUBE_ROOTCA_UPDATED_HOST_TRUSTBOTHCAS,
@@ -4419,7 +4369,7 @@ class KubeRootcaUpdateHostUpdateCertsStep(AbstractKubeRootcaUpdateHostStep):
 
         objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
-        super(KubeRootcaUpdateHostUpdateCertsStep, self).__init__(
+        super().__init__(
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_UPDATECERTS,
             objects_v1.KUBE_ROOTCA_UPDATED_HOST_UPDATECERTS,
@@ -4442,7 +4392,7 @@ class KubeRootcaUpdateHostTrustNewcaStep(AbstractKubeRootcaUpdateHostStep):
 
         objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
-        super(KubeRootcaUpdateHostTrustNewcaStep, self).__init__(
+        super().__init__(
             hosts,
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_HOST_TRUSTNEWCA,
             objects_v1.KUBE_ROOTCA_UPDATED_HOST_TRUSTNEWCA,
@@ -4469,7 +4419,7 @@ class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
         phase,
         timeout_in_secs=3600,
     ):
-        super(AbstractKubeRootcaUpdatePodsStep, self).__init__(
+        super().__init__(
             step_name,
             success_state,
             in_progress_state,
@@ -4481,14 +4431,14 @@ class AbstractKubeRootcaUpdatePodsStep(AbstractKubeRootcaUpdateStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractKubeRootcaUpdatePodsStep, self).from_dict(data)
+        super().from_dict(data)
         self._phase = data["phase"]
         return self
 
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(AbstractKubeRootcaUpdatePodsStep, self).as_dict()
+        data = super().as_dict()
         data["phase"] = self._phase
         return data
 
@@ -4526,7 +4476,7 @@ class KubeRootcaUpdatePodsTrustBothcasStep(AbstractKubeRootcaUpdatePodsStep):
 
         objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
-        super(KubeRootcaUpdatePodsTrustBothcasStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTBOTHCAS,
             objects_v1.KUBE_ROOTCA_UPDATED_PODS_TRUSTBOTHCAS,
             objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTBOTHCAS,
@@ -4543,7 +4493,7 @@ class KubeRootcaUpdatePodsTrustNewcaStep(AbstractKubeRootcaUpdatePodsStep):
 
         objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
-        super(KubeRootcaUpdatePodsTrustNewcaStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_PODS_TRUSTNEWCA,
             objects_v1.KUBE_ROOTCA_UPDATED_PODS_TRUSTNEWCA,
             objects_v1.KUBE_ROOTCA_UPDATING_PODS_TRUSTNEWCA,
@@ -4560,7 +4510,7 @@ class KubeRootcaUpdateStartStep(AbstractKubeRootcaUpdateStep):
 
         objects_v1 = nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE
 
-        super(KubeRootcaUpdateStartStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_START,
             objects_v1.KUBE_ROOTCA_UPDATE_STARTED,
             None,  # sysinv API does not have in-progress state for this action
@@ -4603,7 +4553,7 @@ class KubeRootcaUpdateAbortStep(AbstractKubeRootcaUpdateStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubeRootcaUpdateAbortStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_ABORT,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_ABORTED,
             None,  # sysinv API does not have in-progress state for this action
@@ -4656,7 +4606,7 @@ class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubeRootcaUpdateCompleteStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_COMPLETE,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_COMPLETED,
             None,  # sysinv API does not have in-progress state for this action
@@ -4718,7 +4668,7 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
     def __init__(self, expiry_date, subject):
         from nfv_vim import nfvi
 
-        super(KubeRootcaUpdateGenerateCertStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_ROOTCA_UPDATE_GENERATE_CERT,
             nfvi.objects.v1.KUBE_ROOTCA_UPDATE_STATE.KUBE_ROOTCA_UPDATE_CERT_GENERATED,
             None,  # sysinv API does not have in-progress state for this action
@@ -4758,7 +4708,7 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(KubeRootcaUpdateGenerateCertStep, self).from_dict(data)
+        super().from_dict(data)
         self._expiry_date = data["expiry_date"]
         self._subject = data["subject"]
         return self
@@ -4766,7 +4716,7 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
     def as_dict(self):
         """Represent the kube upgrade step as a dictionary."""
 
-        data = super(KubeRootcaUpdateGenerateCertStep, self).as_dict()
+        data = super().as_dict()
         data["expiry_date"] = self._expiry_date
         data["subject"] = self._subject
         return data
@@ -4779,9 +4729,7 @@ class QueryKubeUpgradeStep(AbstractStrategyStep):
     """Query Kube Upgrade."""
 
     def __init__(self):
-        super(QueryKubeUpgradeStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE, timeout_in_secs=60)
 
     @coroutine
     def _get_kube_upgrade_callback(self):
@@ -4817,9 +4765,7 @@ class QueryKubeVersionsStep(AbstractStrategyStep):
     """
 
     def __init__(self):
-        super(QueryKubeVersionsStep, self).__init__(
-            STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS, timeout_in_secs=60
-        )
+        super().__init__(STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS, timeout_in_secs=60)
 
     @coroutine
     def _query_callback(self):
@@ -4854,7 +4800,7 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
     MAX_RETRIES = 3
 
     def __init__(self, retry_count=MAX_RETRIES):
-        super(QueryKubeHostUpgradeStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE, timeout_in_secs=200
         )
         self._retry_count = retry_count
@@ -4922,7 +4868,7 @@ class QueryKubeHostUpgradeStep(AbstractStrategyStep):
 
 class AbstractKubeUpgradeStep(AbstractStrategyStep):
     def __init__(self, step_name, success_state, fail_state, timeout_in_secs=600):
-        super(AbstractKubeUpgradeStep, self).__init__(step_name, timeout_in_secs)
+        super().__init__(step_name, timeout_in_secs)
         # These two attributes are not persisted
         self._wait_time = 0
         self._query_inprogress = False
@@ -4984,7 +4930,6 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
                         self._fail_state,
                     )
                 )
-                pass
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response["reason"])
@@ -5020,7 +4965,7 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractKubeUpgradeStep, self).from_dict(data)
+        super().from_dict(data)
         # these two attributes are not persisted
         self._wait_time = 0
         self._query_inprogress = False
@@ -5032,7 +4977,7 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
     def as_dict(self):
         """Represent the kube upgrade step as a dictionary."""
 
-        data = super(AbstractKubeUpgradeStep, self).as_dict()
+        data = super().as_dict()
         data["success_state"] = self._success_state
         data["fail_state"] = self._fail_state
         return data
@@ -5044,7 +4989,7 @@ class KubeUpgradeAbortStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubeUpgradeAbortStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_ABORT,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTED,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTING_FAILED,
@@ -5105,7 +5050,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
 
         from nfv_vim import nfvi
 
-        super(KubeUpgradeStartStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_START,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
             None,
@@ -5122,7 +5067,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(KubeUpgradeStartStep, self).from_dict(data)
+        super().from_dict(data)
         self._to_version = data["to_version"]
         self._force = data["force"]
         return self
@@ -5130,7 +5075,7 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
     def as_dict(self):
         """Represent the kube upgrade step as a dictionary."""
 
-        data = super(KubeUpgradeStartStep, self).as_dict()
+        data = super().as_dict()
         data["to_version"] = self._to_version
         data["force"] = self._force
         return data
@@ -5175,7 +5120,7 @@ class KubeUpgradeCleanupAbortedStep(AbstractKubeUpgradeStep):
     # todo(abailey): this class could be replaced by KubeUpgradeCleanupStep
     # if it was enhanced to take an optional 'filter'
     def __init__(self):
-        super(KubeUpgradeCleanupAbortedStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP_ABORTED,
             None,  # there is no success state for this cleanup activity
             None,
@@ -5227,7 +5172,7 @@ class KubeUpgradeCleanupStep(AbstractKubeUpgradeStep):
     """Kube Upgrade Cleanup - Strategy Step."""
 
     def __init__(self):
-        super(KubeUpgradeCleanupStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP,
             None,  # there is no success state for this cleanup activity
             None,
@@ -5269,7 +5214,7 @@ class KubeUpgradeCompleteStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubeUpgradeCompleteStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_COMPLETE,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
             None,
@@ -5315,7 +5260,7 @@ class KubeUpgradeDownloadImagesStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubeUpgradeDownloadImagesStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_DOWNLOAD_IMAGES,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADED_IMAGES,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_DOWNLOADING_IMAGES_FAILED,
@@ -5358,7 +5303,7 @@ class KubePreApplicationUpdateStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubePreApplicationUpdateStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_PRE_APPLICATION_UPDATE,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATED_APPS,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_PRE_UPDATING_APPS_FAILED,
@@ -5401,7 +5346,7 @@ class KubePostApplicationUpdateStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubePostApplicationUpdateStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_POST_APPLICATION_UPDATE,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED,
@@ -5444,7 +5389,7 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubeUpgradeNetworkingStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_NETWORKING,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED,
@@ -5487,7 +5432,7 @@ class KubeUpgradeStorageStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
-        super(KubeUpgradeStorageStep, self).__init__(
+        super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_STORAGE,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_STORAGE,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_STORAGE_FAILED,
@@ -5538,16 +5483,16 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
         fail_state,
         timeout_in_secs=600,
     ):
-        super(AbstractKubeHostUpgradeStep, self).__init__(
+        super().__init__(
             step_name, success_state, fail_state, timeout_in_secs=timeout_in_secs
         )
         self._to_version = to_version
         self._force = force
         # This class accepts only a single host
         # but serializes as a list of hosts (list size of one)
-        self._hosts = list()
-        self._host_names = list()
-        self._host_uuids = list()
+        self._hosts = []
+        self._host_names = []
+        self._host_uuids = []
         self._hosts.append(host)
         self._host_names.append(host.name)
         self._host_uuids.append(host.uuid)
@@ -5555,11 +5500,11 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractKubeHostUpgradeStep, self).from_dict(data)
+        super().from_dict(data)
         self._to_version = data["to_version"]
         self._force = data["force"]
-        self._hosts = list()
-        self._host_uuids = list()
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -5572,7 +5517,7 @@ class AbstractKubeHostUpgradeStep(AbstractKubeUpgradeStep):
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(AbstractKubeHostUpgradeStep, self).as_dict()
+        data = super().as_dict()
         data["to_version"] = self._to_version
         data["force"] = self._force
         data["entity_type"] = "hosts"
@@ -5599,14 +5544,14 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
         fail_state,
         timeout_in_secs=600,
     ):
-        super(AbstractKubeHostListUpgradeStep, self).__init__(
+        super().__init__(
             step_name, success_state, fail_state, timeout_in_secs=timeout_in_secs
         )
         self._to_version = to_version
         self._force = force
         self._hosts = hosts
-        self._host_names = list()
-        self._host_uuids = list()
+        self._host_names = []
+        self._host_uuids = []
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
@@ -5614,11 +5559,11 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
-        super(AbstractKubeHostListUpgradeStep, self).from_dict(data)
+        super().from_dict(data)
         self._to_version = data["to_version"]
         self._force = data["force"]
-        self._hosts = list()
-        self._host_uuids = list()
+        self._hosts = []
+        self._host_uuids = []
         self._host_names = data["entity_names"]
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -5631,7 +5576,7 @@ class AbstractKubeHostListUpgradeStep(AbstractKubeUpgradeStep):
     def as_dict(self):
         """Represent the step as a dictionary."""
 
-        data = super(AbstractKubeHostListUpgradeStep, self).as_dict()
+        data = super().as_dict()
         data["to_version"] = self._to_version
         data["force"] = self._force
         data["entity_type"] = "hosts"
@@ -5652,7 +5597,7 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
         target_failure_state,
         timeout_in_secs=600,
     ):
-        super(KubeHostCordonStep, self).__init__(
+        super().__init__(
             host,
             to_version,
             force,
@@ -5684,9 +5629,7 @@ class KubeHostCordonStep(AbstractKubeHostUpgradeStep):
                 )
                 return True
         # return handle_event of parent class
-        return super(KubeHostCordonStep, self).handle_event(
-            event, event_data=event_data
-        )
+        return super().handle_event(event, event_data=event_data)
 
     def apply(self):
         """Kube Host Cordon."""
@@ -5711,7 +5654,7 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
         target_failure_state,
         timeout_in_secs=600,
     ):
-        super(KubeHostUncordonStep, self).__init__(
+        super().__init__(
             host,
             to_version,
             force,
@@ -5743,9 +5686,7 @@ class KubeHostUncordonStep(AbstractKubeHostUpgradeStep):
                 )
                 return True
         # return handle_event of parent class
-        return super(KubeHostUncordonStep, self).handle_event(
-            event, event_data=event_data
-        )
+        return super().handle_event(event, event_data=event_data)
 
     def apply(self):
         """Kube Host Uncordon."""
@@ -5773,7 +5714,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         target_failure_state,
         timeout_in_secs=420,
     ):
-        super(KubeHostUpgradeControlPlaneStep, self).__init__(
+        super().__init__(
             host,
             to_version,
             force,
@@ -5805,9 +5746,7 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
                 )
                 return True
         # return handle_event of parent class
-        return super(KubeHostUpgradeControlPlaneStep, self).handle_event(
-            event, event_data=event_data
-        )
+        return super().handle_event(event, event_data=event_data)
 
     def apply(self):
         """Kube Host Upgrade Control Plane."""
@@ -5830,7 +5769,7 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
     """
 
     def __init__(self, hosts, to_version, force=True):
-        super(KubeHostUpgradeKubeletStep, self).__init__(
+        super().__init__(
             hosts,
             to_version,
             force,

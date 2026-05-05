@@ -12,8 +12,8 @@ class ObjectData(collections.abc.MutableMapping):
     def __init__(self, version, data=None):
         """Initialize Object Data."""
 
-        super(ObjectData, self).__setattr__("_version", version)
-        super(ObjectData, self).__setattr__("_fields", dict())
+        super().__setattr__("_version", version)
+        super().__setattr__("_fields", {})
 
         if data is not None:
             for key, value in list(data.items()):
@@ -29,13 +29,13 @@ class ObjectData(collections.abc.MutableMapping):
         """Set value in dictionary and as an attribute."""
 
         self._fields[key] = value
-        super(ObjectData, self).__setattr__(key, value)
+        super().__setattr__(key, value)
 
     def _do_delete(self, key):
         """Delete key from dictionary and as an attribute."""
 
         del self._fields[key]
-        super(ObjectData, self).__delattr__(key)
+        super().__delattr__(key)
 
     def __getattr___(self, key):
         """Get an attribute."""

@@ -17,7 +17,7 @@ def strategy_phase_rebuild_from_dict(data):
     if not data:
         return None
 
-    stages = list()
+    stages = []
     for stage_data in data["stages"]:
         stage = strategy_stage_rebuild_from_dict(stage_data)
         stages.append(stage)

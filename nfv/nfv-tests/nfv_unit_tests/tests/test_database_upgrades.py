@@ -8,28 +8,27 @@ import shutil
 import subprocess
 import tempfile
 
+from nfv_unit_tests.tests import testcase
 from nfv_vim import database
 from nfv_vim import tables
-
-from nfv_unit_tests.tests import testcase
 
 
 class TestNFVDatabaseUpgrade(testcase.NFVTestCase):
     def setUp(self):
-        super(TestNFVDatabaseUpgrade, self).setUp()
+        super().setUp()
         root_dir = os.environ["VIRTUAL_ENV"]
         # create a directory to hold the DB, randomly named, under the tox env
         self.db_dir = tempfile.mkdtemp(dir=root_dir)
 
     def tearDown(self):
-        super(TestNFVDatabaseUpgrade, self).tearDown()
+        super().tearDown()
         shutil.rmtree(self.db_dir)
 
     def test_nfv_vim_database_load_and_dump(self):
         """Test VIM database load."""
 
         root_dir = os.environ["VIRTUAL_ENV"]
-        config = dict()
+        config = {}
         config["database_dir"] = self.db_dir
         database.database_initialize(config)
         data_input = "%s/nfv_vim_db_stx_25.09" % root_dir
@@ -44,18 +43,14 @@ class TestNFVDatabaseUpgrade(testcase.NFVTestCase):
         root_dir = os.environ["VIRTUAL_ENV"]
         # stage some old data
         devnull = open(os.devnull, "w")
-        try:
-            vim_cmd = (
-                "nfv-vim-manage db-load-data -d %s "
-                "-f %s/nfv_vim_db_stx_25.09" % (self.db_dir, root_dir)
-            )
-
-            subprocess.check_call([vim_cmd], shell=True, stderr=devnull)
-        except subprocess.CalledProcessError:
-            raise
+        vim_cmd = "nfv-vim-manage db-load-data -d %s " "-f %s/nfv_vim_db_stx_25.09" % (
+            self.db_dir,
+            root_dir,
+        )
+        subprocess.check_call([vim_cmd], shell=True, stderr=devnull)
 
         # migrate the old data
-        config = dict()
+        config = {}
         config["database_dir"] = self.db_dir
         database.database_initialize(config)
         database.database_migrate_data()

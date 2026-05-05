@@ -3,9 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from nfv_vim.objects._object import ObjectData
-
 from nfv_common import debug
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.volume")
 
@@ -14,7 +13,7 @@ class Volume(ObjectData):
     """Volume Object."""
 
     def __init__(self, nfvi_volume):
-        super(Volume, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self._nfvi_volume = nfvi_volume
 
     @property
@@ -91,12 +90,8 @@ class Volume(ObjectData):
     def nfvi_volume_delete(self):
         """NFVI Volume Delete."""
 
-        pass
-
     def nfvi_volume_deleted(self):
         """NFVI Volume Deleted."""
-
-        pass
 
     def _persist(self):
         """Persist changes to volume object."""
@@ -108,7 +103,7 @@ class Volume(ObjectData):
     def as_dict(self):
         """Represent volume object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["description"] = self.description

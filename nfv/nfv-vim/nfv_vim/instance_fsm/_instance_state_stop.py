@@ -6,7 +6,6 @@
 from nfv_common import debug
 from nfv_common import state_machine
 from nfv_common import timers
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import StopTask
@@ -16,9 +15,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 class StopState(state_machine.State):
     """Instance - Stop State."""
-
-    def __init__(self, name):
-        super(StopState, self).__init__(name)
 
     def enter(self, instance):
         """Entering stop state."""
@@ -37,8 +33,6 @@ class StopState(state_machine.State):
 
     def transition(self, instance, event, event_data, to_state):
         """Transition from the stop state."""
-
-        pass
 
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the stop state."""

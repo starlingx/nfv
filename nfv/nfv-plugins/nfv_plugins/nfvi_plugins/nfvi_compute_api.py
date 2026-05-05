@@ -10,23 +10,19 @@ import socket
 import uuid
 
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Object
-
-from nfv_vim import nfvi
-from nfv_vim.nfvi.objects import v1 as nfvi_objs
-
+from nfv_common import timers
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import neutron
 from nfv_plugins.nfvi_plugins.openstack import nova
+from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack import openstack
 from nfv_plugins.nfvi_plugins.openstack import rest_api
 from nfv_plugins.nfvi_plugins.openstack import rpc_listener
-
-from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
+from nfv_vim import nfvi
+from nfv_vim.nfvi.objects import v1 as nfvi_objs
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.compute_api")
 
@@ -36,8 +32,7 @@ def hypervisor_get_admin_state(status):
 
     if nova.HYPERVISOR_STATUS.ENABLED == status:
         return nfvi_objs.HYPERVISOR_ADMIN_STATE.UNLOCKED
-    else:
-        return nfvi_objs.HYPERVISOR_ADMIN_STATE.LOCKED
+    return nfvi_objs.HYPERVISOR_ADMIN_STATE.LOCKED
 
 
 def hypervisor_get_oper_state(state):
@@ -45,8 +40,7 @@ def hypervisor_get_oper_state(state):
 
     if nova.HYPERVISOR_STATE.UP == state:
         return nfvi_objs.HYPERVISOR_OPER_STATE.ENABLED
-    else:
-        return nfvi_objs.HYPERVISOR_OPER_STATE.DISABLED
+    return nfvi_objs.HYPERVISOR_OPER_STATE.DISABLED
 
 
 def instance_get_admin_state(vm_state, task_state, power_state):
@@ -112,7 +106,7 @@ def instance_get_oper_state(vm_state, task_state, power_state):
 def instance_get_avail_status(vm_state, task_state, power_state):
     """Convert the nfvi vm states to an instance availability status."""
 
-    avail_status = list()
+    avail_status = []
 
     if nova.VM_STATE.RESIZED == vm_state:
         avail_status.append(nfvi_objs.INSTANCE_AVAIL_STATUS.RESIZED)
@@ -244,7 +238,7 @@ def instance_get_action_type(vm_action, vm_data=None):
     elif nova.VM_ACTION.LIVE_MIGRATE == vm_action:
         action_type = nfvi_objs.INSTANCE_ACTION_TYPE.LIVE_MIGRATE
         if vm_data:
-            parameters = dict()
+            parameters = {}
             parameters[nfvi_objs.INSTANCE_LIVE_MIGRATE_OPTION.BLOCK_MIGRATION] = (
                 vm_data.get("block_migration")
             )
@@ -258,7 +252,7 @@ def instance_get_action_type(vm_action, vm_data=None):
     elif nova.VM_ACTION.RESIZE == vm_action:
         action_type = nfvi_objs.INSTANCE_ACTION_TYPE.RESIZE
         if vm_data:
-            parameters = dict()
+            parameters = {}
             parameters[nfvi_objs.INSTANCE_RESIZE_OPTION.INSTANCE_TYPE_UUID] = (
                 vm_data.get("flavorRef")
             )
@@ -272,7 +266,7 @@ def instance_get_action_type(vm_action, vm_data=None):
     elif nova.VM_ACTION.REBOOT == vm_action:
         action_type = nfvi_objs.INSTANCE_ACTION_TYPE.REBOOT
         if vm_data:
-            parameters = dict()
+            parameters = {}
             if nova.VM_REBOOT_TYPE.SOFT == vm_data.get("type"):
                 parameters[nfvi_objs.INSTANCE_REBOOT_OPTION.GRACEFUL_SHUTDOWN] = True
             else:
@@ -281,7 +275,7 @@ def instance_get_action_type(vm_action, vm_data=None):
     elif nova.VM_ACTION.REBUILD == vm_action:
         action_type = nfvi_objs.INSTANCE_ACTION_TYPE.REBUILD
         if vm_data:
-            parameters = dict()
+            parameters = {}
             parameters[nfvi_objs.INSTANCE_REBUILD_OPTION.INSTANCE_IMAGE_UUID] = (
                 vm_data.get("imageRef")
             )
@@ -379,17 +373,17 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         return self._signature
 
     def __init__(self):
-        super(NFVIComputeAPI, self).__init__()
+        super().__init__()
         self._token = None
         self._directory = None
         self._rpc_listener = None
         self._rest_api_server = None
-        self._instance_add_callbacks = list()
-        self._instance_delete_callbacks = list()
-        self._instance_state_change_callbacks = list()
-        self._instance_action_change_callbacks = list()
-        self._instance_action_callbacks = list()
-        self._requests = dict()
+        self._instance_add_callbacks = []
+        self._instance_delete_callbacks = []
+        self._instance_state_change_callbacks = []
+        self._instance_action_change_callbacks = []
+        self._instance_action_callbacks = []
+        self._requests = {}
         self._request_times = collections.deque()
         self._max_concurrent_action_requests = 128
         self._max_action_request_wait_in_secs = 45
@@ -405,7 +399,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Notify host enabled."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -471,7 +465,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Notify host disabled."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -538,7 +532,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Delete Host Services, Notify Nova to delete services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -604,7 +598,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Enable Host Services, Notify Nova to enable services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -683,7 +677,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Disable Host Services, notify nova to disable services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -769,7 +763,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Query Host Services, return state of Nova Services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["result-data"] = "enabled"
         response["reason"] = ""
@@ -915,7 +909,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_host_aggregates(self, future, callback):
         """Get a list of host aggregates."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -939,7 +933,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             host_aggregate_data_list = future.result.data
 
-            host_aggregate_objs = list()
+            host_aggregate_objs = []
 
             for host_aggregate_data in host_aggregate_data_list["aggregates"]:
                 host_aggregate_obj = nfvi_objs.HostAggregate(
@@ -978,7 +972,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_hypervisors(self, future, callback):
         """Get a list of hypervisors."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1001,7 +995,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 return
 
             hypervisor_data_list = future.result.data
-            hypervisor_objs = list()
+            hypervisor_objs = []
 
             for hypervisor_data in hypervisor_data_list["hypervisors"]:
                 status = hypervisor_data["status"]
@@ -1044,7 +1038,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_hypervisor(self, future, hypervisor_uuid, callback):
         """Get hypervisor details."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1135,7 +1129,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_instance_types(self, future, paging, callback):
         """Get a list of instance types."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
         response["page-request-id"] = paging.page_request_id
@@ -1163,7 +1157,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 return
 
             flavor_data_list = future.result.data
-            instance_type_objs = list()
+            instance_type_objs = []
 
             for flavor_data in flavor_data_list["flavors"]:
                 instance_type_obj = nfvi_objs.InstanceType(
@@ -1219,7 +1213,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Create an instance type."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1265,7 +1259,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             else:
                 swap_gb = flavor_data["swap"]
 
-            extra_specs = dict()
+            extra_specs = {}
 
             if instance_type_attributes.auto_recovery is not None:
                 extra_specs[
@@ -1282,7 +1276,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                     nfvi_objs.INSTANCE_TYPE_EXTENSION.LIVE_MIGRATION_MAX_DOWNTIME
                 ] = instance_type_attributes.live_migration_max_downtime
 
-            guest_services = dict()
+            guest_services = {}
             auto_recovery = None
             live_migration_timeout = None
             live_migration_max_downtime = None
@@ -1352,7 +1346,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def delete_instance_type(self, future, instance_type_uuid, callback):
         """Delete an instance type."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1402,7 +1396,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_instance_type(self, future, instance_type_uuid, callback):
         """Get an instance type."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1443,7 +1437,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             future.work(nova.get_flavor_extra_specs, self._token, instance_type_uuid)
             future.result = yield
 
-            guest_services = dict()
+            guest_services = {}
             auto_recovery = None
             live_migration_timeout = None
             live_migration_max_downtime = None
@@ -1515,7 +1509,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_instance_groups(self, future, callback):
         """Get a list of instance groupings."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1538,12 +1532,12 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 return
 
             server_group_list = future.result.data
-            instance_group_objs = list()
+            instance_group_objs = []
 
             for server_group in server_group_list["server_groups"]:
                 name = server_group.get("name", server_group["id"])
 
-                members = server_group.get("members", list())
+                members = server_group.get("members", [])
 
                 metadata = server_group.get("metadata", None)
                 if metadata is None:
@@ -1551,9 +1545,9 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 else:
                     best_effort = metadata.get("wrs-sg:best_effort", False)
 
-                server_group_policies = server_group.get("policies", list())
+                server_group_policies = server_group.get("policies", [])
 
-                policies = list()
+                policies = []
                 for server_group_policy in server_group_policies:
                     if "affinity" == server_group_policy and best_effort:
                         policies.append(
@@ -1606,7 +1600,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_instances(self, future, paging, context, callback):
         """Get a list of instances."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
         response["page-request-id"] = paging.page_request_id
@@ -1639,7 +1633,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             instance_data_list = future.result.data
 
-            instances = list()
+            instances = []
 
             for instance_data in instance_data_list["servers"]:
                 instances.append((instance_data["id"], instance_data["name"]))
@@ -1694,7 +1688,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     ):
         """Create an instance."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1747,7 +1741,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
 
             ports_data = future.result.data.get("ports", [])
 
-            nfvi_data = dict()
+            nfvi_data = {}
             nfvi_data["vm_state"] = instance_data["OS-EXT-STS:vm_state"]
             nfvi_data["task_state"] = instance_data["OS-EXT-STS:task_state"]
             nfvi_data["power_state"] = instance_data["OS-EXT-STS:power_state"]
@@ -1778,8 +1772,8 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 instance_data, ports_data
             )
 
-            volumes = instance_data.get("os-extended-volumes:volumes_attached", list())
-            attached_volumes = list()
+            volumes = instance_data.get("os-extended-volumes:volumes_attached", [])
+            attached_volumes = []
             for volume in volumes:
                 attached_volumes.append(volume["id"])
 
@@ -1838,7 +1832,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -1928,7 +1922,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2015,7 +2009,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2101,7 +2095,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2189,7 +2183,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2274,7 +2268,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2357,7 +2351,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2442,7 +2436,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2531,7 +2525,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2630,7 +2624,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2714,7 +2708,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def fail_instance(self, future, instance_uuid, context, callback):
         """Fail an instance."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2772,7 +2766,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2851,7 +2845,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -2933,7 +2927,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -3015,7 +3009,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -3094,7 +3088,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -3172,7 +3166,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         context_response_headers = None
         context_response_body = None
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -3243,7 +3237,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def delete_instance(self, future, instance_uuid, context, callback):
         """Delete an instance."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -3297,7 +3291,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
     def get_instance(self, future, instance_uuid, context, callback):
         """Get an instance."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -3333,7 +3327,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 instance_data["OS-EXT-STS:power_state"]
             )
 
-            nfvi_data = dict()
+            nfvi_data = {}
             nfvi_data["vm_state"] = instance_data["OS-EXT-STS:vm_state"]
             nfvi_data["task_state"] = instance_data["OS-EXT-STS:task_state"]
             nfvi_data["power_state"] = power_state_str
@@ -3372,13 +3366,13 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 instance_data, ports_data
             )
 
-            volumes = instance_data.get("os-extended-volumes:volumes_attached", list())
-            attached_volumes = list()
+            volumes = instance_data.get("os-extended-volumes:volumes_attached", [])
+            attached_volumes = []
             for volume in volumes:
                 attached_volumes.append(volume["id"])
 
             instance_name = instance_data["name"]
-            metadata = instance_data.get("metadata", dict())
+            metadata = instance_data.get("metadata", {})
 
             # Check instance metadata for the recovery priority
             recovery_priority = nova.get_recovery_priority(metadata, instance_name)
@@ -3448,7 +3442,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 '"details": "%s", "code": 409}}' % message
             )
 
-            http_headers = list()
+            http_headers = []
             http_headers.append(("Content-Length", len(http_body)))
 
             try:
@@ -3494,7 +3488,7 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             else:
                 power_state_str = nova.vm_power_state_str(power_state)
 
-            nfvi_data = dict()
+            nfvi_data = {}
             nfvi_data["vm_state"] = vm_state
             nfvi_data["task_state"] = task_state
             nfvi_data["power_state"] = power_state_str

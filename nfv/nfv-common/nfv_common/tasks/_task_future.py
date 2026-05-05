@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_common.tasks._task_work import TaskWork
 
 DLOG = debug.debug_get_logger("nfv_common.tasks.task_future")
@@ -12,7 +11,7 @@ DLOG = debug.debug_get_logger("nfv_common.tasks.task_future")
 TASK_TIMEOUT = 20
 
 
-class TaskFuture(object):
+class TaskFuture:
     """Task Future."""
 
     def __init__(self, scheduler):
@@ -79,8 +78,7 @@ class TaskFuture(object):
             self._scheduler.running_task.add_task_work(task_work)
             self._result = None
             return task_work.id
-        else:
-            raise LookupError("Running task no longer running")
+        raise LookupError("Running task no longer running")
 
     def timer(self, name, interval_secs):
         """Schedule a timer to be fired after so many milliseconds,
@@ -91,8 +89,7 @@ class TaskFuture(object):
         if self._scheduler.running_task is not None:
             timer_id = self._scheduler.running_task.add_timer(name, interval_secs)
             return timer_id
-        else:
-            raise LookupError("Running task no longer running")
+        raise LookupError("Running task no longer running")
 
     def cancel_timer(self, timer_id):
         """Cancel a scheduled timer."""

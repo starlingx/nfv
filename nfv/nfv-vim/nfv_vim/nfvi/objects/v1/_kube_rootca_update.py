@@ -7,7 +7,6 @@
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
@@ -51,8 +50,8 @@ class KubeRootcaUpdate(ObjectData):
     """NFVI Kube RootCA Update Object."""
 
     def __init__(self, state):
-        super(KubeRootcaUpdate, self).__init__("1.0.0")
-        self.update(dict(state=state))
+        super().__init__("1.0.0")
+        self.update({"state": state})
 
 
 class KubeRootcaHostUpdate(ObjectData):
@@ -68,15 +67,15 @@ class KubeRootcaHostUpdate(ObjectData):
         created_at,
         updated_at,
     ):
-        super(KubeRootcaHostUpdate, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                host_id=host_id,
-                hostname=hostname,
-                target_rootca_cert=target_rootca_cert,
-                effective_rootca_cert=effective_rootca_cert,
-                state=state,
-                created_at=created_at,
-                updated_at=updated_at,
-            )
+            {
+                "host_id": host_id,
+                "hostname": hostname,
+                "target_rootca_cert": target_rootca_cert,
+                "effective_rootca_cert": effective_rootca_cert,
+                "state": state,
+                "created_at": created_at,
+                "updated_at": updated_at,
+            }
         )

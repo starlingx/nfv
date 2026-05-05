@@ -17,7 +17,7 @@ from pyparsing import Suppress
 from pyparsing import Word
 
 
-class NfvVimParser(object):
+class NfvVimParser:
     """NFV-VIM Parser."""
 
     def __init__(self, config_data):
@@ -76,7 +76,7 @@ class NfvVimParser(object):
 
             query_obj = re.match(log["regex"], message)
             if query_obj is not None:
-                message_data = dict()
+                message_data = {}
                 message_data["type"] = log["type"]
                 message_data["log"] = message
                 for idx, field_name in enumerate(log["fields"], 1):
@@ -105,7 +105,7 @@ class NfvVimParser(object):
                 if start_date <= timestamp <= end_date:
                     message_data = self.parse_message(parsed[9], parsed[10], parsed[11])
                     if message_data is not None:
-                        record = dict()
+                        record = {}
                         record["timestamp"] = timestamp
                         record["hostname"] = parsed[7]
                         record["pid"] = parsed[8]
@@ -132,5 +132,3 @@ def parser_initialize():
 
 def parser_finalize():
     """Finalize module."""
-
-    pass

@@ -46,8 +46,7 @@ class SystemConfigUpdateAPI(rest.RestController):
     def _lookup(self, key, *remainder):
         if "strategy" == key:
             return SystemConfigUpdateStrategyAPI(), remainder
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(SystemConfigUpdateDescription)
     def get(self):

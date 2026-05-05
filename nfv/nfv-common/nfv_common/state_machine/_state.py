@@ -8,7 +8,7 @@ from nfv_common import debug
 DLOG = debug.debug_get_logger("nfv_common.state_machine.state")
 
 
-class State(object):
+class State:
     """State Object."""
 
     def __init__(self, name):

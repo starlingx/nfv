@@ -8,7 +8,7 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-class ConnectionType(object, metaclass=Singleton):
+class ConnectionType(metaclass=Singleton):
     """Connection Type Constants."""
 
     UNKNOWN = Constant("unknown")
@@ -18,7 +18,7 @@ class ConnectionType(object, metaclass=Singleton):
     PHYSICAL_NIC_ADDRESS = Constant("physical-nic-address")
 
 
-class ConnectivityType(object, metaclass=Singleton):
+class ConnectivityType(metaclass=Singleton):
     """Connectivity Type Constants."""
 
     UNKNOWN = Constant("unknown")

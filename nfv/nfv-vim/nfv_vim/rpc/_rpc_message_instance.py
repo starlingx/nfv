@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
@@ -35,9 +34,7 @@ class APIRequestCreateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["name"] = self.name
@@ -102,9 +99,7 @@ class APIResponseCreateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseCreateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -165,7 +160,7 @@ class APIRequestStartInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.START_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestStartInstance, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -188,9 +183,7 @@ class APIResponseStartInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.START_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseStartInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -213,7 +206,7 @@ class APIRequestStopInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.STOP_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestStopInstance, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -236,7 +229,7 @@ class APIResponseStopInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.STOP_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseStopInstance, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -259,7 +252,7 @@ class APIRequestPauseInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.PAUSE_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestPauseInstance, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -282,9 +275,7 @@ class APIResponsePauseInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.PAUSE_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponsePauseInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -307,9 +298,7 @@ class APIRequestUnpauseInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.UNPAUSE_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestUnpauseInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -332,9 +321,7 @@ class APIResponseUnpauseInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.UNPAUSE_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseUnpauseInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -357,9 +344,7 @@ class APIRequestSuspendInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.SUSPEND_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestSuspendInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -382,9 +367,7 @@ class APIResponseSuspendInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.SUSPEND_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseSuspendInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -407,9 +390,7 @@ class APIRequestResumeInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.RESUME_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestResumeInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -432,9 +413,7 @@ class APIResponseResumeInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.RESUME_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseResumeInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -457,9 +436,7 @@ class APIRequestRebootInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.REBOOT_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestRebootInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -482,9 +459,7 @@ class APIResponseRebootInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.REBOOT_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseRebootInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -507,9 +482,7 @@ class APIRequestLiveMigrateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.LIVE_MIGRATE_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestLiveMigrateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -532,9 +505,7 @@ class APIResponseLiveMigrateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.LIVE_MIGRATE_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseLiveMigrateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -557,9 +528,7 @@ class APIRequestColdMigrateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.COLD_MIGRATE_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestColdMigrateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -582,9 +551,7 @@ class APIResponseColdMigrateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.COLD_MIGRATE_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseColdMigrateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -607,9 +574,7 @@ class APIRequestEvacuateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.EVACUATE_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestEvacuateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -632,9 +597,7 @@ class APIResponseEvacuateInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.EVACUATE_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseEvacuateInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -657,9 +620,7 @@ class APIRequestDeleteInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestDeleteInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -682,9 +643,7 @@ class APIResponseDeleteInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseDeleteInstance, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -708,7 +667,7 @@ class APIRequestGetInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_INSTANCE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestGetInstance, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["get_all"] = self.get_all
@@ -721,8 +680,7 @@ class APIRequestGetInstance(RPCMessage):
     def __str__(self):
         if self.get_all:
             return "get-instance request: get-all"
-        else:
-            return "get-instance request: %s" % self.filter_by_uuid
+        return "get-instance request: %s" % self.filter_by_uuid
 
 
 class APIResponseGetInstance(RPCMessage):
@@ -753,7 +711,7 @@ class APIResponseGetInstance(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_INSTANCE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseGetInstance, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid

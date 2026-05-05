@@ -7,7 +7,6 @@
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
@@ -88,16 +87,16 @@ class KubeHostUpgrade(ObjectData):
         kubelet_version,
         status,
     ):
-        super(KubeHostUpgrade, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                host_id=host_id,
-                host_uuid=host_uuid,
-                target_version=target_version,
-                control_plane_version=control_plane_version,
-                kubelet_version=kubelet_version,
-                status=status,
-            )
+            {
+                "host_id": host_id,
+                "host_uuid": host_uuid,
+                "target_version": target_version,
+                "control_plane_version": control_plane_version,
+                "kubelet_version": kubelet_version,
+                "status": status,
+            }
         )
 
 
@@ -105,8 +104,10 @@ class KubeUpgrade(ObjectData):
     """NFVI Kube Upgrade Object."""
 
     def __init__(self, state, from_version, to_version):
-        super(KubeUpgrade, self).__init__("1.0.0")
-        self.update(dict(state=state, from_version=from_version, to_version=to_version))
+        super().__init__("1.0.0")
+        self.update(
+            {"state": state, "from_version": from_version, "to_version": to_version}
+        )
 
 
 class KubeVersion(ObjectData):
@@ -122,15 +123,15 @@ class KubeVersion(ObjectData):
         applied_patches,
         available_patches,
     ):
-        super(KubeVersion, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                kube_version=kube_version,
-                state=state,
-                target=target,
-                upgrade_from=upgrade_from,
-                downgrade_to=downgrade_to,
-                applied_patches=applied_patches,
-                available_patches=available_patches,
-            )
+            {
+                "kube_version": kube_version,
+                "state": state,
+                "target": target,
+                "upgrade_from": upgrade_from,
+                "downgrade_to": downgrade_to,
+                "applied_patches": applied_patches,
+                "available_patches": available_patches,
+            }
         )

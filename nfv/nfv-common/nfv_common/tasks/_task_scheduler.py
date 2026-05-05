@@ -7,20 +7,19 @@ import collections
 import inspect
 
 from nfv_common import debug
+from nfv_common.helpers import coroutine
 from nfv_common import histogram
 from nfv_common import selectable
 from nfv_common import selobj
-from nfv_common import timers
-
-from nfv_common.helpers import coroutine
 from nfv_common.tasks._task import Task
 from nfv_common.tasks._task import TASK_PRIORITY
 from nfv_common.tasks._task_future import TaskFuture
+from nfv_common import timers
 
 DLOG = debug.debug_get_logger("nfv_common.tasks.task_scheduler")
 
 
-class TaskScheduler(object):
+class TaskScheduler:
     """Task Scheduler."""
 
     def __init__(self, name, task_worker_pool):
@@ -28,18 +27,18 @@ class TaskScheduler(object):
 
         self._name = name
         self._task_worker_pool = task_worker_pool
-        self._workers_selobj = dict()
-        self._workers_timer = dict()
-        self._tasks = dict()
-        self._task_timers = dict()
-        self._task_work_timers = dict()
-        self._task_read_selobjs = dict()
-        self._task_write_selobjs = dict()
+        self._workers_selobj = {}
+        self._workers_timer = {}
+        self._tasks = {}
+        self._task_timers = {}
+        self._task_work_timers = {}
+        self._task_read_selobjs = {}
+        self._task_write_selobjs = {}
         self._running_task = None
         self._tasks_scheduled = False
         self._wait_queue = collections.deque()
-        self._ready_queue = list()
-        self._ready_dequeues = list()
+        self._ready_queue = []
+        self._ready_dequeues = []
         for _ in TASK_PRIORITY:
             self._ready_queue.append(collections.deque())
             self._ready_dequeues.append(0)
@@ -290,12 +289,11 @@ class TaskScheduler(object):
                 self._task_work_timers[timer_id] = task_work
                 self._workers_timer[timer_id] = worker
             return True
-        else:
-            DLOG.verbose(
-                "Pool %s: No task worker available to run TaskWork."
-                % self._task_worker_pool.name
-            )
-            return False
+        DLOG.verbose(
+            "Pool %s: No task worker available to run TaskWork."
+            % self._task_worker_pool.name
+        )
+        return False
 
     @coroutine
     def task_work_complete(self):

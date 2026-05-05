@@ -10,7 +10,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
@@ -90,7 +89,7 @@ def get_dhcp_agent_networks(token, agent_id):
         + "/dhcp-networks?fields=id&fields=provider%3Aphysical_network"
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -107,10 +106,10 @@ def add_network_to_dhcp_agent(token, agent_id, network_id):
         raise ValueError("OpenStack Neutron URL is invalid")
 
     api_cmd = url + "/v2.0/agents/" + agent_id + "/dhcp-networks"
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["network_id"] = network_id
 
     response = rest_api_request(
@@ -128,7 +127,7 @@ def remove_network_from_dhcp_agent(token, agent_id, network_id):
         raise ValueError("OpenStack Neutron URL is invalid")
 
     api_cmd = url + "/v2.0/agents/" + agent_id + "/dhcp-networks/" + network_id
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
@@ -145,7 +144,7 @@ def get_agent_routers(token, agent_id):
 
     api_cmd = url + "/v2.0/agents/" + agent_id + "/l3-routers?fields=id"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -162,10 +161,10 @@ def add_router_to_agent(token, agent_id, router_id):
         raise ValueError("OpenStack Neutron URL is invalid")
 
     api_cmd = url + "/v2.0/agents/" + agent_id + "/l3-routers"
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["router_id"] = router_id
 
     response = rest_api_request(
@@ -183,7 +182,7 @@ def remove_router_from_agent(token, agent_id, router_id):
         raise ValueError("OpenStack Neutron URL is invalid")
 
     api_cmd = url + "/v2.0/agents/" + agent_id + "/l3-routers/" + router_id
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
@@ -199,7 +198,7 @@ def get_router_ports(token, router_id):
         raise ValueError("OpenStack Neutron URL is invalid")
 
     api_cmd = url + "/v2.0/ports?device_id=" + router_id
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -217,7 +216,7 @@ def get_physical_network(token, network_id):
     api_cmd = (
         url + "/v2.0/networks/" + network_id + "?fields=provider%3Aphysical_network"
     )
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -245,7 +244,7 @@ def _get_network_agents(token, host_name):
         )
         api_cmd = api_cmd + fields_qualifier
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -278,11 +277,11 @@ def get_extensions(token):
 
     url = token.get_service_url(OPENSTACK_SERVICE.NEUTRON)
     if url is None:
-        return dict()
+        return {}
 
     api_cmd = url + "/v2.0/extensions.json"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd)
@@ -304,7 +303,7 @@ def get_networks(token, page_limit=None, next_page=None):
     else:
         api_cmd = next_page
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -321,10 +320,10 @@ def create_network(
 
     api_cmd = url + "/v2.0/networks"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    network = dict()
+    network = {}
     network["name"] = network_name
     network["shared"] = shared
 
@@ -336,7 +335,7 @@ def create_network(
         network["provider:segmentation_id"] = segmentation_id
         network["provider:physical_network"] = physical_network
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["network"] = network
 
     response = rest_api_request(
@@ -354,10 +353,10 @@ def update_network(token, network_id, admin_state=None, shared=None):
 
     api_cmd = url + "/v2.0/networks/%s" % network_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    network = dict()
+    network = {}
 
     if admin_state is not None:
         if NETWORK_ADMIN_STATE.UP == admin_state:
@@ -368,7 +367,7 @@ def update_network(token, network_id, admin_state=None, shared=None):
     if shared is not None:
         network["shared"] = shared
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["network"] = network
 
     response = rest_api_request(
@@ -386,7 +385,7 @@ def delete_network(token, network_id):
 
     api_cmd = url + "/v2.0/networks/%s" % network_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
     return response
@@ -401,7 +400,7 @@ def get_network(token, network_id):
 
     api_cmd = url + "/v2.0/networks/%s" % network_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -422,7 +421,7 @@ def get_subnets(token, page_limit=None, next_page=None):
     else:
         api_cmd = next_page
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -439,10 +438,10 @@ def create_subnet(
 
     api_cmd = url + "/v2.0/subnets"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    subnet = dict()
+    subnet = {}
     if subnet_name is not None:
         subnet["name"] = subnet_name
 
@@ -454,7 +453,7 @@ def create_subnet(
     if gateway_ip is not None:
         subnet["gateway_ip"] = gateway_ip
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["subnet"] = subnet
 
     response = rest_api_request(
@@ -474,10 +473,10 @@ def update_subnet(
 
     api_cmd = url + "/v2.0/subnets/%s" % subnet_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    subnet = dict()
+    subnet = {}
 
     if gateway_ip is not None:
         subnet["gateway_ip"] = gateway_ip
@@ -488,7 +487,7 @@ def update_subnet(
     if dhcp_enabled is not None:
         subnet["enable_dhcp"] = dhcp_enabled
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["subnet"] = subnet
 
     response = rest_api_request(
@@ -506,7 +505,7 @@ def delete_subnet(token, subnet_id):
 
     api_cmd = url + "/v2.0/subnets/%s" % subnet_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
     return response
@@ -521,7 +520,7 @@ def get_subnet(token, subnet_id):
 
     api_cmd = url + "/v2.0/subnets/%s" % subnet_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -536,7 +535,7 @@ def get_ports_for_instance(token, instance_uuid):
 
     api_cmd = url + "/v2.0/ports?device_id=%s" % (instance_uuid)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
     return response
@@ -551,7 +550,7 @@ def delete_host_services(token, host_uuid):
 
     api_cmd = url + "/v2.0/hosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     # WARNING: Any change to the timeout must be reflected in the config.ini
     # file for the nfvi plugins.
@@ -598,7 +597,7 @@ def delete_host_services_by_name(token, host_name, host_uuid, only_if_changed=Fa
 
     api_cmd = url + "/v2.0/hosts.json?fields=id&fields=name"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd)
@@ -622,13 +621,13 @@ def enable_host_services(token, host_uuid):
 
     api_cmd = url + "/v2.0/hosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    payload = dict()
+    payload = {}
     payload["availability"] = "up"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["host"] = payload
 
     response = rest_api_request(
@@ -650,9 +649,9 @@ def enable_network_agents(token, host_name):
             token, host_name
         )
 
-        payload = dict()
+        payload = {}
         payload["admin_state_up"] = True
-        api_cmd_payload = dict()
+        api_cmd_payload = {}
         api_cmd_payload["agent"] = payload
 
         num_agents_found = 0
@@ -704,13 +703,13 @@ def disable_host_services(token, host_uuid):
 
     api_cmd = url + "/v2.0/hosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    payload = dict()
+    payload = {}
     payload["availability"] = "down"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["host"] = payload
 
     # WARNING: Any change to the timeout must be reflected in the config.ini
@@ -737,9 +736,9 @@ def disable_network_agents(token, host_name):
             token, host_name
         )
 
-        payload = dict()
+        payload = {}
         payload["admin_state_up"] = False
-        api_cmd_payload = dict()
+        api_cmd_payload = {}
         api_cmd_payload["agent"] = payload
 
         num_agents_found = 0
@@ -778,7 +777,7 @@ def query_host_services(token, host_name):
 
     api_cmd = url + "/v2.0/hosts.json?fields=id&name=%s" % host_name
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     response = rest_api_request(token, "GET", api_cmd)

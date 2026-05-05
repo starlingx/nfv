@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _network_table = None
@@ -12,9 +11,6 @@ _network_table = None
 
 class NetworkTable(Table):
     """Network Table."""
-
-    def __init__(self):
-        super(NetworkTable, self).__init__()
 
     def get_by_name(self, network_name):
         for network_uuid in list(_network_table.keys()):

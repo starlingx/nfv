@@ -5,14 +5,11 @@
 #
 import weakref
 
-from nfv_common.helpers import coroutine
-
 from nfv_common import debug
+from nfv_common.helpers import coroutine
 from nfv_common import state_machine
-
-from nfv_vim import nfvi
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
+from nfv_vim import nfvi
 
 DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance_task_work")
 
@@ -23,7 +20,7 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
     """Query-Hypervisor Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(QueryHypervisorTaskWork, self).__init__(
+        super().__init__(
             "query-hypervisor_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -79,15 +76,14 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
         if hypervisor is not None:
             nfvi.nfvi_get_hypervisor(hypervisor.uuid, self._callback())
             return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
-        else:
-            return state_machine.STATE_TASK_WORK_RESULT.FAILED, empty_reason
+        return state_machine.STATE_TASK_WORK_RESULT.FAILED, empty_reason
 
 
 class LiveMigrateTaskWork(state_machine.StateTaskWork):
     """Live-Migrate Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(LiveMigrateTaskWork, self).__init__(
+        super().__init__(
             "live-migrate-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -182,7 +178,7 @@ class ColdMigrateTaskWork(state_machine.StateTaskWork):
     """Cold-Migrate Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(ColdMigrateTaskWork, self).__init__(
+        super().__init__(
             "cold-migrate-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -252,7 +248,7 @@ class ColdMigrateConfirmTaskWork(state_machine.StateTaskWork):
     """Cold-Migrate-Confirm Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(ColdMigrateConfirmTaskWork, self).__init__(
+        super().__init__(
             "cold-migrate-confirm-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -322,7 +318,7 @@ class ColdMigrateRevertTaskWork(state_machine.StateTaskWork):
     """Cold-Migrate-Revert Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(ColdMigrateRevertTaskWork, self).__init__(
+        super().__init__(
             "cold-migrate-revert-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -426,7 +422,7 @@ class ResizeTaskWork(state_machine.StateTaskWork):
     """Resize Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(ResizeTaskWork, self).__init__(
+        super().__init__(
             "resize-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -517,7 +513,7 @@ class ResizeConfirmTaskWork(state_machine.StateTaskWork):
     """Resize-Confirm Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(ResizeConfirmTaskWork, self).__init__(
+        super().__init__(
             "resize-confirm-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -587,7 +583,7 @@ class ResizeRevertTaskWork(state_machine.StateTaskWork):
     """Resize-Revert Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(ResizeRevertTaskWork, self).__init__(
+        super().__init__(
             "resize-revert-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -697,7 +693,7 @@ class EvacuateTaskWork(state_machine.StateTaskWork):
     """Evacuate Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(EvacuateTaskWork, self).__init__(
+        super().__init__(
             "evacuate-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -812,7 +808,7 @@ class StartTaskWork(state_machine.StateTaskWork):
     """Start Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(StartTaskWork, self).__init__(
+        super().__init__(
             "start-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -880,7 +876,7 @@ class StopTaskWork(state_machine.StateTaskWork):
     """Stop Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(StopTaskWork, self).__init__(
+        super().__init__(
             "stop-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -948,7 +944,7 @@ class PauseTaskWork(state_machine.StateTaskWork):
     """Pause Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(PauseTaskWork, self).__init__(
+        super().__init__(
             "pause-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1016,7 +1012,7 @@ class UnpauseTaskWork(state_machine.StateTaskWork):
     """Unpause Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(UnpauseTaskWork, self).__init__(
+        super().__init__(
             "unpause-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1086,7 +1082,7 @@ class SuspendTaskWork(state_machine.StateTaskWork):
     """Suspend Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(SuspendTaskWork, self).__init__(
+        super().__init__(
             "suspend-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1156,7 +1152,7 @@ class ResumeTaskWork(state_machine.StateTaskWork):
     """Resume Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(ResumeTaskWork, self).__init__(
+        super().__init__(
             "resume-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1226,7 +1222,7 @@ class RebootTaskWork(state_machine.StateTaskWork):
     """Reboot Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(RebootTaskWork, self).__init__(
+        super().__init__(
             "reboot-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1312,7 +1308,7 @@ class RebuildTaskWork(state_machine.StateTaskWork):
     """Rebuild Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(RebuildTaskWork, self).__init__(
+        super().__init__(
             "rebuild-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1406,7 +1402,7 @@ class FailTaskWork(state_machine.StateTaskWork):
     """Fail Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(FailTaskWork, self).__init__(
+        super().__init__(
             "fail-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1474,7 +1470,7 @@ class DeleteTaskWork(state_machine.StateTaskWork):
     """Delete Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(DeleteTaskWork, self).__init__(
+        super().__init__(
             "delete-instance_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1550,7 +1546,7 @@ class GuestServicesCreateTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Create Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(GuestServicesCreateTaskWork, self).__init__(
+        super().__init__(
             "guest-services-create_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1628,7 +1624,7 @@ class GuestServicesEnableTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Enable Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(GuestServicesEnableTaskWork, self).__init__(
+        super().__init__(
             "guest-services-enable_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1657,7 +1653,7 @@ class GuestServicesEnableTaskWork(state_machine.StateTaskWork):
                 result_data = response.get("result-data", None)
                 if result_data is not None:
                     host_name = result_data.get("host_name", None)
-                    nfvi_guest_services = result_data.get("services", list())
+                    nfvi_guest_services = result_data.get("services", [])
                     self._instance.nfvi_guest_services_update(
                         nfvi_guest_services, host_name
                     )
@@ -1714,7 +1710,7 @@ class GuestServicesDisableTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Disable Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(GuestServicesDisableTaskWork, self).__init__(
+        super().__init__(
             "guest-services-disable_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1743,7 +1739,7 @@ class GuestServicesDisableTaskWork(state_machine.StateTaskWork):
                 result_data = response.get("result-data", None)
                 if result_data is not None:
                     host_name = result_data.get("host_name", None)
-                    nfvi_guest_services = result_data.get("services", list())
+                    nfvi_guest_services = result_data.get("services", [])
                     self._instance.nfvi_guest_services_update(
                         nfvi_guest_services, host_name
                     )
@@ -1800,7 +1796,7 @@ class GuestServicesSetTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Set Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(GuestServicesSetTaskWork, self).__init__(
+        super().__init__(
             "guest-services-set_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1829,7 +1825,7 @@ class GuestServicesSetTaskWork(state_machine.StateTaskWork):
                 result_data = response.get("result-data", None)
                 if result_data is not None:
                     host_name = result_data.get("host_name", None)
-                    nfvi_guest_services = result_data.get("services", list())
+                    nfvi_guest_services = result_data.get("services", [])
                     self._instance.nfvi_guest_services_update(
                         nfvi_guest_services, host_name
                     )
@@ -1885,7 +1881,7 @@ class GuestServicesQueryTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Query Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(GuestServicesQueryTaskWork, self).__init__(
+        super().__init__(
             "guest-services-query_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -1914,7 +1910,7 @@ class GuestServicesQueryTaskWork(state_machine.StateTaskWork):
                 result_data = response.get("result-data", None)
                 if result_data is not None:
                     host_name = result_data.get("host_name", None)
-                    nfvi_guest_services = result_data.get("services", list())
+                    nfvi_guest_services = result_data.get("services", [])
                     self._instance.nfvi_guest_services_update(
                         nfvi_guest_services, host_name
                     )
@@ -1965,7 +1961,7 @@ class GuestServicesDeleteTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Delete Task Work."""
 
     def __init__(self, task, instance, force_pass=False):
-        super(GuestServicesDeleteTaskWork, self).__init__(
+        super().__init__(
             "guest-services-delete_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -2033,7 +2029,7 @@ class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Vote Task Work."""
 
     def __init__(self, task, instance, action_type, force_pass=False):
-        super(GuestServicesVoteTaskWork, self).__init__(
+        super().__init__(
             "guest-services-vote_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -2059,8 +2055,7 @@ class GuestServicesVoteTaskWork(state_machine.StateTaskWork):
             )
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
-        else:
-            DLOG.info("Guest-Services-Vote timeout for %s." % self._instance.name)
+        DLOG.info("Guest-Services-Vote timeout for %s." % self._instance.name)
 
         return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
 
@@ -2190,7 +2185,7 @@ class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Pre-Notify Task Work."""
 
     def __init__(self, task, instance, action_type, force_pass=False):
-        super(GuestServicesPreNotifyTaskWork, self).__init__(
+        super().__init__(
             "guest-services-pre-notify_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -2216,8 +2211,7 @@ class GuestServicesPreNotifyTaskWork(state_machine.StateTaskWork):
             )
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
-        else:
-            DLOG.info("Guest-Services-Pre-Notify timeout for %s." % self._instance.name)
+        DLOG.info("Guest-Services-Pre-Notify timeout for %s." % self._instance.name)
 
         return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
 
@@ -2332,7 +2326,7 @@ class GuestServicesPostNotifyTaskWork(state_machine.StateTaskWork):
     """Guest-Services-Post-Notify Task Work."""
 
     def __init__(self, task, instance, action_type, force_pass=False):
-        super(GuestServicesPostNotifyTaskWork, self).__init__(
+        super().__init__(
             "guest-services-post-notify_%s" % instance.name,
             task,
             force_pass=force_pass,
@@ -2358,10 +2352,7 @@ class GuestServicesPostNotifyTaskWork(state_machine.StateTaskWork):
             )
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
-        else:
-            DLOG.info(
-                "Guest-Services-Post-Notify timeout for %s." % self._instance.name
-            )
+        DLOG.info("Guest-Services-Post-Notify timeout for %s." % self._instance.name)
 
         return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
 

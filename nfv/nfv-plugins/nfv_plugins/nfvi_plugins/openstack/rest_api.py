@@ -3,29 +3,26 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
-import re
-import requests
-import ssl
-
 import http.client as httplib
 import http.server as BaseHTTPServer
+import json
+import re
+import socket
 import socketserver as SocketServer
+import ssl
+import struct
 import urllib.error
 import urllib.request
 
-import socket
-import struct
+import requests
 
 from nfv_common import debug
-from nfv_common import selobj
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import get_system_ca_file
 from nfv_common.helpers import Object
 from nfv_common.helpers import Result
-
+from nfv_common import selobj
+from nfv_common import timers
 from nfv_plugins.nfvi_plugins.openstack.exceptions import OpenStackException
 from nfv_plugins.nfvi_plugins.openstack.exceptions import OpenStackRestAPIException
 from nfv_plugins.nfvi_plugins.openstack.openstack_log import log_error
@@ -39,7 +36,7 @@ _ssl_context = None
 class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
     """Reset-API Request Handler."""
 
-    _handlers = dict()
+    _handlers = {}
 
     def __init__(self, request, client_address, server):
         self._is_shutdown = False
@@ -74,6 +71,7 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         if not self._is_shutdown:
             BaseHTTPServer.BaseHTTPRequestHandler.send_error(self, code, message)
 
+    # pylint: disable-next=redefined-builtin
     def log_error(self, format, *args):
         """Override log_error so that it goes to syslog on error."""
 
@@ -159,10 +157,10 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         """Add Rest-API handler."""
 
         if port not in cls._handlers:
-            cls._handlers[port] = dict()
+            cls._handlers[port] = {}
 
         if operation.upper() not in cls._handlers[port]:
-            cls._handlers[port][operation.upper()] = dict()
+            cls._handlers[port][operation.upper()] = {}
 
         cls._handlers[port][operation.upper()][path] = handler
 
@@ -352,7 +350,7 @@ def _rest_api_request(
             with urllib.request.urlopen(
                 request_info, timeout=timeout_in_secs, context=ssl_context
             ) as request:
-                headers = list()  # list of tuples
+                headers = []  # list of tuples
                 for key, value in request.info().items():
                     if key not in headers_per_hop:
                         cap_key = "-".join((ck.capitalize() for ck in key.split("-")))
@@ -362,7 +360,7 @@ def _rest_api_request(
                 status_code = request.code
 
         if response_raw == "" or response_raw == b"":
-            response = dict()
+            response = {}
         else:
             response = json.loads(response_raw)
 
@@ -398,11 +396,11 @@ def _rest_api_request(
         )
 
     except urllib.error.HTTPError as e:
-        headers = list()
-        response_raw = dict()
+        headers = []
+        response_raw = {}
 
         if e.fp is not None:
-            headers = list()  # list of tuples
+            headers = []  # list of tuples
             for key, value in e.fp.info().items():
                 if key not in headers_per_hop:
                     cap_key = "-".join((ck.capitalize() for ck in key.split("-")))

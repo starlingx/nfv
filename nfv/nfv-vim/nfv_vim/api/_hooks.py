@@ -4,30 +4,30 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import http.client as httplib
-import pecan
-from pecan import hooks
 import re
 import time
 from urllib.parse import urlparse
 
+import pecan
+from pecan import hooks
+
 from nfv_common import config
 from nfv_common import debug
+from nfv_common.helpers import Object
 from nfv_common import tcp
 from nfv_vim.api.acl.policies import base as base_policy
 from nfv_vim.api.acl import policy
 
-from nfv_common.helpers import Object
-
 DLOG = debug.debug_get_logger("nfv_vim.api")
 
 
-class VimConnectionMgmt(object):
+class VimConnectionMgmt:
     """VIM Connection Management."""
 
     def __init__(self):
-        super(VimConnectionMgmt, self).__init__()
+        super().__init__()
 
-        self._connections = list()
+        self._connections = []
 
     def open_connection(self):
         """Open a connection to the VIM."""
@@ -59,9 +59,6 @@ class VimConnectionMgmt(object):
 class ConnectionHook(hooks.PecanHook):
     """Connection Hook."""
 
-    def __init__(self):
-        super(ConnectionHook, self).__init__()
-
     def before(self, state):
         state.request.vim = VimConnectionMgmt()
 
@@ -81,7 +78,7 @@ class ContextHook(hooks.PecanHook):
     """Context Hook."""
 
     def __init__(self, acl_public_routes):
-        super(ContextHook, self).__init__()
+        super().__init__()
         self.acl_public_routes = acl_public_routes
 
     def before(self, state):

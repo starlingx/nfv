@@ -6,7 +6,6 @@
 import configparser
 
 from nfv_common.debug._debug_defs import DEBUG_LEVEL
-
 from nfv_common.helpers import Singleton
 
 # File Format:
@@ -38,7 +37,7 @@ from nfv_common.helpers import Singleton
 #
 
 
-class DebugConfig(object, metaclass=Singleton):
+class DebugConfig(metaclass=Singleton):
     """Debug Configuration."""
 
     debug_level_mapping = {

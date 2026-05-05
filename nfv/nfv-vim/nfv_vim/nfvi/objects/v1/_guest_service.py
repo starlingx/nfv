@@ -7,7 +7,6 @@
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
@@ -44,20 +43,20 @@ class GuestService(ObjectData):
     """NFVI Guest Service Object."""
 
     def __init__(self, name, admin_state, oper_state, restart_timeout=None):
-        super(GuestService, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                name=name,
-                admin_state=admin_state,
-                oper_state=oper_state,
-                restart_timeout=restart_timeout,
-            )
+            {
+                "name": name,
+                "admin_state": admin_state,
+                "oper_state": oper_state,
+                "restart_timeout": restart_timeout,
+            }
         )
 
     def as_dict(self):
         """Represent Guest Service data object as dictionary."""
 
-        data = dict()
+        data = {}
         data["name"] = self.name
         data["admin_state"] = self.admin_state
         data["oper_state"] = self.oper_state

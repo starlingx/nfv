@@ -8,7 +8,7 @@ from nfv_common import debug
 DLOG = debug.debug_get_logger("nfv_common.tasks.task_result")
 
 
-class TaskResult(object):
+class TaskResult:
     """Task Result."""
 
     def __init__(

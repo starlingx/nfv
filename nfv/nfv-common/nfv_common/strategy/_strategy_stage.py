@@ -7,18 +7,16 @@ from datetime import datetime
 import weakref
 
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
-
 from nfv_common.strategy._strategy_result import STRATEGY_STAGE_RESULT
 from nfv_common.strategy._strategy_result import strategy_stage_result_update
 from nfv_common.strategy._strategy_result import STRATEGY_STEP_RESULT
+from nfv_common import timers
 
 DLOG = debug.debug_get_logger("nfv_common.strategy.stage")
 
 
-class StrategyStage(object):
+class StrategyStage:
     """Strategy Stage."""
 
     def __init__(self, name):
@@ -26,7 +24,7 @@ class StrategyStage(object):
         self._name = name
         self._current_step = 0
         self._step_timer_id = None
-        self._steps = list()
+        self._steps = []
         self._result = STRATEGY_STAGE_RESULT.INITIAL
         self._result_reason = ""
         self._timer_id = None
@@ -228,7 +226,7 @@ class StrategyStage(object):
     def _abort(self):
         """Stage Abort."""
 
-        abort_list = list()
+        abort_list = []
 
         if STRATEGY_STAGE_RESULT.INITIAL == self._result:
             self._result = STRATEGY_STAGE_RESULT.ABORTED
@@ -580,14 +578,14 @@ class StrategyStage(object):
     def as_dict(self):
         """Represent the strategy stage as a dictionary."""
 
-        data = dict()
+        data = {}
         data["id"] = self._id
         data["name"] = self._name
         data["timeout"] = self._timeout_in_secs
         data["inprogress"] = self._inprogress
         data["current_step"] = self._current_step
         data["total_steps"] = len(self._steps)
-        data["steps"] = list()
+        data["steps"] = []
         for step in self._steps:
             data["steps"].append(step.as_dict())
         data["result"] = self._result

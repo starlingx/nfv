@@ -265,7 +265,7 @@ def _alarm_template_get(alarm_type, alarm_context):
     if alarm_context in alarm_template["exclude_alarm_context"]:
         return None
 
-    template = dict()
+    template = {}
     template["entity_type"] = alarm_template["entity_type"]
     template["entity"] = alarm_template["entity"]
     template["event_type"] = alarm_template["event_type"]
@@ -329,10 +329,10 @@ def _alarm_raise(alarm_type, alarm_context, template, data):
 def raise_sw_update_alarm(alarm_type, additional_text=None, alarm_context=None):
     """Raise a software update alarm."""
 
-    data = dict()
+    data = {}
     data["additional_text"] = additional_text
 
-    alarm_list = list()
+    alarm_list = []
 
     # For now, override alarm context to be the admin only
     alarm_context = alarm.ALARM_CONTEXT.ADMIN

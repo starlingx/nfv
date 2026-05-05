@@ -8,7 +8,7 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-class StrategyResult(object, metaclass=Singleton):
+class StrategyResult(metaclass=Singleton):
     """Strategy Result - Constants."""
 
     INITIAL = Constant("initial")
@@ -22,7 +22,7 @@ class StrategyResult(object, metaclass=Singleton):
     ABORTED = Constant("aborted")
 
 
-class StrategyPhaseResult(object, metaclass=Singleton):
+class StrategyPhaseResult(metaclass=Singleton):
     """Strategy Phase Result - Constants."""
 
     INITIAL = Constant("initial")
@@ -36,7 +36,7 @@ class StrategyPhaseResult(object, metaclass=Singleton):
     ABORTED = Constant("aborted")
 
 
-class StrategyStageResult(object, metaclass=Singleton):
+class StrategyStageResult(metaclass=Singleton):
     """Strategy Stage Result - Constants."""
 
     INITIAL = Constant("initial")
@@ -50,7 +50,7 @@ class StrategyStageResult(object, metaclass=Singleton):
     ABORTED = Constant("aborted")
 
 
-class StrategyStepResult(object, metaclass=Singleton):
+class StrategyStepResult(metaclass=Singleton):
     """Strategy Step Result - Constants."""
 
     INITIAL = Constant("initial")

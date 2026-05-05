@@ -55,8 +55,7 @@ class VirtualisedResourcesAPI(rest.RestController):
         elif "volumes" == key:
             return VolumeAPI(), remainder
 
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(VirtualisedResourcesDescription)
     def get(self):

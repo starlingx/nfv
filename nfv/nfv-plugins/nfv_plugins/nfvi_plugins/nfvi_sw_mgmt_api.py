@@ -6,13 +6,11 @@
 import http.client as httplib
 
 from nfv_common import debug
-
-from nfv_vim import nfvi
-
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import openstack
 from nfv_plugins.nfvi_plugins.openstack import patching
+from nfv_vim import nfvi
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.sw_mgmt_api")
 
@@ -26,7 +24,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
     _signature = "22b3dbf6-e4ba-441b-8797-fb8a51210a43"
 
     def __init__(self):
-        super(NFVISwMgmtAPI, self).__init__()
+        super().__init__()
         self._token = None
         self._directory = None
 
@@ -49,7 +47,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
     def query_updates(self, future, callback):
         """Query software updates."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -71,7 +69,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             if not future.result.is_complete():
                 return
 
-            sw_patches = list()
+            sw_patches = []
 
             if future.result.data is not None:
                 sw_patch_data_list = future.result.data.get("pd", [])
@@ -111,7 +109,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
     def query_hosts(self, future, callback):
         """Query hosts."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -133,7 +131,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             if not future.result.is_complete():
                 return
 
-            hosts = list()
+            hosts = []
 
             if future.result.data is not None:
                 host_data_list = future.result.data.get("data", [])
@@ -176,7 +174,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
     def update_host(self, future, host_name, callback):
         """Apply a software update to a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -226,7 +224,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
     def apply_patches(self, future, patch_names, callback):
         """Apply a software patch that has already been uploaded."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -256,7 +254,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
             if not future.result.is_complete():
                 return
 
-            sw_patches = list()
+            sw_patches = []
 
             if future.result.data is not None:
                 sw_patch_data_list = future.result.data.get("pd", [])
@@ -297,7 +295,7 @@ class NFVISwMgmtAPI(nfvi.api.v1.NFVISwMgmtAPI):
     def update_hosts(self, future, host_names, callback):
         """Apply a software update to a list of hosts."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 

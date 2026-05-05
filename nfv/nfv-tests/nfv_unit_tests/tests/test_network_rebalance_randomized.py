@@ -6,37 +6,37 @@
 import random
 from unittest import mock
 
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
 from nfv_vim.network_rebalance._network_rebalance import (
     _add_router_to_agent_callback_body,
 )
 from nfv_vim.network_rebalance._network_rebalance import (
     _get_agent_routers_callback_body,
 )
-from nfv_vim.network_rebalance._network_rebalance import _get_datanetworks_callback_body
 from nfv_vim.network_rebalance._network_rebalance import (
     _get_network_agents_callback_body,
 )
 from nfv_vim.network_rebalance._network_rebalance import (
     _get_physical_network_callback_body,
 )
-from nfv_vim.network_rebalance._network_rebalance import _get_router_ports_callback_body
 from nfv_vim.network_rebalance._network_rebalance import (
     _remove_router_from_agent_callback_body,
 )
+from nfv_vim.network_rebalance._network_rebalance import _get_datanetworks_callback_body
+from nfv_vim.network_rebalance._network_rebalance import _get_router_ports_callback_body
 from nfv_vim.network_rebalance._network_rebalance import _L3Rebalance
 from nfv_vim.network_rebalance._network_rebalance import _run_state_machine
 from nfv_vim.network_rebalance._network_rebalance import add_rebalance_work_l3
 from nfv_vim.network_rebalance._network_rebalance import L3_REBALANCE_STATE
 
-from nfv_unit_tests.tests import testcase
-from nfv_unit_tests.tests import utils
-
+# pylint: disable=consider-using-enumerate
 DEBUG_PRINTING = False
 
-_fake_host_table = dict()
+_fake_host_table = {}
 
 
-class _fake_host(object):
+class _fake_host:
     def __init__(self, uuid):
         self.uuid = uuid
 
@@ -51,10 +51,10 @@ MAX_LOOPCOUNT = 2 * MAX_AGENTS * MAX_ROUTERS * MAX_PORTS * MAX_NETWORKS
 
 def build_get_agents_response():
 
-    get_agents_response = dict()
+    get_agents_response = {}
     get_agents_response["completed"] = True
     get_agents_response["reason"] = ""
-    get_agents_response["result-data"] = list()
+    get_agents_response["result-data"] = []
 
     NUM_AGENTS = random.randint(0, MAX_AGENTS - 1)
     for x in range(0, NUM_AGENTS):
@@ -78,10 +78,10 @@ def build_get_agents_response():
 
 
 def build_get_agent_routers_response(agent_id):
-    get_agent_routers_response = dict()
+    get_agent_routers_response = {}
     get_agent_routers_response["completed"] = True
     get_agent_routers_response["reason"] = ""
-    get_agent_routers_response["result-data"] = list()
+    get_agent_routers_response["result-data"] = []
 
     for x in range(0, random.randint(0, MAX_ROUTERS - 1)):
         get_agent_routers_response_entry = {"id": agent_id + "_router_" + str(x)}
@@ -93,11 +93,11 @@ def build_get_agent_routers_response(agent_id):
 
 
 def build_get_router_ports_response(router):
-    get_router_ports_response = dict()
+    get_router_ports_response = {}
     get_router_ports_response["completed"] = True
     get_router_ports_response["reason"] = ""
-    get_router_ports_response["result-data"] = dict()
-    get_router_ports_response["result-data"]["ports"] = list()
+    get_router_ports_response["result-data"] = {}
+    get_router_ports_response["result-data"]["ports"] = []
 
     for x in range(0, random.randint(1, MAX_PORTS - 1)):
         get_router_ports_response_entry = {"network_id": router + "_netid" + str(x)}
@@ -109,7 +109,7 @@ def build_get_router_ports_response(router):
 
 
 def build_get_physical_network_response(network_id):
-    get_physical_network_response = dict()
+    get_physical_network_response = {}
     get_physical_network_response["completed"] = True
     get_physical_network_response["reason"] = ""
     network = random.randint(0, MAX_NETWORKS - 1)
@@ -126,10 +126,10 @@ def build_get_physical_network_response(network_id):
 
 
 def build_get_datanetworks_response(host_id):
-    get_datanetworks_response = dict()
+    get_datanetworks_response = {}
     get_datanetworks_response["completed"] = True
     get_datanetworks_response["reason"] = ""
-    get_datanetworks_response["result-data"] = list()
+    get_datanetworks_response["result-data"] = []
     get_datanetworks_response["result-data"].append({"datanetwork_name": "physnet0"})
     get_datanetworks_response["result-data"].append({"datanetwork_name": "physnet1"})
 
@@ -182,7 +182,7 @@ def fake_nfvi_get_datanetworks(host_id, b):
 
 
 def fake_nfvi_remove_router_from_agent(a, b, c):
-    response = dict()
+    response = {}
     response["completed"] = True
     response["reason"] = ""
     if DEBUG_PRINTING:
@@ -192,7 +192,7 @@ def fake_nfvi_remove_router_from_agent(a, b, c):
 
 
 def fake_nfvi_add_router_to_agent(a, b, c):
-    response = dict()
+    response = {}
     response["completed"] = True
     response["reason"] = ""
     if DEBUG_PRINTING:
@@ -224,15 +224,10 @@ def add_to_fake_host_table(host_name):
 @mock.patch("nfv_vim.nfvi.nfvi_add_router_to_agent", fake_nfvi_add_router_to_agent)
 @mock.patch("nfv_vim.tables.tables_get_host_table", fake_tables_get_host_table)
 class TestNeutronRebalance2(testcase.NFVTestCase):
-    def setUp(self):
-        super(TestNeutronRebalance2, self).setUp()
-
-    def tearDown(self):
-        super(TestNeutronRebalance2, self).tearDown()
 
     def test_rebalance_down_host_randomized_w_api_calls(self):
         initial_router_count = 0
-        initial_router_config = list()
+        initial_router_config = []
         for x in range(1, 200):
             _L3Rebalance.router_diff_threshold = random.randint(1, 4)
             add_rebalance_work_l3("compute-0", True)
@@ -296,7 +291,7 @@ class TestNeutronRebalance2(testcase.NFVTestCase):
 
     def test_rebalance_down_host_abort_randomized_w_api_calls(self):
         initial_router_count = 0
-        initial_router_config = list()
+        initial_router_config = []
 
         abort_state_list = [
             L3_REBALANCE_STATE.GET_NETWORK_AGENTS,
@@ -399,7 +394,7 @@ class TestNeutronRebalance2(testcase.NFVTestCase):
 
     def test_rebalance_up_host_randomized_w_api_calls(self):
         initial_router_count = 0
-        initial_router_config = list()
+        initial_router_config = []
         for x in range(1, 200):
             _L3Rebalance.router_diff_threshold = random.randint(1, 4)
             add_rebalance_work_l3("compute-0", False)
@@ -466,7 +461,7 @@ class TestNeutronRebalance2(testcase.NFVTestCase):
 
     def test_rebalance_up_host_abort_randomized_w_api_calls(self):
         initial_router_count = 0
-        initial_router_config = list()
+        initial_router_config = []
 
         abort_state_list = [
             L3_REBALANCE_STATE.GET_NETWORK_AGENTS,

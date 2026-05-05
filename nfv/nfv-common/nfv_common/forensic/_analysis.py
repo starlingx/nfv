@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_common.forensic._defs import NFV_VIM
 
 DLOG = debug.debug_get_logger("forensic-analysis")
@@ -24,7 +23,7 @@ def _analysis_instances_success(
         return True
 
     if action_types is None:
-        action_types = list()
+        action_types = []
 
     if callback is None:
         callback = default_callback
@@ -205,7 +204,7 @@ def analysis_instance_start_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -237,7 +236,7 @@ def analysis_instance_stop_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -269,7 +268,7 @@ def analysis_instance_pause_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -299,7 +298,7 @@ def analysis_instance_unpause_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -335,7 +334,7 @@ def analysis_instance_suspend_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -369,7 +368,7 @@ def analysis_instance_resume_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -409,7 +408,7 @@ def analysis_instance_reboot_success(
         (guest_hb, NFV_VIM.INSTANCE_GUEST_SERVICES_NOTIFY),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -439,7 +438,7 @@ def analysis_instance_rebuild_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -476,7 +475,7 @@ def analysis_instance_live_migrate_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -524,7 +523,7 @@ def analysis_instance_cold_migrate_success(
         (always, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -560,7 +559,7 @@ def analysis_instance_cold_migrate_confirm_success(
         (action, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -596,7 +595,7 @@ def analysis_instance_cold_migrate_revert_success(
         (action, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -634,7 +633,7 @@ def analysis_instance_resize_success(
         (action, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -665,7 +664,7 @@ def analysis_instance_resize_confirm_success(
         (action, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -696,7 +695,7 @@ def analysis_instance_resize_revert_success(
         (action, NFV_VIM.INSTANCE_INITIAL_STATE),
     ]
 
-    expected_records = list()
+    expected_records = []
     for allowed, data_type in possible_records:
         if allowed:
             expected_records.append(data_type)
@@ -716,11 +715,11 @@ def analysis_stdout(records):
     def timestamp_str(timestamp_data):
         return timestamp_data.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-    hosts = dict()
-    instances = dict()
+    hosts = {}
+    instances = {}
 
-    hosts_state_change = dict()
-    instances_state_change = dict()
+    hosts_state_change = {}
+    instances_state_change = {}
 
     print("\nAnalysis:")
 

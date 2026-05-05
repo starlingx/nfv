@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _hypervisor_table = None
@@ -12,9 +11,6 @@ _hypervisor_table = None
 
 class HypervisorTable(Table):
     """Hypervisor Table."""
-
-    def __init__(self):
-        super(HypervisorTable, self).__init__()
 
     def get_by_host_name(self, host_name, default=None):
         for hypervisor in list(self._entries.values()):

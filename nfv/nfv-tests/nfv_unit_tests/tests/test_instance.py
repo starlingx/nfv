@@ -3,16 +3,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import fixtures
 import uuid
 
-from nfv_common import config
+import fixtures
 
+from nfv_common import config
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
 from nfv_vim import host_fsm
 from nfv_vim import nfvi
-from nfv_vim import objects
-
 from nfv_vim.nfvi.objects import v1 as nfvi_objects
+from nfv_vim import objects
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.tables._host_aggregate_table import HostAggregateTable
 from nfv_vim.tables._host_group_table import HostGroupTable
@@ -22,9 +23,6 @@ from nfv_vim.tables._instance_group_table import InstanceGroupTable
 from nfv_vim.tables._instance_table import InstanceTable
 from nfv_vim.tables._instance_type_table import InstanceTypeTable
 from nfv_vim.tables._table import Table
-
-from nfv_unit_tests.tests import testcase
-from nfv_unit_tests.tests import utils
 
 
 def fake_event_issue(a, b, c, d):
@@ -43,7 +41,7 @@ class TestInstance(testcase.NFVTestCase):
     def setUp(self):
         """Setup for testing."""
 
-        super(TestInstance, self).setUp()
+        super().setUp()
         self._tenant_table = Table()
         self._instance_type_table = InstanceTypeTable()
         self._image_table = ImageTable()
@@ -116,7 +114,7 @@ class TestInstance(testcase.NFVTestCase):
     def tearDown(self):
         """Cleanup testing setup."""
 
-        super(TestInstance, self).tearDown()
+        super().tearDown()
         self._tenant_table.clear()
         self._instance_type_table.clear()
         self._image_table.clear()
@@ -154,7 +152,7 @@ class TestInstance(testcase.NFVTestCase):
                             tenant_uuid,
                             admin_state=admin_state,
                             oper_state=nfvi.objects.v1.INSTANCE_OPER_STATE.ENABLED,
-                            avail_status=list(),
+                            avail_status=[],
                             action=nfvi.objects.v1.INSTANCE_ACTION.NONE,
                             host_name=host_name,
                             instance_type=utils.instance_type_to_flavor_dict(

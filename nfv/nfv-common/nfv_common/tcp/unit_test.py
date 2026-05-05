@@ -8,10 +8,9 @@ import time
 
 from nfv_common import debug
 from nfv_common import selobj
-from nfv_common import timers
-
 from nfv_common.tcp._tcp_connection import TCPConnection
 from nfv_common.tcp._tcp_server import TCPServer
+from nfv_common import timers
 
 
 def message_handler(client_connection, msg):
@@ -19,8 +18,8 @@ def message_handler(client_connection, msg):
 
 
 if __name__ == "__main__":
-    CONF = dict()
-    CONF["debug"] = dict()
+    CONF = {}
+    CONF["debug"] = {}
     CONF["debug"]["config_file"] = "/etc/nfv/vim/debug.ini"
     CONF["debug"]["handlers"] = "stdout"
 

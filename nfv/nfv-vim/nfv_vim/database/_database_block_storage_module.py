@@ -5,12 +5,10 @@
 #
 import json
 
+from nfv_vim.database._database import database_get
+from nfv_vim.database import model
 from nfv_vim import nfvi
 from nfv_vim import objects
-
-from nfv_vim.database import model
-
-from nfv_vim.database._database import database_get
 
 
 def database_volume_add(volume_obj):
@@ -65,7 +63,7 @@ def database_volume_get_list():
     session = db.session()
     query = session.query(model.Volume)
 
-    volume_objs = list()
+    volume_objs = []
     for volume in query.all():
         nfvi_volume_data = json.loads(volume.nfvi_volume_data)
         nfvi_volume = nfvi.objects.v1.Volume(
@@ -132,7 +130,7 @@ def database_volume_snapshot_get_list():
     session = db.session()
     query = session.query(model.VolumeSnapshot)
 
-    volume_snapshot_objs = list()
+    volume_snapshot_objs = []
     for volume_snapshot in query.all():
         nfvi_volume_snapshot_data = json.loads(
             volume_snapshot.nfvi_volume_snapshot_data

@@ -12,9 +12,9 @@ from nfv_vim import tables
 
 DLOG = debug.debug_get_logger("nfv_vim.vim_image_api_events")
 
-_image_create_operations = dict()
-_image_update_operations = dict()
-_image_delete_operations = dict()
+_image_create_operations = {}
+_image_update_operations = {}
+_image_delete_operations = {}
 
 
 def _create_image_callback(
@@ -232,10 +232,6 @@ def vim_image_api_get_images(connection, msg):
 def vim_image_api_initialize():
     """Initialize VIM Image API Handling."""
 
-    pass
-
 
 def vim_image_api_finalize():
     """Finalize VIM Image API Handling."""
-
-    pass

@@ -4,10 +4,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
-import config
 import http.client as httplib
 import socket
 import time
+
+import config
 
 from nfv_plugins.nfvi_plugins.openstack import ceilometer
 from nfv_plugins.nfvi_plugins.openstack import cinder
@@ -258,7 +259,7 @@ def nova_unit_tests(token, test_config):
         network for network in networks["networks"] if network["name"] == "network-test"
     )
 
-    networks = list()
+    networks = []
     networks.append({"uuid": network["id"]})
 
     server = nova.create_server(
@@ -278,7 +279,7 @@ def nova_unit_tests(token, test_config):
         volume for volume in volumes["volumes"] if volume["name"] == "volume-test"
     )
 
-    block_devices = list()
+    block_devices = []
     block_devices.append(
         {
             "uuid": volume["id"],
@@ -535,7 +536,7 @@ if __name__ == "__main__":
 
     # TODO(abailey): Port this into a unit test config file and
     # TODO(abailey): fix the config object to handle multiple config files
-    test_config = dict()
+    test_config = {}
     test_config["host_name"] = "compute-101"
     test_config["host_uuid"] = "93ad7f54-f31c-44c8-b44f-2e0ccfb62aa7"
     test_config["image_url"] = (

@@ -7,15 +7,12 @@ import weakref
 
 from nfv_common import config
 from nfv_common import debug
+from nfv_common.helpers import coroutine
 from nfv_common import state_machine
 from nfv_common import timers
-
-from nfv_common.helpers import coroutine
-
+from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim import network_rebalance
 from nfv_vim import nfvi
-
-from nfv_vim.host_fsm._host_defs import HOST_EVENT
 
 DLOG = debug.debug_get_logger("nfv_vim.state_machine.host_task_work")
 
@@ -26,7 +23,7 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
     """Query-Hypervisor Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(QueryHypervisorTaskWork, self).__init__(
+        super().__init__(
             "query-hypervisor_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -87,15 +84,14 @@ class QueryHypervisorTaskWork(state_machine.StateTaskWork):
         if hypervisor is not None:
             nfvi.nfvi_get_hypervisor(hypervisor.uuid, self._callback())
             return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
-        else:
-            return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
+        return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
 
 class NotifyHostEnabledTaskWork(state_machine.StateTaskWork):
     """Notify Host Enabled Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
-        super(NotifyHostEnabledTaskWork, self).__init__(
+        super().__init__(
             "notify-host-enabled_%s_%s" % (host.name, service),
             task,
             force_pass=force_pass,
@@ -171,7 +167,7 @@ class NotifyHostDisabledTaskWork(state_machine.StateTaskWork):
     """Notify Host Disabled Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
-        super(NotifyHostDisabledTaskWork, self).__init__(
+        super().__init__(
             "notify-host-disabled_%s_%s" % (host.name, service),
             task,
             force_pass=force_pass,
@@ -270,7 +266,7 @@ class NotifyHostServicesDisableFailedTaskWork(state_machine.StateTaskWork):
     """Notify Host Service Disable Failed Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(NotifyHostServicesDisableFailedTaskWork, self).__init__(
+        super().__init__(
             "notify-host-services-disable-failed_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -328,7 +324,7 @@ class NotifyHostServicesDeleteFailedTaskWork(state_machine.StateTaskWork):
     """Notify Host Service Delete Failed Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(NotifyHostServicesDeleteFailedTaskWork, self).__init__(
+        super().__init__(
             "notify-host-services-delete-failed_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -386,7 +382,7 @@ class NotifyHostFailedTaskWork(state_machine.StateTaskWork):
     """Notify Host Failed Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(NotifyHostFailedTaskWork, self).__init__(
+        super().__init__(
             "notify-host-failed_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -443,7 +439,7 @@ class FailHostTaskWork(state_machine.StateTaskWork):
     """Fail Host Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(FailHostTaskWork, self).__init__(
+        super().__init__(
             "fail-host_%s" % host.name, task, force_pass=force_pass, timeout_in_secs=120
         )
         self._host_reference = weakref.ref(host)
@@ -464,8 +460,7 @@ class FailHostTaskWork(state_machine.StateTaskWork):
             DLOG.info("Fail-Host timeout for %s, force-passing." % self._host.name)
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
-        else:
-            DLOG.info("Fail-Host timeout for %s." % self._host.name)
+        DLOG.info("Fail-Host timeout for %s." % self._host.name)
 
         return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
 
@@ -524,8 +519,7 @@ class FailHostTaskWork(state_machine.StateTaskWork):
             )
             return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
 
-        else:
-            return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
+        return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
     def handle_event(self, event, event_data=None):
         """Handle host events."""
@@ -557,7 +551,7 @@ class CreateHostServicesTaskWork(state_machine.StateTaskWork):
     """Create Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
-        super(CreateHostServicesTaskWork, self).__init__(
+        super().__init__(
             "create-host-services_%s_%s" % (host.name, service),
             task,
             force_pass=force_pass,
@@ -639,7 +633,7 @@ class DeleteHostServicesTaskWork(state_machine.StateTaskWork):
     """Delete Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
-        super(DeleteHostServicesTaskWork, self).__init__(
+        super().__init__(
             "delete-host-services_%s_%s" % (host.name, service),
             task,
             force_pass=force_pass,
@@ -752,7 +746,7 @@ class WaitHostServicesCreatedTaskWork(state_machine.StateTaskWork):
     """Wait Host Services Created Task Work."""
 
     def __init__(self, task, host, service):
-        super(WaitHostServicesCreatedTaskWork, self).__init__(
+        super().__init__(
             "wait-host-services-created_%s_%s" % (host.name, service),
             task,
             timeout_in_secs=120,
@@ -877,7 +871,7 @@ class EnableHostServicesTaskWork(state_machine.StateTaskWork):
     """Enable Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
-        super(EnableHostServicesTaskWork, self).__init__(
+        super().__init__(
             "enable-host-services_%s_%s" % (host.name, service),
             task,
             force_pass=force_pass,
@@ -996,7 +990,7 @@ class DisableHostServicesTaskWork(state_machine.StateTaskWork):
     """Disable Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
-        super(DisableHostServicesTaskWork, self).__init__(
+        super().__init__(
             "disable-host-services_%s_%s" % (host.name, service),
             task,
             force_pass=force_pass,
@@ -1094,7 +1088,7 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
     """Wait Host Services Disabled Task Work."""
 
     def __init__(self, task, host, service):
-        super(WaitHostServicesDisabledTaskWork, self).__init__(
+        super().__init__(
             "wait-host-services-disabled_%s_%s" % (host.name, service),
             task,
             timeout_in_secs=600,
@@ -1196,11 +1190,10 @@ class WaitHostServicesDisabledTaskWork(state_machine.StateTaskWork):
             # We will wait for a bit before doing our first query to ensure
             # kubernetes has had time to start terminating the pods.
             return state_machine.STATE_TASK_WORK_RESULT.WAIT, empty_reason
-        else:
-            reason = "Trying to wait for unknown host service %s" % self._service
-            DLOG.error(reason)
-            self._host.update_failure_reason(reason)
-            return state_machine.STATE_TASK_WORK_RESULT.FAILED, reason
+        reason = "Trying to wait for unknown host service %s" % self._service
+        DLOG.error(reason)
+        self._host.update_failure_reason(reason)
+        return state_machine.STATE_TASK_WORK_RESULT.FAILED, reason
 
     def handle_event(self, event, event_data=None):
         """Handle events while waiting for host services to be disabled."""
@@ -1241,7 +1234,7 @@ class NotifyHostServicesEnabledTaskWork(state_machine.StateTaskWork):
     """Notify Host Services Enabled Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(NotifyHostServicesEnabledTaskWork, self).__init__(
+        super().__init__(
             "notify-host-services-enabled_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -1305,7 +1298,7 @@ class NotifyHostServicesDisabledTaskWork(state_machine.StateTaskWork):
     """Notify Host Services Disabled Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(NotifyHostServicesDisabledTaskWork, self).__init__(
+        super().__init__(
             "notify-host-services-disabled_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -1370,7 +1363,7 @@ class NotifyHostServicesDeletedTaskWork(state_machine.StateTaskWork):
     """Notify Host Services Deleted Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(NotifyHostServicesDeletedTaskWork, self).__init__(
+        super().__init__(
             "notify-host-services-deleted_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -1427,7 +1420,7 @@ class AuditHostServicesTaskWork(state_machine.StateTaskWork):
     """Audit Host Services Task Work."""
 
     def __init__(self, task, host, service, force_pass=False):
-        super(AuditHostServicesTaskWork, self).__init__(
+        super().__init__(
             "audit-host-services_%s_%s" % (host.name, service),
             task,
             force_pass=force_pass,
@@ -1546,7 +1539,7 @@ class AuditHostServicesCompleteTaskWork(state_machine.StateTaskWork):
     """Audit Host Services Complete Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(AuditHostServicesCompleteTaskWork, self).__init__(
+        super().__init__(
             "audit-host-services_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -1576,7 +1569,7 @@ class AuditInstancesTaskWork(state_machine.StateTaskWork):
     """Audit Instances Task Work."""
 
     def __init__(self, task, host, force_pass=False):
-        super(AuditInstancesTaskWork, self).__init__(
+        super().__init__(
             "audit-instances_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -1626,7 +1619,7 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
         # Add 60s to ensure the migration will time out before task
         self._max_disabling_wait_in_secs = max_migrate_wait_in_secs + 60
 
-        super(NotifyInstancesHostDisablingTaskWork, self).__init__(
+        super().__init__(
             "notify-instances-host-disabling_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -1673,11 +1666,10 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
             )
             return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
-        else:
-            DLOG.info(
-                "Notify-Instances-Host-Disabling timeout for %s, "
-                "locking." % self._host.name
-            )
+        DLOG.info(
+            "Notify-Instances-Host-Disabling timeout for %s, "
+            "locking." % self._host.name
+        )
 
         if not self._host.has_reason():
             self._host.update_failure_reason(
@@ -1739,9 +1731,8 @@ class NotifyInstancesHostDisablingTaskWork(state_machine.StateTaskWork):
             self._host.update_failure_reason(host_operation.reason)
             return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
 
-        else:
-            self._host.update_failure_reason(host_operation.reason)
-            return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
+        self._host.update_failure_reason(host_operation.reason)
+        return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
     def handle_event(self, event, event_data=None):
         """Handle instances move notifications."""
@@ -1843,7 +1834,7 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
         # Add 60s to ensure the evacuation will time out before task
         self._max_disabled_wait_in_secs = max_evacuate_wait_in_secs + 60
 
-        super(NotifyInstancesHostDisabledTaskWork, self).__init__(
+        super().__init__(
             "notify-instances-host-disabled_%s" % host.name,
             task,
             force_pass=force_pass,
@@ -1929,8 +1920,7 @@ class NotifyInstancesHostDisabledTaskWork(state_machine.StateTaskWork):
             self._host.update_failure_reason(host_operation.reason)
             return state_machine.STATE_TASK_WORK_RESULT.TIMED_OUT, empty_reason
 
-        else:
-            return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
+        return state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
 
     def handle_event(self, event, event_data=None):
         """Handle instances move notifications."""
@@ -1998,7 +1988,7 @@ class WaitHostStabilizeTaskWork(state_machine.StateTaskWork):
     """Wait Host Stabilize Task Work."""
 
     def __init__(self, task, host, timeout_in_secs=60):
-        super(WaitHostStabilizeTaskWork, self).__init__(
+        super().__init__(
             "wait-host-stabilize_%s" % host.name, task, timeout_in_secs=timeout_in_secs
         )
         self._host_reference = weakref.ref(host)

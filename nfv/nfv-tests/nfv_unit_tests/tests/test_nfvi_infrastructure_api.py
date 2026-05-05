@@ -4,26 +4,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import sys
+from unittest import mock
 import uuid
 
+from nfv_unit_tests.tests import testcase
 from nfv_vim.nfvi.objects.v1 import HOST_AVAIL_STATUS
 from nfv_vim.nfvi.objects.v1 import HOST_LABEL_KEYS
 from nfv_vim.nfvi.objects.v1 import HOST_LABEL_VALUES
 from nfv_vim.nfvi.objects.v1 import HOST_OPER_STATE
 
-from nfv_unit_tests.tests import testcase
-from unittest import mock
-
 sys.modules["fm_core"] = mock.Mock()
 
 # pylint: disable-next=C0413
 from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import (  # noqa: H306,E402
-    host_state,
+    NFVIInfrastructureAPI,
 )
 
 # pylint: disable-next=C0413
 from nfv_plugins.nfvi_plugins.nfvi_infrastructure_api import (  # noqa: H306,E402
-    NFVIInfrastructureAPI,
+    host_state,
 )
 
 # todo(abailey): use already existing constants
@@ -35,15 +34,6 @@ ADMIN_STATE_UNLOCKED = "unlocked"
 
 
 class TestNFVIInfrastructureAPI(testcase.NFVTestCase):
-    def setUp(self):
-        """Setup for testing."""
-
-        super(TestNFVIInfrastructureAPI, self).setUp()
-
-    def tearDown(self):
-        """Cleanup testing setup."""
-
-        super(TestNFVIInfrastructureAPI, self).tearDown()
 
     def test_create(self):
         """Test that the plugin_api can be created."""

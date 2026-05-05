@@ -6,12 +6,11 @@
 import random
 from unittest import mock
 
+from nfv_unit_tests.tests import testcase
 from nfv_vim.network_rebalance._network_rebalance import _L3Rebalance
 from nfv_vim.network_rebalance._network_rebalance import _reschedule_down_agent
 from nfv_vim.network_rebalance._network_rebalance import _reschedule_new_agent
 from nfv_vim.network_rebalance._network_rebalance import L3_REBALANCE_STATE
-
-from nfv_unit_tests.tests import testcase
 
 DEBUG_PRINTING = False
 
@@ -24,11 +23,6 @@ def fake_nfvi_remove_router_from_agent(a, b, c):
     "nfv_vim.nfvi.nfvi_remove_router_from_agent", fake_nfvi_remove_router_from_agent
 )
 class TestNeutronRebalance(testcase.NFVTestCase):
-    def setUp(self):
-        super(TestNeutronRebalance, self).setUp()
-
-    def tearDown(self):
-        super(TestNeutronRebalance, self).tearDown()
 
     def test_rebalance_down_host_canned(self):
         _L3Rebalance.reinit()
@@ -86,7 +80,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-0 routers
         agent_id = "00000000-3de6-4717-93d4-0f23c38d2bf2"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "415302d1-829c-42ec-aab5-a5b592de5c41"
         )
@@ -111,7 +105,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-2 routers
         agent_id = "22222222-5a5f-4c58-9399-12d0b8e7e321"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "a913c4a3-4d6b-4a4d-9cf5-f8b7c30224a4"
         )
@@ -133,7 +127,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-1 routers
         agent_id = "11111111-562c-438c-8083-0733ebbbe881"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "5054adb8-aef5-445d-b335-fc4bb3ee0871"
         )
@@ -146,7 +140,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-3 routers
         agent_id = "33333333-8989-438c-7083-344322513677"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "51019325-a1d4-410f-a83d-9eb54743dcf0"
         )
@@ -156,7 +150,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-5 routers
         agent_id = "55555555-930c-438c-6083-173472902843"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "2e50468a-755a-4bfb-bc29-f7aadc66c598"
         )
@@ -167,7 +161,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
         # compute-4 routers
 
         agent_id = "44444444-0074-438c-5083-023486659382"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "4c0213e7-4b36-439b-9e47-d5509e0950f1"
         )
@@ -356,7 +350,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-0 routers
         agent_id = "00000000-3de6-4717-93d4-0f23c38d2bf2"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "415302d1-829c-42ec-aab5-a5b592de5c41"
         )
@@ -381,7 +375,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-2 routers
         agent_id = "22222222-5a5f-4c58-9399-12d0b8e7e321"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "a913c4a3-4d6b-4a4d-9cf5-f8b7c30224a4"
         )
@@ -403,7 +397,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-1 routers
         agent_id = "11111111-562c-438c-8083-0733ebbbe881"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "5054adb8-aef5-445d-b335-fc4bb3ee0871"
         )
@@ -416,7 +410,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-3 routers
         agent_id = "33333333-8989-438c-7083-344322513677"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "51019325-a1d4-410f-a83d-9eb54743dcf0"
         )
@@ -426,7 +420,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-5 routers
         agent_id = "55555555-930c-438c-6083-173472902843"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         _L3Rebalance.router_ids_per_agent[agent_id].append(
             "4c0213e7-4b36-439b-9e47-d5509e0950f1"
         )
@@ -436,7 +430,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-4 routers
         agent_id = "44444444-0074-438c-5083-023486659382"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
 
         _L3Rebalance.networks_per_router["415302d1-829c-42ec-aab5-a5b592de5c41"] = [
             "physnet0",
@@ -617,7 +611,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-0 routers
         agent_id = "agentid-compute-0"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         num_routers = num_agents_list[0]
         _L3Rebalance.num_routers_on_agents.append(num_routers)
         for router in range(0, num_routers):
@@ -631,7 +625,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-1 routers
         agent_id = "agentid-compute-1"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         num_routers = num_agents_list[1]
         _L3Rebalance.num_routers_on_agents.append(num_routers)
         for router in range(0, num_routers):
@@ -645,7 +639,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-2 routers
         agent_id = "agentid-compute-2"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         num_routers = num_agents_list[2]
         _L3Rebalance.num_routers_on_agents.append(num_routers)
         for router in range(0, num_routers):
@@ -659,7 +653,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-3 routers
         agent_id = "agentid-compute-3"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         num_routers = num_agents_list[3]
         _L3Rebalance.num_routers_on_agents.append(num_routers)
         for router in range(0, num_routers):
@@ -673,7 +667,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-4 routers
         agent_id = "agentid-compute-4"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         num_routers = num_agents_list[4]
         _L3Rebalance.num_routers_on_agents.append(num_routers)
         for router in range(0, num_routers):
@@ -687,7 +681,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-5 routers
         agent_id = "agentid-compute-5"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         num_routers = num_agents_list[5]
         _L3Rebalance.num_routers_on_agents.append(num_routers)
         for router in range(0, num_routers):
@@ -702,7 +696,7 @@ class TestNeutronRebalance(testcase.NFVTestCase):
 
         # compute-6 routers
         agent_id = "agentid-compute-6"
-        _L3Rebalance.router_ids_per_agent[agent_id] = list()
+        _L3Rebalance.router_ids_per_agent[agent_id] = []
         num_routers = num_agents_list[6]
         _L3Rebalance.num_routers_on_agents.append(num_routers)
         for router in range(0, num_routers):

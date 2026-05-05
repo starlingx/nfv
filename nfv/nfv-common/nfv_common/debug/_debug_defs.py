@@ -8,7 +8,7 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-class _DebugLevel(object, metaclass=Singleton):
+class _DebugLevel(metaclass=Singleton):
     """Debug Level Constants."""
 
     NONE = Constant(8000)

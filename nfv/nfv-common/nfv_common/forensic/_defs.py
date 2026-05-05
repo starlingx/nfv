@@ -5,7 +5,7 @@
 #
 
 
-class _NfvVimRecordType(object):
+class _NfvVimRecordType:
     """NFV-VIM Record Type Constants."""
 
     HOST_NFVI_STATE_CHANGE = "nfv_vim_host_nfvi_state_change"

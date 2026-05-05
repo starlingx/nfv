@@ -24,12 +24,18 @@ load-plugins=
 # https://pylint.readthedocs.io/en/latest/user_guide/output.html#source-code-analysis-section
 # R detect Refactor for a "good practice" metric violation
 # W detect Warning for stylistic problems, or minor programming issues
-disable=R,fixme,
+disable=fixme,
         raise-missing-from,
         missing-class-docstring,
         missing-function-docstring,
         missing-module-docstring,
         consider-using-f-string,
+        # Refactoring relacted checks
+        too-many-instance-attributes,
+        too-few-public-methods,
+        too-many-arguments,
+        too-many-locals,
+        too-many-branches,
 
 
 [REPORTS]

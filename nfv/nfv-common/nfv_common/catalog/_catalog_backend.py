@@ -18,7 +18,7 @@ class CatalogBackend(stevedore.named.NamedExtensionManager, metaclass=Singleton)
     _signature = "7926ef8d-b04c-4f5b-8627-f40f59fd8d11"
 
     def __init__(self, plugin_namespace, plugin_name):
-        super(CatalogBackend, self).__init__(
+        super().__init__(
             plugin_namespace,
             plugin_name,
             invoke_on_load=True,
@@ -42,12 +42,10 @@ class CatalogBackend(stevedore.named.NamedExtensionManager, metaclass=Singleton)
 
         if CatalogBackend._signature == plugin.obj.signature:
             return True
-        else:
-            DLOG.info(
-                "Plugin %s version %s from provider %s has an invalid "
-                "signature."
-                % (plugin.obj.name, plugin.obj.version, plugin.obj.provider)
-            )
+        DLOG.info(
+            "Plugin %s version %s from provider %s has an invalid "
+            "signature." % (plugin.obj.name, plugin.obj.version, plugin.obj.provider)
+        )
         return False
 
     def read_vnf_descriptor(self, vnfd_id, vnf_vendor, vnf_version):

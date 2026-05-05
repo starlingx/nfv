@@ -7,5 +7,4 @@ import testtools
 
 
 class NFVTestCase(testtools.TestCase):
-    def setUp(self):
-        super(NFVTestCase, self).setUp()
+    pass

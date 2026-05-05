@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 
 DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
@@ -15,7 +14,7 @@ class InitialState(state_machine.State):
     """Instance - Initial State."""
 
     def __init__(self, name, task_start_state_name):
-        super(InitialState, self).__init__(name)
+        super().__init__(name)
         self._task_start_state_name = task_start_state_name
 
     def enter(self, instance):
@@ -35,15 +34,12 @@ class InitialState(state_machine.State):
     def transition(self, instance, event, event_data, to_state):
         """Transition from the initial state."""
 
-        pass
-
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the initial state."""
 
         if INSTANCE_EVENT.TASK_START == event:
             return self._task_start_state_name
 
-        else:
-            DLOG.verbose("Ignoring %s event for %s." % (event, instance.name))
+        DLOG.verbose("Ignoring %s event for %s." % (event, instance.name))
 
         return self.name

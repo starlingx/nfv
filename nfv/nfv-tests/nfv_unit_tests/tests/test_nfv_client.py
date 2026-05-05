@@ -8,16 +8,10 @@ import os
 from unittest import mock
 
 from nfv_client import shell
-
 from nfv_unit_tests.tests import testcase
 
 
 class TestNFVClientShell(testcase.NFVTestCase):
-    def setUp(self):
-        super(TestNFVClientShell, self).setUp()
-
-    def tearDown(self):
-        super(TestNFVClientShell, self).tearDown()
 
     # -- Failure cases --
     # Each failure case will :
@@ -55,7 +49,7 @@ class TestNFVClientShellRobustness(TestNFVClientShell):
         self._test_shell_bad_or_empty_args(shell_args=shell_args)
 
 
-class StrategyMixin(object):
+class StrategyMixin:
     MOCK_ENV = {
         "OS_AUTH_URL": "FAKE_OS_AUTH_URL",
         "OS_PROJECT_NAME": "FAKE_OS_PROJECT_NAME",
@@ -273,7 +267,7 @@ class StrategyMixin(object):
 
 class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):
-        super(TestCLISwDeployStrategy, self).setUp()
+        super().setUp()
         self.set_strategy("sw-deploy-strategy")
 
     def required_create_fields(self):
@@ -307,19 +301,19 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
 
 class TestCLIFwUpdateStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):
-        super(TestCLIFwUpdateStrategy, self).setUp()
+        super().setUp()
         self.set_strategy("fw-update-strategy")
 
 
 class TestCLIKubeRootCAUpdateStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):
-        super(TestCLIKubeRootCAUpdateStrategy, self).setUp()
+        super().setUp()
         self.set_strategy("kube-rootca-update-strategy")
 
 
 class TestCLIKubeUpgradeStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):
-        super(TestCLIKubeUpgradeStrategy, self).setUp()
+        super().setUp()
         self.set_strategy("kube-upgrade-strategy")
 
     def required_create_fields(self):
@@ -330,5 +324,5 @@ class TestCLIKubeUpgradeStrategy(TestNFVClientShell, StrategyMixin):
 
 class TestSystemConfigUpdateStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):
-        super(TestSystemConfigUpdateStrategy, self).setUp()
+        super().setUp()
         self.set_strategy("system-config-update-strategy")

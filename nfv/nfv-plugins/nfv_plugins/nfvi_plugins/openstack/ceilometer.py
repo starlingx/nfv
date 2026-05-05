@@ -6,7 +6,6 @@
 import json
 
 from nfv_common import debug
-
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
@@ -46,6 +45,7 @@ def get_meters(token):
     return response
 
 
+# pylint: disable-next=redefined-builtin
 def publish_meter_sample(token, resource, meter_name, type, unit, sample, timestamp):
     """Publish a sample for a meter to OpenStack Ceilometer."""
 
@@ -55,10 +55,10 @@ def publish_meter_sample(token, resource, meter_name, type, unit, sample, timest
 
     api_cmd = url + "/v2/meters/" + meter_name
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["resource_id"] = resource
     api_cmd_payload["project_id"] = "none"
     api_cmd_payload["user_id"] = "none"
@@ -96,10 +96,10 @@ def create_threshold_alarm(
 
     api_cmd = url + "/v2/alarms"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    threshold_rule = dict()
+    threshold_rule = {}
     threshold_rule["meter_name"] = meter_name
     threshold_rule["threshold"] = threshold
     threshold_rule["period"] = period
@@ -110,7 +110,7 @@ def create_threshold_alarm(
         {"field": "resource_id", "op": "eq", "value": "compute-0_compute-0"}
     ]
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["name"] = name
     api_cmd_payload["type"] = "threshold"
     api_cmd_payload["repeat_actions"] = True

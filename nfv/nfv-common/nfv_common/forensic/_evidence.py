@@ -12,8 +12,8 @@ DLOG = debug.debug_get_logger("forensic-evidence")
 def evidence_from_files(files, start_date, end_date, progress=None):
     """Gather evidence."""
 
-    records = list()
-    file_ctrl = dict()
+    records = []
+    file_ctrl = {}
 
     total_lines = 0
     for parser_name, file_name in list(files.items()):

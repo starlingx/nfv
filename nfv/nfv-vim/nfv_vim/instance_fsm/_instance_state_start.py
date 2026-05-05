@@ -6,7 +6,6 @@
 from nfv_common import debug
 from nfv_common import state_machine
 from nfv_common import timers
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import StartTask
@@ -16,9 +15,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 class StartState(state_machine.State):
     """Instance - Start State."""
-
-    def __init__(self, name):
-        super(StartState, self).__init__(name)
 
     def enter(self, instance):
         """Entering start state."""
@@ -37,8 +33,6 @@ class StartState(state_machine.State):
 
     def transition(self, instance, event, event_data, to_state):
         """Transition from the start state."""
-
-        pass
 
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the start state."""

@@ -44,8 +44,7 @@ class StrategyAPI(rest.RestController):
     def _lookup(self, key, *remainder):
         if "strategy" == key:
             return CurrentStrategyAPI(), remainder
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(StrategyDescription)
     def get(self):

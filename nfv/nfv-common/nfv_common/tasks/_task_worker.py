@@ -15,7 +15,7 @@ class TaskWorker(thread.ThreadWorker):
     """Task Worker."""
 
     def __init__(self, name):
-        super(TaskWorker, self).__init__(name)
+        super().__init__(name)
 
     def initialize(self):
         """Initialize the Task Worker."""
@@ -48,7 +48,7 @@ class TaskWorkerThread(thread.Thread):
         self._id = TaskWorkerThread._id
         self._name = name
         self._worker = TaskWorker(self._name)
-        super(TaskWorkerThread, self).__init__(self._name, self._worker)
+        super().__init__(self._name, self._worker)
         TaskWorkerThread._id += 1
 
     @property

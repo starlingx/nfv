@@ -7,14 +7,11 @@ import http.client as httplib
 import uuid
 
 from nfv_common import debug
-
-from nfv_vim import nfvi
-
 from nfv_plugins.nfvi_plugins import config
-
 from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import keystone
 from nfv_plugins.nfvi_plugins.openstack import openstack
+from nfv_vim import nfvi
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.identity_api")
 
@@ -28,7 +25,7 @@ class NFVIIdentityAPI(nfvi.api.v1.NFVIIdentityAPI):
     _signature = "22b3dbf6-e4ba-441b-8797-fb8a51210a43"
 
     def __init__(self):
-        super(NFVIIdentityAPI, self).__init__()
+        super().__init__()
         self._token = None
         self._directory = None
 
@@ -51,7 +48,7 @@ class NFVIIdentityAPI(nfvi.api.v1.NFVIIdentityAPI):
     def get_tenants(self, future, callback):
         """Get a list of tenants."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -75,7 +72,7 @@ class NFVIIdentityAPI(nfvi.api.v1.NFVIIdentityAPI):
 
             tenant_data_list = future.result.data
 
-            tenant_objs = list()
+            tenant_objs = []
 
             for tenant_data in tenant_data_list["projects"]:
                 tenant_uuid = uuid.UUID(tenant_data["id"])

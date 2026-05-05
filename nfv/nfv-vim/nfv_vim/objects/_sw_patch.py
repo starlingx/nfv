@@ -4,14 +4,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
-
+from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import event_log
 from nfv_vim import nfvi
-
 from nfv_vim.objects._sw_update import SW_UPDATE_ALARM_TYPES
 from nfv_vim.objects._sw_update import SW_UPDATE_EVENT_IDS
 from nfv_vim.objects._sw_update import SW_UPDATE_TYPE
@@ -24,13 +21,13 @@ class SwPatch(SwUpdate):
     """Software Patch Object."""
 
     def __init__(self, sw_update_uuid=None, strategy_data=None):
-        super(SwPatch, self).__init__(
+        super().__init__(
             sw_update_type=SW_UPDATE_TYPE.SW_PATCH,
             sw_update_uuid=sw_update_uuid,
             strategy_data=strategy_data,
         )
 
-        self._nfvi_sw_patch_hosts = list()
+        self._nfvi_sw_patch_hosts = []
 
     def strategy_build(
         self,
@@ -73,8 +70,6 @@ class SwPatch(SwUpdate):
 
     def strategy_build_complete(self, success, reason):
         """Creation of a software patch strategy complete."""
-
-        pass
 
     @staticmethod
     def alarm_type(alarm_type):

@@ -12,7 +12,7 @@ from nfv_common import debug
 DLOG = debug.debug_get_logger("nfv_tests.test_base")
 
 
-class Test(object):
+class Test:
     """Test Base Class."""
 
     LOG_FILES = {}

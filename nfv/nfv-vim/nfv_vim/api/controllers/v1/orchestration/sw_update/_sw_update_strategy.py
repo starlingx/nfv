@@ -4,6 +4,7 @@
 #
 import http.client as httplib
 import json
+
 import pecan
 from pecan import rest
 from wsme import types as wsme_types
@@ -18,9 +19,7 @@ from nfv_vim.api.acl.policies import sw_update_strategy_policy
 from nfv_vim.api.acl.policies import sw_upgrade_strategy_policy
 from nfv_vim.api.acl.policies import system_config_update_strategy_policy
 from nfv_vim.api.acl import policy
-
 from nfv_vim import rpc
-
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
     SW_UPDATE_ACTION,
 )
@@ -74,9 +73,8 @@ def _get_sw_update_type_from_path(path):
         return SW_UPDATE_NAME.KUBE_UPGRADE
     elif "current-strategy" in split_path:
         return SW_UPDATE_NAME.CURRENT_STRATEGY
-    else:
-        DLOG.error("Unknown sw_update_type in path: %s" % path)
-        return "unknown"
+    DLOG.error("Unknown sw_update_type in path: %s" % path)
+    return "unknown"
 
 
 class SwUpdateStrategyStageStepData(wsme_types.Base):
@@ -316,7 +314,7 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
         phase.total_stages = phase_data["total_stages"]
         phase.current_stage = phase_data["current_stage"]
         phase.stop_at_stage = phase_data["stop_at_stage"]
-        phase.stages = list()
+        phase.stages = []
         for stage_data in phase_data["stages"]:
             stage = SwUpdateStrategyStageData()
             stage.stage_id = stage_data["id"]
@@ -324,7 +322,7 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
             stage.timeout = stage_data["timeout"]
             stage.total_steps = stage_data["total_steps"]
             stage.current_step = stage_data["current_step"]
-            stage.steps = list()
+            stage.steps = []
             for step_data in stage_data["steps"]:
                 step = SwUpdateStrategyStageStepData()
                 step.step_id = step_data["id"]

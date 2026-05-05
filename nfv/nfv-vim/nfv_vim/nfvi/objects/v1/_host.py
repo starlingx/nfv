@@ -7,7 +7,6 @@
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
@@ -107,23 +106,23 @@ class Host(ObjectData):
         remote_storage=False,
         nfvi_data=None,
     ):
-        super(Host, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                uuid=uuid,
-                name=name,
-                personality=personality,
-                admin_state=admin_state,
-                oper_state=oper_state,
-                avail_status=avail_status,
-                action=action,
-                uptime=uptime,
-                sw_version=sw_version,
-                device_image_update=device_image_update,
-                openstack_compute=openstack_compute,
-                openstack_control=openstack_control,
-                remote_storage=remote_storage,
-            )
+            {
+                "uuid": uuid,
+                "name": name,
+                "personality": personality,
+                "admin_state": admin_state,
+                "oper_state": oper_state,
+                "avail_status": avail_status,
+                "action": action,
+                "uptime": uptime,
+                "sw_version": sw_version,
+                "device_image_update": device_image_update,
+                "openstack_compute": openstack_compute,
+                "openstack_control": openstack_control,
+                "remote_storage": remote_storage,
+            }
         )
 
         self.nfvi_data = nfvi_data

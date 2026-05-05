@@ -4,13 +4,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from nfv_vim.objects._object import ObjectData
-
 from nfv_common import debug
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.host_group")
 
@@ -31,7 +29,7 @@ class HostGroup(ObjectData):
     """Host Group Object."""
 
     def __init__(self, nfvi_host_group):
-        super(HostGroup, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self._nfvi_host_group = nfvi_host_group
 
     @property
@@ -74,7 +72,7 @@ class HostGroup(ObjectData):
     def as_dict(self):
         """Represent host group object as dictionary."""
 
-        data = dict()
+        data = {}
         data["name"] = self.name
         data["members"] = self.member_names
         data["policies"] = self.policies

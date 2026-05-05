@@ -3,16 +3,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from fm_api import constants as fm_constants
-from fm_api import fm_api
 import http.client as httplib
 import json
 
-from nfv_common import debug
-
+from fm_api import constants as fm_constants
+from fm_api import fm_api
 import nfv_common.alarm.handlers.v1 as alarm_handlers_v1
 import nfv_common.alarm.objects.v1 as alarm_objects_v1
-
+from nfv_common import debug
 from nfv_plugins.alarm_handlers import config
 from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import fm
@@ -286,8 +284,8 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
     _provider = "Wind River"
     _signature = "e33d7cf6-f270-4256-893e-16266ee4dd2e"
 
-    _platform_alarm_db = dict()
-    _openstack_alarm_db = dict()
+    _platform_alarm_db = {}
+    _openstack_alarm_db = {}
     _fm_api = None
     _openstack_token = None
     _openstack_directory = None
@@ -362,8 +360,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
             result_data = json.loads(result.result_data)
             if result_data is not None:
                 return result_data["uuid"]
-            else:
-                return None
+            return None
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:
@@ -459,7 +456,7 @@ class FaultManagement(alarm_handlers_v1.AlarmHandler):
         if self.openstack_fm_endpoint_disabled:
             return
 
-        fm_alarms = dict()
+        fm_alarms = {}
 
         try:
             result = fm.get_alarms(self.openstack_token, OPENSTACK_SERVICE.FM)

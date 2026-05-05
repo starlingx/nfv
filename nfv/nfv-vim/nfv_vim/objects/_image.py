@@ -6,15 +6,12 @@
 
 
 from nfv_common import debug
-from nfv_common import state_machine
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
-from nfv_vim.objects._object import ObjectData
-
+from nfv_common import state_machine
 from nfv_vim import nfvi
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.image")
 
@@ -64,17 +61,17 @@ class ImageAttributes(ObjectData):
         protected,
         properties=None,
     ):
-        super(ImageAttributes, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                container_format=container_format,
-                disk_format=disk_format,
-                min_disk_size_gb=min_disk_size_gb,
-                min_memory_size_mb=min_memory_size_mb,
-                visibility=visibility,
-                protected=protected,
-                properties=properties,
-            )
+            {
+                "container_format": container_format,
+                "disk_format": disk_format,
+                "min_disk_size_gb": min_disk_size_gb,
+                "min_memory_size_mb": min_memory_size_mb,
+                "visibility": visibility,
+                "protected": protected,
+                "properties": properties,
+            }
         )
 
 
@@ -82,9 +79,9 @@ class Image(ObjectData):
     """Image Object."""
 
     def __init__(self, nfvi_image):
-        super(Image, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self._nfvi_image = nfvi_image
-        self.task = state_machine.StateTask("EmptyTask", list())
+        self.task = state_machine.StateTask("EmptyTask", [])
 
     @property
     def uuid(self):
@@ -174,8 +171,7 @@ class Image(ObjectData):
             return self._nfvi_image.properties.get(
                 nfvi.objects.v1.IMAGE_PROPERTY.INSTANCE_AUTO_RECOVERY, None
             )
-        else:
-            return None
+        return None
 
     @property
     def live_migration_timeout(self):
@@ -185,8 +181,7 @@ class Image(ObjectData):
             return self._nfvi_image.properties.get(
                 nfvi.objects.v1.IMAGE_PROPERTY.LIVE_MIGRATION_TIMEOUT, None
             )
-        else:
-            return None
+        return None
 
     @property
     def live_migration_max_downtime(self):
@@ -196,8 +191,7 @@ class Image(ObjectData):
             return self._nfvi_image.properties.get(
                 nfvi.objects.v1.IMAGE_PROPERTY.LIVE_MIGRATION_MAX_DOWNTIME, None
             )
-        else:
-            return None
+        return None
 
     @property
     def nfvi_image(self):
@@ -221,8 +215,6 @@ class Image(ObjectData):
     def nfvi_image_delete(self):
         """NFVI Image Delete."""
 
-        pass
-
     def nfvi_image_deleted(self):
         """NFVI Image Deleted."""
 
@@ -244,7 +236,7 @@ class Image(ObjectData):
     def as_dict(self):
         """Represent image object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["description"] = self.description

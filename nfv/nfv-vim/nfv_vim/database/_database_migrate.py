@@ -5,9 +5,8 @@
 #
 import json
 
-from nfv_vim.database import model
-
 from nfv_common import debug
+from nfv_vim.database import model
 
 DLOG = debug.debug_get_logger("nfv_vim.database")
 

@@ -1,10 +1,9 @@
 #
-# Copyright (c) 2015-2016 Wind River Systems, Inc.
+# Copyright (c) 2015-2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common.event_log import *  # noqa: F401,F403
-
 from nfv_vim.event_log._general import issue_general_log  # noqa: F401
 from nfv_vim.event_log._host import host_issue_log  # noqa: F401
 from nfv_vim.event_log._host import hypervisor_issue_log  # noqa: F401

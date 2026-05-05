@@ -1930,7 +1930,7 @@ def _event_template_get(event_id, event_context):
     if event_context in event_template["exclude_event_context"]:
         return None
 
-    template = dict()
+    template = {}
     template["entity_type"] = event_template["entity_type"]
     template["entity"] = event_template["entity"]
     template["event_type"] = event_template["event_type"]
@@ -1989,7 +1989,7 @@ def instance_issue_log(
 ):
     """Issue an event log for instance."""
 
-    data = dict()
+    data = {}
     data["tenant_uuid"] = instance.tenant_uuid
     data["tenant_name"] = instance.tenant_name
     data["instance_uuid"] = instance.uuid
@@ -2030,7 +2030,7 @@ def instance_issue_log(
     else:
         data["repair_action"] = ", %s" % str(repair_action).rstrip(". \t\n\r")
 
-    event_list = list()
+    event_list = []
 
     # For now, override event context to be the admin only
     event_context = event_log.EVENT_CONTEXT.ADMIN
@@ -2070,7 +2070,7 @@ def instance_manage_events(instance, enabling=False):
     additional_text = ""
     reason = None
 
-    events = list()
+    events = []
 
     if instance.is_failed() and not instance.is_action_running():
         if last_event(event_log.EVENT_ID.INSTANCE_LIVE_MIGRATING):

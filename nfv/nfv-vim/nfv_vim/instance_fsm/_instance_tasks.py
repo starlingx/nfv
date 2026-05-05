@@ -7,7 +7,6 @@ import weakref
 
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_task_work import ColdMigrateConfirmTaskWork
 from nfv_vim.instance_fsm._instance_task_work import ColdMigrateRevertTaskWork
@@ -45,11 +44,9 @@ class QueryHypervisorTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(QueryHypervisorTaskWork(self, instance))
-        super(QueryHypervisorTask, self).__init__(
-            "query-hypervisor_%s" % instance.name, task_work_list
-        )
+        super().__init__("query-hypervisor_%s" % instance.name, task_work_list)
         self.nfvi_hypervisor = None
 
     @property
@@ -68,7 +65,7 @@ class QueryHypervisorTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -89,7 +86,7 @@ class LiveMigrateTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesVoteTaskWork(
                 self, instance, self._action_type, force_pass=True
@@ -104,9 +101,7 @@ class LiveMigrateTask(state_machine.StateTask):
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(LiveMigrateTaskWork(self, instance))
-        super(LiveMigrateTask, self).__init__(
-            "live-migrate-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("live-migrate-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -124,7 +119,7 @@ class LiveMigrateTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -145,7 +140,7 @@ class LiveMigrateFinishTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
         )
@@ -154,7 +149,7 @@ class LiveMigrateFinishTask(state_machine.StateTask):
                 self, instance, self._action_type, force_pass=True
             )
         )
-        super(LiveMigrateFinishTask, self).__init__(
+        super().__init__(
             "live-migrate-finish-instance_%s" % instance.name, task_work_list
         )
 
@@ -174,7 +169,7 @@ class LiveMigrateFinishTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -195,7 +190,7 @@ class ColdMigrateTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesVoteTaskWork(
                 self, instance, self._action_type, force_pass=True
@@ -210,9 +205,7 @@ class ColdMigrateTask(state_machine.StateTask):
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(ColdMigrateTaskWork(self, instance))
-        super(ColdMigrateTask, self).__init__(
-            "cold-migrate-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("cold-migrate-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -230,7 +223,7 @@ class ColdMigrateTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -251,7 +244,7 @@ class ColdMigrateConfirmTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(ColdMigrateConfirmTaskWork(self, instance))
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
@@ -261,7 +254,7 @@ class ColdMigrateConfirmTask(state_machine.StateTask):
                 self, instance, self._action_type, force_pass=True
             )
         )
-        super(ColdMigrateConfirmTask, self).__init__(
+        super().__init__(
             "cold-migrate-confirm-instance_%s" % instance.name, task_work_list
         )
 
@@ -281,7 +274,7 @@ class ColdMigrateConfirmTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -302,7 +295,7 @@ class ColdMigrateRevertTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(ColdMigrateRevertTaskWork(self, instance))
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
@@ -312,7 +305,7 @@ class ColdMigrateRevertTask(state_machine.StateTask):
                 self, instance, self._action_type, force_pass=True
             )
         )
-        super(ColdMigrateRevertTask, self).__init__(
+        super().__init__(
             "cold-migrate-revert-instance_%s" % instance.name, task_work_list
         )
 
@@ -332,7 +325,7 @@ class ColdMigrateRevertTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -353,7 +346,7 @@ class ResizeTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.RESIZE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesVoteTaskWork(
                 self, instance, self._action_type, force_pass=True
@@ -368,9 +361,7 @@ class ResizeTask(state_machine.StateTask):
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(ResizeTaskWork(self, instance))
-        super(ResizeTask, self).__init__(
-            "resize-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("resize-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -388,7 +379,7 @@ class ResizeTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -409,7 +400,7 @@ class ResizeConfirmTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.CONFIRM_RESIZE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(ResizeConfirmTaskWork(self, instance))
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
@@ -419,9 +410,7 @@ class ResizeConfirmTask(state_machine.StateTask):
                 self, instance, self._action_type, force_pass=True
             )
         )
-        super(ResizeConfirmTask, self).__init__(
-            "resize-confirm-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("resize-confirm-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -439,7 +428,7 @@ class ResizeConfirmTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -460,7 +449,7 @@ class ResizeRevertTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.REVERT_RESIZE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(ResizeRevertTaskWork(self, instance))
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
@@ -470,9 +459,7 @@ class ResizeRevertTask(state_machine.StateTask):
                 self, instance, self._action_type, force_pass=True
             )
         )
-        super(ResizeRevertTask, self).__init__(
-            "resize-revert-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("resize-revert-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -490,7 +477,7 @@ class ResizeRevertTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -508,14 +495,12 @@ class EvacuateTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(EvacuateTaskWork(self, instance))
-        super(EvacuateTask, self).__init__(
-            "evacuate-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("evacuate-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -533,7 +518,7 @@ class EvacuateTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -551,11 +536,9 @@ class StartTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(StartTaskWork(self, instance))
-        super(StartTask, self).__init__(
-            "start-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("start-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -573,7 +556,7 @@ class StartTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -594,7 +577,7 @@ class StopTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.STOP
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesVoteTaskWork(
                 self, instance, self._action_type, force_pass=True
@@ -609,9 +592,7 @@ class StopTask(state_machine.StateTask):
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(StopTaskWork(self, instance))
-        super(StopTask, self).__init__(
-            "stop-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("stop-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -629,7 +610,7 @@ class StopTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -650,7 +631,7 @@ class PauseTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.PAUSE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesVoteTaskWork(
                 self, instance, self._action_type, force_pass=True
@@ -665,9 +646,7 @@ class PauseTask(state_machine.StateTask):
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(PauseTaskWork(self, instance))
-        super(PauseTask, self).__init__(
-            "pause-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("pause-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -685,7 +664,7 @@ class PauseTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -706,7 +685,7 @@ class UnpauseTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.UNPAUSE
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(UnpauseTaskWork(self, instance))
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
@@ -716,9 +695,7 @@ class UnpauseTask(state_machine.StateTask):
                 self, instance, self._action_type, force_pass=True
             )
         )
-        super(UnpauseTask, self).__init__(
-            "unpause-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("unpause-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -736,7 +713,7 @@ class UnpauseTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -757,7 +734,7 @@ class SuspendTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.SUSPEND
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesVoteTaskWork(
                 self, instance, self._action_type, force_pass=True
@@ -772,9 +749,7 @@ class SuspendTask(state_machine.StateTask):
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(SuspendTaskWork(self, instance))
-        super(SuspendTask, self).__init__(
-            "suspend-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("suspend-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -792,7 +767,7 @@ class SuspendTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -813,7 +788,7 @@ class ResumeTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.RESUME
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(ResumeTaskWork(self, instance))
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
@@ -823,9 +798,7 @@ class ResumeTask(state_machine.StateTask):
                 self, instance, self._action_type, force_pass=True
             )
         )
-        super(ResumeTask, self).__init__(
-            "resume-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("resume-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -843,7 +816,7 @@ class ResumeTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -864,7 +837,7 @@ class RebootTask(state_machine.StateTask):
 
         self._instance_reference = weakref.ref(instance)
         self._action_type = objects.INSTANCE_ACTION_TYPE.REBOOT
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesVoteTaskWork(
                 self, instance, self._action_type, force_pass=True
@@ -879,9 +852,7 @@ class RebootTask(state_machine.StateTask):
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(RebootTaskWork(self, instance))
-        super(RebootTask, self).__init__(
-            "reboot-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("reboot-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -899,7 +870,7 @@ class RebootTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -917,11 +888,9 @@ class RebuildTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(RebuildTaskWork(self, instance))
-        super(RebuildTask, self).__init__(
-            "rebuild-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("rebuild-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -939,7 +908,7 @@ class RebuildTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -957,14 +926,12 @@ class FailTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
         task_work_list.append(FailTaskWork(self, instance))
-        super(FailTask, self).__init__(
-            "fail-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("fail-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -982,7 +949,7 @@ class FailTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -1000,12 +967,10 @@ class DeleteTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(DeleteTaskWork(self, instance))
         task_work_list.append(GuestServicesDeleteTaskWork(self, instance))
-        super(DeleteTask, self).__init__(
-            "delete-instance_%s" % instance.name, task_work_list
-        )
+        super().__init__("delete-instance_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -1023,7 +988,7 @@ class DeleteTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -1041,14 +1006,12 @@ class GuestServicesCreateTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(GuestServicesCreateTaskWork(self, instance))
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
         )
-        super(GuestServicesCreateTask, self).__init__(
-            "guest-services-create-_%s" % instance.name, task_work_list
-        )
+        super().__init__("guest-services-create-_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -1066,7 +1029,7 @@ class GuestServicesCreateTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -1084,13 +1047,11 @@ class GuestServicesEnableTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesEnableTaskWork(self, instance, force_pass=True)
         )
-        super(GuestServicesEnableTask, self).__init__(
-            "guest-services-enable_%s" % instance.name, task_work_list
-        )
+        super().__init__("guest-services-enable_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -1108,7 +1069,7 @@ class GuestServicesEnableTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -1126,13 +1087,11 @@ class GuestServicesDisableTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             GuestServicesDisableTaskWork(self, instance, force_pass=True)
         )
-        super(GuestServicesDisableTask, self).__init__(
-            "guest-services-disable_%s" % instance.name, task_work_list
-        )
+        super().__init__("guest-services-disable_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -1150,7 +1109,7 @@ class GuestServicesDisableTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -1168,11 +1127,9 @@ class GuestServicesSetTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(GuestServicesSetTaskWork(self, instance))
-        super(GuestServicesSetTask, self).__init__(
-            "guest-services-set_%s" % instance.name, task_work_list
-        )
+        super().__init__("guest-services-set_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -1190,7 +1147,7 @@ class GuestServicesSetTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -1208,11 +1165,9 @@ class GuestServicesDeleteTask(state_machine.StateTask):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(GuestServicesDeleteTaskWork(self, instance))
-        super(GuestServicesDeleteTask, self).__init__(
-            "guest-services-delete_%s" % instance.name, task_work_list
-        )
+        super().__init__("guest-services-delete_%s" % instance.name, task_work_list)
 
     @property
     def _instance(self):
@@ -1230,7 +1185,7 @@ class GuestServicesDeleteTask(state_machine.StateTask):
         elif self._instance.action_fsm is not None:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:

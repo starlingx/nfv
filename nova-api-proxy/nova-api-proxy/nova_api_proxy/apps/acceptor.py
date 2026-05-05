@@ -64,7 +64,7 @@ class APIController(Middleware):
 
     def __init__(self, app, _):
         self._default_dispatcher = APIDispatcher(app)
-        super(APIController, self).__init__(app)
+        super().__init__(app)
 
     @webob.dec.wsgify(RequestClass=Request)
     def __call__(self, req):
@@ -160,9 +160,9 @@ class Acceptor(Router):
             mapper.connect(
                 path,
                 controller=api_controller,
-                conditions=dict(method=["POST", "DELETE", "PUT"]),
+                conditions={"method": ["POST", "DELETE", "PUT"]},
             )
-        super(Acceptor, self).__init__(app, conf, mapper, forwarder)
+        super().__init__(app, conf, mapper, forwarder)
 
 
 class VersionController(Middleware):
@@ -170,7 +170,7 @@ class VersionController(Middleware):
         self._default_dispatcher = Proxy()
         self._remote_host = CONF.osapi_compute_listen
         self._remote_port = CONF.osapi_compute_listen_port
-        super(VersionController, self).__init__(app)
+        super().__init__(app)
 
     @webob.dec.wsgify(RequestClass=Request)
     def __call__(self, req):
@@ -190,9 +190,9 @@ class VersionAcceptor(Router):
         mapper = routes.Mapper()
         api_controller = VersionController(app, conf)
         mapper.connect(
-            self.API_VERSION, controller=api_controller, conditions=dict(method=["GET"])
+            self.API_VERSION, controller=api_controller, conditions={"method": ["GET"]}
         )
-        super(VersionAcceptor, self).__init__(app, conf, mapper)
+        super().__init__(app, conf, mapper)
 
 
 class DebugHeaders(Middleware):
@@ -203,7 +203,7 @@ class DebugHeaders(Middleware):
 
     def __init__(self, app, _):
         self._show_body = CONF.show_request_body
-        super(DebugHeaders, self).__init__(app)
+        super().__init__(app)
 
     @webob.dec.wsgify(RequestClass=Request)
     def __call__(self, req):
@@ -241,3 +241,4 @@ def get_json_request_body(request):
     if content_type in ("JSON", "application/json") and request.body.startswith(b"{"):
         LOG.debug("Req body: (%s)" % request.body)
         return request.body
+    return None

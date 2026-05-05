@@ -6,13 +6,12 @@
 import weakref
 
 from nfv_common import debug
-
 from nfv_common.strategy._strategy_result import STRATEGY_STEP_RESULT
 
 DLOG = debug.debug_get_logger("nfv_common.strategy.step")
 
 
-class StrategyStep(object):
+class StrategyStep:
     """Strategy Step."""
 
     def __init__(self, name, force_pass=False, timeout_in_secs=0, max_retries=1):
@@ -204,7 +203,7 @@ class StrategyStep(object):
     def as_dict(self):
         """Represent the strategy step as a dictionary."""
 
-        data = dict()
+        data = {}
         data["id"] = self._id
         data["name"] = self._name
         data["force_pass"] = self._force_pass

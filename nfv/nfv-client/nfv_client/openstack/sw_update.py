@@ -10,7 +10,7 @@ from nfv_client.openstack import rest_api
 from nfv_client import sw_update
 
 
-class StrategyStep(object):
+class StrategyStep:
     step_id = None
     step_name = None
     entity_type = None
@@ -26,7 +26,7 @@ class StrategyStep(object):
         return "%s" % str(self.__dict__)  # noqa: H501
 
 
-class StrategyStage(object):
+class StrategyStage:
     stage_id = None
     stage_name = None
     steps = []
@@ -43,7 +43,7 @@ class StrategyStage(object):
         return "%s" % str(self.__dict__)  # noqa: H501
 
 
-class StrategyPhase(object):
+class StrategyPhase:
     phase_name = None
     stages = []
     total_stages = None
@@ -62,7 +62,7 @@ class StrategyPhase(object):
         return "%s" % str(self.__dict__)  # noqa: H501
 
 
-class Strategy(object):
+class Strategy:
     uuid = None
     name = None
     release = None
@@ -212,7 +212,7 @@ def get_strategies(
 
     api_cmd = url + "/api/orchestration/%s/strategy" % strategy_name
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     if username:
         api_cmd_headers["X-User"] = username
     if tenant:
@@ -243,7 +243,7 @@ def get_strategy(
 
     api_cmd = url + "/api/orchestration/%s/strategy/%s" % (strategy_name, strategy_uuid)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     if username:
         api_cmd_headers["X-User"] = username
     if tenant:
@@ -281,7 +281,7 @@ def create_strategy(
 
     api_cmd = url + "/api/orchestration/%s/strategy" % strategy_name
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     if username:
         api_cmd_headers["X-User"] = username
@@ -290,7 +290,7 @@ def create_strategy(
     if user_domain_name:
         api_cmd_headers["X-User-Domain-Name"] = user_domain_name
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     if sw_update.STRATEGY_NAME_FW_UPDATE == strategy_name:
         api_cmd_payload["controller-apply-type"] = controller_apply_type
         api_cmd_payload["default-instance-action"] = default_instance_action
@@ -355,7 +355,7 @@ def delete_strategy(
 
     api_cmd = url + "/api/orchestration/%s/strategy" % strategy_name
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     if username:
         api_cmd_headers["X-User"] = username
@@ -364,7 +364,7 @@ def delete_strategy(
     if user_domain_name:
         api_cmd_headers["X-User-Domain-Name"] = user_domain_name
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["force"] = force
 
     response = rest_api.request(
@@ -398,7 +398,7 @@ def apply_strategy(
 
     api_cmd = url + ("/api/orchestration/%s/strategy/actions" % strategy_name)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     if username:
         api_cmd_headers["X-User"] = username
@@ -407,7 +407,7 @@ def apply_strategy(
     if user_domain_name:
         api_cmd_headers["X-User-Domain-Name"] = user_domain_name
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     if stage_id is None:
         api_cmd_payload["action"] = "apply-all"
     else:
@@ -442,7 +442,7 @@ def abort_strategy(
 
     api_cmd = url + ("/api/orchestration/%s/strategy/actions" % strategy_name)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     if username:
         api_cmd_headers["X-User"] = username
@@ -451,7 +451,7 @@ def abort_strategy(
     if user_domain_name:
         api_cmd_headers["X-User-Domain-Name"] = user_domain_name
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["action"] = "abort-stage"
     api_cmd_payload["stage-id"] = stage_id
 
@@ -481,7 +481,7 @@ def get_current_strategy(
 
     api_cmd = url + "/api/orchestration/current-strategy/strategy"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     if username:
         api_cmd_headers["X-User"] = username
     if tenant:

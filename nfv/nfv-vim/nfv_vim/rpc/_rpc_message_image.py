@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
@@ -33,7 +32,7 @@ class APIRequestCreateImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_IMAGE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["name"] = self.name
@@ -91,7 +90,7 @@ class APIResponseCreateImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_IMAGE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseCreateImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -147,7 +146,7 @@ class APIRequestUpdateImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_IMAGE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestUpdateImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -193,7 +192,7 @@ class APIResponseUpdateImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_IMAGE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseUpdateImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -243,7 +242,7 @@ class APIRequestDeleteImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_IMAGE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestDeleteImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -266,7 +265,7 @@ class APIResponseDeleteImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_IMAGE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseDeleteImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -290,7 +289,7 @@ class APIRequestGetImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_IMAGE_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestGetImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["get_all"] = self.get_all
@@ -303,8 +302,7 @@ class APIRequestGetImage(RPCMessage):
     def __str__(self):
         if self.get_all:
             return "get-image request: get-all"
-        else:
-            return "get-image request: %s" % self.filter_by_uuid
+        return "get-image request: %s" % self.filter_by_uuid
 
 
 class APIResponseGetImage(RPCMessage):
@@ -329,7 +327,7 @@ class APIResponseGetImage(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_IMAGE_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseGetImage, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid

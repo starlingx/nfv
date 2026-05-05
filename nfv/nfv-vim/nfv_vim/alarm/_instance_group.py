@@ -44,7 +44,7 @@ def _alarm_template_get(alarm_type, alarm_context):
     if alarm_context in alarm_template["exclude_alarm_context"]:
         return None
 
-    template = dict()
+    template = {}
     template["entity_type"] = alarm_template["entity_type"]
     template["entity"] = alarm_template["entity"]
     template["event_type"] = alarm_template["event_type"]
@@ -110,13 +110,13 @@ def raise_instance_group_policy_alarm(
 ):
     """Raise an instance group alarm."""
 
-    data = dict()
+    data = {}
     data["group_uuid"] = instance_group.uuid
     data["group_name"] = instance_group.name
     data["policy"] = policy
     data["additional_text"] = additional_text
 
-    alarm_list = list()
+    alarm_list = []
 
     # For now, override alarm context to be the admin only
     alarm_context = alarm.ALARM_CONTEXT.ADMIN

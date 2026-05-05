@@ -6,16 +6,13 @@
 import uuid
 
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Singleton
-
+from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import event_log
-
 from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.sw_update")
@@ -95,7 +92,7 @@ class SwUpdate(ObjectData):
     def __init__(self, sw_update_type, sw_update_uuid=None, strategy_data=None):
         from nfv_vim import strategy
 
-        super(SwUpdate, self).__init__("1.0.0")
+        super().__init__("1.0.0")
 
         self._sw_update_type = sw_update_type
 
@@ -113,8 +110,8 @@ class SwUpdate(ObjectData):
             self._strategy.sw_update_obj = self
             self._strategy.refresh_timeouts()
 
-        self._alarms = list()
-        self._nfvi_alarms = list()
+        self._alarms = []
+        self._nfvi_alarms = []
 
         self._nfvi_timer_name = sw_update_type + " nfvi audit"
         self._nfvi_timer_id = timers.timers_create_timer(
@@ -317,7 +314,7 @@ class SwUpdate(ObjectData):
         raise NotImplementedError()
 
     def nfvi_alarms_clear(self):
-        self._nfvi_alarms = list()
+        self._nfvi_alarms = []
 
     @coroutine
     def nfvi_alarms_callback(self, timer_id):

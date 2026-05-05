@@ -5,11 +5,9 @@
 #
 import json
 
-from nfv_vim import objects
-
-from nfv_vim.database import model
-
 from nfv_vim.database._database import database_get
+from nfv_vim.database import model
+from nfv_vim import objects
 
 
 def database_sw_update_add(sw_update_obj):
@@ -24,13 +22,13 @@ def database_sw_update_add(sw_update_obj):
         sw_update.uuid = sw_update_obj.uuid
         sw_update.sw_update_type = sw_update_obj.sw_update_type
         if sw_update_obj.strategy is None:
-            sw_update.strategy_data = json.dumps(dict())
+            sw_update.strategy_data = json.dumps({})
         else:
             sw_update.strategy_data = json.dumps(sw_update_obj.strategy.as_dict())
         session.add(sw_update)
     else:
         if sw_update_obj.strategy is None:
-            sw_update.strategy_data = json.dumps(dict())
+            sw_update.strategy_data = json.dumps({})
         else:
             sw_update.strategy_data = json.dumps(sw_update_obj.strategy.as_dict())
     db.commit()
@@ -53,7 +51,7 @@ def database_sw_update_get_list():
     session = db.session()
     query = session.query(model.SoftwareUpdate)
 
-    sw_update_objs = list()
+    sw_update_objs = []
     for sw_update in query.all():
         strategy_data = json.loads(sw_update.strategy_data)
         if objects.SW_UPDATE_TYPE.SW_PATCH == sw_update.sw_update_type:

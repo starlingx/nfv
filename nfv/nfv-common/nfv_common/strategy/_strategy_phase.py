@@ -3,26 +3,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+from datetime import datetime
+
 import pprint
 import weakref
 
-from datetime import datetime
-
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
-
 from nfv_common.strategy._strategy_defs import STRATEGY_PHASE
 from nfv_common.strategy._strategy_result import STRATEGY_PHASE_RESULT
 from nfv_common.strategy._strategy_result import strategy_phase_result_update
 from nfv_common.strategy._strategy_result import STRATEGY_STAGE_RESULT
 from nfv_common.strategy._strategy_result import STRATEGY_STEP_RESULT
+from nfv_common import timers
 
 DLOG = debug.debug_get_logger("nfv_common.strategy.phase")
 
 
-class StrategyPhase(object):
+class StrategyPhase:
     """Strategy Phase."""
 
     def __init__(self, name):
@@ -30,7 +28,7 @@ class StrategyPhase(object):
         self._current_stage = 0
         self._stop_at_stage = 0
         self._stage_timer_id = None
-        self._stages = list()
+        self._stages = []
         self._result = STRATEGY_PHASE_RESULT.INITIAL
         self._result_reason = ""
         self._result_response = ""
@@ -243,7 +241,7 @@ class StrategyPhase(object):
     def _abort(self):
         """Phase Abort."""
 
-        abort_list = list()
+        abort_list = []
 
         if STRATEGY_PHASE_RESULT.INITIAL == self._result:
             self._result = STRATEGY_PHASE_RESULT.ABORTED
@@ -620,7 +618,7 @@ class StrategyPhase(object):
     def as_dict(self):
         """Represent the strategy phase as a dictionary."""
 
-        data = dict()
+        data = {}
         data["name"] = self.name
         data["timeout"] = self._timeout_in_secs
         data["inprogress"] = self._inprogress
@@ -628,7 +626,7 @@ class StrategyPhase(object):
         data["current_stage"] = self._current_stage
         data["stop_at_stage"] = self._stop_at_stage
         data["total_stages"] = len(self._stages)
-        data["stages"] = list()
+        data["stages"] = []
         for stage in self._stages:
             data["stages"].append(stage.as_dict())
         data["result"] = self._result

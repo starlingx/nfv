@@ -7,7 +7,6 @@ from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT  # noqa: F401
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE  # noqa: F401
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION  # noqa: F401
 from nfv_vim.rpc._rpc_message import RPCMessage  # noqa: F401
-
 from nfv_vim.rpc._rpc_message_image import APIRequestCreateImage  # noqa: F401
 from nfv_vim.rpc._rpc_message_image import APIRequestDeleteImage  # noqa: F401
 from nfv_vim.rpc._rpc_message_image import APIRequestGetImage  # noqa: F401
@@ -16,16 +15,6 @@ from nfv_vim.rpc._rpc_message_image import APIResponseCreateImage  # noqa: F401
 from nfv_vim.rpc._rpc_message_image import APIResponseDeleteImage  # noqa: F401
 from nfv_vim.rpc._rpc_message_image import APIResponseGetImage  # noqa: F401
 from nfv_vim.rpc._rpc_message_image import APIResponseUpdateImage  # noqa: F401
-
-from nfv_vim.rpc._rpc_message_volume import APIRequestCreateVolume  # noqa: F401
-from nfv_vim.rpc._rpc_message_volume import APIRequestDeleteVolume  # noqa: F401
-from nfv_vim.rpc._rpc_message_volume import APIRequestGetVolume  # noqa: F401
-from nfv_vim.rpc._rpc_message_volume import APIRequestUpdateVolume  # noqa: F401
-from nfv_vim.rpc._rpc_message_volume import APIResponseCreateVolume  # noqa: F401
-from nfv_vim.rpc._rpc_message_volume import APIResponseDeleteVolume  # noqa: F401
-from nfv_vim.rpc._rpc_message_volume import APIResponseGetVolume  # noqa: F401
-from nfv_vim.rpc._rpc_message_volume import APIResponseUpdateVolume  # noqa: F401
-
 from nfv_vim.rpc._rpc_message_instance import (  # noqa: F401
     APIRequestColdMigrateInstance,
 )
@@ -60,16 +49,6 @@ from nfv_vim.rpc._rpc_message_instance import APIResponseStartInstance  # noqa: 
 from nfv_vim.rpc._rpc_message_instance import APIResponseStopInstance  # noqa: F401
 from nfv_vim.rpc._rpc_message_instance import APIResponseSuspendInstance  # noqa: F401
 from nfv_vim.rpc._rpc_message_instance import APIResponseUnpauseInstance  # noqa: F401
-
-from nfv_vim.rpc._rpc_message_subnet import APIRequestCreateSubnet  # noqa: F401
-from nfv_vim.rpc._rpc_message_subnet import APIRequestDeleteSubnet  # noqa: F401
-from nfv_vim.rpc._rpc_message_subnet import APIRequestGetSubnet  # noqa: F401
-from nfv_vim.rpc._rpc_message_subnet import APIRequestUpdateSubnet  # noqa: F401
-from nfv_vim.rpc._rpc_message_subnet import APIResponseCreateSubnet  # noqa: F401
-from nfv_vim.rpc._rpc_message_subnet import APIResponseDeleteSubnet  # noqa: F401
-from nfv_vim.rpc._rpc_message_subnet import APIResponseGetSubnet  # noqa: F401
-from nfv_vim.rpc._rpc_message_subnet import APIResponseUpdateSubnet  # noqa: F401
-
 from nfv_vim.rpc._rpc_message_network import APIRequestCreateNetwork  # noqa: F401
 from nfv_vim.rpc._rpc_message_network import APIRequestDeleteNetwork  # noqa: F401
 from nfv_vim.rpc._rpc_message_network import APIRequestGetNetwork  # noqa: F401
@@ -78,7 +57,14 @@ from nfv_vim.rpc._rpc_message_network import APIResponseCreateNetwork  # noqa: F
 from nfv_vim.rpc._rpc_message_network import APIResponseDeleteNetwork  # noqa: F401
 from nfv_vim.rpc._rpc_message_network import APIResponseGetNetwork  # noqa: F401
 from nfv_vim.rpc._rpc_message_network import APIResponseUpdateNetwork  # noqa: F401
-
+from nfv_vim.rpc._rpc_message_subnet import APIRequestCreateSubnet  # noqa: F401
+from nfv_vim.rpc._rpc_message_subnet import APIRequestDeleteSubnet  # noqa: F401
+from nfv_vim.rpc._rpc_message_subnet import APIRequestGetSubnet  # noqa: F401
+from nfv_vim.rpc._rpc_message_subnet import APIRequestUpdateSubnet  # noqa: F401
+from nfv_vim.rpc._rpc_message_subnet import APIResponseCreateSubnet  # noqa: F401
+from nfv_vim.rpc._rpc_message_subnet import APIResponseDeleteSubnet  # noqa: F401
+from nfv_vim.rpc._rpc_message_subnet import APIResponseGetSubnet  # noqa: F401
+from nfv_vim.rpc._rpc_message_subnet import APIResponseUpdateSubnet  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
     APIRequestAbortSwUpdateStrategy,
 )
@@ -121,3 +107,11 @@ from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
 from nfv_vim.rpc._rpc_message_sw_update import (  # noqa: F401
     APIResponseGetSwUpdateStrategy,
 )
+from nfv_vim.rpc._rpc_message_volume import APIRequestCreateVolume  # noqa: F401
+from nfv_vim.rpc._rpc_message_volume import APIRequestDeleteVolume  # noqa: F401
+from nfv_vim.rpc._rpc_message_volume import APIRequestGetVolume  # noqa: F401
+from nfv_vim.rpc._rpc_message_volume import APIRequestUpdateVolume  # noqa: F401
+from nfv_vim.rpc._rpc_message_volume import APIResponseCreateVolume  # noqa: F401
+from nfv_vim.rpc._rpc_message_volume import APIResponseDeleteVolume  # noqa: F401
+from nfv_vim.rpc._rpc_message_volume import APIResponseGetVolume  # noqa: F401
+from nfv_vim.rpc._rpc_message_volume import APIResponseUpdateVolume  # noqa: F401

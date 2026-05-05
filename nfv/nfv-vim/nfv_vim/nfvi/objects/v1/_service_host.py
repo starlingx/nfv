@@ -10,5 +10,5 @@ class ServiceHost(ObjectData):
     """NFVI Service Host Object."""
 
     def __init__(self, name, service, zone):
-        super(ServiceHost, self).__init__("1.0.0")
-        self.update(dict(name=name, service=service, zone=zone))
+        super().__init__("1.0.0")
+        self.update({"name": name, "service": service, "zone": zone})

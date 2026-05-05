@@ -8,21 +8,19 @@ from nfv_common import debug
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import get_local_host_name
 from nfv_common.helpers import Singleton
-
-from nfv_vim import nfvi
-from nfv_vim import objects
-from nfv_vim import tables
-
 from nfv_vim.directors._directors_defs import Operation
 from nfv_vim.directors._directors_defs import OPERATION_STATE
 from nfv_vim.directors._directors_defs import OPERATION_TYPE
+from nfv_vim import nfvi
+from nfv_vim import objects
+from nfv_vim import tables
 
 DLOG = debug.debug_get_logger("nfv_vim.host_director")
 
 _host_director = None
 
 
-class HostDirector(object, metaclass=Singleton):
+class HostDirector(metaclass=Singleton):
     """Host Director."""
 
     def __init__(self):
@@ -1264,7 +1262,7 @@ class HostDirector(object, metaclass=Singleton):
             self._host_operation = None
 
         host_table = tables.tables_get_host_table()
-        host_list = list()
+        host_list = []
         for host_name in host_names:
             host = host_table.get(host_name, None)
             if host is None:
@@ -1306,7 +1304,7 @@ class HostDirector(object, metaclass=Singleton):
             self._host_operation = None
 
         host_table = tables.tables_get_host_table()
-        host_list = list()
+        host_list = []
         for host_name in host_names:
             host = host_table.get(host_name, None)
             if host is None:
@@ -1367,5 +1365,3 @@ def host_director_initialize():
 
 def host_director_finalize():
     """Finalize Host Director."""
-
-    pass

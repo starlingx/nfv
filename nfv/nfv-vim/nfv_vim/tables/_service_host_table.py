@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _service_host_table = None
@@ -12,9 +11,6 @@ _service_host_table = None
 
 class ServiceHostTable(Table):
     """Service Host Table."""
-
-    def __init__(self):
-        super(ServiceHostTable, self).__init__()
 
     def _persist_value(self, value):
         database.database_service_host_add(value)

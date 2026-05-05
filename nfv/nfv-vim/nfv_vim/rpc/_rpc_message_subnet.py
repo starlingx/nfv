@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
@@ -30,7 +29,7 @@ class APIRequestCreateSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_SUBNET_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["network_uuid"] = self.network_uuid
@@ -73,7 +72,7 @@ class APIResponseCreateSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_SUBNET_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseCreateSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -117,7 +116,7 @@ class APIRequestUpdateSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_SUBNET_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestUpdateSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["network_name"] = self.network_name
@@ -158,7 +157,7 @@ class APIResponseUpdateSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_SUBNET_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseUpdateSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -199,7 +198,7 @@ class APIRequestDeleteSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_SUBNET_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestDeleteSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["network_name"] = self.network_name
@@ -228,7 +227,7 @@ class APIResponseDeleteSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_SUBNET_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseDeleteSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["network_name"] = self.network_name
@@ -258,7 +257,7 @@ class APIRequestGetSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_SUBNET_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestGetSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["get_all"] = self.get_all
@@ -275,16 +274,15 @@ class APIRequestGetSubnet(RPCMessage):
     def __str__(self):
         if self.get_all:
             return "get-subnet request: get-all"
-        else:
-            return (
-                "get-subnet request: by_uuid=%s, by_network_uuid=%s, "
-                "by_network_name=%s"
-                % (
-                    self.filter_by_uuid,
-                    self.filter_by_network_uuid,
-                    self.filter_by_network_name,
-                )
+        return (
+            "get-subnet request: by_uuid=%s, by_network_uuid=%s, "
+            "by_network_name=%s"
+            % (
+                self.filter_by_uuid,
+                self.filter_by_network_uuid,
+                self.filter_by_network_name,
             )
+        )
 
 
 class APIResponseGetSubnet(RPCMessage):
@@ -305,7 +303,7 @@ class APIResponseGetSubnet(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_SUBNET_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseGetSubnet, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid

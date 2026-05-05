@@ -7,7 +7,6 @@ import weakref
 
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_task_work import AuditHostServicesCompleteTaskWork
 from nfv_vim.host_fsm._host_task_work import AuditHostServicesTaskWork
@@ -38,8 +37,8 @@ class AddHostTask(state_machine.StateTask):
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
-        super(AddHostTask, self).__init__("add-host_%s" % host.name, task_work_list)
+        task_work_list = []
+        super().__init__("add-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -56,7 +55,7 @@ class AddHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -72,7 +71,7 @@ class DeleteHostTask(state_machine.StateTask):
         from nfv_vim import objects
 
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             task_work_list.append(
                 DeleteHostServicesTaskWork(self, host, objects.HOST_SERVICES.COMPUTE)
@@ -88,9 +87,7 @@ class DeleteHostTask(state_machine.StateTask):
         task_work_list.append(
             NotifyHostServicesDeletedTaskWork(self, host, force_pass=True)
         )
-        super(DeleteHostTask, self).__init__(
-            "delete-host_%s" % host.name, task_work_list
-        )
+        super().__init__("delete-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -107,7 +104,7 @@ class DeleteHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -123,7 +120,7 @@ class EnableHostTask(state_machine.StateTask):
         from nfv_vim import objects
 
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
             task_work_list.append(
                 EnableHostServicesTaskWork(self, host, objects.HOST_SERVICES.CONTAINER)
@@ -158,9 +155,7 @@ class EnableHostTask(state_machine.StateTask):
         )
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             task_work_list.append(QueryHypervisorTaskWork(self, host, force_pass=True))
-        super(EnableHostTask, self).__init__(
-            "enable-host_%s" % host.name, task_work_list
-        )
+        super().__init__("enable-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -177,7 +172,7 @@ class EnableHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -210,7 +205,7 @@ class DisableHostTask(state_machine.StateTask):
         else:
             notify_host_services_task = NotifyHostServicesDisabledTaskWork
 
-        task_work_list = list()
+        task_work_list = []
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             task_work_list.append(
                 DisableHostServicesTaskWork(self, host, objects.HOST_SERVICES.COMPUTE)
@@ -256,9 +251,7 @@ class DisableHostTask(state_machine.StateTask):
         task_work_list.append(notify_host_services_task(self, host, force_pass=True))
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             task_work_list.append(QueryHypervisorTaskWork(self, host, force_pass=True))
-        super(DisableHostTask, self).__init__(
-            "disable-host_%s" % host.name, task_work_list
-        )
+        super().__init__("disable-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -280,7 +273,7 @@ class DisableHostTask(state_machine.StateTask):
 
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -297,7 +290,7 @@ class OfflineHostTask(state_machine.StateTask):
 
         self._host_reference = weakref.ref(host)
 
-        task_work_list = list()
+        task_work_list = []
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
             # Only disable the container services if we are not running in a
             # single controller configuration. In a single controller
@@ -312,9 +305,7 @@ class OfflineHostTask(state_machine.StateTask):
                     )
                 )
 
-        super(OfflineHostTask, self).__init__(
-            "offline-host_%s" % host.name, task_work_list
-        )
+        super().__init__("offline-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -331,7 +322,7 @@ class OfflineHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -345,9 +336,9 @@ class FailHostTask(state_machine.StateTask):
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(NotifyHostFailedTaskWork(self, host))
-        super(FailHostTask, self).__init__("fail-host_%s" % host.name, task_work_list)
+        super().__init__("fail-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -364,7 +355,7 @@ class FailHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -378,13 +369,11 @@ class NotifyDeleteFailedTask(state_machine.StateTask):
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             NotifyHostServicesDeleteFailedTaskWork(self, host, force_pass=True)
         )
-        super(NotifyDeleteFailedTask, self).__init__(
-            "notify-delete-failed-host_%s" % host.name, task_work_list
-        )
+        super().__init__("notify-delete-failed-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -401,7 +390,7 @@ class NotifyDeleteFailedTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -415,13 +404,11 @@ class NotifyDisableFailedTask(state_machine.StateTask):
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             NotifyHostServicesDisableFailedTaskWork(self, host, force_pass=True)
         )
-        super(NotifyDisableFailedTask, self).__init__(
-            "notify-disable-failed-host_%s" % host.name, task_work_list
-        )
+        super().__init__("notify-disable-failed-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -438,7 +425,7 @@ class NotifyDisableFailedTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -452,13 +439,11 @@ class NotifyEnabledHostTask(state_machine.StateTask):
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(
             NotifyHostServicesEnabledTaskWork(self, host, force_pass=True)
         )
-        super(NotifyEnabledHostTask, self).__init__(
-            "notify-enabled-host_%s" % host.name, task_work_list
-        )
+        super().__init__("notify-enabled-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -475,7 +460,7 @@ class NotifyEnabledHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -491,7 +476,7 @@ class NotifyDisabledHostTask(state_machine.StateTask):
         from nfv_vim import objects
 
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         if host.host_service_configured(objects.HOST_SERVICES.CONTAINER):
             # Only disable the container services if the host is being locked
             # and we are not running in a single controller configuration. In
@@ -510,9 +495,7 @@ class NotifyDisabledHostTask(state_machine.StateTask):
         task_work_list.append(
             NotifyHostServicesDisabledTaskWork(self, host, force_pass=True)
         )
-        super(NotifyDisabledHostTask, self).__init__(
-            "notify-disabled-host_%s" % host.name, task_work_list
-        )
+        super().__init__("notify-disabled-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -529,7 +512,7 @@ class NotifyDisabledHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -545,7 +528,7 @@ class AuditEnabledHostTask(state_machine.StateTask):
         from nfv_vim import objects
 
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         if host.host_service_configured(objects.HOST_SERVICES.COMPUTE):
             task_work_list.append(
                 AuditHostServicesTaskWork(
@@ -559,9 +542,7 @@ class AuditEnabledHostTask(state_machine.StateTask):
                 )
             )
         task_work_list.append(AuditHostServicesCompleteTaskWork(self, host))
-        super(AuditEnabledHostTask, self).__init__(
-            "audit-enabled-host_%s" % host.name, task_work_list
-        )
+        super().__init__("audit-enabled-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -578,7 +559,7 @@ class AuditEnabledHostTask(state_machine.StateTask):
         else:
             DLOG.verbose("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:
@@ -592,11 +573,9 @@ class AuditDisabledHostTask(state_machine.StateTask):
 
     def __init__(self, host):
         self._host_reference = weakref.ref(host)
-        task_work_list = list()
+        task_work_list = []
         task_work_list.append(AuditInstancesTaskWork(self, host, force_pass=True))
-        super(AuditDisabledHostTask, self).__init__(
-            "audit-disabled-host_%s" % host.name, task_work_list
-        )
+        super().__init__("audit-disabled-host_%s" % host.name, task_work_list)
 
     @property
     def _host(self):
@@ -613,7 +592,7 @@ class AuditDisabledHostTask(state_machine.StateTask):
         else:
             DLOG.debug("Task (%s) complete." % self._name)
 
-            event_data = dict()
+            event_data = {}
             event_data["reason"] = reason
 
             if state_machine.STATE_TASK_RESULT.SUCCESS == result:

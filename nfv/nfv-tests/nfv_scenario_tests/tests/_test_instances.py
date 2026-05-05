@@ -9,12 +9,10 @@ import shutil
 import time
 
 from nfv_common import debug
-
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import fm
 from nfv_plugins.nfvi_plugins.openstack import nova
 from nfv_plugins.nfvi_plugins.openstack import openstack
-
 from tests import _instances
 from tests import _test_base
 
@@ -27,7 +25,7 @@ class TestInstance(_test_base.Test):
     LOG_FILES = {"nfv-vim": "/var/log/nfv-vim.log"}
 
     def __init__(self, name, instance_name, timeout_secs):
-        super(TestInstance, self).__init__(name, timeout_secs)
+        super().__init__(name, timeout_secs)
         self._instance_name = instance_name
         self._instance_data = None
         self._platform_token = None
@@ -201,9 +199,7 @@ class TestInstanceStart(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceStart, self).__init__(
-            "Instance-Start", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Start", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -246,9 +242,7 @@ class TestInstanceStop(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceStop, self).__init__(
-            "Instance-Stop", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Stop", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -291,9 +285,7 @@ class TestInstancePause(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstancePause, self).__init__(
-            "Instance-Pause", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Pause", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -345,9 +337,7 @@ class TestInstanceUnpause(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb):
         """Initialize test."""
 
-        super(TestInstanceUnpause, self).__init__(
-            "Instance-Unpause", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Unpause", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -390,9 +380,7 @@ class TestInstanceSuspend(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceSuspend, self).__init__(
-            "Instance-Suspend", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Suspend", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -435,9 +423,7 @@ class TestInstanceResume(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceResume, self).__init__(
-            "Instance-Resume", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Resume", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -485,7 +471,7 @@ class TestInstanceReboot(TestInstance):
         else:
             test_name = "Instance-Reboot (soft)"
 
-        super(TestInstanceReboot, self).__init__(test_name, instance_name, timeout_secs)
+        super().__init__(test_name, instance_name, timeout_secs)
         self._hard = hard
         self._guest_hb = guest_hb
 
@@ -545,9 +531,7 @@ class TestInstanceRebuild(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceRebuild, self).__init__(
-            "Instance-Rebuild", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Rebuild", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -612,9 +596,7 @@ class TestInstanceLiveMigrate(TestInstance):
     def __init__(self, instance_name, timeout_secs, to_host=None, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceLiveMigrate, self).__init__(
-            "Instance-Live-Migrate", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Live-Migrate", instance_name, timeout_secs)
         self._original_host = None
         self._to_host = to_host
         self._guest_hb = guest_hb
@@ -664,9 +646,7 @@ class TestInstanceColdMigrate(TestInstance):
     def __init__(self, instance_name, timeout_secs, to_host=None, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceColdMigrate, self).__init__(
-            "Instance-Cold-Migrate", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Cold-Migrate", instance_name, timeout_secs)
         self._original_host = None
         self._to_host = to_host
         self._guest_hb = guest_hb
@@ -716,9 +696,7 @@ class TestInstanceColdMigrateConfirm(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceColdMigrateConfirm, self).__init__(
-            "Instance-Cold-Migrate-Confirm", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Cold-Migrate-Confirm", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -795,9 +773,7 @@ class TestInstanceColdMigrateRevert(TestInstance):
     def __init__(self, instance_name, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceColdMigrateRevert, self).__init__(
-            "Instance-Cold-Migrate-Revert", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Cold-Migrate-Revert", instance_name, timeout_secs)
         self._guest_hb = guest_hb
 
     def _do_setup(self):
@@ -874,9 +850,7 @@ class TestInstanceResize(TestInstance):
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceResize, self).__init__(
-            "Instance-Resize", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Resize", instance_name, timeout_secs)
         self._flavor_names = flavor_names
         self._flavor_id = None
         self._guest_hb = guest_hb
@@ -954,9 +928,7 @@ class TestInstanceResizeConfirm(TestInstance):
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceResizeConfirm, self).__init__(
-            "Instance-Resize-Confirm", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Resize-Confirm", instance_name, timeout_secs)
         self._flavor_names = flavor_names
         self._guest_hb = guest_hb
 
@@ -1057,9 +1029,7 @@ class TestInstanceResizeRevert(TestInstance):
     def __init__(self, instance_name, flavor_names, timeout_secs, guest_hb=False):
         """Initialize test."""
 
-        super(TestInstanceResizeRevert, self).__init__(
-            "Instance-Resize-Revert", instance_name, timeout_secs
-        )
+        super().__init__("Instance-Resize-Revert", instance_name, timeout_secs)
         self._flavor_names = flavor_names
         self._guest_hb = guest_hb
 

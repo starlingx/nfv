@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import AuditDisabledHostTask
@@ -18,9 +17,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 class DisabledState(state_machine.State):
     """Host - Disabled State."""
-
-    def __init__(self, name):
-        super(DisabledState, self).__init__(name)
 
     def enter(self, host):
         """Entering disabled state."""
@@ -42,8 +38,6 @@ class DisabledState(state_machine.State):
 
     def transition(self, host, event, event_data, to_state):
         """Transition from the disabled state."""
-
-        pass
 
     def handle_event(self, host, event, event_data=None):
         """Handle event while in the disabled state."""

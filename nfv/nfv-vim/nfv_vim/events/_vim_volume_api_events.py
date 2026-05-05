@@ -10,9 +10,9 @@ from nfv_vim import tables
 
 DLOG = debug.debug_get_logger("nfv_vim.vim_volume_api_events")
 
-_volume_create_operations = dict()
-_volume_update_operations = dict()
-_volume_delete_operations = dict()
+_volume_create_operations = {}
+_volume_update_operations = {}
+_volume_delete_operations = {}
 
 
 def _create_volume_callback(
@@ -187,10 +187,6 @@ def vim_volume_api_get_volumes(connection, msg):
 def vim_volume_api_initialize():
     """Initialize VIM Volume API Handling."""
 
-    pass
-
 
 def vim_volume_api_finalize():
     """Finalize VIM Volume API Handling."""
-
-    pass

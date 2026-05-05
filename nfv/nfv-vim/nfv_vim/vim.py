@@ -17,7 +17,6 @@ from nfv_common import profiler
 from nfv_common import schedule
 from nfv_common import selobj
 from nfv_common import timers
-
 from nfv_vim import audits
 from nfv_vim import database
 from nfv_vim import directors
@@ -57,7 +56,7 @@ def process_signal_handler(signum, frame):
     elif signal.SIGUSR2 == signum:
         reset_data_captured = True
     else:
-        print("Ignoring signal" % signum)
+        print("Ignoring signal")
 
 
 def process_initialize():

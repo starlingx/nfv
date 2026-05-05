@@ -79,8 +79,7 @@ def get_extra_create_args(cmd_area, args):
     elif sw_update.CMD_NAME_KUBE_UPGRADE == cmd_area:
         # kube upgrade supports: to_version
         return {"to_version": args.to_version}
-    else:
-        raise ValueError("Unknown command area, %s, given" % cmd_area)
+    raise ValueError("Unknown command area, %s, given" % cmd_area)
 
 
 def add_list_arg(some_cmd, some_arg, some_list):

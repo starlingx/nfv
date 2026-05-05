@@ -7,8 +7,8 @@ from unittest import mock
 import uuid
 
 from nfv_common import strategy as common_strategy
+from nfv_unit_tests.tests import sw_update_testcase
 from nfv_vim import nfvi
-
 from nfv_vim.nfvi.objects.v1 import KUBE_UPGRADE_STATE
 from nfv_vim.nfvi.objects.v1 import KubeVersion
 from nfv_vim.objects import KubeUpgrade
@@ -17,8 +17,6 @@ from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.strategy._strategy import KubeUpgradeStrategy
 from nfv_vim import tables
-
-from nfv_unit_tests.tests import sw_update_testcase
 
 # Kubernetes versions: v<major.minor.patch>
 FROM_KUBE_VERSION = "v1.29.2"
@@ -117,7 +115,7 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(build_phase, expected_results)
 
 
-class SimplexKubeUpgradeMixin(object):
+class SimplexKubeUpgradeMixin:
     FAKE_KUBE_HOST_UPGRADES_LIST = []
 
     # simplex sets the versions as available
@@ -169,9 +167,6 @@ class SimplexKubeUpgradeMixin(object):
         ),
     ]
 
-    def setUp(self):
-        super(SimplexKubeUpgradeMixin, self).setUp()
-
     def is_simplex(self):
         return True
 
@@ -179,7 +174,7 @@ class SimplexKubeUpgradeMixin(object):
         return False
 
 
-class SimplexMajorKubeUpgradeMixin(object):
+class SimplexMajorKubeUpgradeMixin:
     FAKE_KUBE_HOST_UPGRADES_LIST = []
 
     # simplex sets the versions as available
@@ -222,9 +217,6 @@ class SimplexMajorKubeUpgradeMixin(object):
         ),
     ]
 
-    def setUp(self):
-        super(SimplexMajorKubeUpgradeMixin, self).setUp()
-
     def is_simplex(self):
         return True
 
@@ -232,7 +224,7 @@ class SimplexMajorKubeUpgradeMixin(object):
         return False
 
 
-class DuplexKubeUpgradeMixin(object):
+class DuplexKubeUpgradeMixin:
     FAKE_KUBE_HOST_UPGRADES_LIST = []
 
     # duplex sets only one version as available
@@ -284,9 +276,6 @@ class DuplexKubeUpgradeMixin(object):
         ),
     ]
 
-    def setUp(self):
-        super(DuplexKubeUpgradeMixin, self).setUp()
-
     def is_simplex(self):
         return False
 
@@ -294,7 +283,7 @@ class DuplexKubeUpgradeMixin(object):
         return True
 
 
-class ApplyStageMixin(object):
+class ApplyStageMixin:
     """This Mixin will not work unless combined with other mixins.
 
     HostMixin - to provide the kube host upgrade states.
@@ -319,9 +308,6 @@ class ApplyStageMixin(object):
     kubelet_versions = [
         MID1_KUBE_VERSION,
     ]
-
-    def setUp(self):
-        super(ApplyStageMixin, self).setUp()
 
     def _create_kube_upgrade_obj(self, state, from_version, to_version):
         """Create a kube upgrade db object."""
@@ -905,9 +891,6 @@ class MultiApplyStageMixin(ApplyStageMixin):
         HIGH_KUBE_VERSION,
     ]
 
-    def setUp(self):
-        super(MultiApplyStageMixin, self).setUp()
-
 
 class MultiMajorApplyStageMixin(ApplyStageMixin):
     default_to_version = MAJOR2_KUBE_VERSION
@@ -921,9 +904,6 @@ class MultiMajorApplyStageMixin(ApplyStageMixin):
         MAJOR1_KUBE_VERSION,
         MAJOR2_KUBE_VERSION,
     ]
-
-    def setUp(self):
-        super(MultiMajorApplyStageMixin, self).setUp()
 
 
 @mock.patch(
@@ -944,7 +924,7 @@ class TestSimplexApplyStrategy(
     SimplexKubeUpgradeMixin,
 ):
     def setUp(self):
-        super(TestSimplexApplyStrategy, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         # AIO will be patched in the worker list
         self.std_controller_list = []
@@ -1546,7 +1526,7 @@ class TestSimplexMultiApplyStrategy(
     """This test class can be updated to resume from partial control plane."""
 
     def setUp(self):
-        super(TestSimplexMultiApplyStrategy, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
@@ -1577,7 +1557,7 @@ class TestSimplexMultiMajorApplyStrategy(
     """This test class can be updated to resume from partial control plane."""
 
     def setUp(self):
-        super(TestSimplexMultiMajorApplyStrategy, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         # AIO kubelet phase does not process controller with the workers
         self.std_controller_list = []
@@ -1604,7 +1584,7 @@ class TestDuplexApplyStrategy(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
     def setUp(self):
-        super(TestDuplexApplyStrategy, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
         # AIO kubelet phase does not process controller with the workers
@@ -1630,7 +1610,7 @@ class TestDuplexPlusApplyStrategy(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
     def setUp(self):
-        super(TestDuplexPlusApplyStrategy, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
         self.create_host("compute-0")  # creates a worker
@@ -1659,7 +1639,7 @@ class TestDuplexPlusApplyStrategyTwoWorkers(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
     def setUp(self):
-        super(TestDuplexPlusApplyStrategyTwoWorkers, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
         self.create_host("compute-0")  # creates a worker
@@ -1690,7 +1670,7 @@ class TestDuplexPlusApplyStrategyTwoWorkersParallel(
     def setUp(self):
         # override the strategy values before calling setup of the superclass
         self.worker_apply_type = SW_UPDATE_APPLY_TYPE.PARALLEL
-        super(TestDuplexPlusApplyStrategyTwoWorkersParallel, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
         self.create_host("compute-0")  # creates a worker
@@ -1719,7 +1699,7 @@ class TestDuplexPlusApplyStrategyTwoStorage(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
     def setUp(self):
-        super(TestDuplexPlusApplyStrategyTwoStorage, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
         self.create_host("storage-0")
@@ -1750,7 +1730,7 @@ class TestDuplexPlusApplyStrategyTwoStorageParallel(
     def setUp(self):
         # override the strategy values before calling setup of the superclass
         self.storage_apply_type = SW_UPDATE_APPLY_TYPE.PARALLEL
-        super(TestDuplexPlusApplyStrategyTwoStorageParallel, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         self.create_host("controller-1", aio=True)
         self.create_host("storage-0")
@@ -1779,7 +1759,7 @@ class TestStandardTwoWorkerTwoStorage(
     sw_update_testcase.SwUpdateStrategyTestCase, ApplyStageMixin, DuplexKubeUpgradeMixin
 ):
     def setUp(self):
-        super(TestStandardTwoWorkerTwoStorage, self).setUp()
+        super().setUp()
         # This is not AIO, so the stages are a little different
         self.create_host("controller-0")
         self.create_host("controller-1")
@@ -1793,7 +1773,7 @@ class TestStandardTwoWorkerTwoStorage(
         self.storage_list = [["storage-0"], ["storage-1"]]
 
 
-class SimplexMultiPatchKubeUpgradeMixin(object):
+class SimplexMultiPatchKubeUpgradeMixin:
     """Mixin with multiple patch versions for the same minor (v1.30).
 
     The strategy should filter to only the highest patch per minor.
@@ -1823,9 +1803,6 @@ class SimplexMultiPatchKubeUpgradeMixin(object):
         ),
     ]
 
-    def setUp(self):
-        super(SimplexMultiPatchKubeUpgradeMixin, self).setUp()
-
     def is_simplex(self):
         return True
 
@@ -1848,9 +1825,6 @@ class MultiPatchApplyStageMixin(ApplyStageMixin):
     kubelet_versions = [
         PATCH_KUBE_VERSION,
     ]
-
-    def setUp(self):
-        super(MultiPatchApplyStageMixin, self).setUp()
 
 
 @mock.patch(
@@ -1876,7 +1850,7 @@ class TestSimplexMultiPatchApplyStrategy(
     """
 
     def setUp(self):
-        super(TestSimplexMultiPatchApplyStrategy, self).setUp()
+        super().setUp()
         self.create_host("controller-0", aio=True)
         self.std_controller_list = []
         self.aio_controller_list = ["controller-0"]

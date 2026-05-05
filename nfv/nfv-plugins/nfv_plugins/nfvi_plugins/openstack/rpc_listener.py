@@ -13,10 +13,9 @@ from kombu import Exchange
 from kombu import Queue
 
 from nfv_common import debug
+from nfv_common.helpers import coroutine
 from nfv_common import selectable
 from nfv_common import selobj
-
-from nfv_common.helpers import coroutine
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.rpc")
 
@@ -35,7 +34,7 @@ class RPCListener(threading.Thread):
         routing_key,
         consumer_queue_name,
     ):
-        super(RPCListener, self).__init__()
+        super().__init__()
         self._exit = threading.Event()
         self._exchange_name = exchange_name
         self._routing_key = routing_key
@@ -55,8 +54,8 @@ class RPCListener(threading.Thread):
 
         self._message_queue = selectable.ThreadQueue(consumer_queue_name)
         self._message_filters_lock = threading.RLock()
-        self._message_filters = dict()
-        self._message_handlers = dict()
+        self._message_filters = {}
+        self._message_handlers = {}
 
         selobj.selobj_add_read_obj(self._message_queue.selobj, self._dispatch_messages)
 
@@ -107,7 +106,7 @@ class RPCListener(threading.Thread):
             for msg_type, msg_filter in self._message_filters.items():
                 msg_data = msg_filter(body)
                 if msg_data is not None:
-                    msg = dict()
+                    msg = {}
                     msg["type"] = msg_type
                     msg["data"] = msg_data
                     self._message_queue.put(msg)

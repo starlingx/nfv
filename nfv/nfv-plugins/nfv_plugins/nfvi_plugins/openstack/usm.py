@@ -31,7 +31,7 @@ def _usm_api_cmd(token, endpoint):
 
 
 def _api_cmd_headers():
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
     return api_cmd_headers

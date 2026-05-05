@@ -74,7 +74,8 @@ def validate_certificate_subject(subject):
         key, value = pair_value.split("=")
         subject_dict[key] = value
 
-    if not all([param in params_supported for param in subject_dict.keys()]):
+    # pylint: disable-next=consider-iterating-dictionary
+    if not all(param in params_supported for param in subject_dict.keys()):
         return False, (
             "There are parameters not supported "
             "for the certificate subject specification. "
@@ -83,6 +84,7 @@ def validate_certificate_subject(subject):
             "L=<Locality> O=<Organization> OU=<OrganizationUnit> "
             "CN=<commonName>"
         )
+    # pylint: disable-next=consider-iterating-dictionary
     if "CN" not in list(subject_dict.keys()):
         return False, (
             "The CN=<commonName> parameter is required to be "

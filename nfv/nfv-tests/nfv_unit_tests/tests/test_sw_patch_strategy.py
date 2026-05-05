@@ -7,16 +7,14 @@ from unittest import mock
 import uuid
 
 from nfv_common import strategy as common_strategy
+from nfv_unit_tests.tests import sw_update_testcase
 from nfv_vim import nfvi
-
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.objects import SwPatch
 from nfv_vim.strategy._strategy import SwPatchStrategy
-
-from nfv_unit_tests.tests import sw_update_testcase
 
 
 def create_sw_patch_strategy(
@@ -4199,14 +4197,14 @@ class TestSwPatchStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         fake_patch_obj = SwPatch()
         strategy.sw_update_obj = fake_patch_obj
 
-        nfvi_sw_patches = list()
+        nfvi_sw_patches = []
         sw_patch = nfvi.objects.v1.SwPatch(
             "PATCH_0001", "12.01", "Applied", "Available"
         )
         nfvi_sw_patches.append(sw_patch)
         strategy.nfvi_sw_patches = nfvi_sw_patches
 
-        nfvi_sw_patch_hosts = list()
+        nfvi_sw_patch_hosts = []
         for host_name in ["compute-0", "compute-1"]:
             host = nfvi.objects.v1.HostSwPatch(
                 host_name, "worker", "12.01", True, False, "idle", False, False

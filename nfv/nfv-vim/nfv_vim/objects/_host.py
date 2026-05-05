@@ -5,22 +5,19 @@
 #
 
 from nfv_common import debug
-from nfv_common import state_machine
-from nfv_common import timers
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
-
-from nfv_vim.objects._object import ObjectData
-
+from nfv_common import state_machine
+from nfv_common import timers
 from nfv_vim import event_log
 from nfv_vim import host_fsm
 from nfv_vim import nfvi
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.host")
 
 
-class HostPersonality(object, metaclass=Singleton):
+class HostPersonality(metaclass=Singleton):
     """Host Personality Constants."""
 
     UNKNOWN = Constant("unknown")
@@ -30,7 +27,7 @@ class HostPersonality(object, metaclass=Singleton):
     WORKER = Constant("worker")
 
 
-class HostNames(object, metaclass=Singleton):
+class HostNames(metaclass=Singleton):
     """Host Name Constants."""
 
     CONTROLLER_0 = Constant("controller-0")
@@ -38,7 +35,7 @@ class HostNames(object, metaclass=Singleton):
     STORAGE_0 = Constant("storage-0")
 
 
-class HostServicesState(object, metaclass=Singleton):
+class HostServicesState(metaclass=Singleton):
     """Host-Services State Constants."""
 
     ENABLED = Constant("enabled")
@@ -46,7 +43,7 @@ class HostServicesState(object, metaclass=Singleton):
     FAILED = Constant("failed")
 
 
-class HostServices(object, metaclass=Singleton):
+class HostServices(metaclass=Singleton):
     """Host-Services Constants."""
 
     GUEST = Constant("guest")
@@ -80,7 +77,7 @@ class Host(ObjectData):
         recover_instances=True,
         host_services_locked=False,
     ):
-        super(Host, self).__init__("1.0.0")
+        super().__init__("1.0.0")
 
         if initial_state is None:
             initial_state = host_fsm.HOST_STATE.INITIAL
@@ -89,7 +86,7 @@ class Host(ObjectData):
             action = self._ACTION_NONE
 
         self._elapsed_time_in_state = int(elapsed_time_in_state)
-        self._task = state_machine.StateTask("EmptyTask", list())
+        self._task = state_machine.StateTask("EmptyTask", [])
         self._action = action
         self._reason = ""
         self._upgrade_inprogress = upgrade_inprogress
@@ -101,7 +98,7 @@ class Host(ObjectData):
         self._last_state_timestamp = timers.get_monotonic_timestamp_in_ms()
         self._fail_notification_required = False
         self._fsm_start_time = None
-        self._host_service_state = dict()
+        self._host_service_state = {}
 
         if self.host_service_configured(HOST_SERVICES.COMPUTE):
             self._host_service_state[HOST_SERVICES.COMPUTE] = (
@@ -128,7 +125,7 @@ class Host(ObjectData):
                 else HOST_SERVICE_STATE.DISABLED
             )
 
-        self._events = list()
+        self._events = []
 
     @property
     def uuid(self):
@@ -216,10 +213,9 @@ class Host(ObjectData):
 
         if all_enabled:
             return HOST_SERVICE_STATE.ENABLED
-        elif at_least_one_failed:
+        if at_least_one_failed:
             return HOST_SERVICE_STATE.FAILED
-        else:
-            return HOST_SERVICE_STATE.DISABLED
+        return HOST_SERVICE_STATE.DISABLED
 
     @property
     def host_services_locked(self):
@@ -514,7 +510,7 @@ class Host(ObjectData):
     def notify_instances_moved(self, operation):
         """Notify that the instances have moved."""
 
-        event_data = dict()
+        event_data = {}
         event_data["host-operation"] = operation
         self._fsm.handle_event(host_fsm.HOST_EVENT.INSTANCES_MOVED, event_data)
 
@@ -526,7 +522,7 @@ class Host(ObjectData):
     def notify_instances_stopped(self, operation):
         """Notify that the instances have stopped."""
 
-        event_data = dict()
+        event_data = {}
         event_data["host-operation"] = operation
         self._fsm.handle_event(host_fsm.HOST_EVENT.INSTANCES_STOPPED, event_data)
 
@@ -802,7 +798,7 @@ class Host(ObjectData):
     def as_dict(self):
         """Represent host object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["personality"] = self.personality

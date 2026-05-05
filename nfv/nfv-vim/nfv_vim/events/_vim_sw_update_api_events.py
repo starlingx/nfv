@@ -11,10 +11,10 @@ from nfv_vim.strategy._strategy_steps import STRATEGY_STEP_NAME
 
 DLOG = debug.debug_get_logger("nfv_vim.vim_sw_update_api_events")
 
-_sw_update_strategy_create_operations = dict()
-_sw_update_strategy_apply_operations = dict()
-_sw_update_strategy_abort_operations = dict()
-_sw_update_strategy_delete_operations = dict()
+_sw_update_strategy_create_operations = {}
+_sw_update_strategy_apply_operations = {}
+_sw_update_strategy_abort_operations = {}
+_sw_update_strategy_delete_operations = {}
 
 
 def _vim_sw_update_api_create_strategy_callback(success, reason, strategy):
@@ -495,10 +495,6 @@ def vim_sw_update_api_get_strategy(connection, msg):
 def vim_sw_update_api_initialize():
     """Initialize VIM Software Update API Handling."""
 
-    pass
-
 
 def vim_sw_update_api_finalize():
     """Finalize VIM Software Update API Handling."""
-
-    pass

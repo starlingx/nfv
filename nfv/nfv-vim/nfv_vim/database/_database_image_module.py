@@ -5,12 +5,10 @@
 #
 import json
 
+from nfv_vim.database._database import database_get
+from nfv_vim.database import model
 from nfv_vim import nfvi
 from nfv_vim import objects
-
-from nfv_vim.database import model
-
-from nfv_vim.database._database import database_get
 
 
 def database_image_add(image_obj):
@@ -68,7 +66,7 @@ def database_image_get_list():
     session = db.session()
     query = session.query(model.Image)
 
-    image_objs = list()
+    image_objs = []
     for image in query.all():
         nfvi_image_data = json.loads(image.nfvi_image_data)
         nfvi_image = nfvi.objects.v1.Image(

@@ -64,8 +64,7 @@ class APIController(rest.RestController):
         elif "virtualised-resources" == key:
             return virtualised_resources.VirtualisedResourcesAPI(), remainder
 
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(API)
     def get(self):

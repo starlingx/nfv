@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from nfv_vim.nfvi.objects.v1._object import ObjectData
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
+from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class VolumeAvailabilityStatus(Constants, metaclass=Singleton):
@@ -55,17 +54,17 @@ class Volume(ObjectData):
         encrypted,
         image_uuid,
     ):
-        super(Volume, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                uuid=uuid,
-                name=name,
-                description=description,
-                avail_status=avail_status,
-                action=action,
-                size_gb=size_gb,
-                bootable=bootable,
-                encrypted=encrypted,
-                image_uuid=image_uuid,
-            )
+            {
+                "uuid": uuid,
+                "name": name,
+                "description": description,
+                "avail_status": avail_status,
+                "action": action,
+                "size_gb": size_gb,
+                "bootable": bootable,
+                "encrypted": encrypted,
+                "image_uuid": image_uuid,
+            }
         )

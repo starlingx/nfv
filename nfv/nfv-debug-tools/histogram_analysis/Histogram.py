@@ -61,7 +61,7 @@ call(
 call("gunzip logs/nfv-vim.log.[0-9].gz logs/nfv-vim.log.[0-9][0-9].gz", shell=True)
 
 
-class Parser(object):
+class Parser:
     def __init__(self):
         self.proc = ""  # Name of process being read
         self.timestamp = ""  # Timestamp found on line stating process name

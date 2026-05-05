@@ -38,7 +38,7 @@ def _event_template_get(event_id, event_context):
     if event_context in event_template["exclude_event_context"]:
         return None
 
-    template = dict()
+    template = {}
     template["entity_type"] = event_template["entity_type"]
     template["entity"] = event_template["entity"]
     template["event_type"] = event_template["event_type"]
@@ -89,10 +89,10 @@ def _event_issue(event_id, event_context, template, data):
 def issue_general_log(event_id, additional_text=None, event_context=None):
     """Issue a general event log."""
 
-    data = dict()
+    data = {}
     data["additional_text"] = additional_text
 
-    event_list = list()
+    event_list = []
 
     if event_context is None:
         for event_context in event_log.EVENT_CONTEXT:

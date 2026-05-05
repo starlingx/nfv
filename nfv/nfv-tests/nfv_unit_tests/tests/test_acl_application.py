@@ -4,15 +4,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from unittest import mock
+
 import testtools
 
 from nfv_vim.api.acl._application import AuthenticationApplication
-from unittest import mock
 
 
 class TestAuthenticationApplication(testtools.TestCase):
     def setUp(self):
-        super(TestAuthenticationApplication, self).setUp()
+        super().setUp()
         with (
             mock.patch("nfv_vim.api.openstack.config_load"),
             mock.patch("nfv_vim.api.openstack.get_directory"),

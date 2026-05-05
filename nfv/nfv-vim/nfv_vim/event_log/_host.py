@@ -55,7 +55,7 @@ def _event_template_get(event_id, event_context):
     if event_context in event_template["exclude_event_context"]:
         return None
 
-    template = dict()
+    template = {}
     template["entity_type"] = event_template["entity_type"]
     template["entity"] = event_template["entity"]
     template["event_type"] = event_template["event_type"]
@@ -106,11 +106,11 @@ def _event_issue(event_id, event_context, template, data):
 def host_issue_log(host, event_id, additional_text=None, event_context=None):
     """Issue an event log for host."""
 
-    data = dict()
+    data = {}
     data["host_name"] = host.name
     data["additional_text"] = additional_text
 
-    event_list = list()
+    event_list = []
 
     if event_context is None:
         for event_context in event_log.EVENT_CONTEXT:
@@ -132,14 +132,14 @@ def hypervisor_issue_log(
 ):
     """Issue an event log for host."""
 
-    data = dict()
+    data = {}
     data["hypervisor_uuid"] = hypervisor.uuid
     data["host_name"] = hypervisor.host_name
     data["administrative_state"] = hypervisor.admin_state
     data["operational_state"] = hypervisor.oper_state
     data["additional_text"] = additional_text
 
-    event_list = list()
+    event_list = []
 
     if event_context is None:
         for event_context in event_log.EVENT_CONTEXT:

@@ -10,5 +10,5 @@ class System(ObjectData):
     """NFVI System Object."""
 
     def __init__(self, name, description):
-        super(System, self).__init__("1.0.0")
-        self.update(dict(name=name, description=description))
+        super().__init__("1.0.0")
+        self.update({"name": name, "description": description})

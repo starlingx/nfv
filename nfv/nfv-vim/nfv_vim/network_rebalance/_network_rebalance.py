@@ -4,15 +4,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from nfv_common import config
+from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Singleton
-
-from nfv_common import config
-from nfv_common import debug
 from nfv_common import timers
-
 from nfv_vim import nfvi
 
 DLOG = debug.debug_get_logger("nfv_vim.l3_rebalance")
@@ -45,23 +43,23 @@ class L3RebalanceState(Constants, metaclass=Singleton):
 L3_REBALANCE_STATE = L3RebalanceState()
 
 
-class L3AgentRebalance(object, metaclass=Singleton):
+class L3AgentRebalance(metaclass=Singleton):
     def __init__(self):
         # Our state.
         self.state = L3_REBALANCE_STATE.DONE
         # If rebalance occurring due to down agent,
         # entry zero in below list will be for the down agent
         # list of dictionaries of agent information.
-        self.l3agents = list()
+        self.l3agents = []
         # Dictionary based on agent_id of router ids hosted
         # on an agent.
-        self.router_ids_per_agent = dict()
+        self.router_ids_per_agent = {}
         # For keeping track of routers that cant be schedule.
         # Useful for logging and test.
-        self.router_ids_per_agent_cant_schedule = dict()
+        self.router_ids_per_agent_cant_schedule = {}
         # Dictionary based on router_id of list of physical
         # networks of ports on router.
-        self.networks_per_router = dict()
+        self.networks_per_router = {}
         # For determining whether state machine work is finished
         # in a tick and the state machine can progress.
         self.state_machine_in_progress = False
@@ -73,15 +71,15 @@ class L3AgentRebalance(object, metaclass=Singleton):
         self.net_idx = 0
         # If rebalance occurring due to down agent,
         # entry zero in below list will be for the down agent
-        self.num_routers_on_agents = list()
+        self.num_routers_on_agents = []
         # The queue of work that is to be processed
-        self.work_queue = list()
+        self.work_queue = []
         # The difference between maximum routers on an agent
         # and minimum routers on an agent we are trying to achieve.
         self.router_diff_threshold = 1
         # List of (index, number of routers on agents) tuples
         # for all agents.
-        self.agent_list = list()
+        self.agent_list = []
         # For rebalance, below will be None, as we don't actually
         # care about the name of a new host who's agent has just
         # come up.  For agent down, it will be the name of the host
@@ -92,8 +90,8 @@ class L3AgentRebalance(object, metaclass=Singleton):
         # Current number of ticks waiting to begin work.
         self.current_hold_off_count = 0
         # queues that maintain host names of hosts coming up and going down.
-        self.host_up_queue = list()
-        self.host_down_queue = list()
+        self.host_up_queue = []
+        self.host_down_queue = []
         # whether to abort and restart.
         self.abort = False
 
@@ -131,7 +129,7 @@ class L3AgentRebalance(object, metaclass=Singleton):
         del self.num_routers_on_agents[:]
 
     def add_agent(self, agent_id):
-        self.router_ids_per_agent[agent_id] = list()
+        self.router_ids_per_agent[agent_id] = []
         self.num_l3agents += 1
 
     def get_current_l3agent(self):
@@ -183,10 +181,9 @@ class L3AgentRebalance(object, metaclass=Singleton):
         self.num_routers = len(agent_routers)
         if self.num_routers > 0:
             working_router = agent_routers[self.router_idx]
-            self.networks_per_router[working_router] = list()
+            self.networks_per_router[working_router] = []
             return working_router
-        else:
-            return None
+        return None
 
     def get_current_working_network(self):
         agent_routers = self.router_ids_per_agent[self.l3agents[self.l3agent_idx]["id"]]
@@ -195,8 +192,7 @@ class L3AgentRebalance(object, metaclass=Singleton):
             working_router = agent_routers[self.router_idx]
             working_network = self.networks_per_router[working_router][self.net_idx]
             return working_network
-        else:
-            return None
+        return None
 
     def current_working_network_advance_agent(self):
         self.l3agent_idx += 1
@@ -241,15 +237,14 @@ class L3AgentRebalance(object, metaclass=Singleton):
 
     def update_datanetworks(self, datanetwork_name):
         if not self.l3agents[self.l3agent_idx].get("datanets", False):
-            self.l3agents[self.l3agent_idx]["datanets"] = list()
+            self.l3agents[self.l3agent_idx]["datanets"] = []
         self.l3agents[self.l3agent_idx]["datanets"].append(datanetwork_name)
 
     def datanetworks_done(self):
         self.l3agent_idx += 1
         if self.l3agent_idx >= self.num_l3agents:
             return True
-        else:
-            return False
+        return False
 
     def get_next_router_to_move(self):
         # If there are any routers on the down agent, then
@@ -259,8 +254,7 @@ class L3AgentRebalance(object, metaclass=Singleton):
             router_to_move = self.router_ids_per_agent[agent_id][0]
             router_to_move_physical_networks = self.networks_per_router[router_to_move]
             return router_to_move, router_to_move_physical_networks
-        else:
-            return None, None
+        return None, None
 
     def find_router_with_physical_networks(self, agent_idx, physical_networks):
         agent_routers = self.router_ids_per_agent[self.l3agents[agent_idx]["id"]]
@@ -284,14 +278,13 @@ class L3AgentRebalance(object, metaclass=Singleton):
 
         if all_networks_found:
             return router_id
-        else:
-            # we couldn't find a router with networks matching the requirements
-            return None
+        # we couldn't find a router with networks matching the requirements
+        return None
 
     def populate_l3agents(self, result_data):
         for agent in result_data:
             if agent["agent_type"] == AGENT_TYPE.L3:
-                agent_info_dict = dict()
+                agent_info_dict = {}
                 agent_info_dict["host"] = agent["host"]
                 agent_info_dict["id"] = agent["id"]
                 # For simplicity and easy of access, place the down host
@@ -333,7 +326,7 @@ class L3AgentRebalance(object, metaclass=Singleton):
 
         self.router_ids_per_agent[source_agent_id].remove(router_to_move)
         if self.router_ids_per_agent_cant_schedule.get(source_agent_id, None) is None:
-            self.router_ids_per_agent_cant_schedule[source_agent_id] = list()
+            self.router_ids_per_agent_cant_schedule[source_agent_id] = []
 
         self.router_ids_per_agent_cant_schedule[source_agent_id].append(router_to_move)
 
@@ -445,8 +438,8 @@ class L3AgentRebalance(object, metaclass=Singleton):
         return agent_with_most_routers_entry[0], agent_with_most_routers_entry[1]
 
     def get_agent_list_scheduling_info(self):
-        possible_agent_targets = list()
-        num_routers_on_agents = list()
+        possible_agent_targets = []
+        num_routers_on_agents = []
         for entry in self.agent_list:
             possible_agent_targets.append(entry[0])
             num_routers_on_agents.append(entry[1])
@@ -929,8 +922,8 @@ def _reschedule_new_agent():
         _L3Rebalance.set_state(L3_REBALANCE_STATE.DONE)
         return
 
-    num_routers_on_agents = list()
-    possible_agent_targets = list()
+    num_routers_on_agents = []
+    possible_agent_targets = []
     num_routers_on_agents, possible_agent_targets = (
         _L3Rebalance.get_agent_list_scheduling_info()
     )
@@ -1150,5 +1143,3 @@ def nr_initialize():
 
 def nr_finalize():
     """Finalize Network Rebalance handling."""
-
-    pass

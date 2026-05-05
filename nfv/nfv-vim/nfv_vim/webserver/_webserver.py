@@ -272,7 +272,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/systems", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                system_list = list()
+                system_list = []
                 systems = database.database_system_get_list()
                 for system in systems:
                     system_list.append(system.as_dict())
@@ -296,7 +296,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/hosts", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                host_list = list()
+                host_list = []
                 hosts = database.database_host_get_list()
                 for host in hosts:
                     host_list.append(host.as_dict())
@@ -320,7 +320,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/host_groups", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                host_group_list = list()
+                host_group_list = []
                 host_groups = database.database_host_group_get_list()
                 for host_group in host_groups:
                     host_group_list.append(host_group.as_dict())
@@ -344,7 +344,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/host_aggregates", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                host_aggregate_list = list()
+                host_aggregate_list = []
                 host_aggregates = database.database_host_aggregate_get_list()
                 for host_aggregate in host_aggregates:
                     host_aggregate_list.append(host_aggregate.as_dict())
@@ -368,7 +368,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/hypervisors", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                hypervisor_list = list()
+                hypervisor_list = []
                 hypervisors = database.database_hypervisor_get_list()
                 for hypervisor in hypervisors:
                     hypervisor_list.append(hypervisor.as_dict())
@@ -392,7 +392,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/instances", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                instance_list = list()
+                instance_list = []
                 instances = database.database_instance_get_list()
                 for instance in instances:
                     instance_list.append(instance.as_dict())
@@ -416,7 +416,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/instance_types", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                instance_type_list = list()
+                instance_type_list = []
                 instance_types = database.database_instance_type_get_list()
                 for instance_type in instance_types:
                     instance_type_list.append(instance_type.as_dict())
@@ -440,7 +440,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/instance_groups", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                instance_group_list = list()
+                instance_group_list = []
                 instance_groups = database.database_instance_group_get_list()
                 for instance_group in instance_groups:
                     instance_group_list.append(instance_group.as_dict())
@@ -464,7 +464,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/images", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                image_list = list()
+                image_list = []
                 images = database.database_image_get_list()
                 for image in images:
                     image_list.append(image.as_dict())
@@ -488,7 +488,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/volumes", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                volume_list = list()
+                volume_list = []
                 volumes = database.database_volume_get_list()
                 for volume in volumes:
                     volume_list.append(volume.as_dict())
@@ -512,7 +512,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/volume_snapshots", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                volume_snapshot_list = list()
+                volume_snapshot_list = []
                 volume_snapshots = database.database_volume_snapshot_get_list()
                 for volume_snapshot in volume_snapshots:
                     volume_snapshot_list.append(volume_snapshot.as_dict())
@@ -536,7 +536,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/subnets", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                subnet_list = list()
+                subnet_list = []
                 subnets = database.database_subnet_get_list()
                 for subnet in subnets:
                     subnet_list.append(subnet.as_dict())
@@ -560,7 +560,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         elif re.search("/vim/networks", self.path) is not None:
             query_obj = re.match(".*?callback=(.*)&.*", self.path)
             if query_obj is not None:
-                network_list = list()
+                network_list = []
                 networks = database.database_network_get_list()
                 for network in networks:
                     network_list.append(network.as_dict())
@@ -637,7 +637,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, BaseHTTPServer.HTTPServer)
         BaseHTTPServer.HTTPServer.shutdown(self)
 
 
-class SimpleHttpServer(object):
+class SimpleHttpServer:
     """Simple HTTP Server."""
 
     def __init__(self, webserver_config, nfvi_config, vim_api_config):

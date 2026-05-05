@@ -5,13 +5,13 @@
 #
 import http.client as httplib
 import json
+
 import pecan
 from wsme import types as wsme_types
 import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
 from nfv_common import validate
-
 from nfv_vim import rpc
 
 DLOG = debug.debug_get_logger("nfv_vim.api.volume")
@@ -53,7 +53,7 @@ class VolumeQueryData(wsme_types.Base):
     action = str
 
     def __json__(self):
-        json_data = dict()
+        json_data = {}
         json_data["uuid"] = self.uuid
         json_data["name"] = self.name
         json_data["description"] = self.description
@@ -119,8 +119,7 @@ class VolumeAPI(pecan.rest.RestController):
         http_response = self._get_volume_details(volume_uuid, volume)
         if httplib.OK == http_response:
             return volume
-        else:
-            return pecan.abort(http_response)
+        return pecan.abort(http_response)
 
     @wsme_pecan.wsexpose([VolumeQueryData], status_code=httplib.OK)
     def get_all(self):
@@ -131,7 +130,7 @@ class VolumeAPI(pecan.rest.RestController):
         rpc_request.get_all = True
         vim_connection.send(rpc_request.serialize())
 
-        volumes = list()
+        volumes = []
         while True:
             msg = vim_connection.receive()
             if msg is None:

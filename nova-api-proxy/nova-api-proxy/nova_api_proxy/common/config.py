@@ -75,3 +75,4 @@ def load_paste_app(app_name=None):
         return app
     except LookupError as err:
         LOG.info("got lookup error: %s" % err)
+        return None

@@ -8,23 +8,19 @@ import datetime
 import uuid
 import weakref
 
-from nfv_vim.objects._object import ObjectData
-
 from nfv_common import config
 from nfv_common import debug
-from nfv_common import state_machine
-from nfv_common import timers
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
+from nfv_common import state_machine
+from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import event_log
 from nfv_vim import instance_fsm
 from nfv_vim import nfvi
-
 from nfv_vim.objects._guest_services import GuestServices
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.instance")
 MAX_EVENT_REASON_LENGTH = 255
@@ -174,8 +170,7 @@ class InstanceActionType(Constants, metaclass=Singleton):
         elif nfvi.objects.v1.INSTANCE_ACTION_TYPE.DELETE == nfvi_action_type:
             return InstanceActionType.DELETE
 
-        else:
-            return InstanceActionType.UNKNOWN
+        return InstanceActionType.UNKNOWN
 
 
 class InstanceActionState(Constants, metaclass=Singleton):
@@ -211,7 +206,7 @@ INSTANCE_ACTION_STATE = InstanceActionState()
 INSTANCE_ACTION_INITIATED_BY = InstanceActionInitiatedBy
 
 
-class InstanceActionData(object):
+class InstanceActionData:
     """Instance Action Data."""
 
     _seqnum = 1
@@ -253,8 +248,7 @@ class InstanceActionData(object):
         elif nfvi.objects.v1.INSTANCE_ACTION_STATE.COMPLETED == nfvi_action_state:
             return INSTANCE_ACTION_STATE.COMPLETED
 
-        else:
-            return INSTANCE_ACTION_STATE.UNKNOWN
+        return INSTANCE_ACTION_STATE.UNKNOWN
 
     @property
     def seqnum(self):
@@ -416,7 +410,7 @@ class InstanceActionData(object):
     def as_dict(self):
         """Represent instance action data object as dictionary."""
 
-        data = dict()
+        data = {}
         data["action_seqnum"] = self.seqnum
         data["action_uuid"] = self.uuid
         data["action_type"] = self.action_type
@@ -429,7 +423,7 @@ class InstanceActionData(object):
         return data
 
 
-class InstanceActionFsm(object):
+class InstanceActionFsm:
     """Instance Action FSM."""
 
     START = "start-action"
@@ -458,7 +452,7 @@ class InstanceActionFsm(object):
 
     def __init__(self, instance):
         self._instance_reference = weakref.ref(instance)
-        self._actions = dict()
+        self._actions = {}
         self._actions[self.START] = instance_fsm.StartStateMachine(instance)
         self._actions[self.STOP] = instance_fsm.StopStateMachine(instance)
         self._actions[self.PAUSE] = instance_fsm.PauseStateMachine(instance)
@@ -743,6 +737,7 @@ class InstanceActionFsm(object):
 
         # Certain actions can't cancel other actions.
         if self.GUEST_SERVICES_SET != do_action_name:
+            # pylint: disable-next=consider-using-dict-items
             for action_name in self._actions:
                 if action_name != do_action_name:
                     if self.DELETE == do_action_name:
@@ -776,8 +771,8 @@ class Instance(ObjectData):
         unlock_to_recover=False,
         from_database=False,
     ):
-        super(Instance, self).__init__("1.0.0")
-        self._task = state_machine.StateTask("EmptyTask", list())
+        super().__init__("1.0.0")
+        self._task = state_machine.StateTask("EmptyTask", [])
         self._elapsed_time_in_state = int(elapsed_time_in_state)
         self._elapsed_time_on_host = int(elapsed_time_on_host)
         self._nfvi_instance = nfvi_instance
@@ -788,10 +783,10 @@ class Instance(ObjectData):
         self._last_state_timestamp = timers.get_monotonic_timestamp_in_ms()
         self._last_state_change_datetime = datetime.datetime.utcnow()
         self._nfvi_instance_audit_in_progress = False
-        self._alarms = list()
-        self._events = list()
-        self._guest_heartbeat_alarms = list()
-        self._guest_heartbeat_events = list()
+        self._alarms = []
+        self._events = []
+        self._guest_heartbeat_alarms = []
+        self._guest_heartbeat_events = []
         self._live_migrate_from_host = None
         self._cold_migrate_from_host = None
         self._evacuate_from_host = None
@@ -1149,8 +1144,7 @@ class Instance(ObjectData):
         """
         if self._nfvi_instance.recovery_priority is None:
             return 10
-        else:
-            return self._nfvi_instance.recovery_priority
+        return self._nfvi_instance.recovery_priority
 
     @property
     def unlock_to_recover(self):
@@ -1218,7 +1212,7 @@ class Instance(ObjectData):
         # nova/virt/libvirt/driver.py.
 
         timeout = None
-        timeouts = set([])
+        timeouts = set()
 
         if timeout_from_image is not None:
             try:
@@ -1715,11 +1709,11 @@ class Instance(ObjectData):
         self._deleted = True
 
         alarm.instance_clear_alarm(self._alarms)
-        self._alarms[:] = list()
+        self._alarms[:] = []
 
         if self._guest_heartbeat_alarms:
             alarm.instance_clear_alarm(self._guest_heartbeat_alarms)
-            self._guest_heartbeat_alarms[:] = list()
+            self._guest_heartbeat_alarms[:] = []
 
         event_id = event_log.EVENT_ID.INSTANCE_DELETED
         self._events = event_log.instance_issue_log(self, event_id)
@@ -1781,7 +1775,7 @@ class Instance(ObjectData):
                 del self._last_action_data
             self._last_action_data = self._action_data
 
-            nfvi_action_params = dict()
+            nfvi_action_params = {}
             nfvi_action_params[
                 nfvi.objects.v1.INSTANCE_REBOOT_OPTION.GRACEFUL_SHUTDOWN
             ] = True
@@ -2409,13 +2403,13 @@ class Instance(ObjectData):
         if not guest_services.are_provisioned():
             if self._guest_heartbeat_alarms:
                 alarm.instance_clear_alarm(self._guest_heartbeat_alarms)
-                self._guest_heartbeat_alarms[:] = list()
+                self._guest_heartbeat_alarms[:] = []
             return
 
         if guest_services.guest_communication_established():
             if self._guest_heartbeat_alarms:
                 alarm.instance_clear_alarm(self._guest_heartbeat_alarms)
-                self._guest_heartbeat_alarms[:] = list()
+                self._guest_heartbeat_alarms[:] = []
         else:
             if self.is_enabled() and 600 <= self.elapsed_time_in_state:
                 if self._guest_heartbeat_alarms:
@@ -2429,7 +2423,7 @@ class Instance(ObjectData):
             else:
                 if self._guest_heartbeat_alarms:
                     alarm.instance_clear_alarm(self._guest_heartbeat_alarms)
-                    self._guest_heartbeat_alarms[:] = list()
+                    self._guest_heartbeat_alarms[:] = []
 
     def manage_guest_services(self, enabling=False):
         """Manage guest services associated with this instance."""
@@ -2445,6 +2439,7 @@ class Instance(ObjectData):
         do_set = False
         do_delete = False
 
+        # pylint: disable=simplifiable-if-statement
         if (
             not self.is_rebuilding()
             and not self.is_resizing()
@@ -3120,7 +3115,7 @@ class Instance(ObjectData):
     def as_dict(self):
         """Represent instance object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["admin_state"] = self.admin_state

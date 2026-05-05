@@ -3,17 +3,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+import http.client as httplib
 import json
 
 from fm_api import constants as fm_constants
 from fm_api import fm_api
-import http.client as httplib
-
 from nfv_common import debug
-
 import nfv_common.event_log.handlers.v1 as event_log_handlers_v1
 import nfv_common.event_log.objects.v1 as event_log_objects_v1
-
 from nfv_plugins.event_log_handlers import config
 from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import fm
@@ -831,7 +828,7 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
     _provider = "Wind River"
     _signature = "e33d7cf6-f270-4256-893e-16266ee4dd2e"
 
-    _log_db = dict()
+    _log_db = {}
     _fm_api = None
     _openstack_token = None
     _openstack_directory = None
@@ -904,8 +901,7 @@ class EventLogManagement(event_log_handlers_v1.EventLogHandler):
             result_data = json.loads(result.result_data)
             if result_data is not None:
                 return result_data["uuid"]
-            else:
-                return None
+            return None
 
         except exceptions.OpenStackRestAPIException as e:
             if httplib.UNAUTHORIZED == e.http_status_code:

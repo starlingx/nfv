@@ -10,5 +10,3 @@ class PickleableException(Exception):
 
     Used to mark custom exception classes that can be pickled.
     """
-
-    pass

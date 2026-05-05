@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import UnpauseTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 class UnpauseState(state_machine.State):
     """Instance - Unpause State."""
-
-    def __init__(self, name):
-        super(UnpauseState, self).__init__(name)
 
     def enter(self, instance):
         """Entering unpause state."""
@@ -35,8 +31,6 @@ class UnpauseState(state_machine.State):
 
     def transition(self, instance, event, event_data, to_state):
         """Transition from the unpause state."""
-
-        pass
 
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the unpause state."""
@@ -69,7 +63,6 @@ class UnpauseState(state_machine.State):
                 instance.fail_action(instance.action_fsm_action_type, "timeout")
                 return INSTANCE_STATE.INITIAL
 
-            else:
-                DLOG.verbose("Ignoring %s event for %s." % (event, instance.name))
+            DLOG.verbose("Ignoring %s event for %s." % (event, instance.name))
 
         return self.name

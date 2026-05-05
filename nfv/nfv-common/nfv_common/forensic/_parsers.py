@@ -4,7 +4,7 @@
 #
 from nfv_common.forensic import _nfv_vim_parser
 
-_parsers = dict()
+_parsers = {}
 
 
 def parser_get(parser_name):

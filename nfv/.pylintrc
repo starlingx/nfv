@@ -4,6 +4,7 @@ rcfile=.pylintrc
 
 # Add files or directories to the blacklist. They should be base names, not paths.
 ignore=unit_test.py
+ignore-paths=.*nfv_unit_tests/build.*
 
 # Pickle collected data for later comparisons.
 persistent=yes
@@ -14,114 +15,54 @@ load-plugins=
 
 
 [MESSAGES CONTROL]
-disable=
-  C0103, # invalid-name
-  C0114, # missing-module-docstring
-  C0115, # missing-class-docstring
-  C0116, # missing-function-docstring
-  C0123, # unidiomatic-typecheck  !!!
-  C0200, # consider-using-enumerate !!!
-  C0201, # consider-iterating-dictionary
-  C0204, # bad-mcs-classmethod-argument
-  C0206, # consider-using-dict-items
-  C0209, # consider-using-f-string
-  C0301, # line-too-long
-  C0302, # too-many-lines
-  C0325, # superfluous-parens  !!!
-  C0411, # wrong-import-order
-  C0412, # ungrouped-imports
-  C0415, # import-outside-toplevel
-  C1802, # use-implicit-booleaness-not-len !!!
-  R0205, # useless-object-inheritance
-  R0401, # cyclic-import
-  R0801, # duplicate-code
-  R0901, # too-many-ancestors
-  R0902, # too-many-instance-attributes
-  R0903, # too-few-public-methods
-  R0904, # too-many-public-methods
-  R0911, # too-many-return-statements
-  R0912, # too-many-branches
-  R0913, # too-many-arguments
-  R0914, # too-many-locals
-  R0915, # too-many-statements
-  R0916, # too-many-boolean-expressions
-  R1702, # too-many-nested-blocks
-  R1703, # simplifiable-if-statement
-  R1704, # redefined-argument-from-local !!!
-  R1705, # no-else-return
-  R1710, # inconsistent-return-statements !!!
-  R1711, # useless-return  !!!
-  R1714, # consider-using-in
-  R1720, # no-else-raise
-  R1723, # no-else-break
-  R1724, # no-else-continue
-  R1725, # super-with-arguments
-  R1729, # use-a-generator
-  R1732, # consider-using-with
-  R1734, # use-list-literal
-  R1735, # use-dict-literal
-  W0012, # unknown-option-value
-  W0107, # unnecessary-pass
-  W0120, # useless-else-on-loop
-  W0125, # using-constant-test
-  W0212, # protected-access
-  W0221, # arguments-differ
-  W0223, # abstract-method
-  W0231, # super-init-not-called
-  W0235, # useless-super-delegation
-  W0401, # wildcard-import
-  W0404, # reimported
-  W0511, # fixme
-  W0602, # global-variable-not-assigned
-  W0603, # global-statement
-  W0612, # unused-variable
-  W0613, # unused-argument
-  W0621, # redefined-outer-name
-  W0622, # redefined-builtin
-  W0703, # broad-except (renamed in pylint 2.16 to broad-exception-caught)
-  W0706, # try-except-raise
-  W0707, # raise-missing-from
-  W0719, # broad-exception-raised
-  W1310, # format-string-without-interpolation
-  W1401, # anomalous-backslash-in-string
-  W1406, # redundant-u-string-prefix
-  W1505, # deprecated-method
-  W1514, # unspecified-encoding
-  W0237, # arguments-renamed
-  W4905, # deprecated-decorator
-  E1121  # too-many-function-args
-
-# TODO(rlima): enable these rules once the code formatting is updated
 # Disable the message, report, category or checker with the given id(s). You
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-; disable=fixme,
-;         unnecessary-pass,
-;         arguments-differ,
-;         abstract-method,
-;         super-init-not-called,
-;         useless-super-delegation,
-;         global-statement,
-;         unused-variable,
-;         unused-argument,
-;         redefined-outer-name,
-;         redefined-builtin,
-;         broad-except,
-;         try-except-raise,
-;         raise-missing-from,
-;         anomalous-backslash-in-string,
-;         redundant-u-string-prefix,
-;         unspecified-encoding,
-;         missing-class-docstring,
-;         missing-function-docstring,
-;         missing-module-docstring,
-;         consider-using-f-string,
-;         invalid-name,
-;         import-outside-toplevel,
-;         too-many-lines,
-;         consider-iterating-dictionary,
-;         broad-exception-raised
+disable=fixme,
+        arguments-differ,
+        global-statement,
+        unused-variable,
+        unused-argument,
+        redefined-outer-name,
+        unspecified-encoding,
+        missing-class-docstring,
+        missing-function-docstring,
+        missing-module-docstring,
+        invalid-name,
+        import-outside-toplevel,
+        too-many-lines,
+        broad-exception-caught,
+        broad-exception-raised,
+        # Refactoring relacted checks
+        arguments-renamed,
+        consider-using-in,
+        consider-using-with,
+        consider-using-f-string,
+        cyclic-import,
+        duplicate-code,
+        global-variable-not-assigned,
+        inconsistent-return-statements,
+        no-else-break,
+        no-else-continue,
+        no-else-raise,
+        no-else-return,
+        protected-access,
+        raise-missing-from,
+        redefined-argument-from-local,
+        too-many-ancestors,
+        too-many-arguments,
+        too-many-boolean-expressions,
+        too-many-branches,
+        too-many-instance-attributes,
+        too-many-locals,
+        too-many-nested-blocks,
+        too-many-public-methods,
+        too-many-return-statements,
+        too-many-statements,
+        too-few-public-methods,
+        useless-else-on-loop,
+
 
 [REPORTS]
 # Set the output format. Available formats are text, parseable, colorized, msvs

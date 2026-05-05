@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import EnableHostTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 class EnablingState(state_machine.State):
     """Host - Enabling State."""
-
-    def __init__(self, name):
-        super(EnablingState, self).__init__(name)
 
     def enter(self, host):
         """Entering enabling state."""
@@ -34,8 +30,6 @@ class EnablingState(state_machine.State):
 
     def transition(self, host, event, event_data, to_state):
         """Transition from the enabling state."""
-
-        pass
 
     def handle_event(self, host, event, event_data=None):
         """Handle event while in the enabling state."""

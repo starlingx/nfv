@@ -3,9 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from nfv_vim.objects._object import ObjectData
-
 from nfv_common import debug
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.host_aggregate")
 
@@ -14,7 +13,7 @@ class HostAggregate(ObjectData):
     """Host Aggregate Object."""
 
     def __init__(self, nfvi_host_aggregate):
-        super(HostAggregate, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self._nfvi_host_aggregate = nfvi_host_aggregate
 
     @property
@@ -57,7 +56,7 @@ class HostAggregate(ObjectData):
     def as_dict(self):
         """Represent host aggregate object as dictionary."""
 
-        data = dict()
+        data = {}
         data["name"] = self.name
         data["host_names"] = self.host_names
         data["availability_zone"] = self.availability_zone

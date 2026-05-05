@@ -12,7 +12,7 @@ class OpenStackException(exceptions.PickleableException):
     def __init__(self, method, url, headers, body, message, reason):
         """Create an OpenStack exception."""
 
-        super(OpenStackException, self).__init__(message, reason)
+        super().__init__(message, reason)
         self._method = method
         self._url = url
         self._headers = headers
@@ -80,7 +80,7 @@ class OpenStackRestAPIException(exceptions.PickleableException):
     ):
         """Create an OpenStack Rest-API exception."""
 
-        super(OpenStackRestAPIException, self).__init__(message, reason)
+        super().__init__(message, reason)
         self._method = method
         self._url = url
         self._headers = headers
@@ -178,7 +178,7 @@ class NotFound(exceptions.PickleableException):
     def __init__(self, message):
         """Create an OpenStack exception."""
 
-        super(NotFound, self).__init__(message)
+        super().__init__(message)
         self._message = message
 
     def __str__(self):

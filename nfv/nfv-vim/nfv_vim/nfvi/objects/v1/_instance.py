@@ -5,13 +5,12 @@
 #
 from datetime import datetime
 
-from nfv_vim.nfvi.objects.v1._instance_type import INSTANCE_TYPE_EXTENSION
-from nfv_vim.nfvi.objects.v1._object import ObjectData
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Object
 from nfv_common.helpers import Singleton
+from nfv_vim.nfvi.objects.v1._instance_type import INSTANCE_TYPE_EXTENSION
+from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class InstanceAdministrativeState(Constants, metaclass=Singleton):
@@ -192,7 +191,7 @@ class InstanceActionData(ObjectData):
         from_cli=False,
         context=None,
     ):
-        super(InstanceActionData, self).__init__("1.0.0")
+        super().__init__("1.0.0")
 
         self._action_uuid = action_uuid
         self._action_type = action_type
@@ -326,7 +325,7 @@ class InstanceActionData(ObjectData):
     def as_dict(self):
         """Represent instance action data object as dictionary."""
 
-        data = dict()
+        data = {}
         data["action_uuid"] = str(self.action_uuid)
         data["action_type"] = self.action_type
         if self.action_parameters is None:
@@ -341,7 +340,7 @@ class InstanceActionData(ObjectData):
         data["skip_guest_notify"] = self.skip_guest_notify
         data["from_cli"] = self.from_cli
         if self.context is None:
-            data["context"] = dict()
+            data["context"] = {}
         else:
             context = self.context.as_dict().copy()
 
@@ -387,28 +386,28 @@ class Instance(ObjectData):
         recovery_priority=None,
         live_migration_timeout=None,
     ):
-        super(Instance, self).__init__("1.0.0")
+        super().__init__("1.0.0")
 
         if attached_volumes is None:
-            attached_volumes = list()
+            attached_volumes = []
 
         self.update(
-            dict(
-                uuid=uuid,
-                name=name,
-                tenant_id=tenant_id,
-                admin_state=admin_state,
-                oper_state=oper_state,
-                avail_status=avail_status,
-                action=action,
-                host_name=host_name,
-                instance_type=instance_type,
-                image_uuid=image_uuid,
-                live_migration_support=live_migration_support,
-                attached_volumes=attached_volumes,
-                recovery_priority=recovery_priority,
-                live_migration_timeout=live_migration_timeout,
-            )
+            {
+                "uuid": uuid,
+                "name": name,
+                "tenant_id": tenant_id,
+                "admin_state": admin_state,
+                "oper_state": oper_state,
+                "avail_status": avail_status,
+                "action": action,
+                "host_name": host_name,
+                "instance_type": instance_type,
+                "image_uuid": image_uuid,
+                "live_migration_support": live_migration_support,
+                "attached_volumes": attached_volumes,
+                "recovery_priority": recovery_priority,
+                "live_migration_timeout": live_migration_timeout,
+            }
         )
 
         self.nfvi_data = nfvi_data
@@ -453,7 +452,7 @@ class Instance(ObjectData):
     def instance_type_guest_services(self):
         """Returns the guest services from the flavor extra specs."""
 
-        guest_services = dict()
+        guest_services = {}
         flavor_data_extra = self.get("instance_type").get("extra_specs", None)
         if flavor_data_extra is not None:
             heartbeat = flavor_data_extra.get(

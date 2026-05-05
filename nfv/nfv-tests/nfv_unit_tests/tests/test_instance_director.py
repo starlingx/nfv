@@ -6,15 +6,13 @@
 from unittest import mock
 import uuid
 
-from nfv_vim import nfvi
-from nfv_vim import objects
-
-from nfv_vim.directors._instance_director import InstanceDirector
-from nfv_vim.tables._image_table import ImageTable
-from nfv_vim.tables._table import Table
-
 from nfv_unit_tests.tests import testcase
 from nfv_unit_tests.tests import utils
+from nfv_vim.directors._instance_director import InstanceDirector
+from nfv_vim import nfvi
+from nfv_vim import objects
+from nfv_vim.tables._image_table import ImageTable
+from nfv_vim.tables._table import Table
 
 # Constants
 _audit_interval = 330
@@ -31,7 +29,7 @@ def fake_timer(a, b, c, d):
 
 class TestInstanceDirector(testcase.NFVTestCase):
     def setUp(self):
-        super(TestInstanceDirector, self).setUp()
+        super().setUp()
         self._image_table = ImageTable()
         self._instance_table = Table()
         self._instance_type_table = Table()
@@ -47,7 +45,7 @@ class TestInstanceDirector(testcase.NFVTestCase):
         self.instance_setup_func()
 
     def tearDown(self):
-        super(TestInstanceDirector, self).tearDown()
+        super().tearDown()
         self._image_table.clear()
         self._instance_table.clear()
         self._instance_type_table.clear()
@@ -75,7 +73,7 @@ class TestInstanceDirector(testcase.NFVTestCase):
                     tenant_uuid,
                     admin_state=nfvi.objects.v1.INSTANCE_ADMIN_STATE.UNLOCKED,
                     oper_state=nfvi.objects.v1.INSTANCE_OPER_STATE.ENABLED,
-                    avail_status=list(),
+                    avail_status=[],
                     action=nfvi.objects.v1.INSTANCE_ACTION.NONE,
                     host_name="compute-0",
                     instance_type=utils.instance_type_to_flavor_dict(instance_type),

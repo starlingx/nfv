@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
@@ -28,7 +27,7 @@ class APIRequestCreateNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_NETWORK_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateNetwork, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["name"] = self.name
@@ -68,9 +67,7 @@ class APIResponseCreateNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_NETWORK_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseCreateNetwork, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -112,7 +109,7 @@ class APIRequestUpdateNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_NETWORK_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestUpdateNetwork, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["name"] = self.name
@@ -146,9 +143,7 @@ class APIResponseUpdateNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.UPDATE_NETWORK_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseUpdateNetwork, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid
@@ -190,7 +185,7 @@ class APIRequestDeleteNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_NETWORK_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestDeleteNetwork, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["by_uuid"] = self.by_uuid
@@ -216,9 +211,7 @@ class APIResponseDeleteNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_NETWORK_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseDeleteNetwork, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def __str__(self):
         return "delete-network response"
@@ -237,7 +230,7 @@ class APIRequestGetNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_NETWORK_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestGetNetwork, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["get_all"] = self.get_all
@@ -252,11 +245,10 @@ class APIRequestGetNetwork(RPCMessage):
     def __str__(self):
         if self.get_all:
             return "get-network request: get-all"
-        else:
-            return "get-network request: by_uuid=%s, by_name=%s" % (
-                self.filter_by_uuid,
-                self.filter_by_name,
-            )
+        return "get-network request: by_uuid=%s, by_name=%s" % (
+            self.filter_by_uuid,
+            self.filter_by_name,
+        )
 
 
 class APIResponseGetNetwork(RPCMessage):
@@ -279,7 +271,7 @@ class APIResponseGetNetwork(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_NETWORK_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseGetNetwork, self).__init__(msg_version, msg_type, msg_result)
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["uuid"] = self.uuid

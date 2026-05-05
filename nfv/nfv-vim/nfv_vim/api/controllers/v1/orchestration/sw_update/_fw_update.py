@@ -44,8 +44,7 @@ class FwUpdateAPI(rest.RestController):
     def _lookup(self, key, *remainder):
         if "strategy" == key:
             return FwUpdateStrategyAPI(), remainder
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(FwUpdateDescription)
     def get(self):

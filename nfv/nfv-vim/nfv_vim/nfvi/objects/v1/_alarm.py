@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from nfv_vim.nfvi.objects.v1._object import ObjectData
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
+from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class AlarmSeverity(Constants, metaclass=Singleton):
@@ -37,15 +36,15 @@ class Alarm(ObjectData):
         timestamp,
         mgmt_affecting,
     ):
-        super(Alarm, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                alarm_uuid=alarm_uuid,
-                alarm_id=alarm_id,
-                entity_instance_id=entity_instance_id,
-                severity=severity,
-                reason_text=reason_text,
-                timestamp=timestamp,
-                mgmt_affecting=mgmt_affecting,
-            )
+            {
+                "alarm_uuid": alarm_uuid,
+                "alarm_id": alarm_id,
+                "entity_instance_id": entity_instance_id,
+                "severity": severity,
+                "reason_text": reason_text,
+                "timestamp": timestamp,
+                "mgmt_affecting": mgmt_affecting,
+            }
         )

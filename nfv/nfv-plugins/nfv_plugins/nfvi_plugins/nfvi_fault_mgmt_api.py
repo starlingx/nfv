@@ -42,14 +42,14 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
         return self._signature
 
     def __init__(self):
-        super(NFVIFaultMgmtAPI, self).__init__()
+        super().__init__()
         self._openstack_token = None
         self._openstack_directory = None
 
     def get_openstack_alarms(self, future, callback):
         """Get alarms."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -72,7 +72,7 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
             if not future.result.is_complete():
                 return
 
-            alarms = list()
+            alarms = []
 
             for alarm_data in future.result.data["alarms"]:
                 alarm = nfvi.objects.v1.Alarm(
@@ -110,7 +110,7 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
     def get_openstack_logs(self, future, start_period, end_period, callback):
         """Get logs."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -156,7 +156,7 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
     def get_openstack_alarm_history(self, future, start_period, end_period, callback):
         """Get alarm history."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -213,5 +213,3 @@ class NFVIFaultMgmtAPI(nfvi.api.v1.NFVIFaultMgmtAPI):
 
     def finalize(self):
         """Finalize the plugin."""
-
-        pass

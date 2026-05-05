@@ -6,14 +6,13 @@
 import functools
 
 from nfv_common import debug
-
 from nfv_common.timers._timer import Timer
 from nfv_common.timers._timer_scheduler import TimerScheduler
 
 DLOG = debug.debug_get_logger("nfv_common.timers.timer_module")
 
 _scheduler = None
-_interval_timers = dict()
+_interval_timers = {}
 
 
 def interval_timer(name, initial_delay_secs, interval_secs):

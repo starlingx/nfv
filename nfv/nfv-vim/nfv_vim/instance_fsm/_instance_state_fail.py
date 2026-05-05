@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import FailTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 class FailState(state_machine.State):
     """Instance - Fail State."""
-
-    def __init__(self, name):
-        super(FailState, self).__init__(name)
 
     def enter(self, instance):
         """Entering fail state."""
@@ -35,8 +31,6 @@ class FailState(state_machine.State):
 
     def transition(self, instance, event, event_data, to_state):
         """Transition from the fail state."""
-
-        pass
 
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the fail state."""

@@ -5,8 +5,8 @@
 #
 import copy
 import json
-from nfv_common import debug
 
+from nfv_common import debug
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
@@ -37,7 +37,7 @@ def _api_cmd(token, endpoint):
 
 
 def _api_cmd_headers():
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
     return api_cmd_headers
@@ -114,7 +114,7 @@ def get_datanetworks(token, host_uuid):
         raise ValueError("OpenStack SysInv URL is invalid")
 
     api_cmd = url + "/ihosts/" + host_uuid + "/interface_datanetworks"
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -266,7 +266,7 @@ def get_kube_versions(token):
 def kube_rootca_update_start(token, force=False, alarm_ignore_list=None):
     """Ask System Inventory to start a kube rootca update."""
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["force"] = force
     if alarm_ignore_list is not None:
         api_cmd_payload["alarm_ignore_list"] = copy.copy(alarm_ignore_list)
@@ -276,7 +276,7 @@ def kube_rootca_update_start(token, force=False, alarm_ignore_list=None):
 def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
     """Ask System Inventory to kube rootca update generate a cert."""
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     # even if these values are None, they need to be passed to sysinv API
     api_cmd_payload["expiry_date"] = expiry_date
     api_cmd_payload["subject"] = subject
@@ -286,8 +286,8 @@ def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
 def kube_rootca_update_abort(token):
     """Ask System Inventory to kube rootca update abort."""
 
-    api_cmd_payload = list()
-    state_data = dict()
+    api_cmd_payload = []
+    state_data = {}
     state_data["path"] = "/state"
     state_data["value"] = "update-aborted"
     state_data["op"] = "replace"
@@ -298,8 +298,8 @@ def kube_rootca_update_abort(token):
 def kube_rootca_update_complete(token):
     """Ask System Inventory to kube rootca update complete."""
 
-    api_cmd_payload = list()
-    state_data = dict()
+    api_cmd_payload = []
+    state_data = {}
     state_data["path"] = "/state"
     state_data["value"] = "update-completed"
     state_data["op"] = "replace"
@@ -314,7 +314,7 @@ def kube_rootca_update_host(token, host_uuid, phase):
     """
     api_cmd = "/ihosts/%s/kube_update_ca " % host_uuid
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["phase"] = phase
     return _api_post(token, api_cmd, api_cmd_payload)
 
@@ -324,7 +324,7 @@ def kube_rootca_update_pods(token, phase):
 
     Valid phase values are:  [trust-both-cas, trust-new-ca].
     """
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["phase"] = phase
     return _api_post(token, KUBE_ROOTCA_UPDATE_PODS_ENDPOINT, api_cmd_payload)
 
@@ -332,7 +332,7 @@ def kube_rootca_update_pods(token, phase):
 def kube_upgrade_start(token, to_version, force=False, alarm_ignore_list=None):
     """Ask System Inventory to start a kube upgrade."""
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["to_version"] = to_version
     api_cmd_payload["force"] = force
     if alarm_ignore_list is not None:
@@ -347,11 +347,11 @@ def _patch_kube_upgrade_state(token, new_value, hostname=None):
 
     api_cmd = url + "/kube_upgrade"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = list()
+    api_cmd_payload = []
     api_cmd_payload.append(_api_data_patch("state", new_value))
     # some kube upgrade patch commands take a hostname
     if hostname is not None:
@@ -382,7 +382,7 @@ def kube_upgrade_cleanup(token):
 
     api_cmd = url + "/kube_upgrade"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -456,11 +456,11 @@ def _kube_host_upgrade(token, host_uuid, target_operation, force):
 
     api_cmd = url + "/ihosts/%s/%s" % (host_uuid, target_operation)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["force"] = force
 
     response = rest_api_request(
@@ -510,11 +510,11 @@ def upgrade_start(token):
 
     api_cmd = url + "/upgrade"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["force"] = "false"
 
     response = rest_api_request(
@@ -537,16 +537,16 @@ def upgrade_activate(token):
 
     api_cmd = url + "/upgrade"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    host_data = dict()
+    host_data = {}
     host_data["path"] = "/state"
     host_data["value"] = "activation-requested"
     host_data["op"] = "replace"
 
-    api_cmd_payload = list()
+    api_cmd_payload = []
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(
@@ -575,7 +575,7 @@ def upgrade_complete(token):
 
     api_cmd = url + "/upgrade"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -613,16 +613,16 @@ def notify_host_services_enabled(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["path"] = "/action"
     api_cmd_payload["value"] = "services-enabled"
     api_cmd_payload["op"] = "replace"
 
-    api_cmd_list = list()
+    api_cmd_list = []
     api_cmd_list.append(api_cmd_payload)
 
     response = rest_api_request(
@@ -645,16 +645,16 @@ def notify_host_services_disabled(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["path"] = "/action"
     api_cmd_payload["value"] = "services-disabled"
     api_cmd_payload["op"] = "replace"
 
-    api_cmd_list = list()
+    api_cmd_list = []
     api_cmd_list.append(api_cmd_payload)
 
     response = rest_api_request(
@@ -677,16 +677,16 @@ def notify_host_services_disable_extend(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload_action = dict()
+    api_cmd_payload_action = {}
     api_cmd_payload_action["path"] = "/action"
     api_cmd_payload_action["value"] = "services-disable-extend"
     api_cmd_payload_action["op"] = "replace"
 
-    api_cmd_list = list()
+    api_cmd_list = []
     api_cmd_list.append(api_cmd_payload_action)
 
     response = rest_api_request(
@@ -709,21 +709,21 @@ def notify_host_services_disable_failed(token, host_uuid, reason):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload_action = dict()
+    api_cmd_payload_action = {}
     api_cmd_payload_action["path"] = "/action"
     api_cmd_payload_action["value"] = "services-disable-failed"
     api_cmd_payload_action["op"] = "replace"
 
-    api_cmd_payload_reason = dict()
+    api_cmd_payload_reason = {}
     api_cmd_payload_reason["path"] = "/vim_progress_status"
     api_cmd_payload_reason["value"] = str(reason)
     api_cmd_payload_reason["op"] = "replace"
 
-    api_cmd_list = list()
+    api_cmd_list = []
     api_cmd_list.append(api_cmd_payload_action)
     api_cmd_list.append(api_cmd_payload_reason)
 
@@ -747,7 +747,7 @@ def notify_host_services_deleted(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -770,21 +770,21 @@ def notify_host_services_delete_failed(token, host_uuid, reason):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload_action = dict()
+    api_cmd_payload_action = {}
     api_cmd_payload_action["path"] = "/action"
     api_cmd_payload_action["value"] = "services-delete-failed"
     api_cmd_payload_action["op"] = "replace"
 
-    api_cmd_payload_reason = dict()
+    api_cmd_payload_reason = {}
     api_cmd_payload_reason["path"] = "/vim_progress_status"
     api_cmd_payload_reason["value"] = str(reason)
     api_cmd_payload_reason["op"] = "replace"
 
-    api_cmd_list = list()
+    api_cmd_list = []
     api_cmd_list.append(api_cmd_payload_action)
     api_cmd_list.append(api_cmd_payload_reason)
 
@@ -808,16 +808,16 @@ def lock_host(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    host_data = dict()
+    host_data = {}
     host_data["path"] = "/action"
     host_data["value"] = "lock"
     host_data["op"] = "replace"
 
-    api_cmd_payload = list()
+    api_cmd_payload = []
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(
@@ -840,16 +840,16 @@ def unlock_host(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    host_data = dict()
+    host_data = {}
     host_data["path"] = "/action"
     host_data["value"] = "unlock"
     host_data["op"] = "replace"
 
-    api_cmd_payload = list()
+    api_cmd_payload = []
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(
@@ -872,16 +872,16 @@ def reboot_host(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    host_data = dict()
+    host_data = {}
     host_data["path"] = "/action"
     host_data["value"] = "reboot"
     host_data["op"] = "replace"
 
-    api_cmd_payload = list()
+    api_cmd_payload = []
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(
@@ -904,11 +904,11 @@ def upgrade_host(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s/upgrade" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["force"] = "false"
 
     response = rest_api_request(
@@ -931,16 +931,16 @@ def swact_from_host(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    host_data = dict()
+    host_data = {}
     host_data["path"] = "/action"
     host_data["value"] = "swact"
     host_data["op"] = "replace"
 
-    api_cmd_payload = list()
+    api_cmd_payload = []
     api_cmd_payload.append(host_data)
 
     response = rest_api_request(
@@ -963,7 +963,7 @@ def get_host_devices(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s/pci_devices" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -982,7 +982,7 @@ def get_host_device(token, device_uuid):
 
     api_cmd = url + "/pci_devices/%s" % device_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -1001,11 +1001,11 @@ def host_device_image_update(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s/device_image_update" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
 
     response = rest_api_request(
         token,
@@ -1027,11 +1027,11 @@ def host_device_image_update_abort(token, host_uuid):
 
     api_cmd = url + "/ihosts/%s/device_image_update_abort" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
 
     response = rest_api_request(
         token,

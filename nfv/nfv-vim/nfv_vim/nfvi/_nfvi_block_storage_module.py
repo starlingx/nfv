@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.nfvi._nfvi_block_storage_plugin import NFVIBlockStoragePlugin
 
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_block_storage_module")

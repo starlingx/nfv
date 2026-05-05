@@ -6,7 +6,6 @@
 from nfv_common import debug
 from nfv_common import state_machine
 from nfv_common import timers
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import LiveMigrateTask
@@ -16,9 +15,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 class LiveMigrateState(state_machine.State):
     """Instance - Live Migrate State."""
-
-    def __init__(self, name):
-        super(LiveMigrateState, self).__init__(name)
 
     def enter(self, instance):
         """Entering live migrate state."""
@@ -41,8 +37,6 @@ class LiveMigrateState(state_machine.State):
 
     def transition(self, instance, event, event_data, to_state):
         """Transition from the live migrate state."""
-
-        pass
 
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the live migrate state."""
@@ -81,8 +75,7 @@ class LiveMigrateState(state_machine.State):
                 guest_services = instance.guest_services
                 if guest_services.are_provisioned():
                     return INSTANCE_STATE.LIVE_MIGRATE_FINISH
-                else:
-                    return INSTANCE_STATE.INITIAL
+                return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.LIVE_MIGRATE_ROLLBACK == event:
             DLOG.info("Live-Migrate rollback for %s." % instance.name)
@@ -95,8 +88,7 @@ class LiveMigrateState(state_machine.State):
             )
             if guest_services.are_provisioned():
                 return INSTANCE_STATE.LIVE_MIGRATE_FINISH
-            else:
-                return INSTANCE_STATE.INITIAL
+            return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.TASK_COMPLETED == event:
             DLOG.debug("Live-Migrate inprogress for %s." % instance.name)
@@ -136,8 +128,7 @@ class LiveMigrateState(state_machine.State):
                 )
                 if guest_services.are_provisioned():
                     return INSTANCE_STATE.LIVE_MIGRATE_FINISH
-                else:
-                    return INSTANCE_STATE.INITIAL
+                return INSTANCE_STATE.INITIAL
 
         elif INSTANCE_EVENT.AUDIT == event:
             if instance.action_fsm.from_host_name != instance.host_name:
@@ -148,8 +139,7 @@ class LiveMigrateState(state_machine.State):
                 guest_services = instance.guest_services
                 if guest_services.are_provisioned():
                     return INSTANCE_STATE.LIVE_MIGRATE_FINISH
-                else:
-                    return INSTANCE_STATE.INITIAL
+                return INSTANCE_STATE.INITIAL
 
             elif not (instance.task.inprogress() or instance.is_migrating()):
                 if 0 == instance.action_fsm.wait_time:

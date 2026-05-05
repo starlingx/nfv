@@ -55,18 +55,17 @@ class OrchestrationAPI(rest.RestController):
     def _lookup(self, key, *remainder):
         if "sw-upgrade" == key:
             return SwUpgradeAPI(), remainder
-        elif "system-config-update" == key:
+        if "system-config-update" == key:
             return SystemConfigUpdateAPI(), remainder
-        elif "fw-update" == key:
+        if "fw-update" == key:
             return FwUpdateAPI(), remainder
-        elif "kube-rootca-update" == key:
+        if "kube-rootca-update" == key:
             return KubeRootcaUpdateAPI(), remainder
-        elif "kube-upgrade" == key:
+        if "kube-upgrade" == key:
             return KubeUpgradeAPI(), remainder
-        elif "current-strategy" == key:
+        if "current-strategy" == key:
             return StrategyAPI(), remainder
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(OrchestrationDescription)
     def get(self):

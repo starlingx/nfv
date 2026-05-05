@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
@@ -31,9 +30,7 @@ class APIRequestCreateSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["sw_update_type"] = self.sw_update_type
@@ -73,19 +70,17 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         msg_type=RPC_MSG_TYPE.CREATE_SW_UPGRADE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateSwUpgradeStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
-        super(APIRequestCreateSwUpgradeStrategy, self).serialize_payload(msg)
+        super().serialize_payload(msg)
         msg["release"] = self.release
         msg["rollback"] = self.rollback
         msg["delete"] = self.delete
         msg["snapshot"] = self.snapshot
 
     def deserialize_payload(self, msg):
-        super(APIRequestCreateSwUpgradeStrategy, self).deserialize_payload(msg)
+        super().deserialize_payload(msg)
         self.release = msg.get("release", None)
         self.rollback = msg.get("rollback", None)
         self.delete = msg.get("delete", None)
@@ -107,17 +102,15 @@ class APIRequestCreateKubeRootcaUpdateStrategy(APIRequestCreateSwUpdateStrategy)
         msg_type=RPC_MSG_TYPE.CREATE_KUBE_ROOTCA_UPDATE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateKubeRootcaUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
-        super(APIRequestCreateKubeRootcaUpdateStrategy, self).serialize_payload(msg)
+        super().serialize_payload(msg)
         msg["expiry_date"] = self.expiry_date
         msg["subject"] = self.subject
 
     def deserialize_payload(self, msg):
-        super(APIRequestCreateKubeRootcaUpdateStrategy, self).deserialize_payload(msg)
+        super().deserialize_payload(msg)
         self.expiry_date = msg.get("expiry_date", None)
         self.subject = msg.get("subject", None)
 
@@ -138,16 +131,14 @@ class APIRequestCreateKubeUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         msg_type=RPC_MSG_TYPE.CREATE_KUBE_UPGRADE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateKubeUpgradeStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
-        super(APIRequestCreateKubeUpgradeStrategy, self).serialize_payload(msg)
+        super().serialize_payload(msg)
         msg["to_version"] = self.to_version
 
     def deserialize_payload(self, msg):
-        super(APIRequestCreateKubeUpgradeStrategy, self).deserialize_payload(msg)
+        super().deserialize_payload(msg)
         self.to_version = msg.get("to_version", None)
 
     def __str__(self):
@@ -163,9 +154,7 @@ class APIRequestCreateSystemConfigUpdateStrategy(APIRequestCreateSwUpdateStrateg
         msg_type=RPC_MSG_TYPE.CREATE_SYSTEM_CONFIG_UPDATE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestCreateSystemConfigUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def __str__(self):
         return (
@@ -186,9 +175,7 @@ class APIResponseCreateSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.CREATE_SW_UPDATE_STRATEGY_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseCreateSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["strategy"] = self.strategy
@@ -214,9 +201,7 @@ class APIRequestApplySwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestApplySwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["sw_update_type"] = self.sw_update_type
@@ -244,9 +229,7 @@ class APIResponseApplySwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseApplySwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["strategy"] = self.strategy
@@ -270,9 +253,7 @@ class APIRequestAbortSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestAbortSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["sw_update_type"] = self.sw_update_type
@@ -301,9 +282,7 @@ class APIResponseAbortSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseAbortSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["strategy"] = self.strategy
@@ -329,9 +308,7 @@ class APIRequestDeleteSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_SW_UPDATE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestDeleteSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["sw_update_type"] = self.sw_update_type
@@ -360,9 +337,7 @@ class APIResponseDeleteSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.DELETE_SW_UPDATE_STRATEGY_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseDeleteSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["strategy"] = self.strategy
@@ -386,9 +361,7 @@ class APIRequestGetSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_SW_UPDATE_STRATEGY_REQUEST,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIRequestGetSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["sw_update_type"] = self.sw_update_type
@@ -413,9 +386,7 @@ class APIResponseGetSwUpdateStrategy(RPCMessage):
         msg_type=RPC_MSG_TYPE.GET_SW_UPDATE_STRATEGY_RESPONSE,
         msg_result=RPC_MSG_RESULT.SUCCESS,
     ):
-        super(APIResponseGetSwUpdateStrategy, self).__init__(
-            msg_version, msg_type, msg_result
-        )
+        super().__init__(msg_version, msg_type, msg_result)
 
     def serialize_payload(self, msg):
         msg["strategy"] = self.strategy

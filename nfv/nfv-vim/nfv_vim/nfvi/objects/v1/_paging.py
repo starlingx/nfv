@@ -6,7 +6,7 @@
 import uuid
 
 
-class Paging(object):
+class Paging:
     """Paging Object."""
 
     def __init__(self, page_limit):

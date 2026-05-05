@@ -9,13 +9,11 @@ import shutil
 import time
 
 from nfv_common import debug
-
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import fm
 from nfv_plugins.nfvi_plugins.openstack import nova
 from nfv_plugins.nfvi_plugins.openstack import openstack
 from nfv_plugins.nfvi_plugins.openstack import sysinv
-
 from tests import _hosts
 from tests import _instances
 from tests import _test_base
@@ -29,11 +27,11 @@ class TestHost(_test_base.Test):
     LOG_FILES = {"nfv-vim": "/var/log/nfv-vim.log"}
 
     def __init__(self, name, host_name, instance_names, timeout_secs):
-        super(TestHost, self).__init__(name, timeout_secs)
+        super().__init__(name, timeout_secs)
         self._host_name = host_name
         self._instance_names = instance_names
         self._host_data = None
-        self._instances = dict()
+        self._instances = {}
         self._platform_token = None
         self._openstack_token = None
         self._customer_alarms = None
@@ -213,9 +211,7 @@ class TestHostLock(TestHost):
     """Test - Host Lock."""
 
     def __init__(self, host_name, instance_names, timeout_secs):
-        super(TestHostLock, self).__init__(
-            "Host-Lock", host_name, instance_names, timeout_secs
-        )
+        super().__init__("Host-Lock", host_name, instance_names, timeout_secs)
 
     def _do_setup(self):
         """Setup the test."""
@@ -336,7 +332,7 @@ class TestHostUnlock(TestHost):
     """Test - Host Unlock."""
 
     def __init__(self, host_name, timeout_secs):
-        super(TestHostUnlock, self).__init__("Host-Unlock", host_name, [], timeout_secs)
+        super().__init__("Host-Unlock", host_name, [], timeout_secs)
 
     def _do_setup(self):
         """Setup the test."""

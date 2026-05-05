@@ -5,18 +5,17 @@
 #
 import sys
 
-from nfv_common.helpers import Singleton
-
 from nfv_common.debug._debug_config import DebugConfig
 from nfv_common.debug._debug_defs import DEBUG_LEVEL
 from nfv_common.debug._debug_thread import DebugLoggingThread
+from nfv_common.helpers import Singleton
 
 
-class Debug(object, metaclass=Singleton):
+class Debug(metaclass=Singleton):
     """Debug."""
 
     def __init__(self):
-        self._config_change_callbacks = list()
+        self._config_change_callbacks = []
         self._config = None
         self._debug_config = None
         self._debug_level = DEBUG_LEVEL.VERBOSE
@@ -25,7 +24,7 @@ class Debug(object, metaclass=Singleton):
         self._debug_output = sys.stdout
 
     def reinitialize(self):
-        self._config_change_callbacks = list()
+        self._config_change_callbacks = []
 
     def register_config_change_callback(self, callback):
         """Register a configuration change callback."""

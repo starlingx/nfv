@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _instance_group_table = None
@@ -12,9 +11,6 @@ _instance_group_table = None
 
 class InstanceGroupTable(Table):
     """Instance Group Table."""
-
-    def __init__(self):
-        super(InstanceGroupTable, self).__init__()
 
     @staticmethod
     def get_by_instance(instance_uuid):

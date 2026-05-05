@@ -42,7 +42,7 @@ def create_app():
     return app
 
 
-class Application(object):
+class Application:
     def __init__(self):
         self.application = create_app()
 

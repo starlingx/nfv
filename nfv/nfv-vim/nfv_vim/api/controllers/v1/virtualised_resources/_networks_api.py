@@ -3,12 +3,24 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import http.client as httplib
+
 import pecan
 from wsme import types as wsme_types
 import wsmeext.pecan as wsme_pecan
 
 from nfv_common import debug
-
+from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
+    NetworkResourceType,
+)
+from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
+    NetworkSubnetResourceType,
+)
+from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
+    NetworkSubnetType,
+)
+from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
+    NetworkType,
+)
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
     network_allocate,
 )
@@ -23,18 +35,6 @@ from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware impor
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
     network_update,
-)
-from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkResourceType,
-)
-from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkSubnetResourceType,
-)
-from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkSubnetType,
-)
-from nfv_vim.api.controllers.v1.virtualised_resources._networks_middleware import (
-    NetworkType,
 )
 from nfv_vim.api.controllers.v1.virtualised_resources._networks_model import (
     NetworkResourceClass,
@@ -118,11 +118,10 @@ class NetworksAPI(pecan.rest.RestController):
         http_status_code, network_resource_type = network_get(network_resource_id)
         if httplib.OK == http_status_code:
             output_data = NetworkQueryOutputData()
-            output_data.query_result = list()
+            output_data.query_result = []
             output_data.query_result.append(network_resource_type)
             return output_data
-        else:
-            return pecan.abort(http_status_code)
+        return pecan.abort(http_status_code)
 
     @wsme_pecan.wsexpose(NetworkQueryOutputData, status_code=httplib.OK)
     def get_all(self):
@@ -133,8 +132,7 @@ class NetworksAPI(pecan.rest.RestController):
             output_data = NetworkQueryOutputData()
             output_data.query_result = network_resource_types
             return output_data
-        else:
-            return pecan.abort(http_status_code)
+        return pecan.abort(http_status_code)
 
     @wsme_pecan.wsexpose(
         NetworkCreateOutputData,
@@ -154,13 +152,11 @@ class NetworksAPI(pecan.rest.RestController):
                 output_data = NetworkCreateOutputData()
                 output_data.network_data = network_resource_type
                 return output_data
-            else:
-                return pecan.abort(http_status_code)
-        else:
-            DLOG.error(
-                "Unexpected network resource type %s for network %s."
-                % (input_data.network_resource_type, input_data.network_resource_id)
-            )
+            return pecan.abort(http_status_code)
+        DLOG.error(
+            "Unexpected network resource type %s for network %s."
+            % (input_data.network_resource_type, input_data.network_resource_id)
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
     @wsme_pecan.wsexpose(
@@ -179,13 +175,11 @@ class NetworksAPI(pecan.rest.RestController):
                 output_data = NetworkUpdateOutputData()
                 output_data.network_data = network_resource_type
                 return output_data
-            else:
-                return pecan.abort(http_status_code)
-        else:
-            DLOG.error(
-                "Unexpected network resource for network %s."
-                % input_data.network_resource_id
-            )
+            return pecan.abort(http_status_code)
+        DLOG.error(
+            "Unexpected network resource for network %s."
+            % input_data.network_resource_id
+        )
         return pecan.abort(httplib.INTERNAL_SERVER_ERROR)
 
     @wsme_pecan.wsexpose(
@@ -205,7 +199,5 @@ class NetworksAPI(pecan.rest.RestController):
                 output_data = NetworkDeleteOutputData()
                 output_data.network_resource_ids = deleted_network_resource_ids
                 return output_data
-            else:
-                return pecan.abort(httplib.NOT_FOUND)
-        else:
-            return pecan.abort(http_status_code)
+            return pecan.abort(httplib.NOT_FOUND)
+        return pecan.abort(http_status_code)

@@ -13,7 +13,7 @@ class Table(collections.abc.MutableMapping):
         """Initialize Table."""
 
         self._persist = True
-        self._entries = dict()
+        self._entries = {}
 
     @property
     def persist(self):
@@ -32,14 +32,12 @@ class Table(collections.abc.MutableMapping):
 
         the value to a file or database, if needed.
         """
-        pass
 
     def _unpersist_value(self, key):
         """Unpersist a value, expected to be replaced by sub-classes to remove
 
         a persisted value from a file or database, if needed.
         """
-        pass
 
     def __getitem__(self, key):
         """Get an item from the table based on a key."""

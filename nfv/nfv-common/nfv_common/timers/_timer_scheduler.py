@@ -5,13 +5,12 @@
 #
 from nfv_common import debug
 from nfv_common import histogram
-
 from nfv_common.timers._timestamp import get_monotonic_timestamp_in_ms
 
 DLOG = debug.debug_get_logger("nfv_common.timers.timer_scheduler")
 
 
-class TimerScheduler(object):
+class TimerScheduler:
     """Timer Scheduler."""
 
     def __init__(

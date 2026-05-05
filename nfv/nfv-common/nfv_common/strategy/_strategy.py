@@ -6,7 +6,6 @@
 import json
 
 from nfv_common import debug
-
 from nfv_common.strategy._strategy_defs import STRATEGY_PHASE
 from nfv_common.strategy._strategy_defs import STRATEGY_STATE
 from nfv_common.strategy._strategy_phase import StrategyPhase
@@ -16,7 +15,7 @@ from nfv_common.strategy._strategy_result import strategy_result_update
 DLOG = debug.debug_get_logger("nfv_common.strategy")
 
 
-class Strategy(object):
+class Strategy:
     """Strategy."""
 
     def __init__(
@@ -55,7 +54,7 @@ class Strategy(object):
         apply_phase.strategy = self
         abort_phase.strategy = self
 
-        self._phase = dict()
+        self._phase = {}
         self._phase[STRATEGY_PHASE.BUILD] = build_phase
         self._phase[STRATEGY_PHASE.APPLY] = apply_phase
         self._phase[STRATEGY_PHASE.ABORT] = abort_phase
@@ -440,8 +439,6 @@ class Strategy(object):
     def save(self):
         """Strategy Save (can be overridden by child class)."""
 
-        pass
-
     def build(self):
         """Strategy Build (can be overridden by child class)."""
 
@@ -503,7 +500,7 @@ class Strategy(object):
     def as_dict(self):
         """Represent the strategy as a dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["state"] = self.state

@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import tasks
-
 from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_block_storage_finalize
 from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_block_storage_initialize
 from nfv_vim.nfvi._nfvi_compute_module import nfvi_compute_finalize
@@ -27,7 +26,7 @@ from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_initialize
 
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_module")
 
-_task_worker_pools = dict()
+_task_worker_pools = {}
 
 DISABLED_LIST = ["Yes", "yes", "Y", "y", "True", "true", "T", "t", "1"]
 

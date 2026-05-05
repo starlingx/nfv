@@ -851,7 +851,7 @@ def _event_template_get(event_id, event_context):
     if event_context in event_template["exclude_event_context"]:
         return None
 
-    template = dict()
+    template = {}
     template["entity_type"] = event_template["entity_type"]
     template["entity"] = event_template["entity"]
     template["event_type"] = event_template["event_type"]
@@ -904,7 +904,7 @@ def sw_update_issue_log(
 ):
     """Issue an event log for software update."""
 
-    data = dict()
+    data = {}
 
     if additional_text is None:
         data["additional_text"] = ""
@@ -916,7 +916,7 @@ def sw_update_issue_log(
     else:
         data["reason"] = ", reason = %s" % str(reason).rstrip(". \t\n\r")
 
-    event_list = list()
+    event_list = []
 
     # For now, override event context to be the admin only
     event_context = event_log.EVENT_CONTEXT.ADMIN

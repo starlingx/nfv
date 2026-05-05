@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _system_table = None
@@ -12,9 +11,6 @@ _system_table = None
 
 class SystemTable(Table):
     """System Table."""
-
-    def __init__(self):
-        super(SystemTable, self).__init__()
 
     def _persist_value(self, value):
         database.database_system_add(value)

@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _instance_type_table = None
@@ -12,9 +11,6 @@ _instance_type_table = None
 
 class InstanceTypeTable(Table):
     """Instance Type Table."""
-
-    def __init__(self):
-        super(InstanceTypeTable, self).__init__()
 
     def _persist_value(self, value):
         database.database_instance_type_add(value)

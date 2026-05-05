@@ -7,7 +7,6 @@
 from nfv_common import debug
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Singleton
-
 from nfv_vim import nfvi
 from nfv_vim import objects
 from nfv_vim import tables
@@ -17,7 +16,7 @@ DLOG = debug.debug_get_logger("nfv_vim.network_director")
 _network_director = None
 
 
-class NetworkDirector(object, metaclass=Singleton):
+class NetworkDirector(metaclass=Singleton):
     """Network Director."""
 
     @coroutine
@@ -268,7 +267,7 @@ class NetworkDirector(object, metaclass=Singleton):
             network_table = tables.tables_get_network_table()
             network = network_table.get(network_uuid, None)
             if network is not None:
-                subnet_uuids_to_delete = list()
+                subnet_uuids_to_delete = []
                 subnet_table = tables.tables_get_subnet_table()
                 for subnet in subnet_table.on_network(network_uuid):
                     subnet_uuids_to_delete.append(subnet.uuid)
@@ -301,5 +300,3 @@ def network_director_initialize():
 
 def network_director_finalize():
     """Finalize Image Director."""
-
-    pass

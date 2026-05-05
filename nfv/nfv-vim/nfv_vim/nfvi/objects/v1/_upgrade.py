@@ -23,7 +23,7 @@ class Upgrade(ObjectData):
     """NFVI Upgrade Object."""
 
     def __init__(self, release, release_info, deploy_info, hosts_info):
-        super(Upgrade, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.release = release
         self.release_info = release_info
         self.deploy_info = deploy_info

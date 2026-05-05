@@ -7,7 +7,7 @@ import configparser
 
 # Configuration Global used by other modules to get access to the configuration
 # specified in the ini file.
-CONF = dict()
+CONF = {}
 
 
 class Config(configparser.ConfigParser):

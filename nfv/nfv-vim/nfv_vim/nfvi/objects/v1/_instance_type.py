@@ -46,19 +46,19 @@ class InstanceTypeAttributes(ObjectData):
         live_migration_timeout,
         live_migration_max_downtime,
     ):
-        super(InstanceTypeAttributes, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                vcpus=vcpus,
-                mem_mb=mem_mb,
-                disk_gb=disk_gb,
-                ephemeral_gb=ephemeral_gb,
-                swap_gb=swap_gb,
-                guest_services=guest_services,
-                auto_recovery=auto_recovery,
-                live_migration_timeout=live_migration_timeout,
-                live_migration_max_downtime=live_migration_max_downtime,
-            )
+            {
+                "vcpus": vcpus,
+                "mem_mb": mem_mb,
+                "disk_gb": disk_gb,
+                "ephemeral_gb": ephemeral_gb,
+                "swap_gb": swap_gb,
+                "guest_services": guest_services,
+                "auto_recovery": auto_recovery,
+                "live_migration_timeout": live_migration_timeout,
+                "live_migration_max_downtime": live_migration_max_downtime,
+            }
         )
 
 
@@ -66,8 +66,8 @@ class InstanceType(ObjectData):
     """NFVI Instance Type Object."""
 
     def __init__(self, uuid, name):
-        super(InstanceType, self).__init__("1.0.0")
-        self.update(dict(uuid=uuid, name=name))
+        super().__init__("1.0.0")
+        self.update({"uuid": uuid, "name": name})
 
     def update_details(
         self,
@@ -82,17 +82,17 @@ class InstanceType(ObjectData):
         live_migration_max_downtime,
     ):
         self.update(
-            dict(
-                vcpus=vcpus,
-                mem_mb=mem_mb,
-                disk_gb=disk_gb,
-                ephemeral_gb=ephemeral_gb,
-                swap_gb=swap_gb,
-                guest_services=guest_services,
-                auto_recovery=auto_recovery,
-                live_migration_timeout=live_migration_timeout,
-                live_migration_max_downtime=live_migration_max_downtime,
-            )
+            {
+                "vcpus": vcpus,
+                "mem_mb": mem_mb,
+                "disk_gb": disk_gb,
+                "ephemeral_gb": ephemeral_gb,
+                "swap_gb": swap_gb,
+                "guest_services": guest_services,
+                "auto_recovery": auto_recovery,
+                "live_migration_timeout": live_migration_timeout,
+                "live_migration_max_downtime": live_migration_max_downtime,
+            }
         )
 
     def have_details(self):

@@ -6,11 +6,13 @@
 import sys
 import textwrap
 
+from urllib.parse import urlparse
+
 from nfv_client.auth_types import AUTH_TYPES
 from nfv_client.openstack import openstack
 from nfv_client.openstack import sw_update
 from platform_util.oidc import oidc_utils
-from urllib.parse import urlparse
+
 
 STRATEGY_NAME_SW_DEPLOY = "sw-deploy"
 STRATEGY_NAME_SW_UPGRADE = "sw-upgrade"
@@ -303,29 +305,28 @@ def _get_auth_token_and_url(
         url = f"{protocol}://{controller_ip}:{port}"
 
         return token_id, url
-    else:
-        # Keystone authentication path
-        token = openstack.get_token(
-            os_auth_uri,
-            os_project_name,
-            os_project_domain_name,
-            os_username,
-            os_password,
-            os_user_domain_name,
-        )
-        if token is None:
-            raise ValueError("Invalid keystone token")
+    # Keystone authentication path
+    token = openstack.get_token(
+        os_auth_uri,
+        os_project_name,
+        os_project_domain_name,
+        os_username,
+        os_password,
+        os_user_domain_name,
+    )
+    if token is None:
+        raise ValueError("Invalid keystone token")
 
-        url = token.get_service_url(
-            os_region_name,
-            openstack.SERVICE.VIM,
-            openstack.SERVICE_TYPE.NFV,
-            os_interface,
-        )
-        if url is None:
-            raise ValueError("NFV-VIM URL is invalid")
+    url = token.get_service_url(
+        os_region_name,
+        openstack.SERVICE.VIM,
+        openstack.SERVICE_TYPE.NFV,
+        os_interface,
+    )
+    if url is None:
+        raise ValueError("NFV-VIM URL is invalid")
 
-        return token.get_id(), url
+    return token.get_id(), url
 
 
 def create_strategy(
@@ -435,8 +436,7 @@ def delete_strategy(
     if success:
         print("Strategy deleted")
         return
-    else:
-        raise Exception("Nothing to delete")
+    raise Exception("Nothing to delete")
 
 
 def apply_strategy(
@@ -500,8 +500,7 @@ def apply_strategy(
     if not strategy:
         if stage_id is None:
             raise Exception("Strategy apply failed")
-        else:
-            raise Exception("Strategy stage %s apply failed" % stage_id)
+        raise Exception("Strategy stage %s apply failed" % stage_id)
 
     _display_strategy(strategy)
 

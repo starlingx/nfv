@@ -5,12 +5,10 @@
 #
 import json
 
+from nfv_vim.database._database import database_get
+from nfv_vim.database import model
 from nfv_vim import nfvi
 from nfv_vim import objects
-
-from nfv_vim.database import model
-
-from nfv_vim.database._database import database_get
 
 
 def database_service_host_add(service_host_obj):
@@ -47,7 +45,7 @@ def database_service_host_get_list():
     session = db.session()
     query = session.query(model.ServiceHost)
 
-    service_host_objs = list()
+    service_host_objs = []
     for service_host in query.all():
         service_host_obj = objects.ServiceHost(
             service_host.name, service_host.service, service_host.zone
@@ -120,7 +118,7 @@ def database_hypervisor_get_list():
     session = db.session()
     query = session.query(model.Hypervisor)
 
-    hypervisor_objs = list()
+    hypervisor_objs = []
     for hypervisor in query.all():
         nfvi_hypervisor_data = json.loads(hypervisor.nfvi_hypervisor_data)
         nfvi_hypervisor = nfvi.objects.v1.Hypervisor(
@@ -222,7 +220,7 @@ def database_instance_type_get_list():
     session = db.session()
     query = session.query(model.InstanceType_v5)
 
-    instance_type_objs = list()
+    instance_type_objs = []
     for instance_type in query.all():
         guest_services = json.loads(instance_type.guest_services)
         instance_type_obj = objects.InstanceType(instance_type.uuid, instance_type.name)
@@ -306,7 +304,7 @@ def database_instance_get_list():
     db = database_get()
     session = db.session()
     query = session.query(model.Instance_v5)
-    instance_objs = list()
+    instance_objs = []
     for instance in query.all():
         last_action_data_data = json.loads(instance.last_action_data)
         if last_action_data_data is None:
@@ -369,7 +367,7 @@ def database_instance_get_list():
         else:
             guest_services_data = json.loads(instance.guest_services)
 
-            nfvi_guest_services = list()
+            nfvi_guest_services = []
             for nfvi_guest_service_data in guest_services_data["nfvi_guest_services"]:
                 nfvi_guest_service = nfvi.objects.v1.GuestService(
                     nfvi_guest_service_data["name"],
@@ -387,7 +385,7 @@ def database_instance_get_list():
         nfvi_instance_data = json.loads(instance.nfvi_instance_data)
 
         # Done to accommodate a patch back to 15.12 GA load.
-        attached_volumes = nfvi_instance_data.get("attached_volumes", list())
+        attached_volumes = nfvi_instance_data.get("attached_volumes", [])
 
         nfvi_instance = nfvi.objects.v1.Instance(
             nfvi_instance_data["uuid"],
@@ -467,7 +465,7 @@ def database_instance_group_get_list():
     session = db.session()
     query = session.query(model.InstanceGroup)
 
-    instance_group_objs = list()
+    instance_group_objs = []
     for instance_group in query.all():
         nfvi_data = json.loads(instance_group.nfvi_instance_group_data)
         nfvi_instance_group = nfvi.objects.v1.InstanceGroup(
@@ -525,7 +523,7 @@ def database_host_aggregate_get_list():
     session = db.session()
     query = session.query(model.HostAggregate)
 
-    host_aggregate_objs = list()
+    host_aggregate_objs = []
     for host_aggregate in query.all():
         nfvi_data = json.loads(host_aggregate.nfvi_host_aggregate_data)
         nfvi_host_aggregate = nfvi.objects.v1.HostAggregate(

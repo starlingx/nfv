@@ -4,18 +4,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import argparse
-from netaddr import IPAddress
 import signal
 import socket
 import sys
 from wsgiref import simple_server
 
+from netaddr import IPAddress
+
 from nfv_common import config
 from nfv_common import debug
+from nfv_common.helpers import coroutine
 from nfv_common import selobj
 from nfv_common import timers
-
-from nfv_common.helpers import coroutine
 from nfv_vim.api import Application
 
 PROCESS_TICK_INTERVAL_IN_MS = 500
@@ -36,8 +36,7 @@ def get_address_family(ip_string):
     ip_address = IPAddress(ip_string)
     if ip_address.version == 6:
         return socket.AF_INET6
-    else:
-        return socket.AF_INET
+    return socket.AF_INET
 
 
 def process_signal_handler(signum, frame):
@@ -52,7 +51,7 @@ def process_signal_handler(signum, frame):
     elif signal.SIGHUP == signum:
         do_reload = True
     else:
-        print("Ignoring signal" % signum)
+        print("Ignoring signal")
 
 
 @coroutine
@@ -80,7 +79,7 @@ def get_handler_cls():
     cls = simple_server.WSGIRequestHandler
 
     # old-style class doesn't support super
-    class MyHandler(cls, object):
+    class MyHandler(cls):
         def address_string(self):
             # In the future, we could provide a config option to allow
             # reverse DNS lookups.

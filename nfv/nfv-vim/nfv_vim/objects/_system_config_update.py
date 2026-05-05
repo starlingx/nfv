@@ -4,14 +4,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
-
+from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import event_log
 from nfv_vim import nfvi
-
 from nfv_vim.objects._sw_update import SW_UPDATE_ALARM_TYPES
 from nfv_vim.objects._sw_update import SW_UPDATE_EVENT_IDS
 from nfv_vim.objects._sw_update import SW_UPDATE_TYPE
@@ -24,13 +21,13 @@ class SystemConfigUpdate(SwUpdate):
     """System config update Object."""
 
     def __init__(self, sw_update_uuid=None, strategy_data=None):
-        super(SystemConfigUpdate, self).__init__(
+        super().__init__(
             sw_update_type=SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE,
             sw_update_uuid=sw_update_uuid,
             strategy_data=strategy_data,
         )
 
-        self._system_config_update_hosts = list()
+        self._system_config_update_hosts = []
 
     def strategy_build(
         self,
@@ -72,7 +69,6 @@ class SystemConfigUpdate(SwUpdate):
         """Creation of a system config update strategy complete."""
 
         DLOG.info("System config update strategy build complete.")
-        pass
 
     @staticmethod
     def alarm_type(alarm_type):

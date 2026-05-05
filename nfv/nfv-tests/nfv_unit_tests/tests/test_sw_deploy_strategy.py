@@ -9,6 +9,7 @@ import uuid
 
 from nfv_common import strategy as common_strategy
 from nfv_plugins.nfvi_plugins.openstack.usm import is_target_release_downgrade
+from nfv_unit_tests.tests import sw_update_testcase
 from nfv_vim import nfvi
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
@@ -16,8 +17,6 @@ from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.objects import SwUpgrade
 from nfv_vim.strategy._strategy import SwUpgradeStrategy
-
-from nfv_unit_tests.tests import sw_update_testcase
 
 INITIAL_RELEASE = "3.2.1"
 PATCH_RELEASE_UPGRADE = "3.2.2"

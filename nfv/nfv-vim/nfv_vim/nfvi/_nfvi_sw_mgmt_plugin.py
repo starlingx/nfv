@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import tasks
-
 from nfv_vim.nfvi._nfvi_plugin import NFVIPlugin
 
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_sw_mgmt_plugin")
@@ -20,7 +19,7 @@ class NFVISwMgmtPlugin(NFVIPlugin):
 
     def __init__(self, namespace, pool):
         scheduler = tasks.TaskScheduler("sw-mgmt-plugin", pool)
-        super(NFVISwMgmtPlugin, self).__init__(
+        super().__init__(
             namespace,
             NFVISwMgmtPlugin._version,
             NFVISwMgmtPlugin._signature,

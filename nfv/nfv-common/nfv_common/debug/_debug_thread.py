@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+from logging.handlers import SysLogHandler
 import multiprocessing
 import sys
 import threading
-
-from logging.handlers import SysLogHandler
 
 from nfv_common.helpers import Singleton
 
@@ -21,15 +20,14 @@ class DebugLoggingThreadFormatter(logging.Formatter):
 
         if hasattr(record, "formatted_log"):
             return record.formatted_log
-        else:
-            super(DebugLoggingThreadFormatter, self).format(record)
+        super().format(record)
 
 
-class DebugLoggingThread(object, metaclass=Singleton):
+class DebugLoggingThread(metaclass=Singleton):
     """Debug Logging Thread."""
 
     def __init__(self):
-        self._handlers = list()
+        self._handlers = []
         self._log_queue = multiprocessing.Queue()
         self._thread = threading.Thread(target=self._receive_logs)
         self._thread.daemon = True
@@ -82,7 +80,7 @@ class DebugLoggingThread(object, metaclass=Singleton):
                             handler.strip() for handler in handler_names.split(",")
                         ]
 
-                        self._handlers[:] = list()
+                        self._handlers[:] = []
 
                         if "syslog" in handler_list:
                             address = work.get("syslog_address", "/dev/log")
@@ -102,6 +100,3 @@ class DebugLoggingThread(object, metaclass=Singleton):
 
             except EOFError:
                 return
-
-            except (KeyboardInterrupt, SystemExit):
-                raise

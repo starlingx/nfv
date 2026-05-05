@@ -5,11 +5,9 @@
 #
 
 from nfv_common import debug
-from nfv_common import thread
-
-from nfv_common.helpers import Singleton
-
 from nfv_common.event_log._event_log_handlers import EventLogHandlers
+from nfv_common.helpers import Singleton
+from nfv_common import thread
 
 DLOG = debug.debug_get_logger("nfv_common.event_log.event_log_thread")
 
@@ -18,7 +16,7 @@ class EventLogWorker(thread.ThreadWorker, metaclass=Singleton):
     """Event Log Worker."""
 
     def __init__(self, name, config):
-        super(EventLogWorker, self).__init__(name)
+        super().__init__(name)
         self._config = config
         self._handlers = None
 
@@ -50,11 +48,11 @@ class EventLogThread(thread.Thread, metaclass=Singleton):
 
     def __init__(self, config=None):
         self._worker = EventLogWorker("Event-Log", config)
-        super(EventLogThread, self).__init__("Event-Log", self._worker)
+        super().__init__("Event-Log", self._worker)
 
     def log(self, log_data):
         """Send log data to the Event Log Thread."""
 
-        work = dict()
+        work = {}
         work["log-data"] = log_data
         self.send_work(EventLogThread.ACTION_LOG_EVENT, work)

@@ -7,16 +7,13 @@
 from unittest import mock
 import uuid
 
+from nfv_unit_tests.tests import sw_update_testcase
 from nfv_vim import nfvi
-
-from nfv_vim.strategy._strategy import FwUpdateStrategy
-
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
-
-from nfv_unit_tests.tests import sw_update_testcase
+from nfv_vim.strategy._strategy import FwUpdateStrategy
 
 
 def create_fw_update_strategy(

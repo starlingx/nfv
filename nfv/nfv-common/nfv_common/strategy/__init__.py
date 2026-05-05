@@ -5,9 +5,7 @@
 #
 # flake8: noqa
 from nfv_common.strategy._strategy import Strategy
-from nfv_common.strategy._strategy_defs import (
-    STRATEGY_ALARM_RESTRICTION_TYPES,
-)
+from nfv_common.strategy._strategy_defs import STRATEGY_ALARM_RESTRICTION_TYPES
 from nfv_common.strategy._strategy_defs import STRATEGY_APPLY_TYPE
 from nfv_common.strategy._strategy_defs import STRATEGY_PHASE
 from nfv_common.strategy._strategy_defs import STRATEGY_STATE

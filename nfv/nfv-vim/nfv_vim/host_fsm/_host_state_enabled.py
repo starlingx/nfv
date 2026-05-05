@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import AuditEnabledHostTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 class EnabledState(state_machine.State):
     """Host - Enabled State."""
-
-    def __init__(self, name):
-        super(EnabledState, self).__init__(name)
 
     def enter(self, host):
         """Entering enabled state."""
@@ -33,8 +29,6 @@ class EnabledState(state_machine.State):
     def transition(self, host, event, event_data, to_state):
         """Transition from the enabled state."""
 
-        pass
-
     def handle_event(self, host, event, event_data=None):
         """Handle event while in the enabled state."""
 
@@ -43,14 +37,14 @@ class EnabledState(state_machine.State):
         if HOST_EVENT.DELETE == event:
             return HOST_STATE.DELETING
 
-        elif (
+        if (
             HOST_EVENT.LOCK == event
             or HOST_EVENT.DISABLE == event
             or HOST_EVENT.UNLOCK == event
         ):
             return HOST_STATE.DISABLING
 
-        elif HOST_EVENT.TASK_COMPLETED == event:
+        if HOST_EVENT.TASK_COMPLETED == event:
             # Do not disable this host if only the compute service is disabled.
             # We will raise an alarm, but there is no way to safely move work
             # off the host if the compute service is down.
@@ -63,11 +57,10 @@ class EnabledState(state_machine.State):
                         "Disabling host." % host.name
                     )
                     return HOST_STATE.DISABLING
-                else:
-                    DLOG.info(
-                        "Host services are not enabled on %s. "
-                        "Host services are locked." % host.name
-                    )
+                DLOG.info(
+                    "Host services are not enabled on %s. "
+                    "Host services are locked." % host.name
+                )
 
         elif HOST_EVENT.TASK_FAILED == event:
             DLOG.info("Audit failed for %s." % host.name)

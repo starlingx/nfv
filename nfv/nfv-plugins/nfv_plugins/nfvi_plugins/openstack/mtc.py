@@ -9,7 +9,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
@@ -37,7 +36,7 @@ def system_query(token):
 
     api_cmd = url + "/v1/systems"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
@@ -54,11 +53,11 @@ def host_query(token, host_uuid, host_name):
 
     api_cmd = url + "/v1/hosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = host_uuid
     api_cmd_payload["hostname"] = host_name
 
@@ -77,11 +76,11 @@ def notify_host_severity(token, host_uuid, host_name, host_severity):
 
     api_cmd = url + "/v1/hosts/%s" % host_uuid
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["User-Agent"] = "vim/1.0"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["uuid"] = host_uuid
     api_cmd_payload["hostname"] = host_name
     api_cmd_payload["severity"] = host_severity

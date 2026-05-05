@@ -18,11 +18,9 @@ import yaml
 
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
-
 from nfv_common import debug
 from nfv_common import forensic
 from nfv_plugins.nfvi_plugins import config
-
 import tests
 
 DLOG = debug.debug_get_logger("nfv_tests")
@@ -80,22 +78,22 @@ def process_do_setup(loads_dir, setup_data):
     token = openstack.get_token(directory)
 
     result = nova.get_flavors(token)
-    flavors = result.result_data.get("flavors", list())
+    flavors = result.result_data.get("flavors", [])
 
     result = glance.get_images(token)
-    images = result.result_data.get("images", list())
+    images = result.result_data.get("images", [])
 
     result = cinder.get_volumes(token)
-    volumes = result.result_data.get("volumes", list())
+    volumes = result.result_data.get("volumes", [])
 
     result = neutron.get_networks(token)
-    networks = result.result_data.get("networks", list())
+    networks = result.result_data.get("networks", [])
 
     result = neutron.get_subnets(token)
-    subnets = result.result_data.get("subnets", list())
+    subnets = result.result_data.get("subnets", [])
 
     result = nova.get_servers(token)
-    servers = result.result_data.get("servers", list())
+    servers = result.result_data.get("servers", [])
 
     for resource in setup_data["resources"]:
         if "flavor" == resource["type"]:
@@ -124,7 +122,7 @@ def process_do_setup(loads_dir, setup_data):
             process_progress_marker_end("[OKAY]")
 
     result = nova.get_flavors(token)
-    flavors = result.result_data.get("flavors", list())
+    flavors = result.result_data.get("flavors", [])
 
     for resource in setup_data["resources"]:
         if "image" == resource["type"]:
@@ -156,7 +154,7 @@ def process_do_setup(loads_dir, setup_data):
             process_progress_marker_end("[OKAY]")
 
     result = glance.get_images(token)
-    images = result.result_data.get("images", list())
+    images = result.result_data.get("images", [])
 
     for resource in setup_data["resources"]:
         if "volume" == resource["type"]:
@@ -196,7 +194,7 @@ def process_do_setup(loads_dir, setup_data):
                     time.sleep(5)
                     volumes = cinder.get_volumes(token).result_data
                     if volumes is not None:
-                        volumes = volumes.get("volumes", list())
+                        volumes = volumes.get("volumes", [])
                         volume = next(
                             (x for x in volumes if x["name"] == resource["name"]), None
                         )
@@ -210,7 +208,7 @@ def process_do_setup(loads_dir, setup_data):
             process_progress_marker_end("[OKAY]")
 
     result = cinder.get_volumes(token)
-    volumes = result.result_data.get("volumes", list())
+    volumes = result.result_data.get("volumes", [])
 
     for resource in setup_data["resources"]:
         if "network" == resource["type"]:
@@ -228,7 +226,7 @@ def process_do_setup(loads_dir, setup_data):
             process_progress_marker_end("[OKAY]")
 
     result = neutron.get_networks(token)
-    networks = result.result_data.get("networks", list())
+    networks = result.result_data.get("networks", [])
 
     for resource in setup_data["resources"]:
         if "subnet" == resource["type"]:
@@ -258,7 +256,7 @@ def process_do_setup(loads_dir, setup_data):
             process_progress_marker_end("[OKAY]")
 
     result = neutron.get_subnets(token)
-    subnets = result.result_data.get("subnets", list())
+    subnets = result.result_data.get("subnets", [])
 
     instance_created = False
     for resource in setup_data["resources"]:
@@ -293,7 +291,7 @@ def process_do_setup(loads_dir, setup_data):
                 else:
                     image_id = None
 
-                block_devices = list()
+                block_devices = []
                 for block_device in resource["block_devices"]:
                     if "volume" == block_device["type"]:
                         volume = next(
@@ -325,7 +323,7 @@ def process_do_setup(loads_dir, setup_data):
                 if 0 == len(block_devices):
                     block_devices = None
 
-                network_ids = list()
+                network_ids = []
                 for network_name in resource["networks"]:
                     network = next(
                         (x for x in networks if x["name"] == network_name), None
@@ -355,7 +353,7 @@ def process_do_setup(loads_dir, setup_data):
                 for _ in range(10):
                     time.sleep(5)
                     result = nova.get_servers(token)
-                    servers = result.result_data.get("servers", list())
+                    servers = result.result_data.get("servers", [])
                     if servers:
                         server = next(
                             (x for x in servers if x["name"] == resource["name"]), None
@@ -411,7 +409,7 @@ def process_do_tests(test_data):
         shutil.rmtree(test_output_dir)
     os.makedirs(test_output_dir)
 
-    test_set = list()
+    test_set = []
 
     for test in test_data["tests"]:
         if "pause_instance" == test["type"]:
@@ -571,22 +569,22 @@ def process_do_teardown(setup_data):
     token = openstack.get_token(directory)
 
     result = nova.get_flavors(token)
-    flavors = result.result_data.get("flavors", list())
+    flavors = result.result_data.get("flavors", [])
 
     result = glance.get_images(token)
-    images = result.result_data.get("images", list())
+    images = result.result_data.get("images", [])
 
     result = cinder.get_volumes(token)
-    volumes = result.result_data.get("volumes", list())
+    volumes = result.result_data.get("volumes", [])
 
     result = neutron.get_networks(token)
-    networks = result.result_data.get("networks", list())
+    networks = result.result_data.get("networks", [])
 
     result = neutron.get_subnets(token)
-    subnets = result.result_data.get("subnets", list())
+    subnets = result.result_data.get("subnets", [])
 
     result = nova.get_servers(token)
-    servers = result.result_data.get("servers", list())
+    servers = result.result_data.get("servers", [])
 
     for resource in setup_data["resources"]:
         if "instance" == resource["type"]:
@@ -599,7 +597,7 @@ def process_do_teardown(setup_data):
                     time.sleep(5)
                     servers = nova.get_servers(token).result_data
                     if servers is not None:
-                        servers = servers.get("servers", list())
+                        servers = servers.get("servers", [])
                         server = next(
                             (x for x in servers if x["name"] == resource["name"]), None
                         )

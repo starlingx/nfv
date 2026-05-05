@@ -12,7 +12,7 @@ from oslo_log import log as logging
 LOG = logging.getLogger(__name__)
 
 
-class Histogram(object):
+class Histogram:
     """Histogram Object."""
 
     def __init__(self, name, num_buckets):
@@ -101,7 +101,7 @@ class Histogram(object):
         LOG.info("%s" % "-" * 120)
 
 
-_histograms = list()
+_histograms = []
 
 
 def _find_histogram(name):

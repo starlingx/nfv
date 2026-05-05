@@ -93,7 +93,7 @@ class Rules(dict):
     def __init__(self, rules=None, default_rule=None):
         """Initialize the Rules store."""
 
-        super(Rules, self).__init__(rules or {})
+        super().__init__(rules or {})
         self.default_rule = default_rule
 
     def __missing__(self, key):
@@ -189,7 +189,7 @@ def check(
     return result
 
 
-class BaseCheck(object, metaclass=abc.ABCMeta):
+class BaseCheck(metaclass=abc.ABCMeta):
     """Abstract base class for Check classes."""
 
     @abc.abstractmethod
@@ -199,16 +199,12 @@ class BaseCheck(object, metaclass=abc.ABCMeta):
         this node.
         """
 
-        pass
-
     @abc.abstractmethod
     def __call__(self, target, cred):
         """Perform the check.  Returns False to reject the access or a
 
         true value (not necessary True) to accept the access.
         """
-
-        pass
 
 
 class FalseCheck(BaseCheck):
@@ -239,6 +235,7 @@ class TrueCheck(BaseCheck):
         return True
 
 
+# pylint: disable-next=abstract-method
 class Check(BaseCheck):
     """A base class to allow for user-defined policy checks."""
 
@@ -390,9 +387,8 @@ def _parse_check(rule):
         return _checks[kind](kind, match)
     elif None in _checks:
         return _checks[None](kind, match)
-    else:
-        LOG.error("No handler for matches of kind %s" % kind)
-        return FalseCheck()
+    LOG.error("No handler for matches of kind %s" % kind)
+    return FalseCheck()
 
 
 def _parse_list_rule(rule):
@@ -509,7 +505,7 @@ class ParseStateMeta(type):
 
         cls_dict["reducers"] = reducers
 
-        return super(ParseStateMeta, mcs).__new__(mcs, name, bases, cls_dict)
+        return super().__new__(mcs, name, bases, cls_dict)
 
 
 def reducer(*tokens):
@@ -532,7 +528,7 @@ def reducer(*tokens):
     return decorator
 
 
-class ParseState(object, metaclass=ParseStateMeta):
+class ParseState(metaclass=ParseStateMeta):
     """Implement the core of parsing the policy language.  Uses a greedy
 
     reduction algorithm to reduce a sequence of tokens into a single

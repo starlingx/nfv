@@ -6,16 +6,12 @@
 import http.client as httplib
 
 from nfv_common import debug
-
-from nfv_vim import nfvi
-
 from nfv_plugins.nfvi_plugins import config
-
 from nfv_plugins.nfvi_plugins.openstack import cinder
 from nfv_plugins.nfvi_plugins.openstack import exceptions
-from nfv_plugins.nfvi_plugins.openstack import openstack
-
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
+from nfv_plugins.nfvi_plugins.openstack import openstack
+from nfv_vim import nfvi
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.block_storage_api")
 
@@ -23,7 +19,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.block_storage_api")
 def volume_get_avail_status(status):
     """Convert the nfvi volume status to a volume availability status."""
 
-    avail_status = list()
+    avail_status = []
 
     if cinder.VOLUME_STATUS.AVAILABLE == status:
         avail_status.append(nfvi.objects.v1.VOLUME_AVAIL_STATUS.AVAILABLE)
@@ -67,8 +63,7 @@ def volume_get_action(status):
     elif cinder.VOLUME_STATUS.DOWNLOADING == status:
         return nfvi.objects.v1.VOLUME_ACTION.DOWNLOADING
 
-    else:
-        return nfvi.objects.v1.VOLUME_ACTION.NONE
+    return nfvi.objects.v1.VOLUME_ACTION.NONE
 
 
 class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
@@ -80,7 +75,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     _signature = "22b3dbf6-e4ba-441b-8797-fb8a51210a43"
 
     def __init__(self):
-        super(NFVIBlockStorageAPI, self).__init__()
+        super().__init__()
         self._token = None
         self._directory = None
 
@@ -103,7 +98,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     def get_volumes(self, future, paging, callback):
         """Get a list of volumes."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
         response["page-request-id"] = paging.page_request_id
@@ -113,7 +108,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
 
             if self._directory.get_service_info(OPENSTACK_SERVICE.CINDER) is None:
                 DLOG.info("Cinder service get-volumes not available.")
-                response["result-data"] = list()
+                response["result-data"] = []
                 response["completed"] = True
                 paging.next_page = None
                 return
@@ -139,7 +134,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
 
             volume_data_list = future.result.data
 
-            volumes = list()
+            volumes = []
 
             for volume_data in volume_data_list["volumes"]:
                 name = volume_data.get("name", None)
@@ -187,7 +182,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     ):
         """Create a volume."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -291,7 +286,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     def delete_volume(self, future, volume_uuid, callback):
         """Delete a volume."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -338,7 +333,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     def update_volume(self, future, volume_uuid, volume_description, callback):
         """Update a volume."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -435,7 +430,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     def get_volume(self, future, volume_uuid, callback):
         """Get a volume."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -524,7 +519,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
     def get_volume_snapshots(self, future, callback):
         """Get a list of volume snapshots."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -533,7 +528,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
 
             if self._directory.get_service_info(OPENSTACK_SERVICE.CINDER) is None:
                 DLOG.info("Cinder service get-volume-snapshots not available.")
-                response["result-data"] = list()
+                response["result-data"] = []
                 response["completed"] = True
                 return
 
@@ -554,7 +549,7 @@ class NFVIBlockStorageAPI(nfvi.api.v1.NFVIBlockStorageAPI):
 
             volume_snapshot_data_list = future.result.data
 
-            volume_snapshots = list()
+            volume_snapshots = []
 
             for volume_snapshot_data in volume_snapshot_data_list["snapshots"]:
                 name = volume_snapshot_data.get("name", None)

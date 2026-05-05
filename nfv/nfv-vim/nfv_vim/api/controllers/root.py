@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import http.client as httplib
+
 import pecan
 from pecan import rest
 from wsme import types as wsme_types
@@ -38,8 +39,7 @@ class RootController(rest.RestController):
     def _lookup(self, key, *remainder):
         if "api" == key:
             return APIController(), remainder
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(Root)
     def get(self):

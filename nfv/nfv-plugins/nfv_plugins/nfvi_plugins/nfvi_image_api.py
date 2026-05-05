@@ -6,16 +6,13 @@
 import http.client as httplib
 
 from nfv_common import debug
-
-from nfv_vim import nfvi
-from nfv_vim.nfvi.objects import v1 as nfvi_objs
-
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import glance
-from nfv_plugins.nfvi_plugins.openstack import openstack
-
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
+from nfv_plugins.nfvi_plugins.openstack import openstack
+from nfv_vim import nfvi
+from nfv_vim.nfvi.objects import v1 as nfvi_objs
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.image_api")
 
@@ -23,7 +20,7 @@ DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.image_api")
 def image_get_avail_status(status):
     """Convert the nfvi image status to an image availability status."""
 
-    avail_status = list()
+    avail_status = []
 
     if glance.IMAGE_STATUS.DELETED == status:
         avail_status.append(nfvi_objs.IMAGE_AVAIL_STATUS.DELETED)
@@ -43,8 +40,7 @@ def image_get_action(status):
     elif glance.IMAGE_STATUS.SAVING == status:
         return nfvi_objs.IMAGE_ACTION.SAVING
 
-    else:
-        return nfvi_objs.IMAGE_ACTION.NONE
+    return nfvi_objs.IMAGE_ACTION.NONE
 
 
 class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
@@ -56,7 +52,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
     _signature = "22b3dbf6-e4ba-441b-8797-fb8a51210a43"
 
     def __init__(self):
-        super(NFVIImageAPI, self).__init__()
+        super().__init__()
         self._token = None
         self._directory = None
 
@@ -79,7 +75,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
     def get_images(self, future, paging, callback):
         """Get a list of images."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
         response["page-request-id"] = paging.page_request_id
@@ -89,7 +85,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
 
             if self._directory.get_service_info(OPENSTACK_SERVICE.GLANCE) is None:
                 DLOG.info("Glance service get-images not available.")
-                response["result-data"] = list()
+                response["result-data"] = []
                 response["completed"] = True
                 paging.next_page = None
                 return
@@ -115,7 +111,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
 
             image_data_list = future.result.data
 
-            image_objs = list()
+            image_objs = []
 
             for image_data in image_data_list["images"]:
                 description = image_data.get("description", "")
@@ -130,7 +126,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
                 else:
                     protected = "no"
 
-                properties = dict()
+                properties = {}
 
                 sw_wrs_auto_recovery = image_data.get(
                     nfvi_objs.IMAGE_PROPERTY.INSTANCE_AUTO_RECOVERY, None
@@ -217,7 +213,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
     ):
         """Create an image."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -294,7 +290,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
             else:
                 protected = "no"
 
-            properties = dict()
+            properties = {}
 
             sw_wrs_auto_recovery = image_data.get(
                 nfvi_objs.IMAGE_PROPERTY.INSTANCE_AUTO_RECOVERY, None
@@ -368,7 +364,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
     def delete_image(self, future, image_uuid, callback):
         """Delete an image."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -420,7 +416,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
     ):
         """Update an image."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -472,7 +468,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
             else:
                 protected = "no"
 
-            properties = dict()
+            properties = {}
 
             sw_wrs_auto_recovery = image_data.get(
                 nfvi_objs.IMAGE_PROPERTY.INSTANCE_AUTO_RECOVERY, None
@@ -546,7 +542,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
     def get_image(self, future, image_uuid, callback):
         """Get an image."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -574,7 +570,7 @@ class NFVIImageAPI(nfvi.api.v1.NFVIImageAPI):
             avail_status = image_get_avail_status(image_data["status"])
             action = image_get_action(image_data["status"])
 
-            properties = dict()
+            properties = {}
 
             sw_wrs_auto_recovery = image_data.get(
                 nfvi_objs.IMAGE_PROPERTY.INSTANCE_AUTO_RECOVERY, None

@@ -11,7 +11,7 @@ from nfv_common import tasks
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_plugin")
 
 
-class NFVIPlugin(object):
+class NFVIPlugin:
     """NFVI Plugin."""
 
     def __init__(self, namespace, version, signature, plugin_type, scheduler):
@@ -49,12 +49,10 @@ class NFVIPlugin(object):
 
         if self._signature == plugin.obj.signature:
             return True
-        else:
-            DLOG.info(
-                "Plugin %s version %s from provider %s has an invalid "
-                "signature."
-                % (plugin.obj.name, plugin.obj.version, plugin.obj.provider)
-            )
+        DLOG.info(
+            "Plugin %s version %s from provider %s has an invalid "
+            "signature." % (plugin.obj.name, plugin.obj.version, plugin.obj.provider)
+        )
         return False
 
     def _invoke_plugin_method(self, priority, command, *command_args, **command_kwargs):
@@ -90,8 +88,7 @@ class NFVIPlugin(object):
 
         if self._plugin is not None:
             return self._plugin.obj.ready_to_initialize(config_file)
-        else:
-            return False
+        return False
 
     def initialize(self, config_file):
         """Initialize plugin."""

@@ -6,44 +6,45 @@
 import random
 from unittest import mock
 
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
 from nfv_vim.network_rebalance._dhcp_rebalance import (
     _add_network_to_dhcp_agent_callback_body,
 )
-from nfv_vim.network_rebalance._dhcp_rebalance import _get_datanetworks_callback_body
 from nfv_vim.network_rebalance._dhcp_rebalance import (
     _get_dhcp_agent_networks_callback_body,
 )
-from nfv_vim.network_rebalance._dhcp_rebalance import _get_network_agents_callback_body
 from nfv_vim.network_rebalance._dhcp_rebalance import (
     _remove_network_from_dhcp_agent_callback_body,
 )
 from nfv_vim.network_rebalance._dhcp_rebalance import _DHCPRebalance
+from nfv_vim.network_rebalance._dhcp_rebalance import _get_datanetworks_callback_body
+from nfv_vim.network_rebalance._dhcp_rebalance import _get_network_agents_callback_body
 from nfv_vim.network_rebalance._dhcp_rebalance import _run_state_machine
 from nfv_vim.network_rebalance._dhcp_rebalance import add_rebalance_work_dhcp
 from nfv_vim.network_rebalance._dhcp_rebalance import DHCP_REBALANCE_STATE
 
-from nfv_unit_tests.tests import testcase
-from nfv_unit_tests.tests import utils
+# pylint: disable=consider-using-enumerate
 
 DEBUG_PRINTING = False
 MAX_AGENTS = 40
 MAX_NETWORKS = 200
 MAX_LOOPCOUNT = 2 * MAX_AGENTS * MAX_NETWORKS
 
-_fake_host_table = dict()
+_fake_host_table = {}
 
 
-class _fake_host(object):
+class _fake_host:
     def __init__(self, uuid):
         self.uuid = uuid
 
 
 def build_get_agents_response():
 
-    get_agents_response = dict()
+    get_agents_response = {}
     get_agents_response["completed"] = True
     get_agents_response["reason"] = ""
-    get_agents_response["result-data"] = list()
+    get_agents_response["result-data"] = []
 
     NUM_AGENTS = random.randint(2, MAX_AGENTS - 1)
     for x in range(0, NUM_AGENTS):
@@ -67,10 +68,10 @@ def build_get_agents_response():
 
 
 def build_get_dhcp_agent_networks_response(agent_id, use_strange_networks=False):
-    get_dhcp_agent_networks_response = dict()
+    get_dhcp_agent_networks_response = {}
     get_dhcp_agent_networks_response["completed"] = True
     get_dhcp_agent_networks_response["reason"] = ""
-    get_dhcp_agent_networks_response["result-data"] = list()
+    get_dhcp_agent_networks_response["result-data"] = []
 
     for x in range(0, random.randint(0, MAX_NETWORKS - 1)):
         net_idx = 0
@@ -91,10 +92,10 @@ def build_get_dhcp_agent_networks_response(agent_id, use_strange_networks=False)
 
 
 def build_get_datanetworks_response(host_id):
-    get_datanetworks_response = dict()
+    get_datanetworks_response = {}
     get_datanetworks_response["completed"] = True
     get_datanetworks_response["reason"] = ""
-    get_datanetworks_response["result-data"] = list()
+    get_datanetworks_response["result-data"] = []
     get_datanetworks_response["result-data"].append({"datanetwork_name": "physnet0"})
     get_datanetworks_response["result-data"].append({"datanetwork_name": "physnet1"})
 
@@ -140,7 +141,7 @@ def fake_nfvi_get_datanetworks(host_id, b):
 
 
 def fake_nfvi_remove_network_from_dhcp_agent(a, b, c):
-    response = dict()
+    response = {}
     response["completed"] = True
     response["reason"] = ""
     if DEBUG_PRINTING:
@@ -150,7 +151,7 @@ def fake_nfvi_remove_network_from_dhcp_agent(a, b, c):
 
 
 def fake_nfvi_add_network_to_dhcp_agent(a, b, c):
-    response = dict()
+    response = {}
     response["completed"] = True
     response["reason"] = ""
     if DEBUG_PRINTING:
@@ -183,18 +184,13 @@ def add_to_fake_host_table(host_name):
 )
 @mock.patch("nfv_vim.tables.tables_get_host_table", fake_tables_get_host_table)
 class TestNeutronDHCPRebalance(testcase.NFVTestCase):
-    def setUp(self):
-        super(TestNeutronDHCPRebalance, self).setUp()
-
-    def tearDown(self):
-        super(TestNeutronDHCPRebalance, self).tearDown()
 
     @mock.patch(
         "nfv_vim.nfvi.nfvi_get_dhcp_agent_networks", fake_nfvi_get_dhcp_agent_networks
     )
     def test_rebalance_down_host_randomized_w_api_calls(self):
         initial_network_count = 0
-        initial_network_config = list()
+        initial_network_config = []
         for x in range(1, 200):
             _DHCPRebalance.network_diff_threshold = random.randint(1, 4)
             add_rebalance_work_dhcp("compute-0", True)
@@ -261,7 +257,7 @@ class TestNeutronDHCPRebalance(testcase.NFVTestCase):
     )
     def test_rebalance_down_host_abort_w_api_calls(self):
         initial_network_count = 0
-        initial_network_config = list()
+        initial_network_config = []
 
         abort_state_list = [
             DHCP_REBALANCE_STATE.GET_DHCP_AGENTS,
@@ -365,7 +361,7 @@ class TestNeutronDHCPRebalance(testcase.NFVTestCase):
     )
     def test_rebalance_up_host_abort_randomized_w_api_calls(self):
         initial_network_count = 0
-        initial_network_config = list()
+        initial_network_config = []
 
         abort_state_list = [
             DHCP_REBALANCE_STATE.GET_DHCP_AGENTS,
@@ -470,7 +466,7 @@ class TestNeutronDHCPRebalance(testcase.NFVTestCase):
     )
     def test_rebalance_up_host_randomized_w_api_calls(self):
         initial_network_count = 0
-        initial_network_config = list()
+        initial_network_config = []
         for x in range(1, 200):
             _DHCPRebalance.network_diff_threshold = random.randint(1, 4)
             add_rebalance_work_dhcp("compute-0", False)
@@ -543,7 +539,7 @@ class TestNeutronDHCPRebalance(testcase.NFVTestCase):
     )
     def test_rebalance_up_strange_networks(self):
         initial_network_count = 0
-        initial_network_config = list()
+        initial_network_config = []
         for x in range(1, 200):
             _DHCPRebalance.network_diff_threshold = random.randint(1, 4)
             add_rebalance_work_dhcp("compute-0", False)

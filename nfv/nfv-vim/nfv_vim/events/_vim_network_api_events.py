@@ -10,13 +10,13 @@ from nfv_vim import tables
 
 DLOG = debug.debug_get_logger("nfv_vim.vim_network_api_events")
 
-_subnet_create_operations = dict()
-_subnet_update_operations = dict()
-_subnet_delete_operations = dict()
+_subnet_create_operations = {}
+_subnet_update_operations = {}
+_subnet_delete_operations = {}
 
-_network_create_operations = dict()
-_network_update_operations = dict()
-_network_delete_operations = dict()
+_network_create_operations = {}
+_network_update_operations = {}
+_network_delete_operations = {}
 
 
 def _create_subnet_callback(
@@ -307,7 +307,7 @@ def vim_network_api_get_subnets(connection, msg):
         if network is not None:
             subnets = subnet_table.on_network(network.uuid)
         else:
-            subnets = list()
+            subnets = []
 
     for subnet in subnets:
         response = rpc.APIResponseGetSubnet()
@@ -541,10 +541,6 @@ def vim_network_api_get_networks(connection, msg):
 def vim_network_api_initialize():
     """Initialize VIM Network API Handling."""
 
-    pass
-
 
 def vim_network_api_finalize():
     """Finalize VIM Network API Handling."""
-
-    pass

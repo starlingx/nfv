@@ -3,12 +3,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from nfv_vim.objects._object import ObjectData
-
 from nfv_common import debug
-
 from nfv_vim import event_log
 from nfv_vim import nfvi
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.hypervisor")
 
@@ -17,7 +15,7 @@ class Hypervisor(ObjectData):
     """Hypervisor Object."""
 
     def __init__(self, nfvi_hypervisor):
-        super(Hypervisor, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self._nfvi_hypervisor = nfvi_hypervisor
         if nfvi_hypervisor.have_stats():
             self.vcpus_used = nfvi_hypervisor.vcpus_used
@@ -145,7 +143,7 @@ class Hypervisor(ObjectData):
     def as_dict(self):
         """Represent hypervisor object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["admin_state"] = self.admin_state
         data["oper_state"] = self.oper_state

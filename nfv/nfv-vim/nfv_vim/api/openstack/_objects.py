@@ -4,8 +4,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import datetime
-import iso8601
 import re
+
+import iso8601
 
 from nfv_common import debug
 from nfv_common.helpers import Constant
@@ -59,7 +60,7 @@ class OpenStackServices(Constants, metaclass=Singleton):
 OPENSTACK_SERVICE = OpenStackServices()
 
 
-class Service(object):
+class Service:
     """Service."""
 
     def __init__(
@@ -102,7 +103,7 @@ class Service(object):
         return self._endpoint_override
 
 
-class Directory(object):
+class Directory:
     """Directory."""
 
     def __init__(
@@ -130,7 +131,7 @@ class Directory(object):
         self._auth_uri = auth_uri
         self._auth_user_domain_name = auth_user_domain_name
         self._auth_project_domain_name = auth_project_domain_name
-        self._entries = dict()
+        self._entries = {}
 
     @property
     def service_category(self):
@@ -223,7 +224,7 @@ class Directory(object):
         return self._entries.get(service, None)
 
 
-class Token(object):
+class Token:
     """Token."""
 
     def __init__(self, token_data, directory, token_id):

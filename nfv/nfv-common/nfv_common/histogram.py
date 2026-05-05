@@ -12,7 +12,7 @@ from nfv_common import debug
 DLOG = debug.debug_get_logger("nfv_common.histogram")
 
 
-class Histogram(object):
+class Histogram:
     """Histogram Object."""
 
     def __init__(self, name, num_buckets, units):
@@ -142,7 +142,7 @@ class Histogram(object):
             DLOG.info("%s" % "-" * 120)
 
 
-_histograms = dict()
+_histograms = {}
 
 
 def _find_histogram(name):

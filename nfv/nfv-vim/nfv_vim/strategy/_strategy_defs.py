@@ -8,7 +8,7 @@ from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
 
 
-class EventNames(object, metaclass=Singleton):
+class EventNames(metaclass=Singleton):
     """Strategy - Event Name Constants."""
 
     HOST_LOCK_FAILED = Constant("host-lock-failed")
@@ -43,7 +43,7 @@ class EventNames(object, metaclass=Singleton):
 STRATEGY_EVENT = EventNames()
 
 
-class FirmwareUpdateLabels(object, metaclass=Singleton):
+class FirmwareUpdateLabels(metaclass=Singleton):
     """Firmware Update Labels."""
 
     # Host image update pending key label : True / False

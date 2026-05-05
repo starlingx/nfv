@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _volume_snapshot_table = None
@@ -11,9 +10,6 @@ _volume_snapshot_table = None
 
 class VolumeSnapshotTable(Table):
     """Volume Snapshot Table."""
-
-    def __init__(self):
-        super(VolumeSnapshotTable, self).__init__()
 
     def _persist_value(self, value):
         database.database_volume_snapshot_add(value)

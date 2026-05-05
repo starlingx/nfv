@@ -8,7 +8,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_vim import alarm
 from nfv_vim.objects._object import ObjectData
 
@@ -34,9 +33,9 @@ class InstanceGroup(ObjectData):
     """Instance Group Object."""
 
     def __init__(self, nfvi_instance_group):
-        super(InstanceGroup, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self._nfvi_instance_group = nfvi_instance_group
-        self._alarms = list()
+        self._alarms = []
 
     @property
     def uuid(self):
@@ -75,7 +74,7 @@ class InstanceGroup(ObjectData):
 
         if self._alarms:
             alarm.clear_instance_group_alarm(self._alarms)
-            self._alarms[:] = list()
+            self._alarms[:] = []
 
     def manage_alarms(self):
         """Manage alarms."""
@@ -147,7 +146,7 @@ class InstanceGroup(ObjectData):
     def as_dict(self):
         """Represent instance group object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["members"] = self.member_uuids

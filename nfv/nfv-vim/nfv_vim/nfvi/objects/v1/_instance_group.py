@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from nfv_vim.nfvi.objects.v1._object import ObjectData
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
+from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class InstanceGroupPolicy(Constants, metaclass=Singleton):
@@ -30,7 +29,12 @@ class InstanceGroup(ObjectData):
     """NFVI Instance Group Object."""
 
     def __init__(self, uuid, name, member_uuids, policies):
-        super(InstanceGroup, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(uuid=uuid, name=name, member_uuids=member_uuids, policies=policies)
+            {
+                "uuid": uuid,
+                "name": name,
+                "member_uuids": member_uuids,
+                "policies": policies,
+            }
         )

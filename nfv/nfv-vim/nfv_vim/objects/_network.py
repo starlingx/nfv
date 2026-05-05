@@ -3,9 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from nfv_vim.objects._object import ObjectData
-
 from nfv_common import debug
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.network")
 
@@ -14,13 +13,13 @@ class NetworkProviderData(ObjectData):
     """Network Provider Data Object."""
 
     def __init__(self, physical_network, network_type, segmentation_id):
-        super(NetworkProviderData, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                physical_network=physical_network,
-                network_type=network_type,
-                segmentation_id=segmentation_id,
-            )
+            {
+                "physical_network": physical_network,
+                "network_type": network_type,
+                "segmentation_id": segmentation_id,
+            }
         )
 
 
@@ -38,24 +37,24 @@ class Network(ObjectData):
         mtu,
         provider_data=None,
     ):
-        super(Network, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                uuid=uuid,
-                name=name,
-                admin_state=admin_state,
-                oper_state=oper_state,
-                avail_status=avail_status,
-                is_shared=is_shared,
-                mtu=mtu,
-                provider_data=provider_data,
-            )
+            {
+                "uuid": uuid,
+                "name": name,
+                "admin_state": admin_state,
+                "oper_state": oper_state,
+                "avail_status": avail_status,
+                "is_shared": is_shared,
+                "mtu": mtu,
+                "provider_data": provider_data,
+            }
         )
 
     def as_dict(self):
         """Represent network object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["admin_state"] = self.admin_state

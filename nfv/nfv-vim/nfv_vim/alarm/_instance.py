@@ -6,7 +6,6 @@
 import uuid
 
 from nfv_common import alarm
-
 from nfv_vim import event_log
 
 # Alarm Template Definitions
@@ -342,7 +341,7 @@ def _alarm_template_get(alarm_type, alarm_context):
     if alarm_context in alarm_template["exclude_alarm_context"]:
         return None
 
-    template = dict()
+    template = {}
     template["entity_type"] = alarm_template["entity_type"]
     template["entity"] = alarm_template["entity"]
     template["event_type"] = alarm_template["event_type"]
@@ -409,7 +408,7 @@ def instance_raise_alarm(
 ):
     """Raise alarms against the instance."""
 
-    data = dict()
+    data = {}
     data["tenant_uuid"] = instance.tenant_uuid
     data["tenant_name"] = instance.tenant_name
     data["instance_uuid"] = instance.uuid
@@ -419,7 +418,7 @@ def instance_raise_alarm(
     data["additional_text"] = additional_text
     data["raised_timestamp"] = alarm_timestamp
 
-    alarm_list = list()
+    alarm_list = []
 
     # For now, override alarm context to be the admin only
     alarm_context = alarm.ALARM_CONTEXT.ADMIN
@@ -587,4 +586,4 @@ def instance_manage_alarms(instance):
             )
     else:
         instance_clear_alarm(instance.alarms)
-        instance.alarms = list()
+        instance.alarms = []

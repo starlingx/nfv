@@ -8,22 +8,11 @@ import pickle
 from nfv_plugins.nfvi_plugins.openstack.exceptions import NotFound
 from nfv_plugins.nfvi_plugins.openstack.exceptions import OpenStackException
 from nfv_plugins.nfvi_plugins.openstack.exceptions import OpenStackRestAPIException
-
 from nfv_unit_tests.tests import testcase
 
 
 class TestPickleableExceptions(testcase.NFVTestCase):
     """Unit tests that verify pickleable exceptions."""
-
-    def setUp(self):
-        """Setup for testing."""
-
-        super(TestPickleableExceptions, self).setUp()
-
-    def tearDown(self):
-        """Cleanup testing setup."""
-
-        super(TestPickleableExceptions, self).tearDown()
 
     def _do_pickling_test(self, ex):
         data = pickle.dumps(ex)

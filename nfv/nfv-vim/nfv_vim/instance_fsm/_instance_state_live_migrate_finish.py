@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import LiveMigrateFinishTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 class LiveMigrateFinishState(state_machine.State):
     """Instance - Live Migrate Finish State."""
-
-    def __init__(self, name):
-        super(LiveMigrateFinishState, self).__init__(name)
 
     def enter(self, instance):
         """Entering live-migrate finish state."""
@@ -35,8 +31,6 @@ class LiveMigrateFinishState(state_machine.State):
 
     def transition(self, instance, event, event_data, to_state):
         """Transition from the live-migrate finish state."""
-
-        pass
 
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the live-migrate finish state."""

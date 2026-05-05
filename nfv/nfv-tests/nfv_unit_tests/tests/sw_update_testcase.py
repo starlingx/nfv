@@ -4,16 +4,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-import fixtures
-
 import json
 import pprint
 import uuid
 
+import fixtures
+
+from nfv_unit_tests.tests import testcase
+from nfv_unit_tests.tests import utils
 from nfv_vim import host_fsm
 from nfv_vim import nfvi
 from nfv_vim import objects
-
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.strategy._strategy import strategy_rebuild_from_dict
 from nfv_vim.tables._host_aggregate_table import HostAggregateTable
@@ -22,9 +23,6 @@ from nfv_vim.tables._host_table import HostTable
 from nfv_vim.tables._instance_group_table import InstanceGroupTable
 from nfv_vim.tables._instance_table import InstanceTable
 from nfv_vim.tables._table import Table
-
-from nfv_unit_tests.tests import testcase
-from nfv_unit_tests.tests import utils
 
 # change the following 2 values to assist with
 # unit test comparison between json structures
@@ -185,7 +183,7 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
     def setUp(self):
         """Setup for testing."""
 
-        super(SwUpdateStrategyTestCase, self).setUp()
+        super().setUp()
         self._tenant_table = Table()
         self._instance_type_table = Table()
         self._instance_table = InstanceTable()
@@ -261,7 +259,7 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
     def tearDown(self):
         """Cleanup testing setup."""
 
-        super(SwUpdateStrategyTestCase, self).tearDown()
+        super().tearDown()
         self._tenant_table.clear()
         self._instance_type_table.clear()
         self._instance_table.clear()
@@ -295,7 +293,7 @@ class SwUpdateStrategyTestCase(testcase.NFVTestCase):
                     tenant_uuid,
                     admin_state=admin_state,
                     oper_state=nfvi.objects.v1.INSTANCE_OPER_STATE.ENABLED,
-                    avail_status=list(),
+                    avail_status=[],
                     action=nfvi.objects.v1.INSTANCE_ACTION.NONE,
                     host_name=host_name,
                     instance_type=utils.instance_type_to_flavor_dict(instance_type),

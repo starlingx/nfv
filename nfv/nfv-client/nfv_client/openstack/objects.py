@@ -4,11 +4,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import datetime
-import iso8601
 import re
 
+import iso8601
 
-class Token(object):
+
+class Token:
     """Token."""
 
     def __init__(self, token_data, token_id):

@@ -129,6 +129,7 @@ def get_directory(config, service_category):
             endpoint_override = service_info.get("endpoint_override", None)
             endpoint_disabled = service_info.get("endpoint_disabled", False)
 
+            # pylint: disable-next=simplifiable-if-statement
             if endpoint_disabled in [
                 "Yes",
                 "yes",

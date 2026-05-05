@@ -5,13 +5,12 @@
 #
 import socket
 
-from nfv_common import selobj
-
 from nfv_common.helpers import coroutine
+from nfv_common import selobj
 
 _send_socket = None
 _receive_socket = None
-_pending_function_calls = list()
+_pending_function_calls = []
 
 MESSAGE_ONE = b"1"
 
@@ -38,7 +37,7 @@ def _schedule_dispatch():
             for func, args, kwargs in _pending_function_calls:
                 func(*args, **kwargs)
 
-            _pending_function_calls[:] = list()
+            _pending_function_calls[:] = []
 
 
 def schedule_initialize():
@@ -51,7 +50,7 @@ def schedule_initialize():
     selobj.selobj_add_read_obj(_receive_socket.fileno(), _schedule_dispatch)
 
     del _pending_function_calls
-    _pending_function_calls = list()  # noqa: F841
+    _pending_function_calls = []  # noqa: F841
 
 
 def schedule_finalize():
@@ -67,4 +66,4 @@ def schedule_finalize():
         _receive_socket.close()
 
     del _pending_function_calls
-    _pending_function_calls = list()  # noqa: F841
+    _pending_function_calls = []  # noqa: F841

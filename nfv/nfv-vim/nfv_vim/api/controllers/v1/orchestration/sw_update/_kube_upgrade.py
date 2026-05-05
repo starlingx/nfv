@@ -44,8 +44,7 @@ class KubeUpgradeAPI(rest.RestController):
     def _lookup(self, key, *remainder):
         if "strategy" == key:
             return KubeUpgradeStrategyAPI(), remainder
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(KubeUpgradeDescription)
     def get(self):

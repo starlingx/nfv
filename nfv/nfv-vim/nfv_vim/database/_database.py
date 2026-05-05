@@ -17,7 +17,6 @@ from sqlalchemy.orm import sessionmaker
 from nfv_common.helpers import coroutine
 from nfv_common import histogram
 from nfv_common import timers
-
 from nfv_vim.database._database_migrate import migrate_tables
 from nfv_vim.database._database_upgrades import upgrade_table_row_data
 from nfv_vim.database.model import Base
@@ -28,7 +27,7 @@ _db_name = "vim_db_v%s" % _db_version
 _db_obj = None
 
 
-class Database(object):
+class Database:
     """Database."""
 
     def __init__(self, database_url):
@@ -39,14 +38,14 @@ class Database(object):
         self._commit_inline = False
 
     def dump_data(self, filename):
-        db_data = dict()
+        db_data = {}
         db_data["version"] = _db_version
-        db_data["tables"] = dict()
+        db_data["tables"] = {}
 
         metadata = MetaData()
         metadata.reflect(bind=self._engine)
         for table_name in list(metadata.tables.keys()):
-            db_data["tables"][table_name] = list()
+            db_data["tables"][table_name] = []
             table_class = lookup_class_by_table(table_name)
             if table_class is not None:
                 for row in self._session.query(table_class).all():

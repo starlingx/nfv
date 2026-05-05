@@ -6,12 +6,13 @@
 # Copyright (C) 2019 Intel Corporation
 #
 
+import sys
+from unittest import mock
+
 import kubernetes
 from kubernetes.client.rest import ApiException
 
 from nfv_unit_tests.tests import testcase
-import sys
-from unittest import mock
 
 sys.modules["fm_core"] = mock.Mock()
 from nfv_plugins.nfvi_plugins.clients import (  # noqa: H306,E402  pylint: disable=C0413
@@ -36,7 +37,7 @@ def exchange_json_to_V1Node(body):
 
     node.spec.taints = []
     for taint in body["spec"]["taints"]:
-        if type(taint) is kubernetes.client.models.v1_taint.V1Taint:
+        if isinstance(taint, kubernetes.client.models.v1_taint.V1Taint):
             node.spec.taints.append(taint)
             continue
 
@@ -58,7 +59,7 @@ class TestNFVPluginsK8SNodeTaint(testcase.NFVTestCase):
     test_value2 = "testValue2"
 
     def setUp(self):
-        super(TestNFVPluginsK8SNodeTaint, self).setUp()
+        super().setUp()
         self.test_node_repo = {}
         self.setup_node_repo(self.test_node_name)
 
@@ -77,8 +78,7 @@ class TestNFVPluginsK8SNodeTaint(testcase.NFVTestCase):
         def mock_read_node(obj, node_name):
             if node_name in self.test_node_repo:
                 return self.test_node_repo[node_name]
-            else:
-                raise ApiException
+            raise ApiException
 
         self.mocked_read_node = mock.patch(
             "kubernetes.client.CoreV1Api.read_node", mock_read_node
@@ -86,7 +86,7 @@ class TestNFVPluginsK8SNodeTaint(testcase.NFVTestCase):
         self.mocked_read_node.start()
 
     def tearDown(self):
-        super(TestNFVPluginsK8SNodeTaint, self).tearDown()
+        super().tearDown()
         self.mocked_patch_node.stop()
         self.mocked_read_node.stop()
         self.node_repo_clear()
@@ -295,7 +295,7 @@ class TestNFVPluginsK8SMarkAllPodsNotReady(testcase.NFVTestCase):
     )
 
     def setUp(self):
-        super(TestNFVPluginsK8SMarkAllPodsNotReady, self).setUp()
+        super().setUp()
 
         def mock_list_namespaced_pod(obj, namespace, field_selector=""):
             return self.list_namespaced_pod_result
@@ -313,7 +313,7 @@ class TestNFVPluginsK8SMarkAllPodsNotReady(testcase.NFVTestCase):
         self.mocked_patch_namespaced_pod_status.start()
 
     def tearDown(self):
-        super(TestNFVPluginsK8SMarkAllPodsNotReady, self).tearDown()
+        super().tearDown()
 
         self.mocked_list_namespaced_pod.stop()
         self.mocked_patch_namespaced_pod_status.stop()
@@ -421,7 +421,7 @@ class TestNFVPluginsK8SGetTerminatingPods(testcase.NFVTestCase):
     }
 
     def setUp(self):
-        super(TestNFVPluginsK8SGetTerminatingPods, self).setUp()
+        super().setUp()
 
         def mock_list_namespaced_pod(obj, namespace, field_selector=""):
             node_name = field_selector.split("spec.nodeName=", 1)[1]
@@ -433,7 +433,7 @@ class TestNFVPluginsK8SGetTerminatingPods(testcase.NFVTestCase):
         self.mocked_list_namespaced_pod.start()
 
     def tearDown(self):
-        super(TestNFVPluginsK8SGetTerminatingPods, self).tearDown()
+        super().tearDown()
 
         self.mocked_list_namespaced_pod.stop()
 
@@ -493,7 +493,7 @@ class TestNFVPluginsK8SGetNamespacedRunningPods(testcase.NFVTestCase):
     )
 
     def setUp(self):
-        super(TestNFVPluginsK8SGetNamespacedRunningPods, self).setUp()
+        super().setUp()
 
         def mock_list_namespaced_pod(obj, namespace, field_selector=""):
             return self.list_namespaced_pod_result
@@ -504,7 +504,7 @@ class TestNFVPluginsK8SGetNamespacedRunningPods(testcase.NFVTestCase):
         self.mocked_list_namespaced_pod.start()
 
     def tearDown(self):
-        super(TestNFVPluginsK8SGetNamespacedRunningPods, self).tearDown()
+        super().tearDown()
 
         self.mocked_list_namespaced_pod.stop()
 

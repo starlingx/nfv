@@ -5,11 +5,9 @@
 #
 from nfv_common import debug
 from nfv_common import forensic
-
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import nova
 from nfv_plugins.nfvi_plugins.openstack import openstack
-
 from tests import _alarms
 from tests import _event_logs
 

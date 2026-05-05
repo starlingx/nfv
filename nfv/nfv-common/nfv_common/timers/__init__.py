@@ -9,9 +9,7 @@ from nfv_common.timers._timer_module import timers_create_timer
 from nfv_common.timers._timer_module import timers_delete_timer
 from nfv_common.timers._timer_module import timers_finalize
 from nfv_common.timers._timer_module import timers_initialize
-from nfv_common.timers._timer_module import (
-    timers_register_interval_timers,
-)
+from nfv_common.timers._timer_module import timers_register_interval_timers
 from nfv_common.timers._timer_module import timers_reschedule_timer
 from nfv_common.timers._timer_module import timers_schedule
 from nfv_common.timers._timer_module import timers_scheduling_on_time

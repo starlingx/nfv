@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_vim import directors
 from nfv_vim import objects
 from nfv_vim import rpc
@@ -12,7 +11,7 @@ from nfv_vim import tables
 
 DLOG = debug.debug_get_logger("nfv_vim.vim_instance_api_events")
 
-_instance_create_operations = dict()
+_instance_create_operations = {}
 
 
 def _create_instance_callback(success, instance_name, instance_uuid):
@@ -72,8 +71,8 @@ def vim_instance_api_create_instance(connection, msg):
     _instance_create_operations[msg.name] = connection
     instance_director = directors.get_instance_director()
 
-    networks = list()
-    network = dict()
+    networks = []
+    network = {}
     network["uuid"] = msg.network_uuid
     networks.append(network)
 
@@ -362,10 +361,6 @@ def vim_instance_api_get_instances(connection, msg):
 def vim_instance_api_initialize():
     """Initialize VIM Instance API Handling."""
 
-    pass
-
 
 def vim_instance_api_finalize():
     """Finalize VIM Instance API Handling."""
-
-    pass

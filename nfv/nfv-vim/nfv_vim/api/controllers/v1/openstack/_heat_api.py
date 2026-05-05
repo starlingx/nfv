@@ -40,7 +40,7 @@ def expose_proxy_http():
     return proxy_http_wrap
 
 
-class HeatAPI(object):
+class HeatAPI:
     """OpenStack Heat API."""
 
     @expose_proxy_http()
@@ -74,8 +74,7 @@ class HeatAPI(object):
 
         if headers is not None:
             return webob.Response(body=response, headerlist=headers, status=status_code)
-        else:
-            pecan.abort(status_code=status_code, detail=response)
+        pecan.abort(status_code=status_code, detail=response)
 
     @pecan.expose()
     def _route(self, args, request=None):

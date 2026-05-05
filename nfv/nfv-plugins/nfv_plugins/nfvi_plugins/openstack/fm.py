@@ -4,13 +4,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from nfv_common import debug
+import json
 
+from nfv_common import debug
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
-
-import json
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.openstack.fm")
 
@@ -20,8 +19,7 @@ def assemble_api_cmd(url, cmd):
 
     if url.endswith("/"):
         return url + cmd
-    else:
-        return url + "/" + cmd
+    return url + "/" + cmd
 
 
 def get_alarms(token, fm_service=PLATFORM_SERVICE.FM):
@@ -114,7 +112,7 @@ def raise_alarm(token, alarm_data="", fm_service=OPENSTACK_SERVICE.FM):
 
     api_cmd = assemble_api_cmd(url, "alarms")
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     json_alarm_data = json.dumps(alarm_data)
@@ -134,10 +132,9 @@ def clear_alarm(token, fm_uuid="", fm_service=OPENSTACK_SERVICE.FM):
 
     api_cmd = assemble_api_cmd(url, "alarms")
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
     payload = '{"id": "%s"}' % fm_uuid
 
     rest_api_request(token, "DELETE", api_cmd, api_cmd_headers, payload)
-    return

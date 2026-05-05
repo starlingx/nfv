@@ -5,12 +5,10 @@
 #
 
 from nfv_common import debug
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Singleton
-
 from nfv_vim import nfvi
 from nfv_vim import objects
 from nfv_vim import tables
@@ -43,7 +41,7 @@ OPERATION_TYPE = OperationTypes()
 OPERATION_STATE = OperationStates()
 
 
-class VolumeDirector(object, metaclass=Singleton):
+class VolumeDirector(metaclass=Singleton):
     """Volume Director."""
 
     @coroutine
@@ -181,5 +179,3 @@ def volume_director_initialize():
 
 def volume_director_finalize():
     """Finalize Volume Director."""
-
-    pass

@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _host_aggregate_table = None
@@ -12,9 +11,6 @@ _host_aggregate_table = None
 
 class HostAggregateTable(Table):
     """Host Aggregate Table."""
-
-    def __init__(self):
-        super(HostAggregateTable, self).__init__()
 
     @staticmethod
     def get_by_host(host_name):

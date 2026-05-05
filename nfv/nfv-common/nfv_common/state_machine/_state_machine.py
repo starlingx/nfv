@@ -6,33 +6,32 @@
 import weakref
 
 from nfv_common import debug
-
 from nfv_common.state_machine._state_exception import StateException
 
 DLOG = debug.debug_get_logger("nfv_common.state_machine.state_machine")
 
 
-class StateMachine(object):
+class StateMachine:
     """State Machine Object."""
 
     def __init__(self, context, context_args, context_kwargs, initial_state, states):
         """Create State Machine."""
 
         if context_args is None:
-            context_args = tuple()
+            context_args = ()
 
         if context_kwargs is None:
-            context_kwargs = dict()
+            context_kwargs = {}
 
         self._context_reference = weakref.ref(context)
         self._context_args = context_args
         self._context_kwargs = context_kwargs
         self._states = states
         self._current_state = initial_state
-        self._state_change_callbacks = list()
+        self._state_change_callbacks = []
         self._transitioning = False
         self._event_backlog_state = None
-        self._event_backlog = list()
+        self._event_backlog = []
 
     @property
     def _context(self):

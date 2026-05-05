@@ -11,7 +11,6 @@ from nfv_common import config
 from nfv_common import debug
 from nfv_common import selobj
 from nfv_common import timers
-
 from nfv_vim import database
 from nfv_vim import tables
 from nfv_vim import webserver
@@ -40,7 +39,7 @@ def process_signal_handler(signum, frame):
     elif signal.SIGHUP == signum:
         do_reload = True
     else:
-        print("Ignoring signal" % signum)
+        print("Ignoring signal")
 
 
 def process_initialize():

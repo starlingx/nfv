@@ -4,16 +4,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-from nfv_common import selobj
-
 from nfv_common.helpers import coroutine
-
+from nfv_common import selobj
 from nfv_common.tcp._tcp_connection import TCPConnection
 
 DLOG = debug.debug_get_logger("nfv_common.tcp")
 
 
-class TCPServer(object):
+class TCPServer:
     """TCP Server."""
 
     def __init__(self, ip, port, msg_handler, max_connections=5, auth_key=None):
@@ -24,7 +22,7 @@ class TCPServer(object):
         self._socket = self._connection.sock
         self._socket.listen(max_connections)
         selobj.selobj_add_read_obj(self._connection.selobj, self.dispatch)
-        self._client_connections = dict()
+        self._client_connections = {}
         self._message_handler = msg_handler
 
     @coroutine

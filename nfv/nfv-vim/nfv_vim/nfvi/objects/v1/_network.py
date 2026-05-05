@@ -45,13 +45,13 @@ class NetworkProviderData(ObjectData):
     """NFVI Network Provider Data Object."""
 
     def __init__(self, physical_network, network_type, segmentation_id):
-        super(NetworkProviderData, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                physical_network=physical_network,
-                network_type=network_type,
-                segmentation_id=segmentation_id,
-            )
+            {
+                "physical_network": physical_network,
+                "network_type": network_type,
+                "segmentation_id": segmentation_id,
+            }
         )
 
 
@@ -69,16 +69,16 @@ class Network(ObjectData):
         mtu,
         provider_data=None,
     ):
-        super(Network, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                uuid=uuid,
-                name=name,
-                admin_state=admin_state,
-                oper_state=oper_state,
-                avail_status=avail_status,
-                is_shared=is_shared,
-                mtu=mtu,
-                provider_data=provider_data,
-            )
+            {
+                "uuid": uuid,
+                "name": name,
+                "admin_state": admin_state,
+                "oper_state": oper_state,
+                "avail_status": avail_status,
+                "is_shared": is_shared,
+                "mtu": mtu,
+                "provider_data": provider_data,
+            }
         )

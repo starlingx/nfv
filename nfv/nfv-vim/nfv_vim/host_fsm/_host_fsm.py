@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_state_configure import ConfigureState
 from nfv_vim.host_fsm._host_state_deleted import DeletedState
@@ -43,6 +42,4 @@ class HostStateMachine(state_machine.StateMachine):
     """Host State Machine."""
 
     def __init__(self, host, initial_state):
-        super(HostStateMachine, self).__init__(
-            host, None, None, HOST_STATES[initial_state], HOST_STATES
-        )
+        super().__init__(host, None, None, HOST_STATES[initial_state], HOST_STATES)

@@ -110,7 +110,7 @@ class ImageQueryData(wsme_types.Base):
     properties = str
 
     def __json__(self):
-        json_data = dict()
+        json_data = {}
         json_data["uuid"] = self.uuid
         json_data["name"] = self.name
         json_data["description"] = self.description
@@ -184,8 +184,7 @@ class ImageAPI(rest.RestController):
         http_response = self._get_image_details(image_uuid, image)
         if httplib.OK == http_response:
             return image
-        else:
-            return pecan.abort(http_response)
+        return pecan.abort(http_response)
 
     @wsme_pecan.wsexpose([ImageQueryData], status_code=httplib.OK)
     def get_all(self):
@@ -196,7 +195,7 @@ class ImageAPI(rest.RestController):
         rpc_request.get_all = True
         vim_connection.send(rpc_request.serialize())
 
-        images = list()
+        images = []
         while True:
             msg = vim_connection.receive()
             if msg is None:

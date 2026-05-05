@@ -3,9 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import datetime
-import fcntl
-
 NFVI_OPENSTACK_LOG = "/var/log/nfvi-openstack.log"
 
 
@@ -14,35 +11,6 @@ def _log_write_log(error, msg, *args, **kwargs):
 
     def timestamp_str(timestamp_data):
         return timestamp_data.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-
-    if False:
-        with open(NFVI_OPENSTACK_LOG, "a") as f:
-            fcntl.flock(f, fcntl.LOCK_EX)
-            if error:
-                f.write(
-                    str(
-                        "** "
-                        + timestamp_str(datetime.datetime.now())
-                        + " "
-                        + msg
-                        + "\n",
-                        *args,
-                        **kwargs,
-                    )
-                )
-            else:
-                f.write(
-                    str(
-                        "   "
-                        + timestamp_str(datetime.datetime.now())
-                        + " "
-                        + msg
-                        + "\n",
-                        *args,
-                        **kwargs,
-                    )
-                )
-            fcntl.flock(f, fcntl.LOCK_UN)
 
 
 def log_info(msg, *args, **kwargs):

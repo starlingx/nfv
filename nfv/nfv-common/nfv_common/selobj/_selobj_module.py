@@ -11,9 +11,9 @@ from nfv_common import debug
 
 DLOG = debug.debug_get_logger("nfv_common.selobj")
 
-_read_callbacks = dict()
-_write_callbacks = dict()
-_error_callbacks = dict()
+_read_callbacks = {}
+_write_callbacks = {}
+_error_callbacks = {}
 
 
 def selobj_add_read_obj(selobj, callback, *callback_args, **callback_kwargs):
@@ -154,10 +154,10 @@ def selobj_initialize():
     global _read_callbacks, _write_callbacks
 
     del _read_callbacks
-    _read_callbacks = dict()  # noqa: F841
+    _read_callbacks = {}  # noqa: F841
 
     del _write_callbacks
-    _write_callbacks = dict()  # noqa: F841
+    _write_callbacks = {}  # noqa: F841
 
 
 def selobj_finalize():
@@ -166,6 +166,6 @@ def selobj_finalize():
     global _read_callbacks, _write_callbacks
 
     del _read_callbacks
-    _read_callbacks = dict()  # noqa: F841
+    _read_callbacks = {}  # noqa: F841
     del _write_callbacks
-    _write_callbacks = dict()  # noqa: F841
+    _write_callbacks = {}  # noqa: F841

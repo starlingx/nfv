@@ -18,7 +18,7 @@ class EventLogHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Sing
     _signature = "e33d7cf6-f270-4256-893e-16266ee4dd2e"
 
     def __init__(self, namespace, handler_names):
-        super(EventLogHandlers, self).__init__(
+        super().__init__(
             namespace,
             EventLogHandlers.valid_handler,
             invoke_on_load=True,
@@ -45,12 +45,10 @@ class EventLogHandlers(stevedore.enabled.EnabledExtensionManager, metaclass=Sing
 
         if EventLogHandlers._signature == handler.obj.signature:
             return True
-        else:
-            DLOG.info(
-                "Handler %s version %s from provider %s has an invalid "
-                "signature."
-                % (handler.obj.name, handler.obj.version, handler.obj.provider)
-            )
+        DLOG.info(
+            "Handler %s version %s from provider %s has an invalid "
+            "signature." % (handler.obj.name, handler.obj.version, handler.obj.provider)
+        )
         return False
 
     def log(self, log_data):

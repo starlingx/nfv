@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _host_table = None
@@ -12,9 +11,6 @@ _host_table = None
 
 class HostTable(Table):
     """Host Table."""
-
-    def __init__(self):
-        super(HostTable, self).__init__()
 
     @staticmethod
     def get_by_uuid(host_uuid):

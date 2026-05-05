@@ -7,7 +7,6 @@ from nfv_common import config
 from nfv_common import debug
 from nfv_common import state_machine
 from nfv_common import timers
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import DeleteHostTask
@@ -17,9 +16,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 class DeletingState(state_machine.State):
     """Host - Deleting State."""
-
-    def __init__(self, name):
-        super(DeletingState, self).__init__(name)
 
     def enter(self, host):
         """Entering deleting state."""

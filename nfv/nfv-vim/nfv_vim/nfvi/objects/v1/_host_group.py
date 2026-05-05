@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from nfv_vim.nfvi.objects.v1._object import ObjectData
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
+from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class HostGroupPolicy(Constants, metaclass=Singleton):
@@ -27,5 +26,5 @@ class HostGroup(ObjectData):
     """NFVI Host Group Object."""
 
     def __init__(self, name, member_names, policies):
-        super(HostGroup, self).__init__("1.0.0")
-        self.update(dict(name=name, member_names=member_names, policies=policies))
+        super().__init__("1.0.0")
+        self.update({"name": name, "member_names": member_names, "policies": policies})

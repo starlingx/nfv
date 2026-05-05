@@ -7,16 +7,13 @@ import http.client as httplib
 import json
 
 from nfv_common import debug
-
-from nfv_vim import nfvi
-
 from nfv_plugins.nfvi_plugins import config
 from nfv_plugins.nfvi_plugins.openstack import exceptions
 from nfv_plugins.nfvi_plugins.openstack import guest
+from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack import openstack
 from nfv_plugins.nfvi_plugins.openstack import rest_api
-
-from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
+from nfv_vim import nfvi
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.guest_api")
 
@@ -26,8 +23,7 @@ def guest_service_get_name(name):
 
     if guest.GUEST_SERVICE_NAME.HEARTBEAT == name:
         return nfvi.objects.v1.GUEST_SERVICE_NAME.HEARTBEAT
-    else:
-        return nfvi.objects.v1.GUEST_SERVICE_NAME.UNKNOWN
+    return nfvi.objects.v1.GUEST_SERVICE_NAME.UNKNOWN
 
 
 def guest_service_get_admin_state(state):
@@ -37,8 +33,7 @@ def guest_service_get_admin_state(state):
     """
     if guest.GUEST_SERVICE_STATE.ENABLED == state:
         return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.UNLOCKED
-    else:
-        return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED
+    return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED
 
 
 def guest_service_get_service_state(state):
@@ -46,8 +41,7 @@ def guest_service_get_service_state(state):
 
     if nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.UNLOCKED == state:
         return guest.GUEST_SERVICE_STATE.ENABLED
-    else:
-        return guest.GUEST_SERVICE_STATE.DISABLED
+    return guest.GUEST_SERVICE_STATE.DISABLED
 
 
 def guest_service_get_oper_state(status):
@@ -57,8 +51,7 @@ def guest_service_get_oper_state(status):
     """
     if guest.GUEST_SERVICE_STATUS.ENABLED == status:
         return nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.ENABLED
-    else:
-        return nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.DISABLED
+    return nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.DISABLED
 
 
 def instance_get_event(action_type, pre_notification):
@@ -166,7 +159,7 @@ def get_services_with_guest_service_state(services):
     """
     services_data = []
     for service in services:
-        service_data = dict()
+        service_data = {}
         service_data["service"] = service["service"]
         service_data["state"] = guest_service_get_service_state(service["admin_state"])
         services_data.append(service_data)
@@ -198,16 +191,16 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
         return self._signature
 
     def __init__(self):
-        super(NFVIGuestAPI, self).__init__()
+        super().__init__()
         self._token = None
         self._directory = None
         self._openstack_directory = None
         self._rest_api_server = None
         self._host_services_query_callback = None
         self._guest_services_query_callback = None
-        self._guest_services_state_notify_callbacks = list()
-        self._guest_services_alarm_notify_callbacks = list()
-        self._guest_services_action_notify_callbacks = list()
+        self._guest_services_state_notify_callbacks = []
+        self._guest_services_alarm_notify_callbacks = []
+        self._guest_services_action_notify_callbacks = []
 
     def _host_supports_nova_compute(self, personality):
         return ("worker" in personality) and (
@@ -220,7 +213,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     ):
         """Guest Services Create."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -279,7 +272,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def guest_services_set(self, future, instance_uuid, host_name, services, callback):
         """Guest Services Set."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -314,12 +307,12 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
 
             set_data = future.result.data
 
-            result_data = dict()
+            result_data = {}
             result_data["instance_uuid"] = set_data["uuid"]
             result_data["host_name"] = set_data["hostname"]
 
-            service_objs = list()
-            for service in set_data.get("services", list()):
+            service_objs = []
+            for service in set_data.get("services", []):
                 service_name = guest_service_get_name(service["service"])
                 admin_state = guest_service_get_admin_state(service["state"])
                 oper_state = guest_service_get_oper_state(service["status"])
@@ -362,7 +355,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def guest_services_delete(self, future, instance_uuid, callback):
         """Guest Services Delete."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -420,7 +413,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     def guest_services_query(self, future, instance_uuid, callback):
         """Guest Services Query."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -452,12 +445,12 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
 
             query_data = future.result.data
 
-            result_data = dict()
+            result_data = {}
             result_data["instance_uuid"] = query_data["uuid"]
             result_data["host_name"] = query_data["hostname"]
 
-            service_objs = list()
-            for service in query_data.get("services", list()):
+            service_objs = []
+            for service in query_data.get("services", []):
                 service_name = guest_service_get_name(service["service"])
                 admin_state = guest_service_get_admin_state(service["state"])
                 oper_state = guest_service_get_oper_state(service["status"])
@@ -503,7 +496,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     ):
         """Guest Services Vote."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -573,7 +566,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     ):
         """Guest Services Notify."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -644,7 +637,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     ):
         """Create Host Services, notify Guest to create services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -737,7 +730,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     ):
         """Delete Host Services, notify Guest to delete services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -808,7 +801,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     ):
         """Enable Host Services, notify Guest to enable services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -878,7 +871,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
 
         host (as applicable).
         """
-        response = dict()
+        response = {}
         response["completed"] = False
         response["reason"] = ""
 
@@ -954,7 +947,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
     ):
         """Query Host Services, return state of Guest services for a host."""
 
-        response = dict()
+        response = {}
         response["completed"] = False
         response["result-data"] = "enabled"
         response["reason"] = ""
@@ -1046,7 +1039,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                 if not success:
                     http_response = httplib.BAD_REQUEST
                 else:
-                    http_payload = dict()
+                    http_payload = {}
                     http_payload["uuid"] = host_data["uuid"]
                     http_payload["hostname"] = host_data["hostname"]
                     http_payload["state"] = host_state
@@ -1134,9 +1127,9 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                 http_response = httplib.BAD_REQUEST
             else:
                 if "service" == event_type:
-                    services = event_data.get("services", list())
+                    services = event_data.get("services", [])
 
-                    service_objs = list()
+                    service_objs = []
                     for service in services:
                         restart_timeout = service.get("restart-timeout", None)
                         if restart_timeout is not None:
@@ -1155,7 +1148,7 @@ class NFVIGuestAPI(nfvi.api.v1.NFVIGuestAPI):
                         callback(instance_uuid, host_name, service_objs)
 
                 elif "alarm" == event_type:
-                    services = event_data.get("services", list())
+                    services = event_data.get("services", [])
                     for service_data in services:
                         if (
                             guest.GUEST_SERVICE_NAME.HEARTBEAT

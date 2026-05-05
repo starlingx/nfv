@@ -44,11 +44,11 @@ class NetworkType(wsme_types.Base):
     bandwidth = wsme_types.wsattr(int, mandatory=False, default=0)
     type_of_network = wsme_types.wsattr(NetworkClass, mandatory=False, default=None)
     type_of_segment = wsme_types.wsattr(str, mandatory=False, default=None)
-    network_qos = wsme_types.wsattr([NetworkQosType], mandatory=False, default=list())
+    network_qos = wsme_types.wsattr([NetworkQosType], mandatory=False, default=[])
     is_shared = wsme_types.wsattr(bool, mandatory=False, default=False)
     sharing_criteria = wsme_types.wsattr(str, mandatory=False, default=None)
     layer3_attributes = wsme_types.wsattr(
-        [NetworkSubnetType], mandatory=False, default=list()
+        [NetworkSubnetType], mandatory=False, default=[]
     )
     meta_data = wsme_types.wsattr(str, mandatory=False, default=None)
 

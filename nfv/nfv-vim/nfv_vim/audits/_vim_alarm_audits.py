@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import timers
-
 from nfv_vim import alarm
 from nfv_vim import tables
 
@@ -37,5 +36,3 @@ def vim_alarm_audits_initialize():
 
 def vim_alarm_audits_finalize():
     """Finalize alarm audits."""
-
-    pass

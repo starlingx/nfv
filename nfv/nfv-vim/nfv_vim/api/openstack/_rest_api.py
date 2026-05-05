@@ -50,7 +50,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
         # urllib.request.install_opener(opener)
 
         with urllib.request.urlopen(request_info) as request:
-            headers = list()  # list of tuples
+            headers = []  # list of tuples
             for key, value in request.info().items():
                 if key not in headers_per_hop:
                     cap_key = "-".join((ck.capitalize() for ck in key.split("-")))
@@ -62,7 +62,7 @@ def rest_api_request(token, method, url, headers=None, body=None):
 
     except urllib.error.HTTPError as e:
         if e.fp is not None:
-            headers = list()  # list of tuples
+            headers = []  # list of tuples
             for key, value in e.fp.info().items():
                 if key not in headers_per_hop:
                     cap_key = "-".join((ck.capitalize() for ck in key.split("-")))

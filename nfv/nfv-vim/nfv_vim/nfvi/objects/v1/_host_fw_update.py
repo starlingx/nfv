@@ -10,5 +10,5 @@ class HostFwUpdate(ObjectData):
     """NFVI Host Firmware Update Object."""
 
     def __init__(self, hostname, personality, uuid):
-        super(HostFwUpdate, self).__init__("1.0.0")
-        self.update(dict(hostname=hostname, personality=personality, uuid=uuid))
+        super().__init__("1.0.0")
+        self.update({"hostname": hostname, "personality": personality, "uuid": uuid})

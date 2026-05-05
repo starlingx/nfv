@@ -35,14 +35,14 @@ class Hypervisor(ObjectData):
     """NFVI Hypervisor Object."""
 
     def __init__(self, uuid, admin_state, oper_state, host_name):
-        super(Hypervisor, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                uuid=uuid,
-                admin_state=admin_state,
-                oper_state=oper_state,
-                host_name=host_name,
-            )
+            {
+                "uuid": uuid,
+                "admin_state": admin_state,
+                "oper_state": oper_state,
+                "host_name": host_name,
+            }
         )
 
     def update_stats(
@@ -57,16 +57,16 @@ class Hypervisor(ObjectData):
         running_vms,
     ):
         self.update(
-            dict(
-                vcpus_used=vcpus_used,
-                vcpus_max=vcpus_max,
-                mem_used_mb=mem_used_mb,
-                mem_free_mb=mem_free_mb,
-                mem_max_mb=mem_max_mb,
-                disk_used_gb=disk_used_gb,
-                disk_max_gb=disk_max_gb,
-                running_vms=running_vms,
-            )
+            {
+                "vcpus_used": vcpus_used,
+                "vcpus_max": vcpus_max,
+                "mem_used_mb": mem_used_mb,
+                "mem_free_mb": mem_free_mb,
+                "mem_max_mb": mem_max_mb,
+                "disk_used_gb": disk_used_gb,
+                "disk_max_gb": disk_max_gb,
+                "running_vms": running_vms,
+            }
         )
 
     def have_stats(self):

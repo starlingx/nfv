@@ -7,9 +7,7 @@
 from nfv_common.event_log._event_log_module import event_log
 from nfv_common.event_log._event_log_module import event_log_finalize
 from nfv_common.event_log._event_log_module import event_log_initialize
-from nfv_common.event_log._event_log_module import (
-    event_log_subsystem_sane,
-)
+from nfv_common.event_log._event_log_module import event_log_subsystem_sane
 from nfv_common.event_log.objects.v1 import EVENT_CONTEXT
 from nfv_common.event_log.objects.v1 import EVENT_ID
 from nfv_common.event_log.objects.v1 import EVENT_IMPORTANCE

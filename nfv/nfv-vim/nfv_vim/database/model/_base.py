@@ -8,10 +8,10 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class AsDictMixin(object):
+class AsDictMixin:
     @property
     def data(self):
-        data = dict()
+        data = {}
         for column in self.__table__.columns:
             data[column.name] = getattr(self, column.name)
         return data

@@ -9,7 +9,7 @@ from nfv_common import selectable
 DLOG = debug.debug_get_logger("nfv_common.thread.thread_worker")
 
 
-class ThreadWorker(object):
+class ThreadWorker:
     """Thread Worker."""
 
     def __init__(

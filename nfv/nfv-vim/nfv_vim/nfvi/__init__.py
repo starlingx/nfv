@@ -3,9 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import nfv_vim.nfvi.api  # noqa: F401
-import nfv_vim.nfvi.objects  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_block_storage_module import (  # noqa: F401
     nfvi_block_storage_plugin_disabled,
 )
@@ -17,7 +14,6 @@ from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_delete_volume  # noqa: 
 from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_get_volume  # noqa: F401
 from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_get_volumes  # noqa: F401
 from nfv_vim.nfvi._nfvi_block_storage_module import nfvi_update_volume  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_compute_module import (  # noqa: F401
     nfvi_cold_migrate_confirm_instance,
 )
@@ -83,9 +79,7 @@ from nfv_vim.nfvi._nfvi_compute_module import nfvi_start_instance  # noqa: F401
 from nfv_vim.nfvi._nfvi_compute_module import nfvi_stop_instance  # noqa: F401
 from nfv_vim.nfvi._nfvi_compute_module import nfvi_suspend_instance  # noqa: F401
 from nfv_vim.nfvi._nfvi_compute_module import nfvi_unpause_instance  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_defs import NFVI_ERROR_CODE  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_fault_mgmt_module import (  # noqa: F401
     nfvi_fault_mgmt_plugin_disabled,
 )
@@ -94,7 +88,6 @@ from nfv_vim.nfvi._nfvi_fault_mgmt_module import (  # noqa: F401
 )
 from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_get_openstack_alarms  # noqa: F401
 from nfv_vim.nfvi._nfvi_fault_mgmt_module import nfvi_get_openstack_logs  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_guest_module import (  # noqa: F401
     nfvi_create_guest_host_services,
 )
@@ -130,16 +123,13 @@ from nfv_vim.nfvi._nfvi_guest_module import nfvi_guest_services_query  # noqa: F
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_guest_services_set  # noqa: F401
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_guest_services_vote  # noqa: F401
 from nfv_vim.nfvi._nfvi_guest_module import nfvi_query_guest_host_services  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_identity_module import nfvi_get_tenants  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_image_module import nfvi_create_image  # noqa: F401
 from nfv_vim.nfvi._nfvi_image_module import nfvi_delete_image  # noqa: F401
 from nfv_vim.nfvi._nfvi_image_module import nfvi_get_image  # noqa: F401
 from nfv_vim.nfvi._nfvi_image_module import nfvi_get_images  # noqa: F401
 from nfv_vim.nfvi._nfvi_image_module import nfvi_image_plugin_disabled  # noqa: F401
 from nfv_vim.nfvi._nfvi_image_module import nfvi_update_image  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
     nfvi_delete_container_host_services,
 )
@@ -306,11 +296,9 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_upgrade_activate  # no
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_upgrade_complete  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_upgrade_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_upgrade_start  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_module import nfvi_finalize  # noqa: F401
 from nfv_vim.nfvi._nfvi_module import nfvi_initialize  # noqa: F401
 from nfv_vim.nfvi._nfvi_module import nfvi_reinitialize  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_network_module import (  # noqa: F401
     nfvi_add_network_to_dhcp_agent,
 )
@@ -349,9 +337,10 @@ from nfv_vim.nfvi._nfvi_network_module import nfvi_get_subnets  # noqa: F401
 from nfv_vim.nfvi._nfvi_network_module import nfvi_network_plugin_disabled  # noqa: F401
 from nfv_vim.nfvi._nfvi_network_module import nfvi_update_network  # noqa: F401
 from nfv_vim.nfvi._nfvi_network_module import nfvi_update_subnet  # noqa: F401
-
 from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_apply_updates  # noqa: F401
 from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_query_hosts  # noqa: F401
 from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_query_updates  # noqa: F401
 from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_update_host  # noqa: F401
 from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_update_hosts  # noqa: F401
+import nfv_vim.nfvi.api  # noqa: F401
+import nfv_vim.nfvi.objects  # noqa: F401

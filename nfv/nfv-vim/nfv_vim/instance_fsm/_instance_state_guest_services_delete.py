@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_EVENT
 from nfv_vim.instance_fsm._instance_defs import INSTANCE_STATE
 from nfv_vim.instance_fsm._instance_tasks import GuestServicesDeleteTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.instance")
 
 class GuestServicesDeleteState(state_machine.State):
     """Instance - GuestServicesDelete State."""
-
-    def __init__(self, name):
-        super(GuestServicesDeleteState, self).__init__(name)
 
     def enter(self, instance):
         """Entering GuestServicesDelete state."""
@@ -35,8 +31,6 @@ class GuestServicesDeleteState(state_machine.State):
 
     def transition(self, instance, event, event_data, to_state):
         """Transition from the GuestServicesDelete state."""
-
-        pass
 
     def handle_event(self, instance, event, event_data=None):
         """Handle event while in the GuestServicesDelete state."""
@@ -56,7 +50,6 @@ class GuestServicesDeleteState(state_machine.State):
             DLOG.info("GuestServicesDelete timed out for %s." % instance.name)
             return INSTANCE_STATE.INITIAL
 
-        else:
-            DLOG.verbose("Ignoring %s event for %s." % (event, instance.name))
+        DLOG.verbose("Ignoring %s event for %s." % (event, instance.name))
 
         return self.name

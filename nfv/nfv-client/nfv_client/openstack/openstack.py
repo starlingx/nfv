@@ -14,13 +14,13 @@ import urllib.request
 from nfv_client.openstack.objects import Token
 
 
-class OpenStackServices(object):
+class OpenStackServices:
     """OpenStack Services Constants."""
 
     VIM = "vim"
 
 
-class OpenStackServiceTypes(object):
+class OpenStackServiceTypes:
     """OpenStack Service Types Constants."""
 
     NFV = "nfv"

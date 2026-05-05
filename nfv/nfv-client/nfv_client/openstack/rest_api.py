@@ -67,8 +67,7 @@ def request(
         content_type = response.headers.get("content-type", "")
         if content_type.startswith("application/json"):
             return response.json()
-        else:
-            return response.text
+        return response.text
 
     except requests.HTTPError as e:
         status_code = e.response.status_code
@@ -88,5 +87,4 @@ def request(
             )
         elif status_code == requests.codes.forbidden:  # pylint: disable=no-member
             raise Exception("Authorization failed")
-        else:
-            raise Exception(f"HTTP error: {e}\n{UNKNOWN_FAILURE} ")
+        raise Exception(f"HTTP error: {e}\n{UNKNOWN_FAILURE} ")

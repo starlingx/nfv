@@ -369,7 +369,7 @@ class ComputesAPI(pecan.rest.RestController):
             query_result.compute_attributes = compute_attributes
             query_result.host_id = response.host_uuid
             query_result.vc_image_id = response.image_uuid
-            meta_data = dict()
+            meta_data = {}
             meta_data["sw:wrs:auto_recovery"] = response.auto_recovery
             meta_data["hw:wrs:live_migration_timeout"] = response.live_migration_timeout
             meta_data["hw:wrs:live_migration_max_downtime"] = (
@@ -395,8 +395,7 @@ class ComputesAPI(pecan.rest.RestController):
         http_response = self._get_compute_details(compute_id, compute)
         if httplib.OK == http_response:
             return compute
-        else:
-            return pecan.abort(http_response)
+        return pecan.abort(http_response)
 
     @wsme_pecan.wsexpose([ComputeQueryData], status_code=httplib.OK)
     def get_all(self):
@@ -407,7 +406,7 @@ class ComputesAPI(pecan.rest.RestController):
         rpc_request.get_all = True
         vim_connection.send(rpc_request.serialize())
 
-        computes = list()
+        computes = []
         while True:
             msg = vim_connection.receive()
             if msg is None:
@@ -446,7 +445,7 @@ class ComputesAPI(pecan.rest.RestController):
             query_result.compute_attributes = compute_attributes
             query_result.host_id = response.host_uuid
             query_result.vc_image_id = response.image_uuid
-            meta_data = dict()
+            meta_data = {}
             meta_data["sw:wrs:auto_recovery"] = response.auto_recovery
             meta_data["hw:wrs:live_migration_timeout"] = response.live_migration_timeout
             meta_data["hw:wrs:live_migration_max_downtime"] = (
@@ -474,7 +473,7 @@ class ComputesAPI(pecan.rest.RestController):
         memory_info = compute_data.virtual_memory
         storage_info = compute_data.virtual_storage
         if compute_create_data.meta_data is None:
-            meta_data = dict()
+            meta_data = {}
         else:
             meta_data = json.loads(compute_create_data.meta_data)
         vim_connection = pecan.request.vim.open_connection()
@@ -528,7 +527,7 @@ class ComputesAPI(pecan.rest.RestController):
             query_result.compute_attributes = compute_attributes
             query_result.host_id = response.host_uuid
             query_result.vc_image_id = response.image_uuid
-            meta_data = dict()
+            meta_data = {}
             meta_data["sw:wrs:auto_recovery"] = response.auto_recovery
             meta_data["hw:wrs:live_migration_timeout"] = response.live_migration_timeout
             meta_data["hw:wrs:live_migration_max_downtime"] = (

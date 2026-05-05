@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import AddHostTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 class ConfigureState(state_machine.State):
     """Host - Configure State."""
-
-    def __init__(self, name):
-        super(ConfigureState, self).__init__(name)
 
     def enter(self, host):
         """Entering configure state."""
@@ -34,8 +30,6 @@ class ConfigureState(state_machine.State):
 
     def transition(self, host, event, event_data, to_state):
         """Transition from the configure state."""
-
-        pass
 
     def handle_event(self, host, event, event_data=None):
         """Handle event while in the configure state."""
@@ -54,8 +48,7 @@ class ConfigureState(state_machine.State):
         elif HOST_EVENT.TASK_COMPLETED == event:
             if host.nfvi_host_is_enabled():
                 return HOST_STATE.ENABLING
-            else:
-                return HOST_STATE.DISABLING
+            return HOST_STATE.DISABLING
 
         elif HOST_EVENT.TASK_FAILED == event:
             DLOG.info("Configure failed for %s." % host.name)

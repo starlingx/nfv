@@ -6,7 +6,7 @@
 import abc
 
 
-class NFVINetworkAPI(object, metaclass=abc.ABCMeta):
+class NFVINetworkAPI(metaclass=abc.ABCMeta):
     """Abstract NFVI Network API Class Definition."""
 
     @property
@@ -14,34 +14,24 @@ class NFVINetworkAPI(object, metaclass=abc.ABCMeta):
     def name(self):
         """Returns the name of plugin."""
 
-        pass
-
     @property
     @abc.abstractmethod
     def version(self):
         """Returns the version of the plugin."""
-
-        pass
 
     @property
     @abc.abstractmethod
     def provider(self):
         """Returns the vendor who created the plugin."""
 
-        pass
-
     @property
     @abc.abstractmethod
     def signature(self):
         """Returns the signature of the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def get_networks(self, future, paging, callback):
         """Get a list of networks using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def create_network(
@@ -56,31 +46,21 @@ class NFVINetworkAPI(object, metaclass=abc.ABCMeta):
     ):
         """Create a network using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def update_network(self, future, network_uuid, shared, callback):
         """Update a network using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def delete_network(self, future, network_uuid, callback):
         """Delete a network using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def get_network(self, future, network_uuid, callback):
         """Get a network using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def get_subnets(self, future, paging, callback):
         """Get a list of subnets using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def create_subnet(
@@ -97,27 +77,19 @@ class NFVINetworkAPI(object, metaclass=abc.ABCMeta):
     ):
         """Create a subnet using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def update_subnet(
         self, future, subnet_uuid, gateway_ip, delete_gateway, dhcp_enabled, callback
     ):
         """Update a subnet using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def delete_subnet(self, future, subnet_uuid, callback):
         """Delete a subnet using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def get_subnet(self, future, subnet_uuid, callback):
         """Get a subnet using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def notify_host_disabled(
@@ -125,69 +97,47 @@ class NFVINetworkAPI(object, metaclass=abc.ABCMeta):
     ):
         """Notify network host disabled using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def enable_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):
         """Enable network services on a host using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def get_network_agents(self, future, callback):
         """Get network agent information using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def get_dhcp_agent_networks(self, future, agent_id, callback):
         """Get networks hosted by a dhcp agent using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def get_agent_routers(self, future, agent_id, callback):
         """Get network routers on a hosting agent using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def get_router_ports(self, future, router_id, callback):
         """Get router ports using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def add_network_to_dhcp_agent(self, future, agent_id, network_id, callback):
         """Add a network to a dhcp agent using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def remove_network_from_dhcp_agent(self, future, agent_id, network_id, callback):
         """Remove a network from a dhcp agent using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def add_router_to_agent(self, future, agent_id, router_id, callback):
         """Add a router to an agent using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def remove_router_from_agent(self, future, agent_id, router_id, callback):
         """Remove router from an agent using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def get_physical_network(self, future, network_id, callback):
         """Get physical network of a network using the plugin."""
-
-        pass
 
     @abc.abstractmethod
     def delete_host_services(
@@ -195,24 +145,16 @@ class NFVINetworkAPI(object, metaclass=abc.ABCMeta):
     ):
         """Delete network services on a host using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def query_host_services(
         self, future, host_uuid, host_name, host_personality, check_fully_up, callback
     ):
         """Query network services on a host using the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def initialize(self, config_file):
         """Initialize the plugin."""
 
-        pass
-
     @abc.abstractmethod
     def finalize(self):
         """Finalize the plugin."""
-
-        pass

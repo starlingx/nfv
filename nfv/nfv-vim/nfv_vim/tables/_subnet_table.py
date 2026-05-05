@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _subnet_table = None
@@ -12,9 +11,6 @@ _subnet_table = None
 
 class SubnetTable(Table):
     """Subnet Table."""
-
-    def __init__(self):
-        super(SubnetTable, self).__init__()
 
     def get_by_name(self, subnet_name):
         for subnet_uuid in list(_subnet_table.keys()):

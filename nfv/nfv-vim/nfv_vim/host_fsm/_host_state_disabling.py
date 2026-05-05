@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import DisableHostTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 class DisablingState(state_machine.State):
     """Host - Disabling State."""
-
-    def __init__(self, name):
-        super(DisablingState, self).__init__(name)
 
     def enter(self, host):
         """Entering disabling state."""
@@ -35,8 +31,6 @@ class DisablingState(state_machine.State):
 
     def transition(self, host, event, event_data, to_state):
         """Transition from the disabling state."""
-
-        pass
 
     def handle_event(self, host, event, event_data=None):
         """Handle event while in the disabling state."""

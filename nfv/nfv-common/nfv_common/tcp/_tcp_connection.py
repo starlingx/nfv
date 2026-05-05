@@ -17,7 +17,7 @@ from nfv_common import timers
 DLOG = debug.debug_get_logger("nfv_common.tcp")
 
 
-class TCPConnection(object):
+class TCPConnection:
     """TCP Connection."""
 
     AUTH_VECTOR_MAX_SIZE = 64
@@ -52,7 +52,7 @@ class TCPConnection(object):
         self._blocking = blocking
         self._socket.setblocking(blocking)
         self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        self._msg_parts = list()
+        self._msg_parts = []
         self._msg_len = 0
         self._msg_len_remaining = -1
 
@@ -157,7 +157,7 @@ class TCPConnection(object):
                     self._msg_len = len(msg_block)
 
                     if struct.calcsize("!L") == len(msg):
-                        self._msg_parts[:] = list()
+                        self._msg_parts[:] = []
                         self._msg_len = socket.ntohl(struct.unpack("!L", msg)[0])
                         self._msg_len_remaining = self._msg_len
 
@@ -171,7 +171,7 @@ class TCPConnection(object):
                     self._msg_len_remaining -= len(msg_block)
                     if 0 == self._msg_len_remaining:
                         msg = b"".join(self._msg_parts)
-                        self._msg_parts[:] = list()
+                        self._msg_parts[:] = []
                         self._msg_len = 0
                         self._msg_len_remaining = -1
 
@@ -251,8 +251,7 @@ class TCPConnection(object):
 
         if blocking:
             return self._receive_blocking(timeout_in_secs)
-        else:
-            return self._receive_non_blocking()
+        return self._receive_non_blocking()
 
     def close(self):
         """Close the TCP connection."""

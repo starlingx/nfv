@@ -7,7 +7,6 @@
 import itertools
 
 from nfv_common import debug
-
 from nfv_vim.api.acl.policies import base
 from nfv_vim.api.acl.policies import fw_update_strategy_policy
 from nfv_vim.api.acl.policies import kube_rootca_update_strategy_policy
@@ -16,7 +15,6 @@ from nfv_vim.api.acl.policies import sw_patch_strategy_policy
 from nfv_vim.api.acl.policies import sw_update_strategy_policy
 from nfv_vim.api.acl.policies import sw_upgrade_strategy_policy
 from nfv_vim.api.acl.policies import system_config_update_strategy_policy
-
 from nfv_vim.api.acl import policy
 from nfv_vim.api import openstack
 from platform_util.oidc import oidc_utils
@@ -24,7 +22,7 @@ from platform_util.oidc import oidc_utils
 DLOG = debug.debug_get_logger("nfv_vim.api.acl.application")
 
 
-class AuthenticationApplication(object):
+class AuthenticationApplication:
     """Authentication Application."""
 
     def __init__(self, app):
@@ -125,8 +123,7 @@ class AuthenticationApplication(object):
                 DLOG.debug("OIDC authentication successful")
                 env["auth_context"] = auth_context
                 return self._app(env, start_response)
-            else:
-                DLOG.error("OIDC authentication failed")
+            DLOG.error("OIDC authentication failed")
 
         start_response("403 Forbidden", [])
         return []

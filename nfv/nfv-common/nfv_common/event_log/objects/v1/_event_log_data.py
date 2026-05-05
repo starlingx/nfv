@@ -6,14 +6,14 @@
 from datetime import datetime
 
 
-class EventLogStateData(object):
+class EventLogStateData:
     """Event Log State Data."""
 
     def __init__(self, state):
         self.state = state
 
 
-class EventLogThresholdData(object):
+class EventLogThresholdData:
     """Event Log Threshold Data."""
 
     def __init__(self, threshold_value, observed_value):
@@ -21,7 +21,7 @@ class EventLogThresholdData(object):
         self.observed_value = observed_value
 
 
-class EventLogData(object):
+class EventLogData:
     """Event Log Data."""
 
     _id = 1

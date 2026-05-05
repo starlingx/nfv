@@ -8,16 +8,10 @@ from unittest import mock
 
 from nfv_client import shell
 from nfv_client.sw_update import _sw_update
-
 from nfv_unit_tests.tests import testcase
 
 
 class TestNFVClientAuth(testcase.NFVTestCase):
-    def setUp(self):
-        super(TestNFVClientAuth, self).setUp()
-
-    def tearDown(self):
-        super(TestNFVClientAuth, self).tearDown()
 
     def test_stx_auth_type_default_keystone(self):
         """Test --stx-auth-type defaults to keystone."""

@@ -50,13 +50,13 @@ OPERATION_TYPE = OperationTypes()
 OPERATION_STATE = OperationStates()
 
 
-class Operation(object):
+class Operation:
     """Operation Object."""
 
     def __init__(self, operation_type):
         self._operation_type = operation_type
-        self._hosts = dict()
-        self._instances = dict()
+        self._hosts = {}
+        self._instances = {}
         self._host_total_inprogress = 0
         self._instance_total_inprogress = 0
         self._operation_failed = False

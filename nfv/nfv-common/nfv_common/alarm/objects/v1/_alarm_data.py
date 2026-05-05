@@ -6,7 +6,7 @@
 from datetime import datetime
 
 
-class AlarmStateData(object):
+class AlarmStateData:
     """Alarm State Data."""
 
     def __init__(self, state):
@@ -16,7 +16,7 @@ class AlarmStateData(object):
         return dict.copy(self.__dict__)
 
 
-class AlarmThresholdData(object):
+class AlarmThresholdData:
     """Alarm Threshold Data."""
 
     def __init__(self, threshold_value, observed_value):
@@ -27,7 +27,7 @@ class AlarmThresholdData(object):
         return dict.copy(self.__dict__)
 
 
-class AlarmData(object):
+class AlarmData:
     """Alarm Data."""
 
     def __init__(

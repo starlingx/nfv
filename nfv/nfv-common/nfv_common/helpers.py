@@ -37,7 +37,7 @@ def process_uptime_in_secs():
     return local_uptime_in_secs() - _process_start_time
 
 
-class Object(object):
+class Object:
     """Class Object Type Definition."""
 
     def __init__(self, **kwargs):
@@ -47,7 +47,7 @@ class Object(object):
         return self.__dict__
 
 
-class Result(object):
+class Result:
     """Generic Result Object Type Definition."""
 
     def __init__(self, result_data, ancillary_data=None):
@@ -61,7 +61,7 @@ class Result(object):
         )
 
 
-class Constants(object):
+class Constants:
     def __iter__(self):
         for attr in dir(self):
             if not callable(attr) and not attr.startswith("__"):
@@ -69,7 +69,7 @@ class Constants(object):
                 yield value
 
 
-class Constant(object):
+class Constant:
     """Constant Type Definition."""
 
     def __init__(self, value):
@@ -92,7 +92,7 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
 

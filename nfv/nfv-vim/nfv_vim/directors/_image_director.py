@@ -5,12 +5,10 @@
 #
 
 from nfv_common import debug
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Singleton
-
 from nfv_vim import nfvi
 from nfv_vim import objects
 from nfv_vim import tables
@@ -43,7 +41,7 @@ OPERATION_TYPE = OperationTypes()
 OPERATION_STATE = OperationStates()
 
 
-class ImageDirector(object, metaclass=Singleton):
+class ImageDirector(metaclass=Singleton):
     """Image Director."""
 
     @coroutine
@@ -241,5 +239,3 @@ def image_director_initialize():
 
 def image_director_finalize():
     """Finalize Image Director."""
-
-    pass

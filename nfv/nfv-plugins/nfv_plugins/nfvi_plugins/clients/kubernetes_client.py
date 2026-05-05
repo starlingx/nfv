@@ -4,10 +4,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import http.client as httplib
+import subprocess
+
 from fm_api import constants as fm_constants
 from fm_api import fm_api
 import kubernetes
-
 from kubernetes import __version__ as K8S_MODULE_VERSION
 from kubernetes import client
 from kubernetes.client.models.v1_container_image import V1ContainerImage
@@ -16,9 +18,6 @@ from kubernetes import config
 
 from nfv_common import debug
 from nfv_common.helpers import Result
-
-import http.client as httplib
-import subprocess
 
 K8S_MODULE_MAJOR_VERSION = int(K8S_MODULE_VERSION.split(".", maxsplit=1)[0])
 
@@ -48,7 +47,7 @@ def names(self, names):
 
 # Replacing address of "names" in V1ContainerImage
 # with the "names" defined above
-# pylint: disable-next=assignment-from-no-return
+# pylint: disable-next=assignment-from-no-return,too-many-function-args
 V1ContainerImage.names = V1ContainerImage.names.setter(names)
 
 
@@ -139,8 +138,7 @@ def taint_node(node_name, effect, key, value):
             # being configured). Ignore the failure.
             DLOG.info("Not tainting node %s because it doesn't exist" % node_name)
             return
-        else:
-            raise
+        raise
 
     add_taint = True
     taints = response.spec.taints
@@ -241,6 +239,7 @@ def delete_node(node_name):
 
     try:
         if K8S_MODULE_MAJOR_VERSION < 12:
+            # pylint: disable-next=too-many-function-args
             response = kube_client.delete_node(node_name, body)
         else:
             response = kube_client.delete_node(node_name, body=body)
@@ -251,8 +250,7 @@ def delete_node(node_name):
             # being configured). Ignore the failure.
             DLOG.info("Not deleting node %s because it doesn't exist" % node_name)
             return
-        else:
-            raise
+        raise
 
     return Result(response)
 
@@ -304,7 +302,6 @@ def mark_all_pods_not_ready(node_name, reason):
                                 % (pod.metadata.name, pod.metadata.namespace)
                             )
                     break
-    return
 
 
 def get_terminating_pods(node_name):
@@ -318,7 +315,7 @@ def get_terminating_pods(node_name):
         "", field_selector="spec.nodeName=%s" % node_name
     )
 
-    terminating_pods = list()
+    terminating_pods = []
     pods = response.items
     if pods is not None:
         for pod in pods:
@@ -410,7 +407,7 @@ def list_deployment_hosts():
         if not resources:
             return None
 
-        results = list()
+        results = []
         for resource in resources.get("items"):
             name = resource.get("metadata").get("name")
             unlock_request = resource.get("status").get("strategyRequired")
@@ -441,7 +438,7 @@ def get_namespaced_running_pods(namespace, name):
         return None
 
     pods = response.items
-    found = list()
+    found = []
     if pods is not None:
         for pod in pods:
             if name in pod.metadata.name:
@@ -452,8 +449,6 @@ def get_namespaced_running_pods(namespace, name):
 
 class DrainNodeException(Exception):
     """Custom exception for drain node failures."""
-
-    pass
 
 
 def drain_node(
@@ -534,12 +529,11 @@ def drain_node(
         if process.returncode == 0:
             DLOG.debug(f"Successfully drained node {host_name}.")
             return True
-        else:
-            DLOG.error(
-                f"Failed to drain node {host_name}. Command output: {process.stdout}"
-            )
-            DLOG.error(f"Error: {process.stderr}")
-            return False
+        DLOG.error(
+            f"Failed to drain node {host_name}. Command output: {process.stdout}"
+        )
+        DLOG.error(f"Error: {process.stderr}")
+        return False
 
     except Exception as e:
         DLOG.exception(
@@ -579,9 +573,8 @@ def uncordon_node(host_name):
             v1.patch_node(name=host_name, body=body)
             DLOG.info(f"Node {host_name} successfully uncordoned.")
             return True
-        else:
-            DLOG.info(f"Node {host_name} is already schedulable (uncordoned).")
-            return True
+        DLOG.info(f"Node {host_name} is already schedulable (uncordoned).")
+        return True
 
     except ApiException as e:
         DLOG.error(f"Failed to uncordon node {host_name}, reason: {e.reason}")

@@ -12,7 +12,7 @@ from nfv_common import debug
 DLOG = debug.debug_get_logger("nfv_common.thread.thread_progress_marker")
 
 
-class ThreadProgressMarker(object):
+class ThreadProgressMarker:
     """Thread Progress Marker."""
 
     def __init__(self, initial_value=0):

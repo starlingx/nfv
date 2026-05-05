@@ -18,7 +18,7 @@ ADMIN_OR_CONFIGURATOR = "admin_or_configurator"
 READER_OR_OPERATOR_OR_CONFIGURATOR = "reader_or_operator_or_configurator"
 
 
-class RuleDefault(object):
+class RuleDefault:
     """Class used to represent a policy rule.
 
     :param name: The name of the policy.

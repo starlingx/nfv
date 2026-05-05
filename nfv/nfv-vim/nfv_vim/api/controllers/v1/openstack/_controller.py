@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import http.client as httplib
+
 import pecan
 from pecan import rest
 from wsme import types as wsme_types
@@ -39,8 +40,7 @@ class OpenStackAPI(rest.RestController):
     def _lookup(self, key, *remainder):
         if "heat" == key:
             return HeatAPI(), remainder
-        else:
-            pecan.abort(httplib.NOT_FOUND)
+        pecan.abort(httplib.NOT_FOUND)
 
     @wsme_pecan.wsexpose(OpenStackDescription)
     def get(self):

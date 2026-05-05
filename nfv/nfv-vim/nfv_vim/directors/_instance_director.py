@@ -7,19 +7,16 @@ import os
 
 from nfv_common import config
 from nfv_common import debug
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
 from nfv_common.helpers import Singleton
-
+from nfv_common import timers
+from nfv_vim.directors._directors_defs import Operation
+from nfv_vim.directors._directors_defs import OPERATION_STATE
+from nfv_vim.directors._directors_defs import OPERATION_TYPE
 from nfv_vim import dor
 from nfv_vim import nfvi
 from nfv_vim import objects
 from nfv_vim import tables
-
-from nfv_vim.directors._directors_defs import Operation
-from nfv_vim.directors._directors_defs import OPERATION_STATE
-from nfv_vim.directors._directors_defs import OPERATION_TYPE
 
 DLOG = debug.debug_get_logger("nfv_vim.instance_director")
 
@@ -28,7 +25,7 @@ _instance_director = None
 NFV_VIM_UNLOCK_COMPLETE_FILE = "/var/run/.nfv-vim.unlock_complete"
 
 
-class InstanceDirector(object, metaclass=Singleton):
+class InstanceDirector(metaclass=Singleton):
     """Instance Director."""
 
     def __init__(
@@ -60,14 +57,14 @@ class InstanceDirector(object, metaclass=Singleton):
         self._single_hypervisor = single_hypervisor
         self._recovery_threshold = recovery_threshold
         self._max_throttled_recovering_instances = max_throttled_recovering_instances
-        self._host_operations = dict()
-        self._reboot_count = dict()
-        self._instance_recovery_list = list()
-        self._instance_failed_list = list()
-        self._instance_rebuilding_list = list()
-        self._instance_migrating_list = list()
-        self._instance_rebooting_list = list()
-        self._instance_cleanup_list = list()
+        self._host_operations = {}
+        self._reboot_count = {}
+        self._instance_recovery_list = []
+        self._instance_failed_list = []
+        self._instance_rebuilding_list = []
+        self._instance_migrating_list = []
+        self._instance_rebooting_list = []
+        self._instance_cleanup_list = []
         self._next_audit_interval = recovery_audit_interval
 
         if not nfvi.nfvi_compute_plugin_disabled():
@@ -110,7 +107,7 @@ class InstanceDirector(object, metaclass=Singleton):
         """Returns true if at least given count of hosts and hypervisors are enabled."""
 
         if excluded_hosts is None:
-            excluded_hosts = list()
+            excluded_hosts = []
 
         available_count = 0
         host_table = tables.tables_get_host_table()
@@ -184,12 +181,12 @@ class InstanceDirector(object, metaclass=Singleton):
         next_audit_interval = self._recovery_audit_interval
 
         # Get all instances that are to be considered for recovery.
-        instances_recover = list()
-        instances_failed = list()
-        instances_rebuilding = list()
-        instances_migrating = list()
-        instances_rebooting = list()
-        instance_tracking_uuids = list()
+        instances_recover = []
+        instances_failed = []
+        instances_rebuilding = []
+        instances_migrating = []
+        instances_rebooting = []
+        instance_tracking_uuids = []
         instance_table = tables.tables_get_instance_table()
 
         # Check for failed instances; exclude instances that are part of a
@@ -597,7 +594,7 @@ class InstanceDirector(object, metaclass=Singleton):
         instance_table = tables.tables_get_instance_table()
 
         # Sort the instances on this host based on their recovery priority
-        evacuate_priority_list = list()
+        evacuate_priority_list = []
         for instance in instance_table.on_host(host.name):
             evacuate_priority_list.append(instance)
         evacuate_priority_list.sort(
@@ -1571,7 +1568,7 @@ class InstanceDirector(object, metaclass=Singleton):
                 # In single hypervisor configurations, we stop the instances
                 # before disabling the host services.
                 instance_table = tables.tables_get_instance_table()
-                instance_uuids = list()
+                instance_uuids = []
 
                 for instance in instance_table.on_host(host.name):
                     # Stop any running instances.
@@ -2116,7 +2113,7 @@ class InstanceDirector(object, metaclass=Singleton):
             if self._single_hypervisor:
                 DLOG.info("Unlocking instances after hypervisor enabled")
                 instance_table = tables.tables_get_instance_table()
-                instance_uuids = list()
+                instance_uuids = []
 
                 for instance in list(instance_table.values()):
                     if instance.unlock_to_recover and instance.is_locked():
@@ -2164,7 +2161,7 @@ class InstanceDirector(object, metaclass=Singleton):
                     del instance_table[instance_uuid]
                     trigger_recovery = True
 
-        self._instance_cleanup_list[:] = list()
+        self._instance_cleanup_list[:] = []
         self._timer_cleanup_instances = None
 
         if trigger_recovery:
@@ -2189,7 +2186,7 @@ class InstanceDirector(object, metaclass=Singleton):
 
         overall_operation = Operation(OPERATION_TYPE.MIGRATE_INSTANCES)
 
-        host_operations = dict()
+        host_operations = {}
         for instance_uuid in instance_uuids:
             instance = instance_table.get(instance_uuid, None)
             if instance is None:
@@ -2252,7 +2249,7 @@ class InstanceDirector(object, metaclass=Singleton):
 
         overall_operation = Operation(OPERATION_TYPE.MIGRATE_INSTANCES)
 
-        host_operations = dict()
+        host_operations = {}
         for instance_uuid in instance_uuids:
             instance = instance_table.get(instance_uuid, None)
             if instance is None:
@@ -2315,7 +2312,7 @@ class InstanceDirector(object, metaclass=Singleton):
 
         overall_operation = Operation(OPERATION_TYPE.STOP_INSTANCES)
 
-        host_operations = dict()
+        host_operations = {}
         for instance_uuid in instance_uuids:
             instance = instance_table.get(instance_uuid, None)
             if instance is None:
@@ -2385,7 +2382,7 @@ class InstanceDirector(object, metaclass=Singleton):
 
         overall_operation = Operation(operation_type)
 
-        host_operations = dict()
+        host_operations = {}
         for instance_uuid in instance_uuids:
             instance = instance_table.get(instance_uuid, None)
             if instance is None:
@@ -2512,5 +2509,3 @@ def instance_director_initialize():
 
 def instance_director_finalize():
     """Finalize Instance Director."""
-
-    pass

@@ -40,7 +40,7 @@ class Router(Middleware):
         self.map = mapper
         self.forwarder = forwarder
         self._router = RoutesMiddleware(self._dispatch, self.map)
-        super(Router, self).__init__(app)
+        super().__init__(app)
 
     @webob.dec.wsgify
     def __call__(self, req):
@@ -59,14 +59,13 @@ class Router(Middleware):
             if self.forwarder:
                 LOG.debug("Not match found, forward it to Nova-API")
                 return self.forwarder
-            else:
-                return self.application
+            return self.application
         LOG.debug("Found match action!!!!!")
         app = match["controller"]
         return app
 
 
-class APIDispatcher(object):
+class APIDispatcher:
     """WSGI middleware that dispatch an incoming requests to a remote WSGI apps."""
 
     def __init__(

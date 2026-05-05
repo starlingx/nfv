@@ -5,7 +5,6 @@
 #
 from nfv_common import debug
 from nfv_common import state_machine
-
 from nfv_vim.host_fsm._host_defs import HOST_EVENT
 from nfv_vim.host_fsm._host_defs import HOST_STATE
 from nfv_vim.host_fsm._host_tasks import NotifyDisableFailedTask
@@ -15,9 +14,6 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host")
 
 class DisablingFailedState(state_machine.State):
     """Host - Disabling Failed State."""
-
-    def __init__(self, name):
-        super(DisablingFailedState, self).__init__(name)
 
     def enter(self, host):
         """Entering disabling failed state."""
@@ -35,8 +31,6 @@ class DisablingFailedState(state_machine.State):
 
     def transition(self, host, event, event_data, to_state):
         """Transition from the disabling failed state."""
-
-        pass
 
     def handle_event(self, host, event, event_data=None):
         """Handle event while in the disabling failed state."""
@@ -75,8 +69,7 @@ class DisablingFailedState(state_machine.State):
 
                 if host.is_force_lock():
                     return HOST_STATE.DISABLED
-                else:
-                    return HOST_STATE.ENABLING
+                return HOST_STATE.ENABLING
 
             elif HOST_EVENT.TASK_FAILED == event:
                 DLOG.info("Disabling-Failed failed for %s." % host.name)
@@ -85,8 +78,7 @@ class DisablingFailedState(state_machine.State):
 
                 if host.is_force_lock():
                     return HOST_STATE.DISABLED
-                else:
-                    return HOST_STATE.ENABLING
+                return HOST_STATE.ENABLING
 
             elif HOST_EVENT.TASK_TIMEOUT == event:
                 DLOG.info("Disabling-Failed timed out for %s." % host.name)
@@ -95,8 +87,7 @@ class DisablingFailedState(state_machine.State):
 
                 if host.is_force_lock():
                     return HOST_STATE.DISABLED
-                else:
-                    return HOST_STATE.ENABLING
+                return HOST_STATE.ENABLING
 
             elif HOST_EVENT.AUDIT == event:
                 if not host.task.inprogress():

@@ -5,14 +5,13 @@
 #
 from nfv_common import debug
 from nfv_common import exceptions
-from nfv_common import timers
-
 from nfv_common.helpers import Result
+from nfv_common import timers
 
 DLOG = debug.debug_get_logger("nfv_common.tasks.task_work")
 
 
-class TaskWork(object):
+class TaskWork:
     """Task Work."""
 
     _id = 0

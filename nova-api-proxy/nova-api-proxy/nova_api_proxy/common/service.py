@@ -85,7 +85,7 @@ class Request(webob.Request):
     pass
 
 
-class WritableLogger(object):
+class WritableLogger:
     """A thin wrapper that responds to `write` and logs."""
 
     def __init__(self, logger, level=logging.INFO):
@@ -96,7 +96,7 @@ class WritableLogger(object):
         self.logger.debug(msg.rstrip())
 
 
-class Server(object):
+class Server:
     """Server class to manage multiple WSGI sockets and applications."""
 
     def __init__(
@@ -237,7 +237,7 @@ class Server(object):
         self._pool.resize(0)
 
 
-class Application(object):
+class Application:
     @classmethod
     def factory(cls, global_config, **local_config):  # pylint: disable=unused-argument
         """Used for paste app factories in paste.deploy config files."""

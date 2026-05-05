@@ -3,13 +3,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-import testtools
 from unittest import mock
 import uuid
 
-from nfv_common import strategy as common_strategy
-from nfv_vim import nfvi
+import testtools
 
+from nfv_common import strategy as common_strategy
+from nfv_unit_tests.tests import sw_update_testcase
+from nfv_vim import nfvi
 from nfv_vim.objects import HOST_NAME
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
@@ -18,8 +19,6 @@ from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.objects import SwUpgrade
 from nfv_vim.strategy._strategy import strategy_rebuild_from_dict
 from nfv_vim.strategy._strategy import SwUpgradeStrategy
-
-from nfv_unit_tests.tests import sw_update_testcase
 
 INITIAL_RELEASE = "3.2.1"
 PATCH_RELEASE_UPGRADE = "3.2.2"
@@ -726,8 +725,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         instance_sets = list(host_sets)
         instance_sets[0] = []
 
-        stage_hosts = list()
-        stage_instances = list()
+        stage_hosts = []
+        stage_instances = []
 
         for x in range(0, len(host_sets) - 1):
             stage_hosts.append(["compute-%02d" % host_num for host_num in host_sets[x]])

@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_vim import database
-
 from nfv_vim.tables._table import Table
 
 _host_group_table = None
@@ -12,9 +11,6 @@ _host_group_table = None
 
 class HostGroupTable(Table):
     """Host Group Table."""
-
-    def __init__(self):
-        super(HostGroupTable, self).__init__()
 
     @staticmethod
     def get_by_host(host_name):

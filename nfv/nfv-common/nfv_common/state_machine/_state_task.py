@@ -5,11 +5,10 @@
 #
 from nfv_common import debug
 from nfv_common.helpers import coroutine
-from nfv_common import timers
-
 from nfv_common.state_machine._state_task_result import STATE_TASK_RESULT
 from nfv_common.state_machine._state_task_result import state_task_result_update
 from nfv_common.state_machine._state_task_work_result import STATE_TASK_WORK_RESULT
+from nfv_common import timers
 
 DLOG = debug.debug_get_logger("nfv_common.state_machine.state_task")
 
@@ -28,7 +27,7 @@ def result_log(result, message):
     logger(message)
 
 
-class StateTask(object):
+class StateTask:
     """State Task."""
 
     def __init__(self, name, task_work_list):

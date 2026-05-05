@@ -9,7 +9,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_plugins.nfvi_plugins.openstack.exceptions import NotFound
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
@@ -176,8 +175,7 @@ def vm_power_state_str(power_state):
         return "suspended"
     elif VM_POWER_STATE.BUILDING == power_state:
         return "building"
-    else:
-        return "unknown"
+    return "unknown"
 
 
 def get_host_aggregates(token):
@@ -189,7 +187,7 @@ def get_host_aggregates(token):
 
     api_cmd = url + "/v2.1/%s/os-aggregates" % token.get_tenant_id()
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -208,7 +206,7 @@ def get_hypervisor(token, hypervisor_uuid):
         hypervisor_uuid,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -224,7 +222,7 @@ def get_hypervisors(token):
 
     api_cmd = url + "/v2.1/%s/os-hypervisors" % token.get_tenant_id()
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -246,7 +244,7 @@ def get_flavors(token, page_limit=None, next_page=None):
     else:
         api_cmd = next_page
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -271,12 +269,12 @@ def create_flavor(
 
     api_cmd = url + "/v2.1/%s/flavors" % token.get_tenant_id()
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
-    api_cmd_payload = dict()
-    api_cmd_payload["flavor"] = dict()
+    api_cmd_payload = {}
+    api_cmd_payload["flavor"] = {}
     api_cmd_payload["flavor"]["id"] = flavor_id
     api_cmd_payload["flavor"]["name"] = flavor_name
     api_cmd_payload["flavor"]["vcpus"] = vcpus
@@ -303,7 +301,7 @@ def delete_flavor(token, flavor_id):
 
     api_cmd = url + "/v2.1/%s/flavors/%s" % (token.get_tenant_id(), flavor_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "DELETE", api_cmd, api_cmd_headers)
@@ -319,7 +317,7 @@ def get_flavor(token, flavor_id):
 
     api_cmd = url + "/v2.1/%s/flavors/%s" % (token.get_tenant_id(), flavor_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -337,11 +335,11 @@ def set_flavor_extra_specs(token, flavor_id, extra_specs):
         token.get_tenant_id(),
         flavor_id,
     )
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["extra_specs"] = extra_specs
 
     response = rest_api_request(
@@ -362,7 +360,7 @@ def get_flavor_extra_specs(token, flavor_id):
         flavor_id,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -383,7 +381,7 @@ def get_server_groups(token, all_projects=True):
     if all_projects:
         api_cmd += "?all_projects=True"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -414,7 +412,7 @@ def get_servers(token, page_limit=None, next_page=None, all_tenants=True, contex
     else:
         api_cmd = next_page
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     if context is None:
         response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
@@ -450,10 +448,10 @@ def create_server(
 
     api_cmd = url + "/v2.1/%s/servers" % tenant_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    server = dict()
+    server = {}
 
     server["name"] = server_name
     server["flavorRef"] = flavor_id
@@ -464,14 +462,14 @@ def create_server(
         server["block_device_mapping_v2"] = block_devices
 
     if networks is not None:
-        network_list = list()
+        network_list = []
         for network in networks:
             if network["uuid"] is not None:
                 network_list.append(network)
         if network_list:
             server["networks"] = network_list
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["server"] = server
 
     if context is None:
@@ -503,7 +501,7 @@ def delete_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     if context is None:
         api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
@@ -532,7 +530,7 @@ def get_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     if context is None:
         api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
@@ -563,10 +561,10 @@ def live_migrate_server(
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    server = dict()
+    server = {}
     server["block_migration"] = block_storage_migration
 
     if to_host_name:
@@ -574,7 +572,7 @@ def live_migrate_server(
     else:
         server["host"] = None
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["os-migrateLive"] = server
 
     if context is None:
@@ -608,12 +606,12 @@ def cold_migrate_server(
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     if to_host_name is not None:
-        server = dict()
+        server = {}
         server["host"] = to_host_name
 
         api_cmd_payload["migrate"] = server
@@ -649,13 +647,13 @@ def resize_server(token, server_id, flavor_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    resize = dict()
+    resize = {}
     resize["flavorRef"] = str(flavor_id)
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["resize"] = resize
 
     if context is None:
@@ -687,10 +685,10 @@ def resize_server_confirm(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["confirmResize"] = None
 
     if context is None:
@@ -722,10 +720,10 @@ def resize_server_revert(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["revertResize"] = None
 
     if context is None:
@@ -771,10 +769,10 @@ def evacuate_server(
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    server = dict()
+    server = {}
 
     if admin_password is not None:
         server["adminPass"] = admin_password
@@ -782,7 +780,7 @@ def evacuate_server(
     if to_host_name is not None:
         server["host"] = to_host_name
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["evacuate"] = server
 
     if context is None:
@@ -814,13 +812,13 @@ def reboot_server(token, server_id, reboot_type, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    reboot = dict()
+    reboot = {}
     reboot["type"] = reboot_type
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["reboot"] = reboot
 
     if context is None:
@@ -854,17 +852,17 @@ def rebuild_server(
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    rebuild = dict()
+    rebuild = {}
     rebuild["name"] = server_name
     rebuild["imageRef"] = image_id
 
     if admin_password is not None:
         rebuild["adminPass"] = admin_password
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["rebuild"] = rebuild
 
     if context is None:
@@ -896,10 +894,10 @@ def pause_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["pause"] = None
 
     if context is None:
@@ -931,10 +929,10 @@ def unpause_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["unpause"] = None
 
     if context is None:
@@ -966,10 +964,10 @@ def suspend_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["suspend"] = None
 
     if context is None:
@@ -1001,10 +999,10 @@ def resume_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["resume"] = None
 
     if context is None:
@@ -1036,10 +1034,10 @@ def start_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["os-start"] = None
 
     if context is None:
@@ -1071,10 +1069,10 @@ def stop_server(token, server_id, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["os-stop"] = None
 
     if context is None:
@@ -1106,13 +1104,13 @@ def reset_server_state(token, server_id, state, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/action" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    server_state = dict()
+    server_state = {}
     server_state["state"] = state
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["os-resetState"] = server_state
 
     if context is None:
@@ -1144,14 +1142,14 @@ def attach_volume(token, server_id, volume_id, device_name, context=None):
 
     api_cmd = url + "/v2.1/%s/servers/%s/os-volume_attachments" % (tenant_id, server_id)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    volume_attach = dict()
+    volume_attach = {}
     volume_attach["volumeId"] = volume_id
     volume_attach["device"] = device_name
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["volumeAttachment"] = volume_attach
 
     if context is None:
@@ -1233,6 +1231,7 @@ _rpc_message_service_action_event_types = {
 def rpc_message_server_action_change_filter(message):
     """Filter OpenStack Nova RPC messages for server action changes."""
 
+    # pylint: disable-next=consider-using-dict-items
     for event_type in _rpc_message_service_action_event_types:
         payload = None
 
@@ -1253,7 +1252,7 @@ def rpc_message_server_action_change_filter(message):
                     event_type
                 ]
 
-                action_change = dict()
+                action_change = {}
                 action_change["server_uuid"] = server_uuid
                 action_change["task_state"] = task_state
                 action_change["task_status"] = task_status
@@ -1321,7 +1320,7 @@ def rpc_message_server_state_change_filter(message):
         )
 
         if server_uuid is not None:
-            state_change = dict()
+            state_change = {}
             state_change["server_uuid"] = server_uuid
             state_change["server_name"] = server_name
             state_change["tenant_id"] = tenant_id
@@ -1360,7 +1359,7 @@ def rpc_message_server_delete_filter(message):
         DLOG.verbose("Nova-RPC(instance-deleting): server_uuid=%s." % server_uuid)
 
         if server_uuid is not None:
-            delete = dict()
+            delete = {}
             delete["server_uuid"] = server_uuid
             return delete
 
@@ -1380,16 +1379,15 @@ def get_host_service_id(token, host_name, service_name):
         service_name,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd, api_cmd_headers)
-    services = response.result_data.get("services", list())
+    services = response.result_data.get("services", [])
     if services:
         return services[0].get("id")
-    else:
-        raise NotFound("Service %s not found for host %s" % (service_name, host_name))
+    raise NotFound("Service %s not found for host %s" % (service_name, host_name))
 
 
 def delete_host_services(token, host_name):
@@ -1399,7 +1397,7 @@ def delete_host_services(token, host_name):
     if url is None:
         raise ValueError("OpenStack Nova URL is invalid")
 
-    response = dict()
+    response = {}
 
     # Check to see if nova knows about the host or not.  Nova returns
     # internal-error when the host is not known on a delete.
@@ -1414,7 +1412,7 @@ def delete_host_services(token, host_name):
         compute_service_id,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
@@ -1437,11 +1435,11 @@ def enable_host_services(token, host_name):
         compute_service_id,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["status"] = "enabled"
 
     response = rest_api_request(
@@ -1465,11 +1463,11 @@ def disable_host_services(token, host_name):
         compute_service_id,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["status"] = "disabled"
     api_cmd_payload["disabled_reason"] = "disabled by VIM"
 
@@ -1488,14 +1486,14 @@ def query_host_services(token, host_name):
 
     api_cmd = url + "/v2.1/%s/os-services?host=%s" % (token.get_tenant_id(), host_name)
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
     response = rest_api_request(token, "GET", api_cmd)
 
     host_status = "unknown"
-    services = response.result_data.get("services", list())
+    services = response.result_data.get("services", [])
 
     for service in services:
         service_name = service.get("binary", "")
@@ -1528,11 +1526,11 @@ def notify_host_enabled(token, host_name):
         compute_service_id,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["forced_down"] = False
 
     response = rest_api_request(
@@ -1556,11 +1554,11 @@ def notify_host_disabled(token, host_name):
         compute_service_id,
     )
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["forced_down"] = True
 
     response = rest_api_request(
@@ -1578,7 +1576,7 @@ def query_host_aggregates(token):
 
     api_cmd = "/v2.1/%s/os-aggregates" % token.get_tenant_id()
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
     api_cmd_headers["X-OpenStack-Nova-API-Version"] = NOVA_API_VERSION
 

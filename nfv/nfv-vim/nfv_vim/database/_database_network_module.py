@@ -5,11 +5,9 @@
 #
 import json
 
-from nfv_vim import objects
-
-from nfv_vim.database import model
-
 from nfv_vim.database._database import database_get
+from nfv_vim.database import model
+from nfv_vim import objects
 
 
 def database_subnet_add(subnet_obj):
@@ -53,7 +51,7 @@ def database_subnet_get_list():
     session = db.session()
     query = session.query(model.Subnet)
 
-    subnet_objs = list()
+    subnet_objs = []
     for subnet in query.all():
         subnet_obj = objects.Subnet(
             subnet.uuid,
@@ -121,7 +119,7 @@ def database_network_get_list():
     session = db.session()
     query = session.query(model.Network)
 
-    network_objs = list()
+    network_objs = []
     for network in query.all():
         provider_data = objects.NetworkProviderData(
             network.physical_network, network.network_type, network.segmentation_id

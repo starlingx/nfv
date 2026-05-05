@@ -3,9 +3,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-from nfv_vim.objects._object import ObjectData
-
 from nfv_common import debug
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.volume_snapshot")
 
@@ -14,7 +13,7 @@ class VolumeSnapshot(ObjectData):
     """Volume Snapshot Object."""
 
     def __init__(self, nfvi_volume_snapshot):
-        super(VolumeSnapshot, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self._nfvi_volume_snapshot = nfvi_volume_snapshot
 
     @property
@@ -69,7 +68,7 @@ class VolumeSnapshot(ObjectData):
     def as_dict(self):
         """Represent volume snapshot object as dictionary."""
 
-        data = dict()
+        data = {}
         data["uuid"] = self.uuid
         data["name"] = self.name
         data["description"] = self.description

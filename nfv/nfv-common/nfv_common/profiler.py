@@ -57,5 +57,3 @@ def profiler_initialize():
 
 def profiler_finalize():
     """Profiler - Finalize."""
-
-    pass

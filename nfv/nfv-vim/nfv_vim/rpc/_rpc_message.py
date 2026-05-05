@@ -6,7 +6,6 @@
 import json
 
 from nfv_common import debug
-
 from nfv_vim.rpc._rpc_defs import RPC_MSG_RESULT
 from nfv_vim.rpc._rpc_defs import RPC_MSG_TYPE
 from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
@@ -14,7 +13,7 @@ from nfv_vim.rpc._rpc_defs import RPC_MSG_VERSION
 DLOG = debug.debug_get_logger("nfv_vim.rpc")
 
 
-class RPCMessage(object):
+class RPCMessage:
     """RPC Message."""
 
     version = RPC_MSG_VERSION.UNKNOWN
@@ -29,12 +28,10 @@ class RPCMessage(object):
     def serialize_payload(self, msg):
         """Serialize RPC Message payload."""
 
-        pass
-
     def serialize(self):
         """Serialize RPC Message."""
 
-        msg = dict()
+        msg = {}
         msg["version"] = self.version
         msg["type"] = self.type
         msg["result"] = self.result
@@ -44,8 +41,6 @@ class RPCMessage(object):
 
     def deserialize_payload(self, msg):
         """Deserialize RPC Message payload."""
-
-        pass
 
     @staticmethod
     def deserialize(msg):
@@ -69,7 +64,7 @@ class RPCMessage(object):
         return RPCMessageFactory.get(msg_version, msg_type, msg_result, msg)
 
 
-class RPCMessageFactory(object):
+class RPCMessageFactory:
     """RPC Message Factory."""
 
     from nfv_vim.rpc._rpc_message_image import APIRequestCreateImage
@@ -237,15 +232,11 @@ class RPCMessageFactory(object):
         RPC_MSG_TYPE.CREATE_SYSTEM_CONFIG_UPDATE_STRATEGY_REQUEST: (
             APIRequestCreateSystemConfigUpdateStrategy
         ),
-        RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_REQUEST: (
-            APIRequestApplySwUpdateStrategy
-        ),
+        RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_REQUEST: APIRequestApplySwUpdateStrategy,
         RPC_MSG_TYPE.APPLY_SW_UPDATE_STRATEGY_RESPONSE: (
             APIResponseApplySwUpdateStrategy
         ),
-        RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_REQUEST: (
-            APIRequestAbortSwUpdateStrategy
-        ),
+        RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_REQUEST: APIRequestAbortSwUpdateStrategy,
         RPC_MSG_TYPE.ABORT_SW_UPDATE_STRATEGY_RESPONSE: (
             APIResponseAbortSwUpdateStrategy
         ),
@@ -268,6 +259,5 @@ class RPCMessageFactory(object):
             rpc_msg = rpc_class(msg_version, msg_type, msg_result)
             rpc_msg.deserialize_payload(msg)
             return rpc_msg
-        else:
-            DLOG.info("Unknown rpc message type received, msg_type=%s." % msg_type)
-            return RPCMessage(msg_version, msg_type, msg_result)
+        DLOG.info("Unknown rpc message type received, msg_type=%s." % msg_type)
+        return RPCMessage(msg_version, msg_type, msg_result)

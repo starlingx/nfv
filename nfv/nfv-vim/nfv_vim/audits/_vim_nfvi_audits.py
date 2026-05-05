@@ -5,14 +5,11 @@
 #
 import collections
 
-from nfv_vim.database._database_sw_update import database_sw_update_exists
-
 from nfv_common import debug
+from nfv_common.helpers import coroutine
 from nfv_common import histogram
 from nfv_common import timers
-
-from nfv_common.helpers import coroutine
-
+from nfv_vim.database._database_sw_update import database_sw_update_exists
 from nfv_vim import directors
 from nfv_vim import nfvi
 from nfv_vim import objects
@@ -591,7 +588,7 @@ def _audit_nfvi_volumes_callback(timer_id):
             volume_table = tables.tables_get_volume_table()
 
             if _added_volumes is None:
-                _added_volumes = list()
+                _added_volumes = []
 
             if _deletable_volumes is None:
                 _deletable_volumes = list(volume_table)
@@ -635,7 +632,7 @@ def _audit_nfvi_volumes_callback(timer_id):
             )
             volume_table = tables.tables_get_volume_table()
             if _added_volumes is None:
-                _added_volumes = list()
+                _added_volumes = []
             else:
                 _added_volumes[:] = []
             _deletable_volumes = list(volume_table)
@@ -644,7 +641,7 @@ def _audit_nfvi_volumes_callback(timer_id):
         DLOG.error("Audit-Volumes callback, not completed, responses=%s." % response)
         volume_table = tables.tables_get_volume_table()
         if _added_volumes is None:
-            _added_volumes = list()
+            _added_volumes = []
         else:
             _added_volumes[:] = []
         _deletable_volumes = list(volume_table)
@@ -1255,7 +1252,7 @@ def _audit_nfvi_guest_services_callback():
             instance = instance_table.get(instance_uuid, None)
             if instance is not None:
                 host_name = result_data.get("host_name", None)
-                nfvi_guest_services = result_data.get("services", list())
+                nfvi_guest_services = result_data.get("services", [])
                 instance.nfvi_guest_services_update(nfvi_guest_services, host_name)
 
     else:
@@ -1287,7 +1284,7 @@ def _audit_nfvi_guest_services():
 def vim_nfvi_audits_initialize():
     """Initialize nfvi audits."""
 
-    audits = list()
+    audits = []
 
     audits.append(_audit_nfvi)
 
@@ -1307,5 +1304,3 @@ def vim_nfvi_audits_initialize():
 
 def vim_nfvi_audits_finalize():
     """Finalize nfvi audits."""
-
-    pass

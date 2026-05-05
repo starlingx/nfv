@@ -6,11 +6,10 @@
 
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
-
 from nfv_common.state_machine._state_task_work_result import STATE_TASK_WORK_RESULT
 
 
-class _StateTaskResult(object, metaclass=Singleton):
+class _StateTaskResult(metaclass=Singleton):
     """State Task Result - Constants."""
 
     SUCCESS = Constant("success")

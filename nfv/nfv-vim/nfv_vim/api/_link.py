@@ -25,7 +25,7 @@ class Link(wsme_types.Base):
         resource_args=None,
         title=wsme_types.Unset,
         method=wsme_types.Unset,
-        type=wsme_types.Unset,
+        type=wsme_types.Unset,  # pylint: disable=redefined-builtin
     ):
 
         forwarded_proto = pecan.request.headers.get("X-Forwarded-Proto", "")

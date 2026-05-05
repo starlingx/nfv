@@ -56,7 +56,7 @@ def process_main():
         )
         connection.connect(args.hostname, int(args.port))
 
-        request = dict()
+        request = {}
         request["version"] = 1
         request["notify-type"] = args.type
         request["notify-data"] = args.data

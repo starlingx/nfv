@@ -7,7 +7,6 @@ import argparse
 import sys
 
 from nfv_common import debug
-
 from nfv_vim import database
 
 DLOG = debug.debug_get_logger("nfv_vim.manage")
@@ -42,7 +41,7 @@ def process_main():
             if args.database is None or args.filename is None:
                 parser.print_help()
 
-            database_config = dict()
+            database_config = {}
             database_config["database_dir"] = args.database
             database.database_initialize(database_config)
             database.database_dump_data(args.filename)
@@ -61,7 +60,7 @@ def process_main():
             if args.database is None or args.filename is None:
                 parser.print_help()
 
-            database_config = dict()
+            database_config = {}
             database_config["database_dir"] = args.database
             database.database_initialize(database_config)
             database.database_load_data(args.filename)

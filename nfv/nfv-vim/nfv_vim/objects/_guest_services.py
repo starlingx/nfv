@@ -7,15 +7,13 @@
 from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Singleton
-
-from nfv_vim.objects._object import ObjectData
-
 from nfv_vim import nfvi
+from nfv_vim.objects._object import ObjectData
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.guest_services")
 
 
-class GuestServiceNames(object, metaclass=Singleton):
+class GuestServiceNames(metaclass=Singleton):
     """Guest Services Name Constants."""
 
     HEARTBEAT = Constant("heartbeat")
@@ -37,10 +35,10 @@ class GuestServices(ObjectData):
     SERVICE_DELETING = "deleting"
 
     def __init__(self, services=None, nfvi_guest_services=None):
-        super(GuestServices, self).__init__("1.0.0")
+        super().__init__("1.0.0")
 
         if services is None:
-            self._services = dict()
+            self._services = {}
         else:
             self._services = services
 
@@ -66,14 +64,9 @@ class GuestServices(ObjectData):
 
         if nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED == nfvi_service_admin_state:
             return GuestServices.SERVICE_DISABLED
-        else:
-            if (
-                nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.ENABLED
-                == nfvi_service_oper_state
-            ):
-                return GuestServices.SERVICE_ENABLED
-            else:
-                return GuestServices.SERVICE_ENABLING
+        if nfvi.objects.v1.GUEST_SERVICE_OPER_STATE.ENABLED == nfvi_service_oper_state:
+            return GuestServices.SERVICE_ENABLED
+        return GuestServices.SERVICE_ENABLING
 
     @staticmethod
     def _get_nfvi_service_name(service_name):
@@ -105,8 +98,7 @@ class GuestServices(ObjectData):
         elif GuestServices.SERVICE_DISABLED == service_state:
             return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED
 
-        else:
-            return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED
+        return nfvi.objects.v1.GUEST_SERVICE_ADMIN_STATE.LOCKED
 
     @property
     def services(self):
@@ -294,7 +286,7 @@ class GuestServices(ObjectData):
 
         if self._services is not None:
             del self._services
-        self._services = dict()
+        self._services = {}
 
     def guest_communication_established(self):
         """Returns true if guest communication has been established."""
@@ -305,7 +297,7 @@ class GuestServices(ObjectData):
     def get_nfvi_guest_service_names(self):
         """Returns a listing of nfvi guest services and their state."""
 
-        nfvi_service_names = list()
+        nfvi_service_names = []
         for service_name, service_state in list(self._services.items()):
             nfvi_name = self._get_nfvi_service_name(service_name)
             if nfvi_name is not None:
@@ -316,13 +308,13 @@ class GuestServices(ObjectData):
     def get_nfvi_guest_services(self):
         """Returns a listing of nfvi guest services and their state."""
 
-        nfvi_services = list()
+        nfvi_services = []
         for service_name, service_state in list(self._services.items()):
             nfvi_name = self._get_nfvi_service_name(service_name)
             nfvi_admin_state = self._get_nfvi_service_admin_state(service_state)
 
             if nfvi_name is not None:
-                nfvi_service = dict()
+                nfvi_service = {}
                 nfvi_service["service"] = nfvi_name
                 nfvi_service["admin_state"] = nfvi_admin_state
                 nfvi_services.append(nfvi_service)
@@ -398,10 +390,10 @@ class GuestServices(ObjectData):
     def as_dict(self):
         """Represent Guest Services as dictionary."""
 
-        data = dict()
+        data = {}
         data["state"] = self.state
         data["services"] = self._services
-        data["nfvi_guest_services"] = list()
+        data["nfvi_guest_services"] = []
         if self._nfvi_guest_services is not None:
             for nfvi_service in self._nfvi_guest_services:
                 data["nfvi_guest_services"].append(nfvi_service.as_dict())

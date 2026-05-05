@@ -6,13 +6,12 @@
 import collections
 
 from nfv_common import debug
-
 from nfv_common.tasks._task_worker import TaskWorkerThread
 
 DLOG = debug.debug_get_logger("nfv_common.tasks.task_worker_pool")
 
 
-class TaskWorkerPool(object):
+class TaskWorkerPool:
     """Task Worker Pool."""
 
     def __init__(self, pool_name, num_workers=1):
@@ -20,7 +19,7 @@ class TaskWorkerPool(object):
 
         self._pool_name = pool_name
         self._workers_avail = collections.OrderedDict()
-        self._workers = list()
+        self._workers = []
 
         for worker_x in range(num_workers):
             worker = TaskWorkerThread("%s-Worker-%s" % (pool_name, worker_x))

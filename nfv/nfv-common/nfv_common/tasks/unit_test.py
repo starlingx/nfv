@@ -5,12 +5,11 @@
 #
 from nfv_common import config
 from nfv_common import debug
-from nfv_common import selobj
-from nfv_common import timers
-
 from nfv_common.helpers import coroutine
+from nfv_common import selobj
 from nfv_common.tasks._task_scheduler import TaskScheduler
 from nfv_common.tasks._task_worker_pool import TaskWorkerPool
+from nfv_common import timers
 
 DLOG = debug.debug_get_logger("unit_test", debug_level=debug.DEBUG_LEVEL.INFO)
 
@@ -92,7 +91,7 @@ def _task_coroutine_with_timer(future, arg1, callback):
     callback.send(None)
 
 
-class UnitTest(object):
+class UnitTest:
     def __init__(self):
         self._task_worker_pool = TaskWorkerPool("test-pool", num_workers=1)
         self._scheduler = TaskScheduler("test-scheduler", self._task_worker_pool)

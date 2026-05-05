@@ -10,7 +10,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_plugins.nfvi_plugins.openstack.objects import OPENSTACK_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 
@@ -72,10 +71,10 @@ def create_image(
 
     api_cmd = url + "/v2/images"
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/json"
 
-    api_cmd_payload = dict()
+    api_cmd_payload = {}
     api_cmd_payload["name"] = image_name
     api_cmd_payload["description"] = image_description
     api_cmd_payload["container_format"] = container_format
@@ -86,6 +85,7 @@ def create_image(
     api_cmd_payload["protected"] = protected
 
     if properties is not None:
+        # pylint: disable-next=redefined-builtin
         for property in properties:
             api_cmd_payload[property] = properties[property]
 
@@ -113,38 +113,38 @@ def update_image(
 
     api_cmd = url + "/v2/images/%s" % image_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     api_cmd_headers["Content-Type"] = (
         "application/" + "openstack-images-v2.1-json-patch"
     )
 
-    operations = list()
-    operation = dict()
+    operations = []
+    operation = {}
     operation["op"] = "replace"
     operation["path"] = "/description"
     operation["value"] = image_description
     operations.append(operation)
 
-    operation = dict()
+    operation = {}
     operation["op"] = "replace"
     operation["path"] = "/min_disk"
     operation["value"] = min_disk_size_gb
     operations.append(operation)
 
-    operation = dict()
+    operation = {}
     operation["op"] = "replace"
     operation["path"] = "/min_ram"
     operation["value"] = min_memory_size_mb
     operations.append(operation)
 
-    operation = dict()
+    operation = {}
     operation["op"] = "replace"
     operation["path"] = "/visibility"
     operation["value"] = visibility
     operations.append(operation)
 
-    operation = dict()
+    operation = {}
     operation["op"] = "replace"
     operation["path"] = "/protected"
     operation["value"] = protected
@@ -153,7 +153,7 @@ def update_image(
     if properties:
         for k in list(properties.keys()):
             if properties[k] is not None:
-                operation = dict()
+                operation = {}
                 operation["op"] = "replace"
                 operation["path"] = "/%s" % k
                 operation["value"] = properties[k]
@@ -202,14 +202,14 @@ def upload_image_data_by_url(token, image_id, image_data_url):
 
     api_cmd = url + "/v2/images/%s" % image_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
 
     api_cmd_headers["Content-Type"] = (
         "application/" + "openstack-images-v2.1-json-patch"
     )
 
-    operations = list()
-    operation = dict()
+    operations = []
+    operation = {}
     operation["op"] = "add"
     operation["path"] = "/locations/0"
     operation["value"] = {"url": image_data_url, "metadata": {}}
@@ -238,7 +238,7 @@ def upload_image_data_by_file(token, image_id, image_file):
 
     api_cmd = url + "/v2/images/%s/file" % image_id
 
-    api_cmd_headers = dict()
+    api_cmd_headers = {}
     api_cmd_headers["Content-Type"] = "application/octet-stream"
     file_size = os.path.getsize(image_file)
     api_cmd_headers["Content-Length"] = "%d" % file_size

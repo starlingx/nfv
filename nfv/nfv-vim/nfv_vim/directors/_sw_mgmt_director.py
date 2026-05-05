@@ -7,10 +7,8 @@ import uuid
 
 from nfv_common import config
 from nfv_common import debug
-from nfv_common import schedule
-
 from nfv_common.helpers import Singleton
-
+from nfv_common import schedule
 from nfv_vim import objects
 from nfv_vim import strategy
 
@@ -19,7 +17,7 @@ DLOG = debug.debug_get_logger("nfv_vim.sw_mgmt_director")
 _sw_mgmt_director = None
 
 
-class SwMgmtDirector(object, metaclass=Singleton):
+class SwMgmtDirector(metaclass=Singleton):
     """Software Management Director."""
 
     def __init__(self, sw_update, ignore_alarms, single_controller):
@@ -316,7 +314,6 @@ class SwMgmtDirector(object, metaclass=Singleton):
         schedule.schedule_function_call(
             callback, success, reason, self._sw_update.strategy
         )
-        return
 
     def abort_sw_update_strategy(self, strategy_uuid, stage_id, callback):
         """Abort Software Update Strategy."""
@@ -325,7 +322,6 @@ class SwMgmtDirector(object, metaclass=Singleton):
         schedule.schedule_function_call(
             callback, success, reason, self._sw_update.strategy
         )
-        return
 
     def delete_sw_update_strategy(self, strategy_uuid, force, callback):
         """Delete Software Update Strategy."""
@@ -336,7 +332,6 @@ class SwMgmtDirector(object, metaclass=Singleton):
             del self._sw_update
             self._sw_update = None
         schedule.schedule_function_call(callback, success, reason, strategy_uuid)
-        return
 
     def get_sw_update_strategy(self, sw_update_type):
         """Get Software Update Strategy."""
@@ -565,5 +560,3 @@ def sw_mgmt_director_initialize():
 
 def sw_mgmt_director_finalize():
     """Finalize Software Management Director."""
-
-    pass

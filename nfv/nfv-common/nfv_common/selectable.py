@@ -9,7 +9,7 @@ import socket
 import queue as threading_queue
 
 
-class ThreadQueue(object):
+class ThreadQueue:
     def __init__(self, queue_id):
         if hasattr(queue_id, "encode"):
             queue_id = queue_id.encode()
@@ -35,7 +35,7 @@ class ThreadQueue(object):
             return None
 
 
-class MultiprocessQueue(object):
+class MultiprocessQueue:
     def __init__(self):
         self._queue = multiprocessing.Queue()
 

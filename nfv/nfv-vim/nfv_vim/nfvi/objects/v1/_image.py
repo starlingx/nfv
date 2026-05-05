@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from nfv_vim.nfvi.objects.v1._object import ObjectData
-
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
+from nfv_vim.nfvi.objects.v1._object import ObjectData
 
 
 class ImageAvailabilityStatus(Constants, metaclass=Singleton):
@@ -56,17 +55,17 @@ class ImageAttributes(ObjectData):
         protected,
         properties=None,
     ):
-        super(ImageAttributes, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                container_format=container_format,
-                disk_format=disk_format,
-                min_disk_size_gb=min_disk_size_gb,
-                min_memory_size_mb=min_memory_size_mb,
-                visibility=visibility,
-                protected=protected,
-                properties=properties,
-            )
+            {
+                "container_format": container_format,
+                "disk_format": disk_format,
+                "min_disk_size_gb": min_disk_size_gb,
+                "min_memory_size_mb": min_memory_size_mb,
+                "visibility": visibility,
+                "protected": protected,
+                "properties": properties,
+            }
         )
 
 
@@ -88,20 +87,20 @@ class Image(ObjectData):
         protected,
         properties=None,
     ):
-        super(Image, self).__init__("1.0.0")
+        super().__init__("1.0.0")
         self.update(
-            dict(
-                uuid=uuid,
-                name=name,
-                description=description,
-                avail_status=avail_status,
-                action=action,
-                container_format=container_format,
-                disk_format=disk_format,
-                min_disk_size_gb=min_disk_size_gb,
-                min_memory_size_mb=min_memory_size_mb,
-                visibility=visibility,
-                protected=protected,
-                properties=properties,
-            )
+            {
+                "uuid": uuid,
+                "name": name,
+                "description": description,
+                "avail_status": avail_status,
+                "action": action,
+                "container_format": container_format,
+                "disk_format": disk_format,
+                "min_disk_size_gb": min_disk_size_gb,
+                "min_memory_size_mb": min_memory_size_mb,
+                "visibility": visibility,
+                "protected": protected,
+                "properties": properties,
+            }
         )

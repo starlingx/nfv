@@ -4,13 +4,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from nfv_common import debug
-
 from nfv_common.timers._timestamp import get_monotonic_timestamp_in_ms
 
 DLOG = debug.debug_get_logger("nfv_common.timers.timer")
 
 
-class Timer(object):
+class Timer:
     """Timer."""
 
     _id = 1

@@ -14,7 +14,7 @@ class StateException(Exception):
     def __init__(self, message, reason):
         """Create a State exception."""
 
-        super(StateException, self).__init__(message, reason)
+        super().__init__(message, reason)
         self._reason = reason  # a message string or another exception
         self._message = message
 

@@ -9,7 +9,6 @@ from nfv_common import debug
 from nfv_common.helpers import Constant
 from nfv_common.helpers import Constants
 from nfv_common.helpers import Singleton
-
 from nfv_common.tasks._task_result import TaskResult
 
 DLOG = debug.debug_get_logger("nfv_common.tasks.task")
@@ -27,7 +26,7 @@ class TaskPriority(Constants, metaclass=Singleton):
 TASK_PRIORITY = TaskPriority()
 
 
-class Task(object):
+class Task:
     """Task."""
 
     _READY = Constant("Ready")

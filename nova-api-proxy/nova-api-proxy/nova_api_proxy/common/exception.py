@@ -41,15 +41,14 @@ class ProxyException(Exception):
 
         if not message:
             try:
-                message = self.message % kwargs  # pylint: disable=W1645
+                message = self.message % kwargs
 
             except Exception as e:  # pylint: disable=invalid-name
                 raise e
 
-        super(ProxyException, self).__init__(message)
+        super().__init__(message)
 
     def format_message(self):
         if self.__class__.__name__.endswith("_Remote"):
             return self.args[0]
-        else:
-            return str(self)
+        return str(self)
