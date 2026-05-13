@@ -30,22 +30,6 @@ from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 DLOG = debug.debug_get_logger("nfv_vim.strategy")
 
 
-def filter_highest_patch_versions(ver_list):
-    """Filter a list of strings with major.minor.patch and return a list containing the
-
-    highest patch version for each major.minor.
-    """
-
-    if not ver_list:
-        return []
-    ver_dict = {}
-    for v in ver_list:
-        key = tuple(LooseVersion(v).version[1:3])  # skip 'v', take major.minor
-        if key not in ver_dict or LooseVersion(v) > LooseVersion(ver_dict[key]):
-            ver_dict[key] = v
-    return sorted(ver_dict.values(), key=LooseVersion)
-
-
 class StrategyNames(Constants, metaclass=Singleton):
     """Strategy Names."""
 
@@ -3772,6 +3756,10 @@ class KubeUpgradeStrategy(
         Returns an ordered list of kubernetes versions to complete the upgrade
          If the target is already the active version, the list will be empty
         Raises an exception if the kubernetes chain is broken
+
+        This function is called both at the beginning of an upgrade
+        (where the starting version is 'active') and during mid-upgrade
+        resume/retry (where the starting version may be 'partial').
         """
         # convert the kube_list into a dictionary indexed by version
         kube_dict = {}
@@ -3783,6 +3771,7 @@ class KubeUpgradeStrategy(
         # 'upgrade_from' field.
         # The loop ends when we reach the active/partial version
         # The loop always inserts at the 'front' of the kube_sequence
+        # Only the highest patch version per minor is added to the sequence.
         kube_sequence = []
         ver = target_version
         loop_count = 0
@@ -3801,8 +3790,14 @@ class KubeUpgradeStrategy(
                 # active means we are at the end of the sequence
                 break
 
-            # Add to the kube_sequence if it is any state other than 'active'
-            kube_sequence.insert(0, ver)
+            # Only add this version if a higher patch of the same minor
+            # is not already in the sequence (i.e., keep only the highest
+            # patch per minor version).
+            ver_parsed = LooseVersion(ver).version[1:3]  # [major, minor]
+            if not kube_sequence or tuple(
+                LooseVersion(kube_sequence[0]).version[1:3]
+            ) != tuple(ver_parsed):
+                kube_sequence.insert(0, ver)
 
             # 'partial' means we have started updating that version
             # There can be two partial states if the control plane
@@ -3811,12 +3806,32 @@ class KubeUpgradeStrategy(
                 # if its partial there is no need for another loop
                 break
 
-            # 'upgrade_from' value is a list of versions however the
-            # list should only ever be a single entry so we get the first
-            # value and allow an exception to  be raised if the list is empty
-            # todo(abailey): if the list contains more than one entry the
-            # algorithm may not work, since it may not converge at the active version.
-            ver = kube["upgrade_from"][0]
+            # Select the next version to traverse from 'upgrade_from'.
+            # Priority: if the active or partial (currently running) version
+            # is listed in upgrade_from, pick it directly — the loop will
+            # terminate on the next iteration when it sees that state.
+            # This handles the case where higher patches of the same minor
+            # are installed but not yet active (e.g., active=v1.42.1 but
+            # v1.42.3 also exists). Without this check, the traversal would
+            # pick v1.42.3 and never converge back to the active version.
+            # Otherwise, pick the highest patch from the previous minor.
+            target_minor = (ver_parsed[0], ver_parsed[1] - 1)
+            active_or_partial = None
+            for v in kube["upgrade_from"]:
+                if kube_dict.get(v, {}).get("state") in ("active", "partial"):
+                    active_or_partial = v
+                    break
+            if active_or_partial:
+                ver = active_or_partial
+            else:
+                candidates = []
+                for v in kube["upgrade_from"]:
+                    if tuple(LooseVersion(v).version[1:3]) == target_minor:
+                        candidates.append(v)
+                if candidates:
+                    ver = max(candidates, key=LooseVersion)
+                else:
+                    ver = kube["upgrade_from"][0]
 
             # go around the loop again...
 
@@ -4042,11 +4057,6 @@ class KubeUpgradeStrategy(
         kubeadm_map = self._kubeadm_map()
         kubelet_map = self._kubelet_map()
         kubelet_min_version = min(kubelet_map.values(), key=LooseVersion, default=None)
-
-        # Use the highest patch version when multiple Kubernetes versions
-        # share the same major.minor. This filters out redundant Kubernetes
-        # versions (major.minor.patch).
-        ver_list = filter_highest_patch_versions(ver_list)
 
         # convert the kube_list into a dictionary indexed by version
         kube_dict = {}

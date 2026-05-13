@@ -1856,3 +1856,210 @@ class TestSimplexMultiPatchApplyStrategy(
         self.aio_controller_list = ["controller-0"]
         self.worker_list = []
         self.storage_list = []
+
+
+class SimplexMultiUpgradeFromMixin:
+    """Mixin where upgrade_from contains multiple versions across different minors.
+
+    e.g. v1.43.2 has upgrade_from: [v1.42.0, v1.42.1, v1.42.3, v1.42.4]
+    The strategy should pick v1.42.4 (highest patch one minor lower).
+    """
+
+    FAKE_KUBE_HOST_UPGRADES_LIST = []
+
+    FAKE_KUBE_VERSIONS_LIST = [
+        KubeVersion("v1.42.4", "active", True, [], [], [], []),
+        KubeVersion(
+            "v1.43.2",
+            "available",
+            False,
+            ["v1.42.0", "v1.42.1", "v1.42.3", "v1.42.4"],
+            [],
+            [],
+            [],
+        ),
+    ]
+
+    def is_simplex(self):
+        return True
+
+    def is_duplex(self):
+        return False
+
+
+class MultiUpgradeFromApplyStageMixin(ApplyStageMixin):
+    """Strategy should pick v1.42.4 from upgrade_from and upgrade to v1.43.2."""
+
+    default_from_version = "v1.42.4"
+    default_to_version = "v1.43.2"
+    kube_versions = [
+        "v1.43.2",
+    ]
+    kubelet_versions = [
+        "v1.43.2",
+    ]
+
+
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
+class TestSimplexMultiUpgradeFromApplyStrategy(
+    sw_update_testcase.SwUpdateStrategyTestCase,
+    MultiUpgradeFromApplyStageMixin,
+    SimplexMultiUpgradeFromMixin,
+):
+    """Test that when upgrade_from has multiple versions across different minors,
+
+    the highest patch version one minor lower is selected.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.create_host("controller-0", aio=True)
+        self.std_controller_list = []
+        self.aio_controller_list = ["controller-0"]
+        self.worker_list = []
+        self.storage_list = []
+
+
+class SimplexMultiUpgradeFromActiveLowerPatchMixin:
+    """Mixin where active version is not the highest patch of its minor.
+
+    e.g. active=v1.42.1 but v1.42.3 is also installed (available).
+    Upgrading to v1.44.0 should skip v1.42.3 and go v1.43.0 -> v1.44.0.
+    """
+
+    FAKE_KUBE_HOST_UPGRADES_LIST = []
+
+    FAKE_KUBE_VERSIONS_LIST = [
+        KubeVersion("v1.42.1", "active", True, [], [], [], []),
+        KubeVersion("v1.42.3", "available", False, ["v1.42.0", "v1.42.1"], [], [], []),
+        KubeVersion(
+            "v1.43.0", "available", False, ["v1.42.0", "v1.42.1", "v1.42.3"], [], [], []
+        ),
+        KubeVersion("v1.44.0", "available", False, ["v1.43.0"], [], [], []),
+    ]
+
+    def is_simplex(self):
+        return True
+
+    def is_duplex(self):
+        return False
+
+
+class MultiUpgradeFromActiveLowerPatchApplyStageMixin(ApplyStageMixin):
+    """Strategy should skip v1.42.3 and upgrade v1.43.0 -> v1.44.0."""
+
+    default_from_version = "v1.42.1"
+    default_to_version = "v1.44.0"
+    kube_versions = [
+        "v1.43.0",
+        "v1.44.0",
+    ]
+    kubelet_versions = [
+        "v1.44.0",
+    ]
+
+
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
+class TestSimplexMultiUpgradeFromActiveLowerPatchApplyStrategy(
+    sw_update_testcase.SwUpdateStrategyTestCase,
+    MultiUpgradeFromActiveLowerPatchApplyStageMixin,
+    SimplexMultiUpgradeFromActiveLowerPatchMixin,
+):
+    """Test that when active version is not the highest patch of its minor,
+
+    the strategy skips higher patches and upgrades directly to the next minor.
+    e.g. active=v1.42.1, available=v1.42.3, target=v1.44.0
+    Expected path: v1.42.1 -> v1.43.0 -> v1.44.0 (skips v1.42.3)
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.create_host("controller-0", aio=True)
+        self.std_controller_list = []
+        self.aio_controller_list = ["controller-0"]
+        self.worker_list = []
+        self.storage_list = []
+
+
+class SimplexSameMinorPatchUpgradeMixin:
+    """Mixin where active and target share the same minor version.
+
+    e.g. active=v1.42.4, target=v1.42.9 (same minor, patch-only upgrade).
+    The strategy should produce a single control-plane stage for v1.42.9.
+    """
+
+    FAKE_KUBE_HOST_UPGRADES_LIST = []
+
+    FAKE_KUBE_VERSIONS_LIST = [
+        KubeVersion("v1.42.4", "active", True, [], [], [], []),
+        KubeVersion("v1.42.9", "available", False, ["v1.41.5", "v1.42.4"], [], [], []),
+    ]
+
+    def is_simplex(self):
+        return True
+
+    def is_duplex(self):
+        return False
+
+
+class SameMinorPatchUpgradeApplyStageMixin(ApplyStageMixin):
+    """Strategy should upgrade directly from v1.42.4 to v1.42.9."""
+
+    default_from_version = "v1.42.4"
+    default_to_version = "v1.42.9"
+    kube_versions = [
+        "v1.42.9",
+    ]
+    kubelet_versions = [
+        "v1.42.9",
+    ]
+
+
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
+class TestSimplexSameMinorPatchUpgradeApplyStrategy(
+    sw_update_testcase.SwUpdateStrategyTestCase,
+    SameMinorPatchUpgradeApplyStageMixin,
+    SimplexSameMinorPatchUpgradeMixin,
+):
+    """Test same-minor patch-only upgrade (v1.42.4 -> v1.42.9)."""
+
+    def setUp(self):
+        super().setUp()
+        self.create_host("controller-0", aio=True)
+        self.std_controller_list = []
+        self.aio_controller_list = ["controller-0"]
+        self.worker_list = []
+        self.storage_list = []
