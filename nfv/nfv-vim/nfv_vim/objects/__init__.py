@@ -27,7 +27,6 @@ from nfv_vim.objects._instance_type import INSTANCE_TYPE_EXTENSION  # noqa: F401
 from nfv_vim.objects._instance_type import InstanceType  # noqa: F401
 from nfv_vim.objects._instance_type import InstanceTypeAttributes  # noqa: F401
 from nfv_vim.objects._kube_rootca_update import KubeRootcaUpdate  # noqa: F401
-from nfv_vim.objects._kube_upgrade import KubeUpgrade  # noqa: F401
 from nfv_vim.objects._network import Network  # noqa: F401
 from nfv_vim.objects._network import NetworkProviderData  # noqa: F401
 from nfv_vim.objects._service_host import ServiceHost  # noqa: F401
@@ -44,3 +43,6 @@ from nfv_vim.objects._system_config_update import SystemConfigUpdate  # noqa: F4
 from nfv_vim.objects._tenant import Tenant  # noqa: F401
 from nfv_vim.objects._volume import Volume  # noqa: F401
 from nfv_vim.objects._volume_snapshot import VolumeSnapshot  # noqa: F401
+from nfv_vim.objects.strategies.kube_upgrade._kube_upgrade import (  # noqa: F401
+    KubeUpgrade,
+)

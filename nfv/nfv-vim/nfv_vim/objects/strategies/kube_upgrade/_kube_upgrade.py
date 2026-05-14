@@ -9,16 +9,20 @@ from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import event_log
 from nfv_vim import nfvi
+from nfv_vim.objects._sw_update import DEFAULT_KUBE_AUDIT_RATE
+from nfv_vim.objects._sw_update import KUBERNETES_UPGRADE_EVENT_ID_MAPPING
+from nfv_vim.objects.strategies.kube_upgrade._kube_upgrade_mixins import (
+    KubeUpgradeMixin,
+)
 from nfv_vim.objects._sw_update import SW_UPDATE_ALARM_TYPES
 from nfv_vim.objects._sw_update import SW_UPDATE_EVENT_IDS
 from nfv_vim.objects._sw_update import SW_UPDATE_TYPE
 from nfv_vim.objects._sw_update import SwUpdate
 
 DLOG = debug.debug_get_logger("nfv_vim.objects.kube_upgrade")
-DEFAULT_KUBE_AUDIT_RATE = 5
 
 
-class KubeUpgrade(SwUpdate):
+class KubeUpgrade(SwUpdate, KubeUpgradeMixin):
     """Kubernetes Upgrade Object."""
 
     def __init__(self, sw_update_uuid=None, strategy_data=None):
@@ -27,9 +31,7 @@ class KubeUpgrade(SwUpdate):
             sw_update_uuid=sw_update_uuid,
             strategy_data=strategy_data,
         )
-        # these next two values are used by the audit
-        self._kube_upgrade = None
-        self._kube_upgrade_hosts = []
+        self._init_kube_upgrade_state()
 
     def strategy_build(
         self,
@@ -94,43 +96,7 @@ class KubeUpgrade(SwUpdate):
     @staticmethod
     def event_id(event_id):
         """Returns EVENT_ID corresponding to SW_UPDATE_EVENT_IDS."""
-
-        EVENT_ID_MAPPING = {
-            SW_UPDATE_EVENT_IDS.APPLY_START: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_START
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_INPROGRESS: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_REJECTED: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_REJECTED
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_CANCELLED: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_CANCELLED
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_FAILED: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_FAILED
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_COMPLETED: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_COMPLETED
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_ABORTING: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTING
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT_REJECTED: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_REJECTED
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_ABORT_FAILED: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORT_FAILED
-            ),
-            SW_UPDATE_EVENT_IDS.APPLY_ABORTED: (
-                event_log.EVENT_ID.KUBE_UPGRADE_AUTO_APPLY_ABORTED
-            ),
-        }
-        return EVENT_ID_MAPPING[event_id]
+        return KUBERNETES_UPGRADE_EVENT_ID_MAPPING[event_id]
 
     def nfvi_update(self):
         """NFVI Update."""
@@ -170,52 +136,6 @@ class KubeUpgrade(SwUpdate):
             return False
 
         return True
-
-    @coroutine
-    def nfvi_kube_upgrade_callback(self, timer_id):
-        """Audit Kube Upgrade Callback."""
-
-        from nfv_vim import strategy
-
-        response = yield
-
-        if response["completed"]:
-            DLOG.debug("Audit-Kube-Upgrade callback, response=%s." % response)
-            last_state = self._kube_upgrade.state if self._kube_upgrade else None
-            self._kube_upgrade = response["result-data"]
-            current_state = self._kube_upgrade.state if self._kube_upgrade else None
-            if last_state != current_state:
-                self.handle_event(
-                    strategy.STRATEGY_EVENT.KUBE_UPGRADE_CHANGED, self._kube_upgrade
-                )
-        else:
-            DLOG.error(
-                "Audit-Kube-Upgrade callback, not completed, response=%s." % response
-            )
-
-        self._nfvi_audit_inprogress = False
-
-    @coroutine
-    def nfvi_kube_host_upgrade_list_callback(self, timer_id):
-        """Audit Kube Host Upgrade Callback."""
-
-        from nfv_vim import strategy
-
-        response = yield
-
-        if response["completed"]:
-            DLOG.debug("Audit-Kube-Host-Upgrade callback, response=%s." % response)
-            self._kube_upgrade_hosts = response["result-data"]
-            # todo(abailey): this needs to detect the change
-            self.handle_event(
-                strategy.STRATEGY_EVENT.KUBE_HOST_UPGRADE_CHANGED, self._kube_upgrade
-            )
-        else:
-            DLOG.error(
-                "Audit-Kube-Upgrade callback, not completed, response=%s." % response
-            )
-
-        self._nfvi_audit_inprogress = False
 
     @coroutine
     def nfvi_audit(self):
