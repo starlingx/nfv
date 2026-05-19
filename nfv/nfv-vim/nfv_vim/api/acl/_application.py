@@ -28,7 +28,6 @@ class AuthenticationApplication:
     def __init__(self, app):
         self._app = app
         self._token = None
-        self._oidc_token_cache = {}  # Persistent OIDC token cache
         self._config = openstack.config_load()
         self._directory = openstack.get_directory(
             self._config, openstack.SERVICE_CATEGORY.PLATFORM
@@ -67,9 +66,7 @@ class AuthenticationApplication:
 
         try:
             # Get token claims
-            claims = oidc_utils.get_oidc_token_claims(
-                oidc_token, self._oidc_token_cache
-            )
+            claims = oidc_utils.get_oidc_token_claims(oidc_token)
 
             # Parse claims to get username and roles
             auth_info = oidc_utils.parse_oidc_token_claims(
@@ -88,7 +85,6 @@ class AuthenticationApplication:
             return None
         except Exception as e:
             DLOG.exception("Caught OIDC token validation exception err=%s" % (e))
-            self._oidc_token_cache = {}
             return None
 
     def __call__(self, env, start_response):
