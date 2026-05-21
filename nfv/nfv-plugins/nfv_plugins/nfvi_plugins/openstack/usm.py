@@ -193,6 +193,38 @@ def sw_deploy_activate_rollback(token):
     return response
 
 
+def sw_system_deploy_init(token, release, kube_version=None):
+    """Ask USM to initialize a system deployment."""
+
+    uri = f"system_deploy/{release}/init"
+    url = _usm_api_cmd(token, uri)
+    data = {}
+    if kube_version:
+        data["kube_version"] = kube_version
+
+    response = _api_post(token, url, data)
+    return response
+
+
+def sw_system_deploy_delete(token):
+    """Ask USM to delete a system deployment."""
+
+    uri = "system_deploy"
+    url = _usm_api_cmd(token, uri)
+
+    response = _api_delete(token, url)
+    return response
+
+
+def sw_system_deploy_show(token):
+    """Query USM for information about system deploy (template endpoint)."""
+
+    uri = "system_deploy"
+    url = _usm_api_cmd(token, uri)
+    response = _api_get(token, url)
+    return response
+
+
 def is_target_release_downgrade(index, release_data):
     """Check if target release is a downgrade and if it is RR.
 
@@ -251,12 +283,14 @@ def sw_deploy_get_upgrade_obj(token, release):
     release_info = None
     deploy_info = None
     hosts_info = None
+    system_deploy_info = None
     downgrade = False
     upgrade = False
     vim_rr = None
     release_data = sw_deploy_get_releases(token).result_data
     deploy_data = sw_deploy_show(token).result_data
     hosts_info_data = sw_deploy_host_list(token).result_data
+    system_deploy_data = sw_system_deploy_show(token).result_data
     error_template = (
         "{}, check /var/log/nfv-vim.log or /var/log/software.log for more information."
     )
@@ -313,11 +347,20 @@ def sw_deploy_get_upgrade_obj(token, release):
         DLOG.exception(f"{error}: \n{hosts_info_data=}")
         raise ValueError(error_template.format(error)) from e
 
+    try:
+        if system_deploy_data:
+            system_deploy_info = system_deploy_data[0]
+    except Exception as e:
+        error = f"Failed to parse 'software system-deploy show': {e}"
+        DLOG.exception(f"{error}: \n{system_deploy_info=}")
+        raise ValueError(error_template.format(error)) from e
+
     upgrade_obj = nfvi.objects.v1.Upgrade(
         release,
         release_info,
         deploy_info,
         hosts_info,
+        system_deploy_info,
     )
 
     return upgrade_obj

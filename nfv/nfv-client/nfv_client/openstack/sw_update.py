@@ -316,11 +316,13 @@ def create_strategy(
         api_cmd_payload["rollback"] = kwargs.get("rollback")
         api_cmd_payload["delete"] = kwargs.get("delete")
 
-        # Append snapshot if it was provided. This is to
-        # support API call backwards compatibility, where
-        # the snapshot parameter is unknown.
+        # Append following parameters only if they were provided.
+        # This is to support API call backwards compatibility, where
+        # the parameters are not provided.
         if kwargs.get("snapshot"):
             api_cmd_payload["snapshot"] = kwargs.get("snapshot")
+        if kwargs.get("kube_upgrade"):
+            api_cmd_payload["kube-upgrade"] = kwargs.get("kube_upgrade")
 
     api_cmd_payload["storage-apply-type"] = storage_apply_type
     api_cmd_payload["worker-apply-type"] = worker_apply_type

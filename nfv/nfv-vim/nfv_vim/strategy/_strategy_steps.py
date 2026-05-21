@@ -964,6 +964,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         """
         super().from_dict(data)
         self._release = data["release"]
+        self._snapshot = data.get("snapshot", False)
         return self
 
     def as_dict(self):
@@ -971,6 +972,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
 
         data = super().as_dict()
         data["release"] = self._release
+        data["snapshot"] = self._snapshot
         data["entity_type"] = ""
         data["entity_names"] = []
         data["entity_uuids"] = []
@@ -1428,6 +1430,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         """
         super().from_dict(data)
         self._release = data["release"]
+        self._snapshot = data.get("snapshot", False)
         self._query_inprogress = False
         return self
 
@@ -1439,6 +1442,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         data["entity_names"] = []
         data["entity_uuids"] = []
         data["release"] = self._release
+        data["snapshot"] = self._snapshot
         return data
 
 
@@ -1988,6 +1992,136 @@ class SwDeployActivateRollbackStep(strategy.StrategyStep):
 
     def as_dict(self):
         """Represent the activate-rollback step as a dictionary."""
+
+        data = super().as_dict()
+        data["entity_type"] = ""
+        data["entity_names"] = []
+        data["entity_uuids"] = []
+        return data
+
+
+class SwSystemDeployInitStep(strategy.StrategyStep):
+    """Software System Deploy Init - Strategy Step."""
+
+    def __init__(self, release: str, kube_version: str = None):
+        super().__init__(STRATEGY_STEP_NAME.SW_SYSTEM_DEPLOY_INIT, timeout_in_secs=120)
+        self._release = release
+        self._kube_version = kube_version
+
+    @coroutine
+    def _sw_system_deploy_init_callback(self):
+        """Software system deploy init callback."""
+
+        response = yield
+        DLOG.debug("sw-system-deploy init callback response=%s." % response)
+
+        if response["completed"] and response["complete-data"]:
+            DLOG.debug("sw-system-deploy init completed")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            reason = response["complete-data"].get("info", "").strip()
+            self.stage.step_complete(result, reason)
+        else:
+            reason = response.get(
+                "error-message",
+                "Unknown error while trying software system deploy init, "
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.phase.result_complete_response(response)
+            self.stage.step_complete(result, reason)
+
+    def apply(self):
+        """Software system deploy init."""
+
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+        if self.strategy.nfvi_upgrade.is_system_deploy_active:
+            reason = "Deployment already in progress, skipping init"
+            DLOG.info(reason)
+            return strategy.STRATEGY_STEP_RESULT.SUCCESS, reason
+
+        nfvi.nfvi_sw_system_deploy_init(
+            self._release,
+            self._kube_version,
+            self._sw_system_deploy_init_callback(),
+        )
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """Returns the sw-system-deploy init step object initialized using the given
+
+        dictionary.
+        """
+        super().from_dict(data)
+        self._release = data["release"]
+        self._kube_version = data["kube_version"]
+        return self
+
+    def as_dict(self):
+        """Represent the sw-system-deploy init step as a dictionary."""
+
+        data = super().as_dict()
+        data["release"] = self._release
+        data["kube_version"] = self._kube_version
+        data["entity_type"] = ""
+        data["entity_names"] = []
+        data["entity_uuids"] = []
+        return data
+
+
+class SwSystemDeployDeleteStep(strategy.StrategyStep):
+    """Software System Deploy Delete - Strategy Step."""
+
+    def __init__(self):
+        super().__init__(STRATEGY_STEP_NAME.SW_SYSTEM_DEPLOY_DELETE, timeout_in_secs=60)
+
+    @coroutine
+    def _sw_system_deploy_delete_callback(self):
+        """Software system deploy delete callback."""
+
+        response = yield
+        DLOG.debug("sw-system-deploy delete callback response=%s." % response)
+
+        if response["completed"] and response["complete-data"]:
+            DLOG.debug("sw-system-deploy delete completed")
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            reason = response["complete-data"].get("info", "").strip()
+            self.stage.step_complete(result, reason)
+        else:
+            reason = response.get(
+                "error-message",
+                "Unknown error while trying software system-deploy delete, "
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.phase.result_complete_response(response)
+            self.stage.step_complete(result, reason)
+
+    def apply(self):
+        """Software system deploy delete."""
+
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+
+        nfvi.nfvi_sw_system_deploy_delete(
+            self._sw_system_deploy_delete_callback(),
+        )
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def from_dict(self, data):
+        """Returns the sw-system-deploy init step object initialized using the given
+
+        dictionary.
+        """
+        super().from_dict(data)
+        return self
+
+    def as_dict(self):
+        """Represent the sw-system-deploy init step as a dictionary."""
 
         data = super().as_dict()
         data["entity_type"] = ""
@@ -4720,6 +4854,12 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.UPGRADE_HOSTS == data["name"]:
         step_obj = object.__new__(UpgradeHostsStep)
+
+    elif STRATEGY_STEP_NAME.SW_SYSTEM_DEPLOY_INIT == data["name"]:
+        step_obj = object.__new__(SwSystemDeployInitStep)
+
+    elif STRATEGY_STEP_NAME.SW_SYSTEM_DEPLOY_DELETE == data["name"]:
+        step_obj = object.__new__(SwSystemDeployDeleteStep)
 
     elif STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK == data["name"]:
         step_obj = object.__new__(SwDeployPrecheckStep)

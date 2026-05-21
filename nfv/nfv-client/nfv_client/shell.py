@@ -54,18 +54,21 @@ def get_extra_create_args(cmd_area, args):
         # We can't use mutual exclusion for release and rollback because
         # release is a positional arg.
         if args.release is None and not args.rollback:
-            raise ValueError("Must set rollback or release")
+            raise ValueError("Must set --rollback or release")
         elif args.release is not None and args.rollback:
-            raise ValueError("Cannot set both rollback and release")
+            raise ValueError("Cannot set both --rollback and release")
         elif args.rollback and args.delete:
-            raise ValueError("Cannot set both rollback and delete")
+            raise ValueError("Cannot set both --rollback and --delete")
         elif args.rollback and args.snapshot:
-            raise ValueError("Cannot set both rollback and snapshot")
+            raise ValueError("Cannot set both --rollback and --snapshot")
+        elif args.rollback and args.kube_upgrade:
+            raise ValueError("Cannot set both --kube-upgrade and --rollback")
         return {
             "release": args.release,
             "rollback": args.rollback,
             "delete": args.delete,
             "snapshot": args.snapshot,
+            "kube_upgrade": args.kube_upgrade,
         }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
@@ -500,6 +503,15 @@ def setup_sw_deploy_parser(commands):
         "--snapshot",
         help="add snapshot option",
         action=argparse.BooleanOptionalAction,
+        required=False,
+    )
+
+    # sw-deploy create (kube-upgrade)
+    create_strategy_cmd.add_argument(
+        "--kube-upgrade",
+        help=("Kubernetes version to upgrade to as part of sw-deploy"),
+        type=str,
+        default=None,
         required=False,
     )
 

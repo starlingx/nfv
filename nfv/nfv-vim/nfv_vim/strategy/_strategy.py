@@ -463,6 +463,10 @@ class SwUpdateStrategy(strategy.Strategy):
         """
         DLOG.warn("Strategy Build Failed: %s" % reason)
         self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+        # Need to set the current phase as build because if called before the
+        # actual build phase has started (like a pre validation), then it will
+        # not display the failure reason in the CLI
+        self._current_phase = strategy.STRATEGY_PHASE.BUILD
         self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
         self.build_phase.result_reason = reason
         self.sw_update_obj.strategy_build_complete(
@@ -1932,6 +1936,13 @@ class SwUpgradeStrategy(
     SwDeployControllerHostsMixin,
     SwDeployStorageHostsMixin,
     SwDeployWorkerHostsMixin,
+    # kube mixins are used in the combined upgrade strategy
+    QueryKubeUpgradesMixin,
+    QueryKubeHostUpgradesMixin,
+    QueryKubeVersionsMixin,
+    UpgradeKubeletControllerHostsMixin,
+    UpgradeKubeletWorkerHostsMixin,
+    KubeUpgradeStages,
 ):
     """Software Upgrade - Strategy."""
 
@@ -1948,6 +1959,7 @@ class SwUpgradeStrategy(
         rollback,
         delete,
         snapshot,
+        kube_upgrade_version,
         ignore_alarms,
         single_controller,
     ):
@@ -1968,6 +1980,9 @@ class SwUpgradeStrategy(
         self._rollback = rollback
         self._delete = delete
         self._snapshot = snapshot
+        if kube_upgrade_version and not kube_upgrade_version.startswith("v"):
+            kube_upgrade_version = "v" + kube_upgrade_version
+        self._kube_upgrade_version = kube_upgrade_version
 
         # The following alarms will not prevent a software upgrade operation
         IGNORE_ALARMS = [
@@ -1984,6 +1999,7 @@ class SwUpgradeStrategy(
             "750.006",  # Configuration change requires reapply of cert-manager
             "900.004",  # Incorrect software load
             "900.005",  # Upgrade in progress
+            "900.007",  # Kubernetes upgrade in progress
             "900.020",  # Deploy host completed
             "900.021",  # Deploy host failed
             "900.022",  # Deploy in host-rollback-done state
@@ -1991,12 +2007,22 @@ class SwUpgradeStrategy(
             "900.201",  # Software upgrade auto apply in progress
             "900.202",  # Software deploy auto-apply aborting
             "900.231",  # Software deployment data is out of sync
+            "900.401",  # kube-upgrade-auto-apply-inprogress
+            "900.402",  # Kubernetes upgrade auto-apply aborting
             "900.701",  # Node tainted
         ]
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
         self._nfvi_upgrade = None
         self._ignore_alarms_conditional = None
+
+        if self._kube_upgrade_version:
+            self.initialize_mixin()
+
+    @property
+    def kube_to_version(self):
+        """Property for KubeUpgradeLogicMixin"""
+        return self._kube_upgrade_version
 
     @property
     def nfvi_upgrade(self):
@@ -2016,6 +2042,13 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=self._release))
+
+        if self._kube_upgrade_version:
+            stage.add_step(strategy.QueryKubeVersionsStep())
+            stage.add_step(strategy.QueryKubeUpgradeStep())
+            stage.add_step(strategy.KubeUpgradeCleanupAbortedStep())
+            stage.add_step(strategy.QueryKubeHostUpgradeStep())
+
         # Precheck is part of create phase because DC requested it
         stage.add_step(
             strategy.SwDeployPrecheckStep(
@@ -2038,40 +2071,24 @@ class SwUpgradeStrategy(
         """Build the strategy."""
 
         if self._release is None and not self._rollback:
-            reason = "Release or rollback must be set"
-            DLOG.error(reason)
-            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-            self.build_phase.result_reason = reason
-            self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason
-            )
-            self.save()
-            super().build()
-
+            reason = "Must set rollback or release"
+            self.report_build_failure(reason)
+        elif self._kube_upgrade_version and self._rollback:
+            reason = "Cannot set both kube_upgrade and rollback"
+            self.report_build_failure(reason)
         elif self._release is not None and self._rollback:
             reason = "Cannot set both release and rollback"
-            DLOG.error(reason)
-            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-            self.build_phase.result_reason = reason
-            self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason
-            )
-            self.save()
-            super().build()
+            self.report_build_failure(reason)
 
         elif self._rollback and self._delete is not None:
             reason = "Cannot set both delete and rollback, delete is set by default"
-            DLOG.error(reason)
-            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-            self.build_phase.result_reason = reason
-            self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason
+            self.report_build_failure(reason)
+        elif self._kube_upgrade_version and self.get_second_host() is not None:
+            reason = (
+                "Combined software and Kubernetes upgrade is only supported "
+                "on simplex systems."
             )
-            self.save()
-            super().build()
+            self.report_build_failure(reason)
 
         # TODO(sshathee): Remove this conditon when implementing snapshot
         # with rollback command
@@ -2080,15 +2097,7 @@ class SwUpgradeStrategy(
                 "Cannot set both snapshot and rollback, if snapshot"
                 "is available it will be forcibly used."
             )
-            DLOG.error(reason)
-            self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-            self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-            self.build_phase.result_reason = reason
-            self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason
-            )
-            self.save()
-            super().build()
+            self.report_build_failure(reason)
 
         elif self._rollback:
             return self._build_rollback()
@@ -2256,6 +2265,32 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.SwDeployDeleteStep(release=self._release))
         self.apply_phase.add_stage(stage)
 
+    def _add_system_deploy_init_stage(self, release, kube_version=None):
+        """Add system deploy init strategy stage."""
+
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.SW_SYSTEM_DEPLOY_INIT
+        )
+        # system-deploy init must be done on controller-0 for major release
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
+        stage.add_step(strategy.SwSystemDeployInitStep(release, kube_version))
+        self.apply_phase.add_stage(stage)
+
+    def _add_system_deploy_delete_stage(self):
+        """Add system deploy delete strategy stage."""
+
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.SW_SYSTEM_DEPLOY_DELETE
+        )
+        # system-deploy delete must be done on controller-0 for major release
+        self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
+        stage.add_step(strategy.SwSystemDeployDeleteStep())
+        self.apply_phase.add_stage(stage)
+
     def _build_complete_normal(self, result, result_reason):
         from nfv_vim import strategy
 
@@ -2329,6 +2364,46 @@ class SwUpgradeStrategy(
                 do_complete = False
                 do_delete = False
 
+            if self._kube_upgrade_version:
+                if self.nfvi_kube_upgrade is not None:
+                    from nfv_vim import nfvi
+
+                    v1_objects = nfvi.objects.v1.KUBE_UPGRADE_STATE
+                    POST_CONTROL_PLANE_STATES = {
+                        v1_objects.KUBE_UPGRADING_KUBELETS,
+                        v1_objects.KUBE_HOST_UNCORDON,
+                        v1_objects.KUBE_HOST_UNCORDON_FAILED,
+                        v1_objects.KUBE_HOST_UNCORDON_COMPLETE,
+                        v1_objects.KUBE_UPGRADE_COMPLETE,
+                        v1_objects.KUBE_POST_UPDATING_APPS,
+                        v1_objects.KUBE_POST_UPDATING_APPS_FAILED,
+                        v1_objects.KUBE_POST_UPDATED_APPS,
+                    }
+                    if self.nfvi_kube_upgrade.state in POST_CONTROL_PLANE_STATES:
+                        reason = (
+                            "Kubernetes upgrade is past the control plane "
+                            f"phase (state={self.nfvi_kube_upgrade.state}). "
+                            "Cannot proceed with sw-upgrade strategy."
+                        )
+                        DLOG.error(reason)
+                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
+                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
+                        self.build_phase.result_reason = reason
+                        self.sw_update_obj.strategy_build_complete(
+                            False, self.build_phase.result_reason
+                        )
+                        self.save()
+                        return
+
+                if do_start:
+                    self._add_system_deploy_init_stage(
+                        self._release, self._kube_upgrade_version
+                    )
+
+                self._build_kube_upgrade_stages()
+                if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
+                    return
+
             if do_start:
                 self._add_upgrade_start_stage()
             else:
@@ -2345,7 +2420,12 @@ class SwUpgradeStrategy(
                 DLOG.info("Doing nothing sw-deploy already completed")
 
             if do_delete:
-                self._add_deploy_delete_stage()
+                if self._kube_upgrade_version:
+                    self._add_kube_upgrade_complete_stage()
+                    self._add_deploy_delete_stage()
+                    self._add_system_deploy_delete_stage()
+                else:
+                    self._add_deploy_delete_stage()
             else:
                 DLOG.info("Doing nothing sw-deploy already deleted")
 
@@ -2361,6 +2441,11 @@ class SwUpgradeStrategy(
                 )
                 self.save()
                 return
+
+            DLOG.info(
+                f"Total stages={len(self.apply_phase.stages)}. "
+                f"List of stages: {[stage.name for stage in self.apply_phase.stages]}"
+            )
         else:
             self.sw_update_obj.strategy_build_complete(
                 False, self.build_phase.result_reason
@@ -2600,6 +2685,7 @@ class SwUpgradeStrategy(
                 nfvi_upgrade_data["release_info"],
                 nfvi_upgrade_data["deploy_info"],
                 nfvi_upgrade_data["hosts_info"],
+                nfvi_upgrade_data.get("system_deploy"),
             )
         else:
             self._nfvi_upgrade = None

@@ -343,8 +343,13 @@ class StrategyPhase:
 
             DLOG.info("Phase %s running %s stage." % (self._name, stage.name))
 
-            stage_result, stage_result_reason = stage.apply()
             self._current_stage = idx
+            stage_result, stage_result_reason = stage.apply()
+            # If stage completed synchronously, stage_complete() was already
+            # called recursively which advanced _current_stage and re-entered
+            # _apply(). Detect this and return to avoid running stages twice.
+            if self._current_stage != idx:
+                return self._result, self._result_reason
 
             if STRATEGY_STAGE_RESULT.WAIT == stage_result:
                 if 0 < stage.timeout_in_secs:

@@ -375,8 +375,9 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
         DLOG.info("Step (%s) apply." % self._name)
 
         alarm_ignore_list = [
-            "900.401",
-        ]  # ignore the auto apply alarm
+            "900.201",  # Software deploy auto apply alarm
+            "900.401",  # Kubernetes upgrade auto apply alarm
+        ]
         nfvi.nfvi_kube_upgrade_start(
             self._to_version, self._force, alarm_ignore_list, self._response_callback()
         )

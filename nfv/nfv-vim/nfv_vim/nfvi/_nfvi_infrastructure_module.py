@@ -433,6 +433,24 @@ def nfvi_sw_deploy_activate_rollback(callback):
     return cmd_id
 
 
+def nfvi_sw_system_deploy_init(release, kube_version, callback):
+    """Software system deploy initialization."""
+
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        "sw_system_deploy_init", release, kube_version, callback=callback
+    )
+    return cmd_id
+
+
+def nfvi_sw_system_deploy_delete(callback):
+    """Software system deploy deletion."""
+
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        "sw_system_deploy_delete", callback=callback
+    )
+    return cmd_id
+
+
 def nfvi_disable_container_host_services(
     host_uuid, host_name, host_personality, host_offline, callback
 ):

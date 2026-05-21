@@ -40,6 +40,7 @@ IGNORE_ALARMS_LIST = [
     "750.006",
     "900.004",
     "900.005",
+    "900.007",
     "900.020",
     "900.021",
     "900.022",
@@ -47,11 +48,13 @@ IGNORE_ALARMS_LIST = [
     "900.201",
     "900.202",
     "900.231",
+    "900.401",
+    "900.402",
     "900.701",
 ]
 
 
-# TODO(jkraitbe): Update this when retry count is decicded.
+# TODO(jkraitbe): Update this when retry count is decided.
 # utility method for the formatting of unlock-hosts stage as dict
 # workers default to 5 retries with 120 second delay between attempts
 # std controllers and storage have 0 retries
@@ -91,6 +94,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         rollback=False,
         delete=False,
         snapshot=False,
+        kube_upgrade_version=None,
         nfvi_upgrade=None,
         single_controller=False,
     ):
@@ -108,6 +112,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             rollback=rollback,
             delete=delete,
             snapshot=snapshot,
+            kube_upgrade_version=kube_upgrade_version,
             ignore_alarms=[],
             single_controller=single_controller,
         )

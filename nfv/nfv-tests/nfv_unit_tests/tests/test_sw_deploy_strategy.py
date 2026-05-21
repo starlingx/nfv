@@ -11,6 +11,8 @@ from nfv_common import strategy as common_strategy
 from nfv_plugins.nfvi_plugins.openstack.usm import is_target_release_downgrade
 from nfv_unit_tests.tests import sw_update_testcase
 from nfv_vim import nfvi
+from nfv_vim.nfvi.objects.v1 import KUBE_UPGRADE_STATE
+from nfv_vim.nfvi.objects.v1 import KubeVersion
 from nfv_vim.objects import HOST_PERSONALITY
 from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
@@ -23,6 +25,82 @@ PATCH_RELEASE_UPGRADE = "3.2.2"
 # Minor and Major are both major release upgrades
 MINOR_RELEASE_UPGRADE = "4.0.1"
 MAJOR_RELEASE_UPGRADE = "4.0.1"
+
+# Kubernetes version constants reused across combined strategy tests
+_COMBINED_FROM_KUBE = "v1.29.2"
+_COMBINED_TO_KUBE = "v1.30.6"
+
+# A minimal kube versions list: FROM is active, TO is available.
+# Used to satisfy _build_kube_upgrade_stages version chain lookups.
+_COMBINED_KUBE_VERSIONS_LIST = [
+    KubeVersion(
+        _COMBINED_FROM_KUBE,  # kube_version
+        "active",  # state
+        True,  # target
+        [],  # upgrade_from
+        [],  # downgrade_to
+        [],  # applied_patches
+        [],  # available_patches
+    ),
+    KubeVersion(
+        _COMBINED_TO_KUBE,  # kube_version
+        "available",  # state
+        False,  # target
+        [_COMBINED_FROM_KUBE],  # upgrade_from
+        [],  # downgrade_to
+        [],  # applied_patches
+        [],  # available_patches
+    ),
+]
+
+# A kube versions list where the target version is already active/upgraded.
+_COMBINED_KUBE_VERSIONS_ALREADY_UPGRADED = [
+    KubeVersion(
+        _COMBINED_FROM_KUBE,
+        "active",
+        True,
+        [],
+        [],
+        [],
+        [],
+    ),
+    KubeVersion(
+        _COMBINED_TO_KUBE,
+        "active",  # already active = already upgraded
+        True,
+        [_COMBINED_FROM_KUBE],
+        [],
+        [],
+        [],
+    ),
+]
+
+
+def _make_nfvi_upgrade(release, state="available", reboot_required=True):
+    """Helper: build an nfvi.objects.v1.Upgrade for combined strategy tests."""
+    return nfvi.objects.v1.Upgrade(
+        release,
+        {
+            "state": state,
+            "reboot_required": reboot_required,
+            "sw_version": MAJOR_RELEASE_UPGRADE,
+        },
+        None,
+        None,
+    )
+
+
+def _make_nfvi_alarm(alarm_id="900.007"):
+    """Helper: build a minimal nfvi Alarm object."""
+    return nfvi.objects.v1.Alarm(
+        alarm_uuid="fake-uuid",
+        alarm_id=alarm_id,
+        entity_instance_id="host=controller-0",
+        severity="major",
+        reason_text="test alarm",
+        timestamp="2026-01-01T00:00:00",
+        mgmt_affecting=True,
+    )
 
 
 # utility method for the formatting of unlock-hosts stage as dict
@@ -38,20 +116,32 @@ def _unlock_hosts_stage_as_dict(host_names, retry_count=5, retry_delay=120):
     }
 
 
-@mock.patch(
-    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
-)
-@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
-@mock.patch(
-    "nfv_vim.objects._sw_update.timers.timers_create_timer",
-    sw_update_testcase.fake_timer,
-)
-@mock.patch(
-    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
-    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
-)
-@mock.patch.object(nfvi.objects.v1.upgrade, "SW_VERSION", INITIAL_RELEASE)
-class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
+class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
+    def setUp(self):
+        super().setUp()
+        patchers = [
+            mock.patch(
+                "nfv_vim.event_log._instance._event_issue",
+                sw_update_testcase.fake_event_issue,
+            ),
+            mock.patch(
+                "nfv_vim.objects._sw_update.SwUpdate.save",
+                sw_update_testcase.fake_save,
+            ),
+            mock.patch(
+                "nfv_vim.objects._sw_update.timers.timers_create_timer",
+                sw_update_testcase.fake_timer,
+            ),
+            mock.patch(
+                "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+                sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+            ),
+            mock.patch.object(nfvi.objects.v1.upgrade, "SW_VERSION", INITIAL_RELEASE),
+        ]
+        for p in patchers:
+            p.start()
+            self.addCleanup(p.stop)
+
     def create_sw_deploy_strategy(
         self,
         controller_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
@@ -64,6 +154,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         rollback=False,
         delete=False,
         snapshot=False,
+        kube_upgrade_version=None,
         nfvi_upgrade=None,
         single_controller=False,
     ):
@@ -81,6 +172,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             rollback=rollback,
             delete=delete,
             snapshot=snapshot,
+            kube_upgrade_version=kube_upgrade_version,
             ignore_alarms=[],
             single_controller=single_controller,
         )
@@ -196,6 +288,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         return controller_hosts, storage_hosts, worker_hosts, strategy
 
+
+class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
     def test_is_major_release(self):
         is_major_release = nfvi.objects.v1.is_major_release
         assert is_major_release(INITIAL_RELEASE, MAJOR_RELEASE_UPGRADE)
@@ -4088,3 +4182,751 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         assert not upgrade
         assert downgrade
         assert not vim_rr
+
+    def test_sw_upgrade_strategy_kube_version_normalization(self):
+        """Test that kube_upgrade_version without 'v' prefix gets 'v' prepended.
+
+        Verify:
+        - "1.29.0" is stored as "v1.29.0"
+        - "v1.29.0" is stored unchanged as "v1.29.0"
+        """
+        strategy_no_prefix = self.create_sw_deploy_strategy(
+            kube_upgrade_version="1.29.0"
+        )
+        self.assertEqual("v1.29.0", strategy_no_prefix._kube_upgrade_version)
+
+        strategy_with_prefix = self.create_sw_deploy_strategy(
+            kube_upgrade_version="v1.29.0"
+        )
+        self.assertEqual("v1.29.0", strategy_with_prefix._kube_upgrade_version)
+
+    def test_sw_upgrade_strategy_kube_upgrade_version_with_rollback_fails(self):
+        """Test that setting both kube_upgrade_version and rollback=True fails build.
+
+        Verify:
+        - build() sets state to BUILD_FAILED
+        - build_phase result is FAILED
+        """
+        self.create_host("controller-0", aio=True)
+
+        strategy = self.create_sw_deploy_strategy(
+            release=None,
+            rollback=True,
+            kube_upgrade_version="v1.29.0",
+            delete=None,
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+        strategy.build()
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertEqual(
+            common_strategy.STRATEGY_PHASE_RESULT.FAILED, strategy.build_phase.result
+        )
+        self.assertEqual(
+            "Cannot set both kube_upgrade and rollback",
+            strategy.build_phase.result_reason,
+        )
+
+    @mock.patch("nfv_common.strategy._strategy.Strategy._build")
+    def test_sw_upgrade_strategy_build_query_includes_kube_steps(self, fake_build):
+        """Test that build phase includes kube query steps when kube_upgrade_version set
+
+        Verify:
+        - QueryKubeVersionsStep, QueryKubeUpgradeStep, KubeUpgradeCleanupAbortedStep,
+          and QueryKubeHostUpgradeStep are added to the build query stage.
+        """
+        self.create_host("controller-0", aio=True)
+
+        fake_build.return_value = None
+
+        strategy = self.create_sw_deploy_strategy(
+            kube_upgrade_version="v1.29.0",
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+        strategy.build()
+
+        build_phase = strategy.build_phase.as_dict()
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-query",
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "query-upgrade"},
+                        {"name": "query-kube-versions"},
+                        {"name": "query-kube-upgrade"},
+                        {"name": "kube-upgrade-cleanup-aborted"},
+                        {"name": "query-kube-host-upgrade"},
+                        {"name": "sw-deploy-precheck"},
+                    ],
+                }
+            ],
+        }
+        sw_update_testcase.validate_phase(build_phase, expected_results)
+
+    def test_sw_upgrade_strategy_is_combined_strategy_by_kube_version(self):
+        """Test _is_combined_strategy() reflects whether kube_upgrade_version is set.
+
+        Verify:
+        - When kube_upgrade_version is set: _is_combined_strategy() is truthy and
+          the nfvi_kube_upgrade mixin attribute is initialized.
+        - When kube_upgrade_version is None: _kube_upgrade_version is None,
+          _is_combined_strategy() is falsy and the mixin attribute is not set.
+        """
+        strategy = self.create_sw_deploy_strategy(
+            kube_upgrade_version="v1.29.0",
+        )
+
+        self.assertTrue(strategy._is_combined_strategy())
+        self.assertTrue(hasattr(strategy, "_nfvi_kube_upgrade"))
+
+        strategy = self.create_sw_deploy_strategy(
+            kube_upgrade_version=None,
+        )
+
+        self.assertIsNone(strategy._kube_upgrade_version)
+        self.assertFalse(strategy._is_combined_strategy())
+        self.assertFalse(hasattr(strategy, "_nfvi_kube_upgrade"))
+
+    def test_sw_upgrade_strategy_kube_upgrade_post_control_plane_state_fails(self):
+        """Test build fails when kube upgrade is past the control plane phase.
+
+        Verify:
+        - build_complete sets state to BUILD_FAILED when nfvi_kube_upgrade is in
+          a post-control-plane state (e.g. KUBE_UPGRADING_KUBELETS)
+        """
+        self.create_host("controller-0", aio=True)
+
+        release = "starlingx-24.03.1"
+        strategy = self.create_sw_deploy_strategy(
+            kube_upgrade_version="v1.29.0",
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                {
+                    "state": "deploying",
+                    "reboot_required": True,
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            ),
+        )
+
+        strategy.nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+            state=KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS,
+            from_version="v1.28.0",
+            to_version="v1.29.0",
+        )
+        strategy.nfvi_kube_versions_list = []
+        strategy.nfvi_kube_host_upgrade_list = []
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertEqual(
+            common_strategy.STRATEGY_PHASE_RESULT.FAILED, strategy.build_phase.result
+        )
+        expected_reason = (
+            "Kubernetes upgrade is past the control plane "
+            f"phase (state={KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS}). "
+            "Cannot proceed with sw-upgrade strategy."
+        )
+        self.assertEqual(expected_reason, strategy.build_phase.result_reason)
+
+
+class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
+    """Tests for SwUpgradeStrategy with kube_upgrade_version set (combined strategy)."""
+
+    RELEASE = "starlingx-24.03.1"
+    KUBE_VER = _COMBINED_TO_KUBE
+
+    def setUp(self):
+        super().setUp()
+        self.create_host("controller-0", aio=True)
+        self.fake_upgrade_obj = SwUpgrade()
+        self.strategy = self._create_combined_strategy()
+        self.strategy.sw_update_obj = self.fake_upgrade_obj
+        self.fake_upgrade_obj._strategy = self.strategy
+
+    def _create_combined_strategy(
+        self,
+        kube_upgrade_version=None,
+        nfvi_upgrade=None,
+        nfvi_kube_upgrade=None,
+        kube_versions_list=None,
+        kube_hosts_list=None,
+        single_controller=True,
+        rollback=False,
+        delete=False,
+    ):
+        """Create a SwUpgradeStrategy with kube_upgrade_version populated.
+
+        Populates the mixin query results that would normally come from the
+        build-phase query steps, so build_complete can be called directly.
+        """
+        if kube_upgrade_version is None:
+            kube_upgrade_version = self.KUBE_VER
+
+        strategy = SwUpgradeStrategy(
+            uuid=str(uuid.uuid4()),
+            controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            storage_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
+            max_parallel_worker_hosts=10,
+            default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
+            alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
+            release=self.RELEASE,
+            rollback=rollback,
+            delete=delete,
+            snapshot=False,
+            kube_upgrade_version=kube_upgrade_version,
+            ignore_alarms=[],
+            single_controller=single_controller,
+        )
+
+        if nfvi_upgrade is None:
+            nfvi_upgrade = _make_nfvi_upgrade(self.RELEASE, state="available")
+        strategy.nfvi_upgrade = nfvi_upgrade
+
+        # Populate mixin fields that the build query steps would normally fill
+        strategy.nfvi_kube_upgrade = nfvi_kube_upgrade
+        strategy.nfvi_kube_versions_list = (
+            kube_versions_list
+            if kube_versions_list is not None
+            else _COMBINED_KUBE_VERSIONS_LIST
+        )
+        strategy.nfvi_kube_host_upgrade_list = (
+            kube_hosts_list if kube_hosts_list is not None else []
+        )
+
+        return strategy
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_no_existing_kube_upgrade_has_kube_stages_before_sw_deploy(self):
+        """Test combined strategy with no existing kube upgrade.
+
+        Verify:
+        - apply phase begins with sw-system-deploy-init (kube_version injected)
+        - kube upgrade stages follow: start, download-images, pre-app-update,
+          networking, storage, first-control-plane
+        - no kube-host-cordon stage (suppressed for combined strategy)
+        - no kube-upgrade-kubelet stages (deferred to unlock after sw-deploy)
+        - sw-deploy stages follow the kube stages
+        """
+        self.strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertFalse(self.strategy.is_build_failed())
+
+        stage_names = [s.name for s in self.strategy.apply_phase.stages]
+
+        # sw-system-deploy-init must be first
+        self.assertEqual(stage_names[0], "sw-system-deploy-init")
+
+        # kube upgrade stages must appear before sw-upgrade-start
+        kube_start_idx = stage_names.index("kube-upgrade-start")
+        sw_start_idx = stage_names.index("sw-upgrade-start")
+        self.assertLess(kube_start_idx, sw_start_idx)
+
+        # All expected kube control-plane stages must be present
+        for expected in [
+            "kube-upgrade-start",
+            "kube-upgrade-download-images",
+            "kube-pre-application-update",
+            "kube-upgrade-networking",
+            "kube-upgrade-storage",
+            "kube-upgrade-first-control-plane %s" % self.KUBE_VER,
+        ]:
+            self.assertIn(expected, stage_names, "Missing stage: %s" % expected)
+
+        self.assertNotIn("kube-host-cordon", stage_names)
+        self.assertNotIn("kube-host-uncordon", stage_names)
+
+        kubelet_stages = [s for s in stage_names if "kubelet" in s]
+        self.assertEqual(
+            [],
+            kubelet_stages,
+            "Kubelet stages should be deferred in combined strategy",
+        )
+
+        sw_update_testcase.validate_strategy_persists(self.strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_duplex_system_fails_build(self):
+        """Test BUILD_FAILED when combined strategy is attempted on a duplex system.
+
+        The combined sw-upgrade + kube-upgrade feature is simplex-only.
+        The rejection happens in build() before build_complete is ever called.
+        Verify:
+        - controller-1 present causes BUILD_FAILED
+        - result_reason identifies the simplex-only restriction
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self.create_sw_deploy_strategy(kube_upgrade_version=self.KUBE_VER)
+
+        strategy.nfvi_upgrade = _make_nfvi_upgrade(self.RELEASE, state="available")
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build()
+
+        error_msg = (
+            "Combined software and Kubernetes upgrade is only supported "
+            "on simplex systems."
+        )
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertIn(error_msg, strategy.build_phase.result_reason)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_resume_after_kube_upgrade_started_skips_start_stage(self):
+        """Test combined strategy resumes correctly when kube upgrade already started.
+
+        Verify:
+        - kube-upgrade-start stage is skipped
+        - resumes at kube-upgrade-download-images
+        - sw-deploy stages still follow
+        """
+        nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+            state=KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
+            from_version=_COMBINED_FROM_KUBE,
+            to_version=_COMBINED_TO_KUBE,
+        )
+
+        strategy = self._create_combined_strategy(nfvi_kube_upgrade=nfvi_kube_upgrade)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertFalse(strategy.is_build_failed())
+
+        stage_names = [s.name for s in strategy.apply_phase.stages]
+
+        self.assertNotIn("kube-upgrade-start", stage_names)
+        self.assertIn("kube-upgrade-download-images", stage_names)
+        self.assertIn("sw-upgrade-start", stage_names)
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_resume_after_kube_upgraded_first_master_skips_early_stages(self):
+        """Test combined strategy resumes from KUBE_UPGRADED_FIRST_MASTER.
+
+        Verify:
+        - start, download-images, pre-app-update, networking, storage stages skipped
+        - resumes at second-control-plane (simplex: skipped) or directly at sw-deploy
+        - no kubelet stages
+        """
+        nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+            state=KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+            from_version=_COMBINED_FROM_KUBE,
+            to_version=_COMBINED_TO_KUBE,
+        )
+
+        strategy = self._create_combined_strategy(nfvi_kube_upgrade=nfvi_kube_upgrade)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertFalse(strategy.is_build_failed())
+
+        stage_names = [s.name for s in strategy.apply_phase.stages]
+
+        # Early kube stages must be absent
+        for skipped in [
+            "kube-upgrade-start",
+            "kube-upgrade-download-images",
+            "kube-pre-application-update",
+            "kube-upgrade-networking",
+            "kube-upgrade-storage",
+        ]:
+            self.assertNotIn(skipped, stage_names)
+
+        # sw-deploy stages must still be present
+        self.assertIn("sw-upgrade-start", stage_names)
+        # No kubelet stages
+        self.assertFalse(any("kubelet" in s for s in stage_names))
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_post_control_plane_kube_state_fails_build(self):
+        """Test BUILD_FAILED when kube upgrade is past the control-plane phase.
+
+        Covers all states in POST_CONTROL_PLANE_STATES defined in
+        _build_complete_normal. Each state must cause BUILD_FAILED with a
+        reason that identifies the offending state.
+        """
+        post_control_plane_states = [
+            KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS,
+            KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON,
+            KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED,
+            KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE,
+            KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
+            KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS,
+            KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED,
+            KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS,
+        ]
+
+        for state in post_control_plane_states:
+            with self.subTest(state=state):
+                nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+                    state=state,
+                    from_version=_COMBINED_FROM_KUBE,
+                    to_version=_COMBINED_TO_KUBE,
+                )
+
+                strategy = self._create_combined_strategy(
+                    nfvi_kube_upgrade=nfvi_kube_upgrade
+                )
+                strategy.sw_update_obj = self.fake_upgrade_obj
+
+                strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+                self.assertEqual(
+                    common_strategy.STRATEGY_STATE.BUILD_FAILED,
+                    strategy._state,
+                    "Expected BUILD_FAILED for state=%s" % state,
+                )
+                self.assertIn(
+                    "past the control plane",
+                    strategy.build_phase.result_reason,
+                )
+                self.assertIn(state, strategy.build_phase.result_reason)
+
+                # Reset host table for next subTest iteration
+                self._host_table.clear()
+                self.create_host("controller-0", aio=True)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_active_alarms_fail_build(self):
+        """Test BUILD_FAILED when active alarms are present.
+
+        Verify:
+        - _nfvi_alarms populated with a non-ignored alarm causes BUILD_FAILED
+        - result_reason contains 'active alarms present' and the alarm id
+        """
+        # Inject an alarm that is NOT in the ignore list
+        self.strategy._nfvi_alarms = [_make_nfvi_alarm(alarm_id="400.001")]
+
+        self.strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertEqual(
+            common_strategy.STRATEGY_STATE.BUILD_FAILED, self.strategy._state
+        )
+        self.assertIn("active alarms present", self.strategy.build_phase.result_reason)
+        self.assertIn("400.001", self.strategy.build_phase.result_reason)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_kube_already_upgraded_fails_build(self):
+        """Test BUILD_FAILED when the target kube version is already active.
+
+        Verify:
+        - nfvi_kube_upgrade is None (no upgrade in progress)
+        - target version is already 'active' in kube_versions_list
+        - result is BUILD_FAILED with reason 'Kubernetes is already upgraded to'
+        """
+        strategy = self._create_combined_strategy(
+            nfvi_kube_upgrade=None,
+            kube_versions_list=_COMBINED_KUBE_VERSIONS_ALREADY_UPGRADED,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertIn(
+            "Kubernetes is already upgraded to",
+            strategy.build_phase.result_reason,
+        )
+        self.assertIn(self.KUBE_VER, strategy.build_phase.result_reason)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_invalid_kube_to_version_fails_build(self):
+        """Test BUILD_FAILED when kube_upgrade_version is not in kube_versions_list.
+
+        Verify:
+        - kube_upgrade_version points to a version absent from nfvi_kube_versions_list
+        - result is BUILD_FAILED with reason 'Invalid to_version value'
+        """
+        strategy = self._create_combined_strategy(
+            kube_upgrade_version="v9.99.99",  # not in _COMBINED_KUBE_VERSIONS_LIST
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertIn("Invalid to_version value", strategy.build_phase.result_reason)
+        self.assertIn("v9.99.99", strategy.build_phase.result_reason)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_kube_upgrade_invalid_resume_state_fails_build(self):
+        """Test BUILD_FAILED when kube upgrade is in an unresumable state.
+
+        Verify:
+        - a kube upgrade state not present in RESUME_STATE causes BUILD_FAILED
+        - result_reason contains 'Unable to resume kube upgrade from state'
+        """
+        # KUBE_UPGRADING_FIRST_MASTER is a transient in-progress state that
+        # is not a key in RESUME_STATE (only the *_FAILED and *_DONE variants are)
+        nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+            state=KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER,
+            from_version=_COMBINED_FROM_KUBE,
+            to_version=_COMBINED_TO_KUBE,
+        )
+
+        strategy = self._create_combined_strategy(nfvi_kube_upgrade=nfvi_kube_upgrade)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertIn(
+            "Unable to resume kube upgrade from state",
+            strategy.build_phase.result_reason,
+        )
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_delete_true_appends_kube_and_deploy_cleanup_stages(self):
+        """Test that delete=True with kube_upgrade_version appends cleanup stages.
+
+        Verify apply phase ends with, in order:
+          kube-upgrade-complete → sw-deploy-delete → sw-system-deploy-delete
+        """
+        strategy = self._create_combined_strategy(delete=True)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertFalse(strategy.is_build_failed())
+
+        stage_names = [s.name for s in strategy.apply_phase.stages]
+
+        self.assertIn("kube-upgrade-complete", stage_names)
+        self.assertIn("sw-deploy-delete", stage_names)
+        self.assertIn("sw-system-deploy-delete", stage_names)
+
+        kube_complete_idx = stage_names.index("kube-upgrade-complete")
+        sw_delete_idx = stage_names.index("sw-deploy-delete")
+        sys_delete_idx = stage_names.index("sw-system-deploy-delete")
+
+        self.assertLess(kube_complete_idx, sw_delete_idx)
+        self.assertLess(sw_delete_idx, sys_delete_idx)
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_delete_false_omits_cleanup_stages(self):
+        """Test that delete=False omits kube-upgrade-complete and deploy-delete stages.
+
+        Verify:
+        - kube-upgrade-complete is absent (only added when delete=True)
+        - sw-deploy-delete is absent
+        - sw-system-deploy-delete is absent
+        """
+        self.strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertFalse(self.strategy.is_build_failed())
+
+        stage_names = [s.name for s in self.strategy.apply_phase.stages]
+
+        self.assertNotIn("kube-upgrade-complete", stage_names)
+        self.assertNotIn("sw-deploy-delete", stage_names)
+        self.assertNotIn("sw-system-deploy-delete", stage_names)
+
+        sw_update_testcase.validate_strategy_persists(self.strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_system_deploy_init_is_first_stage(self):
+        """Test that sw-system-deploy-init is the very first apply stage.
+
+        Verify:
+        - stage name is 'sw-system-deploy-init'
+        - it contains a single 'sw-system-deploy-init' step
+        - it precedes all kube and sw-deploy stages
+        """
+        self.strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertFalse(self.strategy.is_build_failed())
+
+        apply_phase = self.strategy.apply_phase.as_dict()
+        first_stage = apply_phase["stages"][0]
+
+        self.assertEqual("sw-system-deploy-init", first_stage["name"])
+        self.assertEqual(1, first_stage["total_steps"])
+        self.assertEqual("sw-system-deploy-init", first_stage["steps"][0]["name"])
+
+        sw_update_testcase.validate_strategy_persists(self.strategy)
+
+    def test_combined_rollback_with_kube_version_fails_at_build(self):
+        """Test that rollback=True combined with kube_upgrade_version is rejected.
+
+        The rejection happens in build() before build_complete is ever called.
+        Verify:
+        - strategy state is BUILD_FAILED immediately after build()
+        - result_reason contains 'Cannot set both kube_upgrade and rollback'
+        """
+        strategy = self._create_combined_strategy(
+            rollback=True,
+            nfvi_upgrade=_make_nfvi_upgrade(self.RELEASE, state="deploying"),
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build()
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertIn(
+            "Cannot set both kube_upgrade and rollback",
+            strategy.build_phase.result_reason,
+        )
+
+    def test_combined_is_combined_strategy_truthy_when_kube_version_set(self):
+        """Test _is_combined_strategy() is truthy when kube_upgrade_version is set.
+
+        Verify:
+        - _is_combined_strategy() returns a truthy value
+        - kube mixin attribute _nfvi_kube_upgrade is initialized
+        """
+        strategy = self._create_combined_strategy(kube_upgrade_version="v1.30.6")
+
+        self.assertTrue(strategy._is_combined_strategy())
+        self.assertTrue(hasattr(strategy, "_nfvi_kube_upgrade"))
+
+    def test_combined_is_combined_strategy_falsy_when_kube_version_none(self):
+        """Test _is_combined_strategy() is falsy when kube_upgrade_version is None.
+
+        Verify:
+        - _kube_upgrade_version is None
+        - _is_combined_strategy() returns a falsy value
+        - kube mixin attribute _nfvi_kube_upgrade is NOT initialized
+        """
+        strategy = self.create_sw_deploy_strategy(
+            single_controller=True,
+            kube_upgrade_version=None,
+        )
+
+        self.assertIsNone(strategy._kube_upgrade_version)
+        self.assertFalse(strategy._is_combined_strategy())
+        self.assertFalse(hasattr(strategy, "_nfvi_kube_upgrade"))
+
+    def test_is_kube_upgrade_active_false_without_strategy(self):
+        """Test _is_kube_upgrade_active returns False when no strategy is attached."""
+        fake_upgrade_obj = SwUpgrade()
+        # _strategy is None by default after __init__
+        self.assertFalse(fake_upgrade_obj._is_kube_upgrade_active())
+
+    def test_is_kube_upgrade_active_false_without_kube_version(self):
+        """Test _is_kube_upgrade_active returns False when no kube version is set.
+
+        Covers the non-combined sw-deploy path where ``kube_to_version`` is
+        None, so the helper short-circuits before inspecting the apply phase.
+        """
+        fake_upgrade_obj = SwUpgrade()
+        fake_strategy = mock.MagicMock()
+        fake_strategy.kube_to_version = None
+        fake_upgrade_obj._strategy = fake_strategy
+
+        self.assertFalse(fake_upgrade_obj._is_kube_upgrade_active())
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_is_kube_upgrade_active_matches_kube_stage_names(self):
+        """Test _is_kube_upgrade_active agrees with stage names across apply phase.
+
+        Regression test: previously this method compared ``stage.name`` against
+        the sysinv KUBE_UPGRADE_STATE values (e.g. "upgrade-started"), which
+        never overlap with strategy stage names ("kube-upgrade-start" etc.),
+        so the helper always returned False once past its early guard. As a
+        consequence the alarm/event context switch in
+        ``SwUpgrade.alarm_type``/``event_id``/``nfvi_update`` was unreachable
+        and a combined strategy raised the sw-upgrade alarm/event for every
+        kube stage.
+
+        This test drives the apply-phase cursor across every stage of a
+        combined strategy and asserts the helper returns True iff the stage
+        belongs to the kube-upgrade workflow.
+        """
+        self.strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(self.strategy.is_build_failed())
+
+        apply_phase = self.strategy.apply_phase
+        self.assertGreater(len(apply_phase.stages), 0)
+
+        for index, stage in enumerate(apply_phase.stages):
+            # current_stage is a read-only property backed by _current_stage;
+            # poking the private attribute is the pragmatic way to drive the
+            # cursor in a unit test without executing the strategy.
+            apply_phase._current_stage = index
+            active = self.fake_upgrade_obj._is_kube_upgrade_active()
+
+            # A kube-upgrade stage starts with "kube-" but is not part of the
+            # kube-rootca-update strategy (which has its own alarm/event ids).
+            is_kube_upgrade_stage = stage.name.startswith(
+                "kube-"
+            ) and not stage.name.startswith("kube-rootca-")
+
+            self.assertEqual(
+                is_kube_upgrade_stage,
+                bool(active),
+                "_is_kube_upgrade_active() returned %s for stage '%s', "
+                "expected %s" % (bool(active), stage.name, is_kube_upgrade_stage),
+            )
+
+    def test_is_kube_upgrade_active_false_when_apply_phase_finished(self):
+        """Test _is_kube_upgrade_active returns False past the last stage.
+
+        Covers the boundary where ``apply_phase.current_stage`` has been
+        advanced past the final stage (e.g. between strategy completion and
+        teardown).
+        """
+        self.strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(self.strategy.is_build_failed())
+
+        # Simulate the apply phase having advanced past the final stage.
+        self.strategy.apply_phase._current_stage = len(self.strategy.apply_phase.stages)
+
+        self.assertFalse(self.fake_upgrade_obj._is_kube_upgrade_active())

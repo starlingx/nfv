@@ -22,12 +22,15 @@ def is_major_release(to_release, from_release):
 class Upgrade(ObjectData):
     """NFVI Upgrade Object."""
 
-    def __init__(self, release, release_info, deploy_info, hosts_info):
+    def __init__(
+        self, release, release_info, deploy_info, hosts_info, system_deploy=None
+    ):
         super().__init__("1.0.0")
         self.release = release
         self.release_info = release_info
         self.deploy_info = deploy_info
         self.hosts_info = hosts_info
+        self.system_deploy = system_deploy
 
     @property
     def release_id(self):
@@ -208,6 +211,10 @@ class Upgrade(ObjectData):
     @property
     def host_states(self):
         return {v["hostname"]: v["host_state"] for v in self.hosts_info}
+
+    @property
+    def is_system_deploy_active(self):
+        return self.system_deploy is not None
 
     def is_host_deployed(self, hostname):
         if not self.hosts_info:

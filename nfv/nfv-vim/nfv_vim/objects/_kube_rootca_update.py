@@ -72,8 +72,7 @@ class KubeRootcaUpdate(SwUpdate):
 
         DLOG.info("Kubernetes root ca update strategy build complete.")
 
-    @staticmethod
-    def alarm_type(alarm_type):
+    def alarm_type(self, alarm_type):
         """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_TYPES."""
 
         ALARM_TYPE_MAPPING = {
@@ -89,8 +88,7 @@ class KubeRootcaUpdate(SwUpdate):
         }
         return ALARM_TYPE_MAPPING[alarm_type]
 
-    @staticmethod
-    def event_id(event_id):
+    def event_id(self, event_id):
         """Returns EVENT_ID corresponding to SW_UPDATE_EVENT_IDS."""
 
         EVENT_ID_MAPPING = {

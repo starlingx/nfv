@@ -2944,6 +2944,165 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def sw_system_deploy_init(self, future, release, kube_version, callback):
+        """Initialize a USM software system-deploy."""
+
+        response = {}
+        response["completed"] = False
+        response["reason"] = ""
+        response["complete-data"] = ""
+
+        try:
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
+
+            if self._platform_token is None or self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = yield
+
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(
+                usm.sw_system_deploy_init, self._platform_token, release, kube_version
+            )
+            future.result = yield
+            if not future.result.is_complete():
+                DLOG.error("USM system deployment initialization did not complete.")
+                return
+
+            response["complete-data"] = future.result.data
+            response["result-data"] = future.result.data
+            response["completed"] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            body = json.loads(e.http_response_body)
+            error_msg = body.get("error", body.get("info"))
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            elif httplib.NOT_ACCEPTABLE == e.http_status_code:
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software system-deploy init, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
+                    )
+                else:
+                    error_msg = f"Software system-deploy init was rejected: {error_msg}"
+                    DLOG.exception(error_msg)
+
+                    # If the traceback is also present in the error message, remove it.
+                    error_msg = error_msg.split("Traceback")[0].strip()
+                    error_msg = (
+                        f"{error_msg} Please, check nfv-vim.log for more information."
+                    )
+
+            elif not error_msg:
+                error_msg = (
+                    "Caught exception while trying "
+                    f"software system-deploy init, error={e}"
+                )
+
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
+
+        except Exception as e:
+            error_msg = (
+                f"Caught exception while trying software system-deploy init, error={e}"
+            )
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
+    def sw_system_deploy_delete(self, future, callback):
+        """Delete a USM software system-deploy."""
+
+        response = {}
+        response["completed"] = False
+        response["reason"] = ""
+        response["complete-data"] = ""
+
+        try:
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
+
+            if self._platform_token is None or self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = yield
+
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(usm.sw_system_deploy_delete, self._platform_token)
+            future.result = yield
+            if not future.result.is_complete():
+                DLOG.error("USM system deployment deletion did not complete.")
+                return
+
+            response["complete-data"] = future.result.data
+            response["result-data"] = future.result.data
+            response["completed"] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            body = json.loads(e.http_response_body)
+            error_msg = body.get("error", body.get("info"))
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            elif httplib.NOT_ACCEPTABLE == e.http_status_code:
+                if not error_msg:
+                    error_msg = (
+                        "Unknown error while trying software system-deploy delete, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
+                    )
+                else:
+                    error_msg = (
+                        f"Software system-deploy delete was rejected: {error_msg}"
+                    )
+                    DLOG.exception(error_msg)
+
+                    # If the traceback is also present in the error message, remove it.
+                    error_msg = error_msg.split("Traceback")[0].strip()
+                    error_msg = (
+                        f"{error_msg} Please, check nfv-vim.log for more information."
+                    )
+
+            elif not error_msg:
+                error_msg = (
+                    "Caught exception while trying "
+                    f"software system-deploy delete, error={e}"
+                )
+
+            if error_msg:
+                response["error-message"] = error_msg.strip()
+                DLOG.exception(error_msg)
+
+        except Exception as e:
+            error_msg = (
+                "Caught exception while trying "
+                f"software system-deploy delete, error={e}"
+            )
+            response["error-message"] = error_msg
+            DLOG.exception(error_msg)
+
+        finally:
+            callback.send(response)
+            callback.close()
+
     def delete_host_services(
         self, future, host_uuid, host_name, host_personality, callback
     ):

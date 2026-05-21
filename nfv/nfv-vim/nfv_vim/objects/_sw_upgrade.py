@@ -9,6 +9,10 @@ from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import event_log
 from nfv_vim import nfvi
+from nfv_vim.objects._sw_update import KUBERNETES_UPGRADE_EVENT_ID_MAPPING
+from nfv_vim.objects.strategies.kube_upgrade._kube_upgrade_mixins import (
+    KubeUpgradeMixin,
+)
 from nfv_vim.objects._sw_update import SW_UPDATE_ALARM_TYPES
 from nfv_vim.objects._sw_update import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects._sw_update import SW_UPDATE_EVENT_IDS
@@ -18,7 +22,7 @@ from nfv_vim.objects._sw_update import SwUpdate
 DLOG = debug.debug_get_logger("nfv_vim.objects.sw_upgrade")
 
 
-class SwUpgrade(SwUpdate):
+class SwUpgrade(SwUpdate, KubeUpgradeMixin):
     """Software Upgrade Object."""
 
     def __init__(self, sw_update_uuid=None, strategy_data=None):
@@ -27,6 +31,7 @@ class SwUpgrade(SwUpdate):
             sw_update_uuid=sw_update_uuid,
             strategy_data=strategy_data,
         )
+        self._init_kube_upgrade_state()
 
     def strategy_build(
         self,
@@ -41,6 +46,7 @@ class SwUpgrade(SwUpdate):
         rollback,
         delete,
         snapshot,
+        kube_upgrade,
         ignore_alarms,
         single_controller,
     ):
@@ -76,6 +82,7 @@ class SwUpgrade(SwUpdate):
             rollback,
             delete,
             snapshot,
+            kube_upgrade,
             ignore_alarms,
             single_controller,
         )
@@ -88,25 +95,36 @@ class SwUpgrade(SwUpdate):
     def strategy_build_complete(self, success, reason):
         """Creation of a software upgrade strategy complete."""
 
-    @staticmethod
-    def alarm_type(alarm_type):
+    def alarm_type(self, alarm_type):
         """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_TYPES."""
 
-        ALARM_TYPE_MAPPING = {
-            SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS: (
-                alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_INPROGRESS
-            ),
-            SW_UPDATE_ALARM_TYPES.APPLY_ABORTING: (
-                alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_ABORTING
-            ),
-            SW_UPDATE_ALARM_TYPES.APPLY_FAILED: (
-                alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_FAILED
-            ),
-        }
+        if self._is_kube_upgrade_active():
+            ALARM_TYPE_MAPPING = {
+                SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS: (
+                    alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_INPROGRESS
+                ),
+                SW_UPDATE_ALARM_TYPES.APPLY_ABORTING: (
+                    alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_ABORTING
+                ),
+                SW_UPDATE_ALARM_TYPES.APPLY_FAILED: (
+                    alarm.ALARM_TYPE.KUBE_UPGRADE_AUTO_APPLY_FAILED
+                ),
+            }
+        else:
+            ALARM_TYPE_MAPPING = {
+                SW_UPDATE_ALARM_TYPES.APPLY_INPROGRESS: (
+                    alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_INPROGRESS
+                ),
+                SW_UPDATE_ALARM_TYPES.APPLY_ABORTING: (
+                    alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_ABORTING
+                ),
+                SW_UPDATE_ALARM_TYPES.APPLY_FAILED: (
+                    alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_FAILED
+                ),
+            }
         return ALARM_TYPE_MAPPING[alarm_type]
 
-    @staticmethod
-    def event_id(event_id):
+    def event_id(self, event_id):
         """Returns EVENT_ID corresponding to SW_UPDATE_EVENT_IDS."""
 
         EVENT_ID_MAPPING = {
@@ -144,6 +162,10 @@ class SwUpgrade(SwUpdate):
                 event_log.EVENT_ID.SW_UPGRADE_AUTO_APPLY_ABORTED
             ),
         }
+
+        if self._is_kube_upgrade_active():
+            EVENT_ID_MAPPING.update(KUBERNETES_UPGRADE_EVENT_ID_MAPPING)
+
         return EVENT_ID_MAPPING[event_id]
 
     def nfvi_update(self):
@@ -152,7 +174,26 @@ class SwUpgrade(SwUpdate):
         if self._strategy is None:
             if self._alarms:
                 alarm.clear_sw_update_alarm(self._alarms)
+                self._alarms = []
             return False
+
+        current_context = "kube" if self._is_kube_upgrade_active() else "sw"
+
+        # If context changed and we have active alarms, clear them first.
+        # This ensures we don't have a kube alarm hanging around when we want
+        # a software alarm or vice versa
+        if self._alarm_context is not None and self._alarm_context != current_context:
+            if self._alarms:
+                DLOG.info(
+                    "Context switch (%s -> %s): Clearing alarms."
+                    % (self._alarm_context, current_context)
+                )
+                alarm.clear_sw_update_alarm(self._alarms)
+                self._alarms = []
+
+        self._alarm_context = (  # pylint: disable=attribute-defined-outside-init
+            current_context
+        )
 
         if self.strategy.is_applying():
             if not self._alarms:
@@ -187,6 +228,7 @@ class SwUpgrade(SwUpdate):
         else:
             if self._alarms:
                 alarm.clear_sw_update_alarm(self._alarms)
+                self._alarms = []
             return False
 
         return True

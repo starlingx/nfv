@@ -274,6 +274,12 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
     nfvi_sw_deploy_precheck,
 )
+from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
+    nfvi_sw_system_deploy_init,
+)
+from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
+    nfvi_sw_system_deploy_delete,
+)
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_deploy_delete  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_alarms  # noqa: F401
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_get_datanetworks  # noqa: F401

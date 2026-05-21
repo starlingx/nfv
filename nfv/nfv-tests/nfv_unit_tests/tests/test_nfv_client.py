@@ -278,7 +278,7 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
     def test_create_missing_both(self):
         shell_args = [self.strategy, "create"]
         e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == "Must set rollback or release", e
+        assert str(e) == "Must set --rollback or release", e
 
     def test_create_rollback(self):
         shell_args = [self.strategy, "create", "--rollback"]
@@ -287,7 +287,7 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
     def test_create_with_both(self):
         shell_args = [self.strategy, "create", "v123.1", "--rollback"]
         e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == "Cannot set both rollback and release", e
+        assert str(e) == "Cannot set both --rollback and release", e
 
     def test_create_snapshot(self):
         shell_args = [self.strategy, "create", "v123.1", "--snapshot"]
@@ -296,7 +296,25 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
     def test_create_rollback_with_snapshot(self):
         shell_args = [self.strategy, "create", "--rollback", "--snapshot"]
         e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == "Cannot set both rollback and snapshot", e
+        assert str(e) == "Cannot set both --rollback and --snapshot", e
+
+    def test_create_delete(self):
+        shell_args = [self.strategy, "create", "v123.1", "--delete"]
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_rollback_with_delete(self):
+        shell_args = [self.strategy, "create", "--rollback", "--delete"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == "Cannot set both --rollback and --delete", e
+
+    def test_create_kube_upgrade(self):
+        shell_args = [self.strategy, "create", "v123.1", "--kube-upgrade=1.2.3"]
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_rollback_with_kube_upgrade(self):
+        shell_args = [self.strategy, "create", "--rollback", "--kube-upgrade=1.2.3"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == "Cannot set both --kube-upgrade and --rollback", e
 
 
 class TestCLIFwUpdateStrategy(TestNFVClientShell, StrategyMixin):

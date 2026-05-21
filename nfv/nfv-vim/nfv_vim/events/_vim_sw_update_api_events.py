@@ -110,6 +110,7 @@ def vim_sw_update_api_create_strategy(connection, msg):
         rollback = msg.rollback
         delete = msg.delete
         snapshot = msg.snapshot
+        kube_upgrade = msg.kube_upgrade
         uuid, reason = sw_mgmt_director.create_sw_upgrade_strategy(
             controller_apply_type,
             storage_apply_type,
@@ -121,6 +122,7 @@ def vim_sw_update_api_create_strategy(connection, msg):
             rollback,
             delete,
             snapshot,
+            kube_upgrade,
             _vim_sw_update_api_create_strategy_callback,
         )
     elif "fw-update" == msg.sw_update_type:

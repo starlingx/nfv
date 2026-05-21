@@ -63,6 +63,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
     rollback = None
     delete = None
     snapshot = None
+    kube_upgrade = None
 
     def __init__(
         self,
@@ -78,6 +79,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         msg["rollback"] = self.rollback
         msg["delete"] = self.delete
         msg["snapshot"] = self.snapshot
+        msg["kube_upgrade"] = self.kube_upgrade
 
     def deserialize_payload(self, msg):
         super().deserialize_payload(msg)
@@ -85,6 +87,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         self.rollback = msg.get("rollback", None)
         self.delete = msg.get("delete", None)
         self.snapshot = msg.get("snapshot", None)
+        self.kube_upgrade = msg.get("kube_upgrade", None)
 
     def __str__(self):
         return "create-sw-deploy-strategy request: %s" % self.deserialize_payload

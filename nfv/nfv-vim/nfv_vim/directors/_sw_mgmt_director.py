@@ -92,6 +92,7 @@ class SwMgmtDirector(metaclass=Singleton):
         rollback,
         delete,
         snapshot,
+        kube_upgrade,
         callback,
     ):
         """Create Software Upgrade Strategy."""
@@ -120,6 +121,7 @@ class SwMgmtDirector(metaclass=Singleton):
             rollback,
             delete,
             snapshot,
+            kube_upgrade,
             self._ignore_alarms,
             self._single_controller,
         )

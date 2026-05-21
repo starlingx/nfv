@@ -8,8 +8,6 @@ from distutils.version import LooseVersion
 from nfv_common import debug
 from nfv_vim.objects import HOST_NAME
 from nfv_vim.objects import HOST_PERSONALITY
-from nfv_vim.strategy._utils import get_first_host
-from nfv_vim.strategy._utils import get_second_host
 
 DLOG = debug.debug_get_logger("nfv_vim.strategy.kube_upgrade")
 
@@ -31,6 +29,53 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         raise NotImplementedError(
             "Classes using KubeUpgradeStages must implement kube_to_version"
         )
+
+    @staticmethod
+    def get_first_host():
+        """This corresponds to the first host that should be updated.
+
+        In simplex env, first host: controller-0. In duplex env: controller-1.
+        """
+        from nfv_vim import tables
+
+        controller_0_host = None
+        controller_1_host = None
+        host_table = tables.tables_get_host_table()
+        for host in host_table.get_by_personality(HOST_PERSONALITY.CONTROLLER):
+            if HOST_NAME.CONTROLLER_0 == host.name:
+                controller_0_host = host
+            if HOST_NAME.CONTROLLER_1 == host.name:
+                controller_1_host = host
+        if controller_1_host is None:
+            # simplex
+            return controller_0_host
+        # duplex
+        return controller_1_host
+
+    @staticmethod
+    def get_second_host():
+        """This corresponds to the second host that should be updated.
+
+        In simplex env, second host: None. In duplex env: controller-0.
+        """
+        from nfv_vim import tables
+
+        controller_0_host = None
+        controller_1_host = None
+        host_table = tables.tables_get_host_table()
+        for host in host_table.get_by_personality(HOST_PERSONALITY.CONTROLLER):
+            if HOST_NAME.CONTROLLER_0 == host.name:
+                controller_0_host = host
+            if HOST_NAME.CONTROLLER_1 == host.name:
+                controller_1_host = host
+        if controller_1_host is None:
+            # simplex
+            return None
+        # duplex
+        return controller_0_host
+
+    def _is_combined_strategy(self):
+        return getattr(self, "_kube_upgrade_version", None)
 
     def _get_kube_version_steps(self, target_version, kube_list):
         """Returns an ordered list for a multi-version kubernetes upgrade.
@@ -256,17 +301,20 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         self._add_kube_host_cordon_stage()
 
     def _add_kube_host_cordon_stage(self):
-        """Add host cordon stage for a host."""
+        """Add host cordon stage for a host.
 
-        # simplex only
+        This will only run if:
+        - Host is simplex
+        - The combined software + kube upgrade is not running
+        """
 
         from nfv_vim import nfvi
         from nfv_vim import strategy
 
-        first_host = get_first_host()
-        second_host = get_second_host()
+        first_host = self.get_first_host()
+        second_host = self.get_second_host()
         is_simplex = second_host is None
-        if is_simplex:
+        if is_simplex and not self._is_combined_strategy():
             # todo(abailey): add rollback support to trigger uncordon
             stage = strategy.StrategyStage(
                 strategy.STRATEGY_STAGE_NAME.KUBE_HOST_CORDON
@@ -350,8 +398,8 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         # -------------------------
         from nfv_vim import strategy
 
-        first_host = get_first_host()
-        second_host = get_second_host()
+        first_host = self.get_first_host()
+        second_host = self.get_second_host()
         ver_list = self._get_kube_version_steps(
             self.kube_to_version, self._nfvi_kube_versions_list
         )
@@ -421,7 +469,12 @@ class KubeUpgradeStages:  # pylint: disable=no-member
             kubelet_skew = self._kubelet_version_skew(kubeadm_version, kubelet_version)
 
             # upgrade kubelet if we exceed skew tolerance.
-            if kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE:
+            # When _kube_upgrade_version is set, this is a combined sw-upgrade strategy
+            # Kubelet upgrades are deferred to unlock after sw-deploy
+            if (
+                kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE
+                and not self._is_combined_strategy()
+            ):
                 self._add_kube_upgrade_kubelets_stage(ver_init)
 
                 # initialize next iteration
@@ -459,7 +512,12 @@ class KubeUpgradeStages:  # pylint: disable=no-member
             kubelet_skew = self._kubelet_version_skew(kubeadm_version, kubelet_version)
 
             # upgrade kubelet if we exceed skew tolerance
-            if kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE:
+            # When _kube_upgrade_version is set, this is a combined sw-upgrade strategy
+            # Kubelet upgrades are deferred to unlock after sw-deploy
+            if (
+                kubelet_skew >= KUBELET_MINOR_SKEW_TOLERANCE
+                and not self._is_combined_strategy()
+            ):
                 self._add_kube_upgrade_kubelets_stage(kube_ver)
 
                 # initialize next iteration
@@ -469,6 +527,11 @@ class KubeUpgradeStages:  # pylint: disable=no-member
             # todo(abailey): change this once all lock/unlock are removed from kubelet
             if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
                 return
+
+        # When _kube_upgrade_version is set, this is a combined sw-upgrade strategy
+        # Kubelet upgrades are deferred to unlock after sw-deploy
+        if self._is_combined_strategy():
+            return
 
         # Update kubelet to the final version if it isn't already
         if kubelet_stage:
@@ -515,8 +578,8 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         from nfv_vim import nfvi
         from nfv_vim import strategy
 
-        first_host = get_first_host()
-        second_host = get_second_host()
+        first_host = self.get_first_host()
+        second_host = self.get_second_host()
         is_simplex = second_host is None
         if is_simplex:
             stage = strategy.StrategyStage(
@@ -546,7 +609,7 @@ class KubeUpgradeStages:  # pylint: disable=no-member
             kube_ver,
         )
         stage = strategy.StrategyStage(stage_name)
-        first_host = get_first_host()
+        first_host = self.get_first_host()
         # force argument is ignored by control plane API
         force = True
         stage.add_step(

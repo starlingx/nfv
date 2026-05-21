@@ -31,6 +31,8 @@ class StrategyStageNames(Constants, metaclass=Singleton):
     SW_UPGRADE_WORKER_HOSTS = Constant("sw-upgrade-worker-hosts")
     SW_UPGRADE_COMPLETE = Constant("sw-upgrade-complete")
     SW_DEPLOY_DELETE = Constant("sw-deploy-delete")
+    SW_SYSTEM_DEPLOY_INIT = Constant("sw-system-deploy-init")
+    SW_SYSTEM_DEPLOY_DELETE = Constant("sw-system-deploy-delete")
     SW_UPGRADE_ROLLBACK_COMPLETE = Constant("sw-upgrade-rollback-complete")
     # firmware update stages
     FW_UPDATE_QUERY = Constant("fw-update-query")
@@ -78,6 +80,13 @@ class StrategyStageNames(Constants, metaclass=Singleton):
     KUBE_UPGRADE_COMPLETE = Constant("kube-upgrade-complete")
     KUBE_UPGRADE_CLEANUP = Constant("kube-upgrade-cleanup")
 
+
+KUBE_STAGE_PREFIXES = (
+    Constant("kube-upgrade-"),
+    Constant("kube-host-"),
+    Constant("kube-pre-application-update"),
+    Constant("kube-post-application-update"),
+)
 
 # Constant Instantiation
 STRATEGY_STAGE_NAME = StrategyStageNames()

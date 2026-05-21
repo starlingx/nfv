@@ -172,16 +172,14 @@ class SwUpdate(ObjectData):
 
         return self._strategy
 
-    @staticmethod
-    def alarm_type(alarm_type):
+    def alarm_type(self, alarm_type):
         """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_EVENT_TYPES
 
         (expected to be overridden by child class).
         """
         raise NotImplementedError()
 
-    @staticmethod
-    def event_id(event_id):
+    def event_id(self, event_id):
         """Returns ALARM_TYPE corresponding to SW_UPDATE_ALARM_EVENT_TYPES
 
         (expected to be overridden by child class).
