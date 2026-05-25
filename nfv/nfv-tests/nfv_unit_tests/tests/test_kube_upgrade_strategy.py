@@ -16,6 +16,7 @@ from nfv_vim.objects import SW_UPDATE_ALARM_RESTRICTION
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.strategy._strategy import KubeUpgradeStrategy
+from nfv_vim.strategy.steps.kube_upgrade_steps import KubeHostUpgradeControlPlaneStep
 from nfv_vim import tables
 
 # Kubernetes versions: v<major.minor.patch>
@@ -847,9 +848,9 @@ class ApplyStageMixin:
         if self.is_duplex():
             host_upgrade = {
                 "host_id": 2,
-                "host_uuid": host_table.get(second_controller)
-                .get("_nfvi_host")
-                .get("uuid"),
+                "host_uuid": (
+                    host_table.get(second_controller).get("_nfvi_host").get("uuid")
+                ),
                 "target_version": self.default_to_version,
                 "control_plane_version": self.default_from_version,
                 "kubelet_version": self.default_from_version,
@@ -1147,9 +1148,9 @@ class TestSimplexApplyStrategy(
         data = [
             {
                 "host_id": 1,
-                "host_uuid": host_table.get("controller-0")
-                .get("_nfvi_host")
-                .get("uuid"),
+                "host_uuid": (
+                    host_table.get("controller-0").get("_nfvi_host").get("uuid")
+                ),
                 "target_version": self.default_to_version,
                 "control_plane_version": self.default_to_version,  # upgraded to final
                 "kubelet_version": self.default_from_version,
@@ -1361,9 +1362,9 @@ class TestSimplexApplyStrategy(
         data = [
             {
                 "host_id": 1,
-                "host_uuid": host_table.get("controller-0")
-                .get("_nfvi_host")
-                .get("uuid"),
+                "host_uuid": (
+                    host_table.get("controller-0").get("_nfvi_host").get("uuid")
+                ),
                 "target_version": self.default_to_version,
                 "control_plane_version": self.default_to_version,  # upgraded to final
                 "kubelet_version": self.default_from_version,
@@ -1427,9 +1428,9 @@ class TestSimplexApplyStrategy(
         data = [
             {
                 "host_id": 1,
-                "host_uuid": host_table.get("controller-0")
-                .get("_nfvi_host")
-                .get("uuid"),
+                "host_uuid": (
+                    host_table.get("controller-0").get("_nfvi_host").get("uuid")
+                ),
                 "target_version": self.default_to_version,
                 "control_plane_version": self.default_to_version,
                 "kubelet_version": self.default_from_version,
@@ -1771,6 +1772,154 @@ class TestStandardTwoWorkerTwoStorage(
         self.aio_controller_list = []
         self.worker_list = [["compute-0"], ["compute-1"]]
         self.storage_list = [["storage-0"], ["storage-1"]]
+
+
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
+class TestKubeHostUpgradeControlPlaneStepRetry(
+    sw_update_testcase.SwUpdateStrategyTestCase,
+):
+    """Unit tests for the transient-error retry logic"""
+
+    def setUp(self):
+        super().setUp()
+
+        self.step = self._make_step()
+        self.step.stage = mock.MagicMock()
+
+    def _make_step(self):
+        """Return a KubeHostUpgradeControlPlaneStep wired to a mock stage."""
+
+        self.create_host("controller-0", aio=True)
+
+        return KubeHostUpgradeControlPlaneStep(
+            host=self._host_table.get("controller-0"),
+            to_version=MID1_KUBE_VERSION,
+            force=True,
+            target_state=nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+            target_failure_state=(
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED
+            ),
+        )
+
+    def _build_response(self, transient=False, error=False):
+        if transient:
+            return {"completed": False, "reason": "[Errno 2] No such file or directory"}
+        if error:
+            return {"completed": False, "reason": "", "error-code": "token-expired"}
+
+        kube_upgrade_obj = nfvi.objects.v1.KubeUpgrade(
+            state=nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+            from_version=FROM_KUBE_VERSION,
+            to_version=MID1_KUBE_VERSION,
+        )
+        return {"completed": True, "reason": "", "result-data": kube_upgrade_obj}
+
+    def _send(self, response):
+        """Drive the coroutine callback with the given response"""
+
+        callback = self.step._get_kube_upgrade_callback()
+        try:
+            callback.send(response)
+        except StopIteration:
+            pass
+
+    def test_transient_error_does_not_fail_step_in_first_occurrence(self):
+        """A single transient GET failure must leave the step in WAIT"""
+
+        self._send(self._build_response(transient=True))
+
+        self.step.stage.step_complete.assert_not_called()
+        self.assertEqual(self.step._transient_failure_retry_count, 1)
+        self.assertFalse(self.step._query_inprogress)
+
+    def test_transient_error_fails_step_after_max_retries_exceeded(self):
+        """After _MAX_RETRIES transient failures the step fails"""
+
+        # exhaust retries without failing
+        for _ in range(KubeHostUpgradeControlPlaneStep._MAX_RETRIES):
+            self._send(self._build_response(transient=True))
+            self.step.stage.step_complete.assert_not_called()
+
+        # one more transient failure must fail the step
+        self._send(self._build_response(transient=True))
+
+        self.step.stage.step_complete.assert_called_once()
+        state = self.step.stage.step_complete.call_args[0][0]
+        self.assertEqual(state, common_strategy.STRATEGY_STEP_RESULT.FAILED)
+
+    def test_error_code_response_fails_step_immediately(self):
+        """A response carrying an error-code must fail the step immediately"""
+
+        self._send(self._build_response(error=True))
+
+        self.step.stage.step_complete.assert_called_once()
+        state = self.step.stage.step_complete.call_args[0][0]
+        self.assertEqual(state, common_strategy.STRATEGY_STEP_RESULT.FAILED)
+        self.assertEqual(self.step._transient_failure_retry_count, 0)
+
+    def test_error_code_response_fails_step_even_after_prior_transient_errors(self):
+        """An error-code response must fail immediately even if retries remain"""
+
+        self._send(self._build_response(transient=True))
+        self.step.stage.step_complete.assert_not_called()
+
+        self._send(self._build_response(error=True))
+        self.step.stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.FAILED, ""
+        )
+
+    def test_successful_response_resets_retry_counter(self):
+        """A successful poll after transient failures resets transient failure count"""
+
+        self._send(self._build_response(transient=True))
+        self.assertEqual(self.step._transient_failure_retry_count, 1)
+
+        self._send(self._build_response())
+        self.step.stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        )
+        self.assertEqual(self.step._transient_failure_retry_count, 0)
+
+    def test_query_inprogress_cleared_after_transient_error(self):
+        """_query_inprogress must be False after a transient failure
+
+        This enables handle_event to issue the next poll on the following HOST_AUDIT
+        """
+
+        self.step._query_inprogress = True
+        self._send(self._build_response(transient=True))
+        self.assertFalse(self.step._query_inprogress)
+
+    def test_query_inprogress_cleared_after_error_code_response(self):
+        """The _query_inprogress must be False after an error-code failure"""
+
+        self.step._query_inprogress = True
+        self._send(self._build_response(error=True))
+        self.assertFalse(self.step._query_inprogress)
+
+    def test_from_dict_resets_transient_failure_retry_count(self):
+        """The _transient_failure_retry_count is reset to 0
+
+        When the step is deserialised after a restart, the count should be reset since
+        as the flag is not stored in the database.
+        """
+
+        # Simulates retries having accumulated before a VIM restart
+        self.step._transient_failure_retry_count = 2
+        data = self.step.as_dict()
+        self.step.from_dict(data)
+        self.assertEqual(self.step._transient_failure_retry_count, 0)
 
 
 class SimplexMultiPatchKubeUpgradeMixin:

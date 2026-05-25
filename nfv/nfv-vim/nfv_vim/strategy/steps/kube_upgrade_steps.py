@@ -27,12 +27,8 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
         self._success_state = success_state
         self._fail_state = fail_state
 
-    @coroutine
-    def _get_kube_upgrade_callback(self):
-        """Get Upgrade Callback."""
-
-        response = yield
-        DLOG.debug("(%s) callback response=%s." % (self._name, response))
+    def _handle_kube_upgrade_callback(self, response):
+        """Handles the kube upgrade callback"""
 
         self._query_inprogress = False
         if response["completed"]:
@@ -84,6 +80,15 @@ class AbstractKubeUpgradeStep(AbstractStrategyStep):
         else:
             result = strategy.STRATEGY_STEP_RESULT.FAILED
             self.stage.step_complete(result, response["reason"])
+
+    @coroutine
+    def _get_kube_upgrade_callback(self):
+        """Get Upgrade Callback."""
+
+        response = yield
+        DLOG.debug("(%s) callback response=%s." % (self._name, response))
+
+        self._handle_kube_upgrade_callback(response)
 
     def _abort(self):
         """Returns the abort step related to this step."""
@@ -998,6 +1003,8 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
     This operation issues a host command, which updates the kube upgrade object
     """
 
+    _MAX_RETRIES = 3
+
     def __init__(
         self,
         host,
@@ -1016,6 +1023,43 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
             target_failure_state,
             timeout_in_secs,
         )
+        # Not persisted — resets on VIM restart
+        self._transient_failure_retry_count = 0
+
+    @coroutine
+    def _get_kube_upgrade_callback(self):
+        response = yield
+        DLOG.debug("(%s) callback response=%s." % (self._name, response))
+
+        self._query_inprogress = False
+
+        if not response["completed"]:
+            # Transient errors do not have an error-code
+            if response.get("error-code") is None:
+                if self._transient_failure_retry_count >= self._MAX_RETRIES:
+                    result = strategy.STRATEGY_STEP_RESULT.FAILED
+                    self.stage.step_complete(result, response["reason"])
+                    return
+                else:
+                    self._transient_failure_retry_count += 1
+                    DLOG.warn(
+                        "A transient error occurred during kube-upgrade upgrade "
+                        "control plane step, retrying "
+                        f"{self._transient_failure_retry_count}/{self._MAX_RETRIES}..."
+                    )
+                    return
+
+        # A successful or a failure response with an error code resets the counter,
+        # because the callback handler will conclude the step.
+        self._transient_failure_retry_count = 0
+        self._handle_kube_upgrade_callback(response)
+
+    def from_dict(self, data):
+        """Returns the step object initialized using the given dictionary."""
+
+        super().from_dict(data)
+        self._transient_failure_retry_count = 0
+        return self
 
     def abort(self):
         """Returns the abort step related to this step."""
