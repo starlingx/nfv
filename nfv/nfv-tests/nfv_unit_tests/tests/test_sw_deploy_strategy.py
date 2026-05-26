@@ -153,6 +153,7 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         release=MAJOR_RELEASE_UPGRADE,
         rollback=False,
         delete=False,
+        cleanup=False,
         snapshot=False,
         kube_upgrade_version=None,
         nfvi_upgrade=None,
@@ -171,6 +172,7 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             release=release,
             rollback=rollback,
             delete=delete,
+            cleanup=cleanup,
             snapshot=snapshot,
             kube_upgrade_version=kube_upgrade_version,
             ignore_alarms=[],
@@ -2927,6 +2929,266 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
+    def test_sw_deploy_strategy_cleanup_build_fails_with_release(self):
+        """cleanup cannot be combined with a release."""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=MAJOR_RELEASE_UPGRADE,
+            cleanup=True,
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build()
+
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+
+    def test_sw_deploy_strategy_cleanup_build_fails_with_rollback(self):
+        """cleanup cannot be combined with rollback."""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            cleanup=True,
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build()
+
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+
+    def test_sw_deploy_strategy_cleanup_deploy_completed(self):
+        """cleanup with a completed deployment: deploy-delete apply stage."""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            cleanup=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                "888.8",
+                {"state": "deploying"},
+                {"state": "completed"},
+                None,
+            ),
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        with mock.patch("nfv_common.strategy._strategy.Strategy._build"):
+            strategy.build()
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        expected_build = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-query",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "query-upgrade"},
+                        {"name": "query-kube-upgrade"},
+                    ],
+                },
+            ],
+        }
+        expected_apply = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-deploy-delete",
+                    "total_steps": 1,
+                    "steps": [
+                        {"name": "deploy-delete"},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.build_phase.as_dict(), expected_build
+        )
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_apply
+        )
+
+    def test_sw_deploy_strategy_cleanup_system_deploy_active(self):
+        """cleanup with an active software system deploy"""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            cleanup=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                "888.8",
+                {"state": "deploying"},
+                None,
+                None,
+                system_deploy={"state": "active"},
+            ),
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        with mock.patch("nfv_common.strategy._strategy.Strategy._build"):
+            strategy.build()
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        expected_build = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-query",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "query-upgrade"},
+                        {"name": "query-kube-upgrade"},
+                    ],
+                },
+            ],
+        }
+        expected_apply = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-system-deploy-delete",
+                    "total_steps": 1,
+                    "steps": [
+                        {"name": "sw-system-deploy-delete"},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.build_phase.as_dict(), expected_build
+        )
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_apply
+        )
+
+    def test_sw_deploy_strategy_cleanup_kube_upgrade_active_and_deploy_completed(
+        self,
+    ):
+        """cleanup with active kube upgrade and completed deploy.
+
+        Verify apply phase: kube-upgrade-complete, kube-post-application-update,
+        kube-upgrade-cleanup, then deploy-delete.
+        """
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            cleanup=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                "888.8",
+                {"state": "deploying"},
+                {"state": "completed"},
+                None,
+            ),
+        )
+        strategy.nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+            state=KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
+            from_version="v1.29.0",
+            to_version="v1.30.0",
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        expected_apply = {
+            "total_stages": 4,
+            "stages": [
+                {
+                    "name": "kube-upgrade-complete",
+                    "total_steps": 1,
+                    "steps": [{"name": "kube-upgrade-complete"}],
+                },
+                {
+                    "name": "kube-post-application-update",
+                    "total_steps": 1,
+                    "steps": [{"name": "kube-post-application-update"}],
+                },
+                {
+                    "name": "kube-upgrade-cleanup",
+                    "total_steps": 1,
+                    "steps": [{"name": "kube-upgrade-cleanup"}],
+                },
+                {
+                    "name": "sw-deploy-delete",
+                    "total_steps": 1,
+                    "steps": [{"name": "deploy-delete"}],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_apply
+        )
+
+    def test_sw_deploy_strategy_cleanup_all_three_conditions(self):
+        """cleanup with all possible active stages
+
+        Verify apply phase:
+            kube-upgrade-complete chain
+            deploy-delete
+            system-deploy-delete.
+        """
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            cleanup=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                "888.8",
+                {"state": "deploying"},
+                {"state": "completed"},
+                None,
+                system_deploy={"state": "active"},
+            ),
+        )
+        strategy.nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+            state=KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
+            from_version="v1.29.0",
+            to_version="v1.30.0",
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        expected_apply = {
+            "total_stages": 5,
+            "stages": [
+                {
+                    "name": "kube-upgrade-complete",
+                    "total_steps": 1,
+                    "steps": [{"name": "kube-upgrade-complete"}],
+                },
+                {
+                    "name": "kube-post-application-update",
+                    "total_steps": 1,
+                    "steps": [{"name": "kube-post-application-update"}],
+                },
+                {
+                    "name": "kube-upgrade-cleanup",
+                    "total_steps": 1,
+                    "steps": [{"name": "kube-upgrade-cleanup"}],
+                },
+                {
+                    "name": "sw-deploy-delete",
+                    "total_steps": 1,
+                    "steps": [{"name": "deploy-delete"}],
+                },
+                {
+                    "name": "sw-system-deploy-delete",
+                    "total_steps": 1,
+                    "steps": [{"name": "sw-system-deploy-delete"}],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_apply
+        )
+
     def test_sw_deploy_strategy_aiodx_rollback_host_rollback_deployed_unlocked_pending(
         self,
     ):
@@ -4384,6 +4646,7 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
             release=self.RELEASE,
             rollback=rollback,
             delete=delete,
+            cleanup=False,
             snapshot=False,
             kube_upgrade_version=kube_upgrade_version,
             ignore_alarms=[],

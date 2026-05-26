@@ -323,6 +323,8 @@ def create_strategy(
             api_cmd_payload["snapshot"] = kwargs.get("snapshot")
         if kwargs.get("kube_upgrade"):
             api_cmd_payload["kube-upgrade"] = kwargs.get("kube_upgrade")
+        if kwargs.get("cleanup"):
+            api_cmd_payload["cleanup"] = kwargs.get("cleanup")
 
     api_cmd_payload["storage-apply-type"] = storage_apply_type
     api_cmd_payload["worker-apply-type"] = worker_apply_type

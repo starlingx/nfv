@@ -109,6 +109,7 @@ def vim_sw_update_api_create_strategy(connection, msg):
         release = msg.release
         rollback = msg.rollback
         delete = msg.delete
+        cleanup = msg.cleanup
         snapshot = msg.snapshot
         kube_upgrade = msg.kube_upgrade
         uuid, reason = sw_mgmt_director.create_sw_upgrade_strategy(
@@ -121,6 +122,7 @@ def vim_sw_update_api_create_strategy(connection, msg):
             release,
             rollback,
             delete,
+            cleanup,
             snapshot,
             kube_upgrade,
             _vim_sw_update_api_create_strategy_callback,

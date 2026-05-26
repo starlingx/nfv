@@ -1738,8 +1738,9 @@ class SwDeployDeleteStep(strategy.StrategyStep):
         reason = ""
 
         if response["completed"]:
-            self.strategy.nfvi_upgrade = response["result-data"]
-            if (
+            self.strategy.nfvi_upgrade = response.get("result-data")
+            # Release will be None in the case of cleanup
+            if self._release is None or (
                 not self.strategy._rollback
                 and self.strategy.nfvi_upgrade.is_deployed
                 or self.strategy._rollback
@@ -2038,8 +2039,8 @@ class SwSystemDeployInitStep(strategy.StrategyStep):
 
         DLOG.info("Step (%s) apply." % self._name)
         if self.strategy.nfvi_upgrade.is_system_deploy_active:
-            reason = "Deployment already in progress, skipping init"
-            DLOG.info(reason)
+            reason = ""
+            DLOG.info("Deployment already in progress, skipping init")
             return strategy.STRATEGY_STEP_RESULT.SUCCESS, reason
 
         nfvi.nfvi_sw_system_deploy_init(

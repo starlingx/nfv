@@ -2723,19 +2723,25 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
 
             response["complete-data"] = future.result.data
 
-            future.work(usm.sw_deploy_get_upgrade_obj, self._platform_token, release)
-            future.result = yield
-
-            if not future.result.is_complete():
-                error_msg = (
-                    "Could not obtain deployment information from USM, "
-                    "check /var/log/nfv-vim.log or /var/log/software.log "
-                    "for more information."
+            # In the case of cleanup, release will not be provided, so we only
+            # need to delete the deployment without trying to obtain the deployment
+            # information after deletion
+            if release is not None:
+                future.work(
+                    usm.sw_deploy_get_upgrade_obj, self._platform_token, release
                 )
-                response["error-message"] = error_msg
-                return
+                future.result = yield
 
-            response["result-data"] = future.result.data
+                if not future.result.is_complete():
+                    error_msg = (
+                        "Could not obtain deployment information from USM, "
+                        "check /var/log/nfv-vim.log or /var/log/software.log "
+                        "for more information."
+                    )
+                    response["error-message"] = error_msg
+                    return
+
+                response["result-data"] = future.result.data
             response["completed"] = True
 
         except exceptions.OpenStackRestAPIException as e:
