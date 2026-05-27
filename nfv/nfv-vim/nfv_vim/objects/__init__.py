@@ -31,7 +31,6 @@ from nfv_vim.objects._network import Network  # noqa: F401
 from nfv_vim.objects._network import NetworkProviderData  # noqa: F401
 from nfv_vim.objects._service_host import ServiceHost  # noqa: F401
 from nfv_vim.objects._subnet import Subnet  # noqa: F401
-from nfv_vim.objects._sw_patch import SwPatch  # noqa: F401
 from nfv_vim.objects._sw_update import SW_UPDATE_ALARM_RESTRICTION  # noqa: F401
 from nfv_vim.objects._sw_update import SW_UPDATE_APPLY_TYPE  # noqa: F401
 from nfv_vim.objects._sw_update import SW_UPDATE_INSTANCE_ACTION  # noqa: F401

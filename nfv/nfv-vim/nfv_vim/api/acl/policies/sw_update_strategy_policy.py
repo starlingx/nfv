@@ -20,7 +20,6 @@
 # FwUpdateStrategyAPI
 # KubeRootcaUpdateStrategyAPI
 # KubeUpgradeStrategyAPI
-# SwPatchStrategyAPI
 # SwUpgradeStrategyAPI
 #
 # those 5 classes needs to handle get_all, post, delete "controller api methods"

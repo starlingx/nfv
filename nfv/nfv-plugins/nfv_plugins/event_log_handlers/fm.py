@@ -505,50 +505,6 @@ _fm_event_id_mapping = dict(
             fm_constants.FM_LOG_ID_VM_GUEST_HEALTH_CHECK_FAILED,
         ),
         (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_START,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_START,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_INPROGRESS,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_INPROGRESS,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_REJECTED,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_REJECTED,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_CANCELLED,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_CANCELLED,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_FAILED,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_FAILED,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_COMPLETED,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_COMPLETED,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_ABORT,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_ABORT,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_ABORTING,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_ABORTING,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_ABORT_REJECTED,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_ABORT_REJECTED,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_ABORT_FAILED,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_ABORT_FAILED,
-        ),
-        (
-            event_log_objects_v1.EVENT_ID.SW_PATCH_AUTO_APPLY_ABORTED,
-            fm_constants.FM_LOG_ID_SW_PATCH_AUTO_APPLY_ABORTED,
-        ),
-        (
             event_log_objects_v1.EVENT_ID.SW_UPGRADE_AUTO_APPLY_START,
             fm_constants.FM_LOG_ID_SW_UPGRADE_AUTO_APPLY_START,
         ),

@@ -11,7 +11,6 @@ from nfv_vim.api.acl.policies import base
 from nfv_vim.api.acl.policies import fw_update_strategy_policy
 from nfv_vim.api.acl.policies import kube_rootca_update_strategy_policy
 from nfv_vim.api.acl.policies import kube_upgrade_strategy_policy
-from nfv_vim.api.acl.policies import sw_patch_strategy_policy
 from nfv_vim.api.acl.policies import sw_update_strategy_policy
 from nfv_vim.api.acl.policies import sw_upgrade_strategy_policy
 from nfv_vim.api.acl.policies import system_config_update_strategy_policy
@@ -47,7 +46,6 @@ class AuthenticationApplication:
             fw_update_strategy_policy.list_rules(),
             kube_rootca_update_strategy_policy.list_rules(),
             kube_upgrade_strategy_policy.list_rules(),
-            sw_patch_strategy_policy.list_rules(),
             sw_upgrade_strategy_policy.list_rules(),
             system_config_update_strategy_policy.list_rules(),
         )

@@ -34,7 +34,6 @@ class PlatformServices(Constants, metaclass=Singleton):
     KEYSTONE = Constant("keystone")
     MTC = Constant("mtc")
     SYSINV = Constant("sysinv")
-    PATCHING = Constant("patching")
     FM = Constant("fm")
     USM = Constant("usm")
 

@@ -15,4 +15,3 @@ from nfv_vim.nfvi.api.v1._nfvi_infrastructure_api import (  # noqa: F401
     NFVIInfrastructureAPI,
 )
 from nfv_vim.nfvi.api.v1._nfvi_network_api import NFVINetworkAPI  # noqa: F401
-from nfv_vim.nfvi.api.v1._nfvi_sw_mgmt_api import NFVISwMgmtAPI  # noqa: F401

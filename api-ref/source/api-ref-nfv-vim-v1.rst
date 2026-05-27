@@ -559,10 +559,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or 'applied' 
+* state - 'building or applying or aborting' or 'ready-to-apply or 'applied'
   or 'aborted' or 'build-failed or apply-failed or abort-failed'.
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -581,23 +581,23 @@ The details of the strategy can be checked using below response parameter.
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Note**
 
 * Phase - This refers to 'create or apply or abort' phase of strategy
-* Stage - This points to various stages at each phase. 
+* Stage - This points to various stages at each phase.
   Example; 'sw-upgrade start deploy', 'sw-upgrade deploy host'
-* Step - This refers to different steps executed in each stage. 
-  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts, 
+* Step - This refers to different steps executed in each stage.
+  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts,
   upgrade-hosts, system-stabilize, unlock-hosts.
 
 When using this API to monitor the progress or status of a create, apply or abort
 operation, wait for the 'completion-percentage' parameter to reach 100%.
 The 'completion-percentage' is 100% only in success case.
-Then, use the 'result' parameter to determine whether it indicates 
-'success' or 'failure'. In the failure scenario, the 'reason' and 'response' 
+Then, use the 'result' parameter to determine whether it indicates
+'success' or 'failure'. In the failure scenario, the 'reason' and 'response'
 parameters provide more detailed information related to the failure.
 
 
@@ -1109,7 +1109,7 @@ forbidden (403), badMethod (405), overLimit (413)
 **Response parameters**
 
 The "sw-deploy create strategy" request starts the creation process of the strategy,
-and returns a response to indicate the status of the creation process. 
+and returns a response to indicate the status of the creation process.
 E.g. typically after initially starting the create.
 
 * state ='building'.
@@ -1133,7 +1133,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Response body example**
@@ -1283,7 +1283,7 @@ These parameters are common for both apply and abort strategy.
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
-           "action", "plain", "xsd:string", "The action to take: ``apply-all``, 
+           "action", "plain", "xsd:string", "The action to take: ``apply-all``,
            ``apply-stage``,``abort`` or ``abort-stage``."
            "stage-id", "plain", "xsd:string", "The stage-id to apply or abort.
            Only used with ``apply-stage`` or ``abort-stage`` actions."
@@ -1291,9 +1291,9 @@ These parameters are common for both apply and abort strategy.
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response 
+  Each stage has a number specified. This can be identified from the response
   parameter 'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
   or aborting all the required stages."
 
 **Request body example**
@@ -1318,7 +1318,7 @@ forbidden (403), badMethod (405), overLimit (413)
 **Response parameters**
 
 The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process,
-and returns a response to indicate the current status of the apply or abort process. 
+and returns a response to indicate the current status of the apply or abort process.
 E.g. typically after initially starting the create.
 
 * state = 'applying' or 'aborting'.
@@ -1342,7 +1342,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Response body example**
@@ -1718,11 +1718,11 @@ Kubernetes Upgrade Strategy
 ----------------------------
 
 Kubernetes upgrade orchestration is performed with a kube upgrade orchestration
-strategy, or plan, for the automated upgrade of kubernetes components to the 
+strategy, or plan, for the automated upgrade of kubernetes components to the
 target version. A kube-upgrade strategy is capable of upgrading multiple versions
 at once in simplex system configuration. In other system configurations,
 kube-upgrade strategy can upgrade only single version at a time.
-Kubernetes upgrade contains a number of parameters for customizing the particular 
+Kubernetes upgrade contains a number of parameters for customizing the particular
 behavior of the kubernetes upgrade orchestration.
 
 **********************************************************
@@ -1750,10 +1750,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or applied 
+* state - 'building or applying or aborting' or 'ready-to-apply or applied
   or aborted' or 'build-failed or apply-failed or abort-failed'.
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -1860,14 +1860,14 @@ Creates a kube-upgrade strategy
 
    "controller-apply-type", "plain", "xsd:string", "The apply type for controller hosts: ``ignore``."
    "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts: ``ignore``."
-   "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``, 
+   "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``,
    ``parallel`` or ``ignore``."
-   "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of 
-   worker hosts to patch in parallel; only applicable if ``worker-apply-type = parallel``. 
+   "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of
+   worker hosts to patch in parallel; only applicable if ``worker-apply-type = parallel``.
    Default value is ``2``."
-   "default-instance-action", "plain", "xsd:string", "The default instance action: 
+   "default-instance-action", "plain", "xsd:string", "The default instance action:
    ``stop-start`` or ``migrate``."
-   "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks: 
+   "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
    ``strict`` or ``relaxed`` (recommended option)"
    "to-version (mandatory)", "plain", "xsd:string", "The kubernetes version to upgrade"
 
@@ -1898,7 +1898,7 @@ forbidden (403), badMethod (405), overLimit (413)
 **Response parameters**
 
 The kubernetes create strategy request starts the creation process of the strategy,
-and returns a response to indicate the status of the creation process. 
+and returns a response to indicate the status of the creation process.
 E.g. typically after initially starting the create.
 
 * state ='building'.
@@ -2048,17 +2048,17 @@ Applies or aborts kube-upgrade strategy
    :header: "Parameter", "Style", "Type", "Description"
    :widths: 20, 20, 20, 60
 
-   "action", "plain", "xsd:string", "The action to take: ``apply-all``, ``apply-stage``, 
+   "action", "plain", "xsd:string", "The action to take: ``apply-all``, ``apply-stage``,
    ``abort``or ``abort-stage``."
-   "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort. 
+   "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
    Only used with ``apply-stage`` or ``abort-stage`` actions."
 
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
   or aborting all the required stages."
 
 **Request body example**
@@ -2083,7 +2083,7 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 **Response parameters**
 
 The kubernetes strategy apply or abort request starts the apply or abort process,
-and returns a response to indicate the current status of the apply or abort process. 
+and returns a response to indicate the current status of the apply or abort process.
 E.g. typically after initially starting the create.
 
 * state = 'applying' or 'aborting'.
@@ -2531,14 +2531,14 @@ forbidden (403), badMethod (405), overLimit (413)
 
    "controller-apply-type", "plain", "xsd:string", "The apply type for controller hosts: ``ignore``."
    "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts: ``ignore``."
-   "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``, 
+   "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``,
    ``parallel`` or ``ignore``."
-   "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", 
-   "The maximum number of worker hosts to patch in parallel; only applicable if 
+   "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer",
+   "The maximum number of worker hosts to patch in parallel; only applicable if
    ``worker-apply-type = parallel``. Default value is ``2``."
-   "default-instance-action", "plain", "xsd:string", "The default instance action: 
+   "default-instance-action", "plain", "xsd:string", "The default instance action:
    ``stop-start`` or ``migrate``."
-   "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks: 
+   "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
    ``strict`` or ``relaxed``."
 
 ::
@@ -2698,17 +2698,17 @@ forbidden (403), badMethod (405), overLimit (413)
    :header: "Parameter", "Style", "Type", "Description"
    :widths: 20, 20, 20, 60
 
-   "action", "plain", "xsd:string", "The action to take: ``apply-all``, ``apply-stage``, 
+   "action", "plain", "xsd:string", "The action to take: ``apply-all``, ``apply-stage``,
    ``abort`` or ``abort-stage``."
-   "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort. 
+   "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
    Only used with ``apply-stage`` or ``abort-stage`` actions."
 
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
   or aborting all the required stages."
 
 ::
@@ -3193,18 +3193,18 @@ forbidden (403), badMethod (405), overLimit (413)
    :header: "Parameter", "Style", "Type", "Description"
    :widths: 20, 20, 20, 60
 
-   "controller-apply-type", "plain", "xsd:string", "The apply type for controller hosts: 
+   "controller-apply-type", "plain", "xsd:string", "The apply type for controller hosts:
    ``serial`` or ``ignore``."
-   "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts: 
+   "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts:
    ``serial`` or ``ignore``."
-   "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: 
+   "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts:
    ``serial``, ``parallel`` or ``ignore``."
-   "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", 
-   "The maximum number of worker hosts to patch in parallel; only applicable if 
+   "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer",
+   "The maximum number of worker hosts to patch in parallel; only applicable if
    ``worker-apply-type = parallel``. Default value is ``2``."
-   "default-instance-action", "plain", "xsd:string", "The default instance action: 
+   "default-instance-action", "plain", "xsd:string", "The default instance action:
    ``stop-start`` or ``migrate``."
-   "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks: 
+   "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
    ``strict`` or ``relaxed``."
 
 ::
@@ -3364,18 +3364,18 @@ forbidden (403), badMethod (405), overLimit (413)
    :header: "Parameter", "Style", "Type", "Description"
    :widths: 20, 20, 20, 60
 
-   "action", "plain", "xsd:string", "The action to take: ``apply-all``, ``apply-stage``, 
+   "action", "plain", "xsd:string", "The action to take: ``apply-all``, ``apply-stage``,
    ``abort`` or ``abort-stage``."
-   "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort. 
+   "stage-id (Optional)", "plain", "xsd:string", "The stage-id to apply or abort.
    Only used with ``apply-stage`` or ``abort-stage`` actions."
 
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
-  or aborting all the required stages." 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
+  or aborting all the required stages."
 
 ::
 
@@ -3564,7 +3564,7 @@ The orchestration supports orchestrating the deployment of both In-service and
 Reboot Required Patch Releases of software and Major Releases of software.
 
 All commands in this procedure are authenticated and require a Keystone Token in the
-X-Auth-Token Header of the Request. See ‘Keystone Authentication Request’ at the top of 
+X-Auth-Token Header of the Request. See ‘Keystone Authentication Request’ at the top of
 this page for more details.
 
 Commands in these procedures are from a variety of StarlingX REST API endpoints,
@@ -3663,7 +3663,7 @@ internalServerError (500)
 
 To verify if the software upload of a release is successful or not use below parameter.
 
-* error - In case of successful upload, this is an empty string(""). On failure, 
+* error - In case of successful upload, this is an empty string(""). On failure,
   this will have the error message.
 
 .. csv-table::
@@ -3714,7 +3714,7 @@ To verify if the software upload of a release is successful or not use below par
            }
 
 **Note**
-This command can take several minutes to complete (e.g. ~ 10 mins); 
+This command can take several minutes to complete (e.g. ~ 10 mins);
 especially in the case of a Major Release ISO.
 Patch files are typically much smaller and faster to load, e.g. a minute or less.
 There is no mechanism to monitor progress.
@@ -3733,7 +3733,7 @@ The typical port used for dcmanager REST API is 8119.
 **Request**
 
 **Request body parameters**
-    
+
 * subcloud-apply-type: subcloud_name
 * max-parallel-subclouds: max_parallel_subclouds
 * stop-on-failure: stop_on_failure
@@ -3742,7 +3742,7 @@ The typical port used for dcmanager REST API is 8119.
 * sysadmin_password: password
 * for_sw_deploy: true
 * prestage-software-version: YY.MM/YY.MM.nn
-        
+
 **Request body example**
 
 ::
@@ -3773,17 +3773,17 @@ serviceUnavailable (503)
            :header: "Parameter", "Type", "Description"
            :widths: 20, 20, 90
 
-           "type", "xsd:string", "Filter to query a particular type of update strategy 
-           if it exists. One of: firmware, kube-rootca-update, kubernetes, patch, prestage, 
+           "type", "xsd:string", "Filter to query a particular type of update strategy
+           if it exists. One of: firmware, kube-rootca-update, kubernetes, prestage
            or sw-deploy."
-           "subcloud-apply-type", "xsd:string", "The apply type for the update. serial 
+           "subcloud-apply-type", "xsd:string", "The apply type for the update. serial
            or parallel."
-           "max-parallel-subclouds", "xsd:integer", "The maximum number of subclouds 
+           "max-parallel-subclouds", "xsd:integer", "The maximum number of subclouds
            to update in parallel."
-           "stop-on-failure", "xsd:boolean", "Flag to indicate if the update should 
+           "stop-on-failure", "xsd:boolean", "Flag to indicate if the update should
            stop updating additional subclouds if a failure is encountered."
            "state", "xsd:integer", "The internal state of the sw-update-strategy."
-           "prestage_software_version", "xsd:integer", "The prestage software version for 
+           "prestage_software_version", "xsd:integer", "The prestage software version for
            the subcloud."
 
 **Note**
@@ -3858,7 +3858,7 @@ serviceUnavailable (503)
            :widths: 20, 20, 60
 
            "type", "xsd:string", "Filter to query a particular type of update strategy
-           if it exists. One of: firmware, kube-rootca-update, kubernetes, patch, prestage, 
+           if it exists. One of: firmware, kube-rootca-update, kubernetes, prestage
            or sw-deploy."
            "subcloud-apply-type", "xsd:string", "The apply type for the update. serial
            or parallel."
@@ -3867,7 +3867,7 @@ serviceUnavailable (503)
            "stop-on-failure", "xsd:boolean", "Flag to indicate if the update should
            stop updating additional subclouds if a failure is encountered."
            "state", "xsd:integer", "The internal state of the sw-update-strategy."
-           "prestage_software_version", "xsd:integer", "The prestage software version for 
+           "prestage_software_version", "xsd:integer", "The prestage software version for
            the subcloud."
 
 **Note**
@@ -3912,16 +3912,16 @@ Creates software deploy strategy
 
             "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts:
             ``serial``, ``parallel`` or ``ignore``."
-            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``, 
+            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``,
             ``parallel`` or ``ignore``."
-            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of 
+            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of
             worker hosts to upgrade in parallel; only applicable if ``worker-apply-type = parallel``.
             Default value is ``2``."
             "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
             ``strict`` or ``relaxed``."
             "release", "plain", "xsd:string", "The release identification name."
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
-            "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be 
+            "delete", "plain", "xsd:bool", "The flag that indicates that deployment will be
             marked complete."
 
 **Request body example**
@@ -3952,8 +3952,8 @@ forbidden (403), badMethod (405), overLimit (413)
 
 **Response parameters**
 
-The "sw-deploy create strategy" request starts the creation process of the strategy, 
-and returns a response to indicate the status of the creation process. 
+The "sw-deploy create strategy" request starts the creation process of the strategy,
+and returns a response to indicate the status of the creation process.
 E.g. typically after initially starting the create.
 
 * state ='building'.
@@ -3977,7 +3977,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Response body example**
@@ -4060,10 +4060,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or applied 
+* state - 'building or applying or aborting' or 'ready-to-apply or applied
   or aborted' or 'build-failed or apply-failed or abort-failed'.
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -4082,16 +4082,16 @@ The details of the strategy can be checked using below response parameter.
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Note**
 
 * Phase - This refers to 'create or apply or abort' phase of strategy
-* Stage - This points to various stages at each phase.Example; 'sw-upgrade start deploy', 
+* Stage - This points to various stages at each phase.Example; 'sw-upgrade start deploy',
   'sw-upgrade deploy host'
-* Step - This refers to different steps executed in each stage. 
-  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts, 
+* Step - This refers to different steps executed in each stage.
+  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts,
   upgrade-hosts, system-stabilize, unlock-hosts.
 
 When using this API to monitor the progress or status of a create, apply or abort
@@ -4135,10 +4135,10 @@ in response message.
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
-  or aborting all the required stages." 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
+  or aborting all the required stages."
 
 **Request body example**
 
@@ -4161,8 +4161,8 @@ forbidden (403), badMethod (405), overLimit (413)
 
 **Response parameters**
 
-The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process, 
-and returns a response to indicate the current status of the apply or abort process. 
+The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process,
+and returns a response to indicate the current status of the apply or abort process.
 E.g. typically after initially starting the create.
 
 * state = 'applying' or 'aborting'.
@@ -4186,7 +4186,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Response body example**
@@ -4235,7 +4235,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
               "reason": ""
               }
             }
-          
+
 
 **Note**
 The API takes long time to complete the operation. Approximately it takes an hour
@@ -4267,9 +4267,9 @@ for stage-id data in the strategy output.
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
   or aborting all the required stages."
 
 **Request body example**
@@ -4294,8 +4294,8 @@ forbidden (403), badMethod (405), overLimit (413)
 
 **Response parameters**
 
-The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process, 
-and returns a response to indicate the current status of the apply or abort process. 
+The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process,
+and returns a response to indicate the current status of the apply or abort process.
 E.g. typically after initially starting the create.
 
 * state = 'applying' or 'aborting'.
@@ -4319,7 +4319,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Response body example**
@@ -4397,10 +4397,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or 
+* state - 'building or applying or aborting' or 'ready-to-apply or
   applied or aborted' or 'build-failed or apply-failed or abort-failed'.
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -4419,16 +4419,16 @@ The details of the strategy can be checked using below response parameter.
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Note**
 
 * Phase - This refers to 'create or apply or abort' phase of strategy
-* Stage - This points to various stages at each phase.Example; 
+* Stage - This points to various stages at each phase.Example;
   'sw-upgrade start deploy', 'sw-upgrade deploy host'
-* Step - This refers to different steps executed in each stage. 
-  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts, 
+* Step - This refers to different steps executed in each stage.
+  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts,
   upgrade-hosts, system-stabilize, unlock-hosts.
 
 When using this API to monitor the progress or status of a create, apply or abort
@@ -4512,7 +4512,7 @@ Pre-requisite
 **************
 
 Check for all the pre-requisites mentioned in 'pre-requisite' section of
-'Software deployment Orchestration for Patch Release and Major Release Update' in 
+'Software deployment Orchestration for Patch Release and Major Release Update' in
 addition to the below pre-requisites.
 
 ---------------------------------------
@@ -4643,9 +4643,9 @@ Create software deploy strategy.
 
             "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts:
             ``serial``, ``parallel`` or ``ignore``."
-            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``, 
+            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial``,
             ``parallel`` or ``ignore``."
-            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of 
+            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number of
             worker hosts to upgrade in parallel; only applicable if ``worker-apply-type = parallel``.
             Default value is ``2``."
             "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm checks:
@@ -4682,8 +4682,8 @@ forbidden (403), badMethod (405), overLimit (413)
 
 **Response parameters**
 
-The "sw-deploy create strategy" request starts the creation process of the strategy, 
-and returns a response to indicate the status of the creation process. 
+The "sw-deploy create strategy" request starts the creation process of the strategy,
+and returns a response to indicate the status of the creation process.
 E.g. typically after initially starting the create.
 
 * state ='building'.
@@ -4707,7 +4707,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the reason 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the reason
    for failure,if any."
 
 **Response body example**
@@ -4790,10 +4790,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or 
+* state - 'building or applying or aborting' or 'ready-to-apply or
   applied or aborted' or 'build-failed or apply-failed or abort-failed'.
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -4812,7 +4812,7 @@ The details of the strategy can be checked using below response parameter.
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Note**
@@ -4820,8 +4820,8 @@ The details of the strategy can be checked using below response parameter.
 * Phase - This refers to 'create or apply or abort' phase of strategy
 * Stage - This points to various stages at each phase.
   Example; 'sw-upgrade start deploy', 'sw-upgrade deploy host'
-* Step - This refers to different steps executed in each stage. 
-  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts, 
+* Step - This refers to different steps executed in each stage.
+  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts,
   upgrade-hosts, system-stabilize, unlock-hosts.
 
 When using this API to monitor the progress or status of a create, apply or abort
@@ -4865,9 +4865,9 @@ in response message.
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
   or aborting all the required stages."
 
 **Request body example**
@@ -4891,8 +4891,8 @@ forbidden (403), badMethod (405), overLimit (413)
 
 **Response parameters**
 
-The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process, 
-and returns a response to indicate the current status of the apply or abort process. 
+The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process,
+and returns a response to indicate the current status of the apply or abort process.
 E.g. typically after initially starting the create.
 
 * state = 'applying' or 'aborting'.
@@ -4916,7 +4916,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Response body example**
@@ -4976,7 +4976,7 @@ The API takes long time to complete the operation. Approximately it takes an hou
 ------------------------------------------
 
 If a particular stage needs to be applied, then use the stage id parameter.
-To identify the stage-id that needs to be applied, the user can get the details 
+To identify the stage-id that needs to be applied, the user can get the details
 by looking for stage-id data in the strategy output.
 
 .. rest_method:: POST /api/orchestration/sw-upgrade/strategy/actions
@@ -4997,9 +4997,9 @@ by looking for stage-id data in the strategy output.
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
   or aborting all the required stages."
 
 **Request body example**
@@ -5024,8 +5024,8 @@ forbidden (403), badMethod (405), overLimit (413)
 
 **Response parameters**
 
-The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process, 
-and returns a response to indicate the current status of the apply or abort process. 
+The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process,
+and returns a response to indicate the current status of the apply or abort process.
 E.g. typically after initially starting the create.
 
 * state = 'applying' or 'aborting'.
@@ -5049,7 +5049,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the reason 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the reason
    for failure,if any."
 
 **Response body example**
@@ -5124,10 +5124,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or 
+* state - 'building or applying or aborting' or 'ready-to-apply or
   applied or aborted' or 'build-failed or apply-failed or abort-failed'.
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -5146,7 +5146,7 @@ The details of the strategy can be checked using below response parameter.
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the reason 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the reason
    for failure,if any."
 
 **Note**
@@ -5154,8 +5154,8 @@ The details of the strategy can be checked using below response parameter.
 * Phase - This refers to 'create or apply or abort' phase of strategy
 * Stage - This points to various stages at each phase.
   Example; 'sw-upgrade start deploy', 'sw-upgrade deploy host'
-* Step - This refers to different steps executed in each stage. 
-  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts, 
+* Step - This refers to different steps executed in each stage.
+  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts,
   upgrade-hosts, system-stabilize, unlock-hosts.
 
 When using this API to monitor the progress or status of a create, apply or abort
@@ -5319,8 +5319,8 @@ itemNotFound (404)
                    "All hosts have current configurations": [OK],
                    "All hosts are patch current": [OK],
                    "Ceph Storage Healthy": [Fail],
-                   "No alarms": [Fail][19] alarms found, [16] of which are 
-                    management affecting and [0] are certificate expiration alarms. 
+                   "No alarms": [Fail][19] alarms found, [16] of which are
+                    management affecting and [0] are certificate expiration alarms.
                     Use "fm alarm-list" for details
                    "All kubernetes nodes are ready": [OK]
                    "All kubernetes control plane pods are ready": [OK]
@@ -5351,11 +5351,11 @@ entity_instance_id, severity and alarm_type.
        :header: "Parameter", "Style", "Type", "Description"
        :widths: 20, 20, 20, 60
 
-       "include_suppress (Optional)", "query", "xsd:boolean", "This optional parameter when set 
+       "include_suppress (Optional)", "query", "xsd:boolean", "This optional parameter when set
        to true (include_suppress=true)
        specifies to include suppressed alarms in output."
-       "expand (Optional)", "query", "xsd:boolean", "This optional parameter when set to 
-       true (expand=true) specifies that the response should contains the same response 
+       "expand (Optional)", "query", "xsd:boolean", "This optional parameter when set to
+       true (expand=true) specifies that the response should contains the same response
        parameters as when querying for a specific alarm."
 
 **Response**
@@ -5376,24 +5376,24 @@ itemNotFound (404)
            :header: "Parameter", "Style", "Type", "Description"
            :widths: 20, 20, 20, 60
 
-           "alarms (Optional)", "plain", "xsd:list", "The list of active alarms based on 
+           "alarms (Optional)", "plain", "xsd:list", "The list of active alarms based on
            the specified query."
-           "alarm_id (Optional)", "plain", "xsd:string", "The alarm ID; each type of alarm 
-           has a unique ID.Note the alarm_id and the entity_instance_id uniquely identify an 
+           "alarm_id (Optional)", "plain", "xsd:string", "The alarm ID; each type of alarm
+           has a unique ID.Note the alarm_id and the entity_instance_id uniquely identify an
            alarm instance."
-           "entity_instance_id (Optional)", "plain", "xsd:string", "The instance of the object 
-           raising alarm. A .separated list of sub-entity-type=instance-value pairs, 
-           representing the containment structure of the overall entity instance. 
+           "entity_instance_id (Optional)", "plain", "xsd:string", "The instance of the object
+           raising alarm. A .separated list of sub-entity-type=instance-value pairs,
+           representing the containment structure of the overall entity instance.
            Note the alarm_id and the entity_instance_id uniquely identify an alarm instance."
            "reason_text (Optional)", "plain", "xsd:string", "The text description of the alarm."
-           "severity (Optional)", "plain", "xsd:string", "The severity of the alarm; ``critical``, 
+           "severity (Optional)", "plain", "xsd:string", "The severity of the alarm; ``critical``,
            ``major``,``minor``, or ``warning``."
-           "timestamp (Optional)", "plain", "xsd:dateTime", "The time in UTC at which the alarm 
+           "timestamp (Optional)", "plain", "xsd:dateTime", "The time in UTC at which the alarm
            has last been updated."
            "uuid (Optional)", "plain", "csapi:UUID", "The unique identifier of the alarm."
 
 **Responde body example**
-        
+
 ::
 
            {
@@ -5428,7 +5428,7 @@ Steps
 **Request**
 
 **Request body parameter**
-       
+
 ::
 
           {
@@ -5458,8 +5458,8 @@ Steps
 
 **Request parameters**
 
-The "sw-deploy create strategy" request starts the creation process of the strategy, 
-and returns a response to indicate the status of the creation process. 
+The "sw-deploy create strategy" request starts the creation process of the strategy,
+and returns a response to indicate the status of the creation process.
 E.g. typically after initially starting the create.
 
 * state ='building'.
@@ -5473,12 +5473,12 @@ Use the sw-deploy get strategy request to monitor the progress and status of the
 
             "storage-apply-type", "plain", "xsd:string", "The apply type for storage hosts:
             ``serial``, ``parallel`` or ``ignore``."
-            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial`` , 
+            "worker-apply-type", "plain", "xsd:string", "The apply type for worker hosts: ``serial`` ,
             ``parallel`` or ``ignore``."
-            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number 
-            of worker hosts to upgrade in parallel; only applicable if ``worker-apply-type = 
+            "max-parallel-worker-hosts (Optional)", "plain", "xsd:integer", "The maximum number
+            of worker hosts to upgrade in parallel; only applicable if ``worker-apply-type =
             parallel``. Default value is ``2``."
-            "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm 
+            "alarm-restrictions (Optional)", "plain", "xsd:string", "The strictness of alarm
             checks:``strict`` or ``relaxed``."
             "release", "plain", "xsd:string", "The release identification name."
             "rollback", "plain", "xsd:bool", "The flag that indicates this is a rollback action."
@@ -5528,10 +5528,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or 
+* state - 'building or applying or aborting' or 'ready-to-apply or
   applied or aborted' or 'build-failed or apply-failed or abort-failed'
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -5550,16 +5550,16 @@ The details of the strategy can be checked using below response parameter.
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the reason 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the reason
    for failure,if any."
 
 **Note**
 
 * Phase - This refers to 'create or apply or abort' phase of strategy
-* Stage - This points to various stages at each phase.Example; 'sw-upgrade start deploy', 
+* Stage - This points to various stages at each phase.Example; 'sw-upgrade start deploy',
   'sw-upgrade deploy host'
-* Step - This refers to different steps executed in each stage. 
-  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts, 
+* Step - This refers to different steps executed in each stage.
+  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts,
   upgrade-hosts, system-stabilize, unlock-hosts.
 
 When using this API to monitor the progress or status of a create, apply or abort
@@ -5603,9 +5603,9 @@ in response message.
 **Note**
 
 * stage-id - This is used to apply or abort a particular stage in the execution flow.
-  Each stage has a number specified. This can be identified from the response parameter 
+  Each stage has a number specified. This can be identified from the response parameter
   'stage-id' which can be used to apply or abort a specific stage.
-* apply-all or abort-all - This is recommended option, as it takes care of applying 
+* apply-all or abort-all - This is recommended option, as it takes care of applying
   or aborting all the required stages."
 
 **Request body example**
@@ -5629,8 +5629,8 @@ forbidden (403), badMethod (405), overLimit (413)
 
 **Response parameters**
 
-The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process, 
-and returns a response to indicate the current status of the apply or abort process. 
+The "sw-deploy" strategy "apply" or "abort" request starts the apply or abort process,
+and returns a response to indicate the current status of the apply or abort process.
 E.g. typically after initially starting the create.
 
 * state = 'applying' or 'aborting'.
@@ -5654,7 +5654,7 @@ Use the sw-deploy get strategy request to monitor the progress and status of App
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the reason 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the reason
    for failure,if any."
 
 **Response body example**
@@ -5729,10 +5729,10 @@ forbidden (403), badMethod (405), overLimit (413), itemNotFound (404)
 
 The details of the strategy can be checked using below response parameter.
 
-* state - 'building or applying or aborting' or 'ready-to-apply or 
+* state - 'building or applying or aborting' or 'ready-to-apply or
   'applied' or 'aborted' or 'build-failed or apply-failed or abort-failed'.
 * result - 'success' or 'failed' or 'aborted'.
-* reason and response - It's empty "" on success and on failure it's updated 
+* reason and response - It's empty "" on success and on failure it's updated
   with details of error.
 
 .. csv-table::
@@ -5751,7 +5751,7 @@ The details of the strategy can be checked using below response parameter.
    "completion-percentage", "plain", "xsd:integer", "The completion percentage of strategy."
    "result", "plain", "xsd:string", "The result of current strategy."
    "reason", "plain", "xsd:string", "The reason for success/failure of the current phase."
-   "response", "plain", "xsd:string", "This displays the detailed error message of the 
+   "response", "plain", "xsd:string", "This displays the detailed error message of the
    reason for failure,if any."
 
 **Note**
@@ -5759,8 +5759,8 @@ The details of the strategy can be checked using below response parameter.
 * Phase - This refers to 'create or apply or abort' phase of strategy
 * Stage - This points to various stages at each phase.
   Example; 'sw-upgrade start deploy', 'sw-upgrade deploy host'
-* Step - This refers to different steps executed in each stage. 
-  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts, 
+* Step - This refers to different steps executed in each stage.
+  Example; In 'sw-upgrade deploy host' stage, there are different steps like lock-hosts,
   upgrade-hosts, system-stabilize, unlock-hosts.
 
 When using this API to monitor the progress or status of a create, apply or abort

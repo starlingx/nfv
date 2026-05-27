@@ -33,7 +33,6 @@ DLOG = debug.debug_get_logger("nfv_vim.strategy")
 class StrategyNames(Constants, metaclass=Singleton):
     """Strategy Names."""
 
-    SW_PATCH = Constant("sw-patch")
     SW_UPGRADE = Constant("sw-upgrade")
     FW_UPDATE = Constant("fw-update")
     KUBE_ROOTCA_UPDATE = Constant("kube-rootca-update")
@@ -51,9 +50,7 @@ MTCE_DELAY = 15
 # a no-reboot patch can stabilize in 30 seconds
 NO_REBOOT_DELAY = 30
 
-# constants used by the patching API for state and repo state
-PATCH_REPO_STATE_APPLIED = "Applied"
-PATCH_STATE_APPLIED = "Applied"
+# constant used by the repo state
 WAIT_ALARM_TIMEOUT = 2400
 
 
@@ -550,104 +547,6 @@ class QueryMixinBase:
         pass
 
 
-class QuerySwPatchesMixin(QueryMixinBase):
-    """This mixin is used through the QuerySwPatchesStep class."""
-
-    def initialize_mixin(self):
-        super().initialize_mixin()
-        self._nfvi_sw_patches = []
-
-    @property
-    def nfvi_sw_patches(self):
-        """Returns the software patches from the NFVI layer."""
-
-        return self._nfvi_sw_patches
-
-    @nfvi_sw_patches.setter
-    def nfvi_sw_patches(self, nfvi_sw_patches):
-        """Save the software patches from the NFVI Layer."""
-
-        self._nfvi_sw_patches = nfvi_sw_patches
-
-    def mixin_from_dict(self, data):
-        """Extracts this mixin data from a dictionary."""
-
-        super().mixin_from_dict(data)
-
-        from nfv_vim import nfvi
-
-        mixin_data = []
-        for sw_patch_data in data["nfvi_sw_patches_data"]:
-            sw_patch = nfvi.objects.v1.SwPatch(
-                sw_patch_data["name"],
-                sw_patch_data["sw_version"],
-                sw_patch_data["repo_state"],
-                sw_patch_data["patch_state"],
-            )
-            mixin_data.append(sw_patch)
-        self._nfvi_sw_patches = mixin_data
-
-    def mixin_as_dict(self, data):
-        """Updates the dictionary with this mixin data."""
-
-        super().mixin_as_dict(data)
-        mixin_data = []
-        for sw_patch in self._nfvi_sw_patches:
-            mixin_data.append(sw_patch.as_dict())
-        data["nfvi_sw_patches_data"] = mixin_data
-
-
-class QuerySwPatchHostsMixin(QueryMixinBase):
-    """This mixin is used through the QuerySwPatchHostsStep class."""
-
-    def initialize_mixin(self):
-        super().initialize_mixin()
-        self._nfvi_sw_patch_hosts = []
-
-    @property
-    def nfvi_sw_patch_hosts(self):
-        """Returns the software patch hosts from the NFVI layer."""
-
-        return self._nfvi_sw_patch_hosts
-
-    @nfvi_sw_patch_hosts.setter
-    def nfvi_sw_patch_hosts(self, nfvi_sw_patch_hosts):
-        """Save the software patch hosts from the NFVI Layer."""
-
-        self._nfvi_sw_patch_hosts = nfvi_sw_patch_hosts
-
-    def mixin_from_dict(self, data):
-        """Extracts this mixin data from a dictionary."""
-
-        super().mixin_from_dict(data)
-
-        from nfv_vim import nfvi
-
-        mixin_data = []
-        for host_data in data["nfvi_sw_patch_hosts_data"]:
-            host = nfvi.objects.v1.HostSwPatch(
-                host_data["name"],
-                host_data["personality"],
-                host_data["sw_version"],
-                host_data["requires_reboot"],
-                host_data["patch_current"],
-                host_data["state"],
-                host_data["patch_failed"],
-                host_data["interim_state"],
-            )
-            mixin_data.append(host)
-        self._nfvi_sw_patch_hosts = mixin_data
-
-    def mixin_as_dict(self, data):
-        """Updates the dictionary with this mixin data."""
-
-        super().mixin_as_dict(data)
-        mixin_data = []
-        for host in self._nfvi_sw_patch_hosts:
-            mixin_data.append(host.as_dict())
-        data["nfvi_sw_patch_hosts_data"] = mixin_data
-
-
 class QueryKubeRootcaHostUpdatesMixin(QueryMixinBase):
     """This mixin is used through the QueryKubeRootcaHostUpdatesStep class."""
 
@@ -1023,7 +922,6 @@ class UpdateControllerHostsMixin:
                             stage.add_step(host_action_step(host_list, extra_args))
                         if reboot:
                             # Cannot unlock right away after certain actions
-                            # like SwPatchHostsStep
                             stage.add_step(
                                 strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
                             )
@@ -1074,7 +972,6 @@ class UpdateControllerHostsMixin:
                     stage.add_step(host_action_step(host_list, extra_args))
                 if reboot:
                     # Cannot unlock right away after certain actions
-                    # like SwPatchHostsStep
                     stage.add_step(
                         strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
                     )
@@ -1107,18 +1004,6 @@ class UpdateControllerHostsMixin:
             DLOG.verbose("Controller apply type set to ignore.")
 
         return True, ""
-
-
-class PatchControllerHostsMixin(UpdateControllerHostsMixin):
-    def _add_controller_strategy_stages(self, controllers, reboot):
-        from nfv_vim import strategy
-
-        return self._add_update_controller_strategy_stages(
-            controllers,
-            reboot,
-            strategy.STRATEGY_STAGE_NAME.SW_PATCH_CONTROLLERS,
-            strategy.SwPatchHostsStep,
-        )
 
 
 class SwDeployControllerHostsMixin(UpdateControllerHostsMixin):
@@ -1217,23 +1102,9 @@ class UpdateStorageHostsMixin:
         return True, ""
 
 
-class PatchStorageHostsMixin(UpdateStorageHostsMixin):
-    def _add_storage_strategy_stages(self, storage_hosts, reboot):
-        """Add storage software patch stages to a strategy."""
-
-        from nfv_vim import strategy
-
-        return self._add_update_storage_strategy_stages(
-            storage_hosts,
-            reboot,
-            strategy.STRATEGY_STAGE_NAME.SW_PATCH_STORAGE_HOSTS,
-            strategy.SwPatchHostsStep,
-        )
-
-
 class SwDeployStorageHostsMixin(UpdateStorageHostsMixin):
     def _add_storage_strategy_stages(self, storage_hosts, reboot):
-        """Add storage software patch stages to a strategy."""
+        """Add storage software deploy stages to a strategy."""
 
         from nfv_vim import strategy
 
@@ -1482,18 +1353,6 @@ class UpdateWorkerHostsMixin:
         return True, ""
 
 
-class PatchWorkerHostsMixin(UpdateWorkerHostsMixin):
-    def _add_worker_strategy_stages(self, worker_hosts, reboot):
-        from nfv_vim import strategy
-
-        return self._add_update_worker_strategy_stages(
-            worker_hosts,
-            reboot,
-            strategy.STRATEGY_STAGE_NAME.SW_PATCH_WORKER_HOSTS,
-            strategy.SwPatchHostsStep,
-        )
-
-
 class SwDeployWorkerHostsMixin(UpdateWorkerHostsMixin):
     def _add_worker_strategy_stages(self, worker_hosts, reboot, do_nothing=False):
         from nfv_vim import strategy
@@ -1537,393 +1396,6 @@ class UpdateSystemConfigWorkerHostsMixin(UpdateWorkerHostsMixin):
             strategy.STRATEGY_STAGE_NAME.SYSTEM_CONFIG_UPDATE_WORKER_HOSTS,
             strategy.SystemConfigUpdateHostsStep,
         )
-
-
-###################################################################
-#
-# The Software Patch Strategy
-#
-###################################################################
-class SwPatchStrategy(
-    SwUpdateStrategy,
-    QuerySwPatchesMixin,
-    QuerySwPatchHostsMixin,
-    PatchControllerHostsMixin,
-    PatchStorageHostsMixin,
-    PatchWorkerHostsMixin,
-):
-    """Software Patch - Strategy."""
-
-    def __init__(
-        self,
-        uuid,
-        controller_apply_type,
-        storage_apply_type,
-        swift_apply_type,
-        worker_apply_type,
-        max_parallel_worker_hosts,
-        default_instance_action,
-        alarm_restrictions,
-        ignore_alarms,
-        single_controller,
-    ):
-        super().__init__(
-            uuid,
-            STRATEGY_NAME.SW_PATCH,
-            controller_apply_type,
-            storage_apply_type,
-            swift_apply_type,
-            worker_apply_type,
-            max_parallel_worker_hosts,
-            default_instance_action,
-            alarm_restrictions,
-            ignore_alarms,
-        )
-
-        # The following alarms will not prevent a software patch operation
-        IGNORE_ALARMS = [
-            "900.001",  # Patch in progress
-            "900.005",  # Upgrade in progress
-            "900.101",  # Software patch auto apply in progress
-            "200.001",  # Maintenance host lock alarm
-            "700.004",  # VM stopped
-            "280.002",  # Subcloud resource out-of-sync
-            "100.119",  # PTP alarm for SyncE
-            "900.701",  # Node tainted
-        ]
-        IGNORE_ALARMS_CONDITIONAL = {"750.006": 120}
-        self._ignore_alarms += IGNORE_ALARMS
-        self._single_controller = single_controller
-
-        # This is to ignore the stale alarm(currently 750.006 is ignored).
-        self._ignore_alarms_conditional = IGNORE_ALARMS_CONDITIONAL
-
-        # initialize the variables required by the mixins
-        # ie: self._nfvi_sw_patches, self._nfvi_sw_patch_hosts
-        self.initialize_mixin()
-
-    def build(self):
-        """Build the strategy."""
-
-        from nfv_vim import strategy
-
-        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_PATCH_QUERY)
-        stage.add_step(
-            strategy.QueryAlarmsStep(
-                ignore_alarms=self._ignore_alarms,
-                ignore_alarms_conditional=self._ignore_alarms_conditional,
-            )
-        )
-        stage.add_step(strategy.QuerySwPatchesStep())
-        stage.add_step(strategy.QuerySwPatchHostsStep())
-        self.build_phase.add_stage(stage)
-        super().build()
-
-    def _add_swift_strategy_stages(self, swift_hosts, reboot):
-        """Add swift software patch strategy stages
-
-        todo(abailey): remove this if swift hosts are not supported.
-        """
-        from nfv_vim import strategy
-        from nfv_vim import tables
-
-        if SW_UPDATE_APPLY_TYPE.IGNORE != self._swift_apply_type:
-            host_table = tables.tables_get_host_table()
-
-            for host in swift_hosts:
-                if HOST_PERSONALITY.SWIFT not in host.personality:
-                    DLOG.error(
-                        "Host inventory personality swift mismatch "
-                        "detected for host %s." % host.name
-                    )
-                    reason = "host inventory personality swift mismatch detected"
-                    return False, reason
-
-            if 2 > host_table.total_by_personality(HOST_PERSONALITY.SWIFT):
-                DLOG.warn("Not enough swift hosts to apply software patches.")
-                reason = "not enough swift hosts to apply software patches"
-                return False, reason
-
-        if self._swift_apply_type in [
-            SW_UPDATE_APPLY_TYPE.SERIAL,
-            SW_UPDATE_APPLY_TYPE.PARALLEL,
-        ]:
-            for host in swift_hosts:
-                host_list = [host]
-                stage = strategy.StrategyStage(
-                    strategy.STRATEGY_STAGE_NAME.SW_PATCH_SWIFT_HOSTS
-                )
-                stage.add_step(
-                    strategy.QueryAlarmsStep(True, ignore_alarms=self._ignore_alarms)
-                )
-                if reboot:
-                    stage.add_step(strategy.LockHostsStep(host_list))
-                stage.add_step(strategy.SwPatchHostsStep(host_list))
-                if reboot:
-                    # Cannot unlock right away after SwPatchHostsStep
-                    stage.add_step(
-                        strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
-                    )
-                    stage.add_step(strategy.UnlockHostsStep(host_list))
-                    stage.add_step(strategy.SystemStabilizeStep())
-                else:
-                    stage.add_step(
-                        strategy.SystemStabilizeStep(timeout_in_secs=NO_REBOOT_DELAY)
-                    )
-                self.apply_phase.add_stage(stage)
-        else:
-            DLOG.verbose("Swift apply type set to ignore.")
-
-        return True, ""
-
-    def build_complete(self, result, result_reason):
-        """Strategy Build Complete."""
-
-        from nfv_vim import strategy
-        from nfv_vim import tables
-
-        result, result_reason = super().build_complete(result, result_reason)
-
-        DLOG.info(
-            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
-        )
-
-        if result in [
-            strategy.STRATEGY_RESULT.SUCCESS,
-            strategy.STRATEGY_RESULT.DEGRADED,
-        ]:
-            host_table = tables.tables_get_host_table()
-
-            if not self.nfvi_sw_patches:
-                DLOG.warn("No software patches found.")
-                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = "no software patches found"
-                self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason
-                )
-                self.save()
-                return
-
-            if self._nfvi_alarms:
-                DLOG.warn("Active alarms found, can't apply software patches.")
-                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = "active alarms present"
-                self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason
-                )
-                self.save()
-                return
-
-            for host in list(host_table.values()):
-                if (
-                    HOST_PERSONALITY.WORKER in host.personality
-                    and HOST_PERSONALITY.CONTROLLER not in host.personality
-                ):
-                    # Allow patch orchestration when worker hosts are available,
-                    # locked or powered down.
-                    if not (
-                        (
-                            host.is_unlocked()
-                            and host.is_enabled()
-                            and host.is_available()
-                        )
-                        or (
-                            host.is_locked()
-                            and host.is_disabled()
-                            and host.is_offline()
-                        )
-                        or (
-                            host.is_locked() and host.is_disabled() and host.is_online()
-                        )
-                    ):
-                        DLOG.warn(
-                            "All worker hosts must be unlocked-enabled-available, "
-                            "locked-disabled-online or locked-disabled-offline, "
-                            "can't apply software patches."
-                        )
-                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                        self.build_phase.result_reason = (
-                            "all worker hosts must be unlocked-enabled-available, "
-                            "locked-disabled-online or locked-disabled-offline"
-                        )
-                        self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason
-                        )
-                        self.save()
-                        return
-                else:
-                    # Only allow patch orchestration when all controller,
-                    # storage and swift hosts are available. It is not safe to
-                    # automate patch application when we do not have full
-                    # redundancy.
-                    if not (
-                        host.is_unlocked() and host.is_enabled() and host.is_available()
-                    ):
-                        DLOG.warn(
-                            "All %s hosts must be unlocked-enabled-available, "
-                            "can't apply software patches." % host.personality
-                        )
-                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                        self.build_phase.result_reason = (
-                            "all %s hosts must be unlocked-enabled-available"
-                            % host.personality
-                        )
-                        self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason
-                        )
-                        self.save()
-                        return
-
-            controllers = []
-            controllers_no_reboot = []
-            storage_hosts = []
-            storage_hosts_no_reboot = []
-            swift_hosts = []
-            swift_hosts_no_reboot = []
-            worker_hosts = []
-            worker_hosts_no_reboot = []
-
-            for sw_patch_host in self.nfvi_sw_patch_hosts:
-                host = host_table.get(sw_patch_host.name, None)
-                if host is None:
-                    DLOG.error(
-                        "Host inventory mismatch detected for host %s."
-                        % sw_patch_host.name
-                    )
-                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                    self.build_phase.result_reason = "host inventory mismatch detected"
-                    self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason
-                    )
-                    self.save()
-                    return
-
-                if sw_patch_host.interim_state:
-                    # A patch operation has been done recently and we don't
-                    # have an up-to-date state for this host.
-                    DLOG.warn(
-                        "Host %s is in pending patch current state."
-                        % sw_patch_host.name
-                    )
-                    self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                    self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                    self.build_phase.result_reason = (
-                        "at least one host is in pending patch current state"
-                    )
-                    self.sw_update_obj.strategy_build_complete(
-                        False, self.build_phase.result_reason
-                    )
-                    self.save()
-                    return
-
-                if sw_patch_host.patch_current:
-                    # No need to patch this host
-                    continue
-
-                if HOST_PERSONALITY.CONTROLLER in sw_patch_host.personality:
-                    if sw_patch_host.requires_reboot:
-                        controllers.append(host)
-                    else:
-                        controllers_no_reboot.append(host)
-
-                elif HOST_PERSONALITY.STORAGE in sw_patch_host.personality:
-                    if sw_patch_host.requires_reboot:
-                        storage_hosts.append(host)
-                    else:
-                        storage_hosts_no_reboot.append(host)
-
-                elif HOST_PERSONALITY.SWIFT in sw_patch_host.personality:
-                    if sw_patch_host.requires_reboot:
-                        swift_hosts.append(host)
-                    else:
-                        swift_hosts_no_reboot.append(host)
-
-                # Separate if check to handle AIO where host has multiple
-                # personality disorder.
-                if HOST_PERSONALITY.WORKER in sw_patch_host.personality:
-                    # Ignore worker hosts that are powered down
-                    if not host.is_offline():
-                        if sw_patch_host.requires_reboot:
-                            worker_hosts.append(host)
-                        else:
-                            worker_hosts_no_reboot.append(host)
-
-            STRATEGY_CREATION_COMMANDS = [
-                (self._add_controller_strategy_stages, controllers_no_reboot, False),
-                (self._add_controller_strategy_stages, controllers, True),
-                (self._add_storage_strategy_stages, storage_hosts_no_reboot, False),
-                (self._add_storage_strategy_stages, storage_hosts, True),
-                (self._add_swift_strategy_stages, swift_hosts_no_reboot, False),
-                (self._add_swift_strategy_stages, swift_hosts, True),
-                (self._add_worker_strategy_stages, worker_hosts_no_reboot, False),
-                (self._add_worker_strategy_stages, worker_hosts, True),
-            ]
-
-            for (
-                add_strategy_stages_function,
-                host_list,
-                reboot,
-            ) in STRATEGY_CREATION_COMMANDS:
-                if host_list:
-                    success, reason = add_strategy_stages_function(host_list, reboot)
-                    if not success:
-                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                        self.build_phase.result_reason = reason
-                        self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason
-                        )
-                        self.save()
-                        return
-
-            if 0 == len(self.apply_phase.stages):
-                DLOG.warn("No software patches need to be applied.")
-                self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                self.build_phase.result_reason = (
-                    "no software patches need to be applied"
-                )
-                self.sw_update_obj.strategy_build_complete(
-                    False, self.build_phase.result_reason
-                )
-                self.save()
-                return
-        else:
-            self.sw_update_obj.strategy_build_complete(
-                False, self.build_phase.result_reason
-            )
-
-        self.sw_update_obj.strategy_build_complete(True, "")
-        self.save()
-
-    def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
-        """Initializes a software patch strategy object using the given dictionary."""
-
-        super().from_dict(data, build_phase, apply_phase, abort_phase)
-
-        self._single_controller = data["single_controller"]
-
-        # get the fields associated with the mixins:
-        # ie: self._nfvi_sw_patch_hosts
-        self.mixin_from_dict(data)
-        return self
-
-    def as_dict(self):
-        """Represent the software patch strategy as a dictionary."""
-
-        data = super().as_dict()
-
-        data["single_controller"] = self._single_controller
-
-        # store mixin data to the data structure
-        # ie: self._nfvi_sw_patch_hosts
-        self.mixin_as_dict(data)
-        return data
 
 
 ###################################################################
@@ -3992,9 +3464,7 @@ def strategy_rebuild_from_dict(data):
     apply_phase = strategy_phase_rebuild_from_dict(data["apply_phase"])
     abort_phase = strategy_phase_rebuild_from_dict(data["abort_phase"])
 
-    if STRATEGY_NAME.SW_PATCH == data["name"]:
-        strategy_obj = object.__new__(SwPatchStrategy)
-    elif STRATEGY_NAME.SW_UPGRADE == data["name"]:
+    if STRATEGY_NAME.SW_UPGRADE == data["name"]:
         strategy_obj = object.__new__(SwUpgradeStrategy)
     elif STRATEGY_NAME.SYSYTEM_CONFIG_UPDATE == data["name"]:
         strategy_obj = object.__new__(SystemConfigUpdateStrategy)

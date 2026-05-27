@@ -54,10 +54,7 @@ def database_sw_update_get_list():
     sw_update_objs = []
     for sw_update in query.all():
         strategy_data = json.loads(sw_update.strategy_data)
-        if objects.SW_UPDATE_TYPE.SW_PATCH == sw_update.sw_update_type:
-            sw_patch_obj = objects.SwPatch(sw_update.uuid, strategy_data)
-            sw_update_objs.append(sw_patch_obj)
-        elif objects.SW_UPDATE_TYPE.SW_UPGRADE == sw_update.sw_update_type:
+        if objects.SW_UPDATE_TYPE.SW_UPGRADE == sw_update.sw_update_type:
             sw_upgrade_obj = objects.SwUpgrade(sw_update.uuid, strategy_data)
             sw_update_objs.append(sw_upgrade_obj)
         elif objects.SW_UPDATE_TYPE.FW_UPDATE == sw_update.sw_update_type:

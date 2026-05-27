@@ -21,7 +21,6 @@ DLOG = debug.debug_get_logger("nfv_vim.objects.sw_update")
 class SwUpdateTypes(Constants, metaclass=Singleton):
     """Software Update - Type Constants."""
 
-    SW_PATCH = Constant("sw-patch")
     SW_UPGRADE = Constant("sw-upgrade")
     SYSTEM_CONFIG_UPDATE = Constant("system-config-update")
     FW_UPDATE = Constant("fw-update")
