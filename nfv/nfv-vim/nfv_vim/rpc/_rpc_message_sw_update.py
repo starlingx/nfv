@@ -62,6 +62,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
     release = None
     rollback = None
     delete = None
+    cleanup = None
     snapshot = None
     kube_upgrade = None
 
@@ -78,6 +79,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         msg["release"] = self.release
         msg["rollback"] = self.rollback
         msg["delete"] = self.delete
+        msg["cleanup"] = self.cleanup
         msg["snapshot"] = self.snapshot
         msg["kube_upgrade"] = self.kube_upgrade
 
@@ -86,6 +88,7 @@ class APIRequestCreateSwUpgradeStrategy(APIRequestCreateSwUpdateStrategy):
         self.release = msg.get("release", None)
         self.rollback = msg.get("rollback", None)
         self.delete = msg.get("delete", None)
+        self.cleanup = msg.get("cleanup", None)
         self.snapshot = msg.get("snapshot", None)
         self.kube_upgrade = msg.get("kube_upgrade", None)
 

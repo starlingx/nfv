@@ -1958,6 +1958,7 @@ class SwUpgradeStrategy(
         release,
         rollback,
         delete,
+        cleanup,
         snapshot,
         kube_upgrade_version,
         ignore_alarms,
@@ -1979,6 +1980,7 @@ class SwUpgradeStrategy(
         self._release = release
         self._rollback = rollback
         self._delete = delete
+        self._cleanup = cleanup
         self._snapshot = snapshot
         if kube_upgrade_version and not kube_upgrade_version.startswith("v"):
             kube_upgrade_version = "v" + kube_upgrade_version
@@ -2016,7 +2018,7 @@ class SwUpgradeStrategy(
         self._nfvi_upgrade = None
         self._ignore_alarms_conditional = None
 
-        if self._kube_upgrade_version:
+        if self._kube_upgrade_version or self._cleanup:
             self.initialize_mixin()
 
     @property
@@ -2067,11 +2069,21 @@ class SwUpgradeStrategy(
         self.build_phase.add_stage(stage)
         super().build()
 
+    def _build_cleanup(self):
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+        stage.add_step(strategy.QueryUpgradeStep(release=None))
+        stage.add_step(strategy.QueryKubeUpgradeStep())
+        self.build_phase.add_stage(stage)
+        super().build()
+
     def build(self):
         """Build the strategy."""
 
-        if self._release is None and not self._rollback:
-            reason = "Must set rollback or release"
+        if self._release is None and not (self._rollback or self._cleanup):
+            reason = "Release or either rollback or cleanup must be set"
             self.report_build_failure(reason)
         elif self._kube_upgrade_version and self._rollback:
             reason = "Cannot set both kube_upgrade and rollback"
@@ -2099,8 +2111,25 @@ class SwUpgradeStrategy(
             )
             self.report_build_failure(reason)
 
+        elif self._cleanup and any(
+            [
+                self._release,
+                self._rollback,
+                self._snapshot,
+                self._delete,
+                self._kube_upgrade_version,
+            ]
+        ):
+            reason = (
+                "Cannot set release, rollback, snapshot, delete or kube-upgrade "
+                "when cleanup is set"
+            )
+            self.report_build_failure(reason)
+
         elif self._rollback:
             return self._build_rollback()
+        elif self._cleanup:
+            return self._build_cleanup()
 
         else:
             return self._build_normal()
@@ -2649,11 +2678,52 @@ class SwUpgradeStrategy(
             self._add_rollback_complete_stage()
             self._add_rollback_hosts_stages(do_nothing)
 
+    def _build_complete_cleanup(self, result, result_reason):
+        from nfv_vim import strategy
+
+        result, result_reason = super().build_complete(result, result_reason)
+
+        DLOG.info(
+            "Build Complete Callback, result=%s, reason=%s." % (result, result_reason)
+        )
+
+        if result not in [
+            strategy.STRATEGY_RESULT.SUCCESS,
+            strategy.STRATEGY_RESULT.DEGRADED,
+        ]:
+            self.sw_update_obj.strategy_build_complete(
+                False, self.build_phase.result_reason
+            )
+            self.save()
+            return
+
+        if self.nfvi_kube_upgrade is not None:
+            DLOG.info("Kube upgrade is active, adding complete stage")
+            self._add_kube_upgrade_complete_stage()
+
+        if self.nfvi_upgrade and self.nfvi_upgrade.is_deploy_completed:
+            DLOG.info("Software deploy is completed, adding delete stage")
+            self._add_deploy_delete_stage()
+
+        if self.nfvi_upgrade and self.nfvi_upgrade.is_system_deploy_active:
+            DLOG.info("Software system deploy is active, adding delete stage")
+            self._add_system_deploy_delete_stage()
+
+        if 0 == len(self.apply_phase.stages):
+            self.report_build_failure("Nothing to clean up")
+            return
+
+        self.sw_update_obj.strategy_build_complete(True, "")
+        self.save()
+
     def build_complete(self, result, result_reason):
         """Strategy Build Complete."""
 
         if self._rollback:
             return self._build_complete_rollback(result, result_reason)
+
+        if self._cleanup:
+            return self._build_complete_cleanup(result, result_reason)
 
         return self._build_complete_normal(result, result_reason)
 

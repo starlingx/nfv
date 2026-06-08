@@ -43,7 +43,7 @@ def get_strategy_name(cmd_area):
 
 
 def get_extra_create_args(cmd_area, args):
-    """Return the extra create arguments supported by a strategy type.
+    """Return the extra create arguments supported by a strategy type
 
     :param cmd_area: the strategy that supports additional create arguments
     :param args: the parsed arguments to extract the additional fields from
@@ -53,8 +53,8 @@ def get_extra_create_args(cmd_area, args):
     if sw_update.CMD_NAME_SW_DEPLOY == cmd_area:
         # We can't use mutual exclusion for release and rollback because
         # release is a positional arg.
-        if args.release is None and not args.rollback:
-            raise ValueError("Must set --rollback or release")
+        if args.release is None and not (args.rollback or args.cleanup):
+            raise ValueError("Must set release or either --rollback or --cleanup")
         elif args.release is not None and args.rollback:
             raise ValueError("Cannot set both --rollback and release")
         elif args.rollback and args.delete:
@@ -62,13 +62,21 @@ def get_extra_create_args(cmd_area, args):
         elif args.rollback and args.snapshot:
             raise ValueError("Cannot set both --rollback and --snapshot")
         elif args.rollback and args.kube_upgrade:
-            raise ValueError("Cannot set both --kube-upgrade and --rollback")
+            raise ValueError("Cannot combine --kube-upgrade with --rollback")
+        elif args.cleanup and any(
+            [args.release, args.rollback, args.snapshot, args.delete, args.kube_upgrade]
+        ):
+            raise ValueError(
+                "Cannot combine --cleanup with release, "
+                "--rollback, --snapshot, --delete or --kube-upgrade"
+            )
         return {
             "release": args.release,
             "rollback": args.rollback,
             "delete": args.delete,
             "snapshot": args.snapshot,
             "kube_upgrade": args.kube_upgrade,
+            "cleanup": args.cleanup,
         }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
@@ -82,7 +90,8 @@ def get_extra_create_args(cmd_area, args):
     elif sw_update.CMD_NAME_KUBE_UPGRADE == cmd_area:
         # kube upgrade supports: to_version
         return {"to_version": args.to_version}
-    raise ValueError("Unknown command area, %s, given" % cmd_area)
+    else:
+        raise ValueError("Unknown command area, %s, given" % cmd_area)
 
 
 def add_list_arg(some_cmd, some_arg, some_list):
@@ -494,6 +503,14 @@ def setup_sw_deploy_parser(commands):
     create_strategy_cmd.add_argument(
         "--delete",
         help="add delete option",
+        action=argparse.BooleanOptionalAction,
+        required=False,
+    )
+
+    # sw-deploy create (cleanup)
+    create_strategy_cmd.add_argument(
+        "--cleanup",
+        help="Only delete the deployment and finish kube upgrade",
         action=argparse.BooleanOptionalAction,
         required=False,
     )

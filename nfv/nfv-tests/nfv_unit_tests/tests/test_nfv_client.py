@@ -278,7 +278,7 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
     def test_create_missing_both(self):
         shell_args = [self.strategy, "create"]
         e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == "Must set --rollback or release", e
+        assert str(e) == "Must set release or either --rollback or --cleanup", e
 
     def test_create_rollback(self):
         shell_args = [self.strategy, "create", "--rollback"]
@@ -314,7 +314,31 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
     def test_create_rollback_with_kube_upgrade(self):
         shell_args = [self.strategy, "create", "--rollback", "--kube-upgrade=1.2.3"]
         e = self._test_shell_create_with_error(shell_args=shell_args)
-        assert str(e) == "Cannot set both --kube-upgrade and --rollback", e
+        assert str(e) == "Cannot combine --kube-upgrade with --rollback", e
+
+    def test_create_cleanup(self):
+        shell_args = [self.strategy, "create", "--cleanup"]
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_cleanup_with_release(self):
+        shell_args = [self.strategy, "create", "v123.1", "--cleanup"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert "Cannot combine --cleanup" in str(e), e
+
+    def test_create_cleanup_with_rollback(self):
+        shell_args = [self.strategy, "create", "--rollback", "--cleanup"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert "Cannot combine --cleanup" in str(e), e
+
+    def test_create_cleanup_with_snapshot(self):
+        shell_args = [self.strategy, "create", "--cleanup", "--snapshot"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert "Cannot combine --cleanup" in str(e), e
+
+    def test_create_cleanup_with_kube_upgrade(self):
+        shell_args = [self.strategy, "create", "--cleanup", "--kube-upgrade=1.2.3"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert "Cannot combine --cleanup" in str(e), e
 
 
 class TestCLIFwUpdateStrategy(TestNFVClientShell, StrategyMixin):

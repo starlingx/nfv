@@ -167,6 +167,7 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     rollback = wsme_types.wsattr(bool, mandatory=False, name="rollback")
     delete = wsme_types.wsattr(bool, mandatory=False, name="delete")
     snapshot = wsme_types.wsattr(bool, mandatory=False, name="snapshot", default=None)
+    cleanup = wsme_types.wsattr(bool, mandatory=False, name="cleanup", default=None)
     kube_upgrade = wsme_types.wsattr(
         str, mandatory=False, name="kube-upgrade", default=None
     )
@@ -621,6 +622,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
         rpc_request.release = request_data.release
         rpc_request.rollback = request_data.rollback
         rpc_request.delete = request_data.delete
+        rpc_request.cleanup = request_data.cleanup
         rpc_request.snapshot = request_data.snapshot
         rpc_request.kube_upgrade = request_data.kube_upgrade
         rpc_request.controller_apply_type = request_data.controller_apply_type

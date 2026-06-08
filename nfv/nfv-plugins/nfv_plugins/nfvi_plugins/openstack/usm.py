@@ -321,15 +321,18 @@ def sw_deploy_get_upgrade_obj(token, release):
     if not release_info:
         if release:
             error = f"Software release not found: {release}"
+            raise EnvironmentError(error)
         else:
-            error = "Expected software deployment in progress, none found"
-        raise EnvironmentError(error)
+            # This will be the case when running the sw-deploy strategy with --cleanup
+            # and the deployment was already deleted
+            DLOG.info("No active deployment found, proceeding without release info")
 
     # During a major release the packages list will be too big and will break RPC calls.
-    release_info["packages_count"] = len(release_info.pop("packages", []))
-    release_info["upgrade"] = upgrade
-    release_info["downgrade"] = downgrade
-    release_info["vim_rr"] = vim_rr
+    if release_info:
+        release_info["packages_count"] = len(release_info.pop("packages", []))
+        release_info["upgrade"] = upgrade
+        release_info["downgrade"] = downgrade
+        release_info["vim_rr"] = vim_rr
 
     try:
         if deploy_data:

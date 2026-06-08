@@ -57,6 +57,7 @@ function _swmanager()
                                 --delete
                                 --snapshot
                                 --kube-upgrade
+                                --cleanup
                             "
                             local createopt=${prev}
                             case "$createopt" in
@@ -98,6 +99,10 @@ function _swmanager()
                                     ;;
                                 --kube-upgrade)
                                     COMPREPLY=( $(compgen -- ${cur}))
+                                    return 0
+                                    ;;
+                                --cleanup)
+                                    COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
                                     return 0
                                     ;;
                                 *)
