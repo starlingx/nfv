@@ -102,9 +102,10 @@ def sw_deploy_host_list(token):
 def sw_deploy_precheck(token, release, force=False, snapshot=False):
     """Ask USM to precheck before a deployment."""
 
-    uri = f"deploy/{release}/precheck"
-    url = _usm_api_cmd(token, uri)
-    data = {}
+    url = _usm_api_cmd(token, "deploy/precheck")
+    data = {
+        "release": release,
+    }
     if force:
         data["force"] = force
     if snapshot:

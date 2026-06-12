@@ -2373,6 +2373,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
         response["completed"] = False
         response["reason"] = ""
         response["complete-data"] = ""
+        response["result-data"] = ""
 
         try:
             future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
@@ -2395,7 +2396,17 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 DLOG.error("USM software deploy precheck did not complete.")
                 return
 
-            precheck_data = future.result.data["system_healthy"]
+            error = future.result.data.get("error")
+            if error:
+                response["error-message"] = error
+                response["completed"] = True
+                return
+
+            # System healthy needs to be checked for each metapackage in the release
+            precheck_data = all(
+                metapackage_data["system_healthy"]
+                for metapackage_data in future.result.data["additional_data"].values()
+            )
 
             response["complete-data"] = future.result.data
             response["result-data"] = precheck_data

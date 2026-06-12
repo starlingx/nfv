@@ -3189,6 +3189,108 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             strategy.apply_phase.as_dict(), expected_apply
         )
 
+    def _send_precheck_callback(self, step, response):
+        """Run the SwDeployPrecheckStep coroutine with the given response"""
+
+        callback = step._sw_deploy_precheck_callback()
+
+        try:
+            callback.send(response)
+        except StopIteration:
+            pass
+
+    def _create_precheck_step(self):
+        from nfv_vim.strategy._strategy_steps import SwDeployPrecheckStep
+
+        step = SwDeployPrecheckStep(release="12.0")
+        step.stage = mock.MagicMock()
+        return step
+
+    def _create_response(
+        self, completed, result_data, complete_data, error_message=None
+    ):
+        response = {
+            "completed": completed,
+            "result-data": result_data,
+            "complete-data": complete_data,
+        }
+
+        if error_message:
+            response["error-message"] = error_message
+
+        return response
+
+    def _assert_response(
+        self,
+        step,
+        expected_result=common_strategy.STRATEGY_STEP_RESULT.SUCCESS,
+        expected_reason=None,
+    ):
+        result, reason = step.stage.step_complete.call_args[0]
+
+        self.assertEqual(result, expected_result)
+        self.assertEqual(reason, expected_reason)
+
+    def test_sw_deploy_precheck_callback_success(self):
+        """Callback succeeds when completed=True and result-data=True"""
+
+        step = self._create_precheck_step()
+        response = self._create_response(True, True, {"info": "all healthy"})
+        self._send_precheck_callback(step, response)
+
+        self._assert_response(step, expected_reason=response["complete-data"]["info"])
+
+    def test_sw_deploy_precheck_callback_fails_when_result_data_is_false(self):
+        """Callback fails when result-data=False (one or more metapackages unhealthy)"""
+
+        step = self._create_precheck_step()
+        response = self._create_response(True, False, {}, "pkg-A not healthy")
+        self._send_precheck_callback(step, response)
+
+        self._assert_response(
+            step, common_strategy.STRATEGY_STEP_RESULT.FAILED, response["error-message"]
+        )
+
+    def test_sw_deploy_precheck_callback_fails_when_not_completed(self):
+        """Callback fails when completed=False"""
+
+        step = self._create_precheck_step()
+        response = self._create_response(False, None, {}, "timeout")
+        self._send_precheck_callback(step, response)
+
+        self._assert_response(
+            step, common_strategy.STRATEGY_STEP_RESULT.FAILED, response["error-message"]
+        )
+
+    def test_sw_deploy_precheck_callback_returns_unhealthy_metapackage_message(self):
+        """Callback returns unhealthy metapackage"""
+
+        step = self._create_precheck_step()
+        response = self._create_response(False, False, {})
+        self._send_precheck_callback(step, response)
+
+        self._assert_response(
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "One or more metapackages are not healthy",
+        )
+
+    def test_sw_deploy_precheck_callback_fails_with_default_message_when_not_completed(
+        self,
+    ):
+        """Callback returns default unknown error message when completed=False"""
+
+        step = self._create_precheck_step()
+        response = self._create_response(False, True, {})
+        self._send_precheck_callback(step, response)
+
+        self._assert_response(
+            step,
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Unknown error while trying software deploy precheck, check "
+            "/var/log/nfv-vim.log or /var/log/software.log for more information.",
+        )
+
     def test_sw_deploy_strategy_aiodx_rollback_host_rollback_deployed_unlocked_pending(
         self,
     ):
