@@ -3879,6 +3879,7 @@ class KubeUpgradeStrategy(
             "900.401",  # kube-upgrade-auto-apply-inprogress
             "900.402",  # Kubernetes upgrade auto-apply aborting
             "900.701",  # Node tainted
+            "900.024",  # Obsolete release in system
         ]
         # self._ignore_alarms is declared in parent class
         self._ignore_alarms += IGNORE_ALARMS
