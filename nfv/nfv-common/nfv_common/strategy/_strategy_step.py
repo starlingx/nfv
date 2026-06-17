@@ -201,6 +201,11 @@ class StrategyStep:
         DLOG.verbose("Default strategy step handle event for %s." % self._name)
         return False
 
+    def fail_strategy(self, response, message):
+        reason = response.get("error-message", message)
+        self.phase.result_complete_response(response)
+        self.stage.step_complete(STRATEGY_STEP_RESULT.FAILED, reason)
+
     def from_dict(self, data):
         """Returns a strategy step object initialized using the given dictionary."""
 

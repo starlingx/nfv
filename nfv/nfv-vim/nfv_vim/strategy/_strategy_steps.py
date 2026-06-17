@@ -915,23 +915,19 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         response = yield
         DLOG.debug("sw-deploy precheck callback response=%s." % response)
 
-        if response["completed"] and response["complete-data"].get(
-            "system_healthy", False
-        ):
+        if response["completed"] and response["result-data"]:
             DLOG.debug("sw-deploy precheck completed")
             result = strategy.STRATEGY_STEP_RESULT.SUCCESS
             reason = response["complete-data"].get("info", "").strip()
             self.stage.step_complete(result, reason)
+        elif not response["result-data"]:
+            self.fail_strategy(response, "One or more metapackages are not healthy")
         else:
-            reason = response.get(
-                "error-message",
-                "Unknown error while trying software deploy precheck, "
-                "check /var/log/nfv-vim.log or /var/log/software.log "
-                "for more information.",
+            self.fail_strategy(
+                response,
+                "Unknown error while trying software deploy precheck, check "
+                "/var/log/nfv-vim.log or /var/log/software.log for more information.",
             )
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.phase.result_complete_response(response)
-            self.stage.step_complete(result, reason)
 
     def apply(self):
         """Software deploy precheck."""
