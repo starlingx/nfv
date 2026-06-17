@@ -1539,7 +1539,7 @@ class TestFwUpdateStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_fw_update_strategy_aio_sx_serial_migrate_no_openstack(self):
-        """Test the sw_patch strategy add worker strategy stages:
+        """Test the fw_update strategy add worker strategy stages:
 
         - 1 all-in-one controller host
         - no openstack

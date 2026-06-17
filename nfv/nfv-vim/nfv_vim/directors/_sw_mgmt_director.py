@@ -37,49 +37,6 @@ class SwMgmtDirector(metaclass=Singleton):
 
         return self._single_controller
 
-    def create_sw_patch_strategy(
-        self,
-        controller_apply_type,
-        storage_apply_type,
-        swift_apply_type,
-        worker_apply_type,
-        max_parallel_worker_hosts,
-        default_instance_action,
-        alarm_restrictions,
-        callback,
-    ):
-        """Create Software Patch Strategy."""
-
-        strategy_uuid = str(uuid.uuid4())
-
-        if self._sw_update is not None:
-            # Do not schedule the callback - if creation failed because a
-            # strategy already exists, the callback will attempt to operate
-            # on the old strategy, which is not what we want.
-            reason = (
-                "strategy already exists of type:%s" % self._sw_update._sw_update_type
-            )
-            return None, reason
-
-        self._sw_update = objects.SwPatch()
-        success, reason = self._sw_update.strategy_build(
-            strategy_uuid,
-            controller_apply_type,
-            storage_apply_type,
-            swift_apply_type,
-            worker_apply_type,
-            max_parallel_worker_hosts,
-            default_instance_action,
-            alarm_restrictions,
-            self._ignore_alarms,
-            self._single_controller,
-        )
-
-        schedule.schedule_function_call(
-            callback, success, reason, self._sw_update.strategy
-        )
-        return strategy_uuid, ""
-
     def create_sw_upgrade_strategy(
         self,
         controller_apply_type,

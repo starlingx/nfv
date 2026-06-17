@@ -16,12 +16,6 @@ DLOG = debug.debug_get_logger("nfv_vim.strategy.stage")
 class StrategyStageNames(Constants, metaclass=Singleton):
     """Strategy Stage Names."""
 
-    # patch stages
-    SW_PATCH_QUERY = Constant("sw-patch-query")
-    SW_PATCH_CONTROLLERS = Constant("sw-patch-controllers")
-    SW_PATCH_STORAGE_HOSTS = Constant("sw-patch-storage-hosts")
-    SW_PATCH_SWIFT_HOSTS = Constant("sw-patch-swift-hosts")
-    SW_PATCH_WORKER_HOSTS = Constant("sw-patch-worker-hosts")
     # upgrade stages
     SW_UPGRADE_QUERY = Constant("sw-upgrade-query")
     SW_UPGRADE_START = Constant("sw-upgrade-start")

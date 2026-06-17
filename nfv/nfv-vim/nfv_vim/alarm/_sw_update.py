@@ -10,45 +10,6 @@ from nfv_common import alarm
 # Alarm Template Definitions
 #   *** Don't add a period to the end of reason_text, these are not sentences.
 _alarm_templates = {
-    alarm.ALARM_TYPE.SW_PATCH_AUTO_APPLY_INPROGRESS: {
-        "entity_type": "orchestration",
-        "entity": "orchestration=sw-patch",
-        "event_type": alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
-        "severity": alarm.ALARM_SEVERITY.MAJOR,
-        "probable_cause": alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
-        "reason_text": "Software patch auto-apply inprogress",
-        "repair_action": (
-            "Wait for software patch auto-apply to complete; "
-            "if problem persists contact next level of support"
-        ),
-        "exclude_alarm_context": [alarm.ALARM_CONTEXT.TENANT],
-    },
-    alarm.ALARM_TYPE.SW_PATCH_AUTO_APPLY_ABORTING: {
-        "entity_type": "orchestration",
-        "entity": "orchestration=sw-patch",
-        "event_type": alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
-        "severity": alarm.ALARM_SEVERITY.MAJOR,
-        "probable_cause": alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
-        "reason_text": "Software patch auto-apply aborting",
-        "repair_action": (
-            "Wait for software patch auto-apply abort to complete; "
-            "if problem persists contact next level of support"
-        ),
-        "exclude_alarm_context": [alarm.ALARM_CONTEXT.TENANT],
-    },
-    alarm.ALARM_TYPE.SW_PATCH_AUTO_APPLY_FAILED: {
-        "entity_type": "orchestration",
-        "entity": "orchestration=sw-patch",
-        "event_type": alarm.ALARM_EVENT_TYPE.EQUIPMENT_ALARM,
-        "severity": alarm.ALARM_SEVERITY.CRITICAL,
-        "probable_cause": alarm.ALARM_PROBABLE_CAUSE.UNKNOWN,
-        "reason_text": "Software patch auto-apply failed",
-        "repair_action": (
-            "Attempt to apply software patches manually; if "
-            "problem persists contact next level of support"
-        ),
-        "exclude_alarm_context": [alarm.ALARM_CONTEXT.TENANT],
-    },
     alarm.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_INPROGRESS: {
         "entity_type": "orchestration",
         "entity": "orchestration=sw-deploy",

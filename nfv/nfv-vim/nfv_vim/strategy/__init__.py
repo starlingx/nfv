@@ -9,7 +9,6 @@ from nfv_vim.strategy._strategy import FwUpdateStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import KubeRootcaUpdateStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import KubeUpgradeStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import strategy_rebuild_from_dict  # noqa: F401
-from nfv_vim.strategy._strategy import SwPatchStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import SwUpgradeStrategy  # noqa: F401
 from nfv_vim.strategy._strategy import SystemConfigUpdateStrategy  # noqa: F401
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT  # noqa: F401
@@ -24,7 +23,6 @@ from nfv_vim.strategy._strategy_steps import (  # noqa: F401
     QueryKubeRootcaHostUpdatesStep,
     QuerySystemConfigUpdateHostsStep,
 )
-
 from nfv_vim.strategy.steps.kube_upgrade_steps import (  # noqa: F401
     KubeHostCordonStep,
     KubeHostUncordonStep,
@@ -43,8 +41,6 @@ from nfv_vim.strategy.steps.kube_upgrade_steps import (  # noqa: F401
     QueryKubeUpgradeStep,
     QueryKubeVersionsStep,
 )
-
-from nfv_vim.strategy._strategy_steps import ApplySwPatchesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import DisableHostServicesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import FwUpdateAbortHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import FwUpdateHostsStep  # noqa: F401
@@ -56,8 +52,6 @@ from nfv_vim.strategy._strategy_steps import MigrateInstancesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryAlarmsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryFwUpdateHostStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryKubeRootcaUpdateStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import QuerySwPatchesStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import QuerySwPatchHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import QueryUpgradeStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import RebootHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import StartInstancesStep  # noqa: F401
@@ -68,7 +62,6 @@ from nfv_vim.strategy._strategy_steps import SwDeployActivateRollbackStep  # noq
 from nfv_vim.strategy._strategy_steps import SwDeployDeleteStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwDeployDoNothingStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwDeployPrecheckStep  # noqa: F401
-from nfv_vim.strategy._strategy_steps import SwPatchHostsStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwSystemDeployDeleteStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SwSystemDeployInitStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import SystemConfigUpdateHostsStep  # noqa: F401

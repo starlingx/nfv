@@ -21,8 +21,6 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_infrastructure_finaliz
 from nfv_vim.nfvi._nfvi_infrastructure_module import nfvi_infrastructure_initialize
 from nfv_vim.nfvi._nfvi_network_module import nfvi_network_finalize
 from nfv_vim.nfvi._nfvi_network_module import nfvi_network_initialize
-from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_finalize
-from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_initialize
 
 DLOG = debug.debug_get_logger("nfv_vim.nfvi.nfvi_module")
 
@@ -87,9 +85,6 @@ def nfvi_initialize(config):
         _task_worker_pools["guest"] = tasks.TaskWorkerPool("Guest", num_workers=1)
         nfvi_guest_initialize(config, _task_worker_pools["guest"])
 
-    _task_worker_pools["sw_mgmt"] = tasks.TaskWorkerPool("Sw-Mgmt", num_workers=1)
-    nfvi_sw_mgmt_initialize(config, _task_worker_pools["sw_mgmt"])
-
     if not fault_mgmt_plugin_disabled:
         _task_worker_pools["fault_mgmt"] = tasks.TaskWorkerPool(
             "Fault-Mgmt", num_workers=1
@@ -126,7 +121,6 @@ def nfvi_finalize():
     nfvi_image_finalize()
     nfvi_identity_finalize()
     nfvi_guest_finalize()
-    nfvi_sw_mgmt_finalize()
     nfvi_fault_mgmt_finalize()
 
     for pool in list(_task_worker_pools.values()):

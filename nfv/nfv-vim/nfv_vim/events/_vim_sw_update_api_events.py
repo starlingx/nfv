@@ -62,13 +62,6 @@ def vim_sw_update_api_create_strategy(connection, msg):
     else:
         storage_apply_type = objects.SW_UPDATE_APPLY_TYPE.IGNORE
 
-    if "parallel" == msg.swift_apply_type:
-        swift_apply_type = objects.SW_UPDATE_APPLY_TYPE.PARALLEL
-    elif "serial" == msg.swift_apply_type:
-        swift_apply_type = objects.SW_UPDATE_APPLY_TYPE.SERIAL
-    else:
-        swift_apply_type = objects.SW_UPDATE_APPLY_TYPE.IGNORE
-
     if "parallel" == msg.worker_apply_type:
         worker_apply_type = objects.SW_UPDATE_APPLY_TYPE.PARALLEL
     elif "serial" == msg.worker_apply_type:
@@ -94,18 +87,7 @@ def vim_sw_update_api_create_strategy(connection, msg):
         alarm_restrictions = objects.SW_UPDATE_ALARM_RESTRICTION.RELAXED
 
     sw_mgmt_director = directors.get_sw_mgmt_director()
-    if "sw-patch" == msg.sw_update_type:
-        uuid, reason = sw_mgmt_director.create_sw_patch_strategy(
-            controller_apply_type,
-            storage_apply_type,
-            swift_apply_type,
-            worker_apply_type,
-            max_parallel_worker_hosts,
-            default_instance_action,
-            alarm_restrictions,
-            _vim_sw_update_api_create_strategy_callback,
-        )
-    elif "sw-upgrade" == msg.sw_update_type:
+    if "sw-upgrade" == msg.sw_update_type:
         release = msg.release
         rollback = msg.rollback
         delete = msg.delete
@@ -231,9 +213,7 @@ def vim_sw_update_api_apply_strategy(connection, msg):
     """Handle Sw-Update Apply Strategy API request."""
 
     DLOG.info("Apply sw-update strategy: (%s) called." % msg.sw_update_type)
-    if "sw-patch" == msg.sw_update_type:
-        sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif "sw-upgrade" == msg.sw_update_type:
+    if "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
@@ -354,9 +334,7 @@ def vim_sw_update_api_abort_strategy(connection, msg):
     """Handle Sw-Update Abort Strategy API request."""
 
     DLOG.info("Abort sw-update strategy.")
-    if "sw-patch" == msg.sw_update_type:
-        sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif "sw-upgrade" == msg.sw_update_type:
+    if "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
@@ -418,9 +396,7 @@ def vim_sw_update_api_delete_strategy(connection, msg):
     """Handle Sw-Update Delete Strategy API request."""
 
     DLOG.info("Delete sw-update strategy, force=%s.", msg.force)
-    if "sw-patch" == msg.sw_update_type:
-        sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif "sw-upgrade" == msg.sw_update_type:
+    if "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE
@@ -455,9 +431,7 @@ def vim_sw_update_api_get_strategy(connection, msg):
     """Handle Sw-Update Get Strategy API request."""
 
     DLOG.verbose("Get sw-update strategy.")
-    if "sw-patch" == msg.sw_update_type:
-        sw_update_type = objects.SW_UPDATE_TYPE.SW_PATCH
-    elif "sw-upgrade" == msg.sw_update_type:
+    if "sw-upgrade" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.SW_UPGRADE
     elif "fw-update" == msg.sw_update_type:
         sw_update_type = objects.SW_UPDATE_TYPE.FW_UPDATE

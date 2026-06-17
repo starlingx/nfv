@@ -343,10 +343,5 @@ from nfv_vim.nfvi._nfvi_network_module import nfvi_get_subnets  # noqa: F401
 from nfv_vim.nfvi._nfvi_network_module import nfvi_network_plugin_disabled  # noqa: F401
 from nfv_vim.nfvi._nfvi_network_module import nfvi_update_network  # noqa: F401
 from nfv_vim.nfvi._nfvi_network_module import nfvi_update_subnet  # noqa: F401
-from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_apply_updates  # noqa: F401
-from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_query_hosts  # noqa: F401
-from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_query_updates  # noqa: F401
-from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_update_host  # noqa: F401
-from nfv_vim.nfvi._nfvi_sw_mgmt_module import nfvi_sw_mgmt_update_hosts  # noqa: F401
 import nfv_vim.nfvi.api  # noqa: F401
 import nfv_vim.nfvi.objects  # noqa: F401

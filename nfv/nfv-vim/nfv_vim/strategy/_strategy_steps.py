@@ -672,136 +672,6 @@ class SwactHostsStep(strategy.StrategyStep):
         return data
 
 
-class SwPatchHostsStep(strategy.StrategyStep):
-    """Software Patch Hosts - Strategy Step."""
-
-    def __init__(self, hosts):
-        super().__init__(STRATEGY_STEP_NAME.SW_PATCH_HOSTS, timeout_in_secs=1800)
-        self._hosts = hosts
-        self._host_names = []
-        self._host_uuids = []
-        self._host_completed = {}
-        self._query_inprogress = False
-
-        for host in hosts:
-            self._host_names.append(host.name)
-            self._host_uuids.append(host.uuid)
-            self._host_completed[host.name] = (False, False, "")
-
-    @coroutine
-    def _query_hosts_callback(self):
-        """Query Software Patch Hosts Callback."""
-
-        response = yield
-        DLOG.debug("Query-Hosts callback response=%s." % response)
-
-        self._query_inprogress = False
-
-        if response["completed"]:
-            for sw_patch_host in response["result-data"]:
-                if self._host_completed.get(sw_patch_host.name, False):
-                    # A patch can be listed as failed, and patch current
-                    # so check the failed state first.
-                    if sw_patch_host.patch_failed:
-                        self._host_completed[sw_patch_host.name] = (
-                            True,
-                            False,
-                            "software update failed to apply on "
-                            "host %s" % sw_patch_host.name,
-                        )
-                    elif sw_patch_host.patch_current:
-                        self._host_completed[sw_patch_host.name] = (True, True, "")
-
-            failed = False
-            failed_reason = ""
-
-            # pylint: disable-next=consider-using-dict-items
-            for host_name in self._host_completed:
-                completed, success, reason = self._host_completed[host_name]
-                if not completed:
-                    break
-
-                if not success:
-                    failed = True
-                    failed_reason = reason
-
-            else:
-                if failed:
-                    result = strategy.STRATEGY_STEP_RESULT.FAILED
-                    self.stage.step_complete(result, failed_reason)
-                else:
-                    result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-                    self.stage.step_complete(result, "")
-
-    @coroutine
-    def _sw_patch_hosts_callback(self):
-        """Software Patch Hosts Callback."""
-
-        response = yield
-        DLOG.debug("Software-Update-Hosts callback response=%s." % response)
-
-        if not response["completed"]:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
-
-    def apply(self):
-        """Software Patch Hosts."""
-
-        from nfv_vim import nfvi
-
-        DLOG.info("Step (%s) apply for hosts %s." % (self._name, self._host_names))
-        nfvi.nfvi_sw_mgmt_update_hosts(
-            self._host_names, self._sw_patch_hosts_callback()
-        )
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def handle_event(self, event, event_data=None):
-        """Handle Host events."""
-
-        from nfv_vim import nfvi
-
-        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
-
-        if event == STRATEGY_EVENT.HOST_AUDIT:
-            if not self._query_inprogress:
-                self._query_inprogress = True
-                nfvi.nfvi_sw_mgmt_query_hosts(self._query_hosts_callback())
-            return True
-
-        return False
-
-    def from_dict(self, data):
-        """Returns the software patch hosts step object initialized using the given
-
-        dictionary.
-        """
-        super().from_dict(data)
-        self._hosts = []
-        self._host_uuids = []
-        self._host_completed = {}
-        self._query_inprogress = False
-
-        self._host_names = data["entity_names"]
-        host_table = tables.tables_get_host_table()
-        for host_name in self._host_names:
-            host = host_table.get(host_name, None)
-            if host is not None:
-                self._hosts.append(host)
-                self._host_uuids.append(host.uuid)
-                self._host_completed[host_name] = data["hosts_completed"][host_name]
-        return self
-
-    def as_dict(self):
-        """Represent the software patch hosts step as a dictionary."""
-
-        data = super().as_dict()
-        data["entity_type"] = "hosts"
-        data["entity_names"] = self._host_names
-        data["entity_uuids"] = self._host_uuids
-        data["hosts_completed"] = self._host_completed
-        return data
-
-
 class SystemConfigUpdateHostsStep(strategy.StrategyStep):
     """System Config Update Hosts - Strategy Step."""
 
@@ -3108,90 +2978,6 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
         return result, reason
 
 
-class QuerySwPatchesStep(strategy.StrategyStep):
-    """Query Software Patches - Strategy Step."""
-
-    def __init__(self):
-        super().__init__(STRATEGY_STEP_NAME.QUERY_SW_PATCHES, timeout_in_secs=60)
-
-    @coroutine
-    def _query_sw_patches_callback(self):
-        """Query Software Patches Callback."""
-
-        response = yield
-        DLOG.debug("Query-Sw-Updates callback response=%s." % response)
-
-        if response["completed"]:
-            if self.strategy is not None:
-                self.strategy.nfvi_sw_patches = response["result-data"]
-
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
-
-    def apply(self):
-        """Query Software Patches."""
-
-        from nfv_vim import nfvi
-
-        DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_sw_mgmt_query_updates(self._query_sw_patches_callback())
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def as_dict(self):
-        """Represent the query software update step as a dictionary."""
-
-        data = super().as_dict()
-        data["entity_type"] = ""
-        data["entity_names"] = []
-        data["entity_uuids"] = []
-        return data
-
-
-class QuerySwPatchHostsStep(strategy.StrategyStep):
-    """Query Software Patch Hosts - Strategy Step."""
-
-    def __init__(self):
-        super().__init__(STRATEGY_STEP_NAME.QUERY_SW_PATCH_HOSTS, timeout_in_secs=60)
-
-    @coroutine
-    def _query_hosts_callback(self):
-        """Query Software Patch Hosts Callback."""
-
-        response = yield
-        DLOG.debug("Query-Hosts callback response=%s." % response)
-
-        if response["completed"]:
-            if self.strategy is not None:
-                self.strategy.nfvi_sw_patch_hosts = response["result-data"]
-
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, "")
-
-    def apply(self):
-        """Query Software Patch Hosts."""
-
-        from nfv_vim import nfvi
-
-        DLOG.info("Step (%s) apply." % self._name)
-        nfvi.nfvi_sw_mgmt_query_hosts(self._query_hosts_callback())
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def as_dict(self):
-        """Represent the query software patches hosts step as a dictionary."""
-
-        data = super().as_dict()
-        data["entity_type"] = ""
-        data["entity_names"] = []
-        data["entity_uuids"] = []
-        return data
-
-
 class QuerySystemConfigUpdateHostsStep(AbstractStrategyStep):
     """Query System Config Update Hosts - Strategy Step."""
 
@@ -3937,56 +3723,6 @@ class EnableHostServicesStep(strategy.StrategyStep):
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
         data["entity_service"] = self._service
-        return data
-
-
-class ApplySwPatchesStep(AbstractStrategyStep):
-    """Apply Patches using patch API."""
-
-    def __init__(self, patches_to_apply):
-        super().__init__(STRATEGY_STEP_NAME.APPLY_PATCHES, timeout_in_secs=600)
-        self._patches_to_apply = patches_to_apply
-
-    @coroutine
-    def _api_callback(self):
-        """Callback for the API method invoked in apply."""
-
-        response = yield
-        DLOG.debug("%s callback response=%s." % (self._name, response))
-
-        if response["completed"]:
-            if self.strategy is not None:
-                self.strategy.nfvi_sw_patches = response["result-data"]
-
-            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
-            self.stage.step_complete(result, "")
-        else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, response["reason"])
-
-    def apply(self):
-        """Apply patches."""
-
-        from nfv_vim import nfvi
-
-        nfvi.nfvi_sw_mgmt_apply_updates(self._patches_to_apply, self._api_callback())
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def from_dict(self, data):
-        """Returns the step object initialized using the given dictionary."""
-
-        super().from_dict(data)
-        # only the names are serialized
-        self._patches_to_apply = data["entity_names"]
-        return self
-
-    def as_dict(self):
-        """Represent the step as a dictionary."""
-
-        data = super().as_dict()
-        data["entity_type"] = "patches"
-        data["entity_names"] = self._patches_to_apply
-        # there are no entity_uuids
         return data
 
 
@@ -4740,7 +4476,6 @@ def strategy_step_rebuild_from_dict(data):
     """Returns the strategy step object initialized using the given dictionary."""
 
     rebuild_map = {
-        STRATEGY_STEP_NAME.APPLY_PATCHES: ApplySwPatchesStep,
         #
         # kube rootca update steps
         #
@@ -4780,9 +4515,7 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.KUBE_HOST_UPGRADE_KUBELET: (
             kube_upgrade_steps.KubeHostUpgradeKubeletStep
         ),
-        STRATEGY_STEP_NAME.KUBE_UPGRADE_ABORT: (
-            kube_upgrade_steps.KubeUpgradeAbortStep
-        ),
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_ABORT: kube_upgrade_steps.KubeUpgradeAbortStep,
         STRATEGY_STEP_NAME.KUBE_UPGRADE_CLEANUP: (
             kube_upgrade_steps.KubeUpgradeCleanupStep
         ),
@@ -4801,9 +4534,7 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.KUBE_UPGRADE_STORAGE: (
             kube_upgrade_steps.KubeUpgradeStorageStep
         ),
-        STRATEGY_STEP_NAME.KUBE_UPGRADE_START: (
-            kube_upgrade_steps.KubeUpgradeStartStep
-        ),
+        STRATEGY_STEP_NAME.KUBE_UPGRADE_START: kube_upgrade_steps.KubeUpgradeStartStep,
         STRATEGY_STEP_NAME.KUBE_PRE_APPLICATION_UPDATE: (
             kube_upgrade_steps.KubePreApplicationUpdateStep
         ),
@@ -4813,9 +4544,7 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.QUERY_KUBE_HOST_UPGRADE: (
             kube_upgrade_steps.QueryKubeHostUpgradeStep
         ),
-        STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE: (
-            kube_upgrade_steps.QueryKubeUpgradeStep
-        ),
+        STRATEGY_STEP_NAME.QUERY_KUBE_UPGRADE: kube_upgrade_steps.QueryKubeUpgradeStep,
         STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS: (
             kube_upgrade_steps.QueryKubeVersionsStep
         ),
@@ -4879,9 +4608,6 @@ def strategy_step_rebuild_from_dict(data):
     elif STRATEGY_STEP_NAME.SW_DEPLOY_ACTIVATE_ROLLBACK == data["name"]:
         step_obj = object.__new__(SwDeployActivateRollbackStep)
 
-    elif STRATEGY_STEP_NAME.SW_PATCH_HOSTS == data["name"]:
-        step_obj = object.__new__(SwPatchHostsStep)
-
     elif STRATEGY_STEP_NAME.MIGRATE_INSTANCES == data["name"]:
         step_obj = object.__new__(MigrateInstancesStep)
 
@@ -4902,12 +4628,6 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.WAIT_ALARMS_CLEAR == data["name"]:
         step_obj = object.__new__(WaitAlarmsClearStep)
-
-    elif STRATEGY_STEP_NAME.QUERY_SW_PATCHES == data["name"]:
-        step_obj = object.__new__(QuerySwPatchesStep)
-
-    elif STRATEGY_STEP_NAME.QUERY_SW_PATCH_HOSTS == data["name"]:
-        step_obj = object.__new__(QuerySwPatchHostsStep)
 
     elif STRATEGY_STEP_NAME.QUERY_UPGRADE == data["name"]:
         step_obj = object.__new__(QueryUpgradeStep)

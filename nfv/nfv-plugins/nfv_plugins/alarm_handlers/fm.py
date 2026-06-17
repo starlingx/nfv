@@ -94,18 +94,6 @@ _fm_alarm_id_mapping = dict(
             fm_constants.FM_ALARM_ID_VM_GROUP_POLICY_CONFLICT,
         ),
         (
-            alarm_objects_v1.ALARM_TYPE.SW_PATCH_AUTO_APPLY_INPROGRESS,
-            fm_constants.FM_ALARM_ID_SW_PATCH_AUTO_APPLY_INPROGRESS,
-        ),
-        (
-            alarm_objects_v1.ALARM_TYPE.SW_PATCH_AUTO_APPLY_ABORTING,
-            fm_constants.FM_ALARM_ID_SW_PATCH_AUTO_APPLY_ABORTING,
-        ),
-        (
-            alarm_objects_v1.ALARM_TYPE.SW_PATCH_AUTO_APPLY_FAILED,
-            fm_constants.FM_ALARM_ID_SW_PATCH_AUTO_APPLY_FAILED,
-        ),
-        (
             alarm_objects_v1.ALARM_TYPE.SW_UPGRADE_AUTO_APPLY_INPROGRESS,
             fm_constants.FM_ALARM_ID_SW_UPGRADE_AUTO_APPLY_INPROGRESS,
         ),

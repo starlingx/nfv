@@ -26,7 +26,6 @@ from nfv_vim.nfvi.objects.v1._host_aggregate import HostAggregate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_fw_update import HostFwUpdate  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_group import HOST_GROUP_POLICY  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_group import HostGroup  # noqa: F401
-from nfv_vim.nfvi.objects.v1._host_sw_patch import HostSwPatch  # noqa: F401
 from nfv_vim.nfvi.objects.v1._host_system_config_update import (  # noqa: F401
     HostSystemConfigUpdate,
 )
@@ -76,7 +75,6 @@ from nfv_vim.nfvi.objects.v1._network import NetworkProviderData  # noqa: F401
 from nfv_vim.nfvi.objects.v1._paging import Paging  # noqa: F401
 from nfv_vim.nfvi.objects.v1._service_host import ServiceHost  # noqa: F401
 from nfv_vim.nfvi.objects.v1._subnet import Subnet  # noqa: F401
-from nfv_vim.nfvi.objects.v1._sw_patch import SwPatch  # noqa: F401
 from nfv_vim.nfvi.objects.v1._system import System  # noqa: F401
 from nfv_vim.nfvi.objects.v1._tenant import Tenant  # noqa: F401
 import nfv_vim.nfvi.objects.v1._upgrade as upgrade  # noqa: F401,H306

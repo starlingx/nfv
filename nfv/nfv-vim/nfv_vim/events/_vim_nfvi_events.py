@@ -126,9 +126,7 @@ def _nfvi_sw_update_get_callback():
     in_progress = None
 
     if sw_update is not None and sw_update.strategy is not None:
-        if sw_update.sw_update_type == objects.SW_UPDATE_TYPE.SW_PATCH:
-            sw_update_type = "sw-patch"
-        elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.SW_UPGRADE:
+        if sw_update.sw_update_type == objects.SW_UPDATE_TYPE.SW_UPGRADE:
             sw_update_type = "sw-upgrade"
         elif sw_update.sw_update_type == objects.SW_UPDATE_TYPE.SYSTEM_CONFIG_UPDATE:
             sw_update_type = "system-config-update"
