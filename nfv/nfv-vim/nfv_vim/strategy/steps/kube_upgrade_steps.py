@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import json
+
 from nfv_common import debug
 from nfv_common.helpers import coroutine
 from nfv_common import strategy
@@ -15,6 +17,14 @@ from nfv_vim.strategy._utils import validate_operation
 from nfv_vim import tables
 
 DLOG = debug.debug_get_logger("nfv_vim.strategy.kube_upgrade.step")
+
+KUBE_UPGRADE_START_ALARM_IGNORE = [
+    "850.002",  # Kubernetes health check failed
+    "900.022",  # Deployment finished (pending deploy delete)
+    "900.023",  # Software release deploy in progress
+    "900.201",  # Software deploy auto apply alarm
+    "900.401",  # Kubernetes upgrade auto apply alarm
+]
 
 
 class AbstractKubeUpgradeStep(AbstractStrategyStep):
@@ -379,12 +389,11 @@ class KubeUpgradeStartStep(AbstractKubeUpgradeStep):
 
         DLOG.info("Step (%s) apply." % self._name)
 
-        alarm_ignore_list = [
-            "900.201",  # Software deploy auto apply alarm
-            "900.401",  # Kubernetes upgrade auto apply alarm
-        ]
         nfvi.nfvi_kube_upgrade_start(
-            self._to_version, self._force, alarm_ignore_list, self._response_callback()
+            self._to_version,
+            self._force,
+            KUBE_UPGRADE_START_ALARM_IGNORE,
+            self._response_callback(),
         )
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
@@ -1085,17 +1094,62 @@ class KubeHostUpgradeControlPlaneStep(AbstractKubeHostUpgradeStep):
         # return handle_event of parent class
         return super().handle_event(event, event_data=event_data)
 
-    def apply(self):
-        """Kube Host Upgrade Control Plane."""
+    def _is_control_plane_already_upgraded(self, kube_host_upgrade_list):
+        """Check if host control plane is already at target version."""
 
+        for host_uuid in self._host_uuids:
+            for k_host in kube_host_upgrade_list:
+                if k_host.host_uuid != host_uuid:
+                    continue
+                if k_host.control_plane_version == self._to_version:
+                    DLOG.info(
+                        "Host %s control plane already at version %s, "
+                        "skipping upgrade." % (host_uuid, self._to_version)
+                    )
+                    return True
+                break
+        return False
+
+    @coroutine
+    def _get_kube_host_upgrade_list_callback(self):
+        """Query kube host upgrade list to check if already upgraded."""
+
+        response = yield
+        DLOG.debug(
+            "(%s) host upgrade list callback response=%s." % (self._name, response)
+        )
+
+        if response["completed"] and self.strategy is not None:
+            self.strategy.nfvi_kube_host_upgrade_list = response["result-data"]
+
+        if response["completed"] and self._is_control_plane_already_upgraded(
+            response["result-data"]
+        ):
+            self.stage.step_complete(strategy.STRATEGY_STEP_RESULT.SUCCESS, "")
+            return
+
+        # Proceed with the upgrade
         from nfv_vim import directors
 
-        DLOG.info("Step (%s) apply to hostnames (%s)." % (self._name, self._host_names))
         host_director = directors.get_host_director()
         operation = host_director.kube_upgrade_hosts_control_plane(
             self._host_names, self._force
         )
-        return validate_operation(operation)
+        if operation.is_failed():
+            self.stage.step_complete(
+                strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
+            )
+
+    def apply(self):
+        """Kube Host Upgrade Control Plane."""
+
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply to hostnames (%s)." % (self._name, self._host_names))
+        nfvi.nfvi_get_kube_host_upgrade_list(
+            self._get_kube_host_upgrade_list_callback()
+        )
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
 
 class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
@@ -1223,3 +1277,117 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
             return strategy.STRATEGY_STEP_RESULT.FAILED, operation.reason
 
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+
+class WaitKubernetesUpgradeHealthy(AbstractStrategyStep):
+    """Wait for the kubernetes upgrade to be healthy - Strategy Step."""
+
+    def __init__(
+        self,
+        timeout_in_secs=180,
+        first_query_delay_in_secs=15,
+        alarm_ignore_list=None,
+    ):
+        super().__init__(
+            STRATEGY_STEP_NAME.KUBE_WAIT_UPGRADE_HEALTHY,
+            timeout_in_secs=timeout_in_secs,
+        )
+        self._first_query_delay_in_secs = first_query_delay_in_secs
+        self._wait_time = 0
+        self._query_inprogress = False
+        self._alarm_ignore_list = alarm_ignore_list or KUBE_UPGRADE_START_ALARM_IGNORE
+
+    @coroutine
+    def _query_health_callback(self):
+        """Query Health Callback."""
+
+        response = yield
+        DLOG.debug("Query-Health callback response=%s." % response)
+
+        self._query_inprogress = False
+
+        if response["completed"]:
+            if "result-data" not in response:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result, "Kubernetes upgrade health check missing result-data"
+                )
+                return
+            health_data = response["result-data"]
+            if isinstance(health_data, dict):
+                health_str = json.dumps(health_data)
+            else:
+                health_str = str(health_data)
+            if "[Fail]" in health_str:
+                DLOG.info(
+                    "Kubernetes upgrade health check has failures: %s" % health_data
+                )
+            else:
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+        else:
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.stage.step_complete(
+                result,
+                response.get("reason")
+                or "Unknown error while trying kubernetes upgrade health check, "
+                "check /var/log/nfv-vim.log for more information.",
+            )
+
+    def apply(self):
+        """Wait for kubernetes upgrade to be healthy."""
+
+        DLOG.info("Step (%s) apply." % self._name)
+        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+    def handle_event(self, event, event_data=None):
+        """Handle Host events to trigger periodic polling."""
+
+        from nfv_vim import nfvi
+
+        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
+
+        if event == STRATEGY_EVENT.HOST_AUDIT:
+            if 0 == self._wait_time:
+                self._wait_time = timers.get_monotonic_timestamp_in_ms()
+
+            now_ms = timers.get_monotonic_timestamp_in_ms()
+            secs_expired = (now_ms - self._wait_time) // 1000
+            if (
+                self._first_query_delay_in_secs <= secs_expired
+                and not self._query_inprogress
+            ):
+                self._query_inprogress = True
+                nfvi.nfvi_get_kube_upgrade_health(
+                    self._alarm_ignore_list, self._query_health_callback()
+                )
+            return True
+
+        return False
+
+    def from_dict(self, data):
+        """Returns the step object initialized using the given dictionary."""
+
+        super().from_dict(data)
+        self._first_query_delay_in_secs = data["first_query_delay_in_secs"]
+        self._wait_time = 0
+        self._query_inprogress = False
+        self._alarm_ignore_list = data.get(
+            "alarm_ignore_list", KUBE_UPGRADE_START_ALARM_IGNORE
+        )
+        return self
+
+    def as_dict(self):
+        """Represent the wait kubernetes upgrade healthy step as a dictionary."""
+
+        data = super().as_dict()
+        data["first_query_delay_in_secs"] = self._first_query_delay_in_secs
+        data["alarm_ignore_list"] = self._alarm_ignore_list
+        return data
+
+    def timeout(self):
+        """Strategy Step Timeout Override."""
+
+        result, _ = super().timeout()
+        reason = "Kubernetes upgrade did not become healthy before timeout"
+        return result, reason

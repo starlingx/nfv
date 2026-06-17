@@ -75,7 +75,21 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         return controller_0_host
 
     def _is_combined_strategy(self):
-        return getattr(self, "_kube_upgrade_version", None)
+        """Returns True only for the simplex interleaved combined strategy.
+
+        On duplex, kube upgrade runs as a full sequential phase after sw-deploy,
+        so kubelet stages and cordon/uncordon should NOT be suppressed.
+        """
+        return (
+            getattr(self, "_kube_upgrade_version", None)
+            and self.get_second_host() is None
+        )
+
+    def _should_defer_kube_upgrade_completion(self):
+        """Returns True only for the combined strategy without delete"""
+        return getattr(self, "_kube_upgrade_version", None) and not getattr(
+            self, "_delete", False
+        )
 
     def _get_kube_version_steps(self, target_version, kube_list):
         """Returns an ordered list for a multi-version kubernetes upgrade.
@@ -219,6 +233,17 @@ class KubeUpgradeStages:  # pylint: disable=no-member
                 continue
 
         return already_upgraded_hosts
+
+    def _add_wait_kubernetes_upgrade_healthy_stage(self):
+        """Add wait for kubernetes upgrade healthy strategy stage."""
+
+        from nfv_vim import strategy
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.KUBE_WAIT_UPGRADE_HEALTHY
+        )
+        stage.add_step(strategy.WaitKubernetesUpgradeHealthy())
+        self.apply_phase.add_stage(stage)
 
     def _add_kube_upgrade_start_stage(self):
         """Add upgrade start strategy stage
@@ -595,7 +620,13 @@ class KubeUpgradeStages:  # pylint: disable=no-member
                 )
             )
             self.apply_phase.add_stage(stage)
-        # after this loop is kube upgrade complete stage
+        if self._should_defer_kube_upgrade_completion():
+            # If we get here, this is the sequential software + kubernetes upgrade
+            # strategy for duplex.
+            # We only want to run the kube upgrade to completion if delete is set,
+            # otherwise the rest of the steps will be executed in a future strategy
+            # with --cleanup
+            return
         self._add_kube_upgrade_complete_stage()
 
     def _add_kube_upgrade_first_control_plane_stage(self, first_host, kube_ver):

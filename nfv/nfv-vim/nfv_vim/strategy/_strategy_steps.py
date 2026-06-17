@@ -4548,6 +4548,9 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.QUERY_KUBE_VERSIONS: (
             kube_upgrade_steps.QueryKubeVersionsStep
         ),
+        STRATEGY_STEP_NAME.KUBE_WAIT_UPGRADE_HEALTHY: (
+            kube_upgrade_steps.WaitKubernetesUpgradeHealthy
+        ),
         #
         # system config update steps
         #

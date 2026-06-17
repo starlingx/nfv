@@ -1922,6 +1922,73 @@ class TestKubeHostUpgradeControlPlaneStepRetry(
         self.assertEqual(self.step._transient_failure_retry_count, 0)
 
 
+class TestKubeHostUpgradeControlPlaneStepSkip(
+    sw_update_testcase.SwUpdateStrategyTestCase,
+):
+    """Unit tests for skipping control plane upgrade when already at target."""
+
+    def setUp(self):
+        super().setUp()
+
+        self.create_host("controller-0", aio=True)
+        self.step = KubeHostUpgradeControlPlaneStep(
+            host=self._host_table.get("controller-0"),
+            to_version=MID1_KUBE_VERSION,
+            force=True,
+            target_state=nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+            target_failure_state=(
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_FIRST_MASTER_FAILED
+            ),
+        )
+        self.mock_stage = mock.MagicMock()
+        self.step.stage = self.mock_stage
+
+    def _send_host_upgrade_list(self, control_plane_version):
+        """Drive the _get_kube_host_upgrade_list_callback coroutine."""
+
+        host = self._host_table.get("controller-0")
+        kube_host_upgrade = nfvi.objects.v1.KubeHostUpgrade(
+            host_id=1,
+            host_uuid=host.uuid,
+            target_version=MID1_KUBE_VERSION,
+            control_plane_version=control_plane_version,
+            kubelet_version=FROM_KUBE_VERSION,
+            status=None,
+        )
+        response = {"completed": True, "result-data": [kube_host_upgrade]}
+        callback = self.step._get_kube_host_upgrade_list_callback()
+        try:
+            callback.send(response)
+        except StopIteration:
+            pass
+
+    @mock.patch("nfv_vim.directors.get_host_director")
+    def test_skip_when_control_plane_already_at_target(self, mock_director):
+        """Step completes SUCCESS without upgrading if already at target."""
+
+        self._send_host_upgrade_list(MID1_KUBE_VERSION)
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        )
+        mock_director.assert_not_called()
+
+    @mock.patch("nfv_vim.directors.get_host_director")
+    def test_proceeds_when_control_plane_not_at_target(self, mock_director):
+        """Step proceeds with upgrade if not at target version."""
+
+        mock_op = mock.MagicMock()
+        mock_op.is_failed.return_value = False
+        mock_director.return_value.kube_upgrade_hosts_control_plane.return_value = (
+            mock_op
+        )
+
+        self._send_host_upgrade_list(FROM_KUBE_VERSION)
+
+        self.mock_stage.step_complete.assert_not_called()
+        mock_director.return_value.kube_upgrade_hosts_control_plane.assert_called_once()
+
+
 class SimplexMultiPatchKubeUpgradeMixin:
     """Mixin with multiple patch versions for the same minor (v1.30).
 

@@ -4774,6 +4774,61 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
+    def get_kube_upgrade_health(self, future, alarm_ignore_list, callback):
+        """Get health of the kube upgrade from sysinv."""
+
+        response = {}
+        response["completed"] = False
+        response["reason"] = ""
+        action_type = "get-kube-upgrade-health"
+
+        try:
+            future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
+
+            if self._platform_token is None or self._platform_token.is_expired():
+                future.work(openstack.get_token, self._platform_directory)
+                future.result = yield
+
+                if not future.result.is_complete() or future.result.data is None:
+                    DLOG.error("OpenStack get-token did not complete.")
+                    return
+
+                self._platform_token = future.result.data
+
+            future.work(
+                sysinv.get_kube_upgrade_health,
+                self._platform_token,
+                alarm_ignore_list=alarm_ignore_list,
+            )
+            future.result = yield
+
+            if not future.result.is_complete():
+                DLOG.error("SysInv %s did not complete." % action_type)
+                return
+
+            response["result-data"] = future.result.data
+            response["completed"] = True
+
+        except exceptions.OpenStackRestAPIException as e:
+            if httplib.UNAUTHORIZED == e.http_status_code:
+                response["error-code"] = nfvi.NFVI_ERROR_CODE.TOKEN_EXPIRED
+                if self._platform_token is not None:
+                    self._platform_token.set_expired()
+
+            else:
+                DLOG.exception(
+                    "Caught API exception while trying %s. error=%s" % (action_type, e)
+                )
+
+        except Exception as e:
+            DLOG.exception(
+                "Caught exception while trying %s. error=%s" % (action_type, e)
+            )
+
+        finally:
+            callback.send(response)
+            callback.close()
+
     def get_deployment_host(self, future, host_name, callback):
         """Get a host resource from the deployment namespace space."""
 

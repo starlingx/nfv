@@ -161,6 +161,9 @@ from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
     nfvi_get_terminating_pods,
 )
 from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
+    nfvi_get_kube_upgrade_health,
+)
+from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
     nfvi_host_device_image_update,
 )
 from nfv_vim.nfvi._nfvi_infrastructure_module import (  # noqa: F401
