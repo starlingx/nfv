@@ -38,7 +38,7 @@ Description: StarlingX Network Function Virtualization Tools
 
 Package: nfv-vim
 Architecture: any
-Depends: ${python3:Depends}, ${misc:Depends}
+Depends: ${python3:Depends}, ${misc:Depends}, libjemalloc2
 Description: StarlingX Virtual Infrastructure Manager
  Virtual infrastructure manager for network function virtualization.
 
