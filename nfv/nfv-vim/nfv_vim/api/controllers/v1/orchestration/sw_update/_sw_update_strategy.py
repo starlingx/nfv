@@ -253,6 +253,12 @@ class KubeRootcaUpdateStrategyCreateData(wsme_types.Base):
 
     expiry_date = wsme_types.wsattr(str, mandatory=False, name="expiry-date")
     subject = wsme_types.wsattr(str, mandatory=False, name="subject")
+    controller_apply_type = wsme_types.wsattr(
+        SwUpdateApplyTypes,
+        mandatory=False,
+        default=SW_UPDATE_APPLY_TYPE.SERIAL,
+        name="controller-apply-type",
+    )
     storage_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="storage-apply-type"
     )
@@ -277,6 +283,12 @@ class KubeUpgradeStrategyCreateData(wsme_types.Base):
     """Kubernetes Upgrade Strategy - Create Data."""
 
     to_version = wsme_types.wsattr(str, mandatory=True, name="to-version")
+    controller_apply_type = wsme_types.wsattr(
+        SwUpdateApplyTypes,
+        mandatory=False,
+        default=SW_UPDATE_APPLY_TYPE.SERIAL,
+        name="controller-apply-type",
+    )
     storage_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="storage-apply-type"
     )
@@ -880,7 +892,12 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
             if not is_valid:
                 return pecan.abort(httplib.BAD_REQUEST, reason)
             rpc_request.subject = request_data.subject
-        rpc_request.controller_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
+        if request_data.controller_apply_type != SW_UPDATE_APPLY_TYPE.SERIAL:
+            return pecan.abort(
+                httplib.BAD_REQUEST,
+                "controller-apply-type must be 'serial' for kube-rootca-update",
+            )
+        rpc_request.controller_apply_type = request_data.controller_apply_type
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.worker_apply_type = request_data.worker_apply_type
         if wsme_types.Unset != request_data.max_parallel_worker_hosts:
@@ -976,7 +993,12 @@ class KubeUpgradeStrategyAPI(SwUpdateStrategyAPI):
             rpc_request.to_version = request_data.to_version
         else:
             rpc_request.to_version = "v{}".format(request_data.to_version)
-        rpc_request.controller_apply_type = SW_UPDATE_APPLY_TYPE.SERIAL
+        if request_data.controller_apply_type != SW_UPDATE_APPLY_TYPE.SERIAL:
+            return pecan.abort(
+                httplib.BAD_REQUEST,
+                "controller-apply-type must be 'serial' for kube-upgrade",
+            )
+        rpc_request.controller_apply_type = request_data.controller_apply_type
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.worker_apply_type = request_data.worker_apply_type
         if wsme_types.Unset != request_data.max_parallel_worker_hosts:
