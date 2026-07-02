@@ -131,6 +131,7 @@ class SwUpdateStrategyData(wsme_types.Base):
     uuid = wsme_types.wsattr(str, name="uuid")
     name = wsme_types.wsattr(SwUpdateNames, name="name")
     release = wsme_types.wsattr(str, mandatory=False, name="release")
+    kube_version = wsme_types.wsattr(str, mandatory=False, name="kube-version")
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, name="controller-apply-type"
     )
@@ -362,6 +363,7 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
         strategy.name = strategy_data["name"]
         if strategy.name == SW_UPDATE_NAME.SW_UPGRADE:
             strategy.release = strategy_data["release"]
+            strategy.kube_version = strategy_data.get("kube_upgrade_version")
         strategy.controller_apply_type = strategy_data["controller_apply_type"]
         strategy.storage_apply_type = strategy_data["storage_apply_type"]
         strategy.swift_apply_type = strategy_data["swift_apply_type"]

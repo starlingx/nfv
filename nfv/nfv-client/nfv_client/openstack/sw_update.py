@@ -66,6 +66,7 @@ class Strategy:
     uuid = None
     name = None
     release = None
+    kube_version = None
     controller_apply_type = None
     storage_apply_type = None
     swift_apply_type = None
@@ -158,6 +159,7 @@ def _get_strategy_object_from_response(response):
     strategy.name = strategy_data["name"]
     if strategy.name == sw_update.STRATEGY_NAME_SW_UPGRADE:
         strategy.release = strategy_data["release"]
+        strategy.kube_version = strategy_data.get("kube-version")
     strategy.controller_apply_type = strategy_data["controller-apply-type"]
     strategy.storage_apply_type = strategy_data["storage-apply-type"]
     strategy.swift_apply_type = strategy_data["swift-apply-type"]
