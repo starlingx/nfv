@@ -204,17 +204,15 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
             _print(2, "release-id", strategy.release_id)
             _print(2, "metapackages", ", ".join(strategy.metapackages))
         else:
-            # TODO(rlima): change this behavior to, instead, display a default message
-            # for when the user specifies an empty release, i.e. previously selected
-            # metapackages
-            if strategy.release is None:
-                strategy.release = []
+            release = "software deploy selected release(s)"
 
-            _print(2, "release", ", ".join(strategy.release))
+            if strategy.release:
+                release = ", ".join(strategy.release)
+
+            _print(2, "release(s)", release)
 
         if strategy.kube_version:
             _print(2, "kube-version", strategy.kube_version)
-
     _print(2, "controller-apply-type", strategy.controller_apply_type)
     _print(2, "storage-apply-type", strategy.storage_apply_type)
     _print(2, "worker-apply-type", strategy.worker_apply_type)
