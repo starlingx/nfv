@@ -352,6 +352,24 @@ class TestCLIKubeRootCAUpdateStrategy(TestNFVClientShell, StrategyMixin):
         super().setUp()
         self.set_strategy("kube-rootca-update-strategy")
 
+    def test_create_controller_apply_type_serial(self):
+        shell_args = [
+            self.strategy,
+            "create",
+            "--controller-apply-type",
+            "serial",
+        ]
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_controller_apply_type_ignore_rejected(self):
+        shell_args = [
+            self.strategy,
+            "create",
+            "--controller-apply-type",
+            "ignore",
+        ]
+        self._test_shell_bad_or_empty_args(shell_args=shell_args)
+
 
 class TestCLIKubeUpgradeStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):
@@ -362,6 +380,26 @@ class TestCLIKubeUpgradeStrategy(TestNFVClientShell, StrategyMixin):
         """Kube Upgrade requires a to-version for create."""
 
         return ["--to-version=1.2.3"]
+
+    def test_create_controller_apply_type_serial(self):
+        shell_args = [
+            self.strategy,
+            "create",
+            "--to-version=1.2.3",
+            "--controller-apply-type",
+            "serial",
+        ]
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_controller_apply_type_ignore_rejected(self):
+        shell_args = [
+            self.strategy,
+            "create",
+            "--to-version=1.2.3",
+            "--controller-apply-type",
+            "ignore",
+        ]
+        self._test_shell_bad_or_empty_args(shell_args=shell_args)
 
 
 class TestSystemConfigUpdateStrategy(TestNFVClientShell, StrategyMixin):

@@ -294,7 +294,6 @@ def create_strategy(
 
     api_cmd_payload = {}
     if sw_update.STRATEGY_NAME_FW_UPDATE == strategy_name:
-        api_cmd_payload["controller-apply-type"] = controller_apply_type
         api_cmd_payload["default-instance-action"] = default_instance_action
     elif sw_update.STRATEGY_NAME_KUBE_ROOTCA_UPDATE == strategy_name:
         # Note that the payload contains '-' and not '_'
@@ -308,11 +307,8 @@ def create_strategy(
         api_cmd_payload["to-version"] = kwargs["to_version"]
         api_cmd_payload["default-instance-action"] = default_instance_action
     elif sw_update.STRATEGY_NAME_SYSTEM_CONFIG_UPDATE == strategy_name:
-        api_cmd_payload["controller-apply-type"] = controller_apply_type
         api_cmd_payload["default-instance-action"] = default_instance_action
     elif sw_update.STRATEGY_NAME_SW_UPGRADE == strategy_name:
-        # controller-apply-type and default-instance-action passed to strategy
-        api_cmd_payload["controller-apply-type"] = controller_apply_type
         api_cmd_payload["default-instance-action"] = default_instance_action
         api_cmd_payload["release"] = kwargs["release"]
         api_cmd_payload["rollback"] = kwargs.get("rollback")
@@ -328,6 +324,7 @@ def create_strategy(
         if kwargs.get("cleanup"):
             api_cmd_payload["cleanup"] = kwargs.get("cleanup")
 
+    api_cmd_payload["controller-apply-type"] = controller_apply_type
     api_cmd_payload["storage-apply-type"] = storage_apply_type
     api_cmd_payload["worker-apply-type"] = worker_apply_type
     if max_parallel_worker_hosts is not None:

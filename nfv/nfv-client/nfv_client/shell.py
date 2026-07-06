@@ -283,7 +283,6 @@ def setup_kube_rootca_update_parser(commands):
         sub_cmds,
         [
             sw_update.APPLY_TYPE_SERIAL,  # controller supports serial only
-            sw_update.APPLY_TYPE_IGNORE,
         ],
         [
             sw_update.APPLY_TYPE_SERIAL,  # storage supports serial only
@@ -344,7 +343,6 @@ def setup_kube_upgrade_parser(commands):
         sub_cmds,
         [
             sw_update.APPLY_TYPE_SERIAL,  # controller supports serial only
-            sw_update.APPLY_TYPE_IGNORE,
         ],
         [
             sw_update.APPLY_TYPE_SERIAL,  # storage supports serial only
