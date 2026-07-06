@@ -1510,6 +1510,28 @@ class SwUpgradeStrategy(
 
         self._nfvi_upgrade = nfvi_upgrade
 
+    def is_abortable(self):
+        """Defines whether the strategy supports abort or not.
+
+        For the combined sw-upgrade strategy (with kube_upgrade_version set),
+        duplex systems are not allowed to abort during kube upgrade stages,
+        requiring a backup and restore to go back to the previous version.
+        """
+
+        from nfv_vim.strategy._strategy_stages import KUBE_STAGE_PREFIXES
+
+        if self._kube_upgrade_version and not self._single_controller:
+            phase = self.apply_phase
+            current_stage_index = phase.current_stage
+            if current_stage_index < len(phase.stages):
+                stage = phase.stages[current_stage_index]
+                if any(
+                    stage.name.startswith(prefix.value)
+                    for prefix in KUBE_STAGE_PREFIXES
+                ):
+                    return False
+        return super().is_abortable()
+
     def _build_normal(self):
         from nfv_vim import strategy
 
@@ -1566,12 +1588,6 @@ class SwUpgradeStrategy(
 
         elif self._rollback and self._delete is not None:
             reason = "Cannot set both delete and rollback, delete is set by default"
-            self.report_build_failure(reason)
-        elif self._kube_upgrade_version and self.get_second_host() is not None:
-            reason = (
-                "Combined software and Kubernetes upgrade is only supported "
-                "on simplex systems."
-            )
             self.report_build_failure(reason)
 
         # TODO(sshathee): Remove this conditon when implementing snapshot
@@ -1865,8 +1881,10 @@ class SwUpgradeStrategy(
                 do_complete = False
                 do_delete = False
 
+            is_duplex = self.get_second_host() is not None
+
             if self._kube_upgrade_version:
-                if self.nfvi_kube_upgrade is not None:
+                if self.nfvi_kube_upgrade is not None and not is_duplex:
                     from nfv_vim import nfvi
 
                     v1_objects = nfvi.objects.v1.KUBE_UPGRADE_STATE
@@ -1896,14 +1914,17 @@ class SwUpgradeStrategy(
                         self.save()
                         return
 
-                if do_start:
-                    self._add_system_deploy_init_stage(
-                        self._release, self._kube_upgrade_version
-                    )
+                if not is_duplex:
+                    # Simplex: interleaved combined strategy
+                    # kube control-plane before sw-deploy, kubelet deferred
+                    if do_start:
+                        self._add_system_deploy_init_stage(
+                            self._release, self._kube_upgrade_version
+                        )
 
-                self._build_kube_upgrade_stages()
-                if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
-                    return
+                    self._build_kube_upgrade_stages()
+                    if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
+                        return
 
             if do_start:
                 self._add_upgrade_start_stage()
@@ -1920,11 +1941,25 @@ class SwUpgradeStrategy(
             else:
                 DLOG.info("Doing nothing sw-deploy already completed")
 
+            # Duplex: full kube upgrade runs sequentially after sw-deploy
+            if self._kube_upgrade_version and is_duplex:
+                self._add_wait_kubernetes_upgrade_healthy_stage()
+                self._build_kube_upgrade_stages()
+                if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
+                    return
+
             if do_delete:
                 if self._kube_upgrade_version:
-                    self._add_kube_upgrade_complete_stage()
-                    self._add_deploy_delete_stage()
-                    self._add_system_deploy_delete_stage()
+                    if is_duplex:
+                        self._add_deploy_delete_stage()
+                    else:
+                        # The kube upgrade cleanup is added by default for sequential
+                        # upgrades after uncordon
+                        # The system deploy cleanup is only used for the optimized
+                        # combined strategy for simplex
+                        self._add_kube_upgrade_complete_stage()
+                        self._add_deploy_delete_stage()
+                        self._add_system_deploy_delete_stage()
                 else:
                     self._add_deploy_delete_stage()
             else:

@@ -60,6 +60,7 @@ class StrategyStepNames(Constants, metaclass=Singleton):
     QUERY_KUBE_ROOTCA_UPDATE = Constant("query-kube-rootca-update")
     QUERY_KUBE_ROOTCA_HOST_UPDATES = Constant("query-kube-rootca-host-updates")
     # kube upgrade steps
+    KUBE_WAIT_UPGRADE_HEALTHY = Constant("kube-wait-upgrade-healthy")
     APPLY_PATCHES = Constant("apply-patches")
     QUERY_KUBE_HOST_UPGRADE = Constant("query-kube-host-upgrade")
     QUERY_KUBE_UPGRADE = Constant("query-kube-upgrade")

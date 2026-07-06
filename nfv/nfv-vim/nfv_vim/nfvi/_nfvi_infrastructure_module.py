@@ -647,6 +647,17 @@ def nfvi_get_terminating_pods(host_name, callback):
     return cmd_id
 
 
+def nfvi_get_kube_upgrade_health(alarm_ignore_list, callback):
+    """Get health of the kube upgrade."""
+
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        "get_kube_upgrade_health",
+        alarm_ignore_list=alarm_ignore_list,
+        callback=callback,
+    )
+    return cmd_id
+
+
 def nfvi_register_host_add_callback(callback):
     """Register for host add notifications."""
 

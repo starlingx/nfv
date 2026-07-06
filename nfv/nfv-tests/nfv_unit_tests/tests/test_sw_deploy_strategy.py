@@ -4828,31 +4828,62 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         "nfv_vim.strategy._strategy.get_local_host_name",
         sw_update_testcase.fake_host_name_controller_0,
     )
-    def test_combined_duplex_system_fails_build(self):
-        """Test BUILD_FAILED when combined strategy is attempted on a duplex system.
+    def test_combined_duplex_builds_sequential_sw_then_kube(self):
+        """Test combined strategy on duplex builds sequential phases.
 
-        The combined sw-upgrade + kube-upgrade feature is simplex-only.
-        The rejection happens in build() before build_complete is ever called.
-        Verify:
-        - controller-1 present causes BUILD_FAILED
-        - result_reason identifies the simplex-only restriction
+        On duplex, --kube-upgrade runs full sw-deploy first, then full
+        kube-upgrade (including control-planes for both controllers). Verify:
+        - Build succeeds (no longer rejected)
+        - sw-deploy stages come before kube-upgrade stages
+        - No sw-system-deploy-init (simplex-only)
+        - Both first and second control-plane stages present
+        - No end stages without --delete (deferred to --cleanup)
+        - No kube-host-cordon (simplex-only)
         """
         self.create_host("controller-1", aio=True)
 
-        strategy = self.create_sw_deploy_strategy(kube_upgrade_version=self.KUBE_VER)
-
-        strategy.nfvi_upgrade = _make_nfvi_upgrade(self.RELEASE, state="available")
+        strategy = self._create_combined_strategy(single_controller=False)
         strategy.sw_update_obj = self.fake_upgrade_obj
 
-        strategy.build()
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
 
-        error_msg = (
-            "Combined software and Kubernetes upgrade is only supported "
-            "on simplex systems."
+        self.assertFalse(strategy.is_build_failed())
+
+        stage_names = [s.name for s in strategy.apply_phase.stages]
+
+        # sw-deploy stages must come before kube-upgrade stages
+        sw_start_idx = stage_names.index("sw-upgrade-start")
+        sw_complete_idx = stage_names.index("sw-upgrade-complete")
+        kube_start_idx = stage_names.index("kube-upgrade-start")
+        self.assertLess(sw_start_idx, kube_start_idx)
+        self.assertLess(sw_complete_idx, kube_start_idx)
+
+        # kube-wait-upgrade-healthy must appear between sw-deploy and kube-upgrade
+        self.assertIn("kube-wait-upgrade-healthy", stage_names)
+        pods_ready_idx = stage_names.index("kube-wait-upgrade-healthy")
+        self.assertLess(sw_complete_idx, pods_ready_idx)
+        self.assertLess(pods_ready_idx, kube_start_idx)
+
+        # No sw-system-deploy-init (duplex does not use it)
+        self.assertNotIn("sw-system-deploy-init", stage_names)
+
+        # kube-host-cordon is simplex-only
+        self.assertNotIn("kube-host-cordon", stage_names)
+
+        # Both control planes present (duplex)
+        self.assertIn(
+            "kube-upgrade-first-control-plane %s" % self.KUBE_VER, stage_names
+        )
+        self.assertIn(
+            "kube-upgrade-second-control-plane %s" % self.KUBE_VER, stage_names
         )
 
-        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
-        self.assertIn(error_msg, strategy.build_phase.result_reason)
+        # End stages NOT present without --delete (deferred to --cleanup)
+        self.assertNotIn("kube-upgrade-complete", stage_names)
+        self.assertNotIn("kube-post-application-update", stage_names)
+        self.assertNotIn("kube-upgrade-cleanup", stage_names)
+
+        sw_update_testcase.validate_strategy_persists(strategy)
 
     @mock.patch(
         "nfv_vim.strategy._strategy.get_local_host_name",
@@ -5144,6 +5175,50 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         "nfv_vim.strategy._strategy.get_local_host_name",
         sw_update_testcase.fake_host_name_controller_0,
     )
+    def test_combined_duplex_delete_true_appends_deploy_cleanup_stages(self):
+        """Test duplex combined + delete=True appends cleanup after kube stages.
+
+        On duplex with --delete, _build_kube_upgrade_stages adds
+        kube-upgrade-complete, kube-post-application-update, and
+        kube-upgrade-cleanup exactly once, followed by sw-deploy-delete.
+        sw-system-deploy-delete is NOT added (simplex-only).
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self._create_combined_strategy(single_controller=False, delete=True)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertFalse(strategy.is_build_failed())
+
+        stage_names = [s.name for s in strategy.apply_phase.stages]
+
+        # Full kube cleanup included via _build_kube_upgrade_stages
+        self.assertIn("kube-upgrade-complete", stage_names)
+        self.assertIn("kube-upgrade-cleanup", stage_names)
+
+        # End stages must appear exactly once (no duplication)
+        self.assertEqual(stage_names.count("kube-upgrade-complete"), 1)
+        self.assertEqual(stage_names.count("kube-post-application-update"), 1)
+        self.assertEqual(stage_names.count("kube-upgrade-cleanup"), 1)
+
+        # sw-deploy-delete appended after kube cleanup
+        self.assertIn("sw-deploy-delete", stage_names)
+
+        # sw-system-deploy-delete is simplex-only
+        self.assertNotIn("sw-system-deploy-delete", stage_names)
+
+        kube_cleanup_idx = stage_names.index("kube-upgrade-cleanup")
+        sw_delete_idx = stage_names.index("sw-deploy-delete")
+        self.assertLess(kube_cleanup_idx, sw_delete_idx)
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
     def test_combined_system_deploy_init_is_first_stage(self):
         """Test that sw-system-deploy-init is the very first apply stage.
 
@@ -5188,16 +5263,32 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         )
 
     def test_combined_is_combined_strategy_truthy_when_kube_version_set(self):
-        """Test _is_combined_strategy() is truthy when kube_upgrade_version is set.
+        """Test _is_combined_strategy() truthy on simplex with kube_version set.
 
         Verify:
         - _is_combined_strategy() returns a truthy value
         - kube mixin attribute _nfvi_kube_upgrade is initialized
         """
-        strategy = self._create_combined_strategy(kube_upgrade_version="v1.30.6")
+        strategy = self._create_combined_strategy(
+            kube_upgrade_version="v1.30.6", single_controller=True
+        )
 
         self.assertTrue(strategy._is_combined_strategy())
         self.assertTrue(hasattr(strategy, "_nfvi_kube_upgrade"))
+
+    def test_combined_is_combined_strategy_falsy_on_duplex(self):
+        """Test _is_combined_strategy() is falsy on duplex even with kube_version set.
+
+        On duplex, the strategy runs sequential (not interleaved), so
+        _is_combined_strategy() must return False.
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self._create_combined_strategy(
+            kube_upgrade_version="v1.30.6", single_controller=False
+        )
+
+        self.assertFalse(strategy._is_combined_strategy())
 
     def test_combined_is_combined_strategy_falsy_when_kube_version_none(self):
         """Test _is_combined_strategy() is falsy when kube_upgrade_version is None.
@@ -5295,3 +5386,338 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         self.strategy.apply_phase._current_stage = len(self.strategy.apply_phase.stages)
 
         self.assertFalse(self.fake_upgrade_obj._is_kube_upgrade_active())
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_is_abortable_false_during_kube_stages_on_duplex(self):
+        """Test is_abortable returns False during kube upgrade stages on duplex.
+
+        On duplex combined strategy, abort must be blocked when the current
+        stage is a kube upgrade stage (matching KUBE_STAGE_PREFIXES).
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self._create_combined_strategy(single_controller=False)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        # Set strategy to applying state
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+
+        # Find a kube stage and set it as current
+        from nfv_vim.strategy._strategy_stages import KUBE_STAGE_PREFIXES
+
+        for index, stage in enumerate(strategy.apply_phase.stages):
+            if any(
+                stage.name.startswith(prefix.value) for prefix in KUBE_STAGE_PREFIXES
+            ):
+                strategy.apply_phase._current_stage = index
+                self.assertFalse(
+                    strategy.is_abortable(),
+                    "Expected is_abortable()=False during kube stage '%s'" % stage.name,
+                )
+                return
+
+        self.fail("No kube upgrade stage found in apply phase")
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_is_abortable_true_during_sw_deploy_stages_on_duplex(self):
+        """Test is_abortable returns True during sw-deploy stages on duplex.
+
+        Even on duplex combined strategy, abort should remain allowed during
+        the sw-deploy portion of the strategy.
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self._create_combined_strategy(single_controller=False)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        # Set strategy to applying state
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+
+        # Find a non-kube stage (sw-deploy stage) and set it as current
+        from nfv_vim.strategy._strategy_stages import KUBE_STAGE_PREFIXES
+
+        for index, stage in enumerate(strategy.apply_phase.stages):
+            if not any(
+                stage.name.startswith(prefix.value) for prefix in KUBE_STAGE_PREFIXES
+            ):
+                strategy.apply_phase._current_stage = index
+                self.assertTrue(
+                    strategy.is_abortable(),
+                    "Expected is_abortable()=True during sw-deploy stage '%s'"
+                    % stage.name,
+                )
+                return
+
+        self.fail("No sw-deploy stage found in apply phase")
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_is_abortable_true_during_kube_stages_on_simplex(self):
+        """Test is_abortable delegates to parent on simplex combined strategy.
+
+        Simplex systems should not block abort during kube stages because
+        the restriction only applies to duplex.
+        """
+        strategy = self._create_combined_strategy(single_controller=True)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        # Set strategy to applying state
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+
+        # Find a kube stage and set it as current
+        from nfv_vim.strategy._strategy_stages import KUBE_STAGE_PREFIXES
+
+        for index, stage in enumerate(strategy.apply_phase.stages):
+            if any(
+                stage.name.startswith(prefix.value) for prefix in KUBE_STAGE_PREFIXES
+            ):
+                strategy.apply_phase._current_stage = index
+                self.assertTrue(
+                    strategy.is_abortable(),
+                    "Expected is_abortable()=True on simplex during kube stage '%s'"
+                    % stage.name,
+                )
+                return
+
+        self.fail("No kube upgrade stage found in apply phase")
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_is_abortable_true_on_duplex_without_kube_version(self):
+        """Test is_abortable delegates to parent on non-combined duplex strategy.
+
+        When kube_upgrade_version is not set, the is_abortable override
+        should not interfere and just delegate to the parent class.
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self.create_sw_deploy_strategy(
+            single_controller=False,
+            kube_upgrade_version=None,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+        strategy.nfvi_upgrade = _make_nfvi_upgrade(
+            MAJOR_RELEASE_UPGRADE, state="available"
+        )
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        # Set strategy to applying state
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+        strategy.apply_phase._current_stage = 0
+
+        self.assertTrue(
+            strategy.is_abortable(),
+            "Expected is_abortable()=True on duplex without kube_upgrade_version",
+        )
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_is_abortable_all_kube_stages_blocked_on_duplex(self):
+        """Test every kube upgrade stage is non-abortable on duplex combined.
+
+        Drives the apply-phase cursor across all stages and asserts that
+        is_abortable() returns False for every kube stage and True for
+        every non-kube stage.
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self._create_combined_strategy(single_controller=False, delete=True)
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        # Set strategy to applying state
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+
+        from nfv_vim.strategy._strategy_stages import KUBE_STAGE_PREFIXES
+
+        for index, stage in enumerate(strategy.apply_phase.stages):
+            strategy.apply_phase._current_stage = index
+            is_kube_stage = any(
+                stage.name.startswith(prefix.value) for prefix in KUBE_STAGE_PREFIXES
+            )
+
+            if is_kube_stage:
+                self.assertFalse(
+                    strategy.is_abortable(),
+                    "Expected is_abortable()=False for kube stage '%s'" % stage.name,
+                )
+            else:
+                self.assertTrue(
+                    strategy.is_abortable(),
+                    "Expected is_abortable()=True for non-kube stage '%s'" % stage.name,
+                )
+
+
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
+class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCase):
+    """Unit tests for the WaitKubernetesUpgradeHealthy."""
+
+    def setUp(self):
+        super().setUp()
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            WaitKubernetesUpgradeHealthy,
+        )
+
+        self.step = WaitKubernetesUpgradeHealthy(
+            timeout_in_secs=180, first_query_delay_in_secs=20
+        )
+        self.mock_stage = mock.MagicMock()
+        self.step.stage = self.mock_stage
+
+    def _send_callback(self, response):
+        """Drive the coroutine callback with the given response."""
+
+        callback = self.step._query_health_callback()
+        try:
+            callback.send(response)
+        except StopIteration:
+            pass
+
+    def test_health_no_failures_completes_step_successfully(self):
+        """Step completes with SUCCESS when health data has no failures."""
+
+        self._send_callback(
+            {
+                "completed": True,
+                "result-data": {"System Health": {"All hosts are provisioned": ["OK"]}},
+            }
+        )
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        )
+
+    def test_query_failure_fails_step(self):
+        """Step fails when the query itself fails."""
+
+        self._send_callback({"completed": False, "reason": "connection error"})
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.FAILED, "connection error"
+        )
+
+    def test_handle_event_triggers_query_after_delay(self):
+        """HOST_AUDIT triggers query after first_query_delay_in_secs."""
+
+        from nfv_common import timers
+        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
+
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=1000
+        ):
+            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=22000
+        ):
+            with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+                mock_query.assert_called_once()
+
+    def test_handle_event_does_not_trigger_query_before_delay(self):
+        """HOST_AUDIT does not trigger query before first_query_delay_in_secs."""
+
+        from nfv_common import timers
+        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
+
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=1000
+        ):
+            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=11000
+        ):
+            with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+                mock_query.assert_not_called()
+
+    def test_from_dict_roundtrip(self):
+        """Step can be serialized and deserialized without data loss."""
+
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            WaitKubernetesUpgradeHealthy,
+        )
+
+        data = self.step.as_dict()
+        new_step = object.__new__(WaitKubernetesUpgradeHealthy)
+        new_step.from_dict(data)
+
+        self.assertEqual(new_step._first_query_delay_in_secs, 20)
+        self.assertEqual(new_step._wait_time, 0)
+        self.assertFalse(new_step._query_inprogress)
+
+    def test_timeout_returns_descriptive_reason(self):
+        """Timeout provides a meaningful error message."""
+
+        result, reason = self.step.timeout()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.TIMED_OUT)
+        self.assertIn("did not become healthy", reason)
+
+    def test_missing_result_data_fails_step(self):
+        """Step fails when response is completed but result-data is missing."""
+
+        self._send_callback({"completed": True})
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Kubernetes upgrade health check missing result-data",
+        )
+
+    def test_query_failure_with_empty_reason_uses_default_message(self):
+        """Step fails with a descriptive message when reason is empty."""
+
+        self._send_callback({"completed": False, "reason": ""})
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Unknown error while trying kubernetes upgrade health check, "
+            "check /var/log/nfv-vim.log for more information.",
+        )
+
+    def test_query_failure_with_no_reason_uses_default_message(self):
+        """Step fails with a descriptive message when reason key is absent."""
+
+        self._send_callback({"completed": False})
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Unknown error while trying kubernetes upgrade health check, "
+            "check /var/log/nfv-vim.log for more information.",
+        )
