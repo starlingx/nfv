@@ -301,7 +301,7 @@ def sw_deploy_get_upgrade_obj(token, release, upgrade_obj, precheck_data=None):
             # [['distcloud', '26.09.0', '26.09.1000']]
             metapackages = [
                 f"{metapackage_info[0]}_{metapackage_info[2]}"
-                for metapackage_info in deploy_info["metapackages"]
+                for metapackage_info in (deploy_info.get("metapackages") or [])
             ]
     elif upgrade_obj:
         # When there's no active deployment and no precheck data, the information needs

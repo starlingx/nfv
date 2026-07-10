@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import copy
+
 from unittest import mock
 
 from nfv_plugins.nfvi_plugins.openstack import usm
@@ -482,6 +484,43 @@ class TestSwDeployGetUpgradeObj(BaseTestUsm):
         self.assertEqual(upgrade_obj.metapackages, ["distcloud_26.09.1000"])
         self.assertTrue(upgrade_obj.release_info["upgrade"])
         self.assertEqual(upgrade_obj.deploy_info, self.deploy_info)
+
+    def test_sw_deploy_get_upgrade_obj_without_metapackages_when_in_progress(self):
+        """A deploy in progress whose payload lacks 'metapackages' must default to [].
+
+        Regression test: after a VIM restart during upgrade, the upgrade_obj might be
+        None when upgrading to latest release. In this scenario, the 'software deploy
+        show' may not include the metapackages key, which previously raised a KeyError.
+        """
+
+        deploy_info = copy.deepcopy(self.deploy_info)
+        del deploy_info["metapackages"]
+        self.mock_show.return_value = self._mock_response([deploy_info])
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(self.token, ["26.09"], None)
+
+        self.assertEqual(upgrade_obj.release, ["26.09"])
+        self.assertEqual(upgrade_obj.release_id, "starlingx-13")
+        self.assertEqual(upgrade_obj.metapackages, [])
+        self.assertTrue(upgrade_obj.release_info["upgrade"])
+        self.assertEqual(upgrade_obj.deploy_info, deploy_info)
+
+    def test_sw_deploy_get_upgrade_obj_with_none_metapackages_when_in_progress(self):
+        """A deploy in progress with 'metapackages' set to None must default to [].
+
+        Complements the missing-key regression test by covering the case where
+        the key exists but carries a None value, which would break the list
+        comprehension with a TypeError if not guarded.
+        """
+
+        deploy_info = copy.deepcopy(self.deploy_info)
+        deploy_info["metapackages"] = None
+        self.mock_show.return_value = self._mock_response([deploy_info])
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(self.token, ["26.09"], None)
+
+        self.assertEqual(upgrade_obj.metapackages, [])
+        self.assertEqual(upgrade_obj.deploy_info, deploy_info)
 
     def test_sw_deploy_get_upgrade_obj_minimal_return(self):
         """With no data available, a minimal Upgrade object is returned."""
