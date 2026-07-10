@@ -7,6 +7,19 @@
 from nfv_common import strategy
 
 
+def normalize_release(release):
+    """Normalize a release value into list format
+
+    Prior to the componentization feature, the release was stored as a string rather
+    than a list of strings. Because of that, when running upgrade from older versions,
+    the data restored after a reboot on host-lock and host-unlock would return the str
+    format, while the code expects [str];
+    """
+    if isinstance(release, str):
+        return [release]
+    return release
+
+
 def validate_operation(operation):
     if operation.is_inprogress():
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""

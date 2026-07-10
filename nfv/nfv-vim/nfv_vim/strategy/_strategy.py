@@ -25,6 +25,7 @@ from nfv_vim.objects import HOST_SERVICES
 from nfv_vim.objects import INSTANCE_GROUP_POLICY
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
+from nfv_vim.strategy._utils import normalize_release
 from nfv_vim.strategy.stages._kube_upgrade_stages import KubeUpgradeStages
 
 DLOG = debug.debug_get_logger("nfv_vim.strategy")
@@ -2116,7 +2117,9 @@ class SwUpgradeStrategy(
         # sw-deploy delete must be done on controller-0 for major release
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
         stage.add_step(
-            strategy.SwDeployDeleteStep(release=self.nfvi_upgrade.release_id)
+            strategy.SwDeployDeleteStep(
+                release=normalize_release(self.nfvi_upgrade.release_id)
+            )
         )
         self.apply_phase.add_stage(stage)
 
@@ -2250,13 +2253,13 @@ class SwUpgradeStrategy(
 
         super().from_dict(data, build_phase, apply_phase, abort_phase)
         self._single_controller = data["single_controller"]
-        self._release = data["release"]
+        self._release = normalize_release(data["release"])
         self._rollback = data["rollback"]
         self._kube_upgrade_version = data.get("kube_upgrade_version")
         nfvi_upgrade_data = data["nfvi_upgrade_data"]
         if nfvi_upgrade_data:
             self._nfvi_upgrade = nfvi.objects.v1.Upgrade(
-                nfvi_upgrade_data["release"],
+                normalize_release(nfvi_upgrade_data["release"]),
                 nfvi_upgrade_data.get("metapackages", None),
                 nfvi_upgrade_data["release_info"],
                 nfvi_upgrade_data["deploy_info"],
