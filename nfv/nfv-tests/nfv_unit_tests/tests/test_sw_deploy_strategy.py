@@ -155,7 +155,7 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         max_parallel_worker_hosts=10,
         alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
         default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
-        release=MAJOR_RELEASE_UPGRADE,
+        release=None,
         rollback=False,
         delete=False,
         cleanup=False,
@@ -165,6 +165,11 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         single_controller=False,
     ):
         """Create a software update strategy."""
+
+        # Cleanup and rollback strategies must not carry a release. Only default
+        # the release for normal deploy strategies.
+        if release is None and not (cleanup or rollback):
+            release = [MAJOR_RELEASE_UPGRADE]
 
         strategy = SwUpgradeStrategy(
             uuid=str(uuid.uuid4()),
@@ -360,7 +365,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -409,7 +414,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -455,7 +460,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -502,7 +507,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -554,7 +559,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -605,7 +610,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -653,7 +658,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -702,7 +707,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -1177,7 +1182,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
+                ["13.01"],
                 MOCK_METAPACKAGES,
                 {
                     "state": "deploying",
@@ -1210,7 +1215,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
+                ["13.01"],
                 MOCK_METAPACKAGES,
                 {
                     "state": "removing",
@@ -1243,7 +1248,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
+                ["13.01"],
                 MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
@@ -1274,7 +1279,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
+                ["13.01"],
                 MOCK_METAPACKAGES,
                 {"state": "deployed"},
                 None,
@@ -1305,7 +1310,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
+                ["13.01"],
                 MOCK_METAPACKAGES,
                 {
                     "state": "deployed",
@@ -1339,7 +1344,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
+                ["13.01"],
                 MOCK_METAPACKAGES,
                 {
                     "state": "commited",
@@ -1373,7 +1378,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01", MOCK_METAPACKAGES, None, None, None
+                ["13.01"], MOCK_METAPACKAGES, None, None, None
             )
         )
 
@@ -1398,7 +1403,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "13.01",
+                ["13.01"],
                 MOCK_METAPACKAGES,
                 {"state": "unavailable"},
                 None,
@@ -1428,7 +1433,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -1495,7 +1500,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -1570,7 +1575,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
             delete=True,
@@ -1653,7 +1658,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=release,
             delete=True,
@@ -1757,7 +1762,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, _, _, strategy = self._gen_standard_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -1856,7 +1861,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, _, _, strategy = self._gen_standard_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -1995,7 +2000,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, _, _, strategy = self._gen_standard_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -2134,7 +2139,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2226,7 +2231,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2318,7 +2323,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2410,7 +2415,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2481,7 +2486,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2579,7 +2584,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2650,7 +2655,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2742,7 +2747,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2819,7 +2824,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2896,7 +2901,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -2966,7 +2971,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
     def test_sw_deploy_strategy_cleanup_build_fails_with_release(self):
         """cleanup cannot be combined with a release."""
         _, strategy = self._gen_aiosx_hosts_and_strategy(
-            release=MAJOR_RELEASE_UPGRADE,
+            release=[MAJOR_RELEASE_UPGRADE],
             cleanup=True,
         )
         fake_upgrade_obj = SwUpgrade()
@@ -2996,7 +3001,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=None,
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "888.8",
+                ["888.8"],
                 MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
@@ -3051,7 +3056,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=None,
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "888.8",
+                ["888.8"],
                 MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 None,
@@ -3113,7 +3118,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=None,
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "888.8",
+                ["888.8"],
                 MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
@@ -3173,7 +3178,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             release=None,
             cleanup=True,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                "888.8",
+                ["888.8"],
                 MOCK_METAPACKAGES,
                 {"state": "deploying"},
                 {"state": "completed"},
@@ -3291,7 +3296,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         step = self._create_precheck_step()
         upgrade_obj = nfvi.objects.v1.Upgrade(
-            "13.0", MOCK_METAPACKAGES, None, None, None
+            ["13.0"], MOCK_METAPACKAGES, None, None, None
         )
         response = self._create_response(
             True, True, {"info": "all healthy"}, upgrade_object_data=upgrade_obj
@@ -3491,7 +3496,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -3595,7 +3600,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -3671,7 +3676,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -3777,7 +3782,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -3869,7 +3874,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -3961,7 +3966,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiodx_hosts_and_strategy(
             release=None,
             rollback=True,
@@ -4053,7 +4058,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         - Pass.
         """
 
-        release = "888.8"
+        release = ["888.8"]
         _, strategy = self._gen_aiosx_hosts_and_strategy(
             release=release,
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -4229,7 +4234,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         """
         self.create_host("controller-0", aio=True)
 
-        release = "starlingx-24.03.1"
+        release = ["starlingx-24.03.1"]
         strategy = self.create_sw_deploy_strategy(
             kube_upgrade_version="v1.29.0",
             nfvi_upgrade=nfvi.objects.v1.Upgrade(
@@ -4272,7 +4277,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
     """Tests for SwUpgradeStrategy with kube_upgrade_version set (combined strategy)."""
 
-    RELEASE = "starlingx-24.03.1"
+    RELEASE = ["starlingx-24.03.1"]
     KUBE_VER = _COMBINED_TO_KUBE
 
     def setUp(self):

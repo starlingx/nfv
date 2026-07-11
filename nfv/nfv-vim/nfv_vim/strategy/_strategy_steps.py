@@ -17,6 +17,7 @@ from nfv_vim.strategy._constants import STRATEGY_STEP_NAME
 from nfv_vim.strategy._strategy_defs import FW_UPDATE_LABEL
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 from nfv_vim.strategy._utils import AbstractStrategyStep
+from nfv_vim.strategy._utils import normalize_release
 from nfv_vim.strategy.steps import kube_upgrade_steps
 from nfv_vim import tables
 import software.states as usm_states
@@ -830,7 +831,7 @@ class SwDeployPrecheckStep(strategy.StrategyStep):
         dictionary.
         """
         super().from_dict(data)
-        self._release = data["release"]
+        self._release = normalize_release(data["release"])
         self._snapshot = data.get("snapshot", False)
         return self
 
@@ -1296,7 +1297,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         dictionary.
         """
         super().from_dict(data)
-        self._release = data["release"]
+        self._release = normalize_release(data["release"])
         self._snapshot = data.get("snapshot", False)
         self._query_inprogress = False
         return self
@@ -1496,7 +1497,7 @@ class UpgradeActivateStep(strategy.StrategyStep):
         dictionary.
         """
         super().from_dict(data)
-        self._release = data["release"]
+        self._release = normalize_release(data["release"])
         self._query_inprogress = False
         self._retry_count = data["retry_count"]
         self._retry_sleep = data["retry_sleep"]
@@ -1572,7 +1573,7 @@ class UpgradeCompleteStep(strategy.StrategyStep):
         dictionary.
         """
         super().from_dict(data)
-        self._release = data["release"]
+        self._release = normalize_release(data["release"])
         return self
 
     def as_dict(self):
@@ -1642,7 +1643,7 @@ class SwDeployDeleteStep(strategy.StrategyStep):
         dictionary.
         """
         super().from_dict(data)
-        self._release = data["release"]
+        self._release = normalize_release(data["release"])
         return self
 
     def as_dict(self):
@@ -1921,7 +1922,7 @@ class SwSystemDeployInitStep(strategy.StrategyStep):
         dictionary.
         """
         super().from_dict(data)
-        self._release = data["release"]
+        self._release = normalize_release(data["release"])
         self._kube_version = data["kube_version"]
         return self
 

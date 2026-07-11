@@ -11,6 +11,13 @@ from unittest import mock
 from nfv_plugins.nfvi_plugins.openstack import usm
 from nfv_unit_tests.tests import testcase
 from nfv_vim import nfvi
+from nfv_vim.strategy._strategy_steps import SwDeployDeleteStep
+from nfv_vim.strategy._strategy_steps import SwDeployPrecheckStep
+from nfv_vim.strategy._strategy_steps import SwSystemDeployInitStep
+from nfv_vim.strategy._strategy_steps import UpgradeActivateStep
+from nfv_vim.strategy._strategy_steps import UpgradeCompleteStep
+from nfv_vim.strategy._strategy_steps import UpgradeStartStep
+from nfv_vim.strategy._utils import normalize_release
 
 
 class BaseTestUsm(testcase.NFVTestCase):
@@ -533,3 +540,74 @@ class TestSwDeployGetUpgradeObj(BaseTestUsm):
         self.assertIsNone(upgrade_obj.release_info)
         self.assertIsNone(upgrade_obj.deploy_info)
         self.mock_releases.assert_not_called()
+
+
+class TestNormalizeRelease(testcase.NFVTestCase):
+    """Unit tests for the normalize_release helper.
+
+    Prior to the componentization feature the software deploy release was
+    persisted as a single string. With componentization, it must be handled as a
+    list of string, so values restored from strategies created with the old
+    code need to be normalized with normalize_release.
+    """
+
+    def test_normalize_release_string_value_normalizes_to_list(self):
+        self.assertEqual(normalize_release("24.03.1"), ["24.03.1"])
+
+    def test_normalize_release_list_is_preserved(self):
+        self.assertEqual(normalize_release(["24.03.1"]), ["24.03.1"])
+
+    def test_normalize_release_multi_item_list_is_preserved(self):
+        self.assertEqual(
+            normalize_release(["24.03.1", "24.03.2"]), ["24.03.1", "24.03.2"]
+        )
+
+    def test_normalize_release_empty_list_is_preserved(self):
+        self.assertEqual(normalize_release([]), [])
+
+    def test_normalize_release_none_is_preserved(self):
+        self.assertIsNone(normalize_release(None))
+
+
+class TestStepReleaseNormalization(testcase.NFVTestCase):
+    """Verify every step that normalizes its release normalizes a legacy string.
+
+    A step persisted by a pre-componentization VIM stores the release as a bare
+    string. On load, from_dict must normalize it back to the list format.
+    """
+
+    def _assert_step_normalizes_string(self, step_class):
+        # A step built with the new list format serializes the list unchanged.
+        step = step_class(release=["24.03.1"])
+        self.assertEqual(step.as_dict()["release"], ["24.03.1"])
+
+        # Simulate a step persisted as a bare string and confirm from_dict
+        # normalizes it back to the list format.
+        data = step.as_dict()
+        data["release"] = "24.03.1"
+        normalized = step_class(release=None).from_dict(data)
+        self.assertEqual(normalized.as_dict()["release"], ["24.03.1"])
+
+    def _assert_step_preserves_list(self, step_class):
+        step = step_class(release=["24.03.1", "24.03.2"])
+        normalized = step_class(release=None).from_dict(step.as_dict())
+        self.assertEqual(normalized.as_dict()["release"], ["24.03.1", "24.03.2"])
+
+    def test_normalize_release_through_steps(self):
+        self._assert_step_normalizes_string(SwDeployPrecheckStep)
+        self._assert_step_preserves_list(SwDeployPrecheckStep)
+
+        self._assert_step_normalizes_string(UpgradeStartStep)
+        self._assert_step_preserves_list(UpgradeStartStep)
+
+        self._assert_step_normalizes_string(UpgradeActivateStep)
+        self._assert_step_preserves_list(UpgradeActivateStep)
+
+        self._assert_step_normalizes_string(UpgradeCompleteStep)
+        self._assert_step_preserves_list(UpgradeCompleteStep)
+
+        self._assert_step_normalizes_string(SwDeployDeleteStep)
+        self._assert_step_preserves_list(SwDeployDeleteStep)
+
+        self._assert_step_normalizes_string(SwSystemDeployInitStep)
+        self._assert_step_preserves_list(SwSystemDeployInitStep)
