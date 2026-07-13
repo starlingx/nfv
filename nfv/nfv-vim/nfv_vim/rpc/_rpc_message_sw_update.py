@@ -101,6 +101,8 @@ class APIRequestCreateKubeRootcaUpdateStrategy(APIRequestCreateSwUpdateStrategy)
 
     expiry_date = None
     subject = None
+    algorithm = None
+    key_size = None
 
     def __init__(
         self,
@@ -114,11 +116,15 @@ class APIRequestCreateKubeRootcaUpdateStrategy(APIRequestCreateSwUpdateStrategy)
         super().serialize_payload(msg)
         msg["expiry_date"] = self.expiry_date
         msg["subject"] = self.subject
+        msg["algorithm"] = self.algorithm
+        msg["key_size"] = self.key_size
 
     def deserialize_payload(self, msg):
         super().deserialize_payload(msg)
         self.expiry_date = msg.get("expiry_date", None)
         self.subject = msg.get("subject", None)
+        self.algorithm = msg.get("algorithm", None)
+        self.key_size = msg.get("key_size", None)
 
     def __str__(self):
         return (

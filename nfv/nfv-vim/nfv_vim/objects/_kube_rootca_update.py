@@ -40,6 +40,8 @@ class KubeRootcaUpdate(SwUpdate):
         single_controller,
         expiry_date,
         subject,
+        algorithm,
+        key_size,
     ):
         """Create a kubernetes root ca update strategy."""
 
@@ -61,6 +63,8 @@ class KubeRootcaUpdate(SwUpdate):
             single_controller,
             expiry_date,
             subject,
+            algorithm,
+            key_size,
         )
         self._strategy.sw_update_obj = self
         self._strategy.build()

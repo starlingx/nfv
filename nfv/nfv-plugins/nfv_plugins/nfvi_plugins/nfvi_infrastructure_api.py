@@ -1006,7 +1006,9 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.send(response)
             callback.close()
 
-    def kube_rootca_update_generate_cert(self, future, expiry_date, subject, callback):
+    def kube_rootca_update_generate_cert(
+        self, future, expiry_date, subject, algorithm, key_size, callback
+    ):
         """Invokes sysinv kube-rootca-update-generate-cert."""
 
         response = {}
@@ -1028,6 +1030,8 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 self._platform_token,
                 expiry_date=expiry_date,
                 subject=subject,
+                algorithm=algorithm,
+                key_size=key_size,
             )
             future.result = yield
             if not future.result.is_complete():

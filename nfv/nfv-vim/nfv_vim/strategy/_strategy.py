@@ -2930,6 +2930,8 @@ class KubeRootcaUpdateStrategy(
         single_controller,
         expiry_date,
         subject,
+        algorithm,
+        key_size,
     ):
         super().__init__(
             uuid,
@@ -2968,6 +2970,8 @@ class KubeRootcaUpdateStrategy(
         self._single_controller = single_controller
         self._expiry_date = expiry_date
         self._subject = subject
+        self._algorithm = algorithm
+        self._key_size = key_size
 
         # initialize the variables required by the mixins
         self.initialize_mixin()
@@ -3006,7 +3010,8 @@ class KubeRootcaUpdateStrategy(
     def _add_kube_rootca_update_cert_stage(self):
         """Add kube-rootca-update cert strategy stage
 
-        This stage generates a cert, supporting a expiry_date and subject option.
+        This stage generates a cert, supporting a expiry_date, subject, algorithm
+        and key_size options.
         This stage is skipped if a previous update has already performed this
         activity.
         """
@@ -3016,7 +3021,9 @@ class KubeRootcaUpdateStrategy(
             strategy.STRATEGY_STAGE_NAME.KUBE_ROOTCA_UPDATE_CERT
         )
         stage.add_step(
-            strategy.KubeRootcaUpdateGenerateCertStep(self._expiry_date, self._subject)
+            strategy.KubeRootcaUpdateGenerateCertStep(
+                self._expiry_date, self._subject, self._algorithm, self._key_size
+            )
         )
         self.apply_phase.add_stage(stage)
         # Proceed to the next stage
@@ -3315,6 +3322,8 @@ class KubeRootcaUpdateStrategy(
         self._single_controller = data["single_controller"]
         self._expiry_date = data.get("expiry_date")
         self._subject = data.get("subject")
+        self._algorithm = data.get("algorithm")
+        self._key_size = data.get("key_size")
         self.mixin_from_dict(data)
         return self
 
@@ -3325,6 +3334,8 @@ class KubeRootcaUpdateStrategy(
         data["single_controller"] = self._single_controller
         data["expiry_date"] = self._expiry_date
         data["subject"] = self._subject
+        data["algorithm"] = self._algorithm
+        data["key_size"] = self._key_size
         self.mixin_as_dict(data)
         return data
 

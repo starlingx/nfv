@@ -83,8 +83,13 @@ def get_extra_create_args(cmd_area, args):
         # no additional kwargs for system config update
         return {}
     elif sw_update.CMD_NAME_KUBE_ROOTCA_UPDATE == cmd_area:
-        # kube rootca update supports expiry_date and subject
-        return {"expiry_date": args.expiry_date, "subject": args.subject}
+        # kube rootca update supports expiry_date, subject, algorithm and key_size
+        return {
+            "expiry_date": args.expiry_date,
+            "subject": args.subject,
+            "algorithm": args.algorithm,
+            "key_size": args.key_size,
+        }
     elif sw_update.CMD_NAME_KUBE_UPGRADE == cmd_area:
         # kube upgrade supports: to_version
         return {"to_version": args.to_version}
@@ -311,6 +316,18 @@ def setup_kube_rootca_update_parser(commands):
     )
     create_strategy_cmd.add_argument(
         "--subject", required=False, help="Subject for the generated certificate"
+    )
+    create_strategy_cmd.add_argument(
+        "--algorithm",
+        required=False,
+        choices=["ECDSA", "RSA"],
+        help="Algorithm for the key in the generated certificate",
+    )
+    create_strategy_cmd.add_argument(
+        "--key-size",
+        required=False,
+        type=int,
+        help="Key size for the generated certificate",
     )
 
     # define the delete command

@@ -312,6 +312,10 @@ def create_strategy(
             api_cmd_payload["expiry-date"] = kwargs["expiry_date"]
         if "subject" in kwargs and kwargs["subject"]:
             api_cmd_payload["subject"] = kwargs["subject"]
+        if "algorithm" in kwargs and kwargs["algorithm"]:
+            api_cmd_payload["algorithm"] = kwargs["algorithm"]
+        if "key_size" in kwargs and kwargs["key_size"]:
+            api_cmd_payload["key-size"] = kwargs["key_size"]
         api_cmd_payload["default-instance-action"] = default_instance_action
     elif sw_update.STRATEGY_NAME_KUBE_UPGRADE == strategy_name:
         # required: 'to_version' passed to strategy as 'to-version'

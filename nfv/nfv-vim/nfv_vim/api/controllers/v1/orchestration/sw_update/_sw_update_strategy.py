@@ -256,6 +256,8 @@ class KubeRootcaUpdateStrategyCreateData(wsme_types.Base):
 
     expiry_date = wsme_types.wsattr(str, mandatory=False, name="expiry-date")
     subject = wsme_types.wsattr(str, mandatory=False, name="subject")
+    algorithm = wsme_types.wsattr(str, mandatory=False, name="algorithm", default=None)
+    key_size = wsme_types.wsattr(int, mandatory=False, name="key-size", default=None)
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes,
         mandatory=False,
@@ -904,6 +906,15 @@ class KubeRootcaUpdateStrategyAPI(SwUpdateStrategyAPI):
             if not is_valid:
                 return pecan.abort(httplib.BAD_REQUEST, reason)
             rpc_request.subject = request_data.subject
+        if request_data.algorithm is not None or request_data.key_size is not None:
+            # Validate the algorithm and key_size
+            is_valid, reason = validate.validate_certificate_key_parameters(
+                request_data.algorithm, request_data.key_size
+            )
+            if not is_valid:
+                return pecan.abort(httplib.BAD_REQUEST, reason)
+            rpc_request.algorithm = request_data.algorithm
+            rpc_request.key_size = request_data.key_size
         if request_data.controller_apply_type != SW_UPDATE_APPLY_TYPE.SERIAL:
             return pecan.abort(
                 httplib.BAD_REQUEST,
