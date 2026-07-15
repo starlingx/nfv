@@ -510,7 +510,7 @@ class ApplyStageMixin:
 
         if do_lock:
             steps = [
-                {"name": "query-alarms"},
+                {"name": "wait-alarms-clear"},
                 {
                     "name": "swact-hosts",
                     "entity_names": [host],
@@ -540,7 +540,7 @@ class ApplyStageMixin:
             ]
         else:
             steps = [
-                {"name": "query-alarms"},
+                {"name": "wait-alarms-clear"},
                 {
                     "name": "kube-host-upgrade-kubelet",
                     "entity_names": [host],
@@ -562,7 +562,7 @@ class ApplyStageMixin:
     ):
         steps = [
             {
-                "name": "query-alarms",
+                "name": "wait-alarms-clear",
             }
         ]
         if do_lock:
