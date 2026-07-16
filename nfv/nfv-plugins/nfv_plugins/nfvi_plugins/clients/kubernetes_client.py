@@ -25,6 +25,12 @@ fmapi = fm_api.FaultAPIs()
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.clients.kubernetes_client")
 
+KUBE_CONTROL_PLANE_COMPONENTS = (
+    "kube-apiserver",
+    "kube-scheduler",
+    "kube-controller-manager",
+)
+
 
 # https://github.com/kubernetes-client/python/issues/895
 # If a container image contains no tag or digest, node
@@ -419,6 +425,62 @@ def list_deployment_hosts():
             "Failed to list hosts from deployment namespace, reason: %s" % e.reason
         )
         return None
+
+
+def get_kube_control_plane_pods_status():
+    """Query kube-system pods for control-plane components and check readiness.
+
+    Returns a Result wrapping a dict:
+      {
+        "ready": True/False,
+        "pods": [
+          {"name": "kube-scheduler-controller-0", "ready": True},
+          ...
+        ],
+        "not_ready": ["kube-scheduler-controller-0"]
+      }
+    """
+    kube_client = get_client()
+
+    label_selector = "component in (%s)" % ",".join(KUBE_CONTROL_PLANE_COMPONENTS)
+    try:
+        response = kube_client.list_namespaced_pod(
+            namespace="kube-system",
+            label_selector=label_selector,
+        )
+    except ApiException as e:
+        DLOG.exception(
+            "Failed to list control-plane pods from kube-system, "
+            "reason: %s" % e.reason
+        )
+        return None
+
+    pods_status = []
+    not_ready = []
+
+    for pod in response.items:
+        pod_name = pod.metadata.name
+        pod_ready = False
+
+        if pod.status and pod.status.conditions:
+            for condition in pod.status.conditions:
+                if condition.type == "Ready" and condition.status == "True":
+                    pod_ready = True
+                    break
+
+        pods_status.append({"name": pod_name, "ready": pod_ready})
+        if not pod_ready:
+            not_ready.append(pod_name)
+
+    all_ready = len(pods_status) > 0 and len(not_ready) == 0
+
+    return Result(
+        {
+            "ready": all_ready,
+            "pods": pods_status,
+            "not_ready": not_ready,
+        }
+    )
 
 
 def get_namespaced_running_pods(namespace, name):

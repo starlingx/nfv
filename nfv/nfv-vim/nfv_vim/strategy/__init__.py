@@ -40,7 +40,7 @@ from nfv_vim.strategy.steps.kube_upgrade_steps import (  # noqa: F401
     QueryKubeHostUpgradeStep,
     QueryKubeUpgradeStep,
     QueryKubeVersionsStep,
-    WaitKubernetesUpgradeHealthy,
+    WaitKubeControlPlanePodsReadyStep,
 )
 from nfv_vim.strategy._strategy_steps import DisableHostServicesStep  # noqa: F401
 from nfv_vim.strategy._strategy_steps import FwUpdateAbortHostsStep  # noqa: F401

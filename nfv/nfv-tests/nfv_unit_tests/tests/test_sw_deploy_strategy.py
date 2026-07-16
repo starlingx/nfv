@@ -4371,6 +4371,11 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         sw_start_idx = stage_names.index("sw-upgrade-start")
         self.assertLess(kube_start_idx, sw_start_idx)
 
+        # kube-wait-control-plane-pods-ready must appear before sw-upgrade-start
+        self.assertIn("kube-wait-control-plane-pods-ready", stage_names)
+        pods_ready_idx = stage_names.index("kube-wait-control-plane-pods-ready")
+        self.assertLess(pods_ready_idx, sw_start_idx)
+
         # All expected kube control-plane stages must be present
         for expected in [
             "kube-upgrade-start",
@@ -4428,9 +4433,10 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         self.assertLess(sw_start_idx, kube_start_idx)
         self.assertLess(sw_complete_idx, kube_start_idx)
 
-        # kube-wait-upgrade-healthy must appear between sw-deploy and kube-upgrade
-        self.assertIn("kube-wait-upgrade-healthy", stage_names)
-        pods_ready_idx = stage_names.index("kube-wait-upgrade-healthy")
+        # kube-wait-control-plane-pods-ready must appear
+        # between sw-deploy and kube-upgrade
+        self.assertIn("kube-wait-control-plane-pods-ready", stage_names)
+        pods_ready_idx = stage_names.index("kube-wait-control-plane-pods-ready")
         self.assertLess(sw_complete_idx, pods_ready_idx)
         self.assertLess(pods_ready_idx, kube_start_idx)
 
@@ -4922,6 +4928,8 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         apply_phase = self.strategy.apply_phase
         self.assertGreater(len(apply_phase.stages), 0)
 
+        from nfv_vim.strategy._strategy_stages import KUBE_STAGE_PREFIXES
+
         for index, stage in enumerate(apply_phase.stages):
             # current_stage is a read-only property backed by _current_stage;
             # poking the private attribute is the pragmatic way to drive the
@@ -4929,10 +4937,11 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
             apply_phase._current_stage = index
             active = self.fake_upgrade_obj._is_kube_upgrade_active()
 
-            # A kube-upgrade stage starts with "kube-" but is not part of the
-            # kube-rootca-update strategy (which has its own alarm/event ids).
-            is_kube_upgrade_stage = stage.name.startswith(
-                "kube-"
+            # A kube-upgrade stage matches one of the KUBE_STAGE_PREFIXES
+            # but is not part of the kube-rootca-update strategy (which has
+            # its own alarm/event ids).
+            is_kube_upgrade_stage = any(
+                stage.name.startswith(prefix.value) for prefix in KUBE_STAGE_PREFIXES
             ) and not stage.name.startswith("kube-rootca-")
 
             self.assertEqual(
@@ -5155,17 +5164,19 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
     "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
     sw_update_testcase.fake_nfvi_compute_plugin_disabled,
 )
-class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCase):
-    """Unit tests for the WaitKubernetesUpgradeHealthy."""
+class TestWaitKubeControlPlanePodsReadyStep(
+    sw_update_testcase.SwUpdateStrategyTestCase
+):
+    """Unit tests for the WaitKubeControlPlanePodsReadyStep."""
 
     def setUp(self):
         super().setUp()
         from nfv_vim.strategy.steps.kube_upgrade_steps import (
-            WaitKubernetesUpgradeHealthy,
+            WaitKubeControlPlanePodsReadyStep,
         )
 
-        self.step = WaitKubernetesUpgradeHealthy(
-            timeout_in_secs=180, first_query_delay_in_secs=20
+        self.step = WaitKubeControlPlanePodsReadyStep(
+            timeout_in_secs=180, first_query_delay_in_secs=10
         )
         self.mock_stage = mock.MagicMock()
         self.step.stage = self.mock_stage
@@ -5173,19 +5184,27 @@ class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCa
     def _send_callback(self, response):
         """Drive the coroutine callback with the given response."""
 
-        callback = self.step._query_health_callback()
+        callback = self.step._query_control_plane_pods_callback()
         try:
             callback.send(response)
         except StopIteration:
             pass
 
-    def test_health_no_failures_completes_step_successfully(self):
-        """Step completes with SUCCESS when health data has no failures."""
+    def test_all_pods_ready_completes_step_successfully(self):
+        """Step completes with SUCCESS when all control-plane pods are ready."""
 
         self._send_callback(
             {
                 "completed": True,
-                "result-data": {"System Health": {"All hosts are provisioned": ["OK"]}},
+                "result-data": {
+                    "ready": True,
+                    "pods": [
+                        {"name": "kube-apiserver-controller-0", "ready": True},
+                        {"name": "kube-scheduler-controller-0", "ready": True},
+                        {"name": "kube-controller-manager-controller-0", "ready": True},
+                    ],
+                    "not_ready": [],
+                },
             }
         )
 
@@ -5193,13 +5212,41 @@ class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCa
             common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
         )
 
-    def test_query_failure_fails_step(self):
-        """Step fails when the query itself fails."""
+    def test_pods_not_ready_does_not_complete_step(self):
+        """Step keeps waiting when some control-plane pods are not ready."""
+
+        self._send_callback(
+            {
+                "completed": True,
+                "result-data": {
+                    "ready": False,
+                    "pods": [
+                        {"name": "kube-apiserver-controller-0", "ready": True},
+                        {"name": "kube-scheduler-controller-0", "ready": False},
+                        {"name": "kube-controller-manager-controller-0", "ready": True},
+                    ],
+                    "not_ready": ["kube-scheduler-controller-0"],
+                },
+            }
+        )
+
+        self.mock_stage.step_complete.assert_not_called()
+
+    def test_query_failure_does_not_fail_step(self):
+        """Step retries when the query itself fails (does not fail step)."""
 
         self._send_callback({"completed": False, "reason": "connection error"})
 
+        self.mock_stage.step_complete.assert_not_called()
+
+    def test_missing_result_data_fails_step(self):
+        """Step fails when response is completed but result-data is missing."""
+
+        self._send_callback({"completed": True})
+
         self.mock_stage.step_complete.assert_called_once_with(
-            common_strategy.STRATEGY_STEP_RESULT.FAILED, "connection error"
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Control-plane pods readiness check missing result-data",
         )
 
     def test_handle_event_triggers_query_after_delay(self):
@@ -5214,9 +5261,11 @@ class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCa
             self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
 
         with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=22000
+            timers, "get_monotonic_timestamp_in_ms", return_value=12000
         ):
-            with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+            with mock.patch(
+                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+            ) as mock_query:
                 self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
                 mock_query.assert_called_once()
 
@@ -5232,9 +5281,11 @@ class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCa
             self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
 
         with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=11000
+            timers, "get_monotonic_timestamp_in_ms", return_value=8000
         ):
-            with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+            with mock.patch(
+                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+            ) as mock_query:
                 self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
                 mock_query.assert_not_called()
 
@@ -5242,14 +5293,14 @@ class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCa
         """Step can be serialized and deserialized without data loss."""
 
         from nfv_vim.strategy.steps.kube_upgrade_steps import (
-            WaitKubernetesUpgradeHealthy,
+            WaitKubeControlPlanePodsReadyStep,
         )
 
         data = self.step.as_dict()
-        new_step = object.__new__(WaitKubernetesUpgradeHealthy)
+        new_step = object.__new__(WaitKubeControlPlanePodsReadyStep)
         new_step.from_dict(data)
 
-        self.assertEqual(new_step._first_query_delay_in_secs, 20)
+        self.assertEqual(new_step._first_query_delay_in_secs, 10)
         self.assertEqual(new_step._wait_time, 0)
         self.assertFalse(new_step._query_inprogress)
 
@@ -5258,36 +5309,227 @@ class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCa
 
         result, reason = self.step.timeout()
         self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.TIMED_OUT)
-        self.assertIn("did not become healthy", reason)
+        self.assertIn("control-plane pods did not become ready", reason)
 
-    def test_missing_result_data_fails_step(self):
-        """Step fails when response is completed but result-data is missing."""
+    def test_apply_returns_wait(self):
+        """Apply returns WAIT to enter the polling loop."""
 
-        self._send_callback({"completed": True})
+        result, reason = self.step.apply()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+        self.assertEqual(reason, "")
+
+    def test_flow_pods_ready_after_query(self):
+        """Full flow: apply → handle_event triggers query → pods ready → SUCCESS.
+
+        Simulates the combined strategy flow where the step is applied, waits
+        for the first query delay, issues a query, and the callback reports all
+        control-plane pods are ready.
+        """
+
+        from nfv_common import timers
+        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
+
+        # Step is applied and enters the WAIT state
+        result, reason = self.step.apply()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+
+        # First HOST_AUDIT sets the wait_time baseline
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=1000
+        ):
+            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+
+        # Second HOST_AUDIT after delay triggers the query
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=12000
+        ):
+            with mock.patch(
+                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+            ) as mock_query:
+                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+                mock_query.assert_called_once()
+
+                # Drive the callback coroutine that was passed to the nfvi call
+                callback = mock_query.call_args[0][0]
+                try:
+                    callback.send(
+                        {
+                            "completed": True,
+                            "result-data": {
+                                "ready": True,
+                                "pods": [
+                                    {
+                                        "name": "kube-apiserver-controller-0",
+                                        "ready": True,
+                                    },
+                                    {
+                                        "name": "kube-scheduler-controller-0",
+                                        "ready": True,
+                                    },
+                                    {
+                                        "name": "kube-controller-manager-controller-0",
+                                        "ready": True,
+                                    },
+                                ],
+                                "not_ready": [],
+                            },
+                        }
+                    )
+                except StopIteration:
+                    pass
 
         self.mock_stage.step_complete.assert_called_once_with(
-            common_strategy.STRATEGY_STEP_RESULT.FAILED,
-            "Kubernetes upgrade health check missing result-data",
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
         )
 
-    def test_query_failure_with_empty_reason_uses_default_message(self):
-        """Step fails with a descriptive message when reason is empty."""
+    def test_flow_pods_not_ready_leads_to_timeout(self):
+        """Full flow: pods not ready on every poll → eventually times out.
 
-        self._send_callback({"completed": False, "reason": ""})
+        Simulates the combined strategy flow where the step polls repeatedly
+        but pods never become ready, so the strategy framework eventually
+        calls timeout().
+        """
 
-        self.mock_stage.step_complete.assert_called_once_with(
-            common_strategy.STRATEGY_STEP_RESULT.FAILED,
-            "Unknown error while trying kubernetes upgrade health check, "
-            "check /var/log/nfv-vim.log for more information.",
+        from nfv_common import timers
+        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
+
+        # Step is applied and enters the WAIT state
+        result, reason = self.step.apply()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+
+        # First HOST_AUDIT sets the wait_time baseline
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=1000
+        ):
+            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+
+        # Simulate multiple polls that all report pods not ready
+        for poll_time_ms in [12000, 25000, 40000]:
+            with mock.patch.object(
+                timers, "get_monotonic_timestamp_in_ms", return_value=poll_time_ms
+            ):
+                with mock.patch(
+                    "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+                ) as mock_query:
+                    self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+                    mock_query.assert_called_once()
+
+                    callback = mock_query.call_args[0][0]
+                    try:
+                        callback.send(
+                            {
+                                "completed": True,
+                                "result-data": {
+                                    "ready": False,
+                                    "pods": [
+                                        {
+                                            "name": "kube-apiserver-controller-0",
+                                            "ready": True,
+                                        },
+                                        {
+                                            "name": "kube-scheduler-controller-0",
+                                            "ready": False,
+                                        },
+                                    ],
+                                    "not_ready": ["kube-scheduler-controller-0"],
+                                },
+                            }
+                        )
+                    except StopIteration:
+                        pass
+
+            # Step should NOT have completed - still waiting
+            self.mock_stage.step_complete.assert_not_called()
+
+        # The strategy framework calls timeout() when time exceeds timeout_in_secs
+        result, reason = self.step.timeout()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.TIMED_OUT)
+        self.assertEqual(
+            reason, "Kubernetes control-plane pods did not become ready before timeout"
         )
 
-    def test_query_failure_with_no_reason_uses_default_message(self):
-        """Step fails with a descriptive message when reason key is absent."""
+    def test_flow_api_exception_retries_then_succeeds(self):
+        """Full flow: API exception causes retry, next poll succeeds.
 
-        self._send_callback({"completed": False})
+        Simulates the combined strategy flow where the Kubernetes API raises
+        an exception (resulting in completed=False from the NFVI layer),
+        the step retries on the next HOST_AUDIT, and then succeeds.
+        """
+
+        from nfv_common import timers
+        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
+
+        # Step is applied and enters the WAIT state
+        result, reason = self.step.apply()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+
+        # First HOST_AUDIT sets the wait_time baseline
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=1000
+        ):
+            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+
+        # Second HOST_AUDIT triggers query - API exception occurs
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=12000
+        ):
+            with mock.patch(
+                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+            ) as mock_query:
+                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+                mock_query.assert_called_once()
+
+                # Simulate what the NFVI layer sends when kubernetes_client
+                # raises ApiException (get_kube_control_plane_pods_status
+                # returns None → future.is_complete() fails → completed=False)
+                callback = mock_query.call_args[0][0]
+                try:
+                    callback.send({"completed": False, "reason": ""})
+                except StopIteration:
+                    pass
+
+        # Step should NOT have failed - it retries
+        self.mock_stage.step_complete.assert_not_called()
+        self.assertFalse(self.step._query_inprogress)
+
+        # Third HOST_AUDIT triggers retry - this time pods are ready
+        with mock.patch.object(
+            timers, "get_monotonic_timestamp_in_ms", return_value=25000
+        ):
+            with mock.patch(
+                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+            ) as mock_query:
+                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+                mock_query.assert_called_once()
+
+                callback = mock_query.call_args[0][0]
+                try:
+                    callback.send(
+                        {
+                            "completed": True,
+                            "result-data": {
+                                "ready": True,
+                                "pods": [
+                                    {
+                                        "name": "kube-apiserver-controller-0",
+                                        "ready": True,
+                                    },
+                                    {
+                                        "name": "kube-scheduler-controller-0",
+                                        "ready": True,
+                                    },
+                                    {
+                                        "name": "kube-controller-manager-controller-0",
+                                        "ready": True,
+                                    },
+                                ],
+                                "not_ready": [],
+                            },
+                        }
+                    )
+                except StopIteration:
+                    pass
 
         self.mock_stage.step_complete.assert_called_once_with(
-            common_strategy.STRATEGY_STEP_RESULT.FAILED,
-            "Unknown error while trying kubernetes upgrade health check, "
-            "check /var/log/nfv-vim.log for more information.",
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
         )
