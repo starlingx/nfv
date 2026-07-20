@@ -203,22 +203,25 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
     if strategy.name == STRATEGY_NAME_SW_UPGRADE:
         # When the release information has not been fully retrieved yet,
         # only display the release parameter the user sent. Otherwise,
-        # display release-id and metapackage data, e.g.
+        # display the release-id and metapackage data, when available, e.g.
         #   release-id:                             starlingx-10.0.0
         #   metapackages:                           k8s-v1.33.0_10.0.0
         #                                           k8s-v1.32.2_10.0.0
         #                                           distcloud_10.0.0
         #   controller-apply-type:                  serial
-        if strategy.release_id and strategy.metapackages:
+        if strategy.release_id:
             _print(2, "release-id", strategy.release_id)
             # The metapackage list can be too large to display when doing a
             # major upgrade. Therefore, instead of showing them in a single line,
-            # display one per line.
-            for index, metapackage in enumerate(strategy.metapackages):
-                if index == 0:
-                    _print(2, "metapackages", metapackage)
-                    continue
-                _print(2, "", metapackage, blank_field=True)
+            # display one per line. In case it is empty, such as in a rollback
+            # strategy, it will not be displayed.
+
+            if strategy.metapackages:
+                for index, metapackage in enumerate(strategy.metapackages):
+                    if index == 0:
+                        _print(2, "metapackage-overrides", metapackage)
+                        continue
+                    _print(2, "", metapackage, blank_field=True)
         else:
             release = "software deploy selected release(s)"
 

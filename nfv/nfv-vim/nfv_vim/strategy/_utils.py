@@ -20,6 +20,16 @@ def normalize_release(release):
     return release
 
 
+def parse_version(sw_version):
+    """Parse a dotted version string into a tuple of integers.
+
+    This allows numeric comparison of releases so that, e.g. "9.0.0" is
+    correctly treated as older than "11.0.0".
+    """
+
+    return tuple(int(section) for section in str(sw_version).split("."))
+
+
 def validate_operation(operation):
     if operation.is_inprogress():
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
