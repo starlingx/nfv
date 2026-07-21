@@ -133,6 +133,9 @@ class SwUpdateStrategyData(wsme_types.Base):
     release = wsme_types.wsattr([str], mandatory=False, name="release")
     release_id = wsme_types.wsattr(str, mandatory=False, name="release-id")
     metapackages = wsme_types.wsattr([str], mandatory=False, name="metapackages")
+    pre_upgrade_deploy = wsme_types.wsattr(
+        bool, mandatory=False, name="pre-upgrade-deploy"
+    )
     kube_version = wsme_types.wsattr(str, mandatory=False, name="kube-version")
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, name="controller-apply-type"
@@ -174,7 +177,7 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
         str, mandatory=False, name="kube-upgrade", default=None
     )
     pre_upgrade_deploy = wsme_types.wsattr(
-        bool, mandatory=False, name="pre-upgrade-deploy", default=None
+        bool, mandatory=False, name="pre-upgrade-deploy", default=False
     )
     storage_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="storage-apply-type"
@@ -389,6 +392,9 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
                 if release_info:
                     strategy.release_id = release_info.get("release_id")
                     strategy.metapackages = nfvi_upgrade_data.get("metapackages")
+                    strategy.pre_upgrade_deploy = strategy_data.get(
+                        "pre_upgrade_deploy"
+                    )
         strategy.controller_apply_type = strategy_data["controller_apply_type"]
         strategy.storage_apply_type = strategy_data["storage_apply_type"]
         strategy.swift_apply_type = strategy_data["swift_apply_type"]

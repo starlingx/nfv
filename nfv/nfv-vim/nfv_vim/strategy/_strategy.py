@@ -2288,6 +2288,7 @@ class SwUpgradeStrategy(
         super().from_dict(data, build_phase, apply_phase, abort_phase)
         self._single_controller = data["single_controller"]
         self._release = normalize_release(data["release"])
+        self._pre_upgrade_deploy = data.get("pre_upgrade_deploy", False)
         self._rollback = data["rollback"]
         self._kube_upgrade_version = data.get("kube_upgrade_version")
         nfvi_upgrade_data = data["nfvi_upgrade_data"]
@@ -2311,6 +2312,7 @@ class SwUpgradeStrategy(
         data = super().as_dict()
         data["single_controller"] = self._single_controller
         data["release"] = self._release
+        data["pre_upgrade_deploy"] = self._pre_upgrade_deploy
         data["rollback"] = self._rollback
         data["kube_upgrade_version"] = self._kube_upgrade_version
         if self._nfvi_upgrade:
