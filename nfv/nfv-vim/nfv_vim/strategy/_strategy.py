@@ -1931,6 +1931,11 @@ class SwUpgradeStrategy(
                         return
 
             if do_start:
+                # After K8s control-plane upgrades, wait for
+                # control-plane pods to be ready before sw-deploy-start
+                # (which runs a precheck that validates pod readiness)
+                if self._kube_upgrade_version and not is_duplex:
+                    self._add_wait_kube_control_plane_pods_ready_stage()
                 self._add_upgrade_start_stage()
             else:
                 DLOG.info("Skipping sw-deploy-start: Already started")
@@ -1947,7 +1952,7 @@ class SwUpgradeStrategy(
 
             # Duplex: full kube upgrade runs sequentially after sw-deploy
             if self._kube_upgrade_version and is_duplex:
-                self._add_wait_kubernetes_upgrade_healthy_stage()
+                self._add_wait_kube_control_plane_pods_ready_stage()
                 self._build_kube_upgrade_stages()
                 if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
                     return

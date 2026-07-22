@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-import json
-
 from nfv_common import debug
 from nfv_common.helpers import coroutine
 from nfv_common import strategy
@@ -1279,63 +1277,66 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
 
-class WaitKubernetesUpgradeHealthy(AbstractStrategyStep):
-    """Wait for the kubernetes upgrade to be healthy - Strategy Step."""
+class WaitKubeControlPlanePodsReadyStep(AbstractStrategyStep):
+    """Wait for Kubernetes control-plane pods to be ready - Strategy Step.
+
+    Queries kube-system pods with label:
+      component in (kube-apiserver, kube-scheduler, kube-controller-manager)
+    Succeeds when all pods have condition Ready=True.
+    """
 
     def __init__(
         self,
         timeout_in_secs=180,
-        first_query_delay_in_secs=15,
-        alarm_ignore_list=None,
+        first_query_delay_in_secs=10,
     ):
         super().__init__(
-            STRATEGY_STEP_NAME.KUBE_WAIT_UPGRADE_HEALTHY,
+            STRATEGY_STEP_NAME.WAIT_KUBE_CONTROL_PLANE_PODS_READY,
             timeout_in_secs=timeout_in_secs,
         )
         self._first_query_delay_in_secs = first_query_delay_in_secs
         self._wait_time = 0
         self._query_inprogress = False
-        self._alarm_ignore_list = alarm_ignore_list or KUBE_UPGRADE_START_ALARM_IGNORE
 
     @coroutine
-    def _query_health_callback(self):
-        """Query Health Callback."""
+    def _query_control_plane_pods_callback(self):
+        """Query Control-Plane Pods Callback."""
 
         response = yield
-        DLOG.debug("Query-Health callback response=%s." % response)
+        DLOG.debug("Query-Control-Plane-Pods callback response=%s." % response)
 
         self._query_inprogress = False
 
         if response["completed"]:
-            if "result-data" not in response:
+            result_data = response.get("result-data")
+            if result_data is None:
                 result = strategy.STRATEGY_STEP_RESULT.FAILED
                 self.stage.step_complete(
-                    result, "Kubernetes upgrade health check missing result-data"
+                    result, "Control-plane pods readiness check missing result-data"
                 )
                 return
-            health_data = response["result-data"]
-            if isinstance(health_data, dict):
-                health_str = json.dumps(health_data)
-            else:
-                health_str = str(health_data)
-            if "[Fail]" in health_str:
+
+            if result_data["ready"]:
                 DLOG.info(
-                    "Kubernetes upgrade health check has failures: %s" % health_data
+                    "All Kubernetes control-plane pods are ready: %s"
+                    % result_data["pods"]
                 )
-            else:
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 self.stage.step_complete(result, "")
+            else:
+                DLOG.info(
+                    "Kubernetes control-plane pods not ready: %s"
+                    % result_data["not_ready"]
+                )
+                # Keep waiting - will retry on next HOST_AUDIT event
         else:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(
-                result,
-                response.get("reason")
-                or "Unknown error while trying kubernetes upgrade health check, "
-                "check /var/log/nfv-vim.log for more information.",
+            # API call itself failed - don't fail the step, just retry
+            DLOG.warn(
+                "Query for control-plane pods readiness did not complete, will retry."
             )
 
     def apply(self):
-        """Wait for kubernetes upgrade to be healthy."""
+        """Wait for control-plane pods to become ready."""
 
         DLOG.info("Step (%s) apply." % self._name)
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
@@ -1358,8 +1359,8 @@ class WaitKubernetesUpgradeHealthy(AbstractStrategyStep):
                 and not self._query_inprogress
             ):
                 self._query_inprogress = True
-                nfvi.nfvi_get_kube_upgrade_health(
-                    self._alarm_ignore_list, self._query_health_callback()
+                nfvi.nfvi_get_kube_control_plane_pods_ready(
+                    self._query_control_plane_pods_callback()
                 )
             return True
 
@@ -1372,22 +1373,18 @@ class WaitKubernetesUpgradeHealthy(AbstractStrategyStep):
         self._first_query_delay_in_secs = data["first_query_delay_in_secs"]
         self._wait_time = 0
         self._query_inprogress = False
-        self._alarm_ignore_list = data.get(
-            "alarm_ignore_list", KUBE_UPGRADE_START_ALARM_IGNORE
-        )
         return self
 
     def as_dict(self):
-        """Represent the wait kubernetes upgrade healthy step as a dictionary."""
+        """Represent the step as a dictionary."""
 
         data = super().as_dict()
         data["first_query_delay_in_secs"] = self._first_query_delay_in_secs
-        data["alarm_ignore_list"] = self._alarm_ignore_list
         return data
 
     def timeout(self):
         """Strategy Step Timeout Override."""
 
         result, _ = super().timeout()
-        reason = "Kubernetes upgrade did not become healthy before timeout"
+        reason = "Kubernetes control-plane pods did not become ready before timeout"
         return result, reason

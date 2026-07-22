@@ -231,23 +231,6 @@ def get_kube_upgrade(token):
     return response
 
 
-def get_kube_upgrade_health(token, alarm_ignore_list=None):
-    """Asks System Inventory for the health of the kube upgrade."""
-
-    url = token.get_service_url(PLATFORM_SERVICE.SYSINV)
-    if url is None:
-        raise ValueError("OpenStack SysInv URL is invalid")
-
-    api_cmd = url + "/health/kube-upgrade"
-    if alarm_ignore_list is not None:
-        api_cmd += "?alarm_ignore_list=" + ",".join(alarm_ignore_list)
-
-    response = rest_api_request(
-        token, "GET", api_cmd, timeout_in_secs=REST_API_REQUEST_TIMEOUT
-    )
-    return response
-
-
 def get_kube_version(token, kube_version):
     """Asks System Inventory for information a kube version."""
 

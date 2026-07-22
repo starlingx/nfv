@@ -662,12 +662,11 @@ def nfvi_get_terminating_pods(host_name, callback):
     return cmd_id
 
 
-def nfvi_get_kube_upgrade_health(alarm_ignore_list, callback):
-    """Get health of the kube upgrade."""
+def nfvi_get_kube_control_plane_pods_ready(callback):
+    """Get control-plane pods readiness from Kubernetes API."""
 
     cmd_id = _infrastructure_plugin.invoke_plugin(
-        "get_kube_upgrade_health",
-        alarm_ignore_list=alarm_ignore_list,
+        "get_kube_control_plane_pods_ready",
         callback=callback,
     )
     return cmd_id
