@@ -198,6 +198,8 @@ class SwMgmtDirector(metaclass=Singleton):
         alarm_restrictions,
         expiry_date,
         subject,
+        algorithm,
+        key_size,
         callback,
     ):
         """Create Kubernetes Root CA Update Strategy."""
@@ -226,6 +228,8 @@ class SwMgmtDirector(metaclass=Singleton):
             self._single_controller,
             expiry_date,
             subject,
+            algorithm,
+            key_size,
         )
 
         schedule.schedule_function_call(

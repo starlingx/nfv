@@ -176,13 +176,17 @@ def nfvi_kube_rootca_update_complete(callback):
     return cmd_id
 
 
-def nfvi_kube_rootca_update_generate_cert(expiry_date, subject, callback):
+def nfvi_kube_rootca_update_generate_cert(
+    expiry_date, subject, algorithm, key_size, callback
+):
     """Kube RootCA Update - Generate Cert."""
 
     cmd_id = _infrastructure_plugin.invoke_plugin(
         "kube_rootca_update_generate_cert",
         expiry_date=expiry_date,
         subject=subject,
+        algorithm=algorithm,
+        key_size=key_size,
         callback=callback,
     )
     return cmd_id
