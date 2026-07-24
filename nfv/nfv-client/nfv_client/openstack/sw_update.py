@@ -164,10 +164,10 @@ def _get_strategy_object_from_response(response):
 
         # When the release information has not been fully retrieved yet,
         # only display the release parameter the user sent. Otherwise,
-        # display release-id and metapackage data.
-        if strategy_data.get("release-id") and strategy_data.get("metapackages"):
+        # display the release-id and metapackage data, when available.
+        if strategy_data.get("release-id"):
             strategy.release_id = strategy_data["release-id"]
-            strategy.metapackages = strategy_data["metapackages"]
+            strategy.metapackages = strategy_data.get("metapackages")
         else:
             strategy.release = strategy_data["release"]
 

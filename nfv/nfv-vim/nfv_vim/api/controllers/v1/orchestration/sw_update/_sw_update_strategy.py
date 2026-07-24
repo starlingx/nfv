@@ -165,7 +165,7 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="controller-apply-type"
     )
-    release = wsme_types.wsattr([str], mandatory=False, name="release")
+    release = wsme_types.wsattr([str], mandatory=False, name="release", default=[])
     rollback = wsme_types.wsattr(bool, mandatory=False, name="rollback")
     delete = wsme_types.wsattr(bool, mandatory=False, name="delete")
     snapshot = wsme_types.wsattr(bool, mandatory=False, name="snapshot", default=None)

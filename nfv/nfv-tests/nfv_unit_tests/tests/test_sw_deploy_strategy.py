@@ -19,11 +19,10 @@ from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.objects import SwUpgrade
 from nfv_vim.strategy._strategy import SwUpgradeStrategy
 
-INITIAL_RELEASE = "3.2.1"
-PATCH_RELEASE_UPGRADE = "3.2.2"
+INITIAL_RELEASE = "26.10.0"
+PATCH_RELEASE_UPGRADE = "26.10.100"
 # Minor and Major are both major release upgrades
-MINOR_RELEASE_UPGRADE = "4.0.1"
-MAJOR_RELEASE_UPGRADE = "4.0.1"
+MAJOR_RELEASE_UPGRADE = "27.03.0"
 
 # Kubernetes version constants reused across combined strategy tests
 _COMBINED_FROM_KUBE = "v1.29.2"
@@ -307,7 +306,6 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
     def test_is_major_release(self):
         is_major_release = nfvi.objects.v1.is_major_release
         assert is_major_release(INITIAL_RELEASE, MAJOR_RELEASE_UPGRADE)
-        assert is_major_release(INITIAL_RELEASE, MINOR_RELEASE_UPGRADE)
         assert not is_major_release(INITIAL_RELEASE, PATCH_RELEASE_UPGRADE)
         assert is_major_release("22.12", "24.09.1")
         assert is_major_release("22.12", "24.09.1")

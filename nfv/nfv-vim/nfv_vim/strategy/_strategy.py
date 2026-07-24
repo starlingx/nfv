@@ -26,6 +26,7 @@ from nfv_vim.objects import INSTANCE_GROUP_POLICY
 from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.strategy._utils import normalize_release
+from nfv_vim.strategy._utils import parse_version
 from nfv_vim.strategy.stages._kube_upgrade_stages import KubeUpgradeStages
 
 DLOG = debug.debug_get_logger("nfv_vim.strategy")
@@ -2127,11 +2128,23 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         # sw-deploy delete must be done on controller-0 for major release
         self._swact_fix(stage, HOST_NAME.CONTROLLER_1)
-        stage.add_step(
-            strategy.SwDeployDeleteStep(
-                release=normalize_release(self.nfvi_upgrade.release_id)
-            )
-        )
+
+        release = normalize_release(self.nfvi_upgrade.release_id)
+        from_release = self.nfvi_upgrade.from_release
+        # When rolling back to a release prior to componentization (26.10), the release
+        # value needs to be set as a single string rather than a list.
+        if from_release and len(release) == 1:
+            try:
+                if parse_version(from_release) < parse_version("26.10.0"):
+                    release = release[0]
+            except (ValueError, TypeError):
+                DLOG.warn(
+                    "Could not parse rollback from_release=%s for release "
+                    "normalization" % from_release
+                )
+
+        stage.add_step(strategy.SwDeployDeleteStep(release=release))
+
         self.apply_phase.add_stage(stage)
 
     def _build_complete_rollback(self, result, result_reason):
@@ -2181,6 +2194,21 @@ class SwUpgradeStrategy(
             )
             self.save()
             return
+
+        # In a rollback for versions prior to the componentization release (26.10),
+        # the release field needs to be stored as None rather than an empty list to
+        # enable the successful reversion.
+        if not self._release:
+            from_release = self.nfvi_upgrade.from_release
+            if from_release:
+                try:
+                    if parse_version(from_release) < parse_version("26.10.0"):
+                        self._release = None
+                except (ValueError, TypeError):
+                    DLOG.warn(
+                        "Could not parse rollback from_release=%s for release "
+                        "normalization" % from_release
+                    )
 
         do_nothing = False
 

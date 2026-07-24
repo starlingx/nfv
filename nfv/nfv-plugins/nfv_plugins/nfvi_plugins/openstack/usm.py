@@ -11,6 +11,7 @@ from nfv_common import debug
 from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 from nfv_vim import nfvi
+from nfv_vim.strategy._utils import parse_version
 
 REST_API_REQUEST_TIMEOUT = 60
 REST_API_DEPLOY_START_TIMEOUT = 120
@@ -215,18 +216,8 @@ def sw_system_deploy_show(token):
     return response
 
 
-def _parse_version(sw_version):
-    """Parse a dotted version string into a tuple of integers.
-
-    This allows numeric comparison of releases so that, e.g. "9.0.0" is
-    correctly treated as older than "11.0.0".
-    """
-
-    return tuple(int(section) for section in str(sw_version).split("."))
-
-
 def _retrieve_release_data(to_release, from_release):
-    if _parse_version(to_release) > _parse_version(from_release):
+    if parse_version(to_release) > parse_version(from_release):
         return True, False
     return False, True
 
