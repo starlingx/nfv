@@ -222,6 +222,7 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
                         _print(2, "metapackage-overrides", metapackage)
                         continue
                     _print(2, "", metapackage, blank_field=True)
+            _print(2, "pre-upgrade-deploy", str(strategy.pre_upgrade_deploy).lower())
         else:
             release = "software deploy selected release(s)"
 

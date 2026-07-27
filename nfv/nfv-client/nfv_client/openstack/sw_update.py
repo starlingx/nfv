@@ -68,6 +68,7 @@ class Strategy:
     release = None
     release_id = None
     metapackages = None
+    pre_upgrade_deploy = None
     kube_version = None
     controller_apply_type = None
     storage_apply_type = None
@@ -168,6 +169,7 @@ def _get_strategy_object_from_response(response):
         if strategy_data.get("release-id"):
             strategy.release_id = strategy_data["release-id"]
             strategy.metapackages = strategy_data.get("metapackages")
+            strategy.pre_upgrade_deploy = strategy_data.get("pre-upgrade-deploy")
         else:
             strategy.release = strategy_data["release"]
 
