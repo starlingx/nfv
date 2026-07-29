@@ -55,6 +55,9 @@ NO_REBOOT_DELAY = 30
 # constant used by the repo state
 WAIT_ALARM_TIMEOUT = 2400
 
+# Timeout for transient alarms to clear during kube-upgrade pre-check
+KUBE_UPGRADE_ALARM_CLEAR_TIMEOUT = 600
+
 
 ###################################################################
 #
@@ -122,6 +125,37 @@ class SwUpdateStrategy(strategy.Strategy):
 
         if self.sw_update_obj is not None:
             self.sw_update_obj.save()
+
+    def _create_alarm_pre_check_step(self):
+        """Create the appropriate alarm pre-check step for this strategy.
+
+        For KubeUpgradeStrategy, uses WaitAlarmsClearStep with
+        KUBE_UPGRADE_ALARM_CLEAR_TIMEOUT to allow transient alarms
+        (e.g., 800.001 CEPH_DOWN in Rook-Ceph environments) to clear
+        before aborting. For other strategies, uses the original
+        QueryAlarmsStep behavior.
+        """
+        from nfv_vim import strategy
+
+        if isinstance(
+            self, KubeUpgradeStrategy
+        ):  # pylint: disable=used-before-assignment
+            return strategy.WaitAlarmsClearStep(
+                timeout_in_secs=KUBE_UPGRADE_ALARM_CLEAR_TIMEOUT,
+                ignore_alarms=self._ignore_alarms,
+                ignore_alarms_conditional=(
+                    self._ignore_alarms_conditional  # pylint: disable=no-member
+                ),
+            )
+        return strategy.QueryAlarmsStep(
+            not isinstance(
+                self, SwUpgradeStrategy
+            ),  # pylint: disable=used-before-assignment
+            ignore_alarms=self._ignore_alarms,
+            ignore_alarms_conditional=(
+                self._ignore_alarms_conditional  # pylint: disable=no-member
+            ),
+        )
 
     def _create_storage_host_lists(self, storage_hosts):
         """Create host lists for updating storage hosts."""
@@ -905,15 +939,7 @@ class UpdateControllerHostsMixin:
                         stage = strategy.StrategyStage(
                             strategy_stage_name, is_abortable
                         )
-                        stage.add_step(
-                            strategy.QueryAlarmsStep(
-                                not isinstance(self, SwUpgradeStrategy),
-                                ignore_alarms=self._ignore_alarms,
-                                ignore_alarms_conditional=(
-                                    self._ignore_alarms_conditional
-                                ),
-                            )
-                        )
+                        stage.add_step(self._create_alarm_pre_check_step())
                         if reboot:
                             stage.add_step(strategy.SwactHostsStep(host_list))
                             stage.add_step(strategy.LockHostsStep(host_list))
@@ -957,13 +983,7 @@ class UpdateControllerHostsMixin:
                 # Sw-deploy strategy does not support abort when upgrading
                 # controller nodes
                 stage = strategy.StrategyStage(strategy_stage_name, is_abortable)
-                stage.add_step(
-                    strategy.QueryAlarmsStep(
-                        not isinstance(self, SwUpgradeStrategy),
-                        ignore_alarms=self._ignore_alarms,
-                        ignore_alarms_conditional=self._ignore_alarms_conditional,
-                    )
-                )
+                stage.add_step(self._create_alarm_pre_check_step())
                 if reboot:
                     stage.add_step(strategy.SwactHostsStep(host_list))
                     stage.add_step(strategy.LockHostsStep(host_list))
@@ -1073,13 +1093,7 @@ class UpdateStorageHostsMixin:
 
         for host_list in host_lists:
             stage = strategy.StrategyStage(strategy_stage_name)
-            stage.add_step(
-                strategy.QueryAlarmsStep(
-                    not isinstance(self, SwUpgradeStrategy),
-                    ignore_alarms=self._ignore_alarms,
-                    ignore_alarms_conditional=self._ignore_alarms_conditional,
-                )
-            )
+            stage.add_step(self._create_alarm_pre_check_step())
             if reboot:
                 stage.add_step(strategy.LockHostsStep(host_list))
             # Add the action step for these hosts (patch, etc..)
@@ -1222,13 +1236,7 @@ class UpdateWorkerHostsMixin:
 
             stage = strategy.StrategyStage(strategy_stage_name, is_abortable)
 
-            stage.add_step(
-                strategy.QueryAlarmsStep(
-                    not isinstance(self, SwUpgradeStrategy),
-                    ignore_alarms=self._ignore_alarms,
-                    ignore_alarms_conditional=self._ignore_alarms_conditional,
-                )
-            )
+            stage.add_step(self._create_alarm_pre_check_step())
 
             if reboot:
                 if 1 == len(host_list):
