@@ -2995,6 +2995,61 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
 
+    def test_sw_deploy_strategy_pre_upgrade_deploy_build_fails_without_release(self):
+        """pre-upgrade-deploy cannot be set without a release."""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=[],
+            pre_upgrade_deploy=True,
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build()
+
+        bpr = strategy.build_phase
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
+        assert bpr.result_reason == (
+            "Cannot set pre-upgrade deploy without a release"
+        ), bpr.result_reason
+
+    def test_sw_deploy_strategy_pre_upgrade_deploy_build_fails_multiple_releases(self):
+        """pre-upgrade-deploy cannot be combined with more than one release."""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=[MAJOR_RELEASE_UPGRADE, PATCH_RELEASE_UPGRADE],
+            pre_upgrade_deploy=True,
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build()
+
+        bpr = strategy.build_phase
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
+        assert bpr.result_reason == (
+            "Cannot set pre-upgrade-deploy with more than one release"
+        ), bpr.result_reason
+
+    def test_sw_deploy_strategy_pre_upgrade_deploy_build_fails_with_kube_upgrade(self):
+        """pre-upgrade-deploy cannot be combined with kube-upgrade."""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=[MAJOR_RELEASE_UPGRADE],
+            pre_upgrade_deploy=True,
+            kube_upgrade_version="1.2.3",
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build()
+
+        bpr = strategy.build_phase
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
+        assert bpr.result_reason == (
+            "Cannot combine kube-upgrade with pre-upgrade-deploy"
+        ), bpr.result_reason
+
     def test_sw_deploy_strategy_cleanup_deploy_completed(self):
         """cleanup with a completed deployment: deploy-delete apply stage."""
         _, strategy = self._gen_aiosx_hosts_and_strategy(

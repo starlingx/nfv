@@ -1588,6 +1588,14 @@ class SwUpgradeStrategy(
             self.report_build_failure("Cannot set both release and rollback")
         elif self._pre_upgrade_deploy and not self._release:
             self.report_build_failure("Cannot set pre-upgrade deploy without a release")
+        elif self._pre_upgrade_deploy and len(self._release) > 1:
+            self.report_build_failure(
+                "Cannot set pre-upgrade-deploy with more than one release"
+            )
+        elif self._pre_upgrade_deploy and self._kube_upgrade_version:
+            self.report_build_failure(
+                "Cannot combine kube-upgrade with pre-upgrade-deploy"
+            )
         elif self._rollback and self._delete:
             self.report_build_failure(
                 "Cannot set both delete and rollback, delete is set by default"
