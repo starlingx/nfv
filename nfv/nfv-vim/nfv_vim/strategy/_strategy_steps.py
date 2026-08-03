@@ -235,7 +235,20 @@ class UnlockHostsStep(AbstractHostsStrategyStep):
 class LockHostsStep(strategy.StrategyStep):
     """Lock Hosts - Strategy Step."""
 
-    def __init__(self, hosts, wait_until_disabled=True):
+    # During an upgrade, a lock may need to be retried if ceph PGs are
+    # in recovery state (e.g. after a swact).
+    MAX_RETRIES = 3
+    RETRY_DELAY = 90
+
+    def __init__(
+        self, hosts, wait_until_disabled=True, retry_count=0, retry_delay=RETRY_DELAY
+    ):
+        """hosts - the list of hosts to be locked
+
+        wait_until_disabled - wait for the host to be disabled after lock
+        retry_count - the number of times to retry per host if lock fails
+        retry_delay - the amount of time to delay before retrying lock.
+        """
         super().__init__(STRATEGY_STEP_NAME.LOCK_HOSTS, timeout_in_secs=900)
         self._hosts = hosts
         self._wait_until_disabled = wait_until_disabled
@@ -244,7 +257,16 @@ class LockHostsStep(strategy.StrategyStep):
         for host in hosts:
             self._host_names.append(host.name)
             self._host_uuids.append(host.uuid)
+        # step_name, hosts, timeout are serialized by parent class
+        # retry_count and retry_delay must be serialized in from_dict/as_dict
+        self._retry_count = retry_count
+        self._retry_delay = retry_delay
+        # Do not persist: _retries, _wait_time, _retry_requested
+        self._retries = {}
+        for host_name in self._host_names:
+            self._retries[host_name] = retry_count
         self._wait_time = 0
+        self._retry_requested = False
 
     def abort(self):
         """Returns the abort step related to this step."""
@@ -280,6 +302,19 @@ class LockHostsStep(strategy.StrategyStep):
 
         return instances_not_locked_disabled
 
+    def _trigger_retry(self, host_name):
+        """Trigger a retry for the lock operation."""
+
+        DLOG.info(
+            "Step (%s) retry due to lock failure for (%s)." % (self._name, host_name)
+        )
+        # set the retry trigger
+        self._retry_requested = True
+        # reset the retry "wait" delay
+        self._wait_time = timers.get_monotonic_timestamp_in_ms()
+        # decrement the number of allowed retries for the validated host
+        self._retries[host_name] = self._retries[host_name] - 1
+
     def apply(self):
         """Lock all hosts."""
 
@@ -312,6 +347,8 @@ class LockHostsStep(strategy.StrategyStep):
     def handle_event(self, event, event_data=None):
         """Handle Host events."""
 
+        from nfv_vim import directors
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [STRATEGY_EVENT.HOST_STATE_CHANGED, STRATEGY_EVENT.HOST_AUDIT]:
@@ -338,11 +375,31 @@ class LockHostsStep(strategy.StrategyStep):
                 self.stage.step_complete(result, "")
                 return True
 
+            # See if we have requested a retry and the delay has elapsed
+            if self._retry_requested:
+                now_ms = timers.get_monotonic_timestamp_in_ms()
+                secs_expired = (now_ms - self._wait_time) // 1000
+                if self._retry_delay <= secs_expired:
+                    self._retry_requested = False
+                    # re-issue lock for all hosts.
+                    # Hosts that are already locked or locking get skipped
+                    host_director = directors.get_host_director()
+                    operation = host_director.lock_hosts(self._host_names)
+                    if operation.is_failed():
+                        result = strategy.STRATEGY_STEP_RESULT.FAILED
+                        self.stage.step_complete(result, "host lock failed")
+            return True
+
         elif event == STRATEGY_EVENT.HOST_LOCK_FAILED:
             host = event_data
             if host is not None and host.name in self._host_names:
-                result = strategy.STRATEGY_STEP_RESULT.FAILED
-                self.stage.step_complete(result, "host lock failed")
+                if self._retries.get(host.name, 0) > 0:
+                    # if lock fails and we have retries, trigger it
+                    self._trigger_retry(host.name)
+                else:
+                    # if lock fails and we are out of retries, fail
+                    result = strategy.STRATEGY_STEP_RESULT.FAILED
+                    self.stage.step_complete(result, "host lock failed")
                 return True
 
         return False
@@ -355,13 +412,22 @@ class LockHostsStep(strategy.StrategyStep):
         self._wait_until_disabled = data["wait_until_disabled"]
         self._host_uuids = []
         self._host_names = data["entity_names"]
+        # Need to perform 'get' with a default value in case
+        # we are deserializing a strategy that does not contain these keys.
+        self._retry_count = data.get("retry_count", 0)
+        self._retry_delay = data.get("retry_delay", self.RETRY_DELAY)
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
             host = host_table.get(host_name, None)
             if host is not None:
                 self._hosts.append(host)
                 self._host_uuids.append(host.uuid)
+        # Do not deserialize _retries, _wait_time and _retry_requested
         self._wait_time = 0
+        self._retry_requested = False
+        self._retries = {}
+        for host_name in self._host_names:
+            self._retries[host_name] = self._retry_count
         return self
 
     def as_dict(self):
@@ -372,6 +438,8 @@ class LockHostsStep(strategy.StrategyStep):
         data["entity_names"] = self._host_names
         data["entity_uuids"] = self._host_uuids
         data["wait_until_disabled"] = self._wait_until_disabled
+        data["retry_count"] = self._retry_count
+        data["retry_delay"] = self._retry_delay
         return data
 
 
