@@ -341,6 +341,39 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
         e = self._test_shell_create_with_error(shell_args=shell_args)
         assert "Cannot combine --cleanup" in str(e), e
 
+    def test_create_pre_upgrade_deploy(self):
+        shell_args = [self.strategy, "create", "123.1", "--pre-upgrade-deploy"]
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_pre_upgrade_deploy_without_release(self):
+        shell_args = [self.strategy, "create", "--pre-upgrade-deploy"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == "Cannot set pre-upgrade deploy without a release", e
+
+    def test_create_pre_upgrade_deploy_with_multiple_releases(self):
+        shell_args = [
+            self.strategy,
+            "create",
+            "123.1",
+            "123.2",
+            "--pre-upgrade-deploy",
+        ]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == (
+            "Cannot set --pre-upgrade-deploy with more than one release"
+        ), e
+
+    def test_create_pre_upgrade_deploy_with_kube_upgrade(self):
+        shell_args = [
+            self.strategy,
+            "create",
+            "123.1",
+            "--pre-upgrade-deploy",
+            "--kube-upgrade=1.2.3",
+        ]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == ("Cannot combine --kube-upgrade with --pre-upgrade-deploy"), e
+
 
 class TestCLIFwUpdateStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):

@@ -57,6 +57,12 @@ def get_extra_create_args(cmd_area, args):
             raise ValueError("Cannot set both --rollback and release")
         elif args.pre_upgrade_deploy and not args.release:
             raise ValueError("Cannot set pre-upgrade deploy without a release")
+        elif args.pre_upgrade_deploy and len(args.release) > 1:
+            raise ValueError(
+                "Cannot set --pre-upgrade-deploy with more than one release"
+            )
+        elif args.pre_upgrade_deploy and args.kube_upgrade:
+            raise ValueError("Cannot combine --kube-upgrade with --pre-upgrade-deploy")
         elif args.rollback and args.delete:
             raise ValueError("Cannot set both --rollback and --delete")
         elif args.rollback and args.snapshot:
