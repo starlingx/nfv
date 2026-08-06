@@ -942,7 +942,13 @@ class UpdateControllerHostsMixin:
                         stage.add_step(self._create_alarm_pre_check_step())
                         if reboot:
                             stage.add_step(strategy.SwactHostsStep(host_list))
-                            stage.add_step(strategy.LockHostsStep(host_list))
+                            stage.add_step(
+                                strategy.LockHostsStep(
+                                    host_list,
+                                    retry_count=strategy.LockHostsStep.MAX_RETRIES,
+                                    retry_delay=strategy.LockHostsStep.RETRY_DELAY,
+                                )
+                            )
                         # Add the action step for these hosts (patch, etc..)
                         if extra_args is None:
                             stage.add_step(host_action_step(host_list))
@@ -986,7 +992,13 @@ class UpdateControllerHostsMixin:
                 stage.add_step(self._create_alarm_pre_check_step())
                 if reboot:
                     stage.add_step(strategy.SwactHostsStep(host_list))
-                    stage.add_step(strategy.LockHostsStep(host_list))
+                    stage.add_step(
+                        strategy.LockHostsStep(
+                            host_list,
+                            retry_count=strategy.LockHostsStep.MAX_RETRIES,
+                            retry_delay=strategy.LockHostsStep.RETRY_DELAY,
+                        )
+                    )
                 # Add the action step for the local_hosts (patch, etc..)
                 if extra_args is None:
                     stage.add_step(host_action_step(host_list))
@@ -1095,7 +1107,13 @@ class UpdateStorageHostsMixin:
             stage = strategy.StrategyStage(strategy_stage_name)
             stage.add_step(self._create_alarm_pre_check_step())
             if reboot:
-                stage.add_step(strategy.LockHostsStep(host_list))
+                stage.add_step(
+                    strategy.LockHostsStep(
+                        host_list,
+                        retry_count=strategy.LockHostsStep.MAX_RETRIES,
+                        retry_delay=strategy.LockHostsStep.RETRY_DELAY,
+                    )
+                )
             # Add the action step for these hosts (patch, etc..)
             stage.add_step(host_action_step(host_list))
             if reboot:
@@ -1284,7 +1302,10 @@ class UpdateWorkerHostsMixin:
                     # Lock hosts
                     stage.add_step(
                         strategy.LockHostsStep(
-                            hosts_to_lock, wait_until_disabled=wait_until_disabled
+                            hosts_to_lock,
+                            wait_until_disabled=wait_until_disabled,
+                            retry_count=strategy.LockHostsStep.MAX_RETRIES,
+                            retry_delay=strategy.LockHostsStep.RETRY_DELAY,
                         )
                     )
 
@@ -2808,7 +2829,10 @@ class FwUpdateStrategy(SwUpdateStrategy):
                 # Lock hosts
                 stage.add_step(
                     strategy.LockHostsStep(
-                        host_list, wait_until_disabled=wait_until_disabled
+                        host_list,
+                        wait_until_disabled=wait_until_disabled,
+                        retry_count=strategy.LockHostsStep.MAX_RETRIES,
+                        retry_delay=strategy.LockHostsStep.RETRY_DELAY,
                     )
                 )
 
