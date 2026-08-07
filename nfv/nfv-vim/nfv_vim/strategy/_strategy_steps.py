@@ -4415,7 +4415,7 @@ class KubeRootcaUpdateCompleteStep(AbstractKubeRootcaUpdateStep):
 class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
     """Kube RootCA Update - Generate Cert - Strategy Step."""
 
-    def __init__(self, expiry_date, subject, algorithm, key_size):
+    def __init__(self, expiry_date, subject):
         from nfv_vim import nfvi
 
         super().__init__(
@@ -4427,8 +4427,6 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
         )  # set a five minute timeout to detect failure
         self._expiry_date = expiry_date
         self._subject = subject
-        self._algorithm = algorithm
-        self._key_size = key_size
 
     @coroutine
     def _response_callback(self):
@@ -4453,11 +4451,7 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
 
         DLOG.info("Step (%s) apply." % self._name)
         nfvi.nfvi_kube_rootca_update_generate_cert(
-            self._expiry_date,
-            self._subject,
-            self._algorithm,
-            self._key_size,
-            self._response_callback(),
+            self._expiry_date, self._subject, self._response_callback()
         )
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
@@ -4467,8 +4461,6 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
         super().from_dict(data)
         self._expiry_date = data["expiry_date"]
         self._subject = data["subject"]
-        self._algorithm = data["algorithm"]
-        self._key_size = data["key_size"]
         return self
 
     def as_dict(self):
@@ -4477,8 +4469,6 @@ class KubeRootcaUpdateGenerateCertStep(AbstractKubeRootcaUpdateStep):
         data = super().as_dict()
         data["expiry_date"] = self._expiry_date
         data["subject"] = self._subject
-        data["algorithm"] = self._algorithm
-        data["key_size"] = self._key_size
         return data
 
 
