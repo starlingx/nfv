@@ -1722,7 +1722,9 @@ class SwDeployDeleteStep(strategy.StrategyStep):
         dictionary.
         """
         super().from_dict(data)
-        self._release = normalize_release(data["release"])
+        # Do not normalize: rollback stores release as a string (release_id),
+        # while normal deploys store it as a list. Preserve whatever was persisted.
+        self._release = data["release"]
         return self
 
     def as_dict(self):
