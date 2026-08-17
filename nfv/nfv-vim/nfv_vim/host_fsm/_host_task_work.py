@@ -18,6 +18,11 @@ DLOG = debug.debug_get_logger("nfv_vim.state_machine.host_task_work")
 
 empty_reason = ""
 
+# Bound on consecutive attempts to re-drive an enable of the compute service
+# when nova reports it disabled but VIM intends it enabled.  A genuine,
+# persistent nova-side failure must not turn into an unbounded request loop.
+MAX_COMPUTE_SERVICE_RECONCILE_ATTEMPTS = 3
+
 
 class QueryHypervisorTaskWork(state_machine.StateTaskWork):
     """Query-Hypervisor Task Work."""
@@ -1451,10 +1456,13 @@ class AuditHostServicesTaskWork(state_machine.StateTaskWork):
             )
 
             if response["completed"]:
-                if "enabled" == response["result-data"]:
+                service_enabled = "enabled" == response["result-data"]
+                if service_enabled:
                     self._host.host_services_update(
                         self._service, objects.HOST_SERVICE_STATE.ENABLED
                     )
+                    if self._service == objects.HOST_SERVICES.COMPUTE:
+                        self._host.clear_compute_service_reconcile_attempts()
                 else:
                     self._host.host_services_update(
                         self._service, objects.HOST_SERVICE_STATE.DISABLED
@@ -1463,24 +1471,37 @@ class AuditHostServicesTaskWork(state_machine.StateTaskWork):
                 self.task.task_work_complete(
                     state_machine.STATE_TASK_WORK_RESULT.SUCCESS, empty_reason
                 )
+
+                # The host FSM deliberately excludes the compute service when
+                # deciding whether to disable a host (see _host_state_enabled),
+                # because work cannot be migrated off a host whose compute
+                # service is down.  That leaves a compute service nova reports
+                # as disabled, on a host VIM intends to be in service, with no
+                # owner.  Reconcile it here, where the real state is known.
+                if not service_enabled and (
+                    self._service == objects.HOST_SERVICES.COMPUTE
+                ):
+                    self._reconcile_compute_service()
             else:
                 if self.force_pass:
-                    if self._host.is_enabled():
-                        self._host.host_services_update(
-                            self._service, objects.HOST_SERVICE_STATE.ENABLED
-                        )
-                    else:
-                        self._host.host_services_update(
-                            self._service, objects.HOST_SERVICE_STATE.DISABLED
-                        )
-
+                    # The query did not complete, so the administrative state
+                    # of the service is unknown.  Do not infer it from the
+                    # platform health of the host: a host can be unlocked,
+                    # enabled and available while its compute service is
+                    # administratively disabled.  Writing ENABLED here caches a
+                    # value that is simply wrong, and HostDirector's
+                    # enable_host_services() then reports the operation
+                    # complete without ever calling nova.  Retain the last
+                    # known state and let a later audit establish the truth.
                     DLOG.info(
-                        "Audit-Host-Services callback for %s, "
-                        "failed, force-passing, "
-                        "defaulting state to %s."
+                        "Audit-Host-Services callback for %s %s, failed, "
+                        "force-passing, retaining last known state %s, "
+                        "reason=%s."
                         % (
                             self._host.name,
+                            self._service,
                             self._host.host_service_state(self._service),
+                            response.get("reason", ""),
                         )
                     )
 
@@ -1495,6 +1516,87 @@ class AuditHostServicesTaskWork(state_machine.StateTaskWork):
                     self.task.task_work_complete(
                         state_machine.STATE_TASK_WORK_RESULT.FAILED, response["reason"]
                     )
+
+    def _reconcile_compute_service(self):
+        """Re-drive the enable of a compute service VIM intends to be enabled.
+
+        Nova reports the compute service as administratively disabled while
+        VIM's own intent is that it be enabled.  The host FSM will not repair
+        this because the compute service is excluded from the aggregate host
+        service state, so nothing else owns the mismatch.  Issue a bounded
+        number of enable requests to converge the two.
+        """
+
+        from nfv_vim.database._database_sw_update import (
+            database_sw_update_exists,
+        )
+
+        host = self._host
+
+        # VIM took the host services down on purpose, by a lock or by an
+        # orchestrated disable-host-services step.  Disabled is the intent.
+        if host.host_services_locked:
+            DLOG.info(
+                "Compute service is disabled on %s, host services are locked, "
+                "not reconciling." % host.name
+            )
+            return
+
+        # Only reconcile a host the platform reports as fully in service.
+        if not host.is_enabled():
+            DLOG.info(
+                "Compute service is disabled on %s, host is not enabled, "
+                "not reconciling." % host.name
+            )
+            return
+
+        # Never race an in-flight update strategy.  Its steps own the
+        # administrative state of the host services for as long as it runs.
+        if database_sw_update_exists():
+            DLOG.info(
+                "Compute service is disabled on %s, software update in "
+                "progress, not reconciling." % host.name
+            )
+            return
+
+        attempts = host.compute_service_reconcile_attempts
+        if attempts >= MAX_COMPUTE_SERVICE_RECONCILE_ATTEMPTS:
+            DLOG.warn(
+                "Compute service on %s is still disabled after %s reconcile "
+                "attempts, giving up until it is next observed enabled."
+                % (host.name, attempts)
+            )
+            return
+
+        host.compute_service_reconcile_attempts = attempts + 1
+        DLOG.info(
+            "Compute service is disabled on %s while the host is enabled; "
+            "re-driving enable of the compute service (attempt %s of %s)."
+            % (
+                host.name,
+                host.compute_service_reconcile_attempts,
+                MAX_COMPUTE_SERVICE_RECONCILE_ATTEMPTS,
+            )
+        )
+        nfvi.nfvi_enable_compute_host_services(
+            host.uuid,
+            host.name,
+            host.personality,
+            self._reconcile_compute_service_callback(host.name),
+        )
+
+    @coroutine
+    def _reconcile_compute_service_callback(self, host_name):
+        """Callback for the compute service reconcile request."""
+
+        response = yield
+        if response["completed"]:
+            DLOG.info("Reconcile-Compute-Services for %s succeeded." % host_name)
+        else:
+            DLOG.error(
+                "Reconcile-Compute-Services for %s failed, reason=%s."
+                % (host_name, response.get("reason", ""))
+            )
 
     def run(self):
         """Run audit host services."""
