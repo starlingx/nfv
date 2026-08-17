@@ -41,6 +41,7 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
         self._is_shutdown = False
         self._response_delayed = False
+        self._headers_ended = False
 
         # Call old-style class __init__
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(
@@ -58,6 +59,13 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         if not self._is_shutdown:
             if "server" != keyword.lower():
                 BaseHTTPServer.BaseHTTPRequestHandler.send_header(self, keyword, value)
+
+    def end_headers(self):
+        """Override end_headers so that it can safely be called more than once."""
+
+        if not self._is_shutdown and not self._headers_ended:
+            self._headers_ended = True
+            BaseHTTPServer.BaseHTTPRequestHandler.end_headers(self)
 
     def send_response(self, code, message=None):
         """Override send_response."""
@@ -78,8 +86,22 @@ class RestAPIRequestDispatcher(BaseHTTPServer.BaseHTTPRequestHandler):
         DLOG.error(format, *args)
 
     def done(self):
-        # todo:abailey  Remove the calls to 'done' in the plugins
-        DLOG.debug("Deprecated: 'done' method no longer supported")
+        """Finalize the response.
+
+        Flushes the buffered headers to the socket, and on the delayed
+        response path also releases the socket, since finish() has already
+        returned without doing so.
+        """
+
+        if not self._is_shutdown:
+            # In python3 send_response and send_header only buffer the
+            # headers, end_headers is what writes them to the socket.
+            self.end_headers()
+
+            if self._response_delayed:
+                # finish has already returned without cleaning up, so this
+                # is the only remaining opportunity to release the socket.
+                self._done()
 
     def _done(self):
         """Finished with processing the request."""

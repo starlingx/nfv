@@ -93,7 +93,7 @@ class WritableLogger:
         self.level = level
 
     def write(self, msg):
-        self.logger.debug(msg.rstrip())
+        self.logger.log(self.level, msg.rstrip())
 
 
 class Server:
