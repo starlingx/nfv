@@ -873,6 +873,18 @@ class KubeUpgradeStages:  # pylint: disable=no-member
             objects_v1.KUBE_POST_UPDATED_APPS: (self._add_kube_upgrade_cleanup_stage),
         }
 
+        matching_kube_version_avail = None
+        for kube_version_object in self.nfvi_kube_versions_list:
+            if kube_version_object["kube_version"] == self.kube_to_version:
+                matching_kube_version_avail = kube_version_object["state"]
+                break
+
+        if matching_kube_version_avail == "unavailable":
+            reason = "Kubernetes target version cannot be unavailable"
+            DLOG.warn(reason)
+            self.report_build_failure(reason)
+            return
+
         matching_version_upgraded = False
         for kube_version_object in self.nfvi_kube_versions_list:
             if kube_version_object["kube_version"] == self.kube_to_version:

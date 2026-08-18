@@ -1594,6 +1594,32 @@ class TestDuplexApplyStrategy(
         self.worker_list = []
         self.storage_list = []
 
+    def test_kube_upgrade_unavailable_version_fails_build(self):
+        """Test the kube_upgrade strategy fails when target version is unavailable.
+
+        The DuplexKubeUpgradeMixin has HIGH_KUBE_VERSION with state 'unavailable'.
+        Targeting that version should cause build_complete to report failure.
+
+        Verify:
+        - is_build_failed() returns True
+        - build_phase result reason matches the exact error message
+        """
+        update_obj = KubeUpgrade()
+
+        strategy = self._create_built_kube_upgrade_strategy(
+            update_obj,
+            HIGH_KUBE_VERSION,
+            single_controller=False,
+        )
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertTrue(strategy.is_build_failed())
+        self.assertEqual(
+            "Kubernetes target version cannot be unavailable",
+            strategy.build_phase.result_reason,
+        )
+
 
 @mock.patch(
     "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue

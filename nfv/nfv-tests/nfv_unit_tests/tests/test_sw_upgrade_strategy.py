@@ -2002,3 +2002,62 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.assertEqual(
             120, strategy_dict["apply_phase"]["stages"][0]["steps"][3]["retry_delay"]
         )
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_upgrade_strategy_serialization_delete_cleanup_snapshot_fields(self):
+        """Test that delete, cleanup, snapshot fields persist through serialization.
+
+        Verify:
+        - Each field with True is preserved when converting to/from dict
+        - Each field with False (default) is preserved when converting to/from dict
+        """
+        for field in ("delete", "cleanup", "snapshot"):
+            strategy_true = self.create_sw_upgrade_strategy(**{field: True})
+            strategy_dict = strategy_true.as_dict()
+            self.assertEqual(True, strategy_dict[field])
+
+            new_strategy = strategy_rebuild_from_dict(strategy_dict)
+            self.assertEqual(True, new_strategy.as_dict()[field])
+
+            strategy_false = self.create_sw_upgrade_strategy(**{field: False})
+            strategy_dict = strategy_false.as_dict()
+            self.assertEqual(False, strategy_dict[field])
+
+            new_strategy = strategy_rebuild_from_dict(strategy_dict)
+            self.assertEqual(False, new_strategy.as_dict()[field])
+
+            sw_update_testcase.validate_strategy_persists(strategy_true)
+            sw_update_testcase.validate_strategy_persists(strategy_false)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_upgrade_strategy_serialization_missing_fields_default_false(self):
+        """Test missing delete/cleanup/snapshot default to False.
+
+        Verify:
+        - Removing delete, cleanup, snapshot from the serialized dict does not
+          cause deserialization failures
+        - The missing fields default to False after deserialization
+        """
+        strategy = self.create_sw_upgrade_strategy(
+            delete=True, cleanup=True, snapshot=True
+        )
+        strategy_dict = strategy.as_dict()
+
+        # Remove the fields to simulate an older version of the dict
+        strategy_dict.pop("delete")
+        strategy_dict.pop("cleanup")
+        strategy_dict.pop("snapshot")
+
+        # Rebuild should not raise and should default to False
+        new_strategy = strategy_rebuild_from_dict(strategy_dict)
+        new_dict = new_strategy.as_dict()
+
+        self.assertEqual(False, new_dict["delete"])
+        self.assertEqual(False, new_dict["cleanup"])
+        self.assertEqual(False, new_dict["snapshot"])
