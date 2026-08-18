@@ -9,6 +9,7 @@ from nfv_common import timers
 from nfv_vim import alarm
 from nfv_vim import event_log
 from nfv_vim import nfvi
+from nfv_vim.objects._sw_update import DEFAULT_KUBE_AUDIT_RATE
 from nfv_vim.objects._sw_update import KUBERNETES_UPGRADE_EVENT_ID_MAPPING
 from nfv_vim.objects.strategies.kube_upgrade._kube_upgrade_mixins import (
     KubeUpgradeMixin,
@@ -253,8 +254,28 @@ class SwUpgrade(SwUpdate, KubeUpgradeMixin):
             while self._nfvi_audit_inprogress:
                 timer_id = yield
 
-            # nfvi_alarms_callback sets timer to 2 seconds. reset back to 30
-            timers.timers_reschedule_timer(timer_id, 30)
+            if self._is_kube_upgrade_active():
+                DLOG.debug("Audit kube upgrade, timer_id=%s." % timer_id)
+                nfvi.nfvi_get_kube_upgrade(self.nfvi_kube_upgrade_callback(timer_id))
+                self._nfvi_audit_inprogress = True
+                while self._nfvi_audit_inprogress:
+                    timer_id = yield
+
+                current_state = self._kube_upgrade.state if self._kube_upgrade else None
+                # only audit the kube hosts when upgrading kubelets
+                if current_state in ["upgrading-kubelets", "upgraded-kubelets"]:
+                    DLOG.debug("Audit kube upgrade hosts, timer_id=%s." % timer_id)
+                    nfvi.nfvi_get_kube_host_upgrade_list(
+                        self.nfvi_kube_host_upgrade_list_callback(timer_id)
+                    )
+                    self._nfvi_audit_inprogress = True
+                    while self._nfvi_audit_inprogress:
+                        timer_id = yield
+
+                timers.timers_reschedule_timer(timer_id, DEFAULT_KUBE_AUDIT_RATE)
+            else:
+                # nfvi_alarms_callback sets timer to 2 seconds. reset back to 30
+                timers.timers_reschedule_timer(timer_id, 30)
 
             if not self.nfvi_update():
                 DLOG.info("Audit no longer needed.")
