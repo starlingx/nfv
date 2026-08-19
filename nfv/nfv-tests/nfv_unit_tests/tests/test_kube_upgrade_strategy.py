@@ -1506,6 +1506,39 @@ class TestSimplexApplyStrategy(
         ]
         self.validate_apply_phase(self.is_simplex(), kube_upgrade, stages)
 
+    def test_kube_upgrade_networking_stage_is_abortable(self):
+        """Test that the kube-upgrade-networking stage is abortable.
+
+        The networking stage should allow abort so that operators can
+        interrupt the strategy during the networking upgrade if needed.
+        """
+        kube_upgrade = None
+        update_obj = KubeUpgrade()
+        strategy = self._create_built_kube_upgrade_strategy(
+            update_obj,
+            self.default_to_version,
+            single_controller=self.is_simplex(),
+            kube_upgrade=kube_upgrade,
+        )
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        # Find the kube-upgrade-networking stage and verify it is abortable
+        networking_stage = None
+        for stage in strategy.apply_phase.stages:
+            if stage.name == "kube-upgrade-networking":
+                networking_stage = stage
+                break
+
+        self.assertIsNotNone(
+            networking_stage,
+            "Expected kube-upgrade-networking stage in apply phase",
+        )
+        self.assertTrue(
+            networking_stage._is_abortable,
+            "Expected kube-upgrade-networking stage to be abortable",
+        )
+
 
 @mock.patch(
     "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue

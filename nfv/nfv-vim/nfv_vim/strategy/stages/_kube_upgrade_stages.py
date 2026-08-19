@@ -300,7 +300,7 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         from nfv_vim import strategy
 
         stage = strategy.StrategyStage(
-            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING, False
+            strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_NETWORKING
         )
         stage.add_step(strategy.KubeUpgradeNetworkingStep())
         self.apply_phase.add_stage(stage)
