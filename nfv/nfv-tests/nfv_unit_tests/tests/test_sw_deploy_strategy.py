@@ -2968,6 +2968,92 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
+    def test_sw_deploy_strategy_aiosx_rollback_system_deploy_active(self):
+        """Test the sw_deploy strategy apply phase:
+
+        - aio-sx
+        - major
+        - host
+        - system_deploy active
+        Verify:
+        - Last stage is sw-system-deploy-delete.
+        """
+
+        release = ["888.8"]
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            delete=False,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                MOCK_METAPACKAGES,
+                {
+                    "release_id": MAJOR_RELEASE_UPGRADE,
+                    "state": "deploying",
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    "state": "host",
+                    "reboot_required": True,
+                    "from_release": INITIAL_RELEASE,
+                    "to_release": MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+                system_deploy={"state": "active"},
+            ),
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            "total_stages": 4,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "sw-deploy-abort"},
+                        {"name": "sw-deploy-activate-rollback"},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "unlock-hosts"},
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-rollback-complete",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                    ],
+                },
+                {
+                    "name": "sw-system-deploy-delete",
+                    "total_steps": 1,
+                    "steps": [
+                        {"name": "sw-system-deploy-delete"},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
     def test_sw_deploy_strategy_cleanup_build_fails_with_release(self):
         """cleanup cannot be combined with a release."""
         _, strategy = self._gen_aiosx_hosts_and_strategy(

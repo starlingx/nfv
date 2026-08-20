@@ -2244,6 +2244,10 @@ class SwUpgradeStrategy(
             self._add_rollback_complete_stage()
             self._add_rollback_hosts_stages(do_nothing)
 
+        if self.nfvi_upgrade and self.nfvi_upgrade.is_system_deploy_active:
+            DLOG.info("Software system deploy is active, adding delete stage")
+            self._add_system_deploy_delete_stage()
+
     def _build_complete_cleanup(self, result, result_reason):
         from nfv_vim import strategy
 
