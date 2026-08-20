@@ -2315,6 +2315,9 @@ class SwUpgradeStrategy(
         self._release = normalize_release(data["release"])
         self._pre_upgrade_deploy = data.get("pre_upgrade_deploy", False)
         self._rollback = data["rollback"]
+        self._delete = data.get("delete", False)
+        self._cleanup = data.get("cleanup", False)
+        self._snapshot = data.get("snapshot", False)
         self._kube_upgrade_version = data.get("kube_upgrade_version")
         nfvi_upgrade_data = data["nfvi_upgrade_data"]
         if nfvi_upgrade_data:
@@ -2339,6 +2342,9 @@ class SwUpgradeStrategy(
         data["release"] = self._release
         data["pre_upgrade_deploy"] = self._pre_upgrade_deploy
         data["rollback"] = self._rollback
+        data["delete"] = self._delete
+        data["cleanup"] = self._cleanup
+        data["snapshot"] = self._snapshot
         data["kube_upgrade_version"] = self._kube_upgrade_version
         if self._nfvi_upgrade:
             nfvi_upgrade_data = self._nfvi_upgrade.as_dict()

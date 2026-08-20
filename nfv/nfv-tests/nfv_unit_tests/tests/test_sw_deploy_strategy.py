@@ -4725,6 +4725,52 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         "nfv_vim.strategy._strategy.get_local_host_name",
         sw_update_testcase.fake_host_name_controller_0,
     )
+    def test_combined_kube_upgrade_unavailable_version_fails_build(self):
+        """Test BUILD_FAILED when kube_upgrade_version targets an unavailable version.
+
+        Verify:
+        - kube_upgrade_version points to a version with state 'unavailable'
+        - result is BUILD_FAILED with reason 'Kubernetes target version cannot
+          be unavailable'
+        """
+        unavailable_kube_versions_list = [
+            KubeVersion(
+                _COMBINED_FROM_KUBE,
+                "active",
+                True,
+                [],
+                [],
+                [],
+                [],
+            ),
+            KubeVersion(
+                _COMBINED_TO_KUBE,
+                "unavailable",
+                False,
+                [_COMBINED_FROM_KUBE],
+                [],
+                [],
+                [],
+            ),
+        ]
+
+        strategy = self._create_combined_strategy(
+            kube_versions_list=unavailable_kube_versions_list,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
+        self.assertEqual(
+            "Kubernetes target version cannot be unavailable",
+            strategy.build_phase.result_reason,
+        )
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
     def test_combined_kube_upgrade_invalid_resume_state_fails_build(self):
         """Test BUILD_FAILED when kube upgrade is in an unresumable state.
 
