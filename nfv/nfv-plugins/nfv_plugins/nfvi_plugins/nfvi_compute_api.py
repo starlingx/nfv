@@ -26,6 +26,43 @@ from nfv_vim.nfvi.objects import v1 as nfvi_objs
 
 DLOG = debug.debug_get_logger("nfv_plugins.nfvi_plugins.compute_api")
 
+# The nova api names its error bodies after the http status code, see
+# nova.api.openstack.wsgi.Fault._fault_names. Only the codes that this
+# plugin can produce are listed here.
+NOVA_FAULT_NAMES = {
+    httplib.BAD_REQUEST: "badRequest",
+    httplib.NOT_FOUND: "itemNotFound",
+}
+
+
+def nova_error_body(http_status_code, message):
+    """Build a nova compatible JSON error response body, encoded as bytes."""
+
+    fault_name = NOVA_FAULT_NAMES.get(http_status_code, "computeFault")
+    body = {fault_name: {"code": http_status_code, "message": message}}
+    return json.dumps(body).encode()
+
+
+def send_error_response(request_dispatch, http_status_code, message):
+    """Send a nova compatible JSON error response and finish the request."""
+
+    http_body = nova_error_body(http_status_code, message)
+    # The reason phrase is left at the standard one for the status code, as
+    # nova does; the detail belongs in the response body.
+    request_dispatch.send_response(http_status_code)
+    request_dispatch.send_header("Content-Type", "application/json")
+    request_dispatch.send_header("Content-Length", str(len(http_body)))
+    try:
+        request_dispatch.end_headers()
+        request_dispatch.wfile.write(http_body)
+    except socket.error as e:
+        # The client can disconnect while waiting for the response.
+        DLOG.error("Send response for %s failed, error=%s" % (request_dispatch.path, e))
+
+    # Called even if the send failed, as the delayed path releases the socket
+    # from here.
+    request_dispatch.done()
+
 
 def hypervisor_get_admin_state(status):
     """Convert the nfvi hypervisor status to a hypervisor administrative state."""
@@ -842,7 +879,9 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                         for key, value in http_headers:
                             if "Server" != key and "Date" != key:
                                 request_dispatch.send_header(key, value)
-                        request_dispatch.end_headers()
+                    # Flush the headers before any body is written, whether or
+                    # not the relayed response carried headers of its own.
+                    request_dispatch.end_headers()
                     if http_body is not None:
                         if hasattr(http_body, "encode"):
                             http_body = http_body.encode()
@@ -3565,7 +3604,11 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
         content = request_dispatch.rfile.read(content_len)
         if "action" != request_dispatch.path.split("/")[-1]:
             DLOG.error("Invalid url %s received" % request_dispatch.path)
-            request_dispatch.send_response(httplib.BAD_REQUEST)
+            send_error_response(
+                request_dispatch,
+                httplib.BAD_REQUEST,
+                "Invalid url, expecting a server action request",
+            )
             return
 
         path_items = request_dispatch.path.split("/")
@@ -3620,9 +3663,10 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                         DLOG.error(
                             "Callback failed for instance_uuid=%s." % instance_uuid
                         )
-                        err_msg = "Instance %s could not be found" % instance_uuid
+                        err_msg = "Instance %s could not be found." % instance_uuid
                         http_response = httplib.NOT_FOUND
             else:
+                err_msg = "No server action specified"
                 http_response = httplib.BAD_REQUEST
         else:
             http_response = httplib.NO_CONTENT
@@ -3639,8 +3683,15 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
                 request_dispatch.response_delayed()
                 self._ageout_action_requests()
         else:
-            request_dispatch.send_response(http_response, message=err_msg)
-            request_dispatch.done()
+            if httplib.NO_CONTENT == http_response:
+                # A 204 response must not carry a message body. done()
+                # flushes the buffered headers, so no explicit
+                # end_headers() is needed here, unlike the error paths
+                # that go through send_error_response().
+                request_dispatch.send_response(http_response)
+                request_dispatch.done()
+            else:
+                send_error_response(request_dispatch, http_response, err_msg)
             self._request_times.pop()
             del self._requests[request_uuid]
 
