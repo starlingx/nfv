@@ -976,7 +976,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -1025,7 +1025,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -1076,7 +1076,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -1156,7 +1156,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {
@@ -1544,7 +1544,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -1704,7 +1704,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -1722,7 +1722,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-1"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -1906,7 +1906,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -1924,7 +1924,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-1"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -2046,7 +2046,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-1"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
@@ -2064,7 +2064,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},
