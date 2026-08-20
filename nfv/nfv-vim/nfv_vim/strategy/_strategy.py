@@ -2267,9 +2267,20 @@ class SwUpgradeStrategy(
             self.save()
             return
 
+        from nfv_vim import nfvi
+
         if self.nfvi_kube_upgrade is not None:
-            DLOG.info("Kube upgrade is active, adding complete stage")
-            self._add_kube_upgrade_complete_stage()
+            if (
+                self.nfvi_kube_upgrade.state
+                == nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTED
+            ):
+                DLOG.info(
+                    "Kube upgrade is in aborted state, adding cleanup (delete) stage"
+                )
+                self._add_kube_upgrade_cleanup_stage()
+            else:
+                DLOG.info("Kube upgrade is active, adding complete stage")
+                self._add_kube_upgrade_complete_stage()
 
         if self.nfvi_upgrade and self.nfvi_upgrade.is_deploy_completed:
             DLOG.info("Software deploy is completed, adding delete stage")
