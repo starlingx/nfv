@@ -644,7 +644,10 @@ class TestStepReleaseNormalization(testcase.NFVTestCase):
         self._assert_step_normalizes_string(UpgradeCompleteStep)
         self._assert_step_preserves_list(UpgradeCompleteStep)
 
-        self._assert_step_normalizes_string(SwDeployDeleteStep)
+        # SwDeployDeleteStep does NOT normalize because it receives either a list
+        # (from normal deploys) or a string (release_id from rollback). It must
+        # preserve whatever was stored to avoid the rollback "Software release not
+        # found" bug.
         self._assert_step_preserves_list(SwDeployDeleteStep)
 
         self._assert_step_normalizes_string(SwSystemDeployInitStep)
