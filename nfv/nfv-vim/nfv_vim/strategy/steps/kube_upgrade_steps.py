@@ -11,6 +11,7 @@ from nfv_common import timers
 from nfv_vim.strategy._constants import STRATEGY_STEP_NAME
 from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 from nfv_vim.strategy._utils import AbstractStrategyStep
+from nfv_vim.strategy._utils import TimerBasedPollingStep
 from nfv_vim.strategy._utils import validate_operation
 from nfv_vim import tables
 
@@ -1277,26 +1278,35 @@ class KubeHostUpgradeKubeletStep(AbstractKubeHostListUpgradeStep):
         return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
 
 
-class WaitKubeControlPlanePodsReadyStep(AbstractStrategyStep):
+class WaitKubeControlPlanePodsReadyStep(TimerBasedPollingStep):
     """Wait for Kubernetes control-plane pods to be ready - Strategy Step.
 
     Queries kube-system pods with label:
       component in (kube-apiserver, kube-scheduler, kube-controller-manager)
     Succeeds when all pods have condition Ready=True.
+
+    Uses a self-scheduling timer to poll at a fixed interval, bypassing the
+    host audit mechanism which is gated by a 30-second delay.
     """
 
-    def __init__(
-        self,
-        timeout_in_secs=180,
-        first_query_delay_in_secs=10,
-    ):
+    POLL_INTERVAL_IN_SECS = 5
+    FIRST_POLL_DELAY_IN_SECS = 10
+
+    def __init__(self, timeout_in_secs=180):
         super().__init__(
             STRATEGY_STEP_NAME.WAIT_KUBE_CONTROL_PLANE_PODS_READY,
             timeout_in_secs=timeout_in_secs,
         )
-        self._first_query_delay_in_secs = first_query_delay_in_secs
-        self._wait_time = 0
-        self._query_inprogress = False
+
+    def _poll_action(self):
+        """Query control-plane pod readiness."""
+
+        from nfv_vim import nfvi
+
+        self._poll_in_progress = True
+        nfvi.nfvi_get_kube_control_plane_pods_ready(
+            self._query_control_plane_pods_callback()
+        )
 
     @coroutine
     def _query_control_plane_pods_callback(self):
@@ -1305,11 +1315,12 @@ class WaitKubeControlPlanePodsReadyStep(AbstractStrategyStep):
         response = yield
         DLOG.debug("Query-Control-Plane-Pods callback response=%s." % response)
 
-        self._query_inprogress = False
+        self._poll_in_progress = False
 
         if response["completed"]:
             result_data = response.get("result-data")
             if result_data is None:
+                self._cleanup_timer()
                 result = strategy.STRATEGY_STEP_RESULT.FAILED
                 self.stage.step_complete(
                     result, "Control-plane pods readiness check missing result-data"
@@ -1321,6 +1332,7 @@ class WaitKubeControlPlanePodsReadyStep(AbstractStrategyStep):
                     "All Kubernetes control-plane pods are ready: %s"
                     % result_data["pods"]
                 )
+                self._cleanup_timer()
                 result = strategy.STRATEGY_STEP_RESULT.SUCCESS
                 self.stage.step_complete(result, "")
             else:
@@ -1328,59 +1340,18 @@ class WaitKubeControlPlanePodsReadyStep(AbstractStrategyStep):
                     "Kubernetes control-plane pods not ready: %s"
                     % result_data["not_ready"]
                 )
-                # Keep waiting - will retry on next HOST_AUDIT event
+                # Keep waiting - timer will trigger the next query
         else:
             # API call itself failed - don't fail the step, just retry
             DLOG.warn(
                 "Query for control-plane pods readiness did not complete, will retry."
             )
 
-    def apply(self):
-        """Wait for control-plane pods to become ready."""
-
-        DLOG.info("Step (%s) apply." % self._name)
-        return strategy.STRATEGY_STEP_RESULT.WAIT, ""
-
-    def handle_event(self, event, event_data=None):
-        """Handle Host events to trigger periodic polling."""
-
-        from nfv_vim import nfvi
-
-        DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
-
-        if event == STRATEGY_EVENT.HOST_AUDIT:
-            if 0 == self._wait_time:
-                self._wait_time = timers.get_monotonic_timestamp_in_ms()
-
-            now_ms = timers.get_monotonic_timestamp_in_ms()
-            secs_expired = (now_ms - self._wait_time) // 1000
-            if (
-                self._first_query_delay_in_secs <= secs_expired
-                and not self._query_inprogress
-            ):
-                self._query_inprogress = True
-                nfvi.nfvi_get_kube_control_plane_pods_ready(
-                    self._query_control_plane_pods_callback()
-                )
-            return True
-
-        return False
-
     def from_dict(self, data):
         """Returns the step object initialized using the given dictionary."""
 
         super().from_dict(data)
-        self._first_query_delay_in_secs = data["first_query_delay_in_secs"]
-        self._wait_time = 0
-        self._query_inprogress = False
         return self
-
-    def as_dict(self):
-        """Represent the step as a dictionary."""
-
-        data = super().as_dict()
-        data["first_query_delay_in_secs"] = self._first_query_delay_in_secs
-        return data
 
     def timeout(self):
         """Strategy Step Timeout Override."""

@@ -5372,9 +5372,7 @@ class TestWaitKubeControlPlanePodsReadyStep(
             WaitKubeControlPlanePodsReadyStep,
         )
 
-        self.step = WaitKubeControlPlanePodsReadyStep(
-            timeout_in_secs=180, first_query_delay_in_secs=10
-        )
+        self.step = WaitKubeControlPlanePodsReadyStep(timeout_in_secs=180)
         self.mock_stage = mock.MagicMock()
         self.step.stage = self.mock_stage
 
@@ -5446,45 +5444,56 @@ class TestWaitKubeControlPlanePodsReadyStep(
             "Control-plane pods readiness check missing result-data",
         )
 
-    def test_handle_event_triggers_query_after_delay(self):
-        """HOST_AUDIT triggers query after first_query_delay_in_secs."""
+    def test_apply_creates_timer_and_returns_wait(self):
+        """Apply creates a polling timer and returns WAIT."""
 
         from nfv_common import timers
+
+        with mock.patch.object(
+            timers, "timers_create_timer", return_value=999
+        ) as mock_create:
+            result, reason = self.step.apply()
+
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+        self.assertEqual(reason, "")
+        mock_create.assert_called_once()
+        self.assertEqual(self.step._poll_timer_id, 999)
+
+    def test_handle_event_returns_false(self):
+        """handle_event is a no-op (polling is timer-driven)."""
+
         from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=1000
-        ):
-            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+        result = self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+        self.assertFalse(result)
 
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=12000
-        ):
-            with mock.patch(
-                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
-            ) as mock_query:
-                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
-                mock_query.assert_called_once()
+    def test_poll_action_triggers_query(self):
+        """_poll_action calls the NFVI query."""
 
-    def test_handle_event_does_not_trigger_query_before_delay(self):
-        """HOST_AUDIT does not trigger query before first_query_delay_in_secs."""
+        with mock.patch(
+            "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+        ) as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
+            self.assertTrue(self.step._poll_in_progress)
+
+    def test_poll_skipped_when_in_progress(self):
+        """Timer callback does not trigger a new query while one is in progress."""
 
         from nfv_common import timers
-        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=1000
-        ):
-            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            self.step.apply()
 
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=8000
-        ):
-            with mock.patch(
-                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
-            ) as mock_query:
-                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
-                mock_query.assert_not_called()
+        # Simulate first poll
+        with mock.patch(
+            "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+        ) as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
+
+        # poll_in_progress is True, so _poll_timer_callback should not call again
+        self.assertTrue(self.step._poll_in_progress)
 
     def test_from_dict_roundtrip(self):
         """Step can be serialized and deserialized without data loss."""
@@ -5497,57 +5506,72 @@ class TestWaitKubeControlPlanePodsReadyStep(
         new_step = object.__new__(WaitKubeControlPlanePodsReadyStep)
         new_step.from_dict(data)
 
-        self.assertEqual(new_step._first_query_delay_in_secs, 10)
-        self.assertEqual(new_step._wait_time, 0)
-        self.assertFalse(new_step._query_inprogress)
+        self.assertIsNone(new_step._poll_timer_id)
+        self.assertFalse(new_step._poll_in_progress)
 
-    def test_timeout_returns_descriptive_reason(self):
-        """Timeout provides a meaningful error message."""
+    def test_from_dict_recreates_timer_on_resume(self):
+        """from_dict recreates the polling timer when step was in WAIT state."""
 
-        result, reason = self.step.timeout()
+        from nfv_common import timers
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            WaitKubeControlPlanePodsReadyStep,
+        )
+
+        # Simulate a step that was in progress (WAIT state) before restart
+        data = self.step.as_dict()
+        data["result"] = "wait"
+
+        new_step = object.__new__(WaitKubeControlPlanePodsReadyStep)
+        with mock.patch.object(
+            timers, "timers_create_timer", return_value=888
+        ) as mock_create:
+            new_step.from_dict(data)
+
+        mock_create.assert_called_once()
+        self.assertEqual(new_step._poll_timer_id, 888)
+        self.assertFalse(new_step._poll_in_progress)
+
+    def test_timeout_cleans_up_timer(self):
+        """Timeout cleans up the timer and provides a meaningful error."""
+
+        from nfv_common import timers
+
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            self.step.apply()
+
+        with mock.patch.object(timers, "timers_delete_timer") as mock_delete:
+            result, reason = self.step.timeout()
+
         self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.TIMED_OUT)
         self.assertIn("control-plane pods did not become ready", reason)
+        mock_delete.assert_called_once_with(999)
+        self.assertIsNone(self.step._poll_timer_id)
 
-    def test_apply_returns_wait(self):
-        """Apply returns WAIT to enter the polling loop."""
+    def test_flow_pods_ready_after_poll(self):
+        """Full flow: apply → timer polls → pods ready → SUCCESS.
 
-        result, reason = self.step.apply()
-        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
-        self.assertEqual(reason, "")
-
-    def test_flow_pods_ready_after_query(self):
-        """Full flow: apply → handle_event triggers query → pods ready → SUCCESS.
-
-        Simulates the combined strategy flow where the step is applied, waits
-        for the first query delay, issues a query, and the callback reports all
+        Simulates the combined strategy flow where the step is applied,
+        the timer fires, issues a query, and the callback reports all
         control-plane pods are ready.
         """
 
         from nfv_common import timers
-        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 
         # Step is applied and enters the WAIT state
-        result, reason = self.step.apply()
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            result, reason = self.step.apply()
         self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
 
-        # First HOST_AUDIT sets the wait_time baseline
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=1000
-        ):
-            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+        # Timer fires → _poll_action triggers query
+        with mock.patch(
+            "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+        ) as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
 
-        # Second HOST_AUDIT after delay triggers the query
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=12000
-        ):
-            with mock.patch(
-                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
-            ) as mock_query:
-                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
-                mock_query.assert_called_once()
-
-                # Drive the callback coroutine that was passed to the nfvi call
-                callback = mock_query.call_args[0][0]
+            # Drive the callback coroutine
+            callback = mock_query.call_args[0][0]
+            with mock.patch.object(timers, "timers_delete_timer"):
                 try:
                     callback.send(
                         {
@@ -5580,126 +5604,94 @@ class TestWaitKubeControlPlanePodsReadyStep(
         )
 
     def test_flow_pods_not_ready_leads_to_timeout(self):
-        """Full flow: pods not ready on every poll → eventually times out.
-
-        Simulates the combined strategy flow where the step polls repeatedly
-        but pods never become ready, so the strategy framework eventually
-        calls timeout().
-        """
+        """Full flow: pods not ready on every poll → eventually times out."""
 
         from nfv_common import timers
-        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 
         # Step is applied and enters the WAIT state
-        result, reason = self.step.apply()
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            result, reason = self.step.apply()
         self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
 
-        # First HOST_AUDIT sets the wait_time baseline
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=1000
-        ):
-            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
-
         # Simulate multiple polls that all report pods not ready
-        for poll_time_ms in [12000, 25000, 40000]:
-            with mock.patch.object(
-                timers, "get_monotonic_timestamp_in_ms", return_value=poll_time_ms
-            ):
-                with mock.patch(
-                    "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
-                ) as mock_query:
-                    self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
-                    mock_query.assert_called_once()
+        for _ in range(3):
+            with mock.patch(
+                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+            ) as mock_query:
+                self.step._poll_action()
+                mock_query.assert_called_once()
 
-                    callback = mock_query.call_args[0][0]
-                    try:
-                        callback.send(
-                            {
-                                "completed": True,
-                                "result-data": {
-                                    "ready": False,
-                                    "pods": [
-                                        {
-                                            "name": "kube-apiserver-controller-0",
-                                            "ready": True,
-                                        },
-                                        {
-                                            "name": "kube-scheduler-controller-0",
-                                            "ready": False,
-                                        },
-                                    ],
-                                    "not_ready": ["kube-scheduler-controller-0"],
-                                },
-                            }
-                        )
-                    except StopIteration:
-                        pass
+                callback = mock_query.call_args[0][0]
+                try:
+                    callback.send(
+                        {
+                            "completed": True,
+                            "result-data": {
+                                "ready": False,
+                                "pods": [
+                                    {
+                                        "name": "kube-apiserver-controller-0",
+                                        "ready": True,
+                                    },
+                                    {
+                                        "name": "kube-scheduler-controller-0",
+                                        "ready": False,
+                                    },
+                                ],
+                                "not_ready": ["kube-scheduler-controller-0"],
+                            },
+                        }
+                    )
+                except StopIteration:
+                    pass
 
             # Step should NOT have completed - still waiting
             self.mock_stage.step_complete.assert_not_called()
 
         # The strategy framework calls timeout() when time exceeds timeout_in_secs
-        result, reason = self.step.timeout()
+        with mock.patch.object(timers, "timers_delete_timer"):
+            result, reason = self.step.timeout()
         self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.TIMED_OUT)
         self.assertEqual(
             reason, "Kubernetes control-plane pods did not become ready before timeout"
         )
 
     def test_flow_api_exception_retries_then_succeeds(self):
-        """Full flow: API exception causes retry, next poll succeeds.
-
-        Simulates the combined strategy flow where the Kubernetes API raises
-        an exception (resulting in completed=False from the NFVI layer),
-        the step retries on the next HOST_AUDIT, and then succeeds.
-        """
+        """Full flow: API exception causes retry, next poll succeeds."""
 
         from nfv_common import timers
-        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
 
         # Step is applied and enters the WAIT state
-        result, reason = self.step.apply()
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            result, reason = self.step.apply()
         self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
 
-        # First HOST_AUDIT sets the wait_time baseline
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=1000
-        ):
-            self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+        # First poll - API exception occurs
+        with mock.patch(
+            "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+        ) as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
 
-        # Second HOST_AUDIT triggers query - API exception occurs
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=12000
-        ):
-            with mock.patch(
-                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
-            ) as mock_query:
-                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
-                mock_query.assert_called_once()
-
-                # Simulate what the NFVI layer sends when kubernetes_client
-                # raises ApiException (get_kube_control_plane_pods_status
-                # returns None → future.is_complete() fails → completed=False)
-                callback = mock_query.call_args[0][0]
-                try:
-                    callback.send({"completed": False, "reason": ""})
-                except StopIteration:
-                    pass
+            callback = mock_query.call_args[0][0]
+            try:
+                callback.send({"completed": False, "reason": ""})
+            except StopIteration:
+                pass
 
         # Step should NOT have failed - it retries
         self.mock_stage.step_complete.assert_not_called()
-        self.assertFalse(self.step._query_inprogress)
+        self.assertFalse(self.step._poll_in_progress)
 
-        # Third HOST_AUDIT triggers retry - this time pods are ready
-        with mock.patch.object(
-            timers, "get_monotonic_timestamp_in_ms", return_value=25000
-        ):
-            with mock.patch(
-                "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
-            ) as mock_query:
-                self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
-                mock_query.assert_called_once()
+        # Second poll - pods are ready
+        with mock.patch(
+            "nfv_vim.nfvi.nfvi_get_kube_control_plane_pods_ready"
+        ) as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
 
-                callback = mock_query.call_args[0][0]
+            callback = mock_query.call_args[0][0]
+            with mock.patch.object(timers, "timers_delete_timer"):
                 try:
                     callback.send(
                         {
