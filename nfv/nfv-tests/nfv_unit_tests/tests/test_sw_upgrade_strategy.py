@@ -1485,7 +1485,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
                         {
                             "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
-                            "retry_count": 0,
+                            "retry_count": 5,
                             "retry_delay": 120,
                         },
                         {"name": "wait-alarms-clear", "timeout": 2400},

@@ -874,6 +874,7 @@ class UpdateControllerHostsMixin:
         host_action_step,
         extra_args=None,
         is_abortable=True,
+        unlock_retry_count=0,
     ):
         """Add controller software stages for a controller list to a strategy."""
 
@@ -958,7 +959,12 @@ class UpdateControllerHostsMixin:
                             stage.add_step(
                                 strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
                             )
-                            stage.add_step(strategy.UnlockHostsStep(host_list))
+                            stage.add_step(
+                                strategy.UnlockHostsStep(
+                                    host_list,
+                                    retry_count=unlock_retry_count,
+                                )
+                            )
                             # After controller node(s) are unlocked, we need extra
                             # time to allow the OSDs to go back in sync and the
                             # storage related alarms to clear.
@@ -1008,7 +1014,12 @@ class UpdateControllerHostsMixin:
                     stage.add_step(
                         strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY)
                     )
-                    stage.add_step(strategy.UnlockHostsStep(host_list))
+                    stage.add_step(
+                        strategy.UnlockHostsStep(
+                            host_list,
+                            retry_count=unlock_retry_count,
+                        )
+                    )
                     # After controller node(s) are unlocked, we need extra time to
                     # allow the OSDs to go back in sync and the storage related
                     # alarms to clear. Note: not all controller nodes will have
@@ -1049,6 +1060,7 @@ class SwDeployControllerHostsMixin(UpdateControllerHostsMixin):
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
             strategy.UpgradeHostsStep,
             is_abortable=False,
+            unlock_retry_count=strategy.UnlockHostsStep.MAX_RETRIES,
         )
 
 
@@ -1089,7 +1101,12 @@ class UpdateStorageHostsMixin:
     """
 
     def _add_update_storage_strategy_stages(
-        self, storage_hosts, reboot, strategy_stage_name, host_action_step
+        self,
+        storage_hosts,
+        reboot,
+        strategy_stage_name,
+        host_action_step,
+        unlock_retry_count=0,
     ):
         """Add storage update stages to a strategy
 
@@ -1118,7 +1135,12 @@ class UpdateStorageHostsMixin:
             if reboot:
                 # Cannot unlock right away after the host action
                 stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
-                stage.add_step(strategy.UnlockHostsStep(host_list))
+                stage.add_step(
+                    strategy.UnlockHostsStep(
+                        host_list,
+                        retry_count=unlock_retry_count,
+                    )
+                )
                 # After storage node(s) are unlocked, we need extra time to
                 # allow the OSDs to go back in sync and the storage related
                 # alarms to clear.
@@ -1146,6 +1168,7 @@ class SwDeployStorageHostsMixin(UpdateStorageHostsMixin):
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_STORAGE_HOSTS,
             strategy.UpgradeHostsStep,
+            unlock_retry_count=strategy.UnlockHostsStep.MAX_RETRIES,
         )
 
 
@@ -1184,6 +1207,7 @@ class UpdateWorkerHostsMixin:
         strategy_stage_name,
         host_action_step,
         extra_args=None,
+        unlock_retry_count=0,
     ):
         """Add worker update stages to a strategy
 
@@ -1319,7 +1343,12 @@ class UpdateWorkerHostsMixin:
                 stage.add_step(strategy.SystemStabilizeStep(timeout_in_secs=MTCE_DELAY))
                 if hosts_to_lock:
                     # Unlock hosts that were locked
-                    stage.add_step(strategy.UnlockHostsStep(hosts_to_lock))
+                    stage.add_step(
+                        strategy.UnlockHostsStep(
+                            hosts_to_lock,
+                            retry_count=unlock_retry_count,
+                        )
+                    )
                 if hosts_to_reboot:
                     # Reboot hosts that were already locked
                     stage.add_step(strategy.RebootHostsStep(hosts_to_reboot))
@@ -1396,6 +1425,7 @@ class SwDeployWorkerHostsMixin(UpdateWorkerHostsMixin):
                 if not do_nothing
                 else strategy.SwDeployDoNothingStep
             ),
+            unlock_retry_count=strategy.UnlockHostsStep.MAX_RETRIES,
         )
 
 
