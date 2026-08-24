@@ -92,6 +92,11 @@ class Host(ObjectData):
         self._upgrade_inprogress = upgrade_inprogress
         self._recover_instances = recover_instances
         self._host_services_locked = host_services_locked
+        # Consecutive attempts to re-drive the enable of a compute service
+        # that nova reports disabled while VIM intends it enabled.  Deliberately
+        # not persisted: it is recovery bookkeeping rather than host state, and
+        # clearing it on process restart is harmless.
+        self._compute_service_reconcile_attempts = 0
         self._nfvi_host = nfvi_host
         self._fsm = host_fsm.HostStateMachine(self, initial_state)
         self._fsm.register_state_change_callback(self._state_change_callback)
@@ -229,6 +234,28 @@ class Host(ObjectData):
 
         self._host_services_locked = value
         self._persist()
+
+    @property
+    def compute_service_reconcile_attempts(self):
+        """Returns the consecutive compute service reconcile attempts."""
+
+        return self._compute_service_reconcile_attempts
+
+    @compute_service_reconcile_attempts.setter
+    def compute_service_reconcile_attempts(self, value):
+        """Allows setting the consecutive compute service reconcile attempts."""
+
+        self._compute_service_reconcile_attempts = value
+
+    def clear_compute_service_reconcile_attempts(self):
+        """Clears the compute service reconcile attempt counter."""
+
+        if 0 != self._compute_service_reconcile_attempts:
+            DLOG.info(
+                "Compute service observed enabled on %s, clearing reconcile "
+                "attempts." % self.name
+            )
+            self._compute_service_reconcile_attempts = 0
 
     @property
     def action(self):
