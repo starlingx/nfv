@@ -4309,7 +4309,8 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         Verify:
         - QueryKubeVersionsStep, QueryKubeUpgradeStep, KubeUpgradeCleanupAbortedStep,
-          and QueryKubeHostUpgradeStep are added to the build query stage.
+          SwSystemDeployCleanupAbortedStep, and QueryKubeHostUpgradeStep are added
+          to the build query stage.
         """
         self.create_host("controller-0", aio=True)
 
@@ -4334,6 +4335,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {"name": "query-kube-versions"},
                         {"name": "query-kube-upgrade"},
                         {"name": "kube-upgrade-cleanup-aborted"},
+                        {"name": "sw-system-deploy-cleanup-aborted"},
                         {"name": "query-kube-host-upgrade"},
                         {"name": "sw-deploy-precheck"},
                     ],
@@ -4440,6 +4442,7 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         rollback=False,
         delete=False,
         release=None,
+        worker_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
     ):
         """Create a SwUpgradeStrategy with kube_upgrade_version populated.
 
@@ -4456,7 +4459,7 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
             uuid=str(uuid.uuid4()),
             controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
             storage_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
+            worker_apply_type=worker_apply_type,
             max_parallel_worker_hosts=10,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,

@@ -1575,6 +1575,7 @@ class SwUpgradeStrategy(
             stage.add_step(strategy.QueryKubeVersionsStep())
             stage.add_step(strategy.QueryKubeUpgradeStep())
             stage.add_step(strategy.KubeUpgradeCleanupAbortedStep())
+            stage.add_step(strategy.SwSystemDeployCleanupAbortedStep())
             stage.add_step(strategy.QueryKubeHostUpgradeStep())
 
         # Precheck is part of create phase because DC requested it

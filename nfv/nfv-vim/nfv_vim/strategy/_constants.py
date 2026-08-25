@@ -27,6 +27,7 @@ class StrategyStepNames(Constants, metaclass=Singleton):
     SW_DEPLOY_DELETE = Constant("deploy-delete")
     SW_SYSTEM_DEPLOY_INIT = Constant("sw-system-deploy-init")
     SW_SYSTEM_DEPLOY_DELETE = Constant("sw-system-deploy-delete")
+    SW_SYSTEM_DEPLOY_CLEANUP_ABORTED = Constant("sw-system-deploy-cleanup-aborted")
     SWACT_HOSTS = Constant("swact-hosts")
     FW_UPDATE_HOSTS = Constant("fw-update-hosts")
     FW_UPDATE_ABORT_HOSTS = Constant("fw-update-abort-hosts")
