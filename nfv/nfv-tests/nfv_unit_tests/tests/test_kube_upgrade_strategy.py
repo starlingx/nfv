@@ -1854,7 +1854,10 @@ class TestKubeHostUpgradeControlPlaneStepRetry(
         super().setUp()
 
         self.step = self._make_step()
-        self.step.stage = mock.MagicMock()
+        # Keep a strong reference — the stage setter stores only a weakref
+        # and MagicMock's cyclic internals defer collection to the GC.
+        self._mock_stage = mock.MagicMock()
+        self.step.stage = self._mock_stage
 
     def _make_step(self):
         """Return a KubeHostUpgradeControlPlaneStep wired to a mock stage."""

@@ -30,6 +30,7 @@ from nfv_vim.strategy.steps.kube_upgrade_steps import (  # noqa: F401
     KubeHostUpgradeKubeletStep,
     KubePostApplicationUpdateStep,
     KubePreApplicationUpdateStep,
+    KubeUpgradeAbortStep,
     KubeUpgradeCleanupAbortedStep,
     KubeUpgradeCleanupStep,
     KubeUpgradeCompleteStep,

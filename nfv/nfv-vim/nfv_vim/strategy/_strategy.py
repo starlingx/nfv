@@ -1594,6 +1594,107 @@ class SwUpgradeStrategy(
                     return False
         return super().is_abortable()
 
+    def abort(self, stage_id):
+        """Abort the strategy.
+
+        For combined P&K strategies on simplex, if kube-upgrade stages have
+        already completed but a subsequent sw-deploy stage fails, the normal
+        abort mechanism skips completed stages and does not generate
+        kube-upgrade-abort steps. This override detects that scenario and
+        appends kube-upgrade-abort + cleanup stages to the abort phase so
+        the stranded kube-upgrade object is properly cleaned up.
+        """
+
+        success, reason = super().abort(stage_id)
+
+        if success and self._kube_upgrade_version and self._single_controller:
+            self._append_kube_upgrade_abort_stages()
+
+        return success, reason
+
+    def _append_kube_upgrade_abort_stages(self):
+        """Append kube-upgrade abort+cleanup stages to the abort phase.
+
+        This handles the case where kube-upgrade stages have already completed
+        successfully but a subsequent sw-deploy stage fails. The normal abort
+        mechanism (StrategyStage._abort) skips step.abort() calls for completed
+        stages (where _current_step == len(steps)), so KubeUpgradeAbortStep is
+        never generated. This method explicitly injects the necessary abort and
+        cleanup steps into the abort phase.
+
+        The kube abort is only added if the abort occurs before the
+        UpgradeHostsStep (deploy-host) has been reached. Once deploy-host
+        has started or completed, the kube-upgrade no longer needs to be
+        aborted separately.
+        """
+
+        from nfv_vim import nfvi
+        from nfv_vim import strategy
+
+        # Only act if there's an active kube-upgrade
+        if self.nfvi_kube_upgrade is None:
+            return
+
+        # Do not add kube abort if kube-upgrade is already in a terminal state
+        if self.nfvi_kube_upgrade.state in (
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTED,
+            nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
+        ):
+            DLOG.info(
+                "Combined P&K strategy abort: kube-upgrade already in "
+                "terminal state '%s', skipping abort+cleanup."
+                % self.nfvi_kube_upgrade.state
+            )
+            return
+
+        # Do not add kube abort if we already reached the UpgradeHostsStep
+        if self._is_at_or_past_upgrade_hosts_step():
+            return
+
+        # Check if the abort phase already has a kube-upgrade-abort step
+        # (avoid duplicates if abort is called multiple times)
+        for abort_stage in self.abort_phase.stages:
+            for step in abort_stage.steps:
+                if step.name == strategy.STRATEGY_STEP_NAME.KUBE_UPGRADE_ABORT:
+                    return
+
+        DLOG.info(
+            "Combined P&K strategy abort: kube-upgrade in state '%s', "
+            "appending kube-upgrade-abort and cleanup stages to abort phase."
+            % self.nfvi_kube_upgrade.state
+        )
+
+        # Create a stage with just kube-upgrade-abort. When it aborts due to
+        # failure on both the standalone kube-upgrade strategy as well as the
+        # combined strategy, only the abort step is executed and the cleanup
+        # is executed by the next strategy build run (KubeUpgradeCleanupAbortedStep).
+        stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.KUBE_UPGRADE_ABORT)
+        stage.add_step(strategy.KubeUpgradeAbortStep())
+        self.abort_phase.add_stage(stage)
+
+    def _is_at_or_past_upgrade_hosts_step(self):
+        """Check if the current execution point has reached UpgradeHostsStep.
+
+        Returns True if the apply phase is currently at or past the first
+        upgrade-hosts step. Returns False if no such step exists or we
+        haven't reached it yet.
+        """
+
+        from nfv_vim import strategy
+
+        phase = self.apply_phase
+        current_stage_index = phase.current_stage
+
+        for stage_idx, stage in enumerate(phase.stages):
+            for step_idx, step in enumerate(stage.steps):
+                if step.name == strategy.STRATEGY_STEP_NAME.UPGRADE_HOSTS:
+                    return current_stage_index > stage_idx or (
+                        current_stage_index == stage_idx
+                        and stage.current_step >= step_idx
+                    )
+
+        return False
+
     def _build_normal(self):
         from nfv_vim import strategy
 

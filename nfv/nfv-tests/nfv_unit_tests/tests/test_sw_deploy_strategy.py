@@ -4440,6 +4440,7 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         rollback=False,
         delete=False,
         release=None,
+        worker_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
     ):
         """Create a SwUpgradeStrategy with kube_upgrade_version populated.
 
@@ -4456,7 +4457,7 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
             uuid=str(uuid.uuid4()),
             controller_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
             storage_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
-            worker_apply_type=SW_UPDATE_APPLY_TYPE.IGNORE,
+            worker_apply_type=worker_apply_type,
             max_parallel_worker_hosts=10,
             default_instance_action=SW_UPDATE_INSTANCE_ACTION.STOP_START,
             alarm_restrictions=SW_UPDATE_ALARM_RESTRICTION.STRICT,
@@ -5347,6 +5348,208 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
                     strategy.is_abortable(),
                     "Expected is_abortable()=True for non-kube stage '%s'" % stage.name,
                 )
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_abort_appends_kube_cleanup_when_kube_upgrade_active(self):
+        """Test abort adds kube-upgrade-abort + cleanup when kube-upgrade is active.
+
+        This test simulates a scenario where a Combined P&K strategy on simplex has
+        a currently active kube-upgrade. When the strategy is aborted, the normal
+        abort mechanism skips completed stages, so no kube-upgrade-abort step is
+        generated. The SwUpgradeStrategy.abort() override must detect the
+        active kube-upgrade and inject kube-upgrade-abort into the abort phase.
+        """
+        strategy = self._create_combined_strategy(
+            single_controller=True,
+            nfvi_kube_upgrade=nfvi.objects.v1.KubeUpgrade(
+                KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+                _COMBINED_FROM_KUBE,
+                _COMBINED_TO_KUBE,
+            ),
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        # Simulate the strategy in mid-apply at the sw-upgrade-start stage
+        # (kube stages already completed)
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+        strategy._current_phase = common_strategy.STRATEGY_PHASE.APPLY
+        strategy.apply_phase._inprogress = True
+        strategy.apply_phase._stop_at_stage = len(strategy.apply_phase.stages)
+
+        # Find sw-upgrade-start and set as current stage
+        sw_start_idx = None
+        for idx, stage in enumerate(strategy.apply_phase.stages):
+            if stage.name == "sw-upgrade-start":
+                sw_start_idx = idx
+                break
+        self.assertIsNotNone(sw_start_idx, "sw-upgrade-start stage not found")
+        strategy.apply_phase._current_stage = sw_start_idx
+
+        # Mark all stages before sw-upgrade-start as completed
+        # (simulates kube stages having finished successfully)
+        for idx in range(sw_start_idx):
+            stage = strategy.apply_phase.stages[idx]
+            stage._current_step = len(stage.steps)
+            stage._result = common_strategy.STRATEGY_STAGE_RESULT.SUCCESS
+
+        # Trigger abort
+        success, reason = strategy.abort(None)
+        self.assertTrue(success, "Abort should succeed, reason: %s" % reason)
+
+        # Verify abort phase has kube-upgrade-abort and cleanup steps
+        abort_stage_names = [s.name for s in strategy.abort_phase.stages]
+        self.assertIn(
+            "kube-upgrade-abort",
+            abort_stage_names,
+            "Abort phase should contain kube-upgrade-abort stage",
+        )
+
+        # Find the abort stage and check its steps
+        abort_stage = None
+        for stage in strategy.abort_phase.stages:
+            if stage.name == "kube-upgrade-abort":
+                abort_stage = stage
+                break
+        self.assertIsNotNone(abort_stage)
+
+        step_names = [s.name for s in abort_stage.steps]
+        self.assertIn("kube-upgrade-abort", step_names)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_abort_skips_kube_cleanup_when_no_kube_upgrade(self):
+        """Test abort does NOT add kube cleanup when no kube-upgrade exists.
+
+        When nfvi_kube_upgrade is None (e.g., abort before kube-upgrade-start
+        executes), the abort override should not inject any kube cleanup stages.
+        """
+        strategy = self._create_combined_strategy(
+            single_controller=True,
+            nfvi_kube_upgrade=None,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+        strategy._current_phase = common_strategy.STRATEGY_PHASE.APPLY
+        strategy.apply_phase._inprogress = True
+        strategy.apply_phase._stop_at_stage = len(strategy.apply_phase.stages)
+        strategy.apply_phase._current_stage = 0
+
+        success, reason = strategy.abort(None)
+        self.assertTrue(success)
+
+        # Abort phase should NOT have kube-upgrade-cleanup
+        abort_stage_names = [s.name for s in strategy.abort_phase.stages]
+        self.assertNotIn("kube-upgrade-cleanup", abort_stage_names)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_abort_skips_kube_cleanup_when_at_upgrade_hosts_step(self):
+        """Test abort does NOT add kube cleanup when at UpgradeHostsStep.
+
+        When the abort occurs at or after the UpgradeHostsStep (deploy-host),
+        the kube-upgrade abort is not needed because the deploy-host operation
+        handles the upgrade lifecycle.
+        """
+        strategy = self._create_combined_strategy(
+            single_controller=True,
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL,
+            nfvi_kube_upgrade=nfvi.objects.v1.KubeUpgrade(
+                KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+                _COMBINED_FROM_KUBE,
+                _COMBINED_TO_KUBE,
+            ),
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+        strategy._current_phase = common_strategy.STRATEGY_PHASE.APPLY
+        strategy.apply_phase._inprogress = True
+        strategy.apply_phase._stop_at_stage = len(strategy.apply_phase.stages)
+
+        # Find the stage containing the UpgradeHostsStep and position
+        # the current execution at that step
+        deploy_stage_idx = None
+        upgrade_step_idx = None
+        for s_idx, stage in enumerate(strategy.apply_phase.stages):
+            for st_idx, step in enumerate(stage.steps):
+                if step.name == "upgrade-hosts":
+                    deploy_stage_idx = s_idx
+                    upgrade_step_idx = st_idx
+                    break
+            if deploy_stage_idx is not None:
+                break
+        self.assertIsNotNone(deploy_stage_idx, "No UpgradeHostsStep found in strategy")
+
+        # Set current stage and step to the UpgradeHostsStep
+        strategy.apply_phase._current_stage = deploy_stage_idx
+        strategy.apply_phase.stages[deploy_stage_idx]._current_step = upgrade_step_idx
+
+        success, reason = strategy.abort(None)
+        self.assertTrue(success)
+
+        # Abort phase should NOT have kube-upgrade-cleanup since at upgrade-hosts
+        abort_stage_names = [s.name for s in strategy.abort_phase.stages]
+        self.assertNotIn("kube-upgrade-cleanup", abort_stage_names)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_0,
+    )
+    def test_combined_abort_skips_kube_cleanup_on_duplex(self):
+        """Test abort does NOT add kube cleanup on duplex systems.
+
+        On duplex, kube-upgrade abort is not supported (requires backup+restore).
+        The override should only activate for simplex (single_controller=True).
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self._create_combined_strategy(
+            single_controller=False,
+            nfvi_kube_upgrade=nfvi.objects.v1.KubeUpgrade(
+                KUBE_UPGRADE_STATE.KUBE_UPGRADED_FIRST_MASTER,
+                _COMBINED_FROM_KUBE,
+                _COMBINED_TO_KUBE,
+            ),
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        self.assertFalse(strategy.is_build_failed())
+
+        strategy._state = common_strategy.STRATEGY_STATE.APPLYING
+        strategy._current_phase = common_strategy.STRATEGY_PHASE.APPLY
+        strategy.apply_phase._inprogress = True
+        strategy.apply_phase._stop_at_stage = len(strategy.apply_phase.stages)
+
+        # Find sw-upgrade-start and set as current stage
+        for idx, stage in enumerate(strategy.apply_phase.stages):
+            if stage.name == "sw-upgrade-start":
+                strategy.apply_phase._current_stage = idx
+                break
+
+        success, reason = strategy.abort(None)
+        self.assertTrue(success)
+
+        # Abort phase should NOT have kube-upgrade-cleanup on duplex
+        abort_stage_names = [s.name for s in strategy.abort_phase.stages]
+        self.assertNotIn("kube-upgrade-cleanup", abort_stage_names)
 
 
 @mock.patch(

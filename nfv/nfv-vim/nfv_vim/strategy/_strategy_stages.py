@@ -73,6 +73,7 @@ class StrategyStageNames(Constants, metaclass=Singleton):
     KUBE_UPGRADE_UNLOCK_LOCKED_WORKERS = Constant("kube-upgrade-unlock-locked-workers")
     KUBE_POST_APPLICATION_UPDATE = Constant("kube-post-application-update")
     KUBE_UPGRADE_COMPLETE = Constant("kube-upgrade-complete")
+    KUBE_UPGRADE_ABORT = Constant("kube-upgrade-abort")
     KUBE_UPGRADE_CLEANUP = Constant("kube-upgrade-cleanup")
 
 
