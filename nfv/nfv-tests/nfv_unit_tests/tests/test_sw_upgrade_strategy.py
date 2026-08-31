@@ -2061,3 +2061,174 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.assertEqual(False, new_dict["delete"])
         self.assertEqual(False, new_dict["cleanup"])
         self.assertEqual(False, new_dict["snapshot"])
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_upgrade_strategy_controller_stages_are_abortable(self):
+        """Test that sw-upgrade controller stages are abortable.
+
+        - standard dx hosts (non-AIO)
+        - serial apply
+        - reboot required
+        Verify:
+        - All sw-upgrade-controllers stages have is_abortable=True.
+        """
+
+        self.create_host("controller-0")
+        self.create_host("controller-1")
+
+        controller_hosts = []
+        for host in list(self._host_table.values()):
+            if HOST_PERSONALITY.CONTROLLER in host.personality:
+                controller_hosts.append(host)
+
+        strategy = self.create_sw_upgrade_strategy()
+
+        strategy._add_controller_strategy_stages(
+            controllers=controller_hosts, reboot=True
+        )
+
+        for stage in strategy.apply_phase.stages:
+            if stage.name == "sw-upgrade-controllers":
+                self.assertTrue(
+                    stage._is_abortable,
+                    "Expected sw-upgrade-controllers stage to be abortable "
+                    "(is_abortable=True)",
+                )
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_upgrade_strategy_worker_stages_with_controller_personality_abortable(
+        self,
+    ):
+        """Test that sw-upgrade worker stages are abortable even when hosts
+
+
+        have controller personality.
+
+        Previously, the sw-upgrade strategy would set is_abortable=False
+        when worker hosts had controller personality (AIO systems).
+        This test verifies that all stages are now abortable.
+
+        - aio-dx hosts (controller + worker personality)
+        - serial apply
+        - reboot required
+        Verify:
+        - All sw-upgrade-worker-hosts stages have is_abortable=True.
+        """
+
+        self.create_host("controller-0", aio=True, openstack_installed=False)
+        self.create_host("controller-1", aio=True, openstack_installed=False)
+
+        worker_hosts = []
+        for host in list(self._host_table.values()):
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        strategy = self.create_sw_upgrade_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
+        )
+
+        success, reason = strategy._add_worker_strategy_stages(
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
+
+        self.assertTrue(success, reason)
+
+        worker_stages = [
+            stage
+            for stage in strategy.apply_phase.stages
+            if stage.name == "sw-upgrade-worker-hosts"
+        ]
+        self.assertGreater(
+            len(worker_stages), 0, "Expected at least one sw-upgrade-worker-hosts stage"
+        )
+
+        for stage in worker_stages:
+            self.assertTrue(
+                stage._is_abortable,
+                "Expected sw-upgrade-worker-hosts stage to be abortable "
+                "(is_abortable=True)",
+            )
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    def test_sw_upgrade_strategy_aiosx_worker_stages_abortable(self):
+        """Test that sw-upgrade worker stages are abortable on AIO-SX.
+
+        - aio-sx host (controller + worker personality)
+        - serial apply
+        - reboot required
+        Verify:
+        - All sw-upgrade-worker-hosts stages have is_abortable=True.
+        """
+
+        controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy()
+
+        success, reason = strategy._add_worker_strategy_stages(
+            worker_hosts=controller_hosts, reboot=True
+        )
+
+        self.assertTrue(success, reason)
+
+        for stage in strategy.apply_phase.stages:
+            if stage.name == "sw-upgrade-worker-hosts":
+                self.assertTrue(
+                    stage._is_abortable,
+                    "Expected sw-upgrade-worker-hosts stage to be abortable "
+                    "(is_abortable=True)",
+                )
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_upgrade_strategy_worker_stages_abortable_persists(self):
+        """Test that is_abortable=True persists through serialization for
+
+        sw-upgrade worker stages with controller personality.
+
+        - aio-dx hosts (controller + worker personality)
+        - serial apply
+        - reboot required
+        Verify:
+        - The is_abortable field is True in the serialized stage dict.
+        """
+
+        self.create_host("controller-0", aio=True, openstack_installed=False)
+        self.create_host("controller-1", aio=True, openstack_installed=False)
+
+        worker_hosts = []
+        for host in list(self._host_table.values()):
+            if HOST_PERSONALITY.WORKER in host.personality:
+                worker_hosts.append(host)
+        sorted_worker_hosts = sorted(worker_hosts, key=lambda host: host.name)
+
+        strategy = self.create_sw_upgrade_strategy(
+            worker_apply_type=SW_UPDATE_APPLY_TYPE.SERIAL
+        )
+
+        success, reason = strategy._add_worker_strategy_stages(
+            worker_hosts=sorted_worker_hosts, reboot=True
+        )
+
+        self.assertTrue(success, reason)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        for stage_dict in apply_phase["stages"]:
+            if stage_dict["name"] == "sw-upgrade-worker-hosts":
+                self.assertTrue(
+                    stage_dict["is_abortable"],
+                    "Expected is_abortable=True in serialized "
+                    "sw-upgrade-worker-hosts stage",
+                )

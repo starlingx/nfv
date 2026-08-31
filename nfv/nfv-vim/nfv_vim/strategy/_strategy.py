@@ -934,8 +934,6 @@ class UpdateControllerHostsMixin:
                         local_host = host
                     else:
                         host_list = [host]
-                        # Sw-deploy strategy does not support abort when upgrading
-                        # controller nodes
                         stage = strategy.StrategyStage(
                             strategy_stage_name, is_abortable
                         )
@@ -991,8 +989,6 @@ class UpdateControllerHostsMixin:
 
             if local_host is not None:
                 host_list = [local_host]
-                # Sw-deploy strategy does not support abort when upgrading
-                # controller nodes
                 stage = strategy.StrategyStage(strategy_stage_name, is_abortable)
                 stage.add_step(self._create_alarm_pre_check_step())
                 if reboot:
@@ -1059,7 +1055,6 @@ class SwDeployControllerHostsMixin(UpdateControllerHostsMixin):
             reboot,
             strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_CONTROLLERS,
             strategy.UpgradeHostsStep,
-            is_abortable=False,
             unlock_retry_count=strategy.UnlockHostsStep.MAX_RETRIES,
         )
 
@@ -1259,15 +1254,12 @@ class UpdateWorkerHostsMixin:
 
             hosts_to_lock = []
             hosts_to_reboot = []
-            is_abortable = True
             if reboot:
                 if isinstance(self, SwUpgradeStrategy) and any(
                     HOST_PERSONALITY.CONTROLLER in v.personality for v in host_list
                 ):
                     # When running a sw-upgrade strategy for a system, without worker
-                    # nodes, the controller will also have a worker personality, so the
-                    # abort needs to be blocked in the sw-upgrade-workers stage
-                    is_abortable = False
+                    # nodes, the controller will also have a worker personality.
                     # Always lock/unlock controllers during rollback/upgrade
                     hosts_to_lock = host_list
                     hosts_to_reboot = []
@@ -1275,7 +1267,7 @@ class UpdateWorkerHostsMixin:
                     hosts_to_lock = [x for x in host_list if not x.is_locked()]
                     hosts_to_reboot = [x for x in host_list if x.is_locked()]
 
-            stage = strategy.StrategyStage(strategy_stage_name, is_abortable)
+            stage = strategy.StrategyStage(strategy_stage_name)
 
             stage.add_step(self._create_alarm_pre_check_step())
 

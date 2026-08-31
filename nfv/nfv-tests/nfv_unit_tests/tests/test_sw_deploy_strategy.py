@@ -1247,6 +1247,148 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_deploy_strategy_controller_stages_are_abortable(self):
+        """Test that sw-deploy controller strategy stages are abortable.
+
+        - standard dx hosts (non-AIO)
+        - serial apply
+        - reboot required
+        Verify:
+        - All sw-upgrade-controllers stages have is_abortable=True.
+        """
+
+        _, _, _, strategy = self._gen_standard_hosts_and_strategy(
+            openstack=False,
+        )
+
+        controller_hosts = []
+        for host in list(self._host_table.values()):
+            if HOST_PERSONALITY.CONTROLLER in host.personality:
+                controller_hosts.append(host)
+
+        success, reason = strategy._add_controller_strategy_stages(
+            controllers=controller_hosts, reboot=True
+        )
+
+        self.assertTrue(success, reason)
+
+        for stage in strategy.apply_phase.stages:
+            if stage.name == "sw-upgrade-controllers":
+                self.assertTrue(
+                    stage._is_abortable,
+                    "Expected sw-upgrade-controllers stage to be abortable "
+                    "(is_abortable=True)",
+                )
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    def test_sw_deploy_strategy_aiosx_worker_stages_are_abortable(self):
+        """Test that sw-deploy worker stages are abortable on AIO-SX.
+
+        - aio-sx host
+        - serial apply
+        - reboot required
+        Verify:
+        - All sw-upgrade-worker-hosts stages have is_abortable=True.
+        """
+
+        controller_hosts, strategy = self._gen_aiosx_hosts_and_strategy()
+
+        success, reason = strategy._add_worker_strategy_stages(
+            worker_hosts=controller_hosts, reboot=True
+        )
+
+        self.assertTrue(success, reason)
+
+        for stage in strategy.apply_phase.stages:
+            if stage.name == "sw-upgrade-worker-hosts":
+                self.assertTrue(
+                    stage._is_abortable,
+                    "Expected sw-upgrade-worker-hosts stage to be abortable "
+                    "(is_abortable=True)",
+                )
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_deploy_strategy_aiodx_worker_stages_are_abortable(self):
+        """Test that sw-deploy worker stages are abortable on AIO-DX.
+
+        - aio-dx hosts
+        - serial apply
+        - reboot required
+        Verify:
+        - All sw-upgrade-worker-hosts stages have is_abortable=True.
+        """
+
+        controller_hosts, strategy = self._gen_aiodx_hosts_and_strategy()
+
+        success, reason = strategy._add_worker_strategy_stages(
+            worker_hosts=controller_hosts, reboot=True
+        )
+
+        self.assertTrue(success, reason)
+
+        for stage in strategy.apply_phase.stages:
+            if stage.name == "sw-upgrade-worker-hosts":
+                self.assertTrue(
+                    stage._is_abortable,
+                    "Expected sw-upgrade-worker-hosts stage to be abortable "
+                    "(is_abortable=True)",
+                )
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
+    @mock.patch(
+        "nfv_vim.strategy._strategy.get_local_host_name",
+        sw_update_testcase.fake_host_name_controller_1,
+    )
+    def test_sw_deploy_strategy_controller_stages_abortable_persists(self):
+        """Test that is_abortable=True persists through serialization
+
+        for sw-deploy controller stages.
+
+        - standard dx hosts (non-AIO)
+        - serial apply
+        - reboot required
+        Verify:
+        - The is_abortable field is True in the serialized stage dict.
+        """
+
+        _, _, _, strategy = self._gen_standard_hosts_and_strategy(
+            openstack=False,
+        )
+
+        controller_hosts = []
+        for host in list(self._host_table.values()):
+            if HOST_PERSONALITY.CONTROLLER in host.personality:
+                controller_hosts.append(host)
+
+        success, reason = strategy._add_controller_strategy_stages(
+            controllers=controller_hosts, reboot=True
+        )
+
+        self.assertTrue(success, reason)
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        for stage_dict in apply_phase["stages"]:
+            if stage_dict["name"] == "sw-upgrade-controllers":
+                self.assertTrue(
+                    stage_dict["is_abortable"],
+                    "Expected is_abortable=True in serialized "
+                    "sw-upgrade-controllers stage",
+                )
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+
     def test_sw_deploy_strategy_aiosx_already_deploying(self):
         """Test the sw_deploy strategy when patch already deploying:
 
