@@ -301,6 +301,81 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
 
         return controller_hosts, storage_hosts, worker_hosts, strategy
 
+    def _gen_rollback_before_deploy_host(
+        self,
+        is_sx,
+        deploy_state="start-done",
+        locked_hosts=None,
+        kube_upgrade_state=None,
+    ):
+        """Build and return a rollback strategy for the pre-deploy-host case.
+
+        Args:
+            is_sx: True for aio-sx, False for aio-dx.
+            deploy_state: Software deploy state ("start-done" or
+                "start-failed").
+            locked_hosts: Host names to override as locked, e.g.
+                ["controller-0"].
+            kube_upgrade_state: A KUBE_UPGRADE_STATE value, or None if no
+                kube-upgrade should be present.
+
+        Returns:
+            The strategy object (already built).
+        """
+
+        release = ["888.8"]
+        hosts = [{"hostname": "controller-0", "host_state": "pending"}]
+        if not is_sx:
+            hosts.append({"hostname": "controller-1", "host_state": "pending"})
+
+        gen = (
+            self._gen_aiosx_hosts_and_strategy
+            if is_sx
+            else self._gen_aiodx_hosts_and_strategy
+        )
+        _, strategy = gen(
+            release=None,
+            rollback=True,
+            delete=False,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                MOCK_METAPACKAGES,
+                {
+                    "release_id": MAJOR_RELEASE_UPGRADE,
+                    "state": "deploying",
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    "state": deploy_state,
+                    "reboot_required": True,
+                    "from_release": INITIAL_RELEASE,
+                    "to_release": MAJOR_RELEASE_UPGRADE,
+                },
+                hosts,
+            ),
+        )
+
+        for host_name in locked_hosts or []:
+            self.create_host(
+                host_name,
+                aio=True,
+                openstack_installed=False,
+                admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED,
+                oper_state=nfvi.objects.v1.HOST_OPER_STATE.DISABLED,
+                avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.ONLINE,
+            )
+
+        if kube_upgrade_state is not None:
+            strategy.nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
+                kube_upgrade_state,
+                "v1.29.2",
+                "v1.30.6",
+            )
+
+        strategy.sw_update_obj = SwUpgrade()
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        return strategy
+
 
 class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
     def test_is_major_release(self):
@@ -2406,63 +2481,14 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
     def test_sw_deploy_strategy_aiosx_rollback_from_start_done(self):
-        """Test the sw_deploy strategy apply phase:
+        """aio-sx, start-done, c0 unlocked, no kube → query-alarms + deploy-delete."""
 
-        - aio-sx
-        - major
-        - start-done
-        Verify:
-        - Pass.
-        """
-
-        release = ["888.8"]
-        _, strategy = self._gen_aiosx_hosts_and_strategy(
-            release=None,
-            rollback=True,
-            delete=False,
-            nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                release,
-                MOCK_METAPACKAGES,
-                {
-                    "release_id": MAJOR_RELEASE_UPGRADE,
-                    "state": "deploying",
-                    "sw_version": MAJOR_RELEASE_UPGRADE,
-                },
-                {
-                    "state": "start-done",
-                    "reboot_required": True,
-                    "from_release": INITIAL_RELEASE,
-                    "to_release": MAJOR_RELEASE_UPGRADE,
-                },
-                [
-                    {
-                        "hostname": "controller-0",
-                        "host_state": "pending",
-                    },
-                ],
-            ),
-        )
-
-        fake_upgrade_obj = SwUpgrade()
-        strategy.sw_update_obj = fake_upgrade_obj
-
-        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        apply_phase = strategy.apply_phase.as_dict()
-
+        strategy = self._gen_rollback_before_deploy_host(is_sx=True)
         expected_results = {
-            "total_stages": 2,
+            "total_stages": 1,
             "stages": [
                 {
                     "name": "sw-upgrade-rollback-start",
-                    "total_steps": 3,
-                    "steps": [
-                        {"name": "query-alarms"},
-                        {"name": "sw-deploy-abort"},
-                        {"name": "sw-deploy-activate-rollback"},
-                    ],
-                },
-                {
-                    "name": "sw-upgrade-rollback-complete",
                     "total_steps": 2,
                     "steps": [
                         {"name": "query-alarms"},
@@ -2471,105 +2497,38 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                 },
             ],
         }
-
         sw_update_testcase.validate_strategy_persists(strategy)
-        sw_update_testcase.validate_phase(apply_phase, expected_results)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
 
     def test_sw_deploy_strategy_aiosx_rollback_from_start_done_locked(self):
-        """Test the sw_deploy strategy apply phase:
+        """aio-sx, start-done, c0 locked, no kube"""
 
-        - aio-sx
-        - major
-        - start-done
-        - c0 locked
-        Verify:
-        - Pass.
-        """
-
-        release = ["888.8"]
-        _, strategy = self._gen_aiosx_hosts_and_strategy(
-            release=None,
-            rollback=True,
-            delete=False,
-            nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                release,
-                MOCK_METAPACKAGES,
-                {
-                    "release_id": MAJOR_RELEASE_UPGRADE,
-                    "state": "deploying",
-                    "sw_version": MAJOR_RELEASE_UPGRADE,
-                },
-                {
-                    "state": "start-done",
-                    "reboot_required": True,
-                    "from_release": INITIAL_RELEASE,
-                    "to_release": MAJOR_RELEASE_UPGRADE,
-                },
-                [
-                    {
-                        "hostname": "controller-0",
-                        "host_state": "pending",
-                    },
-                ],
-            ),
+        strategy = self._gen_rollback_before_deploy_host(
+            is_sx=True, locked_hosts=["controller-0"]
         )
-
-        # Replace controller-0 with locked one
-        self.create_host(
-            "controller-0",
-            aio=True,
-            openstack_installed=False,
-            admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED,
-            oper_state=nfvi.objects.v1.HOST_OPER_STATE.DISABLED,
-            avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.ONLINE,
-        )
-
-        fake_upgrade_obj = SwUpgrade()
-        strategy.sw_update_obj = fake_upgrade_obj
-
-        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-        apply_phase = strategy.apply_phase.as_dict()
-
         expected_results = {
-            "total_stages": 3,
+            "total_stages": 1,
             "stages": [
                 {
                     "name": "sw-upgrade-rollback-start",
                     "total_steps": 3,
                     "steps": [
                         {"name": "query-alarms"},
-                        {"name": "sw-deploy-abort"},
-                        {"name": "sw-deploy-activate-rollback"},
-                    ],
-                },
-                {
-                    "name": "sw-upgrade-rollback-complete",
-                    "total_steps": 2,
-                    "steps": [
-                        {"name": "query-alarms"},
                         {"name": "deploy-delete"},
-                    ],
-                },
-                {
-                    "name": "sw-upgrade-worker-hosts",
-                    "total_steps": 6,
-                    "steps": [
-                        {"name": "query-alarms"},
-                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
                         {
-                            "name": "sw-deploy-do-nothing",
+                            "name": "unlock-hosts",
                             "entity_names": ["controller-0"],
                         },
-                        {"name": "system-stabilize", "timeout": 15},
-                        {"name": "unlock-hosts"},
-                        {"name": "wait-alarms-clear", "timeout": 2400},
                     ],
                 },
             ],
         }
-
         sw_update_testcase.validate_strategy_persists(strategy)
-        sw_update_testcase.validate_phase(apply_phase, expected_results)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
 
     def test_sw_deploy_strategy_aiosx_rollback_from_host_rollback_deployed_unlocked(
         self,
@@ -4188,6 +4147,200 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_aiodx_rollback_from_start_done(self):
+        """aio-dx, start-done, both unlocked"""
+
+        strategy = self._gen_rollback_before_deploy_host(is_sx=False)
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                    ],
+                },
+            ],
+        }
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
+
+    def test_sw_deploy_strategy_aiodx_rollback_from_start_done_locked(self):
+        """aio-dx, start-done, c1 locked"""
+
+        strategy = self._gen_rollback_before_deploy_host(
+            is_sx=False, locked_hosts=["controller-1"]
+        )
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                        {
+                            "name": "unlock-hosts",
+                            "entity_names": ["controller-1"],
+                        },
+                    ],
+                },
+            ],
+        }
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_start_done_with_kube_upgrade(
+        self,
+    ):
+        """aio-sx, start-done, c0 unlocked, active kube"""
+
+        strategy = self._gen_rollback_before_deploy_host(
+            is_sx=True,
+            kube_upgrade_state=KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
+        )
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                        {"name": "kube-upgrade-abort"},
+                    ],
+                },
+            ],
+        }
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_start_done_locked_with_kube_upgrade(
+        self,
+    ):
+        """aio-sx, start-done, c0 locked, active kube"""
+
+        strategy = self._gen_rollback_before_deploy_host(
+            is_sx=True,
+            locked_hosts=["controller-0"],
+            kube_upgrade_state=KUBE_UPGRADE_STATE.KUBE_UPGRADE_STARTED,
+        )
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 4,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                        {
+                            "name": "unlock-hosts",
+                            "entity_names": ["controller-0"],
+                        },
+                        {"name": "kube-upgrade-abort"},
+                    ],
+                },
+            ],
+        }
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_start_done_kube_already_aborted(
+        self,
+    ):
+        """aio-sx, start-done, kube already aborted → no kube-upgrade-abort."""
+
+        strategy = self._gen_rollback_before_deploy_host(
+            is_sx=True,
+            kube_upgrade_state=KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTED,
+        )
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                    ],
+                },
+            ],
+        }
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
+
+    def test_sw_deploy_strategy_aiosx_rollback_from_start_failed(self):
+        """aio-sx, start-failed, c0 unlocked → same as start-done."""
+
+        strategy = self._gen_rollback_before_deploy_host(
+            is_sx=True, deploy_state="start-failed"
+        )
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                    ],
+                },
+            ],
+        }
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(
+            strategy.apply_phase.as_dict(), expected_results
+        )
+
+    @mock.patch("nfv_common.strategy._strategy.Strategy._build")
+    def test_sw_deploy_strategy_rollback_build_phase_steps(self, fake_build):
+        """Verify rollback build phase includes query-kube-upgrade step."""
+
+        self.create_host("controller-0", aio=True)
+
+        strategy = self.create_sw_deploy_strategy(
+            single_controller=True,
+            release=None,
+            rollback=True,
+        )
+        strategy.sw_update_obj = SwUpgrade()
+        strategy.build()
+
+        expected_results = {
+            "total_stages": 1,
+            "stages": [
+                {
+                    "name": "sw-upgrade-query",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "query-upgrade"},
+                        {"name": "query-kube-upgrade"},
+                    ],
+                },
+            ],
+        }
+        sw_update_testcase.validate_phase(
+            strategy.build_phase.as_dict(), expected_results
+        )
 
     def test_sw_deploy_strategy_aiosx_downgrade(self):
         """Test the sw_deploy strategy apply phase:

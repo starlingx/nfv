@@ -1554,7 +1554,7 @@ class SwUpgradeStrategy(
 
         # Any change in this condition need to be reflected to from_dict
         # and as_dict as well
-        if self._kube_upgrade_version or self._cleanup:
+        if self._kube_upgrade_version or self._cleanup or self._rollback:
             self.initialize_mixin()
 
     @property
@@ -1728,6 +1728,7 @@ class SwUpgradeStrategy(
         stage = strategy.StrategyStage(strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_QUERY)
         stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
         stage.add_step(strategy.QueryUpgradeStep(release=None))
+        stage.add_step(strategy.QueryKubeUpgradeStep())
         self.build_phase.add_stage(stage)
         super().build()
 
@@ -2184,6 +2185,69 @@ class SwUpgradeStrategy(
         stage.add_step(strategy.SwDeployActivateRollbackStep())
         self.apply_phase.add_stage(stage)
 
+    def _add_rollback_start_stage_before_deploy_host(self):
+        """Add rollback start stage for the pre-deploy-host case.
+
+        When the deployment state is start-done or start-failed (i.e., no host
+        has been deployed yet), the rollback does not require abort +
+        activate-rollback. Instead, the flow is:
+          1. software deploy delete
+          2. Unlock the first host in the order of operations if it is
+             locked (controller-0 for SX, controller-1 for DX)
+          3. system kube-upgrade abort (if a kube-upgrade exists and is not
+             already in a terminal state)
+        """
+
+        from nfv_vim import nfvi
+        from nfv_vim import strategy
+        from nfv_vim import tables
+
+        stage = strategy.StrategyStage(
+            strategy.STRATEGY_STAGE_NAME.SW_UPGRADE_ROLLBACK_START
+        )
+
+        stage.add_step(strategy.QueryAlarmsStep(ignore_alarms=self._ignore_alarms))
+
+        # deploy-delete operates on a single release and must be persisted as
+        # a string so that after host rollback to a pre-componentization
+        # release (< 26.10), the older VIM code can consume it correctly.
+        # deploy-delete must run before unlock to avoid the platform rejecting
+        # the unlock with "host-unlock rejected: software deploy to <host> has
+        # not completed".
+        release = self.nfvi_upgrade.release_id
+        if isinstance(release, list):
+            release = release[0] if release else None
+
+        stage.add_step(strategy.SwDeployDeleteStep(release=release))
+
+        # Unlock the first host in the order of operations if it is locked.
+        # On SX, that is controller-0. On DX, that is controller-1 (the
+        # non-active controller that gets deployed first).
+        host_table = tables.tables_get_host_table()
+        if self._single_controller:
+            host_to_unlock = host_table.get(HOST_NAME.CONTROLLER_0, None)
+        else:
+            host_to_unlock = host_table.get(HOST_NAME.CONTROLLER_1, None)
+
+        if host_to_unlock is not None and host_to_unlock.is_locked():
+            stage.add_step(
+                strategy.UnlockHostsStep(
+                    [host_to_unlock],
+                    retry_count=strategy.UnlockHostsStep.MAX_RETRIES,
+                )
+            )
+
+        # Abort kube-upgrade if one exists and is not already terminal
+        if self.nfvi_kube_upgrade is not None:
+            terminal_states = (
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_ABORTED,
+                nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
+            )
+            if self.nfvi_kube_upgrade.state not in terminal_states:
+                stage.add_step(strategy.KubeUpgradeAbortStep())
+
+        self.apply_phase.add_stage(stage)
+
     def _add_rollback_hosts_stages(self, do_nothing):
         """Add rollback hosts strategy stage."""
 
@@ -2369,18 +2433,24 @@ class SwUpgradeStrategy(
         if self.nfvi_upgrade.is_start_done or self.nfvi_upgrade.is_start_failed:
             do_nothing = True
 
-        # Unlike with normal deployments we will defer skip logic to the steps
-        self._add_rollback_start_stage()
-        if not do_nothing:
-            self._add_rollback_hosts_stages(do_nothing)
-            self._add_rollback_complete_stage()
+        if do_nothing:
+            # No hosts have been deployed yet, so abort+activate-rollback is
+            # not required. Instead: unlock c0 if locked, deploy-delete, and
+            # kube-upgrade-abort if one exists.
+            self._add_rollback_start_stage_before_deploy_host()
         else:
-            self._add_rollback_complete_stage()
+            # Unlike with normal deployments we will defer skip logic to steps
+            self._add_rollback_start_stage()
             self._add_rollback_hosts_stages(do_nothing)
+            self._add_rollback_complete_stage()
 
-        if self.nfvi_upgrade and self.nfvi_upgrade.is_system_deploy_active:
-            DLOG.info("Software system deploy is active, adding delete stage")
-            self._add_system_deploy_delete_stage()
+            # The system-deploy can only be deleted when running the full rollback,
+            # otherwise the kube-upgrade object will still be present and will be
+            # deleted at next strategy creation, so we defer the system-deploy
+            # deletion to the build of next strategy as well
+            if self.nfvi_upgrade and self.nfvi_upgrade.is_system_deploy_active:
+                DLOG.info("Software system deploy is active, adding delete stage")
+                self._add_system_deploy_delete_stage()
 
     def _build_complete_cleanup(self, result, result_reason):
         from nfv_vim import strategy
@@ -2481,7 +2551,7 @@ class SwUpgradeStrategy(
         else:
             self._nfvi_upgrade = None
 
-        if self._kube_upgrade_version or self._cleanup:
+        if self._kube_upgrade_version or self._cleanup or self._rollback:
             self.mixin_from_dict(data)
 
         return self
@@ -2504,7 +2574,7 @@ class SwUpgradeStrategy(
             nfvi_upgrade_data = None
         data["nfvi_upgrade_data"] = nfvi_upgrade_data
 
-        if self._kube_upgrade_version or self._cleanup:
+        if self._kube_upgrade_version or self._cleanup or self._rollback:
             self.mixin_as_dict(data)
 
         return data

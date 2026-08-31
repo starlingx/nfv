@@ -269,7 +269,21 @@ class LockHostsStep(strategy.StrategyStep):
         self._retry_requested = False
 
     def abort(self):
-        """Returns the abort step related to this step."""
+        """Returns the abort step related to this step.
+
+        For sw-deploy strategies, returns an empty list because the
+        platform rejects host-unlock while a deploy is active. The
+        host will be unlocked by the subsequent rollback strategy,
+        which first deletes the deploy then unlocks the host.
+
+        For other strategies, returns an UnlockHostsStep to restore
+        the host to its pre-lock state.
+        """
+
+        from nfv_vim.strategy._strategy import STRATEGY_NAME
+
+        if self.strategy is not None and self.strategy.name == STRATEGY_NAME.SW_UPGRADE:
+            return []
 
         return [UnlockHostsStep(self._hosts)]
 
