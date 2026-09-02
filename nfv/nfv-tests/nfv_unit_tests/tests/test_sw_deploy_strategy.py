@@ -4309,7 +4309,8 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
 
         Verify:
         - QueryKubeVersionsStep, QueryKubeUpgradeStep, KubeUpgradeCleanupAbortedStep,
-          and QueryKubeHostUpgradeStep are added to the build query stage.
+          SwSystemDeployCleanupAbortedStep, and QueryKubeHostUpgradeStep are added
+          to the build query stage.
         """
         self.create_host("controller-0", aio=True)
 
@@ -4334,6 +4335,7 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
                         {"name": "query-kube-versions"},
                         {"name": "query-kube-upgrade"},
                         {"name": "kube-upgrade-cleanup-aborted"},
+                        {"name": "sw-system-deploy-cleanup-aborted"},
                         {"name": "query-kube-host-upgrade"},
                         {"name": "sw-deploy-precheck"},
                     ],

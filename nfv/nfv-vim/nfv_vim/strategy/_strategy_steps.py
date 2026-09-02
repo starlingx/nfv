@@ -2078,6 +2078,95 @@ class SwSystemDeployDeleteStep(strategy.StrategyStep):
         return data
 
 
+class SwSystemDeployCleanupAbortedStep(strategy.StrategyStep):
+    """Software System Deploy Cleanup Aborted - Strategy Step.
+
+    Deletes the system deploy if there is no active kube upgrade and no active
+    software deploy. This handles the case where a previous strategy created a
+    system deploy but was aborted before it could be cleaned up.
+    """
+
+    def __init__(self):
+        super().__init__(
+            STRATEGY_STEP_NAME.SW_SYSTEM_DEPLOY_CLEANUP_ABORTED, timeout_in_secs=60
+        )
+
+    @coroutine
+    def _sw_system_deploy_delete_callback(self):
+        """Software system deploy cleanup aborted callback."""
+
+        response = yield
+        DLOG.debug("sw-system-deploy-cleanup-aborted callback response=%s." % response)
+
+        if response["completed"]:
+            DLOG.debug("sw-system-deploy-cleanup-aborted completed")
+            if self.strategy is not None:
+                # cleanup deletes the system deploy, clear it from the
+                # strategy so SwSystemDeployInitStep will recreate it
+                self.strategy.nfvi_upgrade.system_deploy = None
+            result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+            self.stage.step_complete(result, "")
+        else:
+            reason = response.get(
+                "error-message",
+                "Unknown error while trying software system-deploy delete, "
+                "check /var/log/nfv-vim.log or /var/log/software.log "
+                "for more information.",
+            )
+            result = strategy.STRATEGY_STEP_RESULT.FAILED
+            self.phase.result_complete_response(response)
+            self.stage.step_complete(result, reason)
+
+    def apply(self):
+        """Software system deploy cleanup aborted.
+
+        Delete the system deploy only if there is no active kube upgrade
+        and no active software deploy.
+        """
+
+        from nfv_vim import nfvi
+
+        DLOG.info("Step (%s) apply." % self._name)
+
+        if self.strategy is not None:
+            nfvi_upgrade = self.strategy.nfvi_upgrade
+            nfvi_kube_upgrade = self.strategy.nfvi_kube_upgrade
+
+            # Only delete system deploy if there is no active kube upgrade
+            # and no active software deploy
+            if (
+                nfvi_kube_upgrade is None
+                and nfvi_upgrade is not None
+                and nfvi_upgrade.deploy_state is None
+                and nfvi_upgrade.is_system_deploy_active
+            ):
+                DLOG.info(
+                    "%s deleting system deploy: no active kube upgrade "
+                    "and no active software deploy" % self._name
+                )
+                nfvi.nfvi_sw_system_deploy_delete(
+                    self._sw_system_deploy_delete_callback(),
+                )
+                return strategy.STRATEGY_STEP_RESULT.WAIT, ""
+
+        # No cleanup needed
+        return strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+
+    def from_dict(self, data):
+        """Returns the step object initialized using the given dictionary."""
+        super().from_dict(data)
+        return self
+
+    def as_dict(self):
+        """Represent the sw-system-deploy cleanup aborted step as a dictionary."""
+
+        data = super().as_dict()
+        data["entity_type"] = ""
+        data["entity_names"] = []
+        data["entity_uuids"] = []
+        return data
+
+
 class MigrateInstancesFromHostStep(strategy.StrategyStep):
     """Migrate Instances From Host - Strategy Step."""
 
@@ -4670,6 +4759,9 @@ def strategy_step_rebuild_from_dict(data):
 
     elif STRATEGY_STEP_NAME.SW_SYSTEM_DEPLOY_DELETE == data["name"]:
         step_obj = object.__new__(SwSystemDeployDeleteStep)
+
+    elif STRATEGY_STEP_NAME.SW_SYSTEM_DEPLOY_CLEANUP_ABORTED == data["name"]:
+        step_obj = object.__new__(SwSystemDeployCleanupAbortedStep)
 
     elif STRATEGY_STEP_NAME.SW_DEPLOY_PRECHECK == data["name"]:
         step_obj = object.__new__(SwDeployPrecheckStep)
