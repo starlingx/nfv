@@ -1552,6 +1552,8 @@ class SwUpgradeStrategy(
         self._nfvi_upgrade = None
         self._ignore_alarms_conditional = None
 
+        # Any change in this condition need to be reflected to from_dict
+        # and as_dict as well
         if self._kube_upgrade_version or self._cleanup:
             self.initialize_mixin()
 
@@ -2479,6 +2481,9 @@ class SwUpgradeStrategy(
         else:
             self._nfvi_upgrade = None
 
+        if self._kube_upgrade_version or self._cleanup:
+            self.mixin_from_dict(data)
+
         return self
 
     def as_dict(self):
@@ -2498,6 +2503,9 @@ class SwUpgradeStrategy(
         else:
             nfvi_upgrade_data = None
         data["nfvi_upgrade_data"] = nfvi_upgrade_data
+
+        if self._kube_upgrade_version or self._cleanup:
+            self.mixin_as_dict(data)
 
         return data
 
