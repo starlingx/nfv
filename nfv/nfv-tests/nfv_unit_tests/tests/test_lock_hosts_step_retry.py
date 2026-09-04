@@ -228,3 +228,63 @@ class TestLockHostsStepRetry(sw_update_testcase.SwUpdateStrategyTestCase):
             self._mock_stage.step_complete.assert_called_once_with(
                 common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
             )
+
+    def test_abort_returns_empty_list_for_sw_upgrade_strategy(self):
+        """abort() returns [] when strategy is SW_UPGRADE.
+
+        For sw-deploy strategies, locked hosts must not be unlocked during
+        abort because the deploy must be cleaned up first via a separate
+        rollback strategy.
+        """
+
+        step = self._make_lock_step(retry_count=0)
+
+        # Build a mock strategy whose name matches SW_UPGRADE
+        mock_strategy = mock.MagicMock()
+        mock_strategy.name = "sw-upgrade"
+
+        # Wire up the chain: step.stage.phase.strategy
+        mock_phase = mock.MagicMock()
+        mock_phase.strategy = mock_strategy
+        self._mock_stage.phase = mock_phase
+
+        result = step.abort()
+        self.assertEqual(result, [])
+
+    def test_abort_returns_unlock_step_for_non_sw_upgrade_strategy(self):
+        """abort() returns [UnlockHostsStep] for non-SW_UPGRADE strategies."""
+
+        step = self._make_lock_step(retry_count=0)
+
+        mock_strategy = mock.MagicMock()
+        mock_strategy.name = "fw-update"
+
+        mock_phase = mock.MagicMock()
+        mock_phase.strategy = mock_strategy
+        self._mock_stage.phase = mock_phase
+
+        result = step.abort()
+        self.assertEqual(len(result), 1)
+        from nfv_vim.strategy._strategy_steps import UnlockHostsStep
+
+        self.assertIsInstance(result[0], UnlockHostsStep)
+
+    def test_abort_returns_unlock_step_when_strategy_is_none(self):
+        """abort() returns [UnlockHostsStep] when strategy is None.
+
+        When the step has no strategy reference (e.g. stage/phase not wired),
+        the fallback behavior is to return an unlock step.
+        """
+
+        step = self._make_lock_step(retry_count=0)
+
+        # Make strategy return None via the property chain
+        mock_phase = mock.MagicMock()
+        mock_phase.strategy = None
+        self._mock_stage.phase = mock_phase
+
+        result = step.abort()
+        self.assertEqual(len(result), 1)
+        from nfv_vim.strategy._strategy_steps import UnlockHostsStep
+
+        self.assertIsInstance(result[0], UnlockHostsStep)
