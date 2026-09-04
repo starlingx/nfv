@@ -2335,7 +2335,7 @@ class SwUpgradeStrategy(
         if not self.nfvi_upgrade.release_info or self.nfvi_upgrade.is_unavailable:
             reason = "Software release does not exist or is unavailable"
 
-        elif not self.nfvi_upgrade.is_deploying:
+        elif not self.nfvi_upgrade.is_deploying and not self.nfvi_upgrade.is_rollback:
             reason = (
                 "Software release must be deploying for a rollback, "
                 + f"found={self.nfvi_upgrade.release_info}"

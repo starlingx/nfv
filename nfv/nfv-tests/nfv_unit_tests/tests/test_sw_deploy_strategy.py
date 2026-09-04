@@ -2221,6 +2221,101 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         sw_update_testcase.validate_strategy_persists(strategy)
         sw_update_testcase.validate_phase(apply_phase, expected_results)
 
+    def test_sw_deploy_strategy_aiosx_rollback_from_activate_rollback_pending(self):
+        """Test the sw_deploy strategy apply phase:
+
+        - aio-sx
+        - major
+        - deploy-activate-rollback-pending (post-abort from completed deploy)
+        - release_info state is 'deployed' (simulates wrong release resolution)
+        Verify:
+        - Pass: the rollback deploy state allows the build to succeed
+          even when the release_info state is not 'deploying'.
+        Regression test for CGTS-105485.
+        """
+
+        release = ["888.8"]
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            delete=False,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                MOCK_METAPACKAGES,
+                {
+                    "release_id": MAJOR_RELEASE_UPGRADE,
+                    "state": "deployed",
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                },
+                {
+                    "state": "activate-rollback-pending",
+                    "reboot_required": True,
+                    "from_release": INITIAL_RELEASE,
+                    "to_release": MAJOR_RELEASE_UPGRADE,
+                },
+                [
+                    {
+                        "hostname": "controller-0",
+                        "host_state": "deployed",
+                    },
+                ],
+            ),
+        )
+
+        # Replace controller-0 with locked one
+        self.create_host(
+            "controller-0",
+            aio=True,
+            openstack_installed=False,
+            admin_state=nfvi.objects.v1.HOST_ADMIN_STATE.LOCKED,
+            oper_state=nfvi.objects.v1.HOST_OPER_STATE.DISABLED,
+            avail_status=nfvi.objects.v1.HOST_AVAIL_STATUS.ONLINE,
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            "total_stages": 3,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "sw-deploy-abort"},
+                        {"name": "sw-deploy-activate-rollback"},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 6,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "lock-hosts", "entity_names": ["controller-0"]},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "unlock-hosts"},
+                        {"name": "wait-alarms-clear", "timeout": 2400},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-rollback-complete",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
     def test_sw_deploy_strategy_aiosx_rollback_from_active_done(self):
         """Test the sw_deploy strategy apply phase:
 
