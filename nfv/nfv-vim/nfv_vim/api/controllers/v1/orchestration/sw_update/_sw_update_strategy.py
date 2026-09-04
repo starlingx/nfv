@@ -160,6 +160,9 @@ class SwUpdateStrategyData(wsme_types.Base):
     build_phase = wsme_types.wsattr(SwUpdateStrategyPhaseData, name="build-phase")
     apply_phase = wsme_types.wsattr(SwUpdateStrategyPhaseData, name="apply-phase")
     abort_phase = wsme_types.wsattr(SwUpdateStrategyPhaseData, name="abort-phase")
+    info_message = wsme_types.wsattr(
+        str, mandatory=False, name="info_message", default=""
+    )
 
 
 class SwUpgradeStrategyCreateData(wsme_types.Base):
@@ -410,6 +413,7 @@ class SwUpdateStrategyQueryData(wsme_types.Base):
         strategy.build_phase = self.convert_strategy_phase(strategy_data["build_phase"])
         strategy.apply_phase = self.convert_strategy_phase(strategy_data["apply_phase"])
         strategy.abort_phase = self.convert_strategy_phase(strategy_data["abort_phase"])
+        strategy.info_message = strategy_data.get("info_message", "")
         self.strategy = strategy
 
     def convert_current_strategy(self, strategy_data):

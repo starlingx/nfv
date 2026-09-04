@@ -83,6 +83,7 @@ class Strategy:
     build_phase = None
     apply_phase = None
     abort_phase = None
+    info_message = ""
 
     def __repr__(self):
         return "%s" % str(self.__dict__)  # noqa: H501
@@ -195,6 +196,7 @@ def _get_strategy_object_from_response(response):
     strategy.abort_phase = _get_strategy_phase_object_from_response(
         strategy_data["abort-phase"]
     )
+    strategy.info_message = strategy_data.get("info_message", "")
 
     return strategy
 

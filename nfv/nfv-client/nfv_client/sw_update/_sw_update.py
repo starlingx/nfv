@@ -298,6 +298,10 @@ def _display_strategy(strategy, details=False, active=False, error_details=False
                 _print(2, "apply-error-response", strategy.apply_phase.response)
                 _print(2, "abort-error-response", strategy.abort_phase.response)
 
+    if hasattr(strategy, "info_message") and strategy.info_message:
+        print("")
+        print("  Note: %s" % strategy.info_message)
+
 
 def _get_auth_token_and_url(
     os_auth_uri,

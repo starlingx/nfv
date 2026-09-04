@@ -1550,6 +1550,7 @@ class SwUpgradeStrategy(
         self._ignore_alarms += IGNORE_ALARMS
         self._single_controller = single_controller
         self._nfvi_upgrade = None
+        self._info_message = ""
         self._ignore_alarms_conditional = None
 
         if self._kube_upgrade_version or self._cleanup:
@@ -1742,6 +1743,24 @@ class SwUpgradeStrategy(
     def build(self):
         """Build the strategy."""
 
+        # For the combined strategy on Simplex, snapshot is implicitly enabled
+        # Force it on here if the user did not explicitly request it so the
+        # precheck call includes the snapshot verification.
+        if (
+            self._kube_upgrade_version
+            and self._single_controller
+            and not self._snapshot
+        ):
+            DLOG.warn(
+                "Combined sw-deploy + kube-upgrade strategy on Simplex detected "
+                "without snapshot enabled. Forcing snapshot=True."
+            )
+            self._snapshot = True
+            self._info_message = (
+                "Snapshot is implicitly enabled for combined platform and "
+                "kubernetes upgrade strategy on AIO-SX."
+            )
+
         # The build validations should be the same as the ones in the client
         # (nfv/nfv-client/nfv_client/shell.py)
         if self._release and self._rollback:
@@ -1760,13 +1779,6 @@ class SwUpgradeStrategy(
             self.report_build_failure(
                 "Cannot set both delete and rollback, delete is set by default"
             )
-        # TODO(sshathee): Remove this conditon when implementing snapshot
-        # with rollback command
-        elif self._rollback and self._snapshot:
-            self.report_build_failure(
-                "Cannot set both snapshot and rollback, if snapshot"
-                "is available it will be forcibly used."
-            )
         elif self._rollback and self._kube_upgrade_version:
             self.report_build_failure("Cannot set both kube_upgrade and rollback")
         elif self._cleanup and any(
@@ -1781,6 +1793,13 @@ class SwUpgradeStrategy(
             self.report_build_failure(
                 "Cannot set release, rollback, snapshot, delete or kube-upgrade "
                 "when cleanup is set"
+            )
+        # TODO(sshathee): Remove this conditon when implementing snapshot
+        # with rollback command
+        elif self._rollback and self._snapshot:
+            self.report_build_failure(
+                "Cannot set both snapshot and rollback, if snapshot"
+                "is available it will be forcibly used."
             )
 
         elif self._rollback:
@@ -2452,6 +2471,17 @@ class SwUpgradeStrategy(
 
         super().apply_complete(result, result_reason)
 
+    def clear_info_message(self):
+        """Clear the one-time info message and persist the change.
+
+        The info message is only meant to be shown once, in the response to
+        the create request. After the create response is sent it is cleared so
+        subsequent get/apply/abort responses do not repeat it.
+        """
+        if self._info_message:
+            self._info_message = ""
+            self.save()
+
     def from_dict(self, data, build_phase=None, apply_phase=None, abort_phase=None):
         """Initializes a software upgrade strategy object using the given dictionary."""
 
@@ -2466,6 +2496,7 @@ class SwUpgradeStrategy(
         self._cleanup = data.get("cleanup", False)
         self._snapshot = data.get("snapshot", False)
         self._kube_upgrade_version = data.get("kube_upgrade_version")
+        self._info_message = data.get("info_message", "")
         nfvi_upgrade_data = data["nfvi_upgrade_data"]
         if nfvi_upgrade_data:
             self._nfvi_upgrade = nfvi.objects.v1.Upgrade(
@@ -2493,6 +2524,7 @@ class SwUpgradeStrategy(
         data["cleanup"] = self._cleanup
         data["snapshot"] = self._snapshot
         data["kube_upgrade_version"] = self._kube_upgrade_version
+        data["info_message"] = self._info_message
         if self._nfvi_upgrade:
             nfvi_upgrade_data = self._nfvi_upgrade.as_dict()
         else:
