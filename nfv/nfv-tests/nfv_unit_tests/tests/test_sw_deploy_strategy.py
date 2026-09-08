@@ -4972,12 +4972,12 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         self.assertLess(sw_start_idx, kube_start_idx)
         self.assertLess(sw_complete_idx, kube_start_idx)
 
-        # kube-wait-control-plane-pods-ready must appear
+        # kube-wait-upgrade-healthy must appear
         # between sw-deploy and kube-upgrade
-        self.assertIn("kube-wait-control-plane-pods-ready", stage_names)
-        pods_ready_idx = stage_names.index("kube-wait-control-plane-pods-ready")
-        self.assertLess(sw_complete_idx, pods_ready_idx)
-        self.assertLess(pods_ready_idx, kube_start_idx)
+        self.assertIn("kube-wait-upgrade-healthy", stage_names)
+        upgrade_healthy_idx = stage_names.index("kube-wait-upgrade-healthy")
+        self.assertLess(sw_complete_idx, upgrade_healthy_idx)
+        self.assertLess(upgrade_healthy_idx, kube_start_idx)
 
         # No sw-system-deploy-init (duplex does not use it)
         self.assertNotIn("sw-system-deploy-init", stage_names)
@@ -6309,6 +6309,334 @@ class TestWaitKubeControlPlanePodsReadyStep(
                                 ],
                                 "not_ready": [],
                             },
+                        }
+                    )
+                except StopIteration:
+                    pass
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        )
+
+
+@mock.patch(
+    "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
+)
+@mock.patch("nfv_vim.objects._sw_update.SwUpdate.save", sw_update_testcase.fake_save)
+@mock.patch(
+    "nfv_vim.objects._sw_update.timers.timers_create_timer",
+    sw_update_testcase.fake_timer,
+)
+@mock.patch(
+    "nfv_vim.nfvi.nfvi_compute_plugin_disabled",
+    sw_update_testcase.fake_nfvi_compute_plugin_disabled,
+)
+class TestWaitKubernetesUpgradeHealthy(sw_update_testcase.SwUpdateStrategyTestCase):
+    """Unit tests for the WaitKubernetesUpgradeHealthy step."""
+
+    def setUp(self):
+        super().setUp()
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            WaitKubernetesUpgradeHealthy,
+        )
+
+        self.step = WaitKubernetesUpgradeHealthy(timeout_in_secs=180)
+        self.mock_stage = mock.MagicMock()
+        self.step.stage = self.mock_stage
+
+    def _send_callback(self, response):
+        """Drive the coroutine callback with the given response."""
+
+        callback = self.step._query_health_callback()
+        try:
+            callback.send(response)
+        except StopIteration:
+            pass
+
+    def test_healthy_completes_step_successfully(self):
+        """Step completes with SUCCESS when health check has no failures."""
+
+        self._send_callback(
+            {
+                "completed": True,
+                "result-data": "OK: all checks passed",
+            }
+        )
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        )
+
+    def test_fail_in_health_does_not_complete_step(self):
+        """Step keeps waiting when health check contains [Fail] entries."""
+
+        self._send_callback(
+            {
+                "completed": True,
+                "result-data": "[Fail] Kubernetes nodes not ready",
+            }
+        )
+
+        self.mock_stage.step_complete.assert_not_called()
+
+    def test_query_failure_does_not_fail_step(self):
+        """Step retries when the query itself fails (does not fail step)."""
+
+        self._send_callback({"completed": False, "reason": "connection error"})
+
+        self.mock_stage.step_complete.assert_not_called()
+
+    def test_missing_result_data_fails_step(self):
+        """Step fails when response is completed but result-data is missing."""
+
+        self._send_callback({"completed": True})
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.FAILED,
+            "Kube upgrade health check missing result-data",
+        )
+
+    def test_apply_creates_timer_and_returns_wait(self):
+        """Apply creates a polling timer and returns WAIT."""
+
+        from nfv_common import timers
+
+        with mock.patch.object(
+            timers, "timers_create_timer", return_value=999
+        ) as mock_create:
+            result, reason = self.step.apply()
+
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+        self.assertEqual(reason, "")
+        mock_create.assert_called_once()
+        self.assertEqual(self.step._poll_timer_id, 999)
+
+    def test_handle_event_returns_false(self):
+        """handle_event is a no-op (polling is timer-driven)."""
+
+        from nfv_vim.strategy._strategy_defs import STRATEGY_EVENT
+
+        result = self.step.handle_event(STRATEGY_EVENT.HOST_AUDIT)
+        self.assertFalse(result)
+
+    def test_poll_action_triggers_query_with_alarm_ignore_list(self):
+        """_poll_action calls the NFVI query with alarm_ignore_list."""
+
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            KUBE_UPGRADE_START_ALARM_IGNORE,
+        )
+
+        with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
+            self.assertTrue(self.step._poll_in_progress)
+            # Verify alarm_ignore_list is passed as first argument
+            call_args = mock_query.call_args[0]
+            self.assertEqual(call_args[0], KUBE_UPGRADE_START_ALARM_IGNORE)
+
+    def test_poll_skipped_when_in_progress(self):
+        """Timer callback does not trigger a new query while one is in progress."""
+
+        from nfv_common import timers
+
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            self.step.apply()
+
+        # Simulate first poll
+        with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
+
+        # poll_in_progress is True, so _poll_timer_callback should not call again
+        self.assertTrue(self.step._poll_in_progress)
+
+    def test_from_dict_roundtrip(self):
+        """Step can be serialized and deserialized without data loss."""
+
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            KUBE_UPGRADE_START_ALARM_IGNORE,
+            WaitKubernetesUpgradeHealthy,
+        )
+
+        data = self.step.as_dict()
+        self.assertEqual(data["alarm_ignore_list"], KUBE_UPGRADE_START_ALARM_IGNORE)
+
+        new_step = object.__new__(WaitKubernetesUpgradeHealthy)
+        new_step.from_dict(data)
+
+        self.assertIsNone(new_step._poll_timer_id)
+        self.assertFalse(new_step._poll_in_progress)
+        self.assertEqual(new_step._alarm_ignore_list, KUBE_UPGRADE_START_ALARM_IGNORE)
+
+    def test_from_dict_roundtrip_custom_alarm_ignore_list(self):
+        """Step preserves a custom alarm_ignore_list through serialization."""
+
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            WaitKubernetesUpgradeHealthy,
+        )
+
+        custom_alarms = ["100.001", "200.002"]
+        step = WaitKubernetesUpgradeHealthy(
+            timeout_in_secs=180, alarm_ignore_list=custom_alarms
+        )
+
+        data = step.as_dict()
+        self.assertEqual(data["alarm_ignore_list"], custom_alarms)
+
+        new_step = object.__new__(WaitKubernetesUpgradeHealthy)
+        new_step.from_dict(data)
+        self.assertEqual(new_step._alarm_ignore_list, custom_alarms)
+
+    def test_from_dict_recreates_timer_on_resume(self):
+        """from_dict recreates the polling timer when step was in WAIT state."""
+
+        from nfv_common import timers
+        from nfv_vim.strategy.steps.kube_upgrade_steps import (
+            WaitKubernetesUpgradeHealthy,
+        )
+
+        # Simulate a step that was in progress (WAIT state) before restart
+        data = self.step.as_dict()
+        data["result"] = "wait"
+
+        new_step = object.__new__(WaitKubernetesUpgradeHealthy)
+        with mock.patch.object(
+            timers, "timers_create_timer", return_value=888
+        ) as mock_create:
+            new_step.from_dict(data)
+
+        mock_create.assert_called_once()
+        self.assertEqual(new_step._poll_timer_id, 888)
+        self.assertFalse(new_step._poll_in_progress)
+
+    def test_timeout_cleans_up_timer(self):
+        """Timeout cleans up the timer and provides a meaningful error."""
+
+        from nfv_common import timers
+
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            self.step.apply()
+
+        with mock.patch.object(timers, "timers_delete_timer") as mock_delete:
+            result, reason = self.step.timeout()
+
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.TIMED_OUT)
+        self.assertIn("did not become healthy before timeout", reason)
+        mock_delete.assert_called_once_with(999)
+        self.assertIsNone(self.step._poll_timer_id)
+
+    def test_flow_healthy_after_poll(self):
+        """Full flow: apply → timer polls → healthy → SUCCESS.
+
+        Simulates the flow where the step is applied, the timer fires,
+        issues a health query, and the callback reports the upgrade is
+        healthy.
+        """
+
+        from nfv_common import timers
+
+        # Step is applied and enters the WAIT state
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            result, reason = self.step.apply()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+
+        # Timer fires → _poll_action triggers query
+        with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
+
+            # Drive the callback coroutine
+            callback = mock_query.call_args[0][1]
+            with mock.patch.object(timers, "timers_delete_timer"):
+                try:
+                    callback.send(
+                        {
+                            "completed": True,
+                            "result-data": "OK: all checks passed",
+                        }
+                    )
+                except StopIteration:
+                    pass
+
+        self.mock_stage.step_complete.assert_called_once_with(
+            common_strategy.STRATEGY_STEP_RESULT.SUCCESS, ""
+        )
+
+    def test_flow_unhealthy_leads_to_timeout(self):
+        """Full flow: health check fails on every poll → eventually times out."""
+
+        from nfv_common import timers
+
+        # Step is applied and enters the WAIT state
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            result, reason = self.step.apply()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+
+        # Simulate multiple polls that all report unhealthy
+        for _ in range(3):
+            with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+                self.step._poll_action()
+                mock_query.assert_called_once()
+
+                callback = mock_query.call_args[0][1]
+                try:
+                    callback.send(
+                        {
+                            "completed": True,
+                            "result-data": "[Fail] Kubernetes nodes not ready",
+                        }
+                    )
+                except StopIteration:
+                    pass
+
+            # Step should NOT have completed - still waiting
+            self.mock_stage.step_complete.assert_not_called()
+
+        # The strategy framework calls timeout() when time exceeds timeout_in_secs
+        with mock.patch.object(timers, "timers_delete_timer"):
+            result, reason = self.step.timeout()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.TIMED_OUT)
+        self.assertEqual(
+            reason, "Kubernetes upgrade did not become healthy before timeout"
+        )
+
+    def test_flow_api_exception_retries_then_succeeds(self):
+        """Full flow: API exception causes retry, next poll succeeds."""
+
+        from nfv_common import timers
+
+        # Step is applied and enters the WAIT state
+        with mock.patch.object(timers, "timers_create_timer", return_value=999):
+            result, reason = self.step.apply()
+        self.assertEqual(result, common_strategy.STRATEGY_STEP_RESULT.WAIT)
+
+        # First poll - API exception occurs
+        with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
+
+            callback = mock_query.call_args[0][1]
+            try:
+                callback.send({"completed": False, "reason": ""})
+            except StopIteration:
+                pass
+
+        # Step should NOT have failed - it retries
+        self.mock_stage.step_complete.assert_not_called()
+        self.assertFalse(self.step._poll_in_progress)
+
+        # Second poll - upgrade is healthy
+        with mock.patch("nfv_vim.nfvi.nfvi_get_kube_upgrade_health") as mock_query:
+            self.step._poll_action()
+            mock_query.assert_called_once()
+
+            callback = mock_query.call_args[0][1]
+            with mock.patch.object(timers, "timers_delete_timer"):
+                try:
+                    callback.send(
+                        {
+                            "completed": True,
+                            "result-data": "OK: all checks passed",
                         }
                     )
                 except StopIteration:

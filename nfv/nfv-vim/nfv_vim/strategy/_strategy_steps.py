@@ -4735,6 +4735,9 @@ def strategy_step_rebuild_from_dict(data):
         STRATEGY_STEP_NAME.WAIT_KUBE_CONTROL_PLANE_PODS_READY: (
             kube_upgrade_steps.WaitKubeControlPlanePodsReadyStep
         ),
+        STRATEGY_STEP_NAME.KUBE_WAIT_UPGRADE_HEALTHY: (
+            kube_upgrade_steps.WaitKubernetesUpgradeHealthy
+        ),
         #
         # system config update steps
         #
