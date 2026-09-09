@@ -52,3 +52,6 @@ api-ref/build/
 # pbr generates these
 AUTHORS
 ChangeLog
+
+# UT Coverage reports
+UTCoverage/

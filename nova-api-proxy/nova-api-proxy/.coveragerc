@@ -1,0 +1,14 @@
+[run]
+source = nova_api_proxy
+omit =
+    */tests/*
+    */apps/acceptor.py
+    */apps/proxy.py
+    */common/service.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if __name__ == .__main__
+show_missing = True

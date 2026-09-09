@@ -2,9 +2,9 @@
 - hosts: "{{ target_hosts | default('all') }}"
   gather_facts: false
   tasks:
-    - name: Collect nfv UTCoverage artifacts
+    - name: Collect nova-api-proxy coverage artifacts
       synchronize:
-        src: "{{ zuul.project.src_dir }}/nfv/{{ item }}"
+        src: "{{ zuul.project.src_dir }}/nova-api-proxy/{{ item }}"
         dest: "{{ zuul.executor.log_root }}/{{ item }}"
         mode: pull
         copy_links: true
@@ -12,5 +12,4 @@
       loop:
         - UTCoverage/
         - UTCoverage/coverage.xml
-        - .coverage
       ignore_errors: true

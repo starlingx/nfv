@@ -2,20 +2,20 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 #
-# Minimum versions verified against StarlingX debian trixie/upper-constraints.txt
-# under Python 3.13.
-hacking>=8.0.0 # Apache-2.0
+# Minimum versions verified against StarlingX debian upper-constraints.txt
+# under Python 3.9.
+hacking>=7.0.0 # Apache-2.0
 bandit>=1.8.0
 coverage>=7.0.0
-fixtures>=4.1.0 # Apache-2.0/BSD
-pylint>=3.0.0
+fixtures>=4.2.6 # Apache-2.0/BSD
+pylint>=2.17.0
 
-# Runtime dependencies required to import/run nova_api_proxy under py3.13.
-eventlet>=0.40.3
-oslo.config>=9.7.1
-oslo.log>=7.1.0
+# Runtime dependencies required to import/run nova_api_proxy.
+eventlet>=0.32.0
+oslo.config>=8.3.3
+oslo.log>=4.4.0
 paste>=3.5.0
-PasteDeploy>=3.1.0
+PasteDeploy>=2.1.1
 routes>=2.5.1
 webob>=1.8.6
 # Test runners
