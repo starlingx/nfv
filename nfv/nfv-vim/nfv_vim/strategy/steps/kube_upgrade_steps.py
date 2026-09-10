@@ -1359,3 +1359,92 @@ class WaitKubeControlPlanePodsReadyStep(TimerBasedPollingStep):
         result, _ = super().timeout()
         reason = "Kubernetes control-plane pods did not become ready before timeout"
         return result, reason
+
+
+class WaitKubernetesUpgradeHealthy(TimerBasedPollingStep):
+    """Wait for Kubernetes Upgrade Healthy - Strategy Step.
+
+    Polls sysinv /health/kube-upgrade endpoint until no failures are
+    reported. Succeeds when the health response contains no '[Fail]'
+    entries.
+
+    Uses a self-scheduling timer to poll at a fixed interval, bypassing the
+    host audit mechanism which is gated by a 30-second delay.
+    """
+
+    POLL_INTERVAL_IN_SECS = 5
+    FIRST_POLL_DELAY_IN_SECS = 15
+
+    def __init__(self, timeout_in_secs=180, alarm_ignore_list=None):
+        super().__init__(
+            STRATEGY_STEP_NAME.KUBE_WAIT_UPGRADE_HEALTHY,
+            timeout_in_secs=timeout_in_secs,
+        )
+        if alarm_ignore_list is None:
+            alarm_ignore_list = KUBE_UPGRADE_START_ALARM_IGNORE
+        self._alarm_ignore_list = alarm_ignore_list
+
+    def _poll_action(self):
+        """Query kube upgrade health."""
+
+        from nfv_vim import nfvi
+
+        self._poll_in_progress = True
+        nfvi.nfvi_get_kube_upgrade_health(
+            self._alarm_ignore_list, self._query_health_callback()
+        )
+
+    @coroutine
+    def _query_health_callback(self):
+        """Query Kube Upgrade Health Callback."""
+
+        response = yield
+        DLOG.debug("Query-Kube-Upgrade-Health callback response=%s." % response)
+
+        self._poll_in_progress = False
+
+        if response["completed"]:
+            result_data = response.get("result-data")
+            if result_data is None:
+                self._cleanup_timer()
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(
+                    result, "Kube upgrade health check missing result-data"
+                )
+                return
+
+            health_str = str(result_data)
+            if "[Fail]" in health_str:
+                DLOG.info("Kubernetes upgrade health check not passed: %s" % health_str)
+                # Keep waiting - timer will trigger the next query
+            else:
+                DLOG.info("Kubernetes upgrade health check passed: %s" % health_str)
+                self._cleanup_timer()
+                result = strategy.STRATEGY_STEP_RESULT.SUCCESS
+                self.stage.step_complete(result, "")
+        else:
+            # API call itself failed - don't fail the step, just retry
+            DLOG.warn("Query for kube upgrade health did not complete, will retry.")
+
+    def from_dict(self, data):
+        """Returns the step object initialized using the given dictionary."""
+
+        super().from_dict(data)
+        self._alarm_ignore_list = data.get(
+            "alarm_ignore_list", KUBE_UPGRADE_START_ALARM_IGNORE
+        )
+        return self
+
+    def as_dict(self):
+        """Represent the step as a dictionary."""
+
+        data = super().as_dict()
+        data["alarm_ignore_list"] = self._alarm_ignore_list
+        return data
+
+    def timeout(self):
+        """Strategy Step Timeout Override."""
+
+        result, _ = super().timeout()
+        reason = "Kubernetes upgrade did not become healthy before timeout"
+        return result, reason

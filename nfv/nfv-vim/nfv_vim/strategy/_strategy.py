@@ -2135,7 +2135,7 @@ class SwUpgradeStrategy(
 
             # Duplex: full kube upgrade runs sequentially after sw-deploy
             if self._kube_upgrade_version and is_duplex:
-                self._add_wait_kube_control_plane_pods_ready_stage()
+                self._add_wait_kubernetes_upgrade_healthy_stage()
                 self._build_kube_upgrade_stages()
                 if self._state == strategy.STRATEGY_STATE.BUILD_FAILED:
                     return

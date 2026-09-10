@@ -672,6 +672,17 @@ def nfvi_get_kube_control_plane_pods_ready(callback):
     return cmd_id
 
 
+def nfvi_get_kube_upgrade_health(alarm_ignore_list, callback):
+    """Get kube upgrade health status."""
+
+    cmd_id = _infrastructure_plugin.invoke_plugin(
+        "get_kube_upgrade_health",
+        alarm_ignore_list,
+        callback=callback,
+    )
+    return cmd_id
+
+
 def nfvi_register_host_add_callback(callback):
     """Register for host add notifications."""
 
