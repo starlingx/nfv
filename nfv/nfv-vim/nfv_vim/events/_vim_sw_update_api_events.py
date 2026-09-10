@@ -32,6 +32,11 @@ def _vim_sw_update_api_create_strategy_callback(success, reason, strategy):
             response = rpc.APIResponseCreateSwUpdateStrategy()
             if success:
                 response.strategy = strategy.as_json()
+                # The info message is only shown in the create response;
+                # clear it (and persist) so subsequent get/apply/abort
+                # responses do not repeat it.
+                if hasattr(strategy, "clear_info_message"):
+                    strategy.clear_info_message()
             else:
                 response.result = rpc.RPC_MSG_RESULT.FAILED
 

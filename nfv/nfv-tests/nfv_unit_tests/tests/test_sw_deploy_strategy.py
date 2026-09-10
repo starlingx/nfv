@@ -5943,6 +5943,135 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         abort_stage_names = [s.name for s in strategy.abort_phase.stages]
         self.assertNotIn("kube-upgrade-cleanup", abort_stage_names)
 
+    @mock.patch("nfv_common.strategy._strategy.Strategy._build")
+    def test_combined_sx_snapshot_forced_when_not_set(self, fake_build):
+        """Test snapshot is forced to True on combined strategy for Simplex.
+
+        When --kube-upgrade is provided but --snapshot is not, the strategy
+        must automatically enable snapshot for Simplex (single_controller=True)
+        because there is no standby controller to fall back to if the upgrade
+        fails.
+
+        Verify:
+        - _snapshot is True after build()
+        - An info message is generated about the implicit snapshot
+        """
+        strategy = self._create_combined_strategy(
+            kube_upgrade_version=self.KUBE_VER,
+            single_controller=True,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+        # Snapshot starts as False (as passed in _create_combined_strategy)
+        self.assertFalse(strategy._snapshot)
+
+        # build() triggers the snapshot enforcement and info message logic
+        strategy.build()
+
+        self.assertTrue(
+            strategy._snapshot,
+            "Expected _snapshot=True for combined SX strategy",
+        )
+        self.assertIn(
+            "Snapshot is implicitly enabled",
+            strategy._info_message,
+        )
+
+    @mock.patch("nfv_common.strategy._strategy.Strategy._build")
+    def test_combined_dx_snapshot_not_forced(self, fake_build):
+        """Test snapshot is NOT forced on combined strategy for Duplex.
+
+        When --kube-upgrade is provided but --snapshot is not, snapshot must
+        remain unchanged (False) on a Duplex system (single_controller=False)
+        because a standby controller is available for recovery.
+
+        Verify:
+        - _snapshot remains False on duplex
+        - No info message is generated
+        """
+        self.create_host("controller-1", aio=True)
+
+        strategy = self._create_combined_strategy(
+            kube_upgrade_version=self.KUBE_VER,
+            single_controller=False,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+        # build() should NOT force snapshot or set an info message on duplex
+        strategy.build()
+
+        self.assertFalse(
+            strategy._snapshot,
+            "Expected _snapshot=False for combined DX strategy",
+        )
+        self.assertEqual(
+            strategy._info_message,
+            "",
+            "Expected no info message for DX combined strategy",
+        )
+
+    @mock.patch("nfv_common.strategy._strategy.Strategy._build")
+    def test_combined_sx_info_message_serialization_roundtrip(self, fake_build):
+        """Test info_message survives as_dict/from_dict round-trip.
+
+        After constructing a combined SX strategy and building it (which forces
+        snapshot and generates an info message), verify that:
+        - as_dict() includes the info_message
+        - from_dict() restores it correctly
+        """
+        strategy = self._create_combined_strategy(
+            kube_upgrade_version=self.KUBE_VER,
+            single_controller=True,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+        # build() generates the info message
+        strategy.build()
+
+        # Verify as_dict includes info_message
+        strategy_dict = strategy.as_dict()
+        self.assertIn("info_message", strategy_dict)
+        self.assertIn(
+            "Snapshot is implicitly enabled",
+            strategy_dict["info_message"],
+        )
+
+        # Verify from_dict restores info_message
+        restored = self._create_combined_strategy(
+            kube_upgrade_version=self.KUBE_VER,
+            single_controller=True,
+        )
+        restored.from_dict(strategy_dict)
+        self.assertEqual(restored._info_message, strategy._info_message)
+
+    @mock.patch("nfv_common.strategy._strategy.Strategy._build")
+    def test_combined_sx_info_message_cleared_after_create(self, fake_build):
+        """Test the info message is shown once then cleared.
+
+        The info message is meant to appear only in the create response. After
+        the create response is sent, clear_info_message() is called so that
+        subsequent get/apply/abort responses do not repeat it.
+
+        Verify:
+        - build() sets the info message (as returned in the create response)
+        - clear_info_message() empties it
+        - the cleared state is reflected in as_dict()
+        """
+        strategy = self._create_combined_strategy(
+            kube_upgrade_version=self.KUBE_VER,
+            single_controller=True,
+        )
+        strategy.sw_update_obj = self.fake_upgrade_obj
+        strategy.build()
+
+        # The create response would carry the info message
+        self.assertIn(
+            "Snapshot is implicitly enabled",
+            strategy.as_dict()["info_message"],
+        )
+
+        # After the create response is sent, the message is cleared
+        strategy.clear_info_message()
+        self.assertEqual(strategy._info_message, "")
+        self.assertEqual(strategy.as_dict()["info_message"], "")
+
 
 @mock.patch(
     "nfv_vim.event_log._instance._event_issue", sw_update_testcase.fake_event_issue
