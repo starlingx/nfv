@@ -93,3 +93,52 @@ SwUpdateAlarmRestrictionTypes = wsme_types.Enum(
     SW_UPDATE_ALARM_RESTRICTION_TYPES.RELAXED,
     SW_UPDATE_ALARM_RESTRICTION_TYPES.PERMISSIVE,
 )
+
+
+class FlexibleListType(wsme_types.UserType):
+    """A WSME user type that accepts both a list of strings and a single
+
+    string, normalizing the latter to a single-element list.
+
+    This provides backwards compatibility for API callers that send a
+    scalar string (e.g., dcmanager from older releases) when the API
+    now expects a list.
+
+    The basetype is set to str so that WSME's JSON fromjson dispatcher
+    passes the raw JSON value through without type-checking. The
+    frombasetype method then normalizes it to a list.
+    """
+
+    basetype = str
+    name = "list(str)"
+
+    def frombasetype(self, value):
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return [str(item) for item in value]
+        if isinstance(value, str):
+            return [value]
+        raise ValueError(
+            "Expected a string or list of strings, got: %s" % type(value).__name__
+        )
+
+    def tobasetype(self, value):
+        if value is None:
+            return []
+        return value
+
+    def validate(self, value):
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise ValueError(
+                "Expected a list of strings, got: %s" % type(value).__name__
+            )
+        for item in value:
+            if not isinstance(item, str):
+                raise ValueError("Expected string items, got: %s" % type(item).__name__)
+        return value
+
+
+FlexibleList = FlexibleListType()

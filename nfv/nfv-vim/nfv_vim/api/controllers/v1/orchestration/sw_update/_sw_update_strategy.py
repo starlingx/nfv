@@ -47,6 +47,9 @@ from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
 from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
     SwUpdateNames,
 )
+from nfv_vim.api.controllers.v1.orchestration.sw_update._sw_update_defs import (
+    FlexibleList,
+)
 
 DLOG = debug.debug_get_logger("nfv_vim.api.sw_update.strategy")
 
@@ -130,7 +133,7 @@ class SwUpdateStrategyData(wsme_types.Base):
 
     uuid = wsme_types.wsattr(str, name="uuid")
     name = wsme_types.wsattr(SwUpdateNames, name="name")
-    release = wsme_types.wsattr([str], mandatory=False, name="release")
+    release = wsme_types.wsattr(FlexibleList, mandatory=False, name="release")
     release_id = wsme_types.wsattr(str, mandatory=False, name="release-id")
     metapackages = wsme_types.wsattr([str], mandatory=False, name="metapackages")
     pre_upgrade_deploy = wsme_types.wsattr(
@@ -171,7 +174,9 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="controller-apply-type"
     )
-    release = wsme_types.wsattr([str], mandatory=False, name="release", default=[])
+    release = wsme_types.wsattr(
+        FlexibleList, mandatory=False, name="release", default=[]
+    )
     rollback = wsme_types.wsattr(bool, mandatory=False, name="rollback")
     delete = wsme_types.wsattr(bool, mandatory=False, name="delete")
     snapshot = wsme_types.wsattr(bool, mandatory=False, name="snapshot", default=None)
