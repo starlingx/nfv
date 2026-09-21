@@ -141,6 +141,7 @@ class SwUpdateStrategy(strategy.Strategy):
         ):  # pylint: disable=used-before-assignment
             return strategy.WaitAlarmsClearStep(
                 timeout_in_secs=KUBE_UPGRADE_ALARM_CLEAR_TIMEOUT,
+                first_query_delay_in_secs=0,
                 ignore_alarms=self._ignore_alarms,
                 ignore_alarms_conditional=(
                     self._ignore_alarms_conditional  # pylint: disable=no-member
