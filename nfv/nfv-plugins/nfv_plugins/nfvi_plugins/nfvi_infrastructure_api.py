@@ -2445,6 +2445,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 release,
                 self._upgrade_obj,
                 precheck_data,
+                pre_upgrade_deploy,
             )
             future.result = yield
 

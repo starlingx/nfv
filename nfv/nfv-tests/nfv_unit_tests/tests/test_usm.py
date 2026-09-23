@@ -652,3 +652,505 @@ class TestStepReleaseNormalization(testcase.NFVTestCase):
 
         self._assert_step_normalizes_string(SwSystemDeployInitStep)
         self._assert_step_preserves_list(SwSystemDeployInitStep)
+
+
+class TestSwDeployGetMetapackages(BaseTestUsm):
+    """Unit tests for the sw_deploy_get_metapackages query."""
+
+    def setUp(self):
+        super().setUp()
+        self.request_mock = self.mock_get
+
+    def test_pre_upgrade_deploy_queries_correct_endpoint(self):
+        response = usm.sw_deploy_get_metapackages(self.token, pre_upgrade_deploy=True)
+
+        self._assert_request("release/metapackage?pre-upgrade-deploy", response)
+
+    def test_all_metapackages_queries_correct_endpoint(self):
+        response = usm.sw_deploy_get_metapackages(self.token, pre_upgrade_deploy=False)
+
+        self._assert_request("release/metapackage?all", response)
+
+
+class TestExtractMetapackageInfo(testcase.NFVTestCase):
+    """Unit tests for _extract_metapackage_info helper."""
+
+    def test_extracts_only_relevant_fields(self):
+        data = [
+            {
+                "release_id": "mp1_27.03.0",
+                "reboot_required": False,
+                "state": "available",
+                "component": "mp1",
+                "packages": ["pkg-a"],
+                "sw_version": "27.03.0",
+            }
+        ]
+        result = usm._extract_metapackage_info(data)
+
+        self.assertEqual(
+            result,
+            [
+                {
+                    "release_id": "mp1_27.03.0",
+                    "reboot_required": False,
+                    "state": "available",
+                }
+            ],
+        )
+
+    def test_filters_by_release_ids(self):
+        data = [
+            {"release_id": "mp1", "reboot_required": False, "state": "available"},
+            {"release_id": "mp2", "reboot_required": True, "state": "available"},
+            {"release_id": "mp3", "reboot_required": False, "state": "available"},
+        ]
+        result = usm._extract_metapackage_info(data, filter_release_ids={"mp1", "mp3"})
+
+        self.assertEqual(len(result), 2)
+        ids = {r["release_id"] for r in result}
+        self.assertEqual(ids, {"mp1", "mp3"})
+
+    def test_filters_by_state(self):
+        data = [
+            {"release_id": "mp1", "reboot_required": False, "state": "deploy-selected"},
+            {"release_id": "mp2", "reboot_required": True, "state": "available"},
+            {"release_id": "mp3", "reboot_required": True, "state": "deploy-selected"},
+        ]
+        result = usm._extract_metapackage_info(data, filter_states={"deploy-selected"})
+
+        self.assertEqual(len(result), 2)
+        ids = {r["release_id"] for r in result}
+        self.assertEqual(ids, {"mp1", "mp3"})
+
+    def test_empty_input_returns_empty_list(self):
+        self.assertEqual(usm._extract_metapackage_info(None), [])
+        self.assertEqual(usm._extract_metapackage_info([]), [])
+
+
+class TestSwDeployGetUpgradeObjMetapackageRR(BaseTestUsm):
+    """Unit tests for metapackage-level reboot_required in sw_deploy_get_upgrade_obj."""
+
+    def setUp(self):
+        super().setUp()
+
+        self.mock_show = self._mock_object(
+            usm, "sw_deploy_show", return_value=self._mock_response(None)
+        )
+        self.mock_hosts = self._mock_object(
+            usm, "sw_deploy_host_list", return_value=self._mock_response([])
+        )
+        self.mock_system = self._mock_object(
+            usm, "sw_system_deploy_show", return_value=self._mock_response([])
+        )
+        self.mock_releases = self._mock_object(usm, "sw_deploy_get_releases")
+        self.mock_metapackages = self._mock_object(usm, "sw_deploy_get_metapackages")
+
+        self.upgrade_obj = nfvi.objects.v1.Upgrade(
+            ["starlingx-27.03.0"],
+            [],
+            {"release_id": "starlingx-27.03.0", "reboot_required": True},
+            None,
+            None,
+        )
+
+        self.precheck_data = {
+            "info": "",
+            "error": "",
+            "warning": "",
+            "major_release": True,
+            "reboot_required": True,
+            "prepatched_iso": False,
+            "apply_operation": True,
+            "from_release": "26.09.0",
+            "to_release": "27.03.0",
+            "additional_data": {
+                "k8s-1.34.1-controlplane_27.03.0": {
+                    "info": "",
+                    "warning": "",
+                    "error": "",
+                    "system_healthy": True,
+                }
+            },
+        }
+
+        self.mock_releases.return_value = self._mock_response(
+            [
+                {
+                    "sw_version": "27.03.0",
+                    "release_id": "starlingx-27.03.0",
+                    "reboot_required": True,
+                    "packages": [],
+                }
+            ]
+        )
+
+    def _make_metapackage(self, release_id, reboot_required):
+        """Build a full metapackage API response entry."""
+
+        return {
+            "release_id": release_id,
+            "reboot_required": reboot_required,
+            "component": release_id.rsplit("_", 1)[0],
+            "sw_version": "27.03.0",
+            "state": "available",
+            "packages": [],
+            "activation_scripts": [],
+        }
+
+    def _expected_stored(self, release_id, reboot_required):
+        """Build the filtered dict that should be stored on the Upgrade object."""
+
+        return {
+            "release_id": release_id,
+            "reboot_required": reboot_required,
+            "state": "available",
+        }
+
+    def test_pre_upgrade_deploy_fetches_metapackages(self):
+        """pre_upgrade_deploy=True triggers the ?pre-upgrade-deploy endpoint."""
+
+        metapackages = [
+            self._make_metapackage("k8s-1.34.1-controlplane_27.03.0", False),
+            self._make_metapackage("k8s-1.34.8-controlplane_27.03.0", False),
+        ]
+        self.mock_metapackages.return_value = self._mock_response(metapackages)
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            ["starlingx-27.03.0"],
+            self.upgrade_obj,
+            self.precheck_data,
+            pre_upgrade_deploy=True,
+        )
+
+        self.mock_metapackages.assert_called_once_with(
+            self.token, pre_upgrade_deploy=True
+        )
+        expected = [
+            self._expected_stored("k8s-1.34.1-controlplane_27.03.0", False),
+            self._expected_stored("k8s-1.34.8-controlplane_27.03.0", False),
+        ]
+        self.assertEqual(upgrade_obj.pre_upgrade_metapackages, expected)
+        # All metapackages are NRR, so reboot_required should be False
+        self.assertFalse(upgrade_obj.reboot_required)
+
+    def test_pre_upgrade_deploy_rr_when_any_metapackage_is_rr(self):
+        """reboot_required is True when at least one metapackage is RR."""
+
+        metapackages = [
+            self._make_metapackage("k8s-1.34.1-controlplane_27.03.0", False),
+            self._make_metapackage("platform_27.03.0", True),
+        ]
+        self.mock_metapackages.return_value = self._mock_response(metapackages)
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            ["starlingx-27.03.0"],
+            self.upgrade_obj,
+            self.precheck_data,
+            pre_upgrade_deploy=True,
+        )
+
+        self.assertTrue(upgrade_obj.reboot_required)
+
+    def test_pre_upgrade_deploy_empty_metapackages_falls_back(self):
+        """Empty metapackage list falls back to release-level RR."""
+
+        self.mock_metapackages.return_value = self._mock_response([])
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            ["starlingx-27.03.0"],
+            self.upgrade_obj,
+            self.precheck_data,
+            pre_upgrade_deploy=True,
+        )
+
+        self.assertEqual(upgrade_obj.pre_upgrade_metapackages, [])
+        # Falls back to release_info vim_rr (True)
+        self.assertTrue(upgrade_obj.reboot_required)
+
+    def test_user_metapackages_fetches_all_endpoint(self):
+        """User-specified metapackages trigger the ?all endpoint."""
+
+        all_metapackages = [
+            self._make_metapackage("k8s-1.34.1-controlplane_27.03.0", False),
+            self._make_metapackage("k8s-1.34.8-controlplane_27.03.0", False),
+            self._make_metapackage("platform_27.03.0", True),
+        ]
+        self.mock_metapackages.return_value = self._mock_response(all_metapackages)
+
+        # User passed specific metapackages (not the main release)
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            ["k8s-1.34.1-controlplane_27.03.0", "k8s-1.34.8-controlplane_27.03.0"],
+            self.upgrade_obj,
+            self.precheck_data,
+        )
+
+        self.mock_metapackages.assert_called_once_with(
+            self.token, pre_upgrade_deploy=False
+        )
+        # Only the two user-specified NRR metapackages should be stored
+        self.assertEqual(len(upgrade_obj.pre_upgrade_metapackages), 2)
+        self.assertFalse(upgrade_obj.reboot_required)
+
+    def test_user_metapackages_rr_when_selected_is_rr(self):
+        """User selects an RR metapackage, reboot_required is True."""
+
+        all_metapackages = [
+            self._make_metapackage("k8s-1.34.1-controlplane_27.03.0", False),
+            self._make_metapackage("platform_27.03.0", True),
+        ]
+        self.mock_metapackages.return_value = self._mock_response(all_metapackages)
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            ["platform_27.03.0"],
+            self.upgrade_obj,
+            self.precheck_data,
+        )
+
+        self.assertTrue(upgrade_obj.reboot_required)
+
+    def test_no_release_filters_by_deploy_selected_state(self):
+        """No release specified fetches ?all and filters deploy-selected."""
+
+        all_metapackages = [
+            self._make_metapackage("distcloud_26.10.1", False),
+            self._make_metapackage("k8s-1.34.1-controlplane_27.03.0", True),
+        ]
+        # Only the first one is deploy-selected
+        all_metapackages[0]["state"] = "deploy-selected"
+
+        self.mock_metapackages.return_value = self._mock_response(all_metapackages)
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            None,
+            self.upgrade_obj,
+            self.precheck_data,
+        )
+
+        self.mock_metapackages.assert_called_once_with(
+            self.token, pre_upgrade_deploy=False
+        )
+        # Only the deploy-selected NRR metapackage should be stored
+        self.assertEqual(len(upgrade_obj.pre_upgrade_metapackages), 1)
+        self.assertEqual(
+            upgrade_obj.pre_upgrade_metapackages[0]["release_id"],
+            "distcloud_26.10.1",
+        )
+        self.assertFalse(upgrade_obj.reboot_required)
+
+    def test_no_release_no_deploy_selected_falls_back(self):
+        """No release and no deploy-selected metapackages falls back to vim_rr."""
+
+        all_metapackages = [
+            self._make_metapackage("k8s-1.34.1-controlplane_27.03.0", False),
+        ]
+        # None are deploy-selected
+        self.mock_metapackages.return_value = self._mock_response(all_metapackages)
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            None,
+            self.upgrade_obj,
+            self.precheck_data,
+        )
+
+        self.assertEqual(upgrade_obj.pre_upgrade_metapackages, [])
+        # Falls back to release_info vim_rr (True)
+        self.assertTrue(upgrade_obj.reboot_required)
+
+    def test_main_release_skips_metapackage_fetch(self):
+        """Passing the main release name does not fetch metapackages."""
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            ["starlingx-27.03.0"],
+            self.upgrade_obj,
+            self.precheck_data,
+        )
+
+        self.mock_metapackages.assert_not_called()
+        self.assertEqual(upgrade_obj.pre_upgrade_metapackages, [])
+        # Falls back to release_info vim_rr
+        self.assertTrue(upgrade_obj.reboot_required)
+
+    def test_deploy_info_takes_precedence_over_metapackages(self):
+        """deploy_info reboot_required takes precedence over metapackage data."""
+
+        metapackages = [
+            self._make_metapackage("k8s-1.34.1-controlplane_27.03.0", False),
+        ]
+        self.mock_metapackages.return_value = self._mock_response(metapackages)
+
+        deploy_info = {
+            "to_release": "27.03.0",
+            "from_release": "26.09.0",
+            "reboot_required": True,
+            "state": "host",
+            "metapackages": [],
+        }
+        self.mock_show.return_value = self._mock_response([deploy_info])
+
+        self.mock_releases.return_value = self._mock_response(
+            {
+                "sw_version": "27.03.0",
+                "release_id": "starlingx-27.03.0",
+                "reboot_required": True,
+                "packages": [],
+            }
+        )
+
+        upgrade_obj = usm.sw_deploy_get_upgrade_obj(
+            self.token,
+            ["starlingx-27.03.0"],
+            self.upgrade_obj,
+            pre_upgrade_deploy=True,
+        )
+
+        # deploy_info exists, so its reboot_required takes precedence
+        self.assertTrue(upgrade_obj.reboot_required)
+
+
+class TestUpgradeRebootRequired(testcase.NFVTestCase):
+    """Unit tests for the Upgrade.reboot_required property."""
+
+    def _make_metapackage(self, release_id, reboot_required):
+        return {
+            "release_id": release_id,
+            "reboot_required": reboot_required,
+        }
+
+    def test_deploy_info_takes_highest_precedence(self):
+        """deploy_info reboot_required overrides everything else."""
+
+        upgrade = nfvi.objects.v1.Upgrade(
+            ["r1"],
+            [],
+            {"reboot_required": False, "vim_rr": False},
+            {"reboot_required": True},
+            None,
+            pre_upgrade_metapackages=[
+                self._make_metapackage("mp1", False),
+            ],
+        )
+
+        self.assertTrue(upgrade.reboot_required)
+
+    def test_pre_upgrade_metapackages_all_nrr(self):
+        """All NRR metapackages -> reboot_required is False."""
+
+        upgrade = nfvi.objects.v1.Upgrade(
+            ["r1"],
+            [],
+            {"reboot_required": True, "vim_rr": True},
+            None,
+            None,
+            pre_upgrade_metapackages=[
+                self._make_metapackage("mp1", False),
+                self._make_metapackage("mp2", False),
+            ],
+        )
+
+        self.assertFalse(upgrade.reboot_required)
+
+    def test_pre_upgrade_metapackages_one_rr(self):
+        """At least one RR metapackage -> reboot_required is True."""
+
+        upgrade = nfvi.objects.v1.Upgrade(
+            ["r1"],
+            [],
+            {"reboot_required": False, "vim_rr": False},
+            None,
+            None,
+            pre_upgrade_metapackages=[
+                self._make_metapackage("mp1", False),
+                self._make_metapackage("mp2", True),
+            ],
+        )
+
+        self.assertTrue(upgrade.reboot_required)
+
+    def test_empty_pre_upgrade_metapackages_falls_back_to_vim_rr(self):
+        """Empty list falls back to release_info vim_rr."""
+
+        upgrade = nfvi.objects.v1.Upgrade(
+            ["r1"],
+            [],
+            {"reboot_required": False, "vim_rr": True},
+            None,
+            None,
+            pre_upgrade_metapackages=[],
+        )
+
+        self.assertTrue(upgrade.reboot_required)
+
+    def test_no_pre_upgrade_metapackages_falls_back_to_release_info(self):
+        """No metapackages and no deploy_info uses release_info."""
+
+        upgrade = nfvi.objects.v1.Upgrade(
+            ["r1"],
+            [],
+            {"reboot_required": True, "vim_rr": True},
+            None,
+            None,
+        )
+
+        self.assertTrue(upgrade.reboot_required)
+
+    def test_no_release_info_returns_none(self):
+        """No release_info and no deploy_info returns None."""
+
+        upgrade = nfvi.objects.v1.Upgrade(
+            ["r1"],
+            [],
+            None,
+            None,
+            None,
+        )
+
+        self.assertIsNone(upgrade.reboot_required)
+
+    def test_update_sets_pre_upgrade_metapackages(self):
+        """update() with pre_upgrade_metapackages sets the field."""
+
+        upgrade = nfvi.objects.v1.Upgrade(["r1"], [], None, None, None)
+        self.assertEqual(upgrade.pre_upgrade_metapackages, [])
+
+        metapackages = [self._make_metapackage("mp1", True)]
+        upgrade.update(
+            {"reboot_required": False, "vim_rr": False},
+            None,
+            None,
+            pre_upgrade_metapackages=metapackages,
+        )
+
+        self.assertEqual(upgrade.pre_upgrade_metapackages, metapackages)
+        self.assertTrue(upgrade.reboot_required)
+
+    def test_update_without_pre_upgrade_metapackages_preserves_existing(self):
+        """update() without pre_upgrade_metapackages preserves existing data."""
+
+        metapackages = [self._make_metapackage("mp1", False)]
+        upgrade = nfvi.objects.v1.Upgrade(
+            ["r1"],
+            [],
+            None,
+            None,
+            None,
+            pre_upgrade_metapackages=metapackages,
+        )
+
+        upgrade.update(
+            {"reboot_required": True, "vim_rr": True},
+            None,
+            None,
+        )
+
+        # Existing metapackages should be preserved
+        self.assertEqual(upgrade.pre_upgrade_metapackages, metapackages)
+        self.assertFalse(upgrade.reboot_required)

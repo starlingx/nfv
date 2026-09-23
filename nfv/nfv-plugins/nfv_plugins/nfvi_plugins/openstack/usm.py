@@ -12,6 +12,7 @@ from nfv_plugins.nfvi_plugins.openstack.objects import PLATFORM_SERVICE
 from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 from nfv_vim import nfvi
 from nfv_vim.strategy._utils import parse_version
+import software.states as usm_states
 
 REST_API_REQUEST_TIMEOUT = 60
 REST_API_DEPLOY_START_TIMEOUT = 120
@@ -216,6 +217,27 @@ def sw_system_deploy_show(token):
     return response
 
 
+def sw_deploy_get_metapackages(token, pre_upgrade_deploy=False):
+    """Query USM for metapackage information.
+
+    When pre_upgrade_deploy is True, queries /v1/release/metapackage?pre-upgrade-deploy
+    to get only the metapackages from the pre-upgrade-deploy section.
+    Otherwise, queries /v1/release/metapackage?all to get all metapackages.
+
+    Returns a list of dicts, each containing at least 'release_id' and
+    'reboot_required' fields.
+    """
+
+    if pre_upgrade_deploy:
+        uri = "release/metapackage?pre-upgrade-deploy"
+    else:
+        uri = "release/metapackage?all"
+
+    url = _usm_api_cmd(token, uri)
+    response = _api_get(token, url)
+    return response
+
+
 def _retrieve_release_data(to_release, from_release):
     if parse_version(to_release) > parse_version(from_release):
         return True, False
@@ -234,11 +256,37 @@ def _retrieve_release_info(token, sw_version):
         raise EnvironmentError(error)
 
 
-def sw_deploy_get_upgrade_obj(token, release, upgrade_obj, precheck_data=None):
+def _extract_metapackage_info(
+    metapackage_data, filter_release_ids=None, filter_states=None
+):
+    """Extract only the relevant fields from metapackage API response.
+
+    Returns a list of dicts with only 'release_id', 'state', and
+    'reboot_required' for each metapackage. When filter_release_ids is
+    provided, only metapackages whose release_id is in the set are included.
+    When filter_states is provided, only metapackages whose state is in the
+    set are included.
+    """
+
+    kept_fields = ("release_id", "state", "reboot_required")
+    result = []
+    for mp in metapackage_data or []:
+        if filter_release_ids and mp.get("release_id") not in filter_release_ids:
+            continue
+        if filter_states and mp.get("state") not in filter_states:
+            continue
+        result.append({k: mp.get(k) for k in kept_fields})
+    return result
+
+
+def sw_deploy_get_upgrade_obj(
+    token, release, upgrade_obj, precheck_data=None, pre_upgrade_deploy=False
+):
     """Quickly gather all information about a software deployment."""
 
     release_id = None
     metapackages = []
+    pre_upgrade_metapackages = []
     release_info = None
     downgrade = False
     upgrade = False
@@ -324,8 +372,66 @@ def sw_deploy_get_upgrade_obj(token, release, upgrade_obj, precheck_data=None):
         release_info["downgrade"] = downgrade
         release_info["vim_rr"] = release_info["reboot_required"]
 
+    # Fetch metapackage-level reboot_required to determine whether the strategy
+    # should include lock/unlock host steps. The source depends on the deploy mode:
+    #  1. --pre-upgrade-deploy: use the pre-upgrade-deploy metapackage set
+    #  2. User specified metapackages: filter ?all to the user's selection
+    #  3. No release specified: filter ?all to deploy-selected state
+    if pre_upgrade_deploy:
+        try:
+            metapackage_data = sw_deploy_get_metapackages(
+                token, pre_upgrade_deploy=True
+            ).result_data
+            pre_upgrade_metapackages = _extract_metapackage_info(metapackage_data)
+            DLOG.info(
+                f"Retrieved {len(pre_upgrade_metapackages)} "
+                f"pre-upgrade-deploy metapackages"
+            )
+        except Exception as e:
+            DLOG.exception(f"Failed to fetch pre-upgrade-deploy metapackages: {e}")
+    elif (
+        release_info
+        and release
+        and (len(release) > 1 or release[0] != release_info.get("release_id"))
+    ):
+        try:
+            all_metapackage_data = sw_deploy_get_metapackages(
+                token, pre_upgrade_deploy=False
+            ).result_data
+            release_set = set(release)
+            pre_upgrade_metapackages = _extract_metapackage_info(
+                all_metapackage_data, filter_release_ids=release_set
+            )
+            DLOG.info(
+                f"Retrieved {len(pre_upgrade_metapackages)} user-specified "
+                f"metapackages"
+            )
+        except Exception as e:
+            DLOG.exception(f"Failed to fetch metapackage data: {e}")
+    elif not release:
+        try:
+            all_metapackage_data = sw_deploy_get_metapackages(
+                token, pre_upgrade_deploy=False
+            ).result_data
+            pre_upgrade_metapackages = _extract_metapackage_info(
+                all_metapackage_data,
+                filter_states={usm_states.DEPLOY_SELECTED},
+            )
+            DLOG.info(
+                f"Retrieved {len(pre_upgrade_metapackages)} "
+                f"deploy-selected metapackages"
+            )
+        except Exception as e:
+            DLOG.exception(f"Failed to fetch deploy-selected metapackages: {e}")
+
     if upgrade_obj:
-        upgrade_obj.update(release_info, deploy_info, hosts_info, system_deploy_info)
+        upgrade_obj.update(
+            release_info,
+            deploy_info,
+            hosts_info,
+            system_deploy_info,
+            pre_upgrade_metapackages=pre_upgrade_metapackages,
+        )
         return upgrade_obj
 
     return nfvi.objects.v1.Upgrade(
@@ -335,4 +441,5 @@ def sw_deploy_get_upgrade_obj(token, release, upgrade_obj, precheck_data=None):
         deploy_info,
         hosts_info,
         system_deploy_info,
+        pre_upgrade_metapackages=pre_upgrade_metapackages,
     )
