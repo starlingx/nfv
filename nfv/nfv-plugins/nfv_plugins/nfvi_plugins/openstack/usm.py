@@ -13,7 +13,7 @@ from nfv_plugins.nfvi_plugins.openstack.rest_api import rest_api_request
 from nfv_vim import nfvi
 from nfv_vim.strategy._utils import parse_version
 
-REST_API_REQUEST_TIMEOUT = 60
+REST_API_REQUEST_TIMEOUT = 120
 REST_API_DEPLOY_START_TIMEOUT = 120
 REST_API_DEPLOY_HOST_TIMEOUT = 240
 REST_API_DEPLOY_DELETE_TIMEOUT = 300
