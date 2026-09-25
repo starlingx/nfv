@@ -30,6 +30,7 @@ class Upgrade(ObjectData):
         deploy_info,
         hosts_info,
         system_deploy=None,
+        pre_upgrade_metapackages=None,
     ):
         super().__init__("1.0.0")
         self.release = release
@@ -38,14 +39,24 @@ class Upgrade(ObjectData):
         self.deploy_info = deploy_info
         self.hosts_info = hosts_info
         self.system_deploy = system_deploy
+        self.pre_upgrade_metapackages = pre_upgrade_metapackages or []
 
-    def update(self, release_info, deploy_info, hosts_info, system_deploy=None):
+    def update(
+        self,
+        release_info,
+        deploy_info,
+        hosts_info,
+        system_deploy=None,
+        pre_upgrade_metapackages=None,
+    ):
         """Update fields."""
 
         self.release_info = release_info
         self.deploy_info = deploy_info
         self.hosts_info = hosts_info
         self.system_deploy = system_deploy
+        if pre_upgrade_metapackages is not None:
+            self.pre_upgrade_metapackages = pre_upgrade_metapackages
 
     @property
     def release_id(self):
@@ -76,6 +87,14 @@ class Upgrade(ObjectData):
         # from release_info will not be correct during multi-patch situations.
         if self.deploy_info:
             return self.deploy_info["reboot_required"]
+
+        # When pre-upgrade-deploy metapackages or user-specified metapackages are
+        # available, determine reboot_required based on whether any of the selected
+        # metapackages require a reboot instead of the release-level RR flag.
+        if self.pre_upgrade_metapackages:
+            return any(
+                mp.get("reboot_required", False) for mp in self.pre_upgrade_metapackages
+            )
 
         if not self.release_info:
             return None
