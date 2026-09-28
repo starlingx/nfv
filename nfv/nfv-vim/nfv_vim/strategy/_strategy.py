@@ -1524,6 +1524,7 @@ class SwUpgradeStrategy(
             "280.003",  # Subcloud backup failure
             "280.004",  # Subcloud peer group in disconnected state
             "280.005",  # Subcloud peer group managed with lower priority
+            "700.001",  # VM failed
             "700.004",  # VM stopped
             "750.006",  # Configuration change requires reapply of cert-manager
             "900.004",  # Incorrect software load
