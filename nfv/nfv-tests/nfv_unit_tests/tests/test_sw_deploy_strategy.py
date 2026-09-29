@@ -4758,54 +4758,6 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         self.assertFalse(strategy._is_combined_strategy())
         self.assertFalse(hasattr(strategy, "_nfvi_kube_upgrade"))
 
-    def test_sw_upgrade_strategy_kube_upgrade_post_control_plane_state_fails(self):
-        """Test build fails when kube upgrade is past the control plane phase.
-
-        Verify:
-        - build_complete sets state to BUILD_FAILED when nfvi_kube_upgrade is in
-          a post-control-plane state (e.g. KUBE_UPGRADING_KUBELETS)
-        """
-        self.create_host("controller-0", aio=True)
-
-        release = ["starlingx-24.03.1"]
-        strategy = self.create_sw_deploy_strategy(
-            kube_upgrade_version="v1.29.0",
-            nfvi_upgrade=nfvi.objects.v1.Upgrade(
-                release,
-                MOCK_METAPACKAGES,
-                {
-                    "state": "deploying",
-                    "reboot_required": True,
-                    "sw_version": MAJOR_RELEASE_UPGRADE,
-                },
-                None,
-                None,
-            ),
-        )
-
-        strategy.nfvi_kube_upgrade = nfvi.objects.v1.KubeUpgrade(
-            state=KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS,
-            from_version="v1.28.0",
-            to_version="v1.29.0",
-        )
-        strategy.nfvi_kube_versions_list = []
-        strategy.nfvi_kube_host_upgrade_list = []
-
-        fake_upgrade_obj = SwUpgrade()
-        strategy.sw_update_obj = fake_upgrade_obj
-        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
-
-        self.assertEqual(common_strategy.STRATEGY_STATE.BUILD_FAILED, strategy._state)
-        self.assertEqual(
-            common_strategy.STRATEGY_PHASE_RESULT.FAILED, strategy.build_phase.result
-        )
-        expected_reason = (
-            "Kubernetes upgrade is past the control plane "
-            f"phase (state={KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS}). "
-            "Cannot proceed with sw-upgrade strategy."
-        )
-        self.assertEqual(expected_reason, strategy.build_phase.result_reason)
-
 
 class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
     """Tests for SwUpgradeStrategy with kube_upgrade_version set (combined strategy)."""
@@ -5081,20 +5033,25 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         "nfv_vim.strategy._strategy.get_local_host_name",
         sw_update_testcase.fake_host_name_controller_0,
     )
-    def test_combined_post_control_plane_kube_state_fails_build(self):
-        """Test BUILD_FAILED when kube upgrade is past the control-plane phase.
+    def test_combined_post_control_plane_kube_state_resumes_successfully(self):
+        """Test combined strategy resumes from post-control-plane kube states.
 
-        Covers all states in POST_CONTROL_PLANE_STATES defined in
-        _build_complete_normal. Each state must cause BUILD_FAILED with a
-        reason that identifies the offending state.
+        When a combined upgrade fails (e.g. during activation) and is
+        retriggered, the kube upgrade may be left in a post-control-plane
+        state such as upgrading-kubelets. The strategy must resume
+        correctly from these states instead of rejecting the build.
+
+        Verify:
+        - build succeeds for all post-control-plane states that have
+          entries in the RESUME_STATE map
+        - no kubelet stages are generated (deferred for combined strategy)
+        - sw-deploy stages are still present
         """
         post_control_plane_states = [
             KUBE_UPGRADE_STATE.KUBE_UPGRADING_KUBELETS,
-            KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON,
             KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_FAILED,
             KUBE_UPGRADE_STATE.KUBE_HOST_UNCORDON_COMPLETE,
             KUBE_UPGRADE_STATE.KUBE_UPGRADE_COMPLETE,
-            KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS,
             KUBE_UPGRADE_STATE.KUBE_POST_UPDATING_APPS_FAILED,
             KUBE_UPGRADE_STATE.KUBE_POST_UPDATED_APPS,
         ]
@@ -5114,16 +5071,24 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
 
                 strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
 
-                self.assertEqual(
-                    common_strategy.STRATEGY_STATE.BUILD_FAILED,
-                    strategy._state,
-                    "Expected BUILD_FAILED for state=%s" % state,
+                self.assertFalse(
+                    strategy.is_build_failed(),
+                    "Expected build to succeed for state=%s but got: %s"
+                    % (state, strategy.build_phase.result_reason),
                 )
-                self.assertIn(
-                    "past the control plane",
-                    strategy.build_phase.result_reason,
+
+                stage_names = [s.name for s in strategy.apply_phase.stages]
+
+                # No kubelet stages (deferred for combined strategy)
+                self.assertFalse(
+                    any("kubelet" in s for s in stage_names),
+                    "Unexpected kubelet stage for state=%s: %s" % (state, stage_names),
                 )
-                self.assertIn(state, strategy.build_phase.result_reason)
+
+                # sw-deploy stages must still be present
+                self.assertIn("sw-upgrade-start", stage_names)
+
+                sw_update_testcase.validate_strategy_persists(strategy)
 
                 # Reset host table for next subTest iteration
                 self._host_table.clear()
