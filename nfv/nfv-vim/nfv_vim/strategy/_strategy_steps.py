@@ -3099,7 +3099,15 @@ class WaitAlarmsClearStep(strategy.StrategyStep):
     def apply(self):
         """Alarm Wait."""
 
+        from nfv_vim import nfvi
+
         DLOG.info("Step (%s) apply." % self._name)
+        # Only the pre-check usage sets first_query_delay_in_secs=0; for that
+        # case, query immediately so the clean path does not wait for the first
+        # HOST_AUDIT tick (~30s).
+        if self._first_query_delay_in_secs == 0:
+            self._query_inprogress = True
+            nfvi.nfvi_get_alarms(self._query_alarms_callback())
         return strategy.STRATEGY_STEP_RESULT.WAIT, ""
 
     def handle_event(self, event, event_data=None):
