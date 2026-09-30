@@ -1154,3 +1154,179 @@ class TestUpgradeRebootRequired(testcase.NFVTestCase):
         # Existing metapackages should be preserved
         self.assertEqual(upgrade.pre_upgrade_metapackages, metapackages)
         self.assertFalse(upgrade.reboot_required)
+
+
+class TestComputeVimRR(BaseTestUsm):
+    """Unit tests for the _compute_vim_rr helper.
+
+    Validates that the correct range of releases is checked when computing
+    vim_rr for patch removal (downgrade) scenarios. The function checks
+    [from_release, to_release) — inclusive on from_release (higher version),
+    exclusive on to_release (lower version, the target).
+    """
+
+    def setUp(self):
+        super().setUp()
+
+        self.mock_releases = self._mock_object(usm, "sw_deploy_get_releases")
+
+    def _create_releases(self, *releases):
+        """Build a list of release dicts from (sw_version, rr) tuples."""
+
+        return [{"sw_version": ver, "reboot_required": rr} for ver, rr in releases]
+
+    def test_checks_from_inclusive_to_exclusive(self):
+        """Only releases in [from, to) are checked (from > to)."""
+
+        releases = self._create_releases(
+            ("26.10.0", True),
+            ("26.10.1", True),
+            ("26.10.2", False),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        # Downgrade from 26.10.2 to 26.10.1: should check only 26.10.2
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.1")
+
+        # 26.10.2 is NRR and 26.10.1 is excluded (to_side exclusive)
+        self.assertFalse(result)
+
+    def test_detects_rr_in_range(self):
+        """RR release in [from, to) makes vim_rr True."""
+
+        releases = self._create_releases(
+            ("26.10.0", False),
+            ("26.10.1", False),
+            ("26.10.2", True),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        # Downgrade from 26.10.2 to 26.10.0: should check 26.10.1 and 26.10.2
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.0")
+
+        self.assertTrue(result)
+
+    def test_includes_from_release(self):
+        """The from_release (higher version being removed) IS included."""
+
+        releases = self._create_releases(
+            ("26.10.0", False),
+            ("26.10.1", False),
+            ("26.10.2", True),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.1")
+
+        # 26.10.2 is RR and included (from_side inclusive)
+        self.assertTrue(result)
+
+    def test_excludes_to_release(self):
+        """The to_release (lower version, target) is NOT included."""
+
+        releases = self._create_releases(
+            ("26.10.0", False),
+            ("26.10.1", True),
+            ("26.10.2", False),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        # Downgrade from 26.10.2 to 26.10.1: should check only 26.10.2
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.1")
+
+        # 26.10.1 is RR but excluded (to_side exclusive)
+        self.assertFalse(result)
+
+    def test_bug_scenario_remove_insvc_patch_over_rr(self):
+        """Reproduce the bug: removing INSVC patch when target is RR.
+
+        System state: 26.10.0 (deployed), 26.10.1 (deployed, RR),
+        26.10.2 (deployed, INSVC).
+        User removes patch 26.10.2 by deploying to 26.10.1.
+        Only 26.10.2 is being removed, and it's INSVC, so no reboot needed.
+        """
+
+        releases = self._create_releases(
+            ("26.10.0", True),
+            ("26.10.1", True),
+            ("26.10.2", False),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        # Downgrade: from 26.10.2 (current) to 26.10.1 (target)
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.1")
+
+        # Only 26.10.2 is being removed, and it's NRR
+        self.assertFalse(result)
+
+    def test_remove_rr_patch(self):
+        """Removing a RR patch should detect reboot needed.
+
+        System state: 26.10.0 (deployed), 26.10.1 (deployed, RR).
+        User removes 26.10.1 by deploying to 26.10.0.
+        """
+
+        releases = self._create_releases(
+            ("26.10.0", True),
+            ("26.10.1", True),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        result = usm._compute_vim_rr(self.token, "26.10.1", "26.10.0")
+
+        self.assertTrue(result)
+
+    def test_remove_multiple_patches_one_rr(self):
+        """Removing multiple patches where one is RR should detect reboot.
+
+        System state: 26.10.0 (deployed), 26.10.1 (deployed, RR),
+        26.10.2 (deployed, INSVC).
+        User removes both by deploying to 26.10.0.
+        """
+
+        releases = self._create_releases(
+            ("26.10.0", True),
+            ("26.10.1", True),
+            ("26.10.2", False),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.0")
+
+        # 26.10.1 is RR and in the removal range
+        self.assertTrue(result)
+
+    def test_returns_none_on_api_failure(self):
+        """API failure returns None to allow fallback."""
+
+        self.mock_releases.side_effect = Exception("API error")
+
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.1")
+
+        self.assertIsNone(result)
+
+    def test_no_releases_returns_false(self):
+        """No releases at all -> False (no RR found)."""
+
+        self.mock_releases.return_value = self._mock_response([])
+
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.1")
+
+        self.assertFalse(result)
+
+    def test_releases_outside_range_ignored(self):
+        """Releases outside the from/to range should not affect the result."""
+
+        releases = self._create_releases(
+            ("26.09.0", True),
+            ("26.10.0", False),
+            ("26.10.1", False),
+            ("26.10.2", False),
+            ("27.03.0", True),
+        )
+        self.mock_releases.return_value = self._mock_response(releases)
+
+        # Downgrade from 26.10.2 to 26.10.1: only 26.10.2 is in range
+        result = usm._compute_vim_rr(self.token, "26.10.2", "26.10.1")
+
+        self.assertFalse(result)

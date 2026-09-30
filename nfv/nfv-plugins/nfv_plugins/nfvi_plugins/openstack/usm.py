@@ -256,6 +256,49 @@ def _retrieve_release_info(token, sw_version):
         raise EnvironmentError(error)
 
 
+def _compute_vim_rr(token, from_release, to_release):
+    """Determine reboot_required by checking all releases being removed.
+
+    When removing patches (downgrade), the range is [from_release, to_release)
+    — inclusive on from_release, exclusive on to_release. from_release is the
+    higher version (current) and to_release is the lower version (target).
+    Only the releases actually being removed should be checked.
+
+    Returns True if any release in the computed range has reboot_required=True.
+    Returns None on failure to allow the caller to fall back.
+    """
+
+    try:
+        all_releases = sw_deploy_get_releases(token).result_data or []
+    except Exception:
+        DLOG.exception("Failed to retrieve releases for vim_rr computation")
+        return None
+
+    # sw_deploy_get_releases without a release_id returns a list of all releases.
+    # Guard against unexpected single-dict responses.
+    if isinstance(all_releases, dict):
+        all_releases = [all_releases]
+
+    from_ver = parse_version(from_release)
+    to_ver = parse_version(to_release)
+
+    rr_in_range = False
+    for release in all_releases:
+        ver = parse_version(release.get("sw_version", "0"))
+        # Remove: check releases in [from_release, to_release)
+        # from_release is the higher version, to_release is the lower
+        if to_ver < ver <= from_ver:
+            if release.get("reboot_required", False):
+                rr_in_range = True
+                break
+
+    DLOG.info(
+        f"Computed reboot_required={rr_in_range} for removal range: "
+        f"{from_release} -> {to_release}"
+    )
+    return rr_in_range
+
+
 def _extract_metapackage_info(
     metapackage_data, filter_release_ids=None, filter_states=None
 ):
@@ -290,6 +333,8 @@ def sw_deploy_get_upgrade_obj(
     release_info = None
     downgrade = False
     upgrade = False
+    from_release = None
+    to_release = None
     error_template = (
         "{}, check /var/log/nfv-vim.log or /var/log/software.log for more information."
     )
@@ -314,26 +359,26 @@ def sw_deploy_get_upgrade_obj(
 
     # should only ever look for upgrade, downgrade and release info
     if precheck_data:
-        upgrade, downgrade = _retrieve_release_data(
-            precheck_data["to_release"], precheck_data["from_release"]
-        )
+        from_release = precheck_data["from_release"]
+        to_release = precheck_data["to_release"]
+        upgrade, downgrade = _retrieve_release_data(to_release, from_release)
         # When the upgrade object is created for the very first time, it does not
         # have the metapackages data filled, so it needs to be set once the
         # information is received in precheck.
         upgrade_obj.metapackages = list(precheck_data["additional_data"])
-        release_info = _retrieve_release_info(token, precheck_data["to_release"])
+        release_info = _retrieve_release_info(token, to_release)
         release_id = release_info.get("release_id")
         DLOG.info(
             f"Detected, {upgrade=}, {downgrade=}, "
             f"target={release_id}, "
             f"reboot_required={release_info['reboot_required']}, "
-            f"to_version={precheck_data['to_release']}, "
+            f"to_version={to_release}, "
             f"metapackages={upgrade_obj.metapackages}"
         )
     elif deploy_info:
-        upgrade, downgrade = _retrieve_release_data(
-            deploy_info["to_release"], deploy_info["from_release"]
-        )
+        from_release = deploy_info["from_release"]
+        to_release = deploy_info["to_release"]
+        upgrade, downgrade = _retrieve_release_data(to_release, from_release)
 
         if upgrade_obj:
             release_id = upgrade_obj.release_info.get("release_id")
@@ -342,7 +387,7 @@ def sw_deploy_get_upgrade_obj(
             # When the strategy is created with a deployment already in progress, the
             # precheck won't be executed, so the information needs to be retrieved
             # in full
-            release_info = _retrieve_release_info(token, deploy_info["to_release"])
+            release_info = _retrieve_release_info(token, to_release)
             release_id = release_info.get("release_id")
             # The metapackage name is stored as:
             # [['distcloud', '26.09.0', '26.09.1000']]
@@ -370,7 +415,18 @@ def sw_deploy_get_upgrade_obj(
         release_info["packages_count"] = len(release_info.pop("packages", []))
         release_info["upgrade"] = upgrade
         release_info["downgrade"] = downgrade
-        release_info["vim_rr"] = release_info["reboot_required"]
+
+        # Compute vim_rr by checking all releases in the deployment range.
+        # When removing patches (downgrade), check the range of releases being
+        # removed rather than using the single target release's flag.
+        if downgrade and from_release and to_release:
+            vim_rr = _compute_vim_rr(token, from_release, to_release)
+            if vim_rr is not None:
+                release_info["vim_rr"] = vim_rr
+            else:
+                release_info["vim_rr"] = release_info["reboot_required"]
+        else:
+            release_info["vim_rr"] = release_info["reboot_required"]
 
     # Fetch metapackage-level reboot_required to determine whether the strategy
     # should include lock/unlock host steps. The source depends on the deploy mode:
