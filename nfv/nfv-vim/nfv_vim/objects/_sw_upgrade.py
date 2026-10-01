@@ -50,6 +50,7 @@ class SwUpgrade(SwUpdate, KubeUpgradeMixin):
         snapshot,
         kube_upgrade,
         pre_upgrade_deploy,
+        remove,
         ignore_alarms,
         single_controller,
     ):
@@ -88,6 +89,7 @@ class SwUpgrade(SwUpdate, KubeUpgradeMixin):
             snapshot,
             kube_upgrade,
             pre_upgrade_deploy,
+            remove,
             ignore_alarms,
             single_controller,
         )

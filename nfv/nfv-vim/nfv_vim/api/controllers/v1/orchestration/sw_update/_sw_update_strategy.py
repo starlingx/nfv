@@ -139,6 +139,7 @@ class SwUpdateStrategyData(wsme_types.Base):
     pre_upgrade_deploy = wsme_types.wsattr(
         bool, mandatory=False, name="pre-upgrade-deploy"
     )
+    remove = wsme_types.wsattr(bool, mandatory=False, name="remove")
     kube_version = wsme_types.wsattr(str, mandatory=False, name="kube-version")
     controller_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, name="controller-apply-type"
@@ -187,6 +188,7 @@ class SwUpgradeStrategyCreateData(wsme_types.Base):
     pre_upgrade_deploy = wsme_types.wsattr(
         bool, mandatory=False, name="pre-upgrade-deploy", default=False
     )
+    remove = wsme_types.wsattr(bool, mandatory=False, name="remove", default=False)
     storage_apply_type = wsme_types.wsattr(
         SwUpdateApplyTypes, mandatory=True, name="storage-apply-type"
     )
@@ -667,6 +669,7 @@ class SwUpgradeStrategyAPI(SwUpdateStrategyAPI):
         rpc_request.snapshot = request_data.snapshot
         rpc_request.kube_upgrade = request_data.kube_upgrade
         rpc_request.pre_upgrade_deploy = request_data.pre_upgrade_deploy
+        rpc_request.remove = request_data.remove
         rpc_request.controller_apply_type = request_data.controller_apply_type
         rpc_request.storage_apply_type = request_data.storage_apply_type
         rpc_request.swift_apply_type = SW_UPDATE_APPLY_TYPE.IGNORE

@@ -63,6 +63,8 @@ def get_extra_create_args(cmd_area, args):
             )
         elif args.pre_upgrade_deploy and args.kube_upgrade:
             raise ValueError("Cannot combine --kube-upgrade with --pre-upgrade-deploy")
+        elif args.remove and not args.pre_upgrade_deploy:
+            raise ValueError("Cannot set --remove without --pre-upgrade-deploy")
         elif args.rollback and args.delete:
             raise ValueError("Cannot set both --rollback and --delete")
         elif args.rollback and args.snapshot:
@@ -84,6 +86,7 @@ def get_extra_create_args(cmd_area, args):
             "kube_upgrade": args.kube_upgrade,
             "cleanup": args.cleanup,
             "pre_upgrade_deploy": args.pre_upgrade_deploy,
+            "remove": args.remove,
         }
     elif sw_update.CMD_NAME_FW_UPDATE == cmd_area:
         # no additional kwargs for firmware update
@@ -542,6 +545,16 @@ def setup_sw_deploy_parser(commands):
         help=(
             "Uses the metapackages from the pre-upgrade-deploy section of the release "
             "metadata. Only applicable for major releases."
+        ),
+        action=argparse.BooleanOptionalAction,
+        required=False,
+    )
+
+    create_strategy_cmd.add_argument(
+        "--remove",
+        help=(
+            "Remove previously deployed pre-upgrade-deploy metapackages "
+            "(requires --pre-upgrade-deploy)."
         ),
         action=argparse.BooleanOptionalAction,
         required=False,

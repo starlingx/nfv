@@ -161,6 +161,7 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         snapshot=False,
         kube_upgrade_version=None,
         pre_upgrade_deploy=False,
+        remove=False,
         nfvi_upgrade=None,
         single_controller=False,
     ):
@@ -186,6 +187,7 @@ class BaseSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             snapshot=snapshot,
             kube_upgrade_version=kube_upgrade_version,
             pre_upgrade_deploy=pre_upgrade_deploy,
+            remove=remove,
             ignore_alarms=[],
             single_controller=single_controller,
         )
@@ -3331,6 +3333,179 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
             "Cannot combine kube-upgrade with pre-upgrade-deploy"
         ), bpr.result_reason
 
+    def test_sw_deploy_strategy_remove_build_fails_without_pre_upgrade_deploy(self):
+        """--remove cannot be set without --pre-upgrade-deploy."""
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=[MAJOR_RELEASE_UPGRADE],
+            remove=True,
+            pre_upgrade_deploy=False,
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build()
+
+        bpr = strategy.build_phase
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
+        assert bpr.result_reason == (
+            "Cannot set --remove without --pre-upgrade-deploy"
+        ), bpr.result_reason
+
+    def test_sw_deploy_strategy_remove_with_pre_upgrade_deploy(self):
+        """--remove with --pre-upgrade-deploy on aio-sx (NRR): build succeeds.
+
+        Verify:
+        - Strategy builds successfully.
+        - The start-upgrade step carries pre_upgrade_deploy=True and remove=True.
+        - All expected stages and steps are present.
+        - Strategy persists through serialization.
+        """
+        release = [MAJOR_RELEASE_UPGRADE]
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=release,
+            pre_upgrade_deploy=True,
+            remove=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                MOCK_METAPACKAGES,
+                {
+                    "state": "available",
+                    "reboot_required": False,
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            ),
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            "total_stages": 3,
+            "stages": [
+                {
+                    "name": "sw-upgrade-start",
+                    "total_steps": 2,
+                    "steps": [
+                        {
+                            "name": "start-upgrade",
+                            "release": release,
+                            "pre_upgrade_deploy": True,
+                            "remove": True,
+                        },
+                        {"name": "query-alarms"},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-complete",
+                    "total_steps": 5,
+                    "steps": [
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "query-alarms"},
+                        {"name": "activate-upgrade", "release": release},
+                        {"name": "complete-upgrade", "release": release},
+                        {"name": "query-alarms"},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_remove_with_pre_upgrade_deploy_and_delete(self):
+        """--remove with --pre-upgrade-deploy and --delete on aio-sx (NRR).
+
+        Verify:
+        - Strategy builds successfully.
+        - The start-upgrade step carries pre_upgrade_deploy=True and remove=True.
+        - The sw-deploy-delete stage is appended at the end.
+        - Strategy persists through serialization.
+        """
+        release = [MAJOR_RELEASE_UPGRADE]
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=release,
+            pre_upgrade_deploy=True,
+            remove=True,
+            delete=True,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                release,
+                MOCK_METAPACKAGES,
+                {
+                    "state": "available",
+                    "reboot_required": False,
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+                None,
+            ),
+        )
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            "total_stages": 4,
+            "stages": [
+                {
+                    "name": "sw-upgrade-start",
+                    "total_steps": 2,
+                    "steps": [
+                        {
+                            "name": "start-upgrade",
+                            "release": release,
+                            "pre_upgrade_deploy": True,
+                            "remove": True,
+                        },
+                        {"name": "query-alarms"},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-complete",
+                    "total_steps": 5,
+                    "steps": [
+                        {"name": "system-stabilize", "timeout": 15},
+                        {"name": "query-alarms"},
+                        {"name": "activate-upgrade", "release": release},
+                        {"name": "complete-upgrade", "release": release},
+                        {"name": "query-alarms"},
+                    ],
+                },
+                {
+                    "name": "sw-deploy-delete",
+                    "total_steps": 1,
+                    "steps": [
+                        {"name": "deploy-delete", "release": release},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
     def test_sw_deploy_strategy_aiosx_rollback_pud(self):
         """PUD rollback after pre-upgrade-deploy completes.
 
@@ -4967,6 +5142,7 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
             snapshot=False,
             kube_upgrade_version=kube_upgrade_version,
             pre_upgrade_deploy=False,
+            remove=False,
             ignore_alarms=[],
             single_controller=single_controller,
         )

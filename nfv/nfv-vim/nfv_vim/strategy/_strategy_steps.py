@@ -1258,12 +1258,20 @@ class UpgradeHostsStep(strategy.StrategyStep):
 class UpgradeStartStep(strategy.StrategyStep):
     """Upgrade Start - Strategy Step."""
 
-    def __init__(self, release, snapshot=False, pre_upgrade_deploy=False, timeout=None):
+    def __init__(
+        self,
+        release,
+        snapshot=False,
+        pre_upgrade_deploy=False,
+        remove=False,
+        timeout=None,
+    ):
         super().__init__(STRATEGY_STEP_NAME.START_UPGRADE, timeout_in_secs=self.TIMEOUT)
 
         self._release = release
         self._snapshot = snapshot
         self._pre_upgrade_deploy = pre_upgrade_deploy
+        self._remove = remove
         self._query_inprogress = False
 
     @property
@@ -1360,6 +1368,7 @@ class UpgradeStartStep(strategy.StrategyStep):
                 force,
                 self._snapshot,
                 self._pre_upgrade_deploy,
+                self._remove,
                 self._start_upgrade_callback(),
             )
 
@@ -1391,6 +1400,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         self._release = normalize_release(data["release"])
         self._snapshot = data.get("snapshot", False)
         self._pre_upgrade_deploy = data.get("pre_upgrade_deploy", False)
+        self._remove = data.get("remove", False)
         self._query_inprogress = False
         return self
 
@@ -1404,6 +1414,7 @@ class UpgradeStartStep(strategy.StrategyStep):
         data["release"] = self._release
         data["snapshot"] = self._snapshot
         data["pre_upgrade_deploy"] = self._pre_upgrade_deploy
+        data["remove"] = self._remove
         return data
 
 

@@ -59,6 +59,7 @@ function _swmanager()
                                 --kube-upgrade
                                 --cleanup
                                 --pre-upgrade-deploy
+                                --remove
                             "
                             local createopt=${prev}
                             case "$createopt" in
@@ -107,6 +108,10 @@ function _swmanager()
                                     return 0
                                     ;;
                                 --pre-upgrade-deploy)
+                                    COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
+                                    return 0
+                                    ;;
+                                --remove)
                                     COMPREPLY=($(compgen -W "${createopts}" -- ${cur}))
                                     return 0
                                     ;;

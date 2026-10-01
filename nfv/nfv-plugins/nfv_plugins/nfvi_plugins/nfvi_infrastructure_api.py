@@ -2509,13 +2509,18 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
             callback.close()
 
     def sw_deploy_start(
-        self, future, release, force, snapshot, pre_upgrade_deploy, callback
+        self, future, release, force, snapshot, pre_upgrade_deploy, remove, callback
     ):
         """Start a USM software deploy."""
 
         response = {}
         response["completed"] = False
         response["reason"] = ""
+
+        DLOG.info(
+            f"sw_deploy_start: {release=}, {force=}, {snapshot=}, "
+            f"{pre_upgrade_deploy=}, {remove=}"
+        )
 
         try:
             future.set_timeouts(config.CONF.get("nfvi-timeouts", None))
@@ -2536,6 +2541,7 @@ class NFVIInfrastructureAPI(nfvi.api.v1.NFVIInfrastructureAPI):
                 force,
                 snapshot,
                 pre_upgrade_deploy,
+                remove,
             )
             future.result = yield
 

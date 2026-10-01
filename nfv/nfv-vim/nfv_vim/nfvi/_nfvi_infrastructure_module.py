@@ -386,7 +386,7 @@ def nfvi_sw_deploy_precheck(release, force, snapshot, pre_upgrade_deploy, callba
     return cmd_id
 
 
-def nfvi_upgrade_start(release, force, snapshot, pre_upgrade_deploy, callback):
+def nfvi_upgrade_start(release, force, snapshot, pre_upgrade_deploy, remove, callback):
     """Software deploy start."""
 
     cmd_id = _infrastructure_plugin.invoke_plugin(
@@ -395,6 +395,7 @@ def nfvi_upgrade_start(release, force, snapshot, pre_upgrade_deploy, callback):
         force,
         snapshot,
         pre_upgrade_deploy,
+        remove,
         callback=callback,
     )
     return cmd_id

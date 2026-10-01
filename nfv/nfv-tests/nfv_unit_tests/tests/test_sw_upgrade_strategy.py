@@ -98,6 +98,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         snapshot=False,
         kube_upgrade_version=None,
         pre_upgrade_deploy=False,
+        remove=False,
         nfvi_upgrade=None,
         single_controller=False,
     ):
@@ -121,6 +122,7 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             snapshot=snapshot,
             kube_upgrade_version=kube_upgrade_version,
             pre_upgrade_deploy=pre_upgrade_deploy,
+            remove=remove,
             ignore_alarms=[],
             single_controller=single_controller,
         )
@@ -2009,13 +2011,13 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_serialization_delete_cleanup_snapshot_fields(self):
-        """Test that delete, cleanup, snapshot fields persist through serialization.
+        """Test that fields persist through serialization.
 
         Verify:
         - Each field with True is preserved when converting to/from dict
         - Each field with False (default) is preserved when converting to/from dict
         """
-        for field in ("delete", "cleanup", "snapshot"):
+        for field in ("delete", "cleanup", "snapshot", "pre_upgrade_deploy", "remove"):
             strategy_true = self.create_sw_upgrade_strategy(**{field: True})
             strategy_dict = strategy_true.as_dict()
             self.assertEqual(True, strategy_dict[field])
@@ -2038,15 +2040,19 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         sw_update_testcase.fake_host_name_controller_1,
     )
     def test_sw_upgrade_strategy_serialization_missing_fields_default_false(self):
-        """Test missing delete/cleanup/snapshot default to False.
+        """Test missing params default to False during serialization.
 
         Verify:
-        - Removing delete, cleanup, snapshot from the serialized dict does not
-          cause deserialization failures
+        - Removing delete, cleanup, snapshot, pre_upgrade_deploy, remove from
+          the serialized dict does not cause deserialization failures
         - The missing fields default to False after deserialization
         """
         strategy = self.create_sw_upgrade_strategy(
-            delete=True, cleanup=True, snapshot=True
+            delete=True,
+            cleanup=True,
+            snapshot=True,
+            pre_upgrade_deploy=True,
+            remove=True,
         )
         strategy_dict = strategy.as_dict()
 
@@ -2054,6 +2060,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         strategy_dict.pop("delete")
         strategy_dict.pop("cleanup")
         strategy_dict.pop("snapshot")
+        strategy_dict.pop("pre_upgrade_deploy")
+        strategy_dict.pop("remove")
 
         # Rebuild should not raise and should default to False
         new_strategy = strategy_rebuild_from_dict(strategy_dict)
@@ -2062,6 +2070,8 @@ class TestSwUpgradeStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         self.assertEqual(False, new_dict["delete"])
         self.assertEqual(False, new_dict["cleanup"])
         self.assertEqual(False, new_dict["snapshot"])
+        self.assertEqual(False, new_dict["pre_upgrade_deploy"])
+        self.assertEqual(False, new_dict["remove"])
 
     @mock.patch(
         "nfv_vim.strategy._strategy.get_local_host_name",

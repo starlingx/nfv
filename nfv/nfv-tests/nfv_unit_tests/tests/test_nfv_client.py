@@ -374,6 +374,21 @@ class TestCLISwDeployStrategy(TestNFVClientShell, StrategyMixin):
         e = self._test_shell_create_with_error(shell_args=shell_args)
         assert str(e) == ("Cannot combine --kube-upgrade with --pre-upgrade-deploy"), e
 
+    def test_create_remove_with_pre_upgrade_deploy(self):
+        shell_args = [
+            self.strategy,
+            "create",
+            "123.1",
+            "--pre-upgrade-deploy",
+            "--remove",
+        ]
+        self._test_shell_create(shell_args=shell_args)
+
+    def test_create_remove_without_pre_upgrade_deploy(self):
+        shell_args = [self.strategy, "create", "123.1", "--remove"]
+        e = self._test_shell_create_with_error(shell_args=shell_args)
+        assert str(e) == "Cannot set --remove without --pre-upgrade-deploy", e
+
 
 class TestCLIFwUpdateStrategy(TestNFVClientShell, StrategyMixin):
     def setUp(self):

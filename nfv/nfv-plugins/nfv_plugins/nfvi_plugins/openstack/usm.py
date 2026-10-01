@@ -114,7 +114,7 @@ def sw_deploy_precheck(
 
 
 def sw_deploy_start(
-    token, release, force=False, snapshot=False, pre_upgrade_deploy=False
+    token, release, force=False, snapshot=False, pre_upgrade_deploy=False, remove=False
 ):
     """Ask USM to start a deployment."""
 
@@ -126,6 +126,8 @@ def sw_deploy_start(
         data["options"] = ["snapshot=true"]
     if pre_upgrade_deploy:
         data["pre_upgrade_deploy"] = pre_upgrade_deploy
+    if remove:
+        data["remove"] = remove
 
     response = _api_post(
         token, url, data, timeout_in_secs=REST_API_DEPLOY_START_TIMEOUT

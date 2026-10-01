@@ -1487,6 +1487,7 @@ class SwUpgradeStrategy(
         snapshot,
         kube_upgrade_version,
         pre_upgrade_deploy,
+        remove,
         ignore_alarms,
         single_controller,
     ):
@@ -1509,6 +1510,7 @@ class SwUpgradeStrategy(
         self._cleanup = cleanup
         self._snapshot = snapshot
         self._pre_upgrade_deploy = pre_upgrade_deploy
+        self._remove = remove
         if kube_upgrade_version and not kube_upgrade_version.startswith("v"):
             kube_upgrade_version = "v" + kube_upgrade_version
         self._kube_upgrade_version = kube_upgrade_version
@@ -1772,6 +1774,10 @@ class SwUpgradeStrategy(
             self.report_build_failure(
                 "Cannot combine kube-upgrade with pre-upgrade-deploy"
             )
+        elif self._remove and not self._pre_upgrade_deploy:
+            self.report_build_failure(
+                "Cannot set --remove without --pre-upgrade-deploy"
+            )
         elif self._rollback and self._delete:
             self.report_build_failure(
                 "Cannot set both delete and rollback, delete is set by default"
@@ -1840,6 +1846,7 @@ class SwUpgradeStrategy(
                 release=self._release,
                 snapshot=self._snapshot,
                 pre_upgrade_deploy=self._pre_upgrade_deploy,
+                remove=self._remove,
             )
         )
         stage.add_step(
@@ -2521,6 +2528,7 @@ class SwUpgradeStrategy(
         self._single_controller = data["single_controller"]
         self._release = normalize_release(data["release"])
         self._pre_upgrade_deploy = data.get("pre_upgrade_deploy", False)
+        self._remove = data.get("remove", False)
         self._rollback = data["rollback"]
         self._delete = data.get("delete", False)
         self._cleanup = data.get("cleanup", False)
@@ -2552,6 +2560,7 @@ class SwUpgradeStrategy(
         data["single_controller"] = self._single_controller
         data["release"] = self._release
         data["pre_upgrade_deploy"] = self._pre_upgrade_deploy
+        data["remove"] = self._remove
         data["rollback"] = self._rollback
         data["delete"] = self._delete
         data["cleanup"] = self._cleanup
