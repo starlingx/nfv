@@ -17,6 +17,11 @@ from nfv_vim import tables
 
 DLOG = debug.debug_get_logger("nfv_vim.strategy.kube_upgrade.step")
 
+# Scale the kube-upgrade-networking step timeout with node count to mirror
+# sysinv's calico/tigera rollout timeout; keep 900s as a floor for small systems.
+KUBE_UPGRADE_NETWORKING_DEFAULT_TIMEOUT = 900
+KUBE_UPGRADE_NETWORKING_SECONDS_PER_NODE = 45
+
 KUBE_UPGRADE_START_ALARM_IGNORE = [
     "850.002",  # Kubernetes health check failed
     "900.022",  # Deployment finished (pending deploy delete)
@@ -672,11 +677,20 @@ class KubeUpgradeNetworkingStep(AbstractKubeUpgradeStep):
     def __init__(self):
         from nfv_vim import nfvi
 
+        # Scale the timeout with the number of nodes to mirror the sysinv
+        # calico/tigera rollout timeout (max(120, num_hosts * 40)s). The
+        # fixed default is kept as a floor so small systems are unaffected.
+        num_hosts = len(tables.tables_get_host_table())
+        timeout_in_secs = max(
+            KUBE_UPGRADE_NETWORKING_DEFAULT_TIMEOUT,
+            num_hosts * KUBE_UPGRADE_NETWORKING_SECONDS_PER_NODE,
+        )
+
         super().__init__(
             STRATEGY_STEP_NAME.KUBE_UPGRADE_NETWORKING,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADED_NETWORKING,
             nfvi.objects.v1.KUBE_UPGRADE_STATE.KUBE_UPGRADING_NETWORKING_FAILED,
-            timeout_in_secs=900,
+            timeout_in_secs=timeout_in_secs,
         )
 
     def abort(self):
