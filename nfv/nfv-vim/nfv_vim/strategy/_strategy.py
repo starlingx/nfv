@@ -2072,36 +2072,6 @@ class SwUpgradeStrategy(
             is_duplex = self.get_second_host() is not None
 
             if self._kube_upgrade_version:
-                if self.nfvi_kube_upgrade is not None and not is_duplex:
-                    from nfv_vim import nfvi
-
-                    v1_objects = nfvi.objects.v1.KUBE_UPGRADE_STATE
-                    POST_CONTROL_PLANE_STATES = {
-                        v1_objects.KUBE_UPGRADING_KUBELETS,
-                        v1_objects.KUBE_HOST_UNCORDON,
-                        v1_objects.KUBE_HOST_UNCORDON_FAILED,
-                        v1_objects.KUBE_HOST_UNCORDON_COMPLETE,
-                        v1_objects.KUBE_UPGRADE_COMPLETE,
-                        v1_objects.KUBE_POST_UPDATING_APPS,
-                        v1_objects.KUBE_POST_UPDATING_APPS_FAILED,
-                        v1_objects.KUBE_POST_UPDATED_APPS,
-                    }
-                    if self.nfvi_kube_upgrade.state in POST_CONTROL_PLANE_STATES:
-                        reason = (
-                            "Kubernetes upgrade is past the control plane "
-                            f"phase (state={self.nfvi_kube_upgrade.state}). "
-                            "Cannot proceed with sw-upgrade strategy."
-                        )
-                        DLOG.error(reason)
-                        self._state = strategy.STRATEGY_STATE.BUILD_FAILED
-                        self.build_phase.result = strategy.STRATEGY_PHASE_RESULT.FAILED
-                        self.build_phase.result_reason = reason
-                        self.sw_update_obj.strategy_build_complete(
-                            False, self.build_phase.result_reason
-                        )
-                        self.save()
-                        return
-
                 if not is_duplex:
                     # Simplex: interleaved combined strategy
                     # kube control-plane before sw-deploy, kubelet deferred
