@@ -2448,7 +2448,6 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         Verify:
         - Pass: the rollback deploy state allows the build to succeed
           even when the release_info state is not 'deploying'.
-        Regression test for CGTS-105485.
         """
 
         release = ["888.8"]
@@ -3331,6 +3330,162 @@ class TestSwUpgradeStrategy(BaseSwUpgradeStrategy):
         assert bpr.result_reason == (
             "Cannot combine kube-upgrade with pre-upgrade-deploy"
         ), bpr.result_reason
+
+    def test_sw_deploy_strategy_aiosx_rollback_pud(self):
+        """PUD rollback after pre-upgrade-deploy completes.
+
+        During PUD the release state stays "available" (never "deploying"),
+        but deploy_info is present with a deploy_state.
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            delete=False,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                None,
+                [],
+                {
+                    "release_id": MAJOR_RELEASE_UPGRADE,
+                    "state": "available",
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                    "reboot_required": False,
+                },
+                {
+                    "state": "complete",
+                    "reboot_required": False,
+                    "from_release": INITIAL_RELEASE,
+                    "to_release": MAJOR_RELEASE_UPGRADE,
+                },
+                [
+                    {
+                        "hostname": "controller-0",
+                        "host_state": "deployed",
+                    },
+                ],
+            ),
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        assert strategy._state != common_strategy.STRATEGY_STATE.BUILD_FAILED, (
+            f"Strategy build failed unexpectedly: "
+            f"{strategy.build_phase.result_reason}"
+        )
+
+        apply_phase = strategy.apply_phase.as_dict()
+
+        expected_results = {
+            "total_stages": 3,
+            "stages": [
+                {
+                    "name": "sw-upgrade-rollback-start",
+                    "total_steps": 3,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "sw-deploy-abort"},
+                        {"name": "sw-deploy-activate-rollback"},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-worker-hosts",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "upgrade-hosts", "entity_names": ["controller-0"]},
+                    ],
+                },
+                {
+                    "name": "sw-upgrade-rollback-complete",
+                    "total_steps": 2,
+                    "steps": [
+                        {"name": "query-alarms"},
+                        {"name": "deploy-delete"},
+                    ],
+                },
+            ],
+        }
+
+        sw_update_testcase.validate_strategy_persists(strategy)
+        sw_update_testcase.validate_phase(apply_phase, expected_results)
+
+    def test_sw_deploy_strategy_rollback_no_deployment(self):
+        """Rollback with no deployment in progress fails at build.
+
+        When deploy_info is None (no active deployment), the rollback
+        strategy must reject the build with BUILD_FAILED.
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            delete=False,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                None,
+                [],
+                None,
+                None,
+                None,
+            ),
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        expected_reason = "No software deployment in progress to rollback"
+        bpr = strategy.build_phase
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
+        assert bpr.result_reason == expected_reason, bpr.result_reason
+
+    def test_sw_deploy_strategy_rollback_deploy_start_in_progress(self):
+        """Rollback while sw-deploy-start is in progress fails at build.
+
+        When deploy_state is 'start', rollback cannot be initiated
+        because the deployment start has not completed yet.
+        """
+
+        _, strategy = self._gen_aiosx_hosts_and_strategy(
+            release=None,
+            rollback=True,
+            delete=False,
+            nfvi_upgrade=nfvi.objects.v1.Upgrade(
+                None,
+                [],
+                {
+                    "release_id": MAJOR_RELEASE_UPGRADE,
+                    "state": "deploying",
+                    "sw_version": MAJOR_RELEASE_UPGRADE,
+                    "reboot_required": True,
+                },
+                {
+                    "state": "start",
+                    "reboot_required": True,
+                    "from_release": INITIAL_RELEASE,
+                    "to_release": MAJOR_RELEASE_UPGRADE,
+                },
+                None,
+            ),
+        )
+
+        fake_upgrade_obj = SwUpgrade()
+        strategy.sw_update_obj = fake_upgrade_obj
+
+        strategy.build_complete(common_strategy.STRATEGY_RESULT.SUCCESS, "")
+
+        expected_reason = (
+            "Software rollback cannot be initiated while "
+            "sw-deploy-start is in progress"
+        )
+        bpr = strategy.build_phase
+        assert strategy._state == common_strategy.STRATEGY_STATE.BUILD_FAILED
+        assert bpr.result == common_strategy.STRATEGY_PHASE_RESULT.FAILED
+        assert bpr.result_reason == expected_reason, bpr.result_reason
 
     def test_sw_deploy_strategy_cleanup_deploy_completed(self):
         """cleanup with a completed deployment: deploy-delete apply stage."""
