@@ -2195,7 +2195,16 @@ class SwSystemDeployCleanupAbortedStep(strategy.StrategyStep):
 class MigrateInstancesFromHostStep(strategy.StrategyStep):
     """Migrate Instances From Host - Strategy Step."""
 
-    def __init__(self, hosts, instances):
+    # A migrate may fail on a transient messaging/RPC error while the control
+    # plane is restarting during a deploy (e.g. a lost scheduler reply while
+    # RabbitMQ is cycling). The failure is not terminal - the instance has not
+    # moved - so retry a bounded number of times before failing the step. The
+    # 90s delay matches UnlockHostsStep and covers a RabbitMQ restart plus the
+    # messaging-client reconnect backoff before a retry can succeed.
+    MAX_RETRIES = 3
+    RETRY_DELAY = 90
+
+    def __init__(self, hosts, instances, retry_count=0, retry_delay=RETRY_DELAY):
         super().__init__(
             STRATEGY_STEP_NAME.MIGRATE_INSTANCES_FROM_HOST, timeout_in_secs=1800
         )
@@ -2211,6 +2220,13 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
             self._instance_names.append(instance.name)
             self._instance_uuids.append(instance.uuid)
             self._instance_host_names[instance.uuid] = instance.host_name
+        # retry_count and retry_delay are serialized in from_dict/as_dict.
+        # Do not persist: _retries, _wait_time, _retry_requested
+        self._retry_count = retry_count
+        self._retry_delay = retry_delay
+        self._retries = retry_count
+        self._wait_time = 0
+        self._retry_requested = False
 
     def _all_instances_migrated(self):
         """Returns true if all instances have migrated from the source hosts."""
@@ -2221,6 +2237,16 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
                 return False, ""
 
         return True, ""
+
+    def _trigger_retry(self):
+        """Request a delayed retry of the migrate after a transient failure."""
+        DLOG.info(
+            "Step (%s) retry due to migrate failure for hosts %s."
+            % (self._name, self._host_names)
+        )
+        self._retry_requested = True
+        self._wait_time = timers.get_monotonic_timestamp_in_ms()
+        self._retries -= 1
 
     def apply(self):
         """Migrate all instances."""
@@ -2279,6 +2305,8 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
     def handle_event(self, event, event_data=None):
         """Handle Instance events."""
 
+        from nfv_vim import directors
+
         DLOG.debug("Step (%s) handle event (%s)." % (self._name, event))
 
         if event in [
@@ -2298,9 +2326,38 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
                 self.stage.step_complete(result, "")
                 return True
 
+            # If a retry was requested after a transient failure, re-issue the
+            # migrate once the retry delay has elapsed. migrate_instances_from_
+            # hosts re-reads the instances still on the host, and the
+            # _all_instances_migrated() check above already returns SUCCESS if
+            # they have all moved, so an already-migrated instance is not
+            # migrated again.
+            if self._retry_requested:
+                now_ms = timers.get_monotonic_timestamp_in_ms()
+                secs_expired = (now_ms - self._wait_time) // 1000
+                if self._retry_delay <= secs_expired:
+                    self._retry_requested = False
+                    instance_director = directors.get_instance_director()
+                    operation = instance_director.migrate_instances_from_hosts(
+                        self._host_names
+                    )
+                    if operation.is_failed():
+                        if self._retries > 0:
+                            self._trigger_retry()
+                        else:
+                            result = strategy.STRATEGY_STEP_RESULT.FAILED
+                            self.stage.step_complete(result, operation.reason)
+            return True
+
         elif STRATEGY_EVENT.MIGRATE_INSTANCES_FAILED == event:
-            result = strategy.STRATEGY_STEP_RESULT.FAILED
-            self.stage.step_complete(result, event_data)
+            # A migrate failure during a deploy is often transient (control
+            # plane restarting). Retry a bounded number of times before failing
+            # the whole strategy. The instance has not moved on failure.
+            if self._retries > 0:
+                self._trigger_retry()
+            else:
+                result = strategy.STRATEGY_STEP_RESULT.FAILED
+                self.stage.step_complete(result, event_data)
             return True
 
         return False
@@ -2318,6 +2375,14 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         self._instances = []
         self._instance_names = []
         self._instance_host_names = {}
+        # retry_count/retry_delay were added to this step; use get() with a
+        # default so older serialized strategies still deserialize.
+        self._retry_count = data.get("retry_count", 0)
+        self._retry_delay = data.get("retry_delay", self.RETRY_DELAY)
+        # Do not deserialize _retries, _wait_time, _retry_requested
+        self._retries = self._retry_count
+        self._wait_time = 0
+        self._retry_requested = False
 
         host_table = tables.tables_get_host_table()
         for host_name in self._host_names:
@@ -2347,6 +2412,8 @@ class MigrateInstancesFromHostStep(strategy.StrategyStep):
         data["entity_uuids"] = self._instance_uuids
         data["instance_host_names"] = self._instance_host_names
         data["host_names"] = self._host_names
+        data["retry_count"] = self._retry_count
+        data["retry_delay"] = self._retry_delay
         return data
 
 
