@@ -1300,7 +1300,14 @@ class UpdateWorkerHostsMixin:
                             # kubernetes services will have to be added.
                         stage.add_step(
                             strategy.MigrateInstancesFromHostStep(
-                                openstack_hosts, instance_list
+                                openstack_hosts,
+                                instance_list,
+                                retry_count=(
+                                    strategy.MigrateInstancesFromHostStep.MAX_RETRIES
+                                ),
+                                retry_delay=(
+                                    strategy.MigrateInstancesFromHostStep.RETRY_DELAY
+                                ),
                             )
                         )
                 # pylint: disable-next=use-implicit-booleaness-not-len
