@@ -3355,12 +3355,25 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             instance_data = future.result.data["server"]
 
             future.work(neutron.get_ports_for_instance, self._token, instance_uuid)
-            future.result = yield
 
-            if not future.result.is_complete() or future.result.data is None:
-                return
-
-            ports_data = future.result.data.get("ports", [])
+            # The ports result feeds only the live_migration_support capability
+            # flag below, not instance liveness. A transient neutron failure
+            # (e.g. a 500 while a neutron-server replica restarts) is thrown
+            # into this generator at the yield, so wrap the yield: on a ports
+            # failure keep nova's good instance state and leave the capability
+            # unknown (see below), refreshed on the next audit.
+            try:
+                future.result = yield
+                ports_available = (
+                    future.result.is_complete() and future.result.data is not None
+                )
+            except Exception:
+                future.result = None
+                ports_available = False
+            if ports_available:
+                ports_data = future.result.data.get("ports", [])
+            else:
+                ports_data = []
 
             power_state_str = nova.vm_power_state_str(
                 instance_data["OS-EXT-STS:power_state"]
@@ -3401,9 +3414,15 @@ class NFVIComputeAPI(nfvi.api.v1.NFVIComputeAPI):
             else:
                 image_uuid = None
 
-            live_migration_support = instance_supports_live_migration(
-                instance_data, ports_data
-            )
+            # Leave the capability unknown (None) on a ports failure so the
+            # object layer keeps the last-known value and refreshes next
+            # audit, rather than overwriting it from an empty ports list.
+            if ports_available:
+                live_migration_support = instance_supports_live_migration(
+                    instance_data, ports_data
+                )
+            else:
+                live_migration_support = None
 
             volumes = instance_data.get("os-extended-volumes:volumes_attached", [])
             attached_volumes = []
