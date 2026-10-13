@@ -1387,7 +1387,7 @@ class WaitKubernetesUpgradeHealthy(TimerBasedPollingStep):
     """
 
     POLL_INTERVAL_IN_SECS = 5
-    FIRST_POLL_DELAY_IN_SECS = 15
+    FIRST_POLL_DELAY_IN_SECS = 10
 
     def __init__(self, timeout_in_secs=180, alarm_ignore_list=None):
         super().__init__(

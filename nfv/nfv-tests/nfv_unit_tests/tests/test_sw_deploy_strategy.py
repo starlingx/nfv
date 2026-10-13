@@ -5193,9 +5193,9 @@ class TestSwUpgradeCombinedKubeStrategy(BaseSwUpgradeStrategy):
         sw_start_idx = stage_names.index("sw-upgrade-start")
         self.assertLess(kube_start_idx, sw_start_idx)
 
-        # kube-wait-control-plane-pods-ready must appear before sw-upgrade-start
-        self.assertIn("kube-wait-control-plane-pods-ready", stage_names)
-        pods_ready_idx = stage_names.index("kube-wait-control-plane-pods-ready")
+        # kube-wait-upgrade-healthy must appear before sw-upgrade-start
+        self.assertIn("kube-wait-upgrade-healthy", stage_names)
+        pods_ready_idx = stage_names.index("kube-wait-upgrade-healthy")
         self.assertLess(pods_ready_idx, sw_start_idx)
 
         # All expected kube control-plane stages must be present

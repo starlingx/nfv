@@ -245,7 +245,7 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         stage.add_step(strategy.WaitKubeControlPlanePodsReadyStep())
         self.apply_phase.add_stage(stage)
 
-    def _add_wait_kubernetes_upgrade_healthy_stage(self):
+    def _add_wait_kubernetes_upgrade_healthy_stage(self, alarm_ignore_list=None):
         """Add wait for kubernetes upgrade healthy stage."""
 
         from nfv_vim import strategy
@@ -253,7 +253,9 @@ class KubeUpgradeStages:  # pylint: disable=no-member
         stage = strategy.StrategyStage(
             strategy.STRATEGY_STAGE_NAME.KUBE_WAIT_UPGRADE_HEALTHY
         )
-        stage.add_step(strategy.WaitKubernetesUpgradeHealthy())
+        stage.add_step(
+            strategy.WaitKubernetesUpgradeHealthy(alarm_ignore_list=alarm_ignore_list)
+        )
         self.apply_phase.add_stage(stage)
 
     def _add_kube_upgrade_start_stage(self):

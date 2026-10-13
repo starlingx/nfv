@@ -27,6 +27,7 @@ from nfv_vim.objects import SW_UPDATE_APPLY_TYPE
 from nfv_vim.objects import SW_UPDATE_INSTANCE_ACTION
 from nfv_vim.strategy._utils import normalize_release
 from nfv_vim.strategy.stages._kube_upgrade_stages import KubeUpgradeStages
+from nfv_vim.strategy.steps.kube_upgrade_steps import KUBE_UPGRADE_START_ALARM_IGNORE
 
 DLOG = debug.debug_get_logger("nfv_vim.strategy")
 
@@ -2101,10 +2102,16 @@ class SwUpgradeStrategy(
 
             if do_start:
                 # After K8s control-plane upgrades, wait for
-                # control-plane pods to be ready before sw-deploy-start
-                # (which runs a precheck that validates pod readiness)
+                # the system to be healthy before sw-deploy-start.
+                # The health check is for kube upgrade (not platform upgrade),
+                # but it covers everything we want to check here
                 if self._kube_upgrade_version and not is_duplex:
-                    self._add_wait_kube_control_plane_pods_ready_stage()
+                    alarm_ignore_list = KUBE_UPGRADE_START_ALARM_IGNORE.copy()
+                    # append 'Kubernetes upgrade in progress' alarm
+                    alarm_ignore_list.append("900.007")
+                    self._add_wait_kubernetes_upgrade_healthy_stage(
+                        alarm_ignore_list=alarm_ignore_list
+                    )
                 self._add_upgrade_start_stage()
             else:
                 DLOG.info("Skipping sw-deploy-start: Already started")
