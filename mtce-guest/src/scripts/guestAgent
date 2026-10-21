@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# Copyright (c) 2013-2014, 2016 Wind River Systems, Inc.
+# Copyright (c) 2013-2014, 2016, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -17,7 +17,7 @@
 # Short-Description: Maintenance Client Daemon 
 ### END INIT INFO
 
-. /etc/init.d/functions
+. /lib/lsb/init-functions
 
 DAEMON_NAME="guestAgent"
 DAEMON="/usr/local/bin/${DAEMON_NAME}"

@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# Copyright (c) 2014 Wind River Systems, Inc.
+# Copyright (c) 2014, 2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -14,7 +14,7 @@
 # Description:       OpenStack Compute (Nova) Ptoxy
 ### END INIT INFO
 
-. /etc/init.d/functions
+. /lib/lsb/init-functions
 
 # Linux Standard Base (LSB) Error Codes
 RETVAL=0
