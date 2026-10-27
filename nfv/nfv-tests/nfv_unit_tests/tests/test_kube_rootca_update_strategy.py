@@ -42,6 +42,8 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
         single_controller=False,
         expiry_date=None,
         subject=None,
+        algorithm=None,
+        key_size=None,
         nfvi_kube_rootca_update=None,
     ):
         """Create a kube rootca update strategy."""
@@ -58,6 +60,8 @@ class TestBuildStrategy(sw_update_testcase.SwUpdateStrategyTestCase):
             single_controller=single_controller,
             expiry_date=expiry_date,
             subject=subject,
+            algorithm=algorithm,
+            key_size=key_size,
         )
         strategy.sw_update_obj = sw_update_obj  # this is a weakref
         strategy.nfvi_kube_rootca_update = nfvi_kube_rootca_update
@@ -168,6 +172,8 @@ class ApplyStageMixin:
         alarms_list=None,
         expiry_date=None,
         subject=None,
+        algorithm=None,
+        key_size=None,
     ):
         """Create a kube rootca update strategy
 
@@ -185,6 +191,8 @@ class ApplyStageMixin:
             single_controller=single_controller,
             expiry_date=expiry_date,
             subject=subject,
+            algorithm=algorithm,
+            key_size=key_size,
         )
         strategy.sw_update_obj = sw_update_obj  # warning: this is a weakref
         strategy.nfvi_kube_rootca_update = kube_rootca_update

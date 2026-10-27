@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016-2025 Wind River Systems, Inc.
+# Copyright (c) 2016-2026 Wind River Systems, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -325,6 +325,8 @@ function _swmanager()
                                 --alarm-restrictions
                                 --expiry-date
                                 --subject
+                                --algorithm
+                                --key-size
                             "
                             local createopt=${prev}
                             case "$createopt" in
@@ -357,6 +359,14 @@ function _swmanager()
                                     return 0
                                     ;;
                                 --subject)
+                                    COMPREPLY=( $(compgen -- ${cur}))
+                                    return 0
+                                    ;;
+                                --algorithm)
+                                    COMPREPLY=($(compgen -W "ECDSA RSA" -- ${cur}))
+                                    return 0
+                                    ;;
+                                --key-size)
                                     COMPREPLY=( $(compgen -- ${cur}))
                                     return 0
                                     ;;

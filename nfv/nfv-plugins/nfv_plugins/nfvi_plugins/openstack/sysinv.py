@@ -290,13 +290,17 @@ def kube_rootca_update_start(token, force=False, alarm_ignore_list=None):
     return _api_post(token, KUBE_ROOTCA_UPDATE_ENDPOINT, api_cmd_payload)
 
 
-def kube_rootca_update_generate_cert(token, expiry_date=None, subject=None):
+def kube_rootca_update_generate_cert(
+    token, expiry_date=None, subject=None, algorithm=None, key_size=None
+):
     """Ask System Inventory to kube rootca update generate a cert."""
 
     api_cmd_payload = {}
     # even if these values are None, they need to be passed to sysinv API
     api_cmd_payload["expiry_date"] = expiry_date
     api_cmd_payload["subject"] = subject
+    api_cmd_payload["algorithm"] = algorithm
+    api_cmd_payload["key_size"] = key_size
     return _api_post(token, KUBE_ROOTCA_UPDATE_GENERATE_CERT_ENDPOINT, api_cmd_payload)
 
 
