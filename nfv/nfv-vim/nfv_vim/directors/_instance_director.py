@@ -368,6 +368,17 @@ class InstanceDirector(metaclass=Singleton):
                     host_operation.add_instance(instance.uuid, OPERATION_STATE.FAILED)
                     host_operation.update_failure_reason(reason)
                     return
+                elif (
+                    instance.is_migrating()
+                    and OPERATION_TYPE.HOST_LOCK == host_operation.operation_type
+                ):
+                    # do not return; we expect live migrations to finish and
+                    # active instances to be successfully evacuated in a host lock
+                    DLOG.info(
+                        "%s %s deferred because instance %s is migrating "
+                        "(in-flight, external trigger); waiting for it to complete."
+                        % (preamble, host.name, instance.name)
+                    )
                 elif instance.is_migrating() or instance.is_cold_migrating():
                     reason = "%s %s failed because instance %s is migrating." % (
                         preamble,
@@ -1425,7 +1436,16 @@ class InstanceDirector(metaclass=Singleton):
                 host_operation.add_instance(instance.uuid, OPERATION_STATE.FAILED)
                 host_operation.update_failure_reason(reason)
                 return False
-            elif instance.is_migrating() or instance.is_cold_migrating():
+            elif instance.is_migrating():
+                # instance is in flight from an external source
+                # not triggered by current operation
+                DLOG.info(
+                    "Lock of host %s deferred because instance %s is "
+                    "migrating (in-flight, external trigger)."
+                    % (host.name, instance.name)
+                )
+                continue
+            elif instance.is_cold_migrating():
                 reason = (
                     "Lock of host %s rejected because instance %s "
                     "is migrating." % (host.name, instance.name)
