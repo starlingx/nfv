@@ -8,6 +8,8 @@ import uuid
 
 from nfv_unit_tests.tests import testcase
 from nfv_unit_tests.tests import utils
+from nfv_vim.directors._directors_defs import Operation
+from nfv_vim.directors._directors_defs import OPERATION_TYPE
 from nfv_vim.directors._instance_director import InstanceDirector
 from nfv_vim import nfvi
 from nfv_vim import objects
@@ -455,3 +457,449 @@ class TestInstanceDirector(testcase.NFVTestCase):
         )
         instance_1._nfvi_instance.image_uuid = original_image_uuid
         instance_1._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.NONE
+
+    @mock.patch("nfv_vim.tables.tables_get_tenant_table")
+    @mock.patch("nfv_vim.tables.tables_get_instance_table")
+    def test_instance_director_host_disabling_okay(
+        self,
+        tables_get_instance_table_mock,
+        tables_get_tenant_table_mock,
+    ):
+        """Test InstanceDirector._host_disabling_okay semantic checks.
+
+        The test cases currently cover the host operation type HOST_LOCK.
+        """
+
+        host = mock.Mock()
+        host.name = "compute-0"
+
+        self._director._is_hypervisor_enabled = mock.Mock(return_value=True)
+        self._director._hypervisors_available = mock.Mock(return_value=True)
+        self._director._single_hypervisor = False
+
+        instance_table = mock.Mock()
+        tables_get_instance_table_mock.return_value = instance_table
+        tables_get_tenant_table_mock.return_value = self._tenant_table
+
+        # A non-HOST_LOCK operation returns early as okay without inspecting any
+        # instances on the host.
+        host_operation = Operation(OPERATION_TYPE.HOST_DISABLE)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is True
+        instance_table.on_host.assert_not_called()
+
+        # A paused instance rejects the lock when the operation is not a live
+        # migration; disabling live-migration support keeps operation at
+        # COLD_MIGRATE so the paused reject branch is reached.
+        paused = self.create_instance("small", "paused")
+        paused._live_migration_support = False
+        paused._nfvi_instance.avail_status.append(
+            nfvi.objects.v1.INSTANCE_AVAIL_STATUS.PAUSED
+        )
+        instance_table.on_host.return_value = [paused]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+
+        # A suspended instance rejects the lock.
+        suspended = self.create_instance("small", "suspended")
+        suspended._nfvi_instance.avail_status.append(
+            nfvi.objects.v1.INSTANCE_AVAIL_STATUS.SUSPENDED
+        )
+        instance_table.on_host.return_value = [suspended]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+
+        # A migrating instance (in-flight, external trigger) is skipped and the
+        # lock is allowed to proceed.
+        migrating = self.create_instance("small", "migrating")
+        migrating._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.MIGRATING
+        instance_table.on_host.return_value = [migrating]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is True
+
+        # A migrating instance followed by an active one: the migrating instance
+        # is skipped (continue) and the loop goes on to evaluate the active
+        # instance, which passes every check, so the lock is allowed to proceed.
+        active = self.create_instance("small", "active")
+        instance_table.on_host.return_value = [migrating, active]
+        self._director._hypervisors_available.reset_mock()
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is True
+        assert host_operation.is_failed() is False
+        assert host_operation.instance_exists(migrating.uuid) is False
+        assert host_operation.instance_exists(active.uuid) is False
+        self._director._hypervisors_available.assert_called_once_with(
+            min_count=1, excluded_hosts=[host.name]
+        )
+
+        # A migrating instance followed by a suspended one: the migrating
+        # instance is skipped (continue) but the suspended instance is still
+        # evaluated and rejects the lock.
+        instance_table.on_host.return_value = [migrating, suspended]
+        self._director._hypervisors_available.reset_mock()
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+        assert host_operation.reason == (
+            "Lock of host %s rejected because instance %s is suspended."
+            % (host.name, suspended.name)
+        )
+        assert host_operation.instance_exists(migrating.uuid) is False
+        assert host_operation.instance_exists(suspended.uuid) is True
+        self._director._hypervisors_available.assert_not_called()
+
+        # An active instance followed by a migrating one: the active instance
+        # passes every check and the migrating instance is then skipped
+        # (continue), so the lock is allowed to proceed.
+        instance_table.on_host.return_value = [active, migrating]
+        self._director._hypervisors_available.reset_mock()
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is True
+        assert host_operation.is_failed() is False
+        assert host_operation.total_instances == 0
+        self._director._hypervisors_available.assert_called_once_with(
+            min_count=1, excluded_hosts=[host.name]
+        )
+
+        # A suspended instance followed by a migrating one: the suspended
+        # instance rejects the lock right away, so the migrating instance is
+        # never evaluated.
+        instance_table.on_host.return_value = [suspended, migrating]
+        self._director._hypervisors_available.reset_mock()
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+        assert host_operation.reason == (
+            "Lock of host %s rejected because instance %s is suspended."
+            % (host.name, suspended.name)
+        )
+        assert host_operation.total_instances == 1
+        assert host_operation.instance_exists(suspended.uuid) is True
+        assert host_operation.instance_exists(migrating.uuid) is False
+        self._director._hypervisors_available.assert_not_called()
+
+        # A cold-migrating instance rejects the lock; cold migration requires the
+        # resizing action together with a COLD_MIGRATE action type.
+        cold_migrating = self.create_instance("small", "cold_migrating")
+        cold_migrating._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.RESIZING
+        cold_migrating._action_data = mock.Mock()
+        cold_migrating._action_data.action_type = (
+            objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
+        )
+        instance_table.on_host.return_value = [cold_migrating]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+        assert host_operation.reason == (
+            "Lock of host %s rejected because instance %s is migrating."
+            % (host.name, cold_migrating.name)
+        )
+
+        # A rebuilding instance rejects the lock.
+        rebuilding = self.create_instance("small", "rebuilding")
+        rebuilding._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.REBUILDING
+        instance_table.on_host.return_value = [rebuilding]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+
+        # An instance with an action in progress rejects the lock; rebooting is a
+        # non-NONE action that is not one of the earlier-evaluated states.
+        action_running = self.create_instance("small", "action_running")
+        action_running._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.REBOOTING
+        instance_table.on_host.return_value = [action_running]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+
+        # A resized/resizing instance rejects the lock.
+        resized = self.create_instance("small", "resized")
+        resized._nfvi_instance.avail_status.append(
+            nfvi.objects.v1.INSTANCE_AVAIL_STATUS.RESIZED
+        )
+        instance_table.on_host.return_value = [resized]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+
+        # With no other hypervisors available for a multi-hypervisor system an
+        # otherwise-migratable instance rejects the lock.
+        active = self.create_instance("small", "active")
+        instance_table.on_host.return_value = [active]
+        self._director._hypervisors_available = mock.Mock(return_value=False)
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        result = self._director._host_disabling_okay(host, host_operation)
+        assert result is False
+        self._director._hypervisors_available.assert_called_with(
+            min_count=1, excluded_hosts=[host.name]
+        )
+
+    @mock.patch("nfv_vim.dor.dor_is_complete")
+    @mock.patch("nfv_vim.tables.tables_get_tenant_table")
+    @mock.patch("nfv_vim.tables.tables_get_instance_table")
+    def test_instance_director_host_migrate_instances(
+        self,
+        tables_get_instance_table_mock,
+        tables_get_tenant_table_mock,
+        dor_is_complete_mock,
+    ):
+        """Test InstanceDirector._host_migrate_instances regular cases."""
+
+        dor_is_complete_mock.return_value = True
+
+        host = mock.Mock()
+        host.name = "compute-0"
+
+        self._director.upgrade_inprogress = mock.Mock(return_value=False)
+        self._director._hypervisors_available = mock.Mock(return_value=True)
+        self._director._single_hypervisor = False
+        self._director.reschedule_audit_instances = mock.Mock()
+
+        instance_table = mock.Mock()
+        tables_get_instance_table_mock.return_value = instance_table
+        tables_get_tenant_table_mock.return_value = self._tenant_table
+
+        # A single cold-migrating instance rejects a HOST_LOCK
+        cold_migrating = self.create_instance("small", "cold_migrating")
+        cold_migrating._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.RESIZING
+        cold_migrating._action_data = mock.Mock()
+        cold_migrating._action_data.action_type = (
+            objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
+        )
+        cold_migrating.do_action = mock.Mock()
+        instance_table.on_host.return_value = [cold_migrating]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is True
+        assert host_operation.reason == (
+            "Lock of host %s failed because instance %s is migrating."
+            % (host.name, cold_migrating.name)
+        )
+        assert host_operation.instance_exists(cold_migrating.uuid) is True
+        cold_migrating.do_action.assert_not_called()
+
+        # A single migrating instance rejects a MIGRATE_INSTANCES operation
+        migrating = self.create_instance("small", "migrating")
+        migrating._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.MIGRATING
+        migrating.do_action = mock.Mock()
+        instance_table.on_host.return_value = [migrating]
+        host_operation = Operation(OPERATION_TYPE.MIGRATE_INSTANCES)
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is True
+        assert host_operation.reason == (
+            "Migrate instances from host %s failed because instance %s is migrating."
+            % (host.name, migrating.name)
+        )
+        assert host_operation.instance_exists(migrating.uuid) is True
+        migrating.do_action.assert_not_called()
+
+        # A single cold-migrating instance also rejects a MIGRATE_INSTANCES
+        # operation at the migrating/cold-migrating check.
+        cold_migrating = self.create_instance("small", "cold_migrating")
+        cold_migrating._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.RESIZING
+        cold_migrating._action_data = mock.Mock()
+        cold_migrating._action_data.action_type = (
+            objects.INSTANCE_ACTION_TYPE.COLD_MIGRATE
+        )
+        cold_migrating.do_action = mock.Mock()
+        instance_table.on_host.return_value = [cold_migrating]
+        host_operation = Operation(OPERATION_TYPE.MIGRATE_INSTANCES)
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is True
+        assert host_operation.reason == (
+            "Migrate instances from host %s failed because instance %s is migrating."
+            % (host.name, cold_migrating.name)
+        )
+        assert host_operation.instance_exists(cold_migrating.uuid) is True
+        cold_migrating.do_action.assert_not_called()
+
+        # When DOR is not complete a MIGRATE_INSTANCES operation returns early
+        dor_is_complete_mock.return_value = False
+        active = self.create_instance("small", "active")
+        active.do_action = mock.Mock()
+        instance_table.on_host.return_value = [active]
+        host_operation = Operation(OPERATION_TYPE.MIGRATE_INSTANCES)
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is False
+        assert host_operation.is_inprogress() is False
+        assert host_operation.instance_exists(active.uuid) is False
+        active.do_action.assert_not_called()
+        self._director.reschedule_audit_instances.assert_called_once_with(
+            self._director._recovery_audit_cooldown
+        )
+
+        # A HOST_LOCK_FORCE operation returns early
+        dor_is_complete_mock.return_value = True
+        self._director.reschedule_audit_instances.reset_mock()
+        active = self.create_instance("small", "active")
+        active.do_action = mock.Mock()
+        instance_table.on_host.return_value = [active]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK_FORCE)
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is False
+        assert host_operation.is_inprogress() is False
+        assert host_operation.instance_exists(active.uuid) is False
+        active.do_action.assert_not_called()
+        self._director.reschedule_audit_instances.assert_called_once_with(
+            self._director._recovery_audit_cooldown
+        )
+
+    @mock.patch("nfv_vim.tables.tables_get_tenant_table")
+    @mock.patch("nfv_vim.tables.tables_get_instance_table")
+    def test_instance_director_host_migrate_instances_deferred(
+        self,
+        tables_get_instance_table_mock,
+        tables_get_tenant_table_mock,
+    ):
+        """Test InstanceDirector._host_migrate_instances HOST_LOCK deferral."""
+
+        host = mock.Mock()
+        host.name = "compute-0"
+
+        self._director.upgrade_inprogress = mock.Mock(return_value=False)
+        self._director._hypervisors_available = mock.Mock(return_value=True)
+        self._director._single_hypervisor = False
+
+        instance_table = mock.Mock()
+        tables_get_instance_table_mock.return_value = instance_table
+        tables_get_tenant_table_mock.return_value = self._tenant_table
+
+        # A single migrating instance defers the lock: it is recorded as
+        # inprogress, no new migrate action is issued, and the operation is not
+        # failed.
+        migrating = self.create_instance("small", "migrating")
+        migrating._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.MIGRATING
+        migrating.do_action = mock.Mock()
+        instance_table.on_host.return_value = [migrating]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_inprogress() is True
+        assert host_operation.is_failed() is False
+        assert host_operation.instance_exists(migrating.uuid) is True
+        migrating.do_action.assert_not_called()
+
+        # Two instances, active first then migrating: re-running
+        # _host_migrate_instances self-skips the already
+        # processed active instance and defers the migrating one.
+        active = self.create_instance("small", "active")
+        active.do_action = mock.Mock()
+        migrating.do_action.reset_mock()
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        instance_table.on_host.return_value = [active, migrating]
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.instance_exists(active.uuid) is True
+        assert host_operation.instance_exists(migrating.uuid) is False
+        active.do_action.assert_called_once_with(
+            objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE,
+            initiated_by=objects.INSTANCE_ACTION_INITIATED_BY.DIRECTOR,
+            reason=mock.ANY,
+        )
+        migrating.do_action.assert_not_called()
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_inprogress() is True
+        assert host_operation.is_failed() is False
+        assert host_operation.instance_exists(migrating.uuid) is True
+        active.do_action.assert_called_once_with(
+            objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE,
+            initiated_by=objects.INSTANCE_ACTION_INITIATED_BY.DIRECTOR,
+            reason=mock.ANY,
+        )
+        migrating.do_action.assert_not_called()
+
+        # Migrating instance first then active: the first call defers the
+        # migrating instance; re-running self-skips the already deferred
+        # migrating instance and live-migrates the active one.
+        active.do_action.reset_mock()
+        migrating.do_action.reset_mock()
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        instance_table.on_host.return_value = [migrating, active]
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.instance_exists(migrating.uuid) is True
+        assert host_operation.instance_exists(active.uuid) is False
+        active.do_action.assert_not_called()
+        migrating.do_action.assert_not_called()
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_inprogress() is True
+        assert host_operation.is_failed() is False
+        assert host_operation.instance_exists(active.uuid) is True
+        active.do_action.assert_called_once_with(
+            objects.INSTANCE_ACTION_TYPE.LIVE_MIGRATE,
+            initiated_by=objects.INSTANCE_ACTION_INITIATED_BY.DIRECTOR,
+            reason=mock.ANY,
+        )
+        migrating.do_action.assert_not_called()
+
+        # Migrating instance first then suspended: the first call defers the
+        # migrating instance; re-running self-skips it and the suspended instance
+        # now rejects the lock.
+        suspended = self.create_instance("small", "suspended")
+        suspended._nfvi_instance.avail_status.append(
+            nfvi.objects.v1.INSTANCE_AVAIL_STATUS.SUSPENDED
+        )
+        suspended.do_action = mock.Mock()
+        migrating.do_action.reset_mock()
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        instance_table.on_host.return_value = [migrating, suspended]
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is False
+        assert host_operation.instance_exists(migrating.uuid) is True
+        assert host_operation.instance_exists(suspended.uuid) is False
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is True
+        assert host_operation.instance_exists(suspended.uuid) is True
+        migrating.do_action.assert_not_called()
+        suspended.do_action.assert_not_called()
+
+        # A rejectable instance (suspended) at the front of the table rejects the
+        # lock immediately, before the migrating instance is ever evaluated.
+        migrating.do_action.reset_mock()
+        suspended.do_action.reset_mock()
+        instance_table.on_host.return_value = [suspended, migrating]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        self._director._host_migrate_instances(host, host_operation)
+        assert host_operation.is_failed() is True
+        assert host_operation.instance_exists(suspended.uuid) is True
+        assert host_operation.instance_exists(migrating.uuid) is False
+        suspended.do_action.assert_not_called()
+        migrating.do_action.assert_not_called()
+
+    @mock.patch("nfv_vim.dor.dor_is_complete")
+    @mock.patch("nfv_vim.tables.tables_get_tenant_table")
+    @mock.patch("nfv_vim.tables.tables_get_instance_table")
+    def test_instance_director_host_evacuate_instances(
+        self,
+        tables_get_instance_table_mock,
+        tables_get_tenant_table_mock,
+        dor_is_complete_mock,
+    ):
+        """Test cases for InstanceDirector _host_evacuate_instances."""
+
+        dor_is_complete_mock.return_value = True
+
+        host = mock.Mock()
+        host.name = "compute-0"
+
+        self._director.upgrade_inprogress = mock.Mock(return_value=False)
+        self._director._hypervisors_available = mock.Mock(return_value=True)
+        self._director._single_hypervisor = False
+
+        instance_table = mock.Mock()
+        tables_get_instance_table_mock.return_value = instance_table
+        tables_get_tenant_table_mock.return_value = self._tenant_table
+
+        # A single migrating instance rejects a HOST_LOCK; the evacuate path has
+        # no deferral branch, so the migrating check fails the lock.
+        migrating = self.create_instance("small", "migrating")
+        migrating._nfvi_instance.action = nfvi.objects.v1.INSTANCE_ACTION.MIGRATING
+        migrating.do_action = mock.Mock()
+        instance_table.on_host.return_value = [migrating]
+        host_operation = Operation(OPERATION_TYPE.HOST_LOCK)
+        self._director._host_evacuate_instances(host, host_operation)
+        assert host_operation.is_failed() is True
+        assert host_operation.instance_exists(migrating.uuid) is True
+        migrating.do_action.assert_not_called()
